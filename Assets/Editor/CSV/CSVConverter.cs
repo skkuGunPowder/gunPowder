@@ -5,8 +5,8 @@ using System.Text;
 
 public class CSVConverter : EditorWindow
 {
-    private string csvPath = "Assets/13.CSV";
-    private string outputPath = "Assets/02.Scripts";
+    private string _csvPath = "Assets/13.CSV";
+    private string _outputPath = "Assets/02.Scripts";
 
     [MenuItem("Tools/GunPowder/CSVConverter")]
     private static void ShowWindow()
@@ -21,7 +21,7 @@ public class CSVConverter : EditorWindow
         GUILayout.Label("CSV to C# 변환기", EditorStyles.boldLabel);
 
         EditorGUILayout.BeginHorizontal();
-        csvPath = EditorGUILayout.TextField("CSV 파일 경로", csvPath);
+        _csvPath = EditorGUILayout.TextField("CSV 파일 경로", _csvPath);
         if (GUILayout.Button("browse...", GUILayout.Width(80)))
         {
             string path = EditorUtility.OpenFilePanel("CSV 파일 선택", Application.dataPath, "csv");
@@ -29,7 +29,7 @@ public class CSVConverter : EditorWindow
             {
                 if (path.StartsWith(Application.dataPath))
                 {
-                    csvPath = "Assets" + path.Substring(Application.dataPath.Length);
+                    _csvPath = "Assets" + path.Substring(Application.dataPath.Length);
                 }
                 else
                 {
@@ -39,7 +39,7 @@ public class CSVConverter : EditorWindow
         }
         EditorGUILayout.EndHorizontal();
 
-        outputPath = EditorGUILayout.TextField("출력 경로", outputPath);
+        _outputPath = EditorGUILayout.TextField("출력 경로", _outputPath);
 
         if (GUILayout.Button("도메인 생성"))
         {
@@ -49,7 +49,7 @@ public class CSVConverter : EditorWindow
 
     private void GenerateClass()
     {
-        if (string.IsNullOrEmpty(csvPath) || !File.Exists(csvPath))
+        if (string.IsNullOrEmpty(_csvPath) || !File.Exists(_csvPath))
         {
             EditorUtility.DisplayDialog("Error", "CSV 파일 경로가 잘못되었거나 존재하지 않습니다.", "OK");
             return;
@@ -58,7 +58,7 @@ public class CSVConverter : EditorWindow
         string headerLine;
         try
         {
-            headerLine = File.ReadAllLines(csvPath)[0];
+            headerLine = File.ReadAllLines(_csvPath)[0];
         }
         catch (System.Exception e)
         {
@@ -67,7 +67,7 @@ public class CSVConverter : EditorWindow
         }
 
         string[] headers = headerLine.Split(',');
-        string className = Path.GetFileNameWithoutExtension(csvPath);
+        string className = Path.GetFileNameWithoutExtension(_csvPath);
 
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("using System;");
@@ -91,12 +91,12 @@ public class CSVConverter : EditorWindow
         }
         sb.AppendLine("}");
 
-        if (!Directory.Exists(outputPath))
+        if (!Directory.Exists(_outputPath))
         {
-            Directory.CreateDirectory(outputPath);
+            Directory.CreateDirectory(_outputPath);
         }
 
-        string pathWithName = Path.Combine(outputPath, $"{className}.cs");
+        string pathWithName = Path.Combine(_outputPath, $"{className}.cs");
         File.WriteAllText(pathWithName, sb.ToString());
 
         AssetDatabase.Refresh();
