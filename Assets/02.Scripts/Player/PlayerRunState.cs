@@ -18,6 +18,10 @@ public class PlayerRunState : MonoState
 
         _keyReleaseTimer = 0f;
 
+        // 플레이어 상태
+        _owner.MyMoveSpeed = _owner.PlayerStatSO.RunSpeed;
+        _owner.IsRunning = true;
+
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Run");
     }
@@ -33,7 +37,7 @@ public class PlayerRunState : MonoState
         || Input.GetKey(KeyCode.LeftArrow) && _owner.FacingDirection == -1)
         {
             _owner.CharacterController.Move(new Vector3(_owner.FacingDirection, 0, 0)
-                                    * _owner.PlayerStatSO.RunSpeed * Time.deltaTime);
+                                    * _owner.MyMoveSpeed * Time.deltaTime);
         }
         else if(Input.GetKeyUp(KeyCode.RightArrow) && _owner.FacingDirection == -1
         || Input.GetKeyUp(KeyCode.LeftArrow) && _owner.FacingDirection == 1)
@@ -47,6 +51,13 @@ public class PlayerRunState : MonoState
             {
                 _playerFSM.ChangeState<PlayerIdleState>();
             }
+        }
+
+        // 점프 키 입력 체크
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            _playerFSM.ChangeState<PlayerJumpState>();
+            return;
         }
     }
 } 

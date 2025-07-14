@@ -30,6 +30,10 @@ public class PlayerWalkState : MonoState
         _isKeyPressed = false;
         _keyReleaseTimer = 0f;
 
+        // 플레이어 상태
+        _owner.MyMoveSpeed = _owner.PlayerStatSO.MoveSpeed;
+        _owner.IsRunning = false;
+
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Walk");
     }
@@ -53,7 +57,7 @@ public class PlayerWalkState : MonoState
         if(Input.GetKey(KeyCode.RightArrow))
         {
             _owner.SetFacingDirection(1);
-            _owner.CharacterController.Move(Vector3.right * _owner.PlayerStatSO.MoveSpeed * Time.deltaTime);
+            _owner.CharacterController.Move(Vector3.right * _owner.MyMoveSpeed * Time.deltaTime);
             
             // 키 입력 감지
             if (!_isKeyPressed)
@@ -115,7 +119,6 @@ public class PlayerWalkState : MonoState
         // 점프 키 입력 체크
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("WalkState: 점프 키 입력 - JumpState로 전환");
             _playerFSM.ChangeState<PlayerJumpState>();
             return;
         }

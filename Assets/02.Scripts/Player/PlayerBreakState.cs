@@ -23,6 +23,9 @@ public class PlayerBreakState : MonoState
         _doubleTapReady = true;
         _isDoubleTapped = false;
 
+        // 플레이어 상태
+        _owner.IsRunning = false;
+
         _owner.SetFacingDirection(-_moveDirection);
 
         // 애니메이션 재생
@@ -39,7 +42,7 @@ public class PlayerBreakState : MonoState
         _breakTimer += Time.deltaTime;
 
         _owner.CharacterController.Move(new Vector3(_moveDirection, 0, 0)
-                                    * _owner.PlayerStatSO.DashSpeed/2 * Time.deltaTime);
+                                    * _owner.MyMoveSpeed/2 * Time.deltaTime);
 
         // 브레이크 타임 내에 같은 방향 키가 한 번 더 눌리면 Run
         if(_doubleTapReady && _breakTimer <= _owner.PlayerStatSO.DoubleTapTime)

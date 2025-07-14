@@ -13,6 +13,9 @@ public class PlayerIdleState : MonoState
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
 
+        // 플레이어 상태
+        _owner.IsRunning = false;
+
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Idle");
     }

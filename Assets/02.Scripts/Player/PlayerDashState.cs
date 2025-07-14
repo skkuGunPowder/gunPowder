@@ -15,8 +15,12 @@ public class PlayerDashState : MonoState
         // 캐스팅
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
-
         _dashTimer = 0f;
+
+        // 플레이어 상태
+        _owner.IsRunning = true;
+        _owner.MyMoveSpeed = _owner.PlayerStatSO.DashSpeed;
+
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Dash");
     }
@@ -34,7 +38,7 @@ public class PlayerDashState : MonoState
 
         // 1. 대시 이동(관성)
         _owner.CharacterController.Move(new Vector3(_owner.FacingDirection, 0, 0)
-                                    * _owner.PlayerStatSO.DashSpeed * Time.deltaTime);
+                                    * _owner.MyMoveSpeed * Time.deltaTime);
 
         int dir = _owner.FacingDirection;
         // 2. 대시 중 반대 방향 키 입력 체크 → BreakState로 전환
