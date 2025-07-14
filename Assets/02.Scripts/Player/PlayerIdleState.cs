@@ -27,9 +27,10 @@ public class PlayerIdleState : MonoState
     private void Update()
     {
         // 이동키를 받으면 걷기 상태로 전환
-        if(Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
+        if(Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
+        || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
          {
-            _owner.SetFacingDirection(Input.GetKeyDown(KeyCode.LeftArrow) ? -1 : 1);
+            _owner.SetFacingDirection(Input.GetKey(KeyCode.LeftArrow) ? -1 : 1);
             _playerFSM.ChangeState<PlayerWalkState>();
          }
         // 점프키(space)를 누르면 점프 상태로 전환

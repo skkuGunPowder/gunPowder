@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     private CharacterController _characterController;
     public CharacterController CharacterController => _characterController;
 
+    [SerializeField]
     private int _facingDirection = 1;
     public int FacingDirection => _facingDirection;     // 바라보는 방향
                                                         // -1: 왼쪽, 1: 오른쪽쪽

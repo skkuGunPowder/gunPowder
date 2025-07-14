@@ -19,6 +19,9 @@ public class PlayerStatSO : ScriptableObject
     [SerializeField] private float dashSpeed;
     public float DashSpeed => dashSpeed;
 
+    [SerializeField] private float breakTime;
+    public float BreakTime => breakTime;
+
     [SerializeField] private float runSpeed;
     public float RunSpeed => runSpeed;
 
