@@ -22,27 +22,33 @@ public class ItemStorage : MonoBehaviour
         {
             Instance = this;
         }
+        else
+        {
+            Destroy(gameObject);
+        }
 
         Init();
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Q))
+    #if UNITY_EDITOR
+        private void Update()
         {
-            ItemDTO newItem = new ItemDTO(
-                TestIcon,
-                UnityEngine.Random.Range(0, 11).ToString(),
-                "Test Item",
-                (EEquipmentSlot)UnityEngine.Random.Range(1, (int)EEquipmentSlot.None),
-                false
-            );
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                ItemDTO newItem = new ItemDTO(
+                    TestIcon,
+                    UnityEngine.Random.Range(0, 11).ToString(),
+                    "Test Item",
+                    (EEquipmentSlot)UnityEngine.Random.Range(1, (int)EEquipmentSlot.None),
+                    false
+                );
 
-            AddItem(newItem);
+                AddItem(newItem);
 
-            Debug.Log($"{newItem}");
+                Debug.Log($"{newItem}");
+            }
         }
-    }
+    #endif
 
     private void Init()
     {
@@ -57,7 +63,7 @@ public class ItemStorage : MonoBehaviour
         if (_storedItemDict == null)
         {
             _storedItemDict = new Dictionary<EEquipmentSlot, List<Item>>();
-            
+
             for (int i = 0; i < (int)EEquipmentSlot.None; i++)
             {
                 if (!_storedItemDict.ContainsKey((EEquipmentSlot)i))
