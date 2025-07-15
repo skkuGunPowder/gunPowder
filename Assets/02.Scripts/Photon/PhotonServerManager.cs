@@ -71,12 +71,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
         
     }
-    // 방에 접속
-    public override void OnJoinedRoom()
-    {
-        Debug.Log("OnJoinedRoom");
-    }
-
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         Debug.Log("OnJoinRandomFailed");
