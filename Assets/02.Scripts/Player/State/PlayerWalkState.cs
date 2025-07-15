@@ -2,11 +2,8 @@ using RobustFSM.Base;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class PlayerWalkState : MonoState
+public class PlayerWalkState : PlayerBaseState
 {
-    private PlayerFSM _playerFSM;
-    private Player _owner;
-
     // 대쉬 타이머
     private float _timer = 0f;
     
@@ -19,11 +16,7 @@ public class PlayerWalkState : MonoState
 
     public override void OnEnter()
     {
-        Debug.Log($"Enter {this.GetType().Name} State");
-
-        // 캐스팅
-        _playerFSM = SuperMachine as PlayerFSM;
-        _owner = _playerFSM.Owner;
+        base.OnEnter();
 
         // 더블탭 변수 초기화
         _lastKeyPressTime = 0f;
@@ -40,14 +33,16 @@ public class PlayerWalkState : MonoState
     
     public override void OnExit()
     {
-        Debug.Log($"Exit {this.GetType().Name} State");
+        base.OnExit();
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    private void Update()
+    public override void Update()
     {
+        base.Update();
+
         _timer += Time.deltaTime;
         _keyReleaseTimer += Time.deltaTime;
 
@@ -114,13 +109,6 @@ public class PlayerWalkState : MonoState
                 _playerFSM.ChangeState<PlayerIdleState>();
                 return;
             }
-        }
-
-        // 점프 키 입력 체크
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            _playerFSM.ChangeState<PlayerJumpState>();
-            return;
         }
     }
 }

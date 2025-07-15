@@ -1,11 +1,8 @@
 using RobustFSM.Base;
 using UnityEngine;
 
-public class PlayerBreakState : MonoState
+public class PlayerBreakState : PlayerBaseState
 {
-    private PlayerFSM _playerFSM;
-    private Player _owner;
-
     private float _breakTimer = 0f;
     private int _moveDirection = 1; // 브레이크 방향(반대방향)
     private bool _doubleTapReady = true; // 진입 시 이미 1회 입력된 것으로 간주
@@ -13,10 +10,7 @@ public class PlayerBreakState : MonoState
 
     public override void OnEnter()
     {
-        Debug.Log($"Enter {this.GetType().Name} State");
-
-        _playerFSM = SuperMachine as PlayerFSM;
-        _owner = _playerFSM.Owner;
+        base.OnEnter();
 
         _breakTimer = 0f;
         _moveDirection = _owner.FacingDirection;
@@ -34,10 +28,10 @@ public class PlayerBreakState : MonoState
 
     public override void OnExit()
     {
-        Debug.Log($"Exit {this.GetType().Name} State");
+        base.OnExit();
     }
 
-    private void Update()
+    public override void Update()
     {
         _breakTimer += Time.deltaTime;
 

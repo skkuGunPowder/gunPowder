@@ -1,13 +1,9 @@
 using System;
 using RobustFSM.Base;
-using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 
-public class PlayerJumpState : MonoState
+public class PlayerJumpState : PlayerBaseState
 {
-    private PlayerFSM _playerFSM;
-    private Player _owner;
-
     private float _gravity = -40f; // 더 강한 중력 추천
     private float _yVelocity = 0f;
     private float _xVelocity = 0f;
@@ -20,11 +16,7 @@ public class PlayerJumpState : MonoState
 
     public override void OnEnter()
     {
-        Debug.Log($"Enter {this.GetType().Name} State");
-
-        _playerFSM = SuperMachine as PlayerFSM;
-        _owner = _playerFSM.Owner;
-
+        base.OnEnter();
         _owner.JumpCount += 1;
 
         // 점프 시작 시 Y속도에 점프 파워를 부여
@@ -33,13 +25,13 @@ public class PlayerJumpState : MonoState
     }
     public override void OnExit()
     {
-        Debug.Log($"Exit {this.GetType().Name} State");
+        base.OnExit();
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    private void Update()
+    public override void Update()
     {
         _timer += Time.deltaTime;
 

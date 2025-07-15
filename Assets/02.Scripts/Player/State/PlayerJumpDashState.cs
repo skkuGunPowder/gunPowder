@@ -1,11 +1,8 @@
 using UnityEngine;
 using RobustFSM.Base;
 
-public class PlayerJumpDashState : MonoState
+public class PlayerJumpDashState : PlayerBaseState
 {
-    private PlayerFSM _playerFSM;
-    private Player _owner;
-
     private float _dashTimer = 0f;
     private float _yVelocity = 0f;
     private float _xVelocity = 0f;
@@ -13,12 +10,7 @@ public class PlayerJumpDashState : MonoState
 
     public override void OnEnter()
     {
-        Debug.Log($"Enter {this.GetType().Name} State");
-
-        // 캐스팅
-        _playerFSM = SuperMachine as PlayerFSM;
-        _owner = _playerFSM.Owner;
-
+        base.OnEnter();
         // 플레이어 상태
         _owner.IsRunning = false;
         _owner.IsJumping = true;
@@ -33,13 +25,13 @@ public class PlayerJumpDashState : MonoState
     }
     public override void OnExit()
     {
-        Debug.Log($"Exit {this.GetType().Name} State");
+        base.OnExit();
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    private void Update()
+    public override void Update()
     {
         
         // 대쉬 시간 종료 후 점프 상태와 같이 움직임

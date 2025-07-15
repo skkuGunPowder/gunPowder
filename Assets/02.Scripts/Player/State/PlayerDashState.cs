@@ -1,20 +1,14 @@
 using RobustFSM.Base;
 using UnityEngine;
 
-public class PlayerDashState : MonoState
+public class PlayerDashState : PlayerBaseState
 {
-    private PlayerFSM _playerFSM;
-    private Player _owner;
-
     private float _dashTimer = 0f;
 
     public override void OnEnter()
     {
-        Debug.Log($"Enter {this.GetType().Name} State");
+        base.OnEnter();
 
-        // 캐스팅
-        _playerFSM = SuperMachine as PlayerFSM;
-        _owner = _playerFSM.Owner;
         _dashTimer = 0f;
 
         // 플레이어 상태
@@ -26,13 +20,13 @@ public class PlayerDashState : MonoState
     }
     public override void OnExit()
     {
-        Debug.Log($"Exit {this.GetType().Name} State");
+        base.OnExit();
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    private void Update()
+    public override void Update()
     {
         _dashTimer += Time.deltaTime;
 

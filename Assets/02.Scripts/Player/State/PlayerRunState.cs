@@ -1,21 +1,14 @@
 using RobustFSM.Base;
 using UnityEngine;
 
-public class PlayerRunState : MonoState
+public class PlayerRunState : PlayerBaseState
 {
-    private PlayerFSM _playerFSM;
-    private Player _owner;
-
     private float _keyReleaseTimer = 0f;
     private float _keyReleaseThreshold = 0.1f;
 
     public override void OnEnter()
     {
-        Debug.Log($"Enter {this.GetType().Name} State");
-
-        _playerFSM = SuperMachine as PlayerFSM;
-        _owner = _playerFSM.Owner;
-
+        base.OnEnter();
         _keyReleaseTimer = 0f;
 
         // 플레이어 상태
@@ -28,11 +21,13 @@ public class PlayerRunState : MonoState
 
     public override void OnExit()
     {
-        Debug.Log($"Exit {this.GetType().Name} State");
+        base.OnExit();
     }
 
-    private void Update()
+    public override void Update()
     {
+        base.Update();
+
         if(Input.GetKey(KeyCode.RightArrow) && _owner.FacingDirection == 1
         || Input.GetKey(KeyCode.LeftArrow) && _owner.FacingDirection == -1)
         {
@@ -51,13 +46,6 @@ public class PlayerRunState : MonoState
             {
                 _playerFSM.ChangeState<PlayerIdleState>();
             }
-        }
-
-        // 점프 키 입력 체크
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            _playerFSM.ChangeState<PlayerJumpState>();
-            return;
         }
     }
 } 
