@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Photon.Realtime;
 using UnityEngine;
 
-public class UI_Room : MonoBehaviour
+public class UI_RoomSearchPopup : UI_Popup
 {
     public List<UI_RoomSlot> RoomSlotList;
 

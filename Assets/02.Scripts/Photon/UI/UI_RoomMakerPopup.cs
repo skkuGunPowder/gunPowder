@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public class UI_CreateRoom : MonoBehaviour
+public class UI_RoomMakerPopup : UI_Popup
 {
     public TMP_InputField RoomName;
     public TMP_Dropdown MaxPlayers;

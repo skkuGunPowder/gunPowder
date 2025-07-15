@@ -33,7 +33,15 @@ public class RoomManager : MonoBehaviour
         SetRoom();
     }
     // 준비가 다 되었다면 마스터가 정한 맵으로 이동시킴
-    
+    public void GameStart()
+    {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        PhotonNetwork.LoadLevel(SelectedMap.ToString());
+    }
     // 현재 이 방의 최고 인원은 몇인가?
 
     //현재 이 방에 있는 플레이어들의 계정 정보
