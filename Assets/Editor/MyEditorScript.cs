@@ -10,7 +10,7 @@ public class MyEditorScript : MonoBehaviour
 
     static void PerformBuild()
     {
-        BuildPipeline.BuildPlayer(FindEnabledEditorScenes(), "Builds/Windows/MyGame.exe", BuildTarget.StandaloneWindows, BuildOptions.None);
+        BuildPipeline.BuildPlayer(FindEnabledEditorScenes(), "Builds/Windows/gunpowder.exe", BuildTarget.StandaloneWindows, BuildOptions.None);
     }
     private static string[] FindEnabledEditorScenes()
     {
