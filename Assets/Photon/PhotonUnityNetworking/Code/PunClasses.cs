@@ -197,6 +197,8 @@ namespace Photon.Pun
         public virtual void OnCreatedRoom()
         {
         }
+        
+        
 
         /// <summary>
         /// Called on entering a lobby on the Master Server. The actual room-list updates will call OnRoomListUpdate.

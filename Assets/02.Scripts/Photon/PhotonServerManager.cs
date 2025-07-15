@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Photon.Pun;
 using Photon.Realtime;
@@ -8,7 +9,8 @@ using UnityEngine.SceneManagement;
 public class PhotonServerManager : MonoBehaviourPunCallbacks
 {   
     public static PhotonServerManager Instance;
-    
+
+    public List<RoomInfo> CachedRoomList { get; set; } = new List<RoomInfo>();
     // 게임이 시작 될 때 연결되는 포톤 서버 매니저
     
    [Header("DataFrameRate")]
@@ -39,11 +41,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         PhotonNetwork.SerializationRate = _serializationRate;
 
         PhotonNetwork.AutomaticallySyncScene = true;
-            
-        // 서버에 연결한다.
-        Connect();
-        
-        
     }
     
     // 서버를 연결하겠다.
@@ -65,16 +62,15 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log("OnConnectedToMaster");
+        PhotonNetwork.JoinLobby(TypedLobby.Default);
     }
-    
-    //로비에 접속 ( when? 로그인을 성공했을 때)
+
     public override void OnJoinedLobby()
     {
         Debug.Log("OnJoinedLobby");
-        SceneManager.LoadScene(ESceneList.Lobby.ToString());
-
+        PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
+        
     }
-
     // 방에 접속
     public override void OnJoinedRoom()
     {

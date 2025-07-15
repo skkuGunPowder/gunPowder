@@ -142,7 +142,7 @@ namespace RobustFSM.Base
                 string printText = MachineName + "\n" + CurrentState.GetStateName();
 
                 //render the label
-                Handles.Label(transform.position, printText);
+                // Handles.Label(transform.position, printText);
             }
         }
 

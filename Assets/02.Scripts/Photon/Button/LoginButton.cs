@@ -1,6 +1,7 @@
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LoginButton : MonoBehaviour
 {
@@ -9,6 +10,6 @@ public class LoginButton : MonoBehaviour
 
     public void OnclickLogin()
     {
-        PhotonNetwork.JoinLobby(); 
+        PhotonServerManager.Instance.Connect();
     }
 }

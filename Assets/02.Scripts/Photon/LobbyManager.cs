@@ -34,16 +34,20 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         roomOptions.IsOpen = true;
         
         PhotonNetwork.CreateRoom(roomName, roomOptions, TypedLobby.Default);
-        Debug.Log($"{_roomInfoList.Count} rooms created");
         OnDataChanged?.Invoke();
     }
     // 모든 룸 정보들을 가지고 있어야함 => 방 refresh담당
-
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
-        _roomInfoList = roomList;
-        OnDataChanged?.Invoke();
-    }
     // 계정 정보들 가져오기?
     // 
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
+    {
+        if (PhotonNetwork.InLobby == false)
+        {
+            return;
+        }
+        _roomInfoList = roomList;
+        OnDataChanged?.Invoke();
+        
+        Debug.Log(_roomInfoList.Count);
+    }
 }
