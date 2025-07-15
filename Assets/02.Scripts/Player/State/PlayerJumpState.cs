@@ -1,3 +1,4 @@
+using System;
 using RobustFSM.Base;
 using Unity.Android.Gradle.Manifest;
 using UnityEngine;
@@ -10,8 +11,12 @@ public class PlayerJumpState : MonoState
     private float _gravity = -40f; // 더 강한 중력 추천
     private float _yVelocity = 0f;
     private float _xVelocity = 0f;
-    private float _jumpCoyoteTimer = 0f;
+    private float _timer = 0f;
     private const float LANDING_GRACE_TIME = 0.1f;
+
+
+    private float _lastLeftTapTime = 0f;
+    private float _lastRightTapTime = 0f;
 
     public override void OnEnter()
     {
@@ -20,9 +25,11 @@ public class PlayerJumpState : MonoState
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
 
+        _owner.JumpCount += 1;
+
         // 점프 시작 시 Y속도에 점프 파워를 부여
-        _yVelocity = _owner.PlayerStatSO.JumpForce; // 예: 10f 등
-        _jumpCoyoteTimer = 0f;
+        _yVelocity = _owner.PlayerStatSO.JumpForce;
+        _timer = 0f;
     }
     public override void OnExit()
     {
@@ -34,11 +41,10 @@ public class PlayerJumpState : MonoState
     /// </summary>
     private void Update()
     {
-        _jumpCoyoteTimer += Time.deltaTime;
+        _timer += Time.deltaTime;
 
         // 중력 적용
         _yVelocity += _gravity * Time.deltaTime;
-        // Clamp: 상승 최대치(점프파워), 하강 최대치(-20f 등)
         _yVelocity = Mathf.Clamp(_yVelocity, _gravity * 3, _owner.PlayerStatSO.JumpForce);
 
         // 좌우 이동
@@ -60,8 +66,41 @@ public class PlayerJumpState : MonoState
 
         _owner.CharacterController.Move(new Vector3(_xVelocity, _yVelocity, 0) * Time.deltaTime);
 
+        // 더블 점프
+        if (Input.GetKeyDown(KeyCode.Space) && _owner.JumpCount < _owner.PlayerStatSO.MaxJumpCount)
+        {
+            _owner.JumpCount++;
+            _yVelocity = _owner.PlayerStatSO.JumpForce;
+        }
+
+        // 방향키 더블 클릭 체크
+        // 점프 대쉬상태로 전환
+        // 방향키 더블탭 체크 (점프 대쉬)
+    if (Input.GetKeyDown(KeyCode.LeftArrow))
+    {
+        if (Time.time - _lastLeftTapTime <= _owner.PlayerStatSO.DoubleTapTime)
+        {
+            Debug.Log("점프 중 왼쪽 더블탭 - 점프 대쉬 상태로 전환");
+            _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
+            return;
+        }
+        _lastLeftTapTime = Time.time;
+    }
+    if (Input.GetKeyDown(KeyCode.RightArrow))
+    {
+        if (Time.time - _lastRightTapTime <= _owner.PlayerStatSO.DoubleTapTime)
+        {
+            Debug.Log("점프 중 오른쪽 더블탭 - 점프 대쉬 상태로 전환");
+            _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
+            return;
+        }
+        _lastRightTapTime = Time.time;
+    }
+
+
+
         // 착지 체크 (유예 시간 이후에만)
-        if (_jumpCoyoteTimer > LANDING_GRACE_TIME && _owner.CharacterController.isGrounded)
+        if (_timer > LANDING_GRACE_TIME && _owner.CharacterController.isGrounded)
         {
             Debug.Log("착지!");
             _playerFSM.ChangeState<PlayerIdleState>();

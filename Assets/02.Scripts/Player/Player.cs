@@ -21,8 +21,12 @@ public class Player : MonoBehaviour
     [SerializeField]
     private bool _isJumping = false;
     public bool IsJumping { get => _isJumping; set => _isJumping = value; }
-
-    public float MyMoveSpeed { get; set; }
+    [SerializeField]
+    private float _myMoveSpeed;
+    public float MyMoveSpeed { get => _myMoveSpeed; set{ _myMoveSpeed = value; } }
+    [SerializeField]
+    private float _jumpCount = 0;
+    public float JumpCount { get => _jumpCount; set{ _jumpCount = value; } }
 
     private void Awake()
     {

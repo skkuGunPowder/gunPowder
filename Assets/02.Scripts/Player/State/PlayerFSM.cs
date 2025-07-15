@@ -14,6 +14,7 @@ public class PlayerFSM : MonoFSM<Player>
         AddState<PlayerDashState>();
         AddState<PlayerRunState>();
         AddState<PlayerBreakState>();
+        AddState<PlayerJumpDashState>();
         
 
         // 초기 상태 설정

@@ -15,6 +15,9 @@ public class PlayerIdleState : MonoState
 
         // 플레이어 상태
         _owner.IsRunning = false;
+        _owner.IsJumping = false;
+        _owner.MyMoveSpeed = _owner.PlayerStatSO.MoveSpeed;  // 기본 이동속도
+        _owner.JumpCount = 0;
 
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Idle");
