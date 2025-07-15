@@ -112,18 +112,9 @@ public class ItemStorage : MonoBehaviour
             throw new Exception("선택된 아이템이 없습니다!");
         }
 
-        // 선택된 아이템 상태 변경
-        selectedItem.Select();
-        if (selectedItem.IsEquipped == true)
-        {
-            // TODO
-            // 인벤토리에서 장착 해제
-        }
-        else
-        {
-            // TODO
-            // 인벤토리에 장착
-        }
+
+
+        
 
         // 데이터 저장
         _repo.SaveItemStorage(_storedItemDict);

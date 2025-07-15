@@ -4,15 +4,18 @@ using UnityEngine.UI;
 public class UI_ItemSlot : MonoBehaviour
 {
     public ItemDTO Item;
-    public Image Image;
+    public Image ItemIcon;
     public Image EquippedIcon;
+    public Image SelectedIcon;
+
+    private bool _isSelected = false;
 
 
     public void Refresh(ItemDTO item)
     {
         Item = item;
+        ItemIcon.sprite = Item.Image;
 
-        Image.sprite = Item.Image;
         if (Item.IsEquipped)
         {
             EquippedIcon.gameObject.SetActive(true);
@@ -20,6 +23,15 @@ public class UI_ItemSlot : MonoBehaviour
         else
         {
             EquippedIcon.gameObject.SetActive(false);
+        }
+
+        if (_isSelected)
+        {
+            SelectedIcon.gameObject.SetActive(true);
+        }
+        else
+        {
+            SelectedIcon.gameObject.SetActive(false);
         }
     }
 
@@ -31,15 +43,7 @@ public class UI_ItemSlot : MonoBehaviour
             return;
         }
 
-        if (EquippedIcon.gameObject.activeInHierarchy)
-        {
-            EquippedIcon.gameObject.SetActive(false);
-        }
-        else
-        {
-            EquippedIcon.gameObject.SetActive(true);
-        }
-
+        _isSelected = true;
         ItemStorage.Instance.SelectItem(Item);
     }
 }

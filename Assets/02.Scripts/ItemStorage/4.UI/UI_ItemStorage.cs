@@ -9,12 +9,15 @@ public class UI_ItemStorage : MonoBehaviour
     public List<UI_ItemSlot> ItemSlotList;
 
     private ItemStorage _itemStorage;
+    private UI_ItemSlot _selectedItemSlot;
 
     private void Start()
     {
-        // 이벤트 구독
         _itemStorage = ItemStorage.Instance;
+
+        // 이벤트 구독
         _itemStorage.OnDataChange += Refresh;
+
         Refresh(_itemStorage._storedItemDict[_itemStorage.CurrentCategory].ConvertAll(x => new ItemDTO(x)));
     }
 

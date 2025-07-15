@@ -43,15 +43,13 @@ public class Item
         IsEquipped = isEquipped;
     }
 
-    public void Select()
+    public void Equip()
     {
-        if (IsEquipped == true)
-        {
-            IsEquipped = false;
-        }
-        else
-        {
-            IsEquipped = true;
-        }
+        IsEquipped = true;
+    }
+
+    public void UnEquip()
+    {
+        IsEquipped = false;
     }
 }
