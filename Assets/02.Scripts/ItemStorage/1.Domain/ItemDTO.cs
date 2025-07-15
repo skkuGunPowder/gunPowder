@@ -1,14 +1,16 @@
+using System;
 using UnityEngine;
 
-
+[Serializable]
 public class ItemDTO
 {
-    public string ID { get; private set; }
-    public string Name { get; private set; }
-    public Sprite Image { get; private set; }
-    public EEquipmentSlot EquipmentSlot { get; private set; }
-    public bool IsEquipped { get; private set; }
+    public string ID;
+    public string Name;
+    public Sprite Image;
+    public EEquipmentSlot EquipmentSlot;
+    public bool IsEquipped;
 
+    
     public ItemDTO(Item item)
     {
         ID = item.ID;

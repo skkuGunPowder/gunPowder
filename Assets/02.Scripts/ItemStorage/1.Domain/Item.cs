@@ -1,18 +1,17 @@
+using System;
 using UnityEngine;
 
+[Serializable]
 public class Item
 {
-    public string ID { get; private set; }
-    public string Name { get; private set; }
-    public Sprite Image { get; private set; }
-    public EEquipmentSlot EquipmentSlot { get; private set; }
-    public bool IsEquipped { get; private set; }
+    public string ID;
+    public string Name;
+    public Sprite Image;
+    public EEquipmentSlot EquipmentSlot;
+    public bool IsEquipped;
 
     public Item(ItemDTO itemDTO)
     {
-        // TODO
-        // 유효성 검사하기
-
         ID = itemDTO.ID;
         Name = itemDTO.Name;
         Image = itemDTO.Image;
@@ -22,8 +21,20 @@ public class Item
 
     public Item(Sprite image, string id, string name, EEquipmentSlot equipmentSlot, bool isEquipped)
     {
-        // TODO
-        // 유효성 검사하기
+        if (image == null)
+        {
+            throw new Exception("아이콘 이미지가 없습니다.");
+        }
+
+        if (string.IsNullOrEmpty(id))
+        {
+            throw new Exception("ID가 비어있습니다.");
+        }
+
+        if (string.IsNullOrEmpty(name))
+        {
+            throw new Exception("아이템 이름이 비어있습니다.");
+        }
 
         ID = id;
         Name = name;

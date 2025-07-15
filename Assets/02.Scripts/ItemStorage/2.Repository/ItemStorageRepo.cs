@@ -12,6 +12,7 @@ public class ItemStorageRepo
     {
         ItemStorageSaveData saveData = new ItemStorageSaveData(itemDict);
         string json = JsonUtility.ToJson(saveData);
+        Debug.LogWarning(json);
         PlayerPrefs.SetString(SAVE_KEY, json);
         
         // TODO
@@ -32,8 +33,7 @@ public class ItemStorageRepo
         // TODO
         // firebase DB랑 연동하기
 
-        // return saveData.ToDictionary();
-        return null;
+        return saveData.ToDictionary();
     }
 }
 
@@ -41,11 +41,11 @@ public class ItemStorageRepo
 [Serializable]
 public class ItemStorageSaveData
 {
-    [SerializeField] public List<Item> HeadItemList;
-    [SerializeField] public List<Item> FaceItemList;
-    [SerializeField] public List<Item> ChestItemList;
-    [SerializeField] public List<Item> WeaponItemList;
-    [SerializeField] public List<Item> BackItemList;
+    public List<Item> HeadItemList;
+    public List<Item> FaceItemList;
+    public List<Item> ChestItemList;
+    public List<Item> WeaponItemList;
+    public List<Item> BackItemList;
 
 
     public ItemStorageSaveData(Dictionary<EEquipmentSlot, List<Item>> itemDict)
