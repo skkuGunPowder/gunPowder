@@ -40,6 +40,34 @@ public class Player : MonoBehaviour
     /// 8방향으로 나누어져 있다.
     /// </summary>
     /// <returns></returns>
+    public Transform GetBombSpawnPoint()
+    {
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        Debug.Log($"h: {h}, v: {v}");
+        switch ((h, v))
+        {
+            case (1, 0):
+                return _bombSpawnPointList[(int)EBombSpawnPoint.Right];
+            case (1, 1):
+                return _bombSpawnPointList[(int)EBombSpawnPoint.RightUp];
+            case (0, 1):
+                return _bombSpawnPointList[(int)EBombSpawnPoint.Up];
+            case (-1, 1):
+                return _bombSpawnPointList[(int)EBombSpawnPoint.LeftUp];
+            case (-1, 0):
+                return _bombSpawnPointList[(int)EBombSpawnPoint.Left];
+            case (-1, -1):
+                return _bombSpawnPointList[(int)EBombSpawnPoint.LeftDown];
+            case (0, -1):
+                return _bombSpawnPointList[(int)EBombSpawnPoint.Down];
+            case (1, -1):
+                return _bombSpawnPointList[(int)EBombSpawnPoint.RightDown];
+            default:
+                return _bombSpawnPointList[(int)EBombSpawnPoint.Right];
+        }
+    }
+
     public Transform GetBombSpawnPoint(EBombSpawnPoint spawnPoint)
     {
         return _bombSpawnPointList[(int)spawnPoint];

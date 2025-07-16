@@ -70,7 +70,7 @@ public class PlayerJumpState : PlayerBaseState
         // 방향키 더블탭 체크 (점프 대쉬)
     if (Input.GetKeyDown(KeyCode.LeftArrow))
     {
-        if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime)
+        if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
         {
             Debug.Log("점프 중 왼쪽 더블탭 - 점프 대쉬 상태로 전환");
             _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
@@ -80,13 +80,10 @@ public class PlayerJumpState : PlayerBaseState
     }
     if (Input.GetKeyDown(KeyCode.RightArrow))
     {
-        if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime)
+        if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
         {
             Debug.Log("점프 중 오른쪽 더블탭 - 점프 대쉬 상태로 전환");
-            if(_owner.PlayerStat.CanJumpDash())
-            {
-                _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
-            }
+            _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
         }
         _lastRightTapTime = Time.time;
     }

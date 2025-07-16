@@ -41,13 +41,29 @@ public class PlayerIdleState : PlayerBaseState
     {
         if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
-            _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+            // 보고 있는 방향으로 폭탄을 둔다.
+            if(_owner.PlayerStat.FacingDirection == 1)
+            {
+                _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+            }
+            else
+            {
+                _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Left));
+            }
             SetLastNormalBombTime();
         }
         
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
-            _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+            // 보고 있는 방향으로 폭탄을 둔다.
+            if(_owner.PlayerStat.FacingDirection == 1)
+            {
+                _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+            }
+            else
+            {
+                _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Left));
+            }
             SetLastSpecialBombTime();
         }
     }
@@ -57,6 +73,9 @@ public class PlayerIdleState : PlayerBaseState
     /// </summary>
     private void IdleMove()
     {
+        //_owner.CharacterController.Move(new Vector3(0, _yVelocity, 0));
+;
+
         // 이동키를 받으면 걷기 상태로 전환
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
         || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
