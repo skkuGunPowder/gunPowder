@@ -27,13 +27,42 @@ public class PlayerIdleState : PlayerBaseState
     public override void Update()
     {
         base.Update();
+        IdleMove();
+        
+        PlaceBomb();
+    }
 
+    /// <summary>
+    /// Idle 상태(방향키 입력이 없고 가만히 있는 상태) 에서는 
+    /// 폭탄 두기 공격이 나간다. 
+    /// 방향키 입력이 없기 때문에 캐릭터의 Right(정면) 으로 공격이 발생한다.
+    /// </summary>
+    private void PlaceBomb()
+    {
+        if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        {
+            _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+            SetLastNormalBombTime();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        {
+            _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+            SetLastSpecialBombTime();
+        }
+    }
+
+    /// <summary>
+    /// 방향키 입력이 발생하면 걷기 상태로 전환
+    /// </summary>
+    private void IdleMove()
+    {
         // 이동키를 받으면 걷기 상태로 전환
-        if(Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
         || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
-         {
+        {
             _owner.SetFacingDirection(Input.GetKey(KeyCode.LeftArrow) ? -1 : 1);
             _playerFSM.ChangeState<PlayerWalkState>();
-         }
+        }
     }
 }
