@@ -379,6 +379,7 @@ GameObject:
   - component: {fileID: 1173896636}
   - component: {fileID: 1173896638}
   - component: {fileID: 1173896637}
+  - component: {fileID: 1173896639}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -526,12 +527,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 230ae4dd4f7a24749bbcf422b4cf9797, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerStatSO: {fileID: 11400000, guid: 24c91fb983f6a934f8d9ad203ab6b394, type: 2}
   _myAnimator: {fileID: 0}
+--- !u!114 &1173896639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1173896631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16a51f8c19a44bd46a675e2f4f3e54cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerStatSO: {fileID: 11400000, guid: 24c91fb983f6a934f8d9ad203ab6b394, type: 2}
+  _moveSpeed: 0
+  _jumpForce: 0
+  _dashTime: 0
+  _doubleTapTime: 0
+  _dashSpeed: 0
+  _breakTime: 0
+  _runSpeed: 0
+  _maxJumpCount: 0
+  _jumpDashCount: 0
   _isRunning: 0
   _isJumping: 0
   _myMoveSpeed: 0
   _jumpCount: 0
+  _facingDirection: 1
 --- !u!1 &1900586725
 GameObject:
   m_ObjectHideFlags: 0

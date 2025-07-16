@@ -12,8 +12,8 @@ public class PlayerRunState : PlayerBaseState
         _keyReleaseTimer = 0f;
 
         // 플레이어 상태
-        _owner.MyMoveSpeed = _owner.PlayerStatSO.RunSpeed;
-        _owner.IsRunning = true;
+        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.RunSpeed;
+        _owner.PlayerStat.IsRunning = true;
 
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Run");
@@ -28,14 +28,14 @@ public class PlayerRunState : PlayerBaseState
     {
         base.Update();
 
-        if(Input.GetKey(KeyCode.RightArrow) && _owner.FacingDirection == 1
-        || Input.GetKey(KeyCode.LeftArrow) && _owner.FacingDirection == -1)
+        if(Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1
+        || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
         {
-            _owner.CharacterController.Move(new Vector3(_owner.FacingDirection, 0, 0)
-                                    * _owner.MyMoveSpeed * Time.deltaTime);
+            _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection, 0, 0)
+                                    * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime);
         }
-        else if(Input.GetKeyUp(KeyCode.RightArrow) && _owner.FacingDirection == -1
-        || Input.GetKeyUp(KeyCode.LeftArrow) && _owner.FacingDirection == 1)
+        else if(Input.GetKeyUp(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
+        || Input.GetKeyUp(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
         {
             _playerFSM.ChangeState<PlayerBreakState>();
         }

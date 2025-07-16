@@ -12,8 +12,8 @@ public class PlayerDashState : PlayerBaseState
         _dashTimer = 0f;
 
         // 플레이어 상태
-        _owner.IsRunning = true;
-        _owner.MyMoveSpeed = _owner.PlayerStatSO.DashSpeed;
+        _owner.PlayerStat.IsRunning = true;
+        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
 
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Dash");
@@ -31,10 +31,10 @@ public class PlayerDashState : PlayerBaseState
         _dashTimer += Time.deltaTime;
 
         // 1. 대시 이동(관성)
-        _owner.CharacterController.Move(new Vector3(_owner.FacingDirection, 0, 0)
-                                    * _owner.MyMoveSpeed * Time.deltaTime);
+        _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection, 0, 0)
+                                    * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime);
 
-        int dir = _owner.FacingDirection;
+        int dir = _owner.PlayerStat.FacingDirection;
         // 2. 대시 중 반대 방향 키 입력 체크 → BreakState로 전환
         if(Input.GetKeyDown(KeyCode.RightArrow) && dir == -1 || Input.GetKeyDown(KeyCode.LeftArrow) && dir == 1)
         {
@@ -44,10 +44,11 @@ public class PlayerDashState : PlayerBaseState
         }
 
         // 3. 대시 시간 종료 후 상태 전이
-        if(_dashTimer >= _owner.PlayerStatSO.DashTime)
+        if(_dashTimer >= _owner.PlayerStat.DashTime)
         {
             // 같은 방향 키 누르고 있음 → Run
-            if ((_owner.FacingDirection == 1 && Input.GetKey(KeyCode.RightArrow)) || (_owner.FacingDirection == -1 && Input.GetKey(KeyCode.LeftArrow)))
+            if ((_owner.PlayerStat.FacingDirection == 1 && Input.GetKey(KeyCode.RightArrow)) 
+            || (_owner.PlayerStat.FacingDirection == -1 && Input.GetKey(KeyCode.LeftArrow)))
             {
                 Debug.Log("DashState: 같은 방향 입력 - RunState로 전환");
                 _playerFSM.ChangeState<PlayerRunState>();

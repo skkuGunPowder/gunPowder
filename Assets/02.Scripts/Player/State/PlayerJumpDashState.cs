@@ -12,9 +12,10 @@ public class PlayerJumpDashState : PlayerBaseState
     {
         base.OnEnter();
         // 플레이어 상태
-        _owner.IsRunning = false;
-        _owner.IsJumping = true;
-        _owner.MyMoveSpeed = _owner.PlayerStatSO.DashSpeed;
+        _owner.PlayerStat.IsRunning = false;
+        _owner.PlayerStat.IsJumping = true;
+        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
+        _owner.PlayerStat.IncrementJumpDashCount();
 
         _yVelocity = 0f;
         _xVelocity = 0f;
@@ -35,26 +36,26 @@ public class PlayerJumpDashState : PlayerBaseState
     {
         
         // 대쉬 시간 종료 후 점프 상태와 같이 움직임
-        if(_dashTimer >= _owner.PlayerStatSO.DashTime)
+        if(_dashTimer >= _owner.PlayerStat.DashTime)
         {
             _yVelocity += _gravity * Time.deltaTime;
-            _yVelocity = Mathf.Clamp(_yVelocity, _gravity * 3, _owner.PlayerStatSO.JumpForce);
+            _yVelocity = Mathf.Clamp(_yVelocity, _gravity * 3, _owner.PlayerStat.JumpForce);
 
             // 좌우 이동
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                if(_owner.FacingDirection == -1)
+                if(_owner.PlayerStat.FacingDirection == -1)
                 {
-                    _owner.MyMoveSpeed = _owner.PlayerStatSO.MoveSpeed;
+                    _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
                 }
                 _xVelocity = 1;
                 _owner.SetFacingDirection(1);
             }
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
-                if(_owner.FacingDirection == 1)
+                if(_owner.PlayerStat.FacingDirection == 1)
                 {
-                    _owner.MyMoveSpeed = _owner.PlayerStatSO.MoveSpeed;
+                    _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
                 }
                 _xVelocity = -1;
                 _owner.SetFacingDirection(-1);
@@ -63,7 +64,7 @@ public class PlayerJumpDashState : PlayerBaseState
             {
                 _xVelocity = 0;
             }
-            _xVelocity *= _owner.MyMoveSpeed;
+            _xVelocity *= _owner.PlayerStat.MyMoveSpeed;
 
             _owner.CharacterController.Move(new Vector3(_xVelocity, _yVelocity, 0) * Time.deltaTime);
 
@@ -74,7 +75,7 @@ public class PlayerJumpDashState : PlayerBaseState
             }
 
             // 더블 점프가 가능하다면 점프 상태로 전환
-            if(Input.GetKeyDown(KeyCode.Space) && _owner.JumpCount < _owner.PlayerStatSO.MaxJumpCount)
+            if(Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
             {
                 _playerFSM.ChangeState<PlayerJumpState>();
             }
@@ -83,8 +84,8 @@ public class PlayerJumpDashState : PlayerBaseState
         {
             // 대쉬 이동후 낙하
             _dashTimer += Time.deltaTime;
-            _owner.CharacterController.Move(new Vector3(_owner.FacingDirection, 0, 0) 
-                                            * _owner.MyMoveSpeed * Time.deltaTime);
+            _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection, 0, 0) 
+                                            * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime);
         }
     }
 }

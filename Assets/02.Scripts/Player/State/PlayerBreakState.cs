@@ -13,12 +13,12 @@ public class PlayerBreakState : PlayerBaseState
         base.OnEnter();
 
         _breakTimer = 0f;
-        _moveDirection = _owner.FacingDirection;
+        _moveDirection = _owner.PlayerStat.FacingDirection;
         _doubleTapReady = true;
         _isDoubleTapped = false;
 
         // 플레이어 상태
-        _owner.IsRunning = false;
+        _owner.PlayerStat.IsRunning = false;
 
         _owner.SetFacingDirection(-_moveDirection);
 
@@ -36,20 +36,20 @@ public class PlayerBreakState : PlayerBaseState
         _breakTimer += Time.deltaTime;
 
         _owner.CharacterController.Move(new Vector3(_moveDirection, 0, 0)
-                                    * _owner.MyMoveSpeed/2 * Time.deltaTime);
+                                    * _owner.PlayerStat.MyMoveSpeed/2 * Time.deltaTime);
 
         // 브레이크 타임 내에 같은 방향 키가 한 번 더 눌리면 Run
-        if(_doubleTapReady && _breakTimer <= _owner.PlayerStatSO.DoubleTapTime)
+        if(_doubleTapReady && _breakTimer <= _owner.PlayerStat.DoubleTapTime)
         {
-            if(Input.GetKeyDown(KeyCode.RightArrow) && _owner.FacingDirection == 1 
-            || Input.GetKeyDown(KeyCode.LeftArrow) && _owner.FacingDirection == -1)
+            if(Input.GetKeyDown(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1 
+            || Input.GetKeyDown(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
             {
                 _isDoubleTapped = true;
                 _doubleTapReady = false; // 더 이상 체크하지 않음
             }
         }
 
-        if(_breakTimer >= _owner.PlayerStatSO.BreakTime)
+        if(_breakTimer >= _owner.PlayerStat.BreakTime)
         {
             if(_isDoubleTapped)
             {
