@@ -134,6 +134,7 @@ namespace RobustFSM.Base
 
         #endregion
 
+        #if UNITY_EDITOR
         public void OnDrawGizmos()
         {
             if (CurrentState != null)
@@ -142,9 +143,10 @@ namespace RobustFSM.Base
                 string printText = MachineName + "\n" + CurrentState.GetStateName();
 
                 //render the label
-                Handles.Label(transform.position, printText);
+                // Handles.Label(transform.position, printText);
             }
         }
+        #endif
 
         #region FSM Methods
 
