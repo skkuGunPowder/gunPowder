@@ -14,7 +14,7 @@ public class ItemStorageRepo
         string json = JsonUtility.ToJson(saveData);
         Debug.LogWarning(json);
         PlayerPrefs.SetString(SAVE_KEY, json);
-        
+
         // TODO
         // firebase DB랑 연동하기
     }
@@ -33,9 +33,22 @@ public class ItemStorageRepo
         // TODO
         // firebase DB랑 연동하기
 
-        return saveData.ToDictionary();
+        // return saveData.ToDictionary();
+        return null;
+    }
+
+    public Dictionary<EEquipmentSlot, Item> LoadInventory()
+    {
+        // TODO
+        return null;
+    }
+
+    public void SaveInventory()
+    {
+        // TODO
     }
 }
+
 
 
 [Serializable]

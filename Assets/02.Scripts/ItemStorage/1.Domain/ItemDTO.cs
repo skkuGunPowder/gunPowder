@@ -10,6 +10,11 @@ public class ItemDTO
     public EEquipmentSlot EquipmentSlot;
     public bool IsEquipped;
 
+    public ItemDTO()
+    {
+        
+    }
+
     
     public ItemDTO(Item item)
     {

@@ -10,6 +10,11 @@ public class Item
     public EEquipmentSlot EquipmentSlot;
     public bool IsEquipped;
 
+    public Item()
+    {
+        
+    }
+
     public Item(ItemDTO itemDTO)
     {
         ID = itemDTO.ID;
