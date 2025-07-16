@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class PlayerIdleState : PlayerBaseState
 {
+    private float lastUpPressTime = -10f;
+    private float lastDownPressTime = -10f;
+    private int upPressCount = 0;
+    private int downPressCount = 0;
+    private float _attackWindow = 0.2f; // 공격 입력 허용 시간
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -30,7 +36,7 @@ public class PlayerIdleState : PlayerBaseState
         base.Update();
         IdleMove();
         
-        PlaceBomb();
+        IdleAttack();
     }
 
     /// <summary>
@@ -38,34 +44,134 @@ public class PlayerIdleState : PlayerBaseState
     /// 폭탄 두기 공격이 나간다. 
     /// 방향키 입력이 없기 때문에 캐릭터의 Right(정면) 으로 공격이 발생한다.
     /// </summary>
-    private void PlaceBomb()
+    private void IdleAttack()
+    {
+        DoubleTapCheck();
+        IdleNormalAttack();
+        IdleSpecialAttack();
+    }
+
+    private void IdleNormalAttack()
     {
         if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
-            // 보고 있는 방향으로 폭탄을 둔다.
-            if(_owner.PlayerStat.FacingDirection == 1)
+            if (Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+                if (upPressCount >= 2 && Time.time - lastUpPressTime <= _attackWindow)
+                {
+                    // 위 더블탭 후 공격: 직선 던지기
+                    _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
+                }
+                else if (upPressCount == 1 && Time.time - lastUpPressTime <= _attackWindow
+                    || Input.GetKey(KeyCode.UpArrow))
+                {
+                    // 위 단일 입력 후 공격: 곡사 던지기
+                    _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
+                }
+            }
+            else if (Input.GetKey(KeyCode.DownArrow))
+            {
+                if (downPressCount >= 2 && Time.time - lastDownPressTime <= _attackWindow)
+                {
+                    // 아래 더블탭 후 공격: 직선 던지기
+                    _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
+                }
+                else if (downPressCount == 1 && Time.time - lastDownPressTime <= _attackWindow
+                    || Input.GetKey(KeyCode.DownArrow))
+                {
+                    // 아래 단일 입력 후 공격: 곡사 던지기
+                    _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
+                }
             }
             else
             {
-                _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Left));
+                // 보고 있는 방향으로 폭탄을 둔다.
+                if (_owner.PlayerStat.FacingDirection == 1)
+                {
+                    _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+                }
+                else
+                {
+                    _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Left));
+                }
             }
             SetLastNormalBombTime();
         }
-        
+    }
+
+    private void IdleSpecialAttack()
+    {
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
-            // 보고 있는 방향으로 폭탄을 둔다.
-            if(_owner.PlayerStat.FacingDirection == 1)
+            if (Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+                if (upPressCount >= 2 && Time.time - lastUpPressTime <= _attackWindow)
+                {
+                    // 위 더블탭 후 공격: 직선 던지기
+                    _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
+                }
+                else if (upPressCount == 1 && Time.time - lastUpPressTime <= _attackWindow
+                    || Input.GetKey(KeyCode.UpArrow))
+                {
+                    // 위 단일 입력 후 공격: 곡사 던지기
+                    _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
+                }
+            }
+            else if (Input.GetKey(KeyCode.DownArrow))
+            {
+                if (downPressCount >= 2 && Time.time - lastDownPressTime <= _attackWindow)
+                {
+                    // 아래 더블탭 후 공격: 직선 던지기
+                    _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
+                }
+                else if (downPressCount == 1 && Time.time - lastDownPressTime <= _attackWindow
+                    || Input.GetKey(KeyCode.DownArrow))
+                {
+                    // 아래 단일 입력 후 공격: 곡사 던지기
+                    _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
+                }
             }
             else
             {
-                _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Left));
+                // 보고 있는 방향으로 폭탄을 둔다.
+                if (_owner.PlayerStat.FacingDirection == 1)
+                {
+                    _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+                }
+                else
+                {
+                    _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Left));
+                }
             }
             SetLastSpecialBombTime();
+        }
+    }
+
+    private void DoubleTapCheck()
+    {
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            if (Time.time - lastUpPressTime <= _owner.PlayerStat.DoubleTapTime)
+            {
+                upPressCount++;
+            }
+            else
+            {
+                upPressCount = 1;
+            }
+            lastUpPressTime = Time.time;
+        }
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            if (Time.time - lastDownPressTime <= _owner.PlayerStat.DoubleTapTime)
+            {
+                downPressCount++;
+            }
+            else
+            {
+                downPressCount = 1;
+            }
+            lastDownPressTime = Time.time;
         }
     }
 

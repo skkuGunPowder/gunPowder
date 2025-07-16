@@ -52,6 +52,19 @@ public class PlayerWalkState : PlayerBaseState
     {
         base.Update();
 
+        // 이동 로직
+        bool flowControl = WalkMove();
+        if (!flowControl)
+        {
+            return;
+        }
+
+        // 공격 로직
+        WalkAttack();
+    }
+
+    private bool WalkMove()
+    {
         _timer += Time.deltaTime;
         _keyReleaseTimer += Time.deltaTime;
 
@@ -71,53 +84,53 @@ public class PlayerWalkState : PlayerBaseState
         {
             _owner.PlayerStat.IsFallingFromLedge = true;
             _playerFSM.ChangeState<PlayerJumpState>();
-            return; 
+            return false;
         }
 
         // 이동
         // 2D기 때문에 +x, -x로만 이동한다.
         // 오른쪽 화살표 -> 우측이동, 왼쪽 화살표 -> 좌측이동
-        if(Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.RightArrow))
         {
             _owner.SetFacingDirection(1);
             _owner.CharacterController.Move(Vector3.right * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime);
-            
+
             // 키 입력 감지
             if (!_isKeyPressed)
             {
                 _isKeyPressed = true;
                 float currentTime = Time.time;
-                
+
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
                 if (_owner.PlayerStat.FacingDirection == 1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStat.DoubleTapTime)
                 {
                     Debug.Log("WalkState: 오른쪽 더블탭 감지 - DashState로 전환");
                     _playerFSM.ChangeState<PlayerDashState>();
-                    return;
+                    return false;
                 }
-                
+
                 _lastKeyPressTime = currentTime;
             }
         }
-        else if(Input.GetKey(KeyCode.LeftArrow))
+        else if (Input.GetKey(KeyCode.LeftArrow))
         {
             _owner.SetFacingDirection(-1);
             _owner.CharacterController.Move(Vector3.left * _owner.PlayerStat.MoveSpeed * Time.deltaTime);
-            
+
             // 키 입력 감지
             if (!_isKeyPressed)
             {
                 _isKeyPressed = true;
                 float currentTime = Time.time;
-                
+
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
                 if (_owner.PlayerStat.FacingDirection == -1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStat.DoubleTapTime)
                 {
                     Debug.Log("WalkState: 왼쪽 더블탭 감지 - DashState로 전환");
                     _playerFSM.ChangeState<PlayerDashState>();
-                    return;
+                    return false;
                 }
-                
+
                 _lastKeyPressTime = currentTime;
             }
         }
@@ -129,14 +142,30 @@ public class PlayerWalkState : PlayerBaseState
                 _isKeyPressed = false;
                 _keyReleaseTimer = 0f;
             }
-            
+
             // 키를 떼고 일정 시간이 지나면 Idle로 전환
             if (_keyReleaseTimer >= KEY_RELEASE_THRESHOLD)
             {
                 Debug.Log("WalkState: 키를 떼어서 IdleState로 전환");
                 _playerFSM.ChangeState<PlayerIdleState>();
-                return;
+                return false;
             }
+        }
+
+        return true;
+    }
+
+    private void WalkAttack()
+    {
+        if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        {
+            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+            SetLastNormalBombTime();
+        }
+        if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        {
+            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+            SetLastSpecialBombTime();
         }
     }
 }

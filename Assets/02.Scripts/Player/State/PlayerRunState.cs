@@ -35,6 +35,17 @@ public class PlayerRunState : PlayerBaseState
     {
         base.Update();
 
+        bool flowControl = RunMove();
+        if (!flowControl)
+        {
+            return;
+        }
+
+        RunAttack();
+    }
+
+    private bool RunMove()
+    {
         // 코요테 타임 및 바닥 체크
         bool isGrounded = IsGrounded();
         if (isGrounded)
@@ -51,16 +62,16 @@ public class PlayerRunState : PlayerBaseState
         {
             _owner.PlayerStat.IsFallingFromLedge = true;
             _playerFSM.ChangeState<PlayerJumpState>();
-            return;
+            return false;
         }
 
-        if(Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1
+        if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1
         || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
         {
             _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime,
              0, 0));
         }
-        else if(Input.GetKeyUp(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
+        else if (Input.GetKeyUp(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
         || Input.GetKeyUp(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
         {
             _playerFSM.ChangeState<PlayerBreakState>();
@@ -68,10 +79,26 @@ public class PlayerRunState : PlayerBaseState
         else
         {
             _keyReleaseTimer += Time.deltaTime;
-            if(_keyReleaseTimer >= _keyReleaseThreshold)
+            if (_keyReleaseTimer >= _keyReleaseThreshold)
             {
                 _playerFSM.ChangeState<PlayerIdleState>();
             }
+        }
+
+        return true;
+    }
+
+    private void RunAttack()
+    {
+        if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        {
+            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+            SetLastNormalBombTime();
+        }
+        if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        {
+            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+            SetLastSpecialBombTime();
         }
     }
 } 

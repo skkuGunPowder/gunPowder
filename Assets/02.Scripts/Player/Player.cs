@@ -23,6 +23,9 @@ public class Player : MonoBehaviour
     private Bomb _specialBomb;
     public Bomb SpecialBomb => _specialBomb;
 
+    // 테스트용
+    public GameObject TestBomb;
+
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();

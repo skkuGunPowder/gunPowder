@@ -44,7 +44,17 @@ public class PlayerJumpState : PlayerBaseState
         base.Update();
 
         _timer += Time.deltaTime;
+        bool flowControl = JumpMove();
+        if (!flowControl)
+        {
+            return;
+        }
 
+        JumpAttack();
+    }
+
+    private bool JumpMove()
+    {
         // 중력 적용
         _yVelocity += _gravity * Time.deltaTime;
         _yVelocity = Mathf.Clamp(_yVelocity, _gravity * 3, _owner.PlayerStat.JumpForce);
@@ -52,7 +62,7 @@ public class PlayerJumpState : PlayerBaseState
         // 좌우 이동
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            if(_owner.PlayerStat.FacingDirection == -1)
+            if (_owner.PlayerStat.FacingDirection == -1)
             {
                 _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
             }
@@ -61,7 +71,7 @@ public class PlayerJumpState : PlayerBaseState
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
-            if(_owner.PlayerStat.FacingDirection == 1)
+            if (_owner.PlayerStat.FacingDirection == 1)
             {
                 _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
             }
@@ -76,37 +86,37 @@ public class PlayerJumpState : PlayerBaseState
 
         _owner.CharacterController.Move(new Vector3(_xVelocity, _yVelocity, 0) * Time.deltaTime);
 
-        
+
         // 더블 점프
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
             _owner.PlayerStat.IncrementJumpCount();
             _yVelocity = _owner.PlayerStat.JumpForce;
         }
-        
+
 
         // 방향키 더블 클릭 체크
         // 점프 대쉬상태로 전환
         // 방향키 더블탭 체크 (점프 대쉬)
-    if (Input.GetKeyDown(KeyCode.LeftArrow))
-    {
-        if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            Debug.Log("점프 중 왼쪽 더블탭 - 점프 대쉬 상태로 전환");
-            _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
-            return;
+            if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
+            {
+                Debug.Log("점프 중 왼쪽 더블탭 - 점프 대쉬 상태로 전환");
+                _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
+                return false;
+            }
+            _lastLeftTapTime = Time.time;
         }
-        _lastLeftTapTime = Time.time;
-    }
-    if (Input.GetKeyDown(KeyCode.RightArrow))
-    {
-        if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
+        if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            Debug.Log("점프 중 오른쪽 더블탭 - 점프 대쉬 상태로 전환");
-            _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
+            if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
+            {
+                Debug.Log("점프 중 오른쪽 더블탭 - 점프 대쉬 상태로 전환");
+                _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
+            }
+            _lastRightTapTime = Time.time;
         }
-        _lastRightTapTime = Time.time;
-    }
 
 
 
@@ -115,7 +125,23 @@ public class PlayerJumpState : PlayerBaseState
         {
             Debug.Log("착지!");
             _playerFSM.ChangeState<PlayerIdleState>();
-            return;
+            return false;
+        }
+
+        return true;
+    }
+
+    private void JumpAttack()
+    {
+        if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        {
+            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+            SetLastNormalBombTime();
+        }
+        if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        {
+            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+            SetLastSpecialBombTime();
         }
     }
 }
