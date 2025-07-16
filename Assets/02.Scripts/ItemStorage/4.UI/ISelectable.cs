@@ -1,9 +1,5 @@
-using UnityEngine;
-
-public interface ISlot
+public interface ISelectable
 {
-    public void Refresh(ItemDTO item);
-
     public void Select();
 
     public void Deselect();

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class UI_ItemStorage : MonoBehaviour
@@ -9,6 +8,7 @@ public class UI_ItemStorage : MonoBehaviour
     public UI_EquipmentSlot EquipmentSlot;
 
     [SerializeField] private List<UI_ItemSlot> _itemSlotList;
+    [SerializeField] private List<UI_Category> _categorieList;
 
     private ItemStorage _itemStorage;
 
@@ -18,8 +18,6 @@ public class UI_ItemStorage : MonoBehaviour
     private void Start()
     {
         _itemStorage = ItemStorage.Instance;
-
-        // 이벤트 구독
         _itemStorage.OnDataChanged += Refresh;
 
         Refresh(_itemStorage.CurrentCategory);
@@ -29,12 +27,12 @@ public class UI_ItemStorage : MonoBehaviour
     {
         List<ItemDTO> itemList = _itemStorage.GetStoredItemList(currentCategory);
 
-        // 아이템 슬롯 순회
+        // 아이템 슬롯 업데이트
         for (int i = 0; i < _itemSlotList.Count; i++)
         {
             _itemSlotList[i].Deselect();
 
-            // 아이템 개수만큼 아이템 슬롯 활성화
+            // 아이템 개수만큼 아이템 슬롯 활성화, 업데이트
             if (i < itemList.Count)
             {
                 _itemSlotList[i].gameObject.SetActive(true);
@@ -45,6 +43,18 @@ public class UI_ItemStorage : MonoBehaviour
                 // 나머지 아이템 슬롯 비활성화
                 _itemSlotList[i].gameObject.SetActive(false);
             }
+        }
+
+        // 카테고리 슬롯 업데이트
+        foreach (UI_Category category in _categorieList)
+        {
+            if (category.Category == currentCategory)
+            {
+                category.Select();
+                continue;
+            }
+
+            category.Deselect();
         }
 
         // 선택된 슬롯 업데이트

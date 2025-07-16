@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_ItemSlot : MonoBehaviour, ISlot
+public class UI_ItemSlot : MonoBehaviour, ISelectable
 {
     public ItemDTO Item;
     
