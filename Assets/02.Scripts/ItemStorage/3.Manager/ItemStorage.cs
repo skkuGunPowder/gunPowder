@@ -39,9 +39,10 @@ public class ItemStorage : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
         {
             ItemDTO newItem = new ItemDTO(
-                TestIcon,
                 UnityEngine.Random.Range(0, 11).ToString(),
                 "Test Item",
+                "Descriptions...",
+                TestIcon,
                 (EEquipmentSlot)UnityEngine.Random.Range(0, (int)EEquipmentSlot.None),
                 false
             );
@@ -110,6 +111,16 @@ public class ItemStorage : MonoBehaviour
         }
 
         return new ItemDTO(_equippedItemDict[equipmentSlot]);
+    }
+
+    public ItemDTO GetSelectedItem()
+    {
+        if (_selectedItem == null)
+        {
+            return null;
+        }
+
+        return _selectedItem;
     }
 
     public void ChangeCategory(EEquipmentSlot nextCategory)

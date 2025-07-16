@@ -9,8 +9,6 @@ public class UI_EquipmentSlot : MonoBehaviour, ISlot
     public Image EquippedIcon;
     public Image SelectedIcon;
 
-    private bool _isSelected;
-
 
     public void Refresh(ItemDTO item)
     {

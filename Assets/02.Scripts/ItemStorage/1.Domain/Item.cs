@@ -6,13 +6,14 @@ public class Item
 {
     public string ID;
     public string Name;
+    public string Description;
     public Sprite Image;
     public EEquipmentSlot EquipmentSlot;
     public bool IsEquipped;
 
     public Item()
     {
-        
+
     }
 
     public Item(ItemDTO itemDTO)
@@ -20,11 +21,12 @@ public class Item
         ID = itemDTO.ID;
         Name = itemDTO.Name;
         Image = itemDTO.Image;
+        Description = itemDTO.Description;
         EquipmentSlot = itemDTO.EquipmentSlot;
         IsEquipped = itemDTO.IsEquipped;
     }
 
-    public Item(Sprite image, string id, string name, EEquipmentSlot equipmentSlot, bool isEquipped)
+    public Item(string id, string name, string description, Sprite image, EEquipmentSlot equipmentSlot, bool isEquipped)
     {
         if (image == null)
         {
@@ -43,6 +45,7 @@ public class Item
 
         ID = id;
         Name = name;
+        Description = description;
         Image = image;
         EquipmentSlot = equipmentSlot;
         IsEquipped = isEquipped;
