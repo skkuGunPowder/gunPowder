@@ -32,23 +32,34 @@ public class ItemStorage : MonoBehaviour
         Init();
     }
 
+    private async void LoadData()
+    {
+        _storedItemDict = await _repo.LoadItemStorage();
+        OnDataChanged?.Invoke(CurrentCategory);
+    }
+
 #if UNITY_EDITOR
     public Sprite TestIcon;
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Backslash))
         {
-            ItemDTO newItem = new ItemDTO(
-                UnityEngine.Random.Range(0, 11).ToString(),
-                "Test Item",
-                "Descriptions...",
-                TestIcon,
-                (EEquipmentSlot)UnityEngine.Random.Range(0, (int)EEquipmentSlot.None),
-                false
-            );
-
-            AddItem(newItem);
+            LoadData();
         }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+            {
+                ItemDTO newItem = new ItemDTO(
+                    UnityEngine.Random.Range(0, 11).ToString(),
+                    "Test Item",
+                    "Descriptions...",
+                    TestIcon,
+                    (EEquipmentSlot)UnityEngine.Random.Range(0, (int)EEquipmentSlot.None),
+                    false
+                );
+
+                AddItem(newItem);
+            }
 
         if (Input.GetKeyDown(KeyCode.W))
         {
@@ -74,8 +85,11 @@ public class ItemStorage : MonoBehaviour
 
         // 저장된 데이터 로드
         _repo = new ItemStorageRepo();
-        _storedItemDict = _repo.LoadItemStorage();
+        // _storedItemDict = _repo.LoadItemStorage().Result;
+        _storedItemDict = null;
         _equippedItemDict = _repo.LoadInventory();
+
+
 
         // 저장된 데이터 없을 시 딕셔너리 초기화
         if (_storedItemDict == null)

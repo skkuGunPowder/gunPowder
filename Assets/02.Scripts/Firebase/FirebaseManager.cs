@@ -14,7 +14,7 @@ public class FirebaseManager : MonoBehaviour
     {
         if (Instance == null)
         {
-            Instance = null;
+            Instance = this;
         }
         else
         {
@@ -25,17 +25,19 @@ public class FirebaseManager : MonoBehaviour
         Init();
     }
 
-    private void Init()
+    private async void Init()
     {
-        var dependencyStatus = FirebaseApp.CheckAndFixDependenciesAsync().Result;
+        var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
         if (dependencyStatus == DependencyStatus.Available)
         {
             App = FirebaseApp.DefaultInstance;
             DB = FirebaseFirestore.DefaultInstance;
+
+            Debug.Log("Firebase 연결 성공");
         }
         else
         {
-            Debug.LogError($"Could not resolve all Firebase dependencies: {dependencyStatus}");
+            Debug.LogError($"Firebase 연결 실패: {dependencyStatus}");
         }
     }
 }
