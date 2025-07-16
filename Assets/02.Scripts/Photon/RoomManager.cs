@@ -1,9 +1,8 @@
-using System;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
-using Unity.VisualScripting;
 using UnityEngine;
+using PhotonPlayer = Photon.Realtime.Player;
 
 public class RoomManager : MonoBehaviourPunCallbacks
 {
@@ -61,9 +60,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
     // 사람들이 모두 눌렀는가?
     public bool IsPlayerReady()
     {
-        Player[] players = PhotonNetwork.PlayerList;
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
         
-        foreach (Player player in players)
+        foreach (PhotonPlayer player in players)
         {
             Debug.Log(player.NickName + $"{player.CustomProperties.ContainsKey("isReady")}");
             if (player.IsMasterClient)
