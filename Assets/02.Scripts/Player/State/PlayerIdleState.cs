@@ -7,10 +7,11 @@ public class PlayerIdleState : PlayerBaseState
     {
         base.OnEnter();
         // 플레이어 상태
-        _owner.IsRunning = false;
-        _owner.IsJumping = false;
-        _owner.MyMoveSpeed = _owner.PlayerStatSO.MoveSpeed;  // 기본 이동속도
-        _owner.JumpCount = 0;
+        _owner.PlayerStat.IsRunning = false;
+        _owner.PlayerStat.IsJumping = false;
+        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;  // 기본 이동속도
+        _owner.PlayerStat.JumpCount = 0;
+        _owner.PlayerStat.ResetJumpDashCount();
 
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Idle");

@@ -17,10 +17,10 @@ public class PlayerJumpState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        _owner.JumpCount += 1;
+        _owner.PlayerStat.IncrementJumpCount();
 
         // 점프 시작 시 Y속도에 점프 파워를 부여
-        _yVelocity = _owner.PlayerStatSO.JumpForce;
+        _yVelocity = _owner.PlayerStat.JumpForce;
         _timer = 0f;
     }
     public override void OnExit()
@@ -37,7 +37,7 @@ public class PlayerJumpState : PlayerBaseState
 
         // 중력 적용
         _yVelocity += _gravity * Time.deltaTime;
-        _yVelocity = Mathf.Clamp(_yVelocity, _gravity * 3, _owner.PlayerStatSO.JumpForce);
+        _yVelocity = Mathf.Clamp(_yVelocity, _gravity * 3, _owner.PlayerStat.JumpForce);
 
         // 좌우 이동
         if (Input.GetKey(KeyCode.RightArrow))
@@ -54,15 +54,15 @@ public class PlayerJumpState : PlayerBaseState
         {
             _xVelocity = 0;
         }
-        _xVelocity *= _owner.MyMoveSpeed;
+        _xVelocity *= _owner.PlayerStat.MyMoveSpeed;
 
         _owner.CharacterController.Move(new Vector3(_xVelocity, _yVelocity, 0) * Time.deltaTime);
 
         // 더블 점프
-        if (Input.GetKeyDown(KeyCode.Space) && _owner.JumpCount < _owner.PlayerStatSO.MaxJumpCount)
+        if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
-            _owner.JumpCount++;
-            _yVelocity = _owner.PlayerStatSO.JumpForce;
+            _owner.PlayerStat.IncrementJumpCount();
+            _yVelocity = _owner.PlayerStat.JumpForce;
         }
 
         // 방향키 더블 클릭 체크
@@ -70,7 +70,7 @@ public class PlayerJumpState : PlayerBaseState
         // 방향키 더블탭 체크 (점프 대쉬)
     if (Input.GetKeyDown(KeyCode.LeftArrow))
     {
-        if (Time.time - _lastLeftTapTime <= _owner.PlayerStatSO.DoubleTapTime)
+        if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime)
         {
             Debug.Log("점프 중 왼쪽 더블탭 - 점프 대쉬 상태로 전환");
             _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
@@ -80,11 +80,13 @@ public class PlayerJumpState : PlayerBaseState
     }
     if (Input.GetKeyDown(KeyCode.RightArrow))
     {
-        if (Time.time - _lastRightTapTime <= _owner.PlayerStatSO.DoubleTapTime)
+        if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime)
         {
             Debug.Log("점프 중 오른쪽 더블탭 - 점프 대쉬 상태로 전환");
-            _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
-            return;
+            if(_owner.PlayerStat.CanJumpDash())
+            {
+                _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
+            }
         }
         _lastRightTapTime = Time.time;
     }

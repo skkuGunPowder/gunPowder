@@ -24,8 +24,8 @@ public class PlayerWalkState : PlayerBaseState
         _keyReleaseTimer = 0f;
 
         // 플레이어 상태
-        _owner.MyMoveSpeed = _owner.PlayerStatSO.MoveSpeed;
-        _owner.IsRunning = false;
+        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+        _owner.PlayerStat.IsRunning = false;
 
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Walk");
@@ -52,7 +52,7 @@ public class PlayerWalkState : PlayerBaseState
         if(Input.GetKey(KeyCode.RightArrow))
         {
             _owner.SetFacingDirection(1);
-            _owner.CharacterController.Move(Vector3.right * _owner.MyMoveSpeed * Time.deltaTime);
+            _owner.CharacterController.Move(Vector3.right * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime);
             
             // 키 입력 감지
             if (!_isKeyPressed)
@@ -61,7 +61,7 @@ public class PlayerWalkState : PlayerBaseState
                 float currentTime = Time.time;
                 
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
-                if (_owner.FacingDirection == 1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStatSO.DoubleTapTime)
+                if (_owner.PlayerStat.FacingDirection == 1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStat.DoubleTapTime)
                 {
                     Debug.Log("WalkState: 오른쪽 더블탭 감지 - DashState로 전환");
                     _playerFSM.ChangeState<PlayerDashState>();
@@ -74,7 +74,7 @@ public class PlayerWalkState : PlayerBaseState
         else if(Input.GetKey(KeyCode.LeftArrow))
         {
             _owner.SetFacingDirection(-1);
-            _owner.CharacterController.Move(Vector3.left * _owner.PlayerStatSO.MoveSpeed * Time.deltaTime);
+            _owner.CharacterController.Move(Vector3.left * _owner.PlayerStat.MoveSpeed * Time.deltaTime);
             
             // 키 입력 감지
             if (!_isKeyPressed)
@@ -83,7 +83,7 @@ public class PlayerWalkState : PlayerBaseState
                 float currentTime = Time.time;
                 
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
-                if (_owner.FacingDirection == -1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStatSO.DoubleTapTime)
+                if (_owner.PlayerStat.FacingDirection == -1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStat.DoubleTapTime)
                 {
                     Debug.Log("WalkState: 왼쪽 더블탭 감지 - DashState로 전환");
                     _playerFSM.ChangeState<PlayerDashState>();
