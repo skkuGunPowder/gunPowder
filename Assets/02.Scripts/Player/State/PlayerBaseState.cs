@@ -10,10 +10,7 @@ public class PlayerBaseState : MonoState
     private float _lastNormalBombTime = 0f;
     private float _lastSpecialBombTime = 0f;
 
-    // 코요테 타임 관련
-    private float _coyoteTimer = 0f;
-    private const float COYOTE_TIME = 0.15f;
-    private bool _wasGroundedLastFrame = true;
+
 
     public override void OnEnter()
     {
@@ -21,8 +18,6 @@ public class PlayerBaseState : MonoState
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
         Debug.Log($"Enter {this.GetType().Name} State");
-        _coyoteTimer = 0f;
-        _wasGroundedLastFrame = IsGrounded();
     }
 
     public override void OnExit()
@@ -34,48 +29,17 @@ public class PlayerBaseState : MonoState
     public virtual void Update()
     {
         _attackTimer += Time.deltaTime;
-
-        // 바닥 체크 및 코요테 타임 관리
-        bool isGrounded = IsGrounded();
-        if (isGrounded)
-        {
-            _coyoteTimer = 0f;
-        }
-        else
-        {
-            _coyoteTimer += Time.deltaTime;
-        }
-
-        // 바닥에서 떨어진 순간(이전 프레임엔 있었고, 이번 프레임엔 없음)
-        if (_wasGroundedLastFrame && !isGrounded)
-        {
-            if (!_playerFSM.IsCurrentState<PlayerJumpState>() &&
-                !_playerFSM.IsCurrentState<PlayerJumpDashState>() &&
-                !_playerFSM.IsCurrentState<PlayerDashState>())
-            {
-                _playerFSM.ChangeState<PlayerJumpState>();
-            }
-        }
-        _wasGroundedLastFrame = isGrounded;
-
         JumpInput();
     }
 
     // 하위에서 사용하고 싶은 것만 사용한다.
     protected virtual void JumpInput()
     {
-        // 대쉬 중에는 점프를 하지 못한다.
         if (_playerFSM.IsCurrentState<PlayerDashState>() || _playerFSM.IsCurrentState<PlayerJumpDashState>())
-            return;
-
-        // 코요테 타임 내에는 점프 허용
-        bool isGrounded = IsGrounded();
-        if (!isGrounded && _coyoteTimer > COYOTE_TIME)
             return;
 
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
-            //_owner.PlayerStat.IncrementJumpCount();
             _playerFSM.ChangeState<PlayerJumpState>();
         }
     }

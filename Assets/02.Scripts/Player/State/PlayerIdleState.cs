@@ -13,6 +13,7 @@ public class PlayerIdleState : PlayerBaseState
         _owner.PlayerStat.JumpCount = 0;
         _owner.PlayerStat.ResetJumpDashCount();
 
+
         // 애니메이션 재생
         // _owner.MyAnimator.SetTrigger("Idle");
     }
@@ -73,7 +74,7 @@ public class PlayerIdleState : PlayerBaseState
     /// </summary>
     private void IdleMove()
     {
-        //_owner.CharacterController.Move(new Vector3(0, _yVelocity, 0));
+        _owner.CharacterController.Move(new Vector3(0, -9f, 0));
 ;
 
         // 이동키를 받으면 걷기 상태로 전환

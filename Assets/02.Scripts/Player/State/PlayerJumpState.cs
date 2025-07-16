@@ -17,11 +17,16 @@ public class PlayerJumpState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+        
         _yVelocity = 0f;
-        if(!_playerFSM.IsPreviousState<PlayerJumpDashState>())
+        if (_owner.PlayerStat.IsFallingFromLedge)
+        {
+            _yVelocity = 0f; // 낙하
+            _owner.PlayerStat.IsFallingFromLedge = false;
+        }
+        else if(!_playerFSM.IsPreviousState<PlayerJumpDashState>())
         {
             _owner.PlayerStat.IncrementJumpCount();
-            // 점프 시작 시 Y속도에 점프 파워를 부여
             _yVelocity = _owner.PlayerStat.JumpForce;
         }
         _timer = 0f;
@@ -47,11 +52,19 @@ public class PlayerJumpState : PlayerBaseState
         // 좌우 이동
         if (Input.GetKey(KeyCode.RightArrow))
         {
+            if(_owner.PlayerStat.FacingDirection == -1)
+            {
+                _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+            }
             _xVelocity = 1;
             _owner.SetFacingDirection(1);
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
+            if(_owner.PlayerStat.FacingDirection == 1)
+            {
+                _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+            }
             _xVelocity = -1;
             _owner.SetFacingDirection(-1);
         }

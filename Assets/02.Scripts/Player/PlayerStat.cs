@@ -50,6 +50,8 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private int _facingDirection = 1;
     public int FacingDirection { get => _facingDirection; set => _facingDirection = value; }
 
+    public bool IsFallingFromLedge = false;
+
     void Start()
     {
         InitializeStats();

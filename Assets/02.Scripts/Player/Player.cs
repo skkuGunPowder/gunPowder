@@ -23,7 +23,6 @@ public class Player : MonoBehaviour
     private Bomb _specialBomb;
     public Bomb SpecialBomb => _specialBomb;
 
-
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();

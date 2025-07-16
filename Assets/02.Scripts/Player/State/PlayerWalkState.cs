@@ -14,6 +14,11 @@ public class PlayerWalkState : PlayerBaseState
     private float _keyReleaseTimer = 0f;
     private const float KEY_RELEASE_THRESHOLD = 0.1f; // 키를 떼고 이 시간 이내에 다시 누르면 더블탭으로 인식
 
+    // 코요테 타임 관련
+    private float _coyoteTimer = 0f;
+    private const float COYOTE_TIME = 0.15f;
+    private bool _wasGroundedLastFrame = true;
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -22,6 +27,10 @@ public class PlayerWalkState : PlayerBaseState
         _lastKeyPressTime = 0f;
         _isKeyPressed = false;
         _keyReleaseTimer = 0f;
+
+        // 코요테 타임 초기화
+        _coyoteTimer = 0f;
+        _wasGroundedLastFrame = IsGrounded();
 
         // 플레이어 상태
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
@@ -45,6 +54,25 @@ public class PlayerWalkState : PlayerBaseState
 
         _timer += Time.deltaTime;
         _keyReleaseTimer += Time.deltaTime;
+
+        // 코요테 타임 및 바닥 체크
+        bool isGrounded = IsGrounded();
+        if (isGrounded)
+        {
+            _coyoteTimer = 0f;
+        }
+        else
+        {
+            _coyoteTimer += Time.deltaTime;
+        }
+
+        // 바닥에서 떨어진 순간(이전 프레임엔 있었고, 이번 프레임엔 없음)
+        if (!isGrounded)
+        {
+            _owner.PlayerStat.IsFallingFromLedge = true;
+            _playerFSM.ChangeState<PlayerJumpState>();
+            return; 
+        }
 
         // 이동
         // 2D기 때문에 +x, -x로만 이동한다.
