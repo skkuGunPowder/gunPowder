@@ -17,10 +17,13 @@ public class PlayerJumpState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        _owner.PlayerStat.IncrementJumpCount();
-
-        // 점프 시작 시 Y속도에 점프 파워를 부여
-        _yVelocity = _owner.PlayerStat.JumpForce;
+        _yVelocity = 0f;
+        if(!_playerFSM.IsPreviousState<PlayerJumpDashState>())
+        {
+            _owner.PlayerStat.IncrementJumpCount();
+            // 점프 시작 시 Y속도에 점프 파워를 부여
+            _yVelocity = _owner.PlayerStat.JumpForce;
+        }
         _timer = 0f;
     }
     public override void OnExit()
@@ -33,6 +36,8 @@ public class PlayerJumpState : PlayerBaseState
     /// </summary>
     public override void Update()
     {
+        base.Update();
+
         _timer += Time.deltaTime;
 
         // 중력 적용
@@ -58,12 +63,14 @@ public class PlayerJumpState : PlayerBaseState
 
         _owner.CharacterController.Move(new Vector3(_xVelocity, _yVelocity, 0) * Time.deltaTime);
 
+        
         // 더블 점프
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
             _owner.PlayerStat.IncrementJumpCount();
             _yVelocity = _owner.PlayerStat.JumpForce;
         }
+        
 
         // 방향키 더블 클릭 체크
         // 점프 대쉬상태로 전환
