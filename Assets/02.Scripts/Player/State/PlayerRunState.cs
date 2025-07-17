@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerRunState : PlayerBaseState
 {
     private float _keyReleaseTimer = 0f;
-    private float _keyReleaseThreshold = 0.1f;
+    private float _keyReleaseThreshold = 0.3f;
 
     // 코요테 타임 관련
     private float _coyoteTimer = 0f;
@@ -79,6 +79,8 @@ public class PlayerRunState : PlayerBaseState
         else
         {
             _keyReleaseTimer += Time.deltaTime;
+            _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime,
+             0, 0));
             if (_keyReleaseTimer >= _keyReleaseThreshold)
             {
                 _playerFSM.ChangeState<PlayerIdleState>();
@@ -94,11 +96,15 @@ public class PlayerRunState : PlayerBaseState
         {
             _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
             SetLastNormalBombTime();
+            _playerFSM.ChangeState<PlayerRecoilState>();
+            return;
         }
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
             _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
             SetLastSpecialBombTime();
+            _playerFSM.ChangeState<PlayerRecoilState>();
+            return;
         }
     }
 } 

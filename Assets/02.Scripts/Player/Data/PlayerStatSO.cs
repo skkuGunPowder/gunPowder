@@ -29,8 +29,11 @@ public class PlayerStatSO : ScriptableObject
     [SerializeField] private float _maxJumpCount;
     public float MaxJumpCount => _maxJumpCount;
 
-   
-    
+    [SerializeField] private float _recoilTime;
+    public float RecoilTime => _recoilTime;
+
+    [SerializeField] private float _recoilSpeed;
+    public float RecoilSpeed => _recoilSpeed;
     
     
 }

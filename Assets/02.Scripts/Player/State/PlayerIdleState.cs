@@ -3,11 +3,6 @@ using UnityEngine;
 
 public class PlayerIdleState : PlayerBaseState
 {
-    private float lastUpPressTime = -10f;
-    private float lastDownPressTime = -10f;
-    private int upPressCount = 0;
-    private int downPressCount = 0;
-    private float _attackWindow = 0.2f; // 공격 입력 허용 시간
 
     public override void OnEnter()
     {
@@ -46,7 +41,6 @@ public class PlayerIdleState : PlayerBaseState
     /// </summary>
     private void IdleAttack()
     {
-        DoubleTapCheck();
         IdleNormalAttack();
         IdleSpecialAttack();
     }
@@ -57,29 +51,15 @@ public class PlayerIdleState : PlayerBaseState
         {
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                if (upPressCount >= 2 && Time.time - lastUpPressTime <= _attackWindow)
+                if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
                 {
-                    // 위 더블탭 후 공격: 직선 던지기
-                    _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
-                }
-                else if (upPressCount == 1 && Time.time - lastUpPressTime <= _attackWindow
-                    || Input.GetKey(KeyCode.UpArrow))
-                {
-                    // 위 단일 입력 후 공격: 곡사 던지기
                     _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
                 }
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
-                if (downPressCount >= 2 && Time.time - lastDownPressTime <= _attackWindow)
+                if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
                 {
-                    // 아래 더블탭 후 공격: 직선 던지기
-                    _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
-                }
-                else if (downPressCount == 1 && Time.time - lastDownPressTime <= _attackWindow
-                    || Input.GetKey(KeyCode.DownArrow))
-                {
-                    // 아래 단일 입력 후 공격: 곡사 던지기
                     _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
                 }
             }
@@ -105,29 +85,15 @@ public class PlayerIdleState : PlayerBaseState
         {
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                if (upPressCount >= 2 && Time.time - lastUpPressTime <= _attackWindow)
+                if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
                 {
-                    // 위 더블탭 후 공격: 직선 던지기
-                    _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
-                }
-                else if (upPressCount == 1 && Time.time - lastUpPressTime <= _attackWindow
-                    || Input.GetKey(KeyCode.UpArrow))
-                {
-                    // 위 단일 입력 후 공격: 곡사 던지기
                     _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
                 }
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
-                if (downPressCount >= 2 && Time.time - lastDownPressTime <= _attackWindow)
+                if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
                 {
-                    // 아래 더블탭 후 공격: 직선 던지기
-                    _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
-                }
-                else if (downPressCount == 1 && Time.time - lastDownPressTime <= _attackWindow
-                    || Input.GetKey(KeyCode.DownArrow))
-                {
-                    // 아래 단일 입력 후 공격: 곡사 던지기
                     _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
                 }
             }
@@ -144,34 +110,6 @@ public class PlayerIdleState : PlayerBaseState
                 }
             }
             SetLastSpecialBombTime();
-        }
-    }
-
-    private void DoubleTapCheck()
-    {
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            if (Time.time - lastUpPressTime <= _owner.PlayerStat.DoubleTapTime)
-            {
-                upPressCount++;
-            }
-            else
-            {
-                upPressCount = 1;
-            }
-            lastUpPressTime = Time.time;
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            if (Time.time - lastDownPressTime <= _owner.PlayerStat.DoubleTapTime)
-            {
-                downPressCount++;
-            }
-            else
-            {
-                downPressCount = 1;
-            }
-            lastDownPressTime = Time.time;
         }
     }
 

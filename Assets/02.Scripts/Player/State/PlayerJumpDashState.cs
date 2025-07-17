@@ -12,7 +12,7 @@ public class PlayerJumpDashState : PlayerBaseState
     {
         base.OnEnter();
         // 플레이어 상태
-        _owner.PlayerStat.IsRunning = false;
+        _owner.PlayerStat.IsRunning = true;
         _owner.PlayerStat.IsJumping = true;
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
         _owner.PlayerStat.IncrementJumpDashCount();
