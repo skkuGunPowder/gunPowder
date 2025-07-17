@@ -58,6 +58,35 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private int _facingDirection = 1;
     public int FacingDirection { get => _facingDirection; set => _facingDirection = value; }
 
+    [Header("Player Attributes")]
+    [SerializeField] private int _attackPenaltyTime;
+    public int AttackPenaltyTime { get => _attackPenaltyTime; set => _attackPenaltyTime = value; }
+
+    [SerializeField] private int _attackPenaltyAmount;
+    public int AttackPenaltyAmount { get => _attackPenaltyAmount; set => _attackPenaltyAmount = value; }
+    
+
+    [Header("Die")]
+    [SerializeField] private int _dieExplosionDamage;
+    public int DieExplosionDamage { get => _dieExplosionDamage; set => _dieExplosionDamage = value; }
+    [SerializeField] private float _dieExplosionRadius;
+    public float DieExplosionRadius { get => _dieExplosionRadius; set => _dieExplosionRadius = value; }
+    [SerializeField] private float _dieExplosionForce;
+    public float DieExplosionForce { get => _dieExplosionForce; set => _dieExplosionForce = value; }
+    [SerializeField] private float _invincibleTime;
+    public float InvincibleTime { get => _invincibleTime; set => _invincibleTime = value; }
+
+    [Header("Current Player")]
+    // 현재 플레이어가 가지고 있는 수치
+    [SerializeField] private int _currentPlayerGunPowderCount;
+    public int CurrentPlayerGunPowderCount => _currentPlayerGunPowderCount;    
+    [SerializeField] private int _currentPlayerDamagedCount;
+    public int CurrentPlayerDamagedCount => _currentPlayerDamagedCount;
+
+    
+    
+    
+    
     public bool IsFallingFromLedge = false;
 
     void Start()
@@ -79,6 +108,16 @@ public class PlayerStat : MonoBehaviour
             _maxJumpCount = _playerStatSO.MaxJumpCount;
             _recoilTime = _playerStatSO.RecoilTime;
             _recoilSpeed = _playerStatSO.RecoilSpeed;
+            _attackPenaltyTime = _playerStatSO.AttackPenaltyTime;
+            _attackPenaltyAmount = _playerStatSO.AttackPenaltyAmount;
+            _dieExplosionDamage = _playerStatSO.DieExplosionDamage;
+            _dieExplosionRadius = _playerStatSO.DieExplosionRadius;
+            _dieExplosionForce = _playerStatSO.DieExplosionForce;
+            _invincibleTime = _playerStatSO.InvincibleTime;
+
+            // 나중에는 방 설정에 따라 달라질 수 있음.
+            _currentPlayerGunPowderCount = _playerStatSO.MaxGunPoderCount;
+            _currentPlayerDamagedCount = 0;
         }
     }
 
