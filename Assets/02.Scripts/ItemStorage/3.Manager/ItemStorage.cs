@@ -32,35 +32,49 @@ public class ItemStorage : MonoBehaviour
         Init();
     }
 
-    private async void LoadData()
+    private void LoadItemStorageData(Dictionary<EEquipmentSlot, List<Item>> itemDict)
     {
-        _storedItemDict = await _repo.LoadItemStorage();
+        _storedItemDict = itemDict;
+
         OnDataChanged?.Invoke(CurrentCategory);
     }
 
-#if UNITY_EDITOR
+    private void LoadInventoryData(Dictionary<EEquipmentSlot, Item> equippedItemDict)
+    {
+        _equippedItemDict = equippedItemDict;
+
+        OnDataChanged?.Invoke(CurrentCategory);
+    }
+
+
+    #if UNITY_EDITOR
     public Sprite TestIcon;
     private void Update()
     {
+        // 저장된 데이터 로드 테스트
         if (Input.GetKeyDown(KeyCode.Backslash))
         {
-            LoadData();
+            _repo.LoadItemStorage();
+            _repo.LoadInventory();
         }
 
+        // 아이템 추가 테스트
         if (Input.GetKeyDown(KeyCode.Q))
-            {
-                ItemDTO newItem = new ItemDTO(
-                    UnityEngine.Random.Range(0, 11).ToString(),
-                    "Test Item",
-                    "Descriptions...",
-                    TestIcon,
-                    (EEquipmentSlot)UnityEngine.Random.Range(0, (int)EEquipmentSlot.None),
-                    false
-                );
+        {
+            ItemDTO newItem = new ItemDTO(
+                UnityEngine.Random.Range(0, 11).ToString(),
+                "Test Item",
+                "Descriptions...",
+                TestIcon,
+                "Assets/05.Images/Item/PunIcon-128.png",
+                (EEquipmentSlot)UnityEngine.Random.Range(0, (int)EEquipmentSlot.None),
+                false
+            );
 
-                AddItem(newItem);
-            }
+            AddItem(newItem);
+        }
 
+        // 아이템 장착 테스트
         if (Input.GetKeyDown(KeyCode.W))
         {
             if (_selectedItem.IsEquipped)
@@ -73,7 +87,7 @@ public class ItemStorage : MonoBehaviour
             }
         }
     }
-#endif
+    #endif
 
     private void Init()
     {
@@ -85,13 +99,16 @@ public class ItemStorage : MonoBehaviour
 
         // 저장된 데이터 로드
         _repo = new ItemStorageRepo();
-        // _storedItemDict = _repo.LoadItemStorage().Result;
+        _repo.OnItemStorageLoaded += LoadItemStorageData;
+        _repo.OnInventoryLoaded += LoadInventoryData;
+
+        // TODO
+        // 파이어베이스 연결 성공 때까지 대기(이벤트 매니저 활용)
         _storedItemDict = null;
-        _equippedItemDict = _repo.LoadInventory();
+        _equippedItemDict = null;
 
 
-
-        // 저장된 데이터 없을 시 딕셔너리 초기화
+        // 저장된 데이터 없을 시 아이템 보관함 초기화
         if (_storedItemDict == null)
         {
             _storedItemDict = new Dictionary<EEquipmentSlot, List<Item>>();
@@ -102,6 +119,7 @@ public class ItemStorage : MonoBehaviour
             }
         }
 
+        // 저장된 데이터 없을 시 인벤토리 초기화
         if (_equippedItemDict == null)
         {
             _equippedItemDict = new Dictionary<EEquipmentSlot, Item>((int)EEquipmentSlot.None);
@@ -201,7 +219,8 @@ public class ItemStorage : MonoBehaviour
 
         if (_equippedItemDict[item.EquipmentSlot] != null)
         {
-            _equippedItemDict[item.EquipmentSlot].UnEquip();
+            Item equippedItem = _storedItemDict[item.EquipmentSlot].Find(x => x.ID == _equippedItemDict[item.EquipmentSlot].ID);
+            equippedItem.UnEquip();
         }
 
         Item desiredItem = _storedItemDict[item.EquipmentSlot].Find(x => x.ID == item.ID);
@@ -209,9 +228,10 @@ public class ItemStorage : MonoBehaviour
 
         _equippedItemDict[item.EquipmentSlot] = desiredItem;
 
-        OnDataChanged?.Invoke(item.EquipmentSlot);
+        _repo.SaveInventory(_equippedItemDict);
         _repo.SaveItemStorage(_storedItemDict);
-        _repo.SaveInventory();
+        
+        OnDataChanged?.Invoke(item.EquipmentSlot);
     }
 
     public void UnEquipItem(ItemDTO item)
@@ -231,7 +251,9 @@ public class ItemStorage : MonoBehaviour
 
         _equippedItemDict[item.EquipmentSlot] = null;
 
+        _repo.SaveInventory(_equippedItemDict);
+        _repo.SaveItemStorage(_storedItemDict);
+
         OnDataChanged?.Invoke(item.EquipmentSlot);
-        _repo.SaveInventory();
     }
 }
