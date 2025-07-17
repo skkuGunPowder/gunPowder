@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDamagable
 {
     [SerializeField]
     private Animator _myAnimator;
@@ -20,5 +20,18 @@ public class Player : MonoBehaviour
     public void SetFacingDirection(int direction)
     {
         _playerStat.SetFacingDirection(direction);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        Debug.Log("TakeDamage: " + damage);
+    }
+
+    /// <summary>
+    /// 피격시 건파우더 흩뿌리기
+    /// </summary>
+    private void ReleaseGunPowder()
+    {
+
     }
 }
