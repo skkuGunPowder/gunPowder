@@ -6,6 +6,12 @@ public class PlayerBaseState : MonoState
     protected PlayerFSM _playerFSM;
     protected Player _owner;
 
+    private float _attackTimer = 0f;
+    private float _lastNormalBombTime = 0f;
+    private float _lastSpecialBombTime = 0f;
+
+
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -22,15 +28,60 @@ public class PlayerBaseState : MonoState
 
     public virtual void Update()
     {
+        _attackTimer += Time.deltaTime;
         JumpInput();
     }
 
     // 하위에서 사용하고 싶은 것만 사용한다.
     protected virtual void JumpInput()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
+        if (_playerFSM.IsCurrentState<PlayerDashState>() || _playerFSM.IsCurrentState<PlayerJumpDashState>())
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
             _playerFSM.ChangeState<PlayerJumpState>();
         }
+    }
+
+    // Raycast로 바닥 체크
+    protected virtual bool IsGrounded()
+    {
+        float rayDistance = 0.2f;
+        Vector3 origin = _owner.transform.position;
+        var cc = _owner.GetComponent<CharacterController>();
+        if (cc != null)
+        {
+            rayDistance = cc.height / 2f + 0.1f;
+        }
+        return Physics.Raycast(origin, Vector3.down, rayDistance);
+    }
+
+    protected virtual bool CanNormalBomb()
+    {
+        if(_attackTimer - _lastNormalBombTime < _owner.NormalBomb.BombCoolTime)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    protected virtual bool CanSpecialBomb()
+    {
+        if(_attackTimer - _lastSpecialBombTime < _owner.SpecialBomb.BombCoolTime)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    protected virtual void SetLastNormalBombTime()
+    {
+        _lastNormalBombTime = _attackTimer;
+    }
+
+    protected virtual void SetLastSpecialBombTime()
+    {
+        _lastSpecialBombTime = _attackTimer;
     }
 }
