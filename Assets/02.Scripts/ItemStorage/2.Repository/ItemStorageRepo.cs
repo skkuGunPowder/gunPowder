@@ -8,9 +8,7 @@ using UnityEngine.AddressableAssets;
 
 public class ItemStorageRepo
 {
-    #if UNITY_EDITOR
     private const string USER_ID = "USER_01";
-    #endif
 
     public event Action<Dictionary<EEquipmentSlot, List<Item>>> OnItemStorageLoaded;
     public event Action<Dictionary<EEquipmentSlot, Item>> OnInventoryLoaded;
