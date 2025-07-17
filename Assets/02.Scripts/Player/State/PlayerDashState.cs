@@ -38,6 +38,10 @@ public class PlayerDashState : PlayerBaseState
         // 2. 대시 중 반대 방향 키 입력 체크 → BreakState로 전환
         if(Input.GetKeyDown(KeyCode.RightArrow) && dir == -1 || Input.GetKeyDown(KeyCode.LeftArrow) && dir == 1)
         {
+            if(!IsGrounded())
+            {
+                return;
+            }
             Debug.Log("DashState: 반대 방향 키 다운 - BreakState로 전환");
             _playerFSM.ChangeState<PlayerBreakState>();
             return;
@@ -57,9 +61,18 @@ public class PlayerDashState : PlayerBaseState
             // 아무 키도 안 누름 → Idle
             else
             {
-                Debug.Log("DashState: 입력 없음 - IdleState로 전환");
-                _playerFSM.ChangeState<PlayerIdleState>();
-                return;
+                if(IsGrounded())
+                {
+                    Debug.Log("DashState: 입력 없음 - IdleState로 전환");
+                    _playerFSM.ChangeState<PlayerIdleState>();
+                    return;
+                }
+                else
+                {
+                    _owner.PlayerStat.IsFallingFromLedge = true;
+                    _playerFSM.ChangeState<PlayerJumpState>();
+                    return;
+                }
             }
         }
     }
