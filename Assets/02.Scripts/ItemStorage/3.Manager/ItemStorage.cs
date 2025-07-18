@@ -6,16 +6,16 @@ public class ItemStorage : MonoBehaviour
 {
     public static ItemStorage Instance { get; private set; }
 
-    private Dictionary<EEquipmentSlot, List<Item>> _storedItemDict;
-    private Dictionary<EEquipmentSlot, Item> _equippedItemDict;
+    private Dictionary<EItemType, List<InventoryItem>> _storedItemDict;
+    private Dictionary<EItemType, InventoryItem> _equippedItemDict;
 
-    public EEquipmentSlot CurrentCategory { get; private set; }
+    public EItemType CurrentCategory { get; private set; }
     public int SelectedItemIndex { get; private set; }
-    private ItemDTO _selectedItem;
+    private InventoryItem _selectedItem;
 
     private ItemStorageRepo _repo;
 
-    public event Action<EEquipmentSlot> OnDataChanged;
+    public event Action<EItemType> OnDataChanged;
 
 
     private void Awake()
@@ -29,25 +29,20 @@ public class ItemStorage : MonoBehaviour
             Destroy(gameObject);
         }
 
+        _repo = new ItemStorageRepo();
+        _repo.OnItemStorageLoaded += LoadItemStorageData;
+        _repo.OnInventoryLoaded += LoadInventoryData;
+
+        _storedItemDict = null;
+        _equippedItemDict = null;
+    }
+
+    private void OnEnable()
+    {
         Init();
     }
 
-    private void LoadItemStorageData(Dictionary<EEquipmentSlot, List<Item>> itemDict)
-    {
-        _storedItemDict = itemDict;
-
-        OnDataChanged?.Invoke(CurrentCategory);
-    }
-
-    private void LoadInventoryData(Dictionary<EEquipmentSlot, Item> equippedItemDict)
-    {
-        _equippedItemDict = equippedItemDict;
-
-        OnDataChanged?.Invoke(CurrentCategory);
-    }
-
-
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     public Sprite TestIcon;
     private void Update()
     {
@@ -61,17 +56,19 @@ public class ItemStorage : MonoBehaviour
         // 아이템 추가 테스트
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            ItemDTO newItem = new ItemDTO(
-                UnityEngine.Random.Range(0, 11).ToString(),
-                "Test Item",
-                "Descriptions...",
-                TestIcon,
-                "Assets/05.Images/Item/PunIcon-128.png",
-                (EEquipmentSlot)UnityEngine.Random.Range(0, (int)EEquipmentSlot.None),
-                false
-            );
 
-            AddItem(newItem);
+            // Item newItem = new Item("B0001", EItemType.Bomb, )
+            // InventoryItem testItem = new InventoryItem(
+            //     UnityEngine.Random.Range(0, 11).ToString(),
+            //     "Test Item",
+            //     "Descriptions...",
+            //     TestIcon,
+            //     "Assets/05.Images/Item/PunIcon-128.png",
+            //     (EEquipmentSlot)UnityEngine.Random.Range(0, (int)EEquipmentSlot.None),
+            //     false
+            // );
+
+            // AddItem(newItem);
         }
 
         // 아이템 장착 테스트
@@ -89,63 +86,66 @@ public class ItemStorage : MonoBehaviour
     }
     #endif
 
-    private void Init()
+    public void Init()
     {
         // 현재 카테고리 초기화
-        CurrentCategory = EEquipmentSlot.Head;
+        CurrentCategory = EItemType.Head;
 
         // 선택된 아이템 인덱스 초기화
         SelectedItemIndex = -1;
 
-        // 저장된 데이터 로드
-        _repo = new ItemStorageRepo();
-        _repo.OnItemStorageLoaded += LoadItemStorageData;
-        _repo.OnInventoryLoaded += LoadInventoryData;
-
-        // TODO
-        // 파이어베이스 연결 성공 때까지 대기(이벤트 매니저 활용)
-        _storedItemDict = null;
-        _equippedItemDict = null;
-
-
         // 저장된 데이터 없을 시 아이템 보관함 초기화
         if (_storedItemDict == null)
         {
-            _storedItemDict = new Dictionary<EEquipmentSlot, List<Item>>();
+            _storedItemDict = new Dictionary<EItemType, List<InventoryItem>>();
 
-            for (int i = 0; i < (int)EEquipmentSlot.None; i++)
+            for (int i = 0; i < (int)EItemType.None; i++)
             {
-                _storedItemDict.Add((EEquipmentSlot)i, new List<Item>());
+                _storedItemDict.Add((EItemType)i, new List<InventoryItem>());
             }
         }
 
         // 저장된 데이터 없을 시 인벤토리 초기화
         if (_equippedItemDict == null)
         {
-            _equippedItemDict = new Dictionary<EEquipmentSlot, Item>((int)EEquipmentSlot.None);
-            for (int i = 0; i < (int)EEquipmentSlot.None; i++)
+            _equippedItemDict = new Dictionary<EItemType, InventoryItem>((int)EItemType.None);
+            for (int i = 0; i < (int)EItemType.None; i++)
             {
-                _equippedItemDict.Add((EEquipmentSlot)i, null);
+                _equippedItemDict.Add((EItemType)i, null);
             }
         }
     }
 
-    public List<ItemDTO> GetStoredItemList(EEquipmentSlot equipmentSlot)
+    private void LoadItemStorageData(Dictionary<EItemType, List<InventoryItem>> itemDict)
     {
-        return _storedItemDict[equipmentSlot].ConvertAll(x => new ItemDTO(x));
+        _storedItemDict = itemDict;
+
+        OnDataChanged?.Invoke(CurrentCategory);
     }
 
-    public ItemDTO GetEquppedItem(EEquipmentSlot equipmentSlot)
+    private void LoadInventoryData(Dictionary<EItemType, InventoryItem> equippedItemDict)
+    {
+        _equippedItemDict = equippedItemDict;
+
+        OnDataChanged?.Invoke(CurrentCategory);
+    }
+
+    public List<InventoryItem> GetStoredItemList(EItemType itemType)
+    {
+        return _storedItemDict[itemType];
+    }
+
+    public InventoryItem GetEquppedItem(EItemType equipmentSlot)
     {
         if (_equippedItemDict[equipmentSlot] == null)
         {
             return null;
         }
 
-        return new ItemDTO(_equippedItemDict[equipmentSlot]);
+        return _equippedItemDict[equipmentSlot];
     }
 
-    public ItemDTO GetSelectedItem()
+    public InventoryItem GetSelectedItem()
     {
         if (_selectedItem == null)
         {
@@ -155,7 +155,7 @@ public class ItemStorage : MonoBehaviour
         return _selectedItem;
     }
 
-    public void ChangeCategory(EEquipmentSlot nextCategory)
+    public void ChangeCategory(EItemType nextCategory)
     {
         // 현재 카테고리 변경
         CurrentCategory = nextCategory;
@@ -167,7 +167,7 @@ public class ItemStorage : MonoBehaviour
         OnDataChanged?.Invoke(CurrentCategory);
     }
 
-    public void AddItem(ItemDTO newItem)
+    public void AddItem(InventoryItem newItem)
     {
         // null 검사
         if (newItem == null)
@@ -176,11 +176,10 @@ public class ItemStorage : MonoBehaviour
         }
 
         // Item 객체 생성 및 컨테이너에 추가
-        Item item = new Item(newItem);
-        _storedItemDict[item.EquipmentSlot].Add(item);
+        _storedItemDict[newItem.Item.ItemType].Add(newItem);
 
         // 현재 카테고리 변경
-        CurrentCategory = item.EquipmentSlot;
+        CurrentCategory = newItem.Item.ItemType;
 
         // 데이터 저장
         _repo.SaveItemStorage(_storedItemDict);
@@ -189,10 +188,10 @@ public class ItemStorage : MonoBehaviour
         OnDataChanged?.Invoke(CurrentCategory);
     }
 
-    public void SelectItem(ItemDTO item)
+    public void SelectItem(InventoryItem item)
     {
         // 선택된 아이템 인덱스 검색
-        int newSelectedItemIndex = _storedItemDict[item.EquipmentSlot].FindIndex(x => x.ID == item.ID);
+        int newSelectedItemIndex = _storedItemDict[item.Item.ItemType].FindIndex(x => x.ID == item.ID);
 
         if (newSelectedItemIndex == -1)
         {
@@ -202,58 +201,58 @@ public class ItemStorage : MonoBehaviour
         _selectedItem = item;
         SelectedItemIndex = newSelectedItemIndex;
 
-        OnDataChanged.Invoke(item.EquipmentSlot);
+        OnDataChanged.Invoke(item.Item.ItemType);
     }
 
-    public void EquipItem(ItemDTO item)
+    public void EquipItem(InventoryItem item)
     {
         if (item == null)
         {
             throw new Exception("장착하려는 아이템이 없습니다!");
         }
 
-        if (!_equippedItemDict.ContainsKey(item.EquipmentSlot))
+        if (!_equippedItemDict.ContainsKey(item.Item.ItemType))
         {
-            throw new Exception($"장착아이템 컨테이너에 해당 키가 없습니다 || {item.EquipmentSlot}");
+            throw new Exception($"장착아이템 컨테이너에 해당 키가 없습니다 || {item.Item.ItemType}");
         }
 
-        if (_equippedItemDict[item.EquipmentSlot] != null)
+        if (_equippedItemDict[item.Item.ItemType] != null)
         {
-            Item equippedItem = _storedItemDict[item.EquipmentSlot].Find(x => x.ID == _equippedItemDict[item.EquipmentSlot].ID);
+            InventoryItem equippedItem = _storedItemDict[item.Item.ItemType].Find(x => x.ID == _equippedItemDict[item.Item.ItemType].ID);
             equippedItem.UnEquip();
         }
 
-        Item desiredItem = _storedItemDict[item.EquipmentSlot].Find(x => x.ID == item.ID);
+        InventoryItem desiredItem = _storedItemDict[item.Item.ItemType].Find(x => x.ID == item.ID);
         desiredItem.Equip();
 
-        _equippedItemDict[item.EquipmentSlot] = desiredItem;
+        _equippedItemDict[item.Item.ItemType] = desiredItem;
 
         _repo.SaveInventory(_equippedItemDict);
         _repo.SaveItemStorage(_storedItemDict);
         
-        OnDataChanged?.Invoke(item.EquipmentSlot);
+        OnDataChanged?.Invoke(item.Item.ItemType);
     }
 
-    public void UnEquipItem(ItemDTO item)
+    public void UnEquipItem(InventoryItem item)
     {
         if (item == null)
         {
             throw new Exception("해제하려는 아이템이 없습니다!");
         }
 
-        if (!_equippedItemDict.ContainsKey(item.EquipmentSlot))
+        if (!_equippedItemDict.ContainsKey(item.Item.ItemType))
         {
             throw new Exception("해제하려는 아이템이 없습니다!");
         }
 
-        Item desiredItem = _storedItemDict[item.EquipmentSlot].Find(x => x.ID == item.ID);
+        InventoryItem desiredItem = _storedItemDict[item.Item.ItemType].Find(x => x.ID == item.ID);
         desiredItem.UnEquip();
 
-        _equippedItemDict[item.EquipmentSlot] = null;
+        _equippedItemDict[item.Item.ItemType] = null;
 
         _repo.SaveInventory(_equippedItemDict);
         _repo.SaveItemStorage(_storedItemDict);
 
-        OnDataChanged?.Invoke(item.EquipmentSlot);
+        OnDataChanged?.Invoke(item.Item.ItemType);
     }
 }

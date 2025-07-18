@@ -190,10 +190,10 @@ public class ItemStorageRepo
         Item loadedItem = new Item(
             id: dict["ID"] as string,
             name: dict["Name"] as string,
-            description: dict["Description"] as string,
+            explanation: dict["Description"] as string,
             image: sprite,
             imageAddress: dict["ImageAddress"] as string,
-            equipmentSlot: Enum.TryParse(dict["EquipmentSlot"] as string, out EEquipmentSlot slot) ? slot : default,
+            itme: Enum.TryParse(dict["EquipmentSlot"] as string, out EEquipmentSlot slot) ? slot : default,
             isEquipped: dict.ContainsKey("IsEquipped") && (bool)dict["IsEquipped"]
         );
 
@@ -229,7 +229,7 @@ public class SerializableItem
             throw new Exception("아이템 이름이 비어있습니다.");
         }
 
-        if (string.IsNullOrEmpty(item.Description))
+        if (string.IsNullOrEmpty(item.Explanation))
         {
             throw new Exception("아이템 설명이 비어있습니다.");
         }
@@ -241,9 +241,9 @@ public class SerializableItem
 
         ID = item.ID;
         Name = item.Name;
-        Description = item.Description;
+        Explanation = item.Explanation;
         ImageAddress = item.ImageAddress;
-        EquipmentSlot = item.EquipmentSlot.ToString();
+        EquipmentSlot = item.ItemType.ToString();
         IsEquipped = item.IsEquipped;
     }
 }

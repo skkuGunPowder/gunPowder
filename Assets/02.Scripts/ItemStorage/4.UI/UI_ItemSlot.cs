@@ -21,14 +21,14 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable
         Item = item;
         ItemIcon.sprite = Item.Image;
 
-        if (Item.IsEquipped)
-        {
-            gameObject.SetActive(false);
-        }
-        else
-        {
-           gameObject.SetActive(true);
-        }
+        // if (Item.IsEquipped)
+        // {
+        //     gameObject.SetActive(false);
+        // }
+        // else
+        // {
+        //    gameObject.SetActive(true);
+        // }
     }
 
     public void Select()
@@ -48,6 +48,6 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable
             throw new System.Exception("아이템이 슬롯에 할당되지 않았습니다.");
         }
 
-        ItemStorage.Instance.SelectItem(Item);
+        // ItemStorage.Instance.SelectItem(Item);
     }
 }

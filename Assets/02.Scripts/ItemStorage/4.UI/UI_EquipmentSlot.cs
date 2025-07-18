@@ -40,6 +40,6 @@ public class UI_EquipmentSlot : MonoBehaviour, ISelectable
             throw new System.Exception("아이템이 슬롯에 할당되지 않았습니다.");
         }
 
-        ItemStorage.Instance.SelectItem(Item);
+        // ItemStorage.Instance.SelectItem(Item);
     }
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using Firebase;
-using Firebase.Extensions;
 using Firebase.Firestore;
+using System;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -32,8 +32,17 @@ public class FirebaseManager : MonoBehaviour
         {
             App = FirebaseApp.DefaultInstance;
             DB = FirebaseFirestore.DefaultInstance;
-
             Debug.Log("Firebase 연결 성공");
+
+            try
+            {
+                ItemDatabase.Instance.Init();
+                Debug.Log("아이템 데이터 로드 성공");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+            }
         }
         else
         {
