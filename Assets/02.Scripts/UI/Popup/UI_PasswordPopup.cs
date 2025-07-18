@@ -1,17 +1,28 @@
-using UnityEngine;
-using UnityEngine.UI;
-
+using Photon.Pun;
+using TMPro;
 public class UI_PasswordPopup : UI_Popup
 {
-    public InputField PasswordInputField;
+    public TMP_InputField PasswordInputField;
     
-    public bool PasswordCheck(string password)
+    // 비밀번호 확인해서 적용시킴
+    public void PasswordCheck(string password, string roomName)
     {
         if (PasswordInputField.text != password)
         {
-            return false;
+            Fail();
         }
         
-        return true;
+        Success(roomName); 
+    }
+
+    private void Fail()
+    {
+        
+    }
+
+    private void Success(string roomName)
+    {
+        Close();
+        PhotonNetwork.JoinRoom(roomName);
     }
 }

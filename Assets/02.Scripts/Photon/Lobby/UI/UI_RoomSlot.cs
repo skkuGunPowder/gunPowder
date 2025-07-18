@@ -21,7 +21,7 @@ public class UI_RoomSlot : MonoBehaviour
         _roomInfo = roomInfo;
     }
     
-    public void PasswordCheck()
+    public void LockedCheck()
     {
         if((bool)_roomInfo.CustomProperties[$"{EProperties.IsLocked}"])
         {
@@ -38,19 +38,11 @@ public class UI_RoomSlot : MonoBehaviour
         PhotonNetwork.JoinRoom(RoomName.text);
     }
 
-    public void CloseRoom()
+    public void PasswordCheck()
     {
-        string password = _roomInfo.CustomProperties[$"{EProperties.Password}"].ToString();
+        string password = (string)_roomInfo.CustomProperties[$"{EProperties.Password}"];
         
-        if (PasswordPopup.PasswordCheck(password))
-        {
-            JoinRoom();
-            PopupManager.Instance.Close(EPopupType.UI_PasswordPopup);
-        }
-        else
-        {
-            
-        }
+        PasswordPopup.PasswordCheck(password, RoomName.text);
     }
     
 }
