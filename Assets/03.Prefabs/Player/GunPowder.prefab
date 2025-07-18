@@ -1,5 +1,71 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &910909249314585098
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1891453545158416542}
+  - component: {fileID: 2210599388468189359}
+  - component: {fileID: 4967536908889847192}
+  m_Layer: 0
+  m_Name: GunPowderCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1891453545158416542
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910909249314585098}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2296979838211452121}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2210599388468189359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910909249314585098}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2078e2143734e3c4d8f17ca511056e9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!135 &4967536908889847192
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910909249314585098}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Radius: 5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2640530332653095854
 GameObject:
   m_ObjectHideFlags: 0
@@ -12,6 +78,7 @@ GameObject:
   - component: {fileID: 4366487603456720529}
   - component: {fileID: 2541081426239502733}
   - component: {fileID: 8624660503008547033}
+  - component: {fileID: 5893106614059971835}
   - component: {fileID: 592022657066048674}
   - component: {fileID: 3739907028313335914}
   - component: {fileID: 1969233818461129981}
@@ -34,7 +101,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1891453545158416542}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4366487603456720529
@@ -107,10 +175,22 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5893106614059971835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2640530332653095854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feca4d3bdb21b4d4a80f905a30c97c7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &592022657066048674
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -120,19 +200,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 2640530332653095854}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b0e5da3b52c1dc644b44fdd090ba4238, type: 3}
+  m_Script: {fileID: 11500000, guid: 4472d1f57c56fb74298e95cdb9cd6844, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _timerMax: 0
   _timerCurrent: 0
-  _speed: 5
+  _speed: 0
   RandomTimerMax: 1.5
   RandomTimerMin: 0.8
   _start: {fileID: 0}
   _end: {fileID: 0}
-  _newPointDistanceFromStart: 10
+  _newPointDistanceFromStart: 6
   _newPointDistanceFromEnd: 6
-  _gunPowderSpeed: 3
+  _gunPowderSpeed: 5
 --- !u!114 &3739907028313335914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -140,7 +220,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2640530332653095854}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 74a64ccf6d2871e419533f9b57a9311a, type: 3}
   m_Name: 

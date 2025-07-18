@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public class GunPowder : MonoBehaviour
+public class GunPowderTrigger : MonoBehaviour
 {
     private Collider _collider;
     private float _timer = 0f;
-    private float _colliderOnTime = 2f;
+    private float _colliderOnTime = 3f;
 
     private void Start()
     {
@@ -20,12 +20,11 @@ public class GunPowder : MonoBehaviour
             _collider.enabled = true;
         }
     }
-
     void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.CompareTag("Player"))
         {
-            Destroy(gameObject);
+            gameObject.GetComponentInParent<GunPowderBezierCurve>().enabled = true;
         }
     }
 }

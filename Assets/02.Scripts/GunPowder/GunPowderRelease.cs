@@ -80,6 +80,7 @@ public class GunPowderRelease : MonoBehaviour
                 else
                 {
                     isGrounded = true;
+                    gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = true;
                 }
             }
         }

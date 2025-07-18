@@ -34,9 +34,16 @@ public class Player : MonoBehaviour, IDamagable
     private float _gunPowderDecreaseWithoutAttackTimer;
     public float GunPowderDecreaseWithoutAttackTimer => _gunPowderDecreaseWithoutAttackTimer;
 
+    [Header("GunPowder")]
+    [SerializeField]
+    private float _gunPowderSpreadAngle = 90f;
+    private float _gunPowderSpreadDistance = 1.0f;
+    
+
 
     // 테스트용
     public GameObject TestBomb;
+    public GameObject TestGunPowder;
 
     private void Awake()
     {
@@ -93,16 +100,47 @@ public class Player : MonoBehaviour, IDamagable
         _playerStat.SetFacingDirection(direction);
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, Vector3 attacker, bool isFallingOut)
     {
-        Debug.Log("TakeDamage: " + damage);
+        // TODO: 피격 처리
+        // 피 달기
+        _playerStat.DecreaseGunPowderCount(damage);
+        // 폭탄 맞은 위치 반 대 방향으로 건파우터 낙출
+        ReleaseGunPowder(attacker, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+
+        // 피격 상태 돌입
+
     }
 
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
-    private void ReleaseGunPowder()
+    public void ReleaseGunPowder(Vector3 explosionOrigin, int count = 3, float spreadAngle = 30f,
+     float distance = 1.0f, bool isFallingOut = true)
     {
+        Vector3 baseDir = (transform.position - explosionOrigin).normalized;
+
+        for (int i = 0; i < count; i++)
+        {
+            float angle = (i - (count - 1) / 2f) * spreadAngle;
+            Quaternion rot = Quaternion.AngleAxis(angle, Vector3.up);
+            Vector3 dir = rot * baseDir;
+            Vector3 spawnPos = transform.position + dir * distance;
+            spawnPos.z = 0f;
+            GunPowderBezierCurve gunPowder = Instantiate(TestGunPowder, spawnPos, Quaternion.identity).GetComponent<GunPowderBezierCurve>();
+
+            //TODO: isFallingout에 따라 뭔가 설정
+            if(isFallingOut)
+            {
+                gunPowder.GetComponent<GunPowderRelease>().enabled = true;
+                gunPowder.GetComponent<GunPowderBezierCurve>().enabled = false;
+            }
+            else
+            {
+                gunPowder.GetComponent<GunPowderRelease>().enabled = false;
+                gunPowder.GetComponent<GunPowderBezierCurve>().enabled = true;
+            }
+        }
     }
 
     /// <summary>
