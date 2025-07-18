@@ -6,6 +6,7 @@ public enum EPopupType
     UI_SystemPopup,
     UI_GameStartPopup,
     UI_FriendsListPopup,
+    UI_PasswordPopup,
     
     Count
 }

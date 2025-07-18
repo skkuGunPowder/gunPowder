@@ -18,7 +18,7 @@ public class UI_ProfileSlot : MonoBehaviour
             return;
         }
         
-        Debug.Log($"{player.ActorNumber}의 커스텀프로퍼티가 있나요? : {player.CustomProperties.ContainsKey("isReady")}");
+        Debug.Log($"{player.ActorNumber}의 커스텀프로퍼티가 있나요? : {player.CustomProperties.ContainsKey(EProperties.IsReady)}");
         // ProfileImage.sprite = profileImage;
         // bool isReady = (bool)player.CustomProperties["isReady"];
         // ReadyCheck(isReady);

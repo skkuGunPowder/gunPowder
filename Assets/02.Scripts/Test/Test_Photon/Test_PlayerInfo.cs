@@ -1,16 +1,15 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class Test_PlayerInfo : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Awake()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"]);
+        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.IsLocked}"]);
+        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"]);
+        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"]);
+        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Password}"]);
+        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"]);
     }
 }

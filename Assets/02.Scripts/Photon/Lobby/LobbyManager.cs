@@ -26,11 +26,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     
     // 방에 보내기
-    public void MakeRoom(string roomName, int maxPlayers)
+    public void MakeRoom(string roomName, int maxPlayers, int playTime, int life, int gunpowder, int decline, bool isLocked, string password = null)
     {
+        // 룸 프로퍼티에 들어가야할 것들 : 시간, 목숨, 시작 건파우더, 시간 당 감소
         Hashtable roomProperties = new Hashtable
         {
-            {"MapSelected", ESceneList.Map1.ToString()}
+            {$"{EProperties.MapSelected}", ESceneList.Map1},
+            {$"{EProperties.PlayTime}", playTime},
+            {$"{EProperties.Life}", life},
+            {$"{EProperties.Gunpowder}", gunpowder},
+            {$"{EProperties.DeclinePowder}", decline},
+            {$"{EProperties.IsLocked}",isLocked },
+            {$"{EProperties.Password}", password}
         };
         
         RoomOptions roomOptions = new RoomOptions();
@@ -38,7 +45,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         roomOptions.MaxPlayers = maxPlayers;
         roomOptions.IsVisible = true;
         roomOptions.IsOpen = true;
-        roomOptions.CustomRoomPropertiesForLobby = new string[] {"MapSelected"};
+        roomOptions.CustomRoomPropertiesForLobby = new string[]
+        {
+            $"{EProperties.MapSelected}",
+            $"{EProperties.IsLocked}"
+        };
         roomOptions.CustomRoomProperties = roomProperties; 
         roomOptions.EmptyRoomTtl = 0;
         
@@ -75,26 +86,15 @@ public class LobbyManager : MonoBehaviourPunCallbacks
                     _roomInfoList.Add(roomInfo);
                 }
             }
-            
-            if (roomInfo.CustomProperties.ContainsKey("MapSelected"))
-            {
-                string mapName = roomInfo.CustomProperties["MapSelected"].ToString();
-                Debug.Log($"방 이름: {roomInfo.Name}, 맵: {mapName}");
-            }
+            //
+            // if (roomInfo.CustomProperties.ContainsKey($"{EProperties.MapSelected}"))
+            // {
+            //     string mapName = roomInfo.CustomProperties[$"{EProperties.MapSelected}"].ToString();
+            //     Debug.Log($"방 이름: {roomInfo.Name}, 맵: {mapName}");
+            // }
         }
         
         
         OnDataChanged?.Invoke();
     }
-
-    // public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
-    // {
-    //     Debug.Log("OnRoomPropertiesUpdate");
-    //     Debug.Log($"{propertiesThatChanged["SelectedMap"]}");
-    //     if (propertiesThatChanged.ContainsKey("SelectedMap") && propertiesThatChanged["SelectedMap"] != null)
-    //     {
-    //         OnDataChanged?.Invoke();
-    //     }
-    // }
-    
 }

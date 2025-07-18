@@ -26,11 +26,7 @@ public class UI_RoomSearchPopup : UI_Popup
             MapDataDictionary.Add(dataSo.MapSceneList.ToString(), dataSo);
         }
     }
-
-    private void Start()
-    {
-    }
-
+    
     private void OnEnable()
     {
         Refresh();
@@ -77,7 +73,7 @@ public class UI_RoomSearchPopup : UI_Popup
                 RoomInfo room = roomInfoList[startIndex + i];
                 Sprite mapIcon = StringToSprite(room);
                 RoomSlotList[i].gameObject.SetActive(true);
-                RoomSlotList[i].Refresh(room.Name, room.PlayerCount, room.MaxPlayers, mapIcon);
+                RoomSlotList[i].Refresh(room.Name, room.PlayerCount, room.MaxPlayers, mapIcon, room);
             }
             else
             {
@@ -88,10 +84,10 @@ public class UI_RoomSearchPopup : UI_Popup
 
     private Sprite StringToSprite(RoomInfo info)
     {
-        Debug.Log("맵 찾는중 ..");
-        Debug.Log(info.CustomProperties["MapSelected"].ToString());
-        string map = info.CustomProperties["MapSelected"].ToString();
         
+        string map = ((ESceneList)info.CustomProperties[$"{EProperties.MapSelected}"]).ToString();
+        
+        Debug.Log(map);
         if (MapDataDictionary.TryGetValue(map, out var mapData))
         { 
             return mapData.MapSprite;
@@ -107,7 +103,6 @@ public class UI_RoomSearchPopup : UI_Popup
     public void OnClickSetPage(int index)
     {
         _currentPage = Mathf.Clamp(_currentPage + index, 1, _maxPage);
-        
         Refresh();
     }
 

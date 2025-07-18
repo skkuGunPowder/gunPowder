@@ -53,7 +53,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
             return;
         }
         
-        Debug.Log("Start");
         Init();
     } 
     
@@ -65,9 +64,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
             return;
         }
         
-        Debug.Log("OnJoinedRoom");
         Init();
-       
     }
     
     // 방에 들어왔을 때 첫 세팅 하기
@@ -83,29 +80,28 @@ public class RoomManager : MonoBehaviourPunCallbacks
         }
         
         SetReady();
+        Debug.Log($"{PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"]}");
         SetCurrentMap();
-        Debug.Log($"{PhotonNetwork.CurrentRoom.CustomProperties["MapSelected"]}");
-        
-
     }
-
     
     // 플레이어가 레디를 했는지 체크했는지 알아보는 커스텀 프로퍼티
     private void SetReady()
     {
-        Hashtable ready = new Hashtable { { "isReady", false } };
+        Hashtable ready = new Hashtable { { $"{EProperties.IsReady}", false } };
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
-        Debug.Log("커스텀 프로퍼티가 적용이 되었습니다."  + ready["isReady"]);
     }
     // 현재 방의 맵이 무엇인가?
     private void SetCurrentMap()
     {
-        string mapName = PhotonNetwork.CurrentRoom.CustomProperties["MapSelected"].ToString();
-        if (Enum.TryParse(mapName, out ESceneList parseMap))
-        {
-            SelectedMap = parseMap;
-            OnMapChanged?.Invoke();   
-        }
+        // string mapName = PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.MapSelected}"].ToString();
+        //
+        // if (Enum.TryParse(mapName, out ESceneList parseMap))
+        // {
+        //     SelectedMap = parseMap;
+        //     OnMapChanged?.Invoke();   
+        // }
+        SelectedMap = (ESceneList)PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.MapSelected}"];
+        OnMapChanged?.Invoke();
     }
     // 준비가 다 되었다면 마스터가 정한 맵으로 이동시킴
     // 확인이 필요한 것 : 1. 방장인가?
@@ -137,7 +133,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
                 continue;
             }
 
-            if (player.CustomProperties.ContainsKey("isReady") == false || (bool)player.CustomProperties["isReady"] == false)
+            if (player.CustomProperties.ContainsKey($"{EProperties.IsReady}") == false || (bool)player.CustomProperties[$"{EProperties.IsReady}"] == false)
             {
                 return false;
             }
@@ -158,7 +154,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer,Hashtable changedProps)
     {
-        if (changedProps.ContainsKey("isReady"))
+        if (changedProps.ContainsKey($"{EProperties.IsReady}"))
         {
             OnReadyChanged?.Invoke();
         }
@@ -174,22 +170,18 @@ public class RoomManager : MonoBehaviourPunCallbacks
         {
             PlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
             _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray()); // 전달
-            // _photonView.RPC(nameof(MapSetup), newPlayer, SelectedMap);
         }
         
     }
 
     public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
     {
-        Debug.Log("OnPlayerLeftRoom");
-
         if (PhotonNetwork.IsMasterClient)
         {
             PlayerLeft(otherPlayer);
             _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray());
         }
         
-        Debug.Log($"{PhotonNetwork.MasterClient.ActorNumber}");
     }
 
     public void PlayerLeft(PhotonPlayer player)
@@ -207,7 +199,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
     }
     public void PlayerPlacement(PhotonPlayer player)
     {
-        Debug.Log("player placement");
         for (int i = 0; i < _playerSlotList.Count; i++)
         {
             if (_playerSlotList[i] == 0)
@@ -221,25 +212,23 @@ public class RoomManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void UpdateSlots(int[] actorNumbers)
     {
-        Debug.Log("UpdateSlots");
         _playerSlotList = new List<int>(actorNumbers);
-        
         OnDataChanged?.Invoke();
     }
 
     // 맵 변경시 콜백
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
-        Debug.Log("OnRoomPropertiesUpdate");
-        Debug.Log(propertiesThatChanged["MapSelected"]);
-        if (propertiesThatChanged.ContainsKey("MapSelected") && propertiesThatChanged["MapSelected"] != null)
+        if (propertiesThatChanged.ContainsKey($"{EProperties.MapSelected}") && propertiesThatChanged[$"{EProperties.MapSelected}"] != null)
         { 
-            string mapName = propertiesThatChanged["MapSelected"].ToString();
-            if (Enum.TryParse(mapName, out ESceneList parseMap))
-            {
-                SelectedMap = parseMap;
-                OnMapChanged?.Invoke();   
-            }
+            // string mapName = propertiesThatChanged[$"{EProperties.MapSelected}"].ToString();
+            // if (Enum.TryParse(mapName, out ESceneList parseMap))
+            // {
+            //     SelectedMap = parseMap;
+            //     OnMapChanged?.Invoke();   
+            // }
+            SelectedMap = (ESceneList)propertiesThatChanged[$"{EProperties.MapSelected}"];
+            OnMapChanged?.Invoke();
         }
     }
     
@@ -248,14 +237,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         OnMasterChanged?.Invoke();
     }
-
-    [PunRPC]
-    public void MapSetup(ESceneList map)
-    {
-        SelectedMap = map;
-        Debug.Log($"{PhotonNetwork.CurrentRoom.CustomProperties["MapSelected"]}");
-        OnMapChanged?.Invoke();
-    }
+    
 }
     
     

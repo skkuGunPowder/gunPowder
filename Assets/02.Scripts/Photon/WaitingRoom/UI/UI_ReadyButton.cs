@@ -25,13 +25,10 @@ public class UI_ReadyButton : MonoBehaviour
         // 레디 했다가 안했다가 할 수 있다.
         _isReady = !_isReady;
         
-        Hashtable ready = new Hashtable { {"isReady" , _isReady} };
+        Hashtable ready = new Hashtable { {$"{EProperties.IsReady}" , _isReady} };
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
 
         ReadyTextUGUI.text =  _isReady ? "Ready" : "Not Ready";
-
-        Debug.Log(ready["isReady"]);
-        
         
         if (PhotonNetwork.IsMasterClient == false)
         {

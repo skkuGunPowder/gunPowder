@@ -12,7 +12,7 @@ public class UI_MapSetup : MonoBehaviour
         
         Hashtable roomProperties = new Hashtable()
         {
-            {"MapSelected", SelectedMap.ToString()}
+            {"MapSelected", SelectedMap}
         };
         
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
