@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class PopupSlot : MonoBehaviour
@@ -7,5 +8,10 @@ public class PopupSlot : MonoBehaviour
     public void Open()
     {
         PopupManager.Instance.Open(Popup);
+    }
+
+    public void Close()
+    {
+        PopupManager.Instance.Close(Popup);
     }
 }

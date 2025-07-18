@@ -13,7 +13,7 @@ public class UI_ReadyButton : MonoBehaviour
     // 레디 버튼을 눌렀을 때, 커스텀 프로퍼티를 바꾼다.
     public void OnClickReady()
     {
-        
+        //만약 내가 방장이라면 레디 자체를 안눌리게 한다.
         if (PhotonNetwork.IsMasterClient)
         {
             if (RoomManager.Instance.IsPlayerReady() == false)
@@ -22,6 +22,7 @@ public class UI_ReadyButton : MonoBehaviour
             }   
         }
         
+        // 레디 했다가 안했다가 할 수 있다.
         _isReady = !_isReady;
         
         Hashtable ready = new Hashtable { {"isReady" , _isReady} };
@@ -31,11 +32,11 @@ public class UI_ReadyButton : MonoBehaviour
 
         Debug.Log(ready["isReady"]);
         
+        
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
-        
         RoomManager.Instance.GameStart();
     }
 }

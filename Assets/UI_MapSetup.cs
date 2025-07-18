@@ -1,3 +1,5 @@
+using ExitGames.Client.Photon;
+using Photon.Pun;
 using UnityEngine;
 
 public class UI_MapSetup : MonoBehaviour
@@ -7,6 +9,14 @@ public class UI_MapSetup : MonoBehaviour
     public void SetupMap()
     {
         RoomManager.Instance.SelectedMap = SelectedMap;
+        
+        Hashtable roomProperties = new Hashtable()
+        {
+            {"MapSelected", SelectedMap.ToString()}
+        };
+        
+        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+        
         Debug.Log("Selected Map: " + RoomManager.Instance.SelectedMap);
     }
 }

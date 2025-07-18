@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PopupManager : MonoBehaviour
@@ -62,5 +63,22 @@ public class PopupManager : MonoBehaviour
                 break;
             }
         }
+    }
+
+    public void Close(EPopupType popupType)
+    {
+        PopupClose(popupType.ToString());
+    }
+    private void PopupClose(string popupName)
+    {
+        foreach (UI_Popup popup in PopupList)
+        {
+            if (popup.name == popupName)
+            {
+                popup.Close();
+                break;
+            }
+        }
+
     }
 }

@@ -18,11 +18,12 @@ public class UI_ProfileSlot : MonoBehaviour
             return;
         }
         
+        Debug.Log($"{player.ActorNumber}의 커스텀프로퍼티가 있나요? : {player.CustomProperties.ContainsKey("isReady")}");
         // ProfileImage.sprite = profileImage;
-        bool isReady = (bool)player.CustomProperties["isReady"];
-        ReadyCheck(isReady);
-        
-        NicknameTextUGUI.text = player.NickName;
+        // bool isReady = (bool)player.CustomProperties["isReady"];
+        // ReadyCheck(isReady);
+        //
+        NicknameTextUGUI.text = player.NickName + player.ActorNumber;
         
     }
 
