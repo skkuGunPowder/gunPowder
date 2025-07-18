@@ -6,26 +6,46 @@ using UnityEngine;
 using UnityEngine.UI;
 public class UI_RoomSlot : MonoBehaviour
 {
+    [Header("상단 정보")]
     public TextMeshProUGUI RoomName;
     public TextMeshProUGUI PlayerCount;
+    
+    [Header("하단 정보")]
+    public TextMeshProUGUI GunpowderAmount;
+    public TextMeshProUGUI DeclineAmount;
+    public TextMeshProUGUI LifeAmount;
+    public TextMeshProUGUI PlayTime;
+    
+    [Header("이미지")]
     public Image MapIcon;
+    public GameObject LockIcon;
+    
+    [Header("참조")]
     public UI_PasswordPopup PasswordPopup;
     private RoomInfo _roomInfo;
     
     public void Refresh(string roomName, int currentPlayerCount, int maxPlayerCount, Sprite mapIcon, RoomInfo roomInfo)
     {
-        Debug.Log($"Refresh : {mapIcon.name}");
         RoomName.text = roomName;
         PlayerCount.text = $"{currentPlayerCount}/{maxPlayerCount}";
         MapIcon.sprite = mapIcon;
         _roomInfo = roomInfo;
+        
+        // 커스텀 프로퍼티가 필요한 요소
+        GunpowderAmount.text = _roomInfo.CustomProperties[$"{EProperties.Gunpowder}"].ToString();
+        DeclineAmount.text = _roomInfo.CustomProperties[$"{EProperties.DeclinePowder}"].ToString();
+        LifeAmount.text = _roomInfo.CustomProperties[$"{EProperties.Life}"].ToString();
+        PlayTime.text = _roomInfo.CustomProperties[$"{EProperties.PlayTime}"].ToString();
+        LockIcon.SetActive((bool)_roomInfo.CustomProperties[$"{EProperties.IsLocked}"]);
     }
     
     public void LockedCheck()
     {
+        Debug.Log($"{_roomInfo}");
         if((bool)_roomInfo.CustomProperties[$"{EProperties.IsLocked}"])
         {
             PopupManager.Instance.Open(EPopupType.UI_PasswordPopup);
+            PasswordPopup.SetRoomInfo(_roomInfo);
         }
         else
         { 
@@ -36,13 +56,6 @@ public class UI_RoomSlot : MonoBehaviour
     public void JoinRoom()
     {
         PhotonNetwork.JoinRoom(RoomName.text);
-    }
-
-    public void PasswordCheck()
-    {
-        string password = (string)_roomInfo.CustomProperties[$"{EProperties.Password}"];
-        
-        PasswordPopup.PasswordCheck(password, RoomName.text);
     }
     
 }

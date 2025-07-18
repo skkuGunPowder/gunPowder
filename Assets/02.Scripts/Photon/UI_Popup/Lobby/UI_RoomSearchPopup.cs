@@ -39,6 +39,7 @@ public class UI_RoomSearchPopup : UI_Popup
         Debug.Log("Refresh");
         List<RoomInfo> roomInfoList = LobbyManager.Instance.RoomInfoList;
 
+        // 방이 0개인 경우
         if (roomInfoList == null || roomInfoList.Count == 0)
         {
             foreach (UI_RoomSlot slot in RoomSlotList)
@@ -48,6 +49,7 @@ public class UI_RoomSearchPopup : UI_Popup
             return;
         }
         
+        // 페이지 수 설정
         int roomCount = roomInfoList.Count;
         _maxPage = (int)(roomCount / RoomSlotList.Count + 1);
         
@@ -64,8 +66,10 @@ public class UI_RoomSearchPopup : UI_Popup
         }
         
         PageSetting();
+        
         int countThisPage = Mathf.Min(RoomSlotList.Count, roomCount - startIndex);
         
+        // 방 리프레시
         for (int i = 0; i < RoomSlotList.Count; i++)
         {
             if (i < countThisPage)
@@ -82,6 +86,7 @@ public class UI_RoomSearchPopup : UI_Popup
         }
     }
 
+    // 아이콘 가져오기
     private Sprite StringToSprite(RoomInfo info)
     {
         
@@ -100,6 +105,7 @@ public class UI_RoomSearchPopup : UI_Popup
     {
         RoomPageTextUGUI.text = $"{_currentPage}/{_maxPage}";
     }
+    
     public void OnClickSetPage(int index)
     {
         _currentPage = Mathf.Clamp(_currentPage + index, 1, _maxPage);

@@ -10,7 +10,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public static LobbyManager Instance;
     private List<RoomInfo> _roomInfoList = new List<RoomInfo>();
     public List<RoomInfo> RoomInfoList => _roomInfoList;
-
+    
     public event Action OnDataChanged;
     public event Action OnMapChanged;
     private void Awake()
@@ -28,6 +28,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     // 방에 보내기
     public void MakeRoom(string roomName, int maxPlayers, int playTime, int life, int gunpowder, int decline, bool isLocked, string password = null)
     {
+        Debug.Log($"{password}");
         // 룸 프로퍼티에 들어가야할 것들 : 시간, 목숨, 시작 건파우더, 시간 당 감소
         Hashtable roomProperties = new Hashtable
         {
@@ -48,7 +49,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         roomOptions.CustomRoomPropertiesForLobby = new string[]
         {
             $"{EProperties.MapSelected}",
-            $"{EProperties.IsLocked}"
+            $"{EProperties.IsLocked}",
+            $"{EProperties.PlayTime}",
+            $"{EProperties.Life}",
+            $"{EProperties.Gunpowder}",
+            $"{EProperties.DeclinePowder}",
+            $"{EProperties.Password}"
         };
         roomOptions.CustomRoomProperties = roomProperties; 
         roomOptions.EmptyRoomTtl = 0;

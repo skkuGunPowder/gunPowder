@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_SetupButton : MonoBehaviour
+public class UI_RoomSetupButton : MonoBehaviour
 {
     public TextMeshProUGUI Value;
     public int MaxValue;           // 최대치는 직접 입력해서 조절

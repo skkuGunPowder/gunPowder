@@ -14,18 +14,19 @@ public class UI_RoomMakerPopup : UI_Popup
     public Toggle IsLocked;            // 비번 방 여부
     // public 
     public TMP_Dropdown MaxPlayers;
-    public UI_SetupButton PlayTime;
-    public UI_SetupButton Life;
-    public UI_SetupButton Gunpowder;
-    public UI_SetupButton Decline;
+    public UI_RoomSetupButton PlayTime;
+    public UI_RoomSetupButton Life;
+    public UI_RoomSetupButton Gunpowder;
+    public UI_RoomSetupButton Decline;
     
-    public List<UI_SetupButton> SetupButtonList = new List<UI_SetupButton>();
+    public List<UI_RoomSetupButton> SetupButtonList = new List<UI_RoomSetupButton>();
     public void OnclickCreateRoom()
     {
         string roomName = RoomName.text;
         int maxPlayers = int.Parse(MaxPlayers.options[MaxPlayers.value].text);
         
         Debug.Log(maxPlayers);
+        
         if (IsLocked.isOn == false)
         {
             RoomPassword.text = "";
