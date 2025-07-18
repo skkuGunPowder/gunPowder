@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_ItemSlot : MonoBehaviour, ISelectable
+public class UI_EquipmentSlot : MonoBehaviour, ISelectable
 {
     public ItemDTO Item;
-    
+
     public Image ItemIcon;
+    public Image EquippedIcon;
     public Image SelectedIcon;
 
 
@@ -20,15 +21,6 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable
 
         Item = item;
         ItemIcon.sprite = Item.Image;
-
-        if (Item.IsEquipped)
-        {
-            gameObject.SetActive(false);
-        }
-        else
-        {
-           gameObject.SetActive(true);
-        }
     }
 
     public void Select()
