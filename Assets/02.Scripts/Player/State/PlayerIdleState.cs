@@ -53,14 +53,14 @@ public class PlayerIdleState : PlayerBaseState
             {
                 if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
                 {
-                    _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
+                    ThrowNormalBomb(EBombSpawnPoint.Up);
                 }
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
                 if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
                 {
-                    _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
+                    ThrowNormalBomb(EBombSpawnPoint.Down);
                 }
             }
             else
@@ -68,11 +68,11 @@ public class PlayerIdleState : PlayerBaseState
                 // 보고 있는 방향으로 폭탄을 둔다.
                 if (_owner.PlayerStat.FacingDirection == 1)
                 {
-                    _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+                    PlaceNormalBomb(EBombSpawnPoint.Right);
                 }
                 else
                 {
-                    _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Left));
+                    PlaceNormalBomb(EBombSpawnPoint.Left);
                 }
             }
             SetLastNormalBombTime();
@@ -87,26 +87,27 @@ public class PlayerIdleState : PlayerBaseState
             {
                 if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
                 {
-                    _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Up));
+                    ThrowSpecialBomb(EBombSpawnPoint.Up);
                 }
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
                 if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
                 {
-                    _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Down));
+                    ThrowSpecialBomb(EBombSpawnPoint.Down);
                 }
             }
             else
             {
                 // 보고 있는 방향으로 폭탄을 둔다.
+                // FacingDirection 은 1 이면 오른쪽, -1 이면 왼쪽
                 if (_owner.PlayerStat.FacingDirection == 1)
                 {
-                    _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Right));
+                    PlaceSpecialBomb(EBombSpawnPoint.Right);
                 }
                 else
                 {
-                    _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(EBombSpawnPoint.Left));
+                    PlaceSpecialBomb(EBombSpawnPoint.Left);
                 }
             }
             SetLastSpecialBombTime();

@@ -159,13 +159,11 @@ public class PlayerWalkState : PlayerBaseState
     {
         if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
-            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
-            SetLastNormalBombTime();
+            ThrowNormalBomb();
         }
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
-            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
-            SetLastSpecialBombTime();
+            ThrowSpecialBomb();
         }
     }
 }

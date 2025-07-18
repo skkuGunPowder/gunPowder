@@ -1,3 +1,4 @@
+using System;
 using RobustFSM.Base;
 using UnityEngine;
 
@@ -81,5 +82,112 @@ public class PlayerBaseState : MonoState
     protected virtual void SetLastSpecialBombTime()
     {
         _lastSpecialBombTime = _owner.AttackTimer;
+    }
+
+    protected virtual void ResetGunPowderDecreaseWithoutAttackTimer()
+    {
+        _owner.ResetGunPowderDecreaseWithoutAttackTimer();
+    }
+
+    /// <summary>
+    /// 일반 폭탄을 배치하고 자동으로 Reset을 호출합니다.
+    /// </summary>
+    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void PlaceNormalBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        if (spawnPoint.HasValue)
+        {
+            _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+        }
+        else
+        {
+            _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint());
+        }
+        ResetGunPowderDecreaseWithoutAttackTimer();
+    }
+
+    /// <summary>
+    /// 일반 폭탄을 던지고 자동으로 Reset을 호출합니다.
+    /// </summary>
+    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void ThrowNormalBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        if (spawnPoint.HasValue)
+        {
+            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+        }
+        else
+        {
+            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+        }
+        ResetGunPowderDecreaseWithoutAttackTimer();
+    }
+
+    /// <summary>
+    /// 특수 폭탄을 배치하고 자동으로 Reset을 호출합니다.
+    /// </summary>
+    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void PlaceSpecialBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        if (spawnPoint.HasValue)
+        {
+            _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+        }
+        else
+        {
+            _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint());
+        }
+        ResetGunPowderDecreaseWithoutAttackTimer();
+    }
+
+    /// <summary>
+    /// 특수 폭탄을 던지고 자동으로 Reset을 호출합니다.
+    /// </summary>
+    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void ThrowSpecialBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        if (spawnPoint.HasValue)
+        {
+            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+        }
+        else
+        {
+            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+        }
+        ResetGunPowderDecreaseWithoutAttackTimer();
+    }
+
+    /// <summary>
+    /// 일반 폭탄을 직선으로 던지고 자동으로 Reset을 호출합니다.
+    /// </summary>
+    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void ThrowStraightNormalBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        if (spawnPoint.HasValue)
+        {
+            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(spawnPoint.Value));
+        }
+        else
+        {
+            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+        }
+        ResetGunPowderDecreaseWithoutAttackTimer();
+    }
+
+    /// <summary>
+    /// 특수 폭탄을 직선으로 던지고 자동으로 Reset을 호출합니다.
+    /// </summary>
+    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void ThrowStraightSpecialBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        if (spawnPoint.HasValue)
+        {
+            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(spawnPoint.Value));
+        }
+        else
+        {
+            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+        }
+        ResetGunPowderDecreaseWithoutAttackTimer();
     }
 }

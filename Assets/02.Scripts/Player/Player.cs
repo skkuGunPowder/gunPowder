@@ -23,8 +23,16 @@ public class Player : MonoBehaviour, IDamagable
     private Bomb _specialBomb;
     public Bomb SpecialBomb => _specialBomb;
 
+    [Header("Timer")]
+    [SerializeField]
     private float _attackTimer = 0f;
     public float AttackTimer => _attackTimer;
+    [SerializeField]
+    private float _gunPowderDecreaseTimer = 0f;
+    public float GunPowderDecreaseTimer => _gunPowderDecreaseTimer;
+    [SerializeField]
+    private float _gunPowderDecreaseWithoutAttackTimer;
+    public float GunPowderDecreaseWithoutAttackTimer => _gunPowderDecreaseWithoutAttackTimer;
 
 
     // 테스트용
@@ -39,7 +47,46 @@ public class Player : MonoBehaviour, IDamagable
     private void Update()
     {
         _attackTimer += Time.deltaTime;
+
+        _gunPowderDecreaseTimer += Time.deltaTime;
+        DecreaseGunPowderPeriodically();
+
+        _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
+        DecreaseGunPowderWithoutAttack();
     }
+
+    /// <summary>
+    /// 주기적으로 건파우더 감소
+    /// </summary>
+    private void DecreaseGunPowderPeriodically()
+    {
+        if (_gunPowderDecreaseTimer >= PlayerStat.GunPowderDecreaseTime)
+        {
+            _gunPowderDecreaseTimer = 0f;
+            _playerStat.DecreaseGunPowderCount(1);
+        }
+    }
+
+    /// <summary>
+    /// 공격을 일정시간 하지 않으면 건파우더 감소
+    /// </summary>
+    private void DecreaseGunPowderWithoutAttack()
+    {
+        if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
+        {
+            _gunPowderDecreaseWithoutAttackTimer = 0f;
+            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount);
+        }
+    }
+
+    /// <summary>
+    /// 공격을 하면 타이머 초기화
+    /// </summary>
+    public void ResetGunPowderDecreaseWithoutAttackTimer()
+    {
+        _gunPowderDecreaseWithoutAttackTimer = 0f;
+    }
+
 
     public void SetFacingDirection(int direction)
     {

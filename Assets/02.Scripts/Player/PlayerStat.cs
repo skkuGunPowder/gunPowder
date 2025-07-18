@@ -59,6 +59,8 @@ public class PlayerStat : MonoBehaviour
     public int FacingDirection { get => _facingDirection; set => _facingDirection = value; }
 
     [Header("Player Attributes")]
+    [SerializeField] private float _gunPowderDecreaseTime;
+    public float GunPowderDecreaseTime { get => _gunPowderDecreaseTime; set => _gunPowderDecreaseTime = value; }
     [SerializeField] private int _attackPenaltyTime;
     public int AttackPenaltyTime { get => _attackPenaltyTime; set => _attackPenaltyTime = value; }
 
@@ -110,6 +112,7 @@ public class PlayerStat : MonoBehaviour
             _recoilSpeed = _playerStatSO.RecoilSpeed;
             _attackPenaltyTime = _playerStatSO.AttackPenaltyTime;
             _attackPenaltyAmount = _playerStatSO.AttackPenaltyAmount;
+            _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;
             _dieExplosionDamage = _playerStatSO.DieExplosionDamage;
             _dieExplosionRadius = _playerStatSO.DieExplosionRadius;
             _dieExplosionForce = _playerStatSO.DieExplosionForce;
@@ -155,4 +158,16 @@ public class PlayerStat : MonoBehaviour
     {
         _jumpDashCount = 0;
     }
+
+    public void IncreseGunPowderCount(int amount)
+    {
+        _currentPlayerGunPowderCount += amount;
+    }
+
+    public void DecreaseGunPowderCount(int amount)
+    {
+        _currentPlayerGunPowderCount -= amount;
+    }
+
+    
 }

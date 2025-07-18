@@ -37,6 +37,8 @@ public class PlayerStatSO : ScriptableObject
 
     [SerializeField] private int _maxGunPoderCount;
     public int MaxGunPoderCount => _maxGunPoderCount;
+    [SerializeField] private float _gunPowderDecreaseTime;
+    public float GunPowderDecreaseTime => _gunPowderDecreaseTime;
     [SerializeField] private int _attackPenaltyTime;
     public int AttackPenaltyTime => _attackPenaltyTime;
     [SerializeField] private int _attackPenaltyAmount;

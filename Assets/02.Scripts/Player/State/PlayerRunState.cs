@@ -94,15 +94,13 @@ public class PlayerRunState : PlayerBaseState
     {
         if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
-            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
-            SetLastNormalBombTime();
+            ThrowStraightNormalBomb();
             _playerFSM.ChangeState<PlayerRecoilState>();
             return;
         }
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
-            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
-            SetLastSpecialBombTime();
+            ThrowStraightSpecialBomb();
             _playerFSM.ChangeState<PlayerRecoilState>();
             return;
         }

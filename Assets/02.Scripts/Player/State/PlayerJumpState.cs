@@ -187,12 +187,12 @@ public class PlayerJumpState : PlayerBaseState
         {
             if(_owner.PlayerStat.IsRunning)
             {
-                _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+                ThrowStraightNormalBomb();
                 _playerFSM.ChangeState<PlayerRecoilState>();
             }
             else
             {
-                _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+                ThrowNormalBomb();
             }
             SetLastNormalBombTime();
         }
@@ -200,12 +200,12 @@ public class PlayerJumpState : PlayerBaseState
         {
             if(_owner.PlayerStat.IsRunning)
             {
-                _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+                ThrowStraightSpecialBomb();
                 _playerFSM.ChangeState<PlayerRecoilState>();
             }
             else
             {
-                _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+                ThrowSpecialBomb();
             }
             SetLastSpecialBombTime();
         }
