@@ -1,43 +1,51 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_ItemSlot : MonoBehaviour
+public class UI_ItemSlot : MonoBehaviour, ISelectable
 {
     public ItemDTO Item;
-    public Image Image;
-    public Image EquippedIcon;
+    
+    public Image ItemIcon;
+    public Image SelectedIcon;
 
 
     public void Refresh(ItemDTO item)
     {
-        Item = item;
+        if (item == null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+        gameObject.SetActive(true);
 
-        Image.sprite = Item.Image;
+        Item = item;
+        ItemIcon.sprite = Item.Image;
+
         if (Item.IsEquipped)
         {
-            EquippedIcon.gameObject.SetActive(true);
+            gameObject.SetActive(false);
         }
         else
         {
-            EquippedIcon.gameObject.SetActive(false);
+           gameObject.SetActive(true);
         }
+    }
+
+    public void Select()
+    {
+        SelectedIcon.gameObject.SetActive(true);
+    }
+
+    public void Deselect()
+    {
+        SelectedIcon.gameObject.SetActive(false);
     }
 
     public void OnClick()
     {
         if (Item == null)
         {
-            Debug.LogError("아이템이 슬롯에 할당되지 않았습니다.");
-            return;
-        }
-
-        if (EquippedIcon.gameObject.activeInHierarchy)
-        {
-            EquippedIcon.gameObject.SetActive(false);
-        }
-        else
-        {
-            EquippedIcon.gameObject.SetActive(true);
+            throw new System.Exception("아이템이 슬롯에 할당되지 않았습니다.");
         }
 
         ItemStorage.Instance.SelectItem(Item);
