@@ -6,7 +6,6 @@ public class PlayerBaseState : MonoState
     protected PlayerFSM _playerFSM;
     protected Player _owner;
 
-    private float _attackTimer = 0f;
     private float _lastNormalBombTime = 0f;
     private float _lastSpecialBombTime = 0f;
 
@@ -28,7 +27,6 @@ public class PlayerBaseState : MonoState
 
     public virtual void Update()
     {
-        _attackTimer += Time.deltaTime;
         JumpInput();
     }
 
@@ -59,7 +57,7 @@ public class PlayerBaseState : MonoState
 
     protected virtual bool CanNormalBomb()
     {
-        if(_attackTimer - _lastNormalBombTime < _owner.NormalBomb.BombCoolTime)
+        if(_owner.AttackTimer - _lastNormalBombTime < _owner.NormalBomb.BombCoolTime)
         {
             return false;
         }
@@ -68,7 +66,7 @@ public class PlayerBaseState : MonoState
 
     protected virtual bool CanSpecialBomb()
     {
-        if(_attackTimer - _lastSpecialBombTime < _owner.SpecialBomb.BombCoolTime)
+        if(_owner.AttackTimer - _lastSpecialBombTime < _owner.SpecialBomb.BombCoolTime)
         {
             return false;
         }
@@ -77,11 +75,11 @@ public class PlayerBaseState : MonoState
 
     protected virtual void SetLastNormalBombTime()
     {
-        _lastNormalBombTime = _attackTimer;
+        _lastNormalBombTime = _owner.AttackTimer;
     }
 
     protected virtual void SetLastSpecialBombTime()
     {
-        _lastSpecialBombTime = _attackTimer;
+        _lastSpecialBombTime = _owner.AttackTimer;
     }
 }

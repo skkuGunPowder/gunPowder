@@ -35,13 +35,13 @@ public class PlayerRunState : PlayerBaseState
     {
         base.Update();
 
+        RunAttack();
+
         bool flowControl = RunMove();
         if (!flowControl)
         {
             return;
         }
-
-        RunAttack();
     }
 
     private bool RunMove()

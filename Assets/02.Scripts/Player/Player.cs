@@ -23,6 +23,10 @@ public class Player : MonoBehaviour, IDamagable
     private Bomb _specialBomb;
     public Bomb SpecialBomb => _specialBomb;
 
+    private float _attackTimer = 0f;
+    public float AttackTimer => _attackTimer;
+
+
     // 테스트용
     public GameObject TestBomb;
 
@@ -30,6 +34,11 @@ public class Player : MonoBehaviour, IDamagable
     {
         _characterController = GetComponent<CharacterController>();
         _playerStat = GetComponent<PlayerStat>();
+    }
+
+    private void Update()
+    {
+        _attackTimer += Time.deltaTime;
     }
 
     public void SetFacingDirection(int direction)
