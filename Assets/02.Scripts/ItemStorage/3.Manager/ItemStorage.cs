@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public class ItemStorage : MonoBehaviour
 {
@@ -56,19 +58,10 @@ public class ItemStorage : MonoBehaviour
         // 아이템 추가 테스트
         if (Input.GetKeyDown(KeyCode.Q))
         {
+            Item newItem = new Item("B0001", EItemType.Bomb, "기본 폭탄", "기본 폭탄", "Assets/05.Images/Item/PunIcon-128.png", null);
+            InventoryItem testItem = new InventoryItem(new ItemDTO(newItem));
 
-            // Item newItem = new Item("B0001", EItemType.Bomb, )
-            // InventoryItem testItem = new InventoryItem(
-            //     UnityEngine.Random.Range(0, 11).ToString(),
-            //     "Test Item",
-            //     "Descriptions...",
-            //     TestIcon,
-            //     "Assets/05.Images/Item/PunIcon-128.png",
-            //     (EEquipmentSlot)UnityEngine.Random.Range(0, (int)EEquipmentSlot.None),
-            //     false
-            // );
-
-            // AddItem(newItem);
+            AddItem(testItem);
         }
 
         // 아이템 장착 테스트

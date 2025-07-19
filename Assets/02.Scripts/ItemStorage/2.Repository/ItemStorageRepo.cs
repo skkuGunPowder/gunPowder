@@ -10,11 +10,11 @@ public class ItemStorageRepo
 {
     private const string USER_ID = "USER_01";
 
-    public event Action<Dictionary<EEquipmentSlot, List<Item>>> OnItemStorageLoaded;
-    public event Action<Dictionary<EEquipmentSlot, Item>> OnInventoryLoaded;
+    public event Action<Dictionary<EItemType, List<InventoryItem>>> OnItemStorageLoaded;
+    public event Action<Dictionary<EItemType, InventoryItem>> OnInventoryLoaded;
 
 
-    public async void SaveItemStorage(Dictionary<EEquipmentSlot, List<Item>> itemDict)
+    public async void SaveItemStorage(Dictionary<EItemType, List<InventoryItem>> itemDict)
     {
         // FireStore에 저장가능한 형태로 데이터 변환
         Dictionary<string, List<SerializableItem>> saveData = ConvertItemStorageData(itemDict);
@@ -24,6 +24,7 @@ public class ItemStorageRepo
         try
         {
             await docRef.SetAsync(new Dictionary<string, object> { { "InStorage", saveData } });
+            
         }
         catch (FirebaseException e)
         {
@@ -42,22 +43,22 @@ public class ItemStorageRepo
             if (document.Exists)
             {
                 var rawItemStorageData = document.GetValue<Dictionary<string, object>>("InStorage");
-                var itemDict = new Dictionary<EEquipmentSlot, List<Item>>();
+                var itemDict = new Dictionary<EItemType, List<InventoryItem>>();
                 
                 // 아이템 딕셔너리에 데이터 할당
                 foreach (var kvp in rawItemStorageData)
                 {
                     string key = kvp.Key;
-                    if (!Enum.TryParse(key, out EEquipmentSlot slot))
+                    if (!Enum.TryParse(key, out EItemType slot))
                     {
                         continue;
                     }
 
-                    var itemList = new List<Item>();
+                    var itemList = new List<InventoryItem>();
                     // 아이템 리스트에 데이터 할당
                     foreach (var obj in kvp.Value as List<object>)
                     {
-                        Item item = await ConvertToItemAsync(obj as Dictionary<string, object>);
+                        InventoryItem item = await ConvertToItemAsync(obj as Dictionary<string, object>);
                         itemList.Add(item);
                     }
 
@@ -83,7 +84,7 @@ public class ItemStorageRepo
             if (document.Exists)
             {
                 var rawInventoryData = document.GetValue<Dictionary<string, object>>("Equipments");
-                var equippedItemDict = new Dictionary<EEquipmentSlot, Item>();
+                var equippedItemDict = new Dictionary<EItemType, InventoryItem>();
 
                 // 장착된 아이템 딕셔너리에 데이터 할당
                 foreach (var kvp in rawInventoryData)
@@ -91,7 +92,7 @@ public class ItemStorageRepo
                     string key = kvp.Key;
 
                     // 아이템 데이터 없을 시 null 할당
-                    if (Enum.TryParse(key, out EEquipmentSlot slot))
+                    if (Enum.TryParse(key, out EItemType slot))
                     {
                         equippedItemDict[slot] = null;
                         continue;
@@ -110,7 +111,7 @@ public class ItemStorageRepo
         }
     }
 
-    public async void SaveInventory(Dictionary<EEquipmentSlot, Item> equippedItemDict)
+    public async void SaveInventory(Dictionary<EItemType, InventoryItem> equippedItemDict)
     {
         // FireStore에 저장가능한 형태로 데이터 변환
         Dictionary<string, SerializableItem> saveData = ConvertInventoryData(equippedItemDict);
@@ -127,7 +128,7 @@ public class ItemStorageRepo
         }
     }
 
-    public Dictionary<string, List<SerializableItem>> ConvertItemStorageData(Dictionary<EEquipmentSlot, List<Item>> itemDict)
+    public Dictionary<string, List<SerializableItem>> ConvertItemStorageData(Dictionary<EItemType, List<InventoryItem>> itemDict)
     {
         // 아이템 보관함 데이터 => 저장가능한 데이터로 변환하는 메소드
 
@@ -148,7 +149,7 @@ public class ItemStorageRepo
         return saveData;
     }
 
-    public Dictionary<string, SerializableItem> ConvertInventoryData(Dictionary<EEquipmentSlot, Item> equippedItemDict)
+    public Dictionary<string, SerializableItem> ConvertInventoryData(Dictionary<EItemType, InventoryItem> equippedItemDict)
     {
         // 인벤토리 데이터 => 저장가능한 데이터로 변환하는 메소드
 
@@ -173,7 +174,7 @@ public class ItemStorageRepo
     }
 
 
-    private async Task<Item> ConvertToItemAsync(Dictionary<string, object> dict)
+    private async Task<InventoryItem> ConvertToItemAsync(Dictionary<string, object> dict)
     {
         // 저장된 데이터 -> Item 객체로 변환하는 메소드
 
@@ -186,18 +187,10 @@ public class ItemStorageRepo
         // 스프라이트 에셋 로드
         var sprite = await Addressables.LoadAssetAsync<Sprite>(dict["ImageAddress"]).Task;
 
-        // Item객체로 변환
-        Item loadedItem = new Item(
-            id: dict["ID"] as string,
-            name: dict["Name"] as string,
-            explanation: dict["Description"] as string,
-            image: sprite,
-            imageAddress: dict["ImageAddress"] as string,
-            itme: Enum.TryParse(dict["EquipmentSlot"] as string, out EEquipmentSlot slot) ? slot : default,
-            isEquipped: dict.ContainsKey("IsEquipped") && (bool)dict["IsEquipped"]
-        );
 
-        return loadedItem;
+        // InventoryItem객체로 변환
+        ItemDTO item = ItemDatabase.Instance.GetItem((string)dict["ID"]);
+        return new InventoryItem(item);
     }
 }
 
@@ -206,10 +199,6 @@ public class ItemStorageRepo
 public class SerializableItem
 {
     [FirestoreProperty] public string ID { get; set; }
-    [FirestoreProperty] public string Name { get; set; }
-    [FirestoreProperty] public string Description { get; set; }
-    [FirestoreProperty] public string ImageAddress { get; set; }
-    [FirestoreProperty] public string EquipmentSlot { get; set; }
     [FirestoreProperty] public bool IsEquipped { get; set; }
 
     public SerializableItem()
@@ -217,33 +206,14 @@ public class SerializableItem
 
     }
 
-    public SerializableItem(Item item)
+    public SerializableItem(InventoryItem item)
     {
         if (string.IsNullOrEmpty(item.ID))
-            {
-                throw new Exception("ID가 비어있습니다.");
-            }
-
-        if (string.IsNullOrEmpty(item.Name))
         {
-            throw new Exception("아이템 이름이 비어있습니다.");
-        }
-
-        if (string.IsNullOrEmpty(item.Explanation))
-        {
-            throw new Exception("아이템 설명이 비어있습니다.");
-        }
-
-        if (string.IsNullOrEmpty(item.ImageAddress))
-        {
-            throw new Exception("아이콘 이미지 주소가 없습니다.");
+            throw new Exception("ID가 비어있습니다.");
         }
 
         ID = item.ID;
-        Name = item.Name;
-        Explanation = item.Explanation;
-        ImageAddress = item.ImageAddress;
-        EquipmentSlot = item.ItemType.ToString();
         IsEquipped = item.IsEquipped;
     }
 }

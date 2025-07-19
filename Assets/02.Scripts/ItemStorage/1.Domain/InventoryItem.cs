@@ -1,16 +1,17 @@
 using System;
+using Firebase.Firestore;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 
-[Serializable]
+[FirestoreData]
 public class InventoryItem
 {
-    public readonly string ID;
-    public readonly ItemDTO Item;
-    public Sprite Image;
-    public bool IsEquipped;
+    [FirestoreProperty] public string ID { get; private set; }
+    [FirestoreProperty] public bool IsEquipped { get; private set; }
 
+    public ItemDTO Item;
+    public Sprite Image;
 
     public InventoryItem()
     {
@@ -26,7 +27,7 @@ public class InventoryItem
 
         ID = itemDTO.ID;
         Item = itemDTO;
-        
+
         LoadImageAsync();
     }
 
