@@ -34,6 +34,14 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private float _jumpDashCount;
     public float JumpDashCount { get => _jumpDashCount; set => _jumpDashCount = value; }
 
+    [SerializeField] private float _recoilTime;
+    public float RecoilTime { get => _recoilTime; set => _recoilTime = value; }
+
+    [SerializeField] private float _recoilSpeed;
+    public float RecoilSpeed { get => _recoilSpeed; set => _recoilSpeed = value; }
+
+
+
     [Header("Player State Stats")]
     [SerializeField] private bool _isRunning = false;
     public bool IsRunning { get => _isRunning; set => _isRunning = value; }
@@ -49,6 +57,8 @@ public class PlayerStat : MonoBehaviour
 
     [SerializeField] private int _facingDirection = 1;
     public int FacingDirection { get => _facingDirection; set => _facingDirection = value; }
+
+    public bool IsFallingFromLedge = false;
 
     void Start()
     {
@@ -67,6 +77,8 @@ public class PlayerStat : MonoBehaviour
             _breakTime = _playerStatSO.BreakTime;
             _runSpeed = _playerStatSO.RunSpeed;
             _maxJumpCount = _playerStatSO.MaxJumpCount;
+            _recoilTime = _playerStatSO.RecoilTime;
+            _recoilSpeed = _playerStatSO.RecoilSpeed;
         }
     }
 
