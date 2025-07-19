@@ -28,8 +28,12 @@ public class UI_RoomSetting : MonoBehaviour
     {
         Room currentRoom = PhotonNetwork.CurrentRoom;
         
-        int value = (int)currentRoom.CustomProperties[properties.ToString()];
-
+        
+        Debug.Log(currentRoom.CustomProperties.ToString());
+        Debug.Log(currentRoom.CustomProperties[properties.ToString()]);
+        Debug.Log(currentRoom.CustomProperties[properties.ToString()].GetType());
+        int value = int.Parse(currentRoom.CustomProperties[properties.ToString()].ToString());
+        
         button.InitValue = value;
         button.Init();
         
@@ -42,12 +46,14 @@ public class UI_RoomSetting : MonoBehaviour
         
         Hashtable roomProperties = new Hashtable
         {
-            {$"{EProperties.PlayTime}", Playtime.Value},
-            {$"{EProperties.Life}", Life.Value},
-            {$"{EProperties.Gunpowder}", Powder.Value},
-            {$"{EProperties.DeclinePowder}", Life.Value},
+            {$"{EProperties.PlayTime}", Playtime.Value.text},
+            {$"{EProperties.Life}", Life.Value.text},
+            {$"{EProperties.Gunpowder}", Powder.Value.text},
+            {$"{EProperties.DeclinePowder}", Decline.Value.text},
         };
+        
         currentRoom.SetCustomProperties(roomProperties);
+        
     }
 
     public void CancelButton()
