@@ -20,6 +20,15 @@ public class UI_RoomMakerPopup : UI_Popup
     public UI_RoomSetupButton Decline;
     
     public List<UI_RoomSetupButton> SetupButtonList = new List<UI_RoomSetupButton>();
+
+    private void OnEnable()
+    {
+        PlayTime.Init();
+        Life.Init();
+        Gunpowder.Init();
+        Decline.Init();
+    }
+
     public void OnclickCreateRoom()
     {
         string roomName = RoomName.text;

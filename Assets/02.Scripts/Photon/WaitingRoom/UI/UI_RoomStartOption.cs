@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_SelectOption : MonoBehaviour
+public class UI_RoomStartOption : MonoBehaviour
 {
     public Button MapSelectButton;
     public Image MapIcon;
@@ -17,9 +17,6 @@ public class UI_SelectOption : MonoBehaviour
     
     private void Awake()
     {
-        RoomManager.Instance.OnMapChanged += MapChange;
-        RoomManager.Instance.OnMasterChanged += ButtonSetup;
-        
         MapDataDictionary = new Dictionary<string, MapDataSO>();
         
         foreach (MapDataSO dataSo in MapDataList)
@@ -31,8 +28,12 @@ public class UI_SelectOption : MonoBehaviour
 
     private void Start()
     {
+        RoomManager.Instance.OnMapChanged += MapChange;
+        RoomManager.Instance.OnMasterChanged += ButtonSetup;
+        
         ButtonSetup();
     }
+    
     // 탭 선택하기 => 고른 옵션만 true 나머지는 false
     // 맵 선택 interation 조절 => 방장만 누를 수 있게
     public void ButtonSetup()

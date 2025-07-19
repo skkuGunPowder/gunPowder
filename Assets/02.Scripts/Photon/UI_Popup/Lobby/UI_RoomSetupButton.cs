@@ -11,7 +11,7 @@ public class UI_RoomSetupButton : MonoBehaviour
     public int InitValue;          // 처음 시작 값 조절
     private int _currentValue;      // 현재 값
 
-    private void OnEnable()
+    public void Init()
     {
         _currentValue = InitValue;
         Refresh();
