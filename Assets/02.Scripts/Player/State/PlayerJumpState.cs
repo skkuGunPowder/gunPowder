@@ -19,6 +19,8 @@ public class PlayerJumpState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+
+        _owner.PlayerStat.IsJumping = true;
         
         _gravity = -40f;
         _yVelocity = 0;
@@ -28,7 +30,8 @@ public class PlayerJumpState : PlayerBaseState
             _owner.PlayerStat.IsFallingFromLedge = false;
         }
         else if(!_playerFSM.IsPreviousState<PlayerJumpDashState>()
-            && !_playerFSM.IsPreviousState<PlayerRecoilState>())
+            && !_playerFSM.IsPreviousState<PlayerRecoilState>()
+            && !_playerFSM.IsPreviousState<PlayerBreakState>())
         {
             _owner.PlayerStat.IncrementJumpCount();
             _yVelocity = _owner.PlayerStat.JumpForce;

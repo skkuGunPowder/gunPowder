@@ -58,7 +58,15 @@ public class PlayerBreakState : PlayerBaseState
             }
             else
             {
-                _playerFSM.ChangeState<PlayerIdleState>();
+                if (_owner.CharacterController.isGrounded)
+                {
+                    _playerFSM.ChangeState<PlayerIdleState>();  
+                }
+                else
+                {
+                    _owner.MyAnimator.SetTrigger("Fall");
+                    _playerFSM.ChangeState<PlayerJumpState>();
+                }
             }
         }
     }

@@ -104,6 +104,16 @@ public class PlayerBaseState : MonoState
         {
             _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint());
         }
+
+        if (_owner.PlayerStat.IsJumping)
+        {
+            // 점프 공격
+            _owner.MyAnimator.SetTrigger("JumpAttack");
+        }
+        else
+        {
+            _owner.MyAnimator.SetTrigger("Attack");
+        }
         ResetGunPowderDecreaseWithoutAttackTimer();
     }
 
@@ -120,6 +130,16 @@ public class PlayerBaseState : MonoState
         else
         {
             _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+        }
+
+        if (_owner.PlayerStat.IsJumping)
+        {
+            // 점프 공격
+            _owner.MyAnimator.SetTrigger("JumpAttack");
+        }
+        else
+        {
+            _owner.MyAnimator.SetTrigger("Attack");
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
     }
