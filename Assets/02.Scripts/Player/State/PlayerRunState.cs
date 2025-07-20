@@ -23,12 +23,13 @@ public class PlayerRunState : PlayerBaseState
         _owner.PlayerStat.IsRunning = true;
 
         // 애니메이션 재생
-        // _owner.MyAnimator.SetTrigger("Run");
+        _owner.MyAnimator.SetTrigger("Run");
     }
 
     public override void OnExit()
     {
         base.OnExit();
+        _owner.MyAnimator.ResetTrigger("Run");
     }
 
     public override void Update()
@@ -61,6 +62,7 @@ public class PlayerRunState : PlayerBaseState
         if (!isGrounded)
         {
             _owner.PlayerStat.IsFallingFromLedge = true;
+            _owner.MyAnimator.SetTrigger("Fall");
             _playerFSM.ChangeState<PlayerJumpState>();
             return false;
         }

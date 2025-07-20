@@ -174,6 +174,7 @@ public class PlayerJumpState : PlayerBaseState
         if (_timer > LANDING_GRACE_TIME && _owner.CharacterController.isGrounded)
         {
             Debug.Log("착지!");
+            _owner.MyAnimator.SetTrigger("Land");
             _playerFSM.ChangeState<PlayerIdleState>();
             return false;
         }

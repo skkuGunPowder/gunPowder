@@ -37,12 +37,13 @@ public class PlayerWalkState : PlayerBaseState
         _owner.PlayerStat.IsRunning = false;
 
         // 애니메이션 재생
-        // _owner.MyAnimator.SetTrigger("Walk");
+        _owner.MyAnimator.SetTrigger("Walk");
     }
     
     public override void OnExit()
     {
         base.OnExit();
+        _owner.MyAnimator.ResetTrigger("Walk");
     }
 
     /// <summary>
@@ -83,6 +84,7 @@ public class PlayerWalkState : PlayerBaseState
         if (!isGrounded)
         {
             _owner.PlayerStat.IsFallingFromLedge = true;
+            _owner.MyAnimator.SetTrigger("Fall");
             _playerFSM.ChangeState<PlayerJumpState>();
             return false;
         }

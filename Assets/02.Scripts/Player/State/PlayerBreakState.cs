@@ -23,12 +23,13 @@ public class PlayerBreakState : PlayerBaseState
         _owner.SetFacingDirection(-_moveDirection);
 
         // 애니메이션 재생
-        // _owner.MyAnimator.SetTrigger("Break");
+        _owner.MyAnimator.SetTrigger("Break");
     }
 
     public override void OnExit()
     {
         base.OnExit();
+        _owner.MyAnimator.ResetTrigger("Break");
     }
 
     public override void Update()

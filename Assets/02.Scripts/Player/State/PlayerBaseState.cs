@@ -39,6 +39,7 @@ public class PlayerBaseState : MonoState
 
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
+            _owner.MyAnimator.SetTrigger("Jump");
             _playerFSM.ChangeState<PlayerJumpState>();
         }
     }
