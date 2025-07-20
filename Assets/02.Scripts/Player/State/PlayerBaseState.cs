@@ -192,6 +192,16 @@ public class PlayerBaseState : MonoState
         {
             _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
         }
+
+        if (_owner.PlayerStat.IsJumping)
+        {
+            _owner.SetAnimatorTrigger("JumpStrongAttack");
+        }
+        else
+        {
+            _owner.SetAnimatorTrigger("StrongAttack");
+        }
+
         ResetGunPowderDecreaseWithoutAttackTimer();
     }
 
@@ -209,6 +219,16 @@ public class PlayerBaseState : MonoState
         {
             _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
         }
+
+        if (_owner.PlayerStat.IsJumping)
+        {
+            _owner.SetAnimatorTrigger("JumpStrongAttack");
+        }
+        else
+        {
+            _owner.SetAnimatorTrigger("StrongAttack");
+        }
+        
         ResetGunPowderDecreaseWithoutAttackTimer();
     }
 }
