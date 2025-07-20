@@ -476,6 +476,11 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!212 &1418256585 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8017956271051314402, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+  m_PrefabInstance: {fileID: 2913345949144442835}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1422523835 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5056152076861241072, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
@@ -503,6 +508,16 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!212 &1422523840 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8679675925086405580, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+  m_PrefabInstance: {fileID: 2913345949144442835}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1502048109 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7850616562687174035, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+  m_PrefabInstance: {fileID: 2913345949144442835}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1712179265 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4817753150163071209, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
@@ -530,6 +545,11 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!212 &1712179270 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 368176435797759158, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+  m_PrefabInstance: {fileID: 2913345949144442835}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1900586725
 GameObject:
   m_ObjectHideFlags: 0
@@ -683,6 +703,11 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!212 &1923966034 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 4462265209823409086, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+  m_PrefabInstance: {fileID: 2913345949144442835}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1926425621
 GameObject:
   m_ObjectHideFlags: 0
@@ -818,9 +843,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!212 &1965728439 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 4356627362282477391, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+  m_PrefabInstance: {fileID: 2913345949144442835}
+  m_PrefabAsset: {fileID: 0}
 --- !u!95 &2097735508 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 795069093886001525, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+  m_PrefabInstance: {fileID: 2913345949144442835}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &2097735510 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 5523093471900638999, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
   m_PrefabInstance: {fileID: 2913345949144442835}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2144177925
@@ -1075,6 +1110,38 @@ PrefabInstance:
       propertyPath: m_SortingOrder
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5813680443752217710, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: _mySpriteRendererList.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5813680443752217710, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: '_mySpriteRendererList.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2097735510}
+    - target: {fileID: 5813680443752217710, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: '_mySpriteRendererList.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1502048109}
+    - target: {fileID: 5813680443752217710, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: '_mySpriteRendererList.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1712179270}
+    - target: {fileID: 5813680443752217710, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: '_mySpriteRendererList.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1965728439}
+    - target: {fileID: 5813680443752217710, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: '_mySpriteRendererList.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1923966034}
+    - target: {fileID: 5813680443752217710, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: '_mySpriteRendererList.Array.data[5]'
+      value: 
+      objectReference: {fileID: 1422523840}
+    - target: {fileID: 5813680443752217710, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: '_mySpriteRendererList.Array.data[6]'
+      value: 
+      objectReference: {fileID: 1418256585}
     - target: {fileID: 6589060692335139018, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
       propertyPath: m_Enabled
       value: 0
