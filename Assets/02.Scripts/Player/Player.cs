@@ -7,6 +7,7 @@ public class Player : MonoBehaviour, IDamagable
     private List<Animator> _myAnimatorList;
     public List<Animator> MyAnimatorList => _myAnimatorList;
 
+
     private CharacterController _characterController;
     public CharacterController CharacterController => _characterController;
     private PlayerStat _playerStat;

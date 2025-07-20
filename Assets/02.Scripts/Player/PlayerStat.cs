@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
@@ -85,6 +86,10 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private int _currentPlayerDamagedCount;
     public int CurrentPlayerDamagedCount => _currentPlayerDamagedCount;
 
+        [SerializeField]
+    private List<SpriteRenderer> _mySpriteRendererList;
+    public List<SpriteRenderer> MySpriteREndererList => _mySpriteRendererList;
+
     
     
     
@@ -127,6 +132,17 @@ public class PlayerStat : MonoBehaviour
     public void SetFacingDirection(int direction)
     {
         _facingDirection = direction;
+        foreach (SpriteRenderer spriteRenderer in _mySpriteRendererList)
+        {
+            if (_facingDirection == 1)
+            {
+                spriteRenderer.flipX = false;
+            }
+            else
+            {
+                spriteRenderer.flipX = true;
+            }
+        }
     }
 
     public void ResetJumpCount()
