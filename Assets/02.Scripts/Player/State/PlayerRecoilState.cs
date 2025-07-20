@@ -35,7 +35,7 @@ public class PlayerRecoilState : PlayerBaseState
             }
             else
             {
-                if (_owner.CharacterController.isGrounded)
+                if (IsGrounded())
                 {
                     _playerFSM.ChangeState<PlayerIdleState>();  
                 }
