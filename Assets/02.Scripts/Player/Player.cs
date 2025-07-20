@@ -4,8 +4,9 @@ using System.Collections.Generic;
 public class Player : MonoBehaviour, IDamagable
 {
     [SerializeField]
-    private Animator _myAnimator;
-    public Animator MyAnimator => _myAnimator;
+    private List<Animator> _myAnimatorList;
+    public List<Animator> MyAnimatorList => _myAnimatorList;
+
     private CharacterController _characterController;
     public CharacterController CharacterController => _characterController;
     private PlayerStat _playerStat;
@@ -38,7 +39,7 @@ public class Player : MonoBehaviour, IDamagable
     [SerializeField]
     private float _gunPowderSpreadAngle = 90f;
     private float _gunPowderSpreadDistance = 1.0f;
-    
+
 
 
     // 테스트용
@@ -130,7 +131,7 @@ public class Player : MonoBehaviour, IDamagable
             GunPowderBezierCurve gunPowder = Instantiate(TestGunPowder, spawnPos, Quaternion.identity).GetComponent<GunPowderBezierCurve>();
 
             //TODO: isFallingout에 따라 뭔가 설정
-            if(isFallingOut)
+            if (isFallingOut)
             {
                 gunPowder.GetComponent<GunPowderRelease>().enabled = true;
                 gunPowder.GetComponent<GunPowderBezierCurve>().enabled = false;
@@ -179,5 +180,21 @@ public class Player : MonoBehaviour, IDamagable
     public Transform GetBombSpawnPoint(EBombSpawnPoint spawnPoint)
     {
         return _bombSpawnPointList[(int)spawnPoint];
+    }
+
+    public void SetAnimatorTrigger(string triggerName)
+    {
+        foreach (Animator animator in _myAnimatorList)
+        {
+            animator.SetTrigger(triggerName);
+        }
+    }
+
+    public void ResetAnimatorTrigger(string triggerName)
+    {
+        foreach (Animator animator in _myAnimatorList)
+        {
+            animator.ResetTrigger(triggerName);
+        }
     }
 }

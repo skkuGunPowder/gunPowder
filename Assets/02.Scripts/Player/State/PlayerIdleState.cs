@@ -16,12 +16,12 @@ public class PlayerIdleState : PlayerBaseState
 
 
         // 애니메이션 재생
-        _owner.MyAnimator.SetTrigger("Idle");
+        _owner.SetAnimatorTrigger("Idle");
     }
     public override void OnExit()
     {
         base.OnExit();
-        _owner.MyAnimator.ResetTrigger("Idle");
+        _owner.ResetAnimatorTrigger("Idle");
     }
 
     /// <summary>

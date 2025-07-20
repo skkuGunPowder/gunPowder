@@ -42,6 +42,8 @@ public class PlayerJumpState : PlayerBaseState
 
     public override void OnExit()
     {
+        _owner.ResetAnimatorTrigger("Jump");
+        _owner.SetAnimatorTrigger("Land");
         base.OnExit();
     }
 
@@ -177,7 +179,7 @@ public class PlayerJumpState : PlayerBaseState
         if (_timer > LANDING_GRACE_TIME && _owner.CharacterController.isGrounded)
         {
             Debug.Log("착지!");
-            _owner.MyAnimator.SetTrigger("Land");
+            _owner.SetAnimatorTrigger("Land");
             _playerFSM.ChangeState<PlayerIdleState>();
             return false;
         }

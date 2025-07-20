@@ -23,13 +23,13 @@ public class PlayerBreakState : PlayerBaseState
         _owner.SetFacingDirection(-_moveDirection);
 
         // 애니메이션 재생
-        _owner.MyAnimator.SetTrigger("Break");
+        _owner.SetAnimatorTrigger("Break");
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        _owner.MyAnimator.ResetTrigger("Break");
+        _owner.ResetAnimatorTrigger("Break");
     }
 
     public override void Update()
@@ -64,7 +64,7 @@ public class PlayerBreakState : PlayerBaseState
                 }
                 else
                 {
-                    _owner.MyAnimator.SetTrigger("Fall");
+                    _owner.SetAnimatorTrigger("Fall");
                     _playerFSM.ChangeState<PlayerJumpState>();
                 }
             }

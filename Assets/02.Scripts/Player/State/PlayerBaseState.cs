@@ -39,7 +39,7 @@ public class PlayerBaseState : MonoState
 
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
-            _owner.MyAnimator.SetTrigger("Jump");
+            _owner.SetAnimatorTrigger("Jump");
             _playerFSM.ChangeState<PlayerJumpState>();
         }
     }
@@ -108,11 +108,11 @@ public class PlayerBaseState : MonoState
         if (_owner.PlayerStat.IsJumping)
         {
             // 점프 공격
-            _owner.MyAnimator.SetTrigger("JumpAttack");
+            _owner.SetAnimatorTrigger("JumpAttack");
         }
         else
         {
-            _owner.MyAnimator.SetTrigger("Attack");
+            _owner.SetAnimatorTrigger("Attack");
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
     }
@@ -135,11 +135,11 @@ public class PlayerBaseState : MonoState
         if (_owner.PlayerStat.IsJumping)
         {
             // 점프 공격
-            _owner.MyAnimator.SetTrigger("JumpAttack");
+            _owner.SetAnimatorTrigger("JumpAttack");
         }
         else
         {
-            _owner.MyAnimator.SetTrigger("Attack");
+            _owner.SetAnimatorTrigger("Attack");
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
     }
