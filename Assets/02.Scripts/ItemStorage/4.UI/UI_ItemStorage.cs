@@ -23,9 +23,9 @@ public class UI_ItemStorage : MonoBehaviour
         Refresh(_itemStorage.CurrentCategory);
     }
 
-    private void Refresh(EEquipmentSlot currentCategory)
+    private void Refresh(EItemType currentCategory)
     {
-        List<ItemDTO> itemList = _itemStorage.GetStoredItemList(currentCategory);
+        List<InventoryItem> itemList = _itemStorage.GetStoredItemList(currentCategory);
 
         // 아이템 슬롯 업데이트
         for (int i = 0; i < _itemSlotList.Count; i++)
@@ -69,7 +69,7 @@ public class UI_ItemStorage : MonoBehaviour
         }
 
         // 장착 슬롯 업데이트
-        ItemDTO EquippedItem = _itemStorage.GetEquppedItem(currentCategory);
+        InventoryItem EquippedItem = _itemStorage.GetEquppedItem(currentCategory);
         EquipmentSlot.Refresh(EquippedItem);
         if (_selectedSlot == null || !_selectedSlot.Item.IsEquipped)
         {
@@ -87,7 +87,7 @@ public class UI_ItemStorage : MonoBehaviour
         }
         else
         {
-            ItemNameText.text = _selectedSlot.Item.Name;
+            ItemNameText.text = _selectedSlot.Item.Item.Name;
         }
     }
 }

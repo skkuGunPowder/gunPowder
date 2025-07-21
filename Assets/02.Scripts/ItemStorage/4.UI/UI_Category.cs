@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class UI_Category : MonoBehaviour, ISelectable
 {
-    public EEquipmentSlot Category;
+    public EItemType Category;
 
     public GameObject SelectedIcon;
 
