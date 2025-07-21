@@ -4,6 +4,10 @@ public class BasicBomb : Bomb
 {
     public const string ID = "B0001";
 
+    protected override void Init()
+    {
+        SetStat(ID);
+    }
 
     protected override void Update()
     {
