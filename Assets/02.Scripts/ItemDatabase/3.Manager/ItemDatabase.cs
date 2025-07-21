@@ -42,7 +42,7 @@ public class ItemDatabase
 
     public T GetStat<T>(string itemID) where T: class, IStat
     {
-        if (_stats.TryGetValue(itemID, out IStat stat))
+        if (!_stats.TryGetValue(itemID, out IStat stat))
         {
             Debug.LogError($"{this} || 존재하지 않는 아이템이거나, 스탯이 존재하지 않는 아이템입니다. ({itemID})");
             return null;
