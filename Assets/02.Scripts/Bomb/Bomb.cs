@@ -4,9 +4,11 @@ public class Bomb : MonoBehaviour, IBomb
 {
     public GameObject ExplosionPrefab;
 
+    protected Rigidbody2D _rigidBody;
     protected BombStat _bombStat;
-    protected float _currentSpeed;
+    protected Transform _fireTransform;
     protected Vector3 _fireDirection;
+    protected float _currentSpeed;
 
     private float _fuzeTimer;
 
@@ -17,6 +19,11 @@ public class Bomb : MonoBehaviour, IBomb
 
     protected virtual void Update()
     {
+        if(_bombStat == null)
+        {
+            return;
+        }
+        
         _fuzeTimer += Time.deltaTime;
         if (_fuzeTimer >= _bombStat.FuzeTime)
         {
@@ -26,7 +33,7 @@ public class Bomb : MonoBehaviour, IBomb
 
     protected virtual void Init()
     {
-
+        _rigidBody = GetComponent<Rigidbody2D>();
     }
 
     protected void SetStat(string id)
@@ -34,9 +41,9 @@ public class Bomb : MonoBehaviour, IBomb
         _bombStat = ItemDatabase.Instance.GetStat<BombStat>(id);
     }
 
-    protected virtual void OnTriggerEnter(Collider other)
+    protected virtual void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.TryGetComponent(out Bomb otherBomb))
+        if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
             int otherPriority = otherBomb._bombStat.Priority;
             if (_bombStat.Priority <= otherPriority)

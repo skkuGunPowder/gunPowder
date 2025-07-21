@@ -14,6 +14,10 @@ public class PlayerIdleState : PlayerBaseState
         _owner.PlayerStat.JumpCount = 0;
         _owner.PlayerStat.ResetJumpDashCount();
 
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        velocity.x = 0f;
+        _owner.Rigidbody2D.linearVelocity = velocity;
+
 
         // 애니메이션 재생
         _owner.SetAnimatorTrigger("Idle");
@@ -118,9 +122,6 @@ public class PlayerIdleState : PlayerBaseState
     /// </summary>
     private void IdleMove()
     {
-        _owner.CharacterController.Move(new Vector3(0, -9f, 0));
-;
-
         // 이동키를 받으면 걷기 상태로 전환
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
         || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))

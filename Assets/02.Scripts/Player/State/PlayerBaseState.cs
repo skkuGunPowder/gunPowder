@@ -1,4 +1,5 @@
 using System;
+using RaycastPro.RaySensors2D;
 using RobustFSM.Base;
 using UnityEngine;
 
@@ -10,6 +11,10 @@ public class PlayerBaseState : MonoState
     private float _lastNormalBombTime = 0f;
     private float _lastSpecialBombTime = 0f;
 
+    public float BombCoolTime = 0.2f;
+    protected BoxRay2D _groundRay2D;
+
+
 
 
     public override void OnEnter()
@@ -17,6 +22,7 @@ public class PlayerBaseState : MonoState
         base.OnEnter();
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
+        _groundRay2D = _owner.GroundRay2D;
         Debug.Log($"Enter {this.GetType().Name} State");
 
         //
@@ -45,7 +51,8 @@ public class PlayerBaseState : MonoState
     // 하위에서 사용하고 싶은 것만 사용한다.
     protected virtual void JumpInput()
     {
-        if (_playerFSM.IsCurrentState<PlayerDashState>() || _playerFSM.IsCurrentState<PlayerJumpDashState>())
+        if (_playerFSM.IsCurrentState<PlayerDashState>() 
+        || _playerFSM.IsCurrentState<PlayerJumpDashState>())
             return;
 
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
@@ -55,22 +62,21 @@ public class PlayerBaseState : MonoState
         }
     }
 
-    // Raycast로 바닥 체크
-    protected virtual bool IsGrounded()
+    // 2D Raycast로 바닥 체크
+    protected virtual bool IsGrounded2D()
     {
-        float rayDistance = 0.2f;
-        Vector3 origin = _owner.transform.position;
-        var cc = _owner.GetComponent<CharacterController>();
-        if (cc != null)
+        if(_groundRay2D == null)
         {
-            rayDistance = cc.height / 2f + 0.1f;
+            return false;
         }
-        return Physics.Raycast(origin, Vector3.down, rayDistance);
+
+        _groundRay2D.Cast();
+        return _groundRay2D.Performed;
     }
 
     protected virtual bool CanNormalBomb()
     {
-        if(_owner.AttackTimer - _lastNormalBombTime < _owner.NormalBomb.BombCoolTime)
+        if(_owner.AttackTimer - _lastNormalBombTime < BombCoolTime)
         {
             return false;
         }
@@ -79,7 +85,7 @@ public class PlayerBaseState : MonoState
 
     protected virtual bool CanSpecialBomb()
     {
-        if(_owner.AttackTimer - _lastSpecialBombTime < _owner.SpecialBomb.BombCoolTime)
+        if(_owner.AttackTimer - _lastSpecialBombTime < BombCoolTime)
         {
             return false;
         }
@@ -107,14 +113,17 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void PlaceNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = Instantiate(_owner.NormalBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        bomb.GetComponent<Bomb>().PlaceBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -135,14 +144,82 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
+            
         }
         else
         {
-            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = Instantiate(_owner.NormalBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        bomb.GetComponent<Bomb>().ThrowBomb(bombSpawnPoint);
+
+        if (_owner.PlayerStat.IsJumping)
+        {
+            // 점프 공격
+            _owner.SetAnimatorTrigger("JumpAttack");
+        }
+        else
+        {
+            _owner.SetAnimatorTrigger("Attack");
+        }
+        
+        ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastNormalBombTime();
+    }
+
+    /// <summary>
+    /// 특수 폭탄을 배치하고 자동으로 Reset을 호출합니다.
+    /// </summary>
+    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void PlaceSpecialBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        Transform bombSpawnPoint;
+        if (spawnPoint.HasValue)
+        {
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
+        }
+        else
+        {
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
+        }
+        GameObject bomb = Instantiate(_owner.SpecialBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        bomb.GetComponent<Bomb>().PlaceBomb(bombSpawnPoint);
+
+        if (_owner.PlayerStat.IsJumping)
+        {
+            // 점프 공격
+            _owner.SetAnimatorTrigger("JumpAttack");
+        }
+        else
+        {
+            _owner.SetAnimatorTrigger("Attack");
+        }
+
+        ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastSpecialBombTime();
+    }
+
+    /// <summary>
+    /// 특수 폭탄을 던지고 자동으로 Reset을 호출합니다.
+    /// </summary>
+    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void ThrowSpecialBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        Transform bombSpawnPoint;
+        if (spawnPoint.HasValue)
+        {
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
+        }
+        else
+        {
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
+        }
+        GameObject bomb = Instantiate(_owner.SpecialBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        bomb.GetComponent<Bomb>().ThrowBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -154,42 +231,6 @@ public class PlayerBaseState : MonoState
             _owner.SetAnimatorTrigger("Attack");
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastNormalBombTime();
-    }
-
-    /// <summary>
-    /// 특수 폭탄을 배치하고 자동으로 Reset을 호출합니다.
-    /// </summary>
-    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
-    protected virtual void PlaceSpecialBomb(EBombSpawnPoint? spawnPoint = null)
-    {
-        if (spawnPoint.HasValue)
-        {
-            _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
-        }
-        else
-        {
-            _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint());
-        }
-        ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastSpecialBombTime();
-    }
-
-    /// <summary>
-    /// 특수 폭탄을 던지고 자동으로 Reset을 호출합니다.
-    /// </summary>
-    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
-    protected virtual void ThrowSpecialBomb(EBombSpawnPoint? spawnPoint = null)
-    {
-        if (spawnPoint.HasValue)
-        {
-            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
-        }
-        else
-        {
-            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
-        }
-        ResetGunPowderDecreaseWithoutAttackTimer();
         SetLastSpecialBombTime();
     }
 
@@ -199,14 +240,17 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowStraightNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = Instantiate(_owner.NormalBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        bomb.GetComponent<Bomb>().ThrowBombStraight(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -241,14 +285,17 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowStraightSpecialBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = Instantiate(_owner.SpecialBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        bomb.GetComponent<Bomb>().ThrowBombStraight(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {

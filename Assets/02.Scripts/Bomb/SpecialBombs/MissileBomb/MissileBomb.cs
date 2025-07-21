@@ -10,6 +10,8 @@ public class MissileBomb : Bomb
 
     protected override void Init()
     {
+        base.Init();
+        
         SetStat(ID);
         _timer = 0f;
     }
@@ -25,6 +27,8 @@ public class MissileBomb : Bomb
         }
 
         transform.position += _fireDirection * _currentSpeed * Time.deltaTime;
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(_fireTransform.forward, _fireTransform.up), 1);
+        
     }
 
     public override void PlaceBomb(Transform fireTransform)
@@ -34,7 +38,8 @@ public class MissileBomb : Bomb
 
     public override void ThrowBomb(Transform fireTransform)
     {
-        _fireDirection = fireTransform.right;
+        _fireTransform = fireTransform;
+        _fireDirection = _fireTransform.right;
         _currentSpeed = _bombStat.Speed;
     }
 
