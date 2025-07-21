@@ -154,7 +154,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D
                             {
                                 TriggerName = triggerName.GetValue(null) as string,
                                 TriggerType = scriptClass,
-                                AllTriggers = FindObjectsOfType(scriptClass).ToList(),
+                                AllTriggers = FindObjectsByType(scriptClass, FindObjectsSortMode.None).ToList(),
                                 TriggerCurrentIndex = 0
                             };
 

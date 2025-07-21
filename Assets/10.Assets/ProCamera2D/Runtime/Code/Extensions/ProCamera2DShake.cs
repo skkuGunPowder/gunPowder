@@ -17,7 +17,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D
             {
                 if (Equals(_instance, null))
                 {
-                    _instance = FindObjectOfType(typeof(ProCamera2DShake)) as ProCamera2DShake;
+                    _instance = FindFirstObjectByType<ProCamera2DShake>();
 
                     if (Equals(_instance, null))
                         throw new UnityException("ProCamera2D does not have a Shake extension.");

@@ -15,7 +15,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D
     public class ProCamera2D : MonoBehaviour, ISerializationCallbackReceiver
     {
 		public const string Title = "Pro Camera 2D";
-        public static readonly Version Version = new Version("2.9.7");
+        public static readonly Version Version = new Version("2.9.8");
 
         #region Inspector Variables
 
