@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using RaycastPro.RaySensors2D;
 
 public class Player : MonoBehaviour, IDamagable
 {
@@ -8,9 +9,9 @@ public class Player : MonoBehaviour, IDamagable
     private List<Animator> _myAnimatorList;
     public List<Animator> MyAnimatorList => _myAnimatorList;
 
+    private Rigidbody2D _rigidbody2D;
+    public Rigidbody2D Rigidbody2D => _rigidbody2D;
 
-    private CharacterController _characterController;
-    public CharacterController CharacterController => _characterController;
     private PlayerStat _playerStat;
     public PlayerStat PlayerStat => _playerStat;
 
@@ -44,6 +45,8 @@ public class Player : MonoBehaviour, IDamagable
 
     public event Action OnHit;
 
+    private BoxRay2D _groundRay2D;
+    public BoxRay2D GroundRay2D => _groundRay2D;
 
 
     // 테스트용
@@ -53,8 +56,9 @@ public class Player : MonoBehaviour, IDamagable
 
     private void Awake()
     {
-        _characterController = GetComponent<CharacterController>();
         _playerStat = GetComponent<PlayerStat>();
+        _rigidbody2D = GetComponent<Rigidbody2D>();
+        _groundRay2D = GetComponent<BoxRay2D>();
     }
 
     private void Update()

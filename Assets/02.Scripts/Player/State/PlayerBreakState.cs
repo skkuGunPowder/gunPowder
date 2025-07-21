@@ -37,8 +37,10 @@ public class PlayerBreakState : PlayerBaseState
     {
         _breakTimer += Time.deltaTime;
 
-        _owner.CharacterController.Move(new Vector3(_moveDirection, 0, 0)
-                                    * _owner.PlayerStat.MyMoveSpeed/2 * Time.deltaTime);
+        // Rigidbody2D 기반 이동 (브레이크 시 느리게 이동)
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        velocity.x = _moveDirection * _owner.PlayerStat.MyMoveSpeed / 2f;
+        _owner.Rigidbody2D.linearVelocity = velocity;
 
         // 브레이크 타임 내에 같은 방향 키가 한 번 더 눌리면 Run
         if(_doubleTapReady && _breakTimer <= _owner.PlayerStat.DoubleTapTime)
@@ -59,7 +61,7 @@ public class PlayerBreakState : PlayerBaseState
             }
             else
             {
-                if (_owner.CharacterController.isGrounded)
+                if (IsGrounded2D())
                 {
                     _playerFSM.ChangeState<PlayerIdleState>();  
                 }
