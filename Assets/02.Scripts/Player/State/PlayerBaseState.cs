@@ -126,6 +126,7 @@ public class PlayerBaseState : MonoState
             _owner.SetAnimatorTrigger("Attack");
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastNormalBombTime();
     }
 
     /// <summary>
@@ -153,6 +154,7 @@ public class PlayerBaseState : MonoState
             _owner.SetAnimatorTrigger("Attack");
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastNormalBombTime();
     }
 
     /// <summary>
@@ -170,6 +172,7 @@ public class PlayerBaseState : MonoState
             _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint());
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastSpecialBombTime();
     }
 
     /// <summary>
@@ -187,6 +190,7 @@ public class PlayerBaseState : MonoState
             _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastSpecialBombTime();
     }
 
     /// <summary>
@@ -228,6 +232,7 @@ public class PlayerBaseState : MonoState
         }
 
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastNormalBombTime();
     }
 
     /// <summary>
@@ -269,5 +274,6 @@ public class PlayerBaseState : MonoState
         }
         
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastSpecialBombTime();
     }
 }

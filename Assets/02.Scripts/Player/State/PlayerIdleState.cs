@@ -76,7 +76,6 @@ public class PlayerIdleState : PlayerBaseState
                     PlaceNormalBomb(EBombSpawnPoint.Left);
                 }
             }
-            SetLastNormalBombTime();
         }
     }
 
@@ -111,7 +110,6 @@ public class PlayerIdleState : PlayerBaseState
                     PlaceSpecialBomb(EBombSpawnPoint.Left);
                 }
             }
-            SetLastSpecialBombTime();
         }
     }
 

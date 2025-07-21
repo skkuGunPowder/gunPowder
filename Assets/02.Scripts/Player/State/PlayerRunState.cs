@@ -73,8 +73,8 @@ public class PlayerRunState : PlayerBaseState
             _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime,
              0, 0));
         }
-        else if (Input.GetKeyUp(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
-        || Input.GetKeyUp(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
+        else if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
+        || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
         {
             _playerFSM.ChangeState<PlayerBreakState>();
         }
