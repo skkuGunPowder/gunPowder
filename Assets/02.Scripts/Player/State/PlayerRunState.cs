@@ -23,25 +23,26 @@ public class PlayerRunState : PlayerBaseState
         _owner.PlayerStat.IsRunning = true;
 
         // 애니메이션 재생
-        // _owner.MyAnimator.SetTrigger("Run");
+        _owner.SetAnimatorTrigger("Run");
     }
 
     public override void OnExit()
     {
         base.OnExit();
+        _owner.ResetAnimatorTrigger("Run");
     }
 
     public override void Update()
     {
         base.Update();
 
+        RunAttack();
+
         bool flowControl = RunMove();
         if (!flowControl)
         {
             return;
         }
-
-        RunAttack();
     }
 
     private bool RunMove()
@@ -61,6 +62,7 @@ public class PlayerRunState : PlayerBaseState
         if (!isGrounded)
         {
             _owner.PlayerStat.IsFallingFromLedge = true;
+            _owner.SetAnimatorTrigger("Fall");
             _playerFSM.ChangeState<PlayerJumpState>();
             return false;
         }
@@ -94,15 +96,13 @@ public class PlayerRunState : PlayerBaseState
     {
         if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
-            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
-            SetLastNormalBombTime();
+            ThrowStraightNormalBomb();
             _playerFSM.ChangeState<PlayerRecoilState>();
             return;
         }
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
-            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
-            SetLastSpecialBombTime();
+            ThrowStraightSpecialBomb();
             _playerFSM.ChangeState<PlayerRecoilState>();
             return;
         }

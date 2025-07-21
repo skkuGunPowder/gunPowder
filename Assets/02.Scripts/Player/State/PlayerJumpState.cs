@@ -19,6 +19,8 @@ public class PlayerJumpState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+
+        _owner.PlayerStat.IsJumping = true;
         
         _gravity = -40f;
         _yVelocity = 0;
@@ -28,7 +30,8 @@ public class PlayerJumpState : PlayerBaseState
             _owner.PlayerStat.IsFallingFromLedge = false;
         }
         else if(!_playerFSM.IsPreviousState<PlayerJumpDashState>()
-            && !_playerFSM.IsPreviousState<PlayerRecoilState>())
+            && !_playerFSM.IsPreviousState<PlayerRecoilState>()
+            && !_playerFSM.IsPreviousState<PlayerBreakState>())
         {
             _owner.PlayerStat.IncrementJumpCount();
             _yVelocity = _owner.PlayerStat.JumpForce;
@@ -39,6 +42,8 @@ public class PlayerJumpState : PlayerBaseState
 
     public override void OnExit()
     {
+        _owner.ResetAnimatorTrigger("Jump");
+        _owner.SetAnimatorTrigger("Land");
         base.OnExit();
     }
 
@@ -174,6 +179,7 @@ public class PlayerJumpState : PlayerBaseState
         if (_timer > LANDING_GRACE_TIME && _owner.CharacterController.isGrounded)
         {
             Debug.Log("착지!");
+            _owner.SetAnimatorTrigger("Land");
             _playerFSM.ChangeState<PlayerIdleState>();
             return false;
         }
@@ -187,12 +193,12 @@ public class PlayerJumpState : PlayerBaseState
         {
             if(_owner.PlayerStat.IsRunning)
             {
-                _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+                ThrowStraightNormalBomb();
                 _playerFSM.ChangeState<PlayerRecoilState>();
             }
             else
             {
-                _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+                ThrowNormalBomb();
             }
             SetLastNormalBombTime();
         }
@@ -200,12 +206,12 @@ public class PlayerJumpState : PlayerBaseState
         {
             if(_owner.PlayerStat.IsRunning)
             {
-                _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+                ThrowStraightSpecialBomb();
                 _playerFSM.ChangeState<PlayerRecoilState>();
             }
             else
             {
-                _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+                ThrowSpecialBomb();
             }
             SetLastSpecialBombTime();
         }

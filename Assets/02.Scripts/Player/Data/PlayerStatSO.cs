@@ -34,6 +34,28 @@ public class PlayerStatSO : ScriptableObject
 
     [SerializeField] private float _recoilSpeed;
     public float RecoilSpeed => _recoilSpeed;
-    
+
+    [SerializeField] private int _maxGunPoderCount;
+    public int MaxGunPoderCount => _maxGunPoderCount;
+    [SerializeField] private float _gunPowderDecreaseTime;
+    public float GunPowderDecreaseTime => _gunPowderDecreaseTime;
+    [SerializeField] private int _attackPenaltyTime;
+    public int AttackPenaltyTime => _attackPenaltyTime;
+    [SerializeField] private int _attackPenaltyAmount;
+    public int AttackPenaltyAmount => _attackPenaltyAmount;
+
+    [Header("Die")]
+    [SerializeField]private int _dieExplosionDamage;
+    public int DieExplosionDamage => _dieExplosionDamage;
+    [SerializeField]private float _dieExplosionRadius;
+    public float DieExplosionRadius => _dieExplosionRadius;
+    [SerializeField]private float _dieExplosionForce;
+    public float DieExplosionForce => _dieExplosionForce;
+    [SerializeField] private float _invincibleTime;
+    public float InvincibleTime => _invincibleTime;
+
+    [Header("Damaged")]
+    [SerializeField] private float _damagedTime;
+    public float DamagedTime => _damagedTime;
     
 }

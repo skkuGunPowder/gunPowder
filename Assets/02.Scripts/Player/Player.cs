@@ -1,11 +1,14 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDamagable
 {
     [SerializeField]
-    private Animator _myAnimator;
-    public Animator MyAnimator => _myAnimator;
+    private List<Animator> _myAnimatorList;
+    public List<Animator> MyAnimatorList => _myAnimatorList;
+
+
     private CharacterController _characterController;
     public CharacterController CharacterController => _characterController;
     private PlayerStat _playerStat;
@@ -23,8 +26,29 @@ public class Player : MonoBehaviour
     private Bomb _specialBomb;
     public Bomb SpecialBomb => _specialBomb;
 
+    [Header("Timer")]
+    [SerializeField]
+    private float _attackTimer = 0f;
+    public float AttackTimer => _attackTimer;
+    [SerializeField]
+    private float _gunPowderDecreaseTimer = 0f;
+    public float GunPowderDecreaseTimer => _gunPowderDecreaseTimer;
+    [SerializeField]
+    private float _gunPowderDecreaseWithoutAttackTimer;
+    public float GunPowderDecreaseWithoutAttackTimer => _gunPowderDecreaseWithoutAttackTimer;
+
+    [Header("GunPowder")]
+    [SerializeField]
+    private float _gunPowderSpreadAngle = 90f;
+    private float _gunPowderSpreadDistance = 1.0f;
+
+    public event Action OnHit;
+
+
+
     // 테스트용
     public GameObject TestBomb;
+    public GameObject TestGunPowder;
 
     private void Awake()
     {
@@ -32,9 +56,98 @@ public class Player : MonoBehaviour
         _playerStat = GetComponent<PlayerStat>();
     }
 
+    private void Update()
+    {
+        _attackTimer += Time.deltaTime;
+
+        _gunPowderDecreaseTimer += Time.deltaTime;
+        DecreaseGunPowderPeriodically();
+
+        _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
+        DecreaseGunPowderWithoutAttack();
+    }
+
+    /// <summary>
+    /// 주기적으로 건파우더 감소
+    /// </summary>
+    private void DecreaseGunPowderPeriodically()
+    {
+        if (_gunPowderDecreaseTimer >= PlayerStat.GunPowderDecreaseTime)
+        {
+            _gunPowderDecreaseTimer = 0f;
+            _playerStat.DecreaseGunPowderCount(1);
+        }
+    }
+
+    /// <summary>
+    /// 공격을 일정시간 하지 않으면 건파우더 감소
+    /// </summary>
+    private void DecreaseGunPowderWithoutAttack()
+    {
+        if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
+        {
+            _gunPowderDecreaseWithoutAttackTimer = 0f;
+            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount);
+        }
+    }
+
+    /// <summary>
+    /// 공격을 하면 타이머 초기화
+    /// </summary>
+    public void ResetGunPowderDecreaseWithoutAttackTimer()
+    {
+        _gunPowderDecreaseWithoutAttackTimer = 0f;
+    }
+
+
     public void SetFacingDirection(int direction)
     {
         _playerStat.SetFacingDirection(direction);
+    }
+
+    public void TakeDamage(int damage, Vector3 attacker, bool isFallingOut)
+    {
+        // TODO: 피격 처리
+        // 피 달기
+        _playerStat.DecreaseGunPowderCount(damage);
+        // 폭탄 맞은 위치 반 대 방향으로 건파우터 낙출
+        ReleaseGunPowder(attacker, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+
+        // 피격 상태 돌입
+
+        // 피격 이벤트 발생
+        OnHit?.Invoke();
+    }
+
+    /// <summary>
+    /// 피격시 건파우더 흩뿌리기
+    /// </summary>
+    public void ReleaseGunPowder(Vector3 explosionOrigin, int count = 3, float spreadAngle = 30f,
+     float distance = 1.0f, bool isFallingOut = true)
+    {
+        Vector3 baseDir = (transform.position - explosionOrigin).normalized;
+
+        for (int i = 0; i < count; i++)
+        {
+            float angle = (i - (count - 1) / 2f) * spreadAngle;
+            Quaternion rot = Quaternion.AngleAxis(angle, Vector3.up);
+            Vector3 dir = rot * baseDir;
+            Vector3 spawnPos = transform.position + dir * distance;
+            spawnPos.z = 0f;
+            GunPowderBezierCurve gunPowder = Instantiate(TestGunPowder, spawnPos, Quaternion.identity).GetComponent<GunPowderBezierCurve>();
+
+            //TODO: isFallingout에 따라 뭔가 설정
+            if (isFallingOut)
+            {
+                gunPowder.GetComponent<GunPowderRelease>().enabled = true;
+                gunPowder.GetComponent<GunPowderBezierCurve>().enabled = false;
+            }
+            else
+            {
+                gunPowder.GetComponent<GunPowderRelease>().enabled = false;
+                gunPowder.GetComponent<GunPowderBezierCurve>().enabled = true;
+            }
+        }
     }
 
     /// <summary>
@@ -73,5 +186,21 @@ public class Player : MonoBehaviour
     public Transform GetBombSpawnPoint(EBombSpawnPoint spawnPoint)
     {
         return _bombSpawnPointList[(int)spawnPoint];
+    }
+
+    public void SetAnimatorTrigger(string triggerName)
+    {
+        foreach (Animator animator in _myAnimatorList)
+        {
+            animator.SetTrigger(triggerName);
+        }
+    }
+
+    public void ResetAnimatorTrigger(string triggerName)
+    {
+        foreach (Animator animator in _myAnimatorList)
+        {
+            animator.ResetTrigger(triggerName);
+        }
     }
 }

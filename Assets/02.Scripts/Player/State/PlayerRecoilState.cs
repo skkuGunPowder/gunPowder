@@ -30,11 +30,20 @@ public class PlayerRecoilState : PlayerBaseState
         {
             if(_owner.PlayerStat.IsJumping)
             {
+                _owner.SetAnimatorTrigger("Fall");
                 _playerFSM.ChangeState<PlayerJumpState>();
             }
             else
             {
-                _playerFSM.ChangeState<PlayerIdleState>();
+                if (IsGrounded())
+                {
+                    _playerFSM.ChangeState<PlayerIdleState>();  
+                }
+                else
+                {
+                    _owner.SetAnimatorTrigger("Fall");
+                    _playerFSM.ChangeState<PlayerJumpState>();
+                }
             }
             return;
         }
