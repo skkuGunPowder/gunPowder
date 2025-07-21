@@ -47,7 +47,8 @@ public class Player : MonoBehaviour, IDamagable
 
 
     // 테스트용
-    public GameObject TestBomb;
+    public GameObject NormalBombPrefab;
+    public GameObject SpecialBombPrefab;
     public GameObject TestGunPowder;
 
     private void Awake()

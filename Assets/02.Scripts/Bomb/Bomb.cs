@@ -17,6 +17,11 @@ public class Bomb : MonoBehaviour, IBomb
 
     protected virtual void Update()
     {
+        if(_bombStat == null)
+        {
+            return;
+        }
+        
         _fuzeTimer += Time.deltaTime;
         if (_fuzeTimer >= _bombStat.FuzeTime)
         {
