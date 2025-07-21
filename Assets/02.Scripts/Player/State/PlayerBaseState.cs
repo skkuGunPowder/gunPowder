@@ -18,12 +18,23 @@ public class PlayerBaseState : MonoState
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
         Debug.Log($"Enter {this.GetType().Name} State");
+
+        //
+        _owner.OnHit += HandleHit;
     }
 
     public override void OnExit()
     {
         base.OnExit();
         Debug.Log($"Exit {this.GetType().Name} State");
+
+        //
+        _owner.OnHit -= HandleHit;
+    }
+
+    protected virtual void HandleHit()
+    {
+        _playerFSM.ChangeState<PlayerDamagedState>();
     }
 
     public virtual void Update()
@@ -195,11 +206,25 @@ public class PlayerBaseState : MonoState
 
         if (_owner.PlayerStat.IsJumping)
         {
-            _owner.SetAnimatorTrigger("JumpStrongAttack");
+            if(Input.GetKey(KeyCode.UpArrow))
+            {
+                _owner.SetAnimatorTrigger("JumpUpStrongAttack");
+            }
+            else
+            {
+                _owner.SetAnimatorTrigger("JumpStrongAttack");
+            }
         }
         else
         {
-            _owner.SetAnimatorTrigger("StrongAttack");
+            if(Input.GetKey(KeyCode.UpArrow))
+            {
+                _owner.SetAnimatorTrigger("UpStrongAttack");
+            }
+            else
+            {
+                _owner.SetAnimatorTrigger("StrongAttack");
+            }
         }
 
         ResetGunPowderDecreaseWithoutAttackTimer();
@@ -222,11 +247,25 @@ public class PlayerBaseState : MonoState
 
         if (_owner.PlayerStat.IsJumping)
         {
-            _owner.SetAnimatorTrigger("JumpStrongAttack");
+            if(Input.GetKey(KeyCode.UpArrow))
+            {
+                _owner.SetAnimatorTrigger("JumpUpStrongAttack");
+            }
+            else
+            {
+                _owner.SetAnimatorTrigger("JumpStrongAttack");
+            }
         }
         else
         {
-            _owner.SetAnimatorTrigger("StrongAttack");
+            if(Input.GetKey(KeyCode.UpArrow))
+            {
+                _owner.SetAnimatorTrigger("UpStrongAttack");
+            }
+            else
+            {
+                _owner.SetAnimatorTrigger("StrongAttack");
+            }
         }
         
         ResetGunPowderDecreaseWithoutAttackTimer();

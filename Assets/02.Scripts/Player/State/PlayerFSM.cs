@@ -1,7 +1,5 @@
-using Assets.SimpleFSM.Demo.Scripts.States.Idle;
-using Photon.Realtime;
 using RobustFSM.Base;
-using UnityEngine;
+
 
 public class PlayerFSM : MonoFSM<Player>
 {
@@ -16,6 +14,7 @@ public class PlayerFSM : MonoFSM<Player>
         AddState<PlayerBreakState>();
         AddState<PlayerJumpDashState>();
         AddState<PlayerRecoilState>();
+        AddState<PlayerDamagedState>();
 
         // 초기 상태 설정
         SetInitialState<PlayerIdleState>();

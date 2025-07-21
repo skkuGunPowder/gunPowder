@@ -54,6 +54,8 @@ public class PlayerStatSO : ScriptableObject
     [SerializeField] private float _invincibleTime;
     public float InvincibleTime => _invincibleTime;
 
-    
+    [Header("Damaged")]
+    [SerializeField] private float _damagedTime;
+    public float DamagedTime => _damagedTime;
     
 }

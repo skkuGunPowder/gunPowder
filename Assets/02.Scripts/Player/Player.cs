@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class Player : MonoBehaviour, IDamagable
 {
@@ -40,6 +41,8 @@ public class Player : MonoBehaviour, IDamagable
     [SerializeField]
     private float _gunPowderSpreadAngle = 90f;
     private float _gunPowderSpreadDistance = 1.0f;
+
+    public event Action OnHit;
 
 
 
@@ -112,6 +115,8 @@ public class Player : MonoBehaviour, IDamagable
 
         // 피격 상태 돌입
 
+        // 피격 이벤트 발생
+        OnHit?.Invoke();
     }
 
     /// <summary>

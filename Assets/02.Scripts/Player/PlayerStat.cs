@@ -86,9 +86,13 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private int _currentPlayerDamagedCount;
     public int CurrentPlayerDamagedCount => _currentPlayerDamagedCount;
 
-        [SerializeField]
+    [SerializeField]
     private List<SpriteRenderer> _mySpriteRendererList;
     public List<SpriteRenderer> MySpriteREndererList => _mySpriteRendererList;
+
+    [Header("Damaged")]
+    [SerializeField] private float _damagedTime;
+    public float DamagedTime { get => _damagedTime; set => _damagedTime = value; }
 
     
     
@@ -122,6 +126,7 @@ public class PlayerStat : MonoBehaviour
             _dieExplosionRadius = _playerStatSO.DieExplosionRadius;
             _dieExplosionForce = _playerStatSO.DieExplosionForce;
             _invincibleTime = _playerStatSO.InvincibleTime;
+            _damagedTime = _playerStatSO.DamagedTime;
 
             // 나중에는 방 설정에 따라 달라질 수 있음.
             _currentPlayerGunPowderCount = _playerStatSO.MaxGunPoderCount;
