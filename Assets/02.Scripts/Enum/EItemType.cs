@@ -3,21 +3,9 @@ public enum EItemType
     Head,
     Face,
     Chest,
-    Back,
+    Cape,
     Bomb,
     BombSkin,
     BombVFX,
-    None
-}
-
-public enum EEquipmentSlot
-{
-    Head,
-    Face,
-    Chest,
-    Back,
-    Weapon,
-    WeaponSkin,
-    WeaponVFX,
     None
 }
