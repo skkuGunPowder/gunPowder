@@ -116,7 +116,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D
         public void CalculateParallaxObjectsOffset()
         {
             // Find all parallax objects
-            var parallaxObjs = FindObjectsOfType<ProCamera2DParallaxObject>();
+            var parallaxObjs = FindObjectsByType<ProCamera2DParallaxObject>(FindObjectsSortMode.None);
 
             // Create dictionary that links Unity layers to ProCamera2D parallax layers
             var layersDic = new Dictionary<int, ProCamera2DParallaxLayer>();

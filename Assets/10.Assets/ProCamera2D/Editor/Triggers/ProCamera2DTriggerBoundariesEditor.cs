@@ -156,8 +156,8 @@ namespace Com.LuisPedroFonseca.ProCamera2D
 
             if(proCamera2DTriggerBoundaries._setAsStartingBoundaries)
             {
-                var allBoundariesTriggers = FindObjectsOfType(typeof(ProCamera2DTriggerBoundaries));
-                foreach (ProCamera2DTriggerBoundaries trigger in allBoundariesTriggers) 
+                var allBoundariesTriggers = FindObjectsByType<ProCamera2DTriggerBoundaries>(FindObjectsSortMode.None);
+                foreach (var trigger in allBoundariesTriggers) 
                 {
                     trigger._setAsStartingBoundaries = false;
                 }

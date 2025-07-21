@@ -153,7 +153,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D
 				_numericBoundaries = ProCamera2D.GetComponentInChildren<ProCamera2DNumericBoundaries>();
 
 			if (_numericBoundaries == null)
-				_numericBoundaries = FindObjectOfType<ProCamera2DNumericBoundaries>();
+				_numericBoundaries = FindFirstObjectByType<ProCamera2DNumericBoundaries>();
 
 			if (_numericBoundaries == null)
 				UseNumericBoundaries = false;
