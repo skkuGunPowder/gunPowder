@@ -37,9 +37,8 @@ public class PlayerNormalRecoilState : PlayerBaseState
         float yBounce = Mathf.Sin(t * Mathf.PI * 2f) * _yVelocitySpeed; 
 
         // 최종 이동 벡터
-        Vector3 recoilMove = new Vector3(-_owner.PlayerStat.FacingDirection * (baseSpeed + oscillation), yBounce, 0);
-
-        _owner.CharacterController.Move(recoilMove * Time.deltaTime);
+        Vector2 recoilMove = new Vector2(-_owner.PlayerStat.FacingDirection * (baseSpeed + oscillation), yBounce);
+        _owner.Rigidbody2D.linearVelocity = recoilMove;
         
         // 시간이 지나면 아이들 상태로
         if(_recoilTimer >= _owner.PlayerStat.NormalRecoilTime)
@@ -51,7 +50,7 @@ public class PlayerNormalRecoilState : PlayerBaseState
             }
             else
             {
-                if (IsGrounded())
+                if (IsGrounded2D())
                 {
                     _playerFSM.ChangeState<PlayerIdleState>();  
                 }

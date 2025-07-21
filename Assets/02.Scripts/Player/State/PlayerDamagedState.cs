@@ -28,7 +28,7 @@ public class PlayerDamagedState : PlayerBaseState
 
         if(_timer >= _owner.PlayerStat.DamagedTime)
         {
-            if(IsGrounded())
+            if(IsGrounded2D())
             {
                 _playerFSM.ChangeState<PlayerIdleState>();
                 return;

@@ -1,4 +1,5 @@
 using System;
+using RaycastPro.RaySensors2D;
 using RobustFSM.Base;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ public class PlayerBaseState : MonoState
     private float _lastSpecialBombTime = 0f;
 
     public float BombCoolTime = 0.2f;
+    protected BoxRay2D _groundRay2D;
+
 
 
 
@@ -19,6 +22,7 @@ public class PlayerBaseState : MonoState
         base.OnEnter();
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
+        _groundRay2D = _owner.GroundRay2D;
         Debug.Log($"Enter {this.GetType().Name} State");
 
         //
@@ -47,7 +51,8 @@ public class PlayerBaseState : MonoState
     // 하위에서 사용하고 싶은 것만 사용한다.
     protected virtual void JumpInput()
     {
-        if (_playerFSM.IsCurrentState<PlayerDashState>() || _playerFSM.IsCurrentState<PlayerJumpDashState>())
+        if (_playerFSM.IsCurrentState<PlayerDashState>() 
+        || _playerFSM.IsCurrentState<PlayerJumpDashState>())
             return;
 
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
@@ -57,17 +62,16 @@ public class PlayerBaseState : MonoState
         }
     }
 
-    // Raycast로 바닥 체크
-    protected virtual bool IsGrounded()
+    // 2D Raycast로 바닥 체크
+    protected virtual bool IsGrounded2D()
     {
-        float rayDistance = 0.2f;
-        Vector3 origin = _owner.transform.position;
-        var cc = _owner.GetComponent<CharacterController>();
-        if (cc != null)
+        if(_groundRay2D == null)
         {
-            rayDistance = cc.height / 2f + 0.1f;
+            return false;
         }
-        return Physics.Raycast(origin, Vector3.down, rayDistance);
+
+        _groundRay2D.Cast();
+        return _groundRay2D.Performed;
     }
 
     protected virtual bool CanNormalBomb()

@@ -8,7 +8,7 @@ public class PlayerJumpState : PlayerBaseState
     private float _yVelocity = 0f;
     private float _xVelocity = 0f;
     private float _timer = 0f;
-    private const float LANDING_GRACE_TIME = 0.1f;
+    private const float LANDING_GRACE_TIME = 0.2f;
 
     // 키 릴리즈 타이머 추가
     private float _keyReleaseTimer = 0f;
@@ -85,38 +85,33 @@ public class PlayerJumpState : PlayerBaseState
         // 좌우 이동 - 러닝 상태에 따른 처리
         if (_owner.PlayerStat.IsRunning)
         {
-            // 러닝 상태일 때의 이동 처리
             if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1 || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
             {
-                _keyReleaseTimer = 0; // 키를 누르고 있으면 타이머 리셋
+                _keyReleaseTimer = 0;
                 _xVelocity = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.RunSpeed;
             }
             else if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
             {
-                // 반대 방향키를 누르면 즉시 러닝 상태 해제
                 _owner.PlayerStat.IsRunning = false;
                 _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
-                _keyReleaseTimer = 0; // 타이머도 리셋
+                _keyReleaseTimer = 0;
             }
             else
             {
                 _keyReleaseTimer += Time.deltaTime;
                 if (_keyReleaseTimer >= _keyReleaseThreshold)
                 {
-                    // 키 릴리즈 시간이 지나면 러닝 상태 해제
                     _owner.PlayerStat.IsRunning = false;
                     _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
                 }
                 else
                 {
-                    // 관성 유지
                     _xVelocity = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.RunSpeed;
                 }
             }
         }
         else
         {
-            // 일반 점프 상태일 때의 이동 처리
             if (Input.GetKey(KeyCode.RightArrow))
             {
                 if (_owner.PlayerStat.FacingDirection == -1)
@@ -144,24 +139,31 @@ public class PlayerJumpState : PlayerBaseState
             _xVelocity *= _owner.PlayerStat.MyMoveSpeed;
         }
 
-        _owner.CharacterController.Move(new Vector3(_xVelocity, _yVelocity, 0) * Time.deltaTime);
+        // Rigidbody2D 기반 이동 적용
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        velocity.x = _xVelocity;
+        velocity.y = _yVelocity;
+        _owner.Rigidbody2D.linearVelocity = velocity;
 
         // 더블 점프
+        
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
             _owner.PlayerStat.IncrementJumpCount();
             _yVelocity = _owner.PlayerStat.JumpForce;
+            // 점프 시 y속도 갱신
+            velocity = _owner.Rigidbody2D.linearVelocity;
+            velocity.y = _yVelocity;
+            _owner.Rigidbody2D.linearVelocity = velocity;
         }
 
-        // 방향키 더블 클릭 체크
-        // 점프 대쉬상태로 전환
-        // 방향키 더블탭 체크 (점프 대쉬)
+        // 방향키 더블 클릭 체크 (점프 대쉬)
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
                 Debug.Log("점프 중 왼쪽 더블탭 - 점프 대쉬 상태로 전환");
-                _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
+                _playerFSM.ChangeState<PlayerJumpDashState>();
                 return false;
             }
             _lastLeftTapTime = Time.time;
@@ -171,13 +173,14 @@ public class PlayerJumpState : PlayerBaseState
             if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
                 Debug.Log("점프 중 오른쪽 더블탭 - 점프 대쉬 상태로 전환");
-                _playerFSM.ChangeState<PlayerJumpDashState>(); // 점프 대쉬 상태로 전환
+                _playerFSM.ChangeState<PlayerJumpDashState>();
+                return false;
             }
             _lastRightTapTime = Time.time;
         }
 
-        // 착지 체크 (유예 시간 이후에만)
-        if (_timer > LANDING_GRACE_TIME && _owner.CharacterController.isGrounded)
+        // 착지 체크 (유예 시간 이후에만, 2D Raycast 사용)
+        if (_timer > LANDING_GRACE_TIME && IsGrounded2D())
         {
             Debug.Log("착지!");
             _owner.SetAnimatorTrigger("Land");
@@ -187,6 +190,7 @@ public class PlayerJumpState : PlayerBaseState
 
         return true;
     }
+
 
     private void JumpAttack()
     {
