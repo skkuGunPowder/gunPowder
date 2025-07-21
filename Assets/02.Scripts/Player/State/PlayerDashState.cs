@@ -16,11 +16,12 @@ public class PlayerDashState : PlayerBaseState
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
 
         // 애니메이션 재생
-        // _owner.MyAnimator.SetTrigger("Dash");
+        _owner.SetAnimatorTrigger("Dash");
     }
     public override void OnExit()
     {
         base.OnExit();
+        _owner.ResetAnimatorTrigger("Dash");
     }
 
     /// <summary>
@@ -70,6 +71,7 @@ public class PlayerDashState : PlayerBaseState
                 else
                 {
                     _owner.PlayerStat.IsFallingFromLedge = true;
+                    _owner.SetAnimatorTrigger("Fall");
                     _playerFSM.ChangeState<PlayerJumpState>();
                     return;
                 }

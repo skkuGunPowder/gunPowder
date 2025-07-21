@@ -26,7 +26,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D
                 return;
                 
             if (ProCamera2DRails == null)
-                ProCamera2DRails = FindObjectOfType<ProCamera2DRails>();
+                ProCamera2DRails = FindFirstObjectByType<ProCamera2DRails>();
 
             if (ProCamera2DRails == null)
                 Debug.LogWarning("Rails extension couldn't be found on ProCamera2D. Please enable it to use this trigger.");

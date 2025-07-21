@@ -20,15 +20,17 @@ public class PlayerBreakState : PlayerBaseState
         // 플레이어 상태
         _owner.PlayerStat.IsRunning = false;
 
-        _owner.SetFacingDirection(-_moveDirection);
+        
 
         // 애니메이션 재생
-        // _owner.MyAnimator.SetTrigger("Break");
+        _owner.SetAnimatorTrigger("Break");
     }
 
     public override void OnExit()
     {
         base.OnExit();
+        _owner.SetFacingDirection(-_moveDirection);
+        _owner.ResetAnimatorTrigger("Break");
     }
 
     public override void Update()
@@ -41,8 +43,8 @@ public class PlayerBreakState : PlayerBaseState
         // 브레이크 타임 내에 같은 방향 키가 한 번 더 눌리면 Run
         if(_doubleTapReady && _breakTimer <= _owner.PlayerStat.DoubleTapTime)
         {
-            if(Input.GetKeyDown(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1 
-            || Input.GetKeyDown(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
+            if(Input.GetKeyDown(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 
+            || Input.GetKeyDown(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
             {
                 _isDoubleTapped = true;
                 _doubleTapReady = false; // 더 이상 체크하지 않음
@@ -57,7 +59,15 @@ public class PlayerBreakState : PlayerBaseState
             }
             else
             {
-                _playerFSM.ChangeState<PlayerIdleState>();
+                if (_owner.CharacterController.isGrounded)
+                {
+                    _playerFSM.ChangeState<PlayerIdleState>();  
+                }
+                else
+                {
+                    _owner.SetAnimatorTrigger("Fall");
+                    _playerFSM.ChangeState<PlayerJumpState>();
+                }
             }
         }
     }

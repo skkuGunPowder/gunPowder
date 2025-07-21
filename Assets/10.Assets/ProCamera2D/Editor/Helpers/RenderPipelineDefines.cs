@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 
@@ -54,8 +55,8 @@ namespace Com.LuisPedroFonseca.ProCamera2D
  
             List<string> defined;
             var platform = EditorUserBuildSettings.selectedBuildTargetGroup;
- 
-            originalDefineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(platform);
+
+            originalDefineSymbols = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(platform));
             defined = originalDefineSymbols.Split(';').Where(x => !String.IsNullOrWhiteSpace(x)).ToList();
 
             void AppendRemoveTag(bool stat, string tag)
@@ -72,7 +73,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D
             newDefineSymbols = string.Join(";", defined);
             if(originalDefineSymbols != newDefineSymbols)
             {
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(platform, newDefineSymbols);
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(platform), newDefineSymbols);
             }
         }
     }

@@ -3,14 +3,14 @@ using UnityEngine.UI;
 
 public class UI_EquipmentSlot : MonoBehaviour, ISelectable
 {
-    public ItemDTO Item;
+    public InventoryItem Item;
 
     public Image ItemIcon;
     public Image EquippedIcon;
     public Image SelectedIcon;
 
 
-    public void Refresh(ItemDTO item)
+    public void Refresh(InventoryItem item)
     {
         if (item == null)
         {

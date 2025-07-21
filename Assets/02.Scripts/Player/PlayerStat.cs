@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
@@ -40,6 +41,11 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private float _recoilSpeed;
     public float RecoilSpeed { get => _recoilSpeed; set => _recoilSpeed = value; }
 
+    [SerializeField] private float _normalRecoilTime;
+    public float NormalRecoilTime { get => _normalRecoilTime; set => _normalRecoilTime = value; }
+    [SerializeField] private float _normalRecoilSpeed;
+    public float NormalRecoilSpeed { get => _normalRecoilSpeed; set => _normalRecoilSpeed = value; }
+
 
 
     [Header("Player State Stats")]
@@ -58,6 +64,45 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private int _facingDirection = 1;
     public int FacingDirection { get => _facingDirection; set => _facingDirection = value; }
 
+    [Header("Player Attributes")]
+    [SerializeField] private float _gunPowderDecreaseTime;
+    public float GunPowderDecreaseTime { get => _gunPowderDecreaseTime; set => _gunPowderDecreaseTime = value; }
+    [SerializeField] private int _attackPenaltyTime;
+    public int AttackPenaltyTime { get => _attackPenaltyTime; set => _attackPenaltyTime = value; }
+
+    [SerializeField] private int _attackPenaltyAmount;
+    public int AttackPenaltyAmount { get => _attackPenaltyAmount; set => _attackPenaltyAmount = value; }
+    
+
+    [Header("Die")]
+    [SerializeField] private int _dieExplosionDamage;
+    public int DieExplosionDamage { get => _dieExplosionDamage; set => _dieExplosionDamage = value; }
+    [SerializeField] private float _dieExplosionRadius;
+    public float DieExplosionRadius { get => _dieExplosionRadius; set => _dieExplosionRadius = value; }
+    [SerializeField] private float _dieExplosionForce;
+    public float DieExplosionForce { get => _dieExplosionForce; set => _dieExplosionForce = value; }
+    [SerializeField] private float _invincibleTime;
+    public float InvincibleTime { get => _invincibleTime; set => _invincibleTime = value; }
+
+    [Header("Current Player")]
+    // 현재 플레이어가 가지고 있는 수치
+    [SerializeField] private int _currentPlayerGunPowderCount;
+    public int CurrentPlayerGunPowderCount => _currentPlayerGunPowderCount;    
+    [SerializeField] private int _currentPlayerDamagedCount;
+    public int CurrentPlayerDamagedCount => _currentPlayerDamagedCount;
+
+    [SerializeField]
+    private List<SpriteRenderer> _mySpriteRendererList;
+    public List<SpriteRenderer> MySpriteREndererList => _mySpriteRendererList;
+
+    [Header("Damaged")]
+    [SerializeField] private float _damagedTime;
+    public float DamagedTime { get => _damagedTime; set => _damagedTime = value; }
+
+    
+    
+    
+    
     public bool IsFallingFromLedge = false;
 
     void Start()
@@ -79,12 +124,37 @@ public class PlayerStat : MonoBehaviour
             _maxJumpCount = _playerStatSO.MaxJumpCount;
             _recoilTime = _playerStatSO.RecoilTime;
             _recoilSpeed = _playerStatSO.RecoilSpeed;
+            _normalRecoilTime = _playerStatSO.NormalRecoilTime;
+            _normalRecoilSpeed = _playerStatSO.NormalRecoilSpeed;
+            _attackPenaltyTime = _playerStatSO.AttackPenaltyTime;
+            _attackPenaltyAmount = _playerStatSO.AttackPenaltyAmount;
+            _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;
+            _dieExplosionDamage = _playerStatSO.DieExplosionDamage;
+            _dieExplosionRadius = _playerStatSO.DieExplosionRadius;
+            _dieExplosionForce = _playerStatSO.DieExplosionForce;
+            _invincibleTime = _playerStatSO.InvincibleTime;
+            _damagedTime = _playerStatSO.DamagedTime;
+
+            // 나중에는 방 설정에 따라 달라질 수 있음.
+            _currentPlayerGunPowderCount = _playerStatSO.MaxGunPoderCount;
+            _currentPlayerDamagedCount = 0;
         }
     }
 
     public void SetFacingDirection(int direction)
     {
         _facingDirection = direction;
+        foreach (SpriteRenderer spriteRenderer in _mySpriteRendererList)
+        {
+            if (_facingDirection == 1)
+            {
+                spriteRenderer.flipX = false;
+            }
+            else
+            {
+                spriteRenderer.flipX = true;
+            }
+        }
     }
 
     public void ResetJumpCount()
@@ -116,4 +186,16 @@ public class PlayerStat : MonoBehaviour
     {
         _jumpDashCount = 0;
     }
+
+    public void IncreseGunPowderCount(int amount)
+    {
+        _currentPlayerGunPowderCount += amount;
+    }
+
+    public void DecreaseGunPowderCount(int amount)
+    {
+        _currentPlayerGunPowderCount -= amount;
+    }
+
+    
 }
