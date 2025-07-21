@@ -638,6 +638,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1991507868
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1991507870}
+  - component: {fileID: 1991507869}
+  m_Layer: 0
+  m_Name: FireBaseManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1991507869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991507868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b833188fe70082a4a8b2223700f44978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1991507870
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991507868}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2144177925
 GameObject:
   m_ObjectHideFlags: 0
@@ -806,6 +850,14 @@ PrefabInstance:
       propertyPath: TestGunPowder
       value: 
       objectReference: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
+    - target: {fileID: 4130130019619308656, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: NormalBombPrefab
+      value: 
+      objectReference: {fileID: 3001153516144104530, guid: b3fb438e801506a4ab38467990bf3887, type: 3}
+    - target: {fileID: 4130130019619308656, guid: 193bcf17433e98644b103e55f8276e53, type: 3}
+      propertyPath: SpecialBombPrefab
+      value: 
+      objectReference: {fileID: 2493808269564610583, guid: c6c3d386220973f4db5354405d7a56fb, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -822,3 +874,4 @@ SceneRoots:
   - {fileID: 2913345949144442835}
   - {fileID: 939527012}
   - {fileID: 1037970232}
+  - {fileID: 1991507870}
