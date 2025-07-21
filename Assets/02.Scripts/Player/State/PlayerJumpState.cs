@@ -200,7 +200,6 @@ public class PlayerJumpState : PlayerBaseState
             {
                 ThrowNormalBomb();
             }
-            SetLastNormalBombTime();
         }
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
@@ -213,7 +212,6 @@ public class PlayerJumpState : PlayerBaseState
             {
                 ThrowSpecialBomb();
             }
-            SetLastSpecialBombTime();
         }
     }
 } 

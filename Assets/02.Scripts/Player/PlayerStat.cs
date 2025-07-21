@@ -41,6 +41,11 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private float _recoilSpeed;
     public float RecoilSpeed { get => _recoilSpeed; set => _recoilSpeed = value; }
 
+    [SerializeField] private float _normalRecoilTime;
+    public float NormalRecoilTime { get => _normalRecoilTime; set => _normalRecoilTime = value; }
+    [SerializeField] private float _normalRecoilSpeed;
+    public float NormalRecoilSpeed { get => _normalRecoilSpeed; set => _normalRecoilSpeed = value; }
+
 
 
     [Header("Player State Stats")]
@@ -119,6 +124,8 @@ public class PlayerStat : MonoBehaviour
             _maxJumpCount = _playerStatSO.MaxJumpCount;
             _recoilTime = _playerStatSO.RecoilTime;
             _recoilSpeed = _playerStatSO.RecoilSpeed;
+            _normalRecoilTime = _playerStatSO.NormalRecoilTime;
+            _normalRecoilSpeed = _playerStatSO.NormalRecoilSpeed;
             _attackPenaltyTime = _playerStatSO.AttackPenaltyTime;
             _attackPenaltyAmount = _playerStatSO.AttackPenaltyAmount;
             _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;

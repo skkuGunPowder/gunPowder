@@ -162,10 +162,14 @@ public class PlayerWalkState : PlayerBaseState
         if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
             ThrowNormalBomb();
+            _playerFSM.ChangeState<PlayerNormalRecoilState>();
+            return;
         }
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
             ThrowSpecialBomb();
+            _playerFSM.ChangeState<PlayerNormalRecoilState>();
+            return;
         }
     }
 }
