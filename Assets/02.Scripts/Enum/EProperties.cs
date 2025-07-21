@@ -8,6 +8,7 @@ public enum EProperties
     DeclinePowder,
     IsLocked,
     Password,
+    PlayerList,
     
     Count
 }

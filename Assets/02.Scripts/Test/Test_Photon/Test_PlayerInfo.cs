@@ -1,8 +1,21 @@
+using System;
 using Photon.Pun;
+using RaycastPro.RaySensors2D;
 using UnityEngine;
 
 public class Test_PlayerInfo : MonoBehaviour
 {
+    public BasicRay2D Ray2D;
+
+
+    public void Update()
+    {
+        if (Ray2D.Cast())
+        {
+            
+        }
+    }
+
     private void Awake()
     {
         Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"]);

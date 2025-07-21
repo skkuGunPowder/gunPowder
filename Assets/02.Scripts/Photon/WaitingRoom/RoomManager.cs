@@ -10,6 +10,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
 {
     public static RoomManager Instance;
     private Room _room;
+    public Transform SpawnPoint;
     
     //리스트로 정보칸 들어가게 하기 => 플레이어 칸 정하기
     private List<int> _playerSlotList;
@@ -70,6 +71,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     private void Init()
     {
         _initialized = true;
+        GeneratePlayer();
         SetRoom();
         
         if (PhotonNetwork.IsMasterClient)
@@ -82,7 +84,11 @@ public class RoomManager : MonoBehaviourPunCallbacks
         Debug.Log($"{PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"]}");
         SetCurrentMap();
     }
-    
+
+    private void GeneratePlayer()
+    {
+        PhotonNetwork.Instantiate("PlayerTest", SpawnPoint.position, Quaternion.identity, 0);
+    }
     // 플레이어가 레디를 했는지 체크했는지 알아보는 커스텀 프로퍼티
     private void SetReady()
     {
@@ -212,6 +218,11 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public void UpdateSlots(int[] actorNumbers)
     {
         _playerSlotList = new List<int>(actorNumbers);
+        Hashtable playerList = new Hashtable()
+        {
+            {EProperties.PlayerList.ToString(), _playerSlotList.ToArray()}
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(playerList);
         OnDataChanged?.Invoke();
     }
 
