@@ -31,6 +31,7 @@ public class PlayerJumpState : PlayerBaseState
         }
         else if(!_playerFSM.IsPreviousState<PlayerJumpDashState>()
             && !_playerFSM.IsPreviousState<PlayerRecoilState>()
+            && !_playerFSM.IsPreviousState<PlayerNormalRecoilState>()
             && !_playerFSM.IsPreviousState<PlayerBreakState>())
         {
             _owner.PlayerStat.IncrementJumpCount();
