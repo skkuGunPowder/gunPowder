@@ -133,7 +133,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.SetFacingDirection(direction);
     }
 
-    public void TakeDamage(int damage, Vector3 attacker, bool isFallingOut)
+    public void TakeDamage(int damage, Transform attacker, bool isFallingOut)
     {
         // TODO: 피격 처리
         // 피 달기
@@ -152,10 +152,10 @@ public class Player : MonoBehaviourPun, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
-    public void ReleaseGunPowder(Vector3 explosionOrigin, int count = 3, float spreadAngle = 30f,
+    public void ReleaseGunPowder(Transform explosionOrigin, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
-        Vector3 baseDir = (transform.position - explosionOrigin).normalized;
+        Vector3 baseDir = (transform.position - explosionOrigin.position).normalized;
 
         for (int i = 0; i < count; i++)
         {
