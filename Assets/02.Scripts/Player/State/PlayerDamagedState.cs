@@ -1,3 +1,4 @@
+using Photon.Pun;
 using RobustFSM.Base;
 using UnityEngine;
 
@@ -11,16 +12,16 @@ public class PlayerDamagedState : PlayerBaseState
 
         _timer = 0f;
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Hit");
+        _owner.RPC_SetAnimatorTrigger("Hit");
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        _owner.ResetAnimatorTrigger("Hit");
+        _owner.RPC_ResetAnimatorTrigger("Hit");
     }
 
-    public override void Update()
+    public override void MineUpdate()
     {
         // 피격 시간 로직
         // 피격 시간이 끝나면 피격 상태 종료

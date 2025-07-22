@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -100,7 +101,7 @@ public class PlayerStat : MonoBehaviour
     public float DamagedTime { get => _damagedTime; set => _damagedTime = value; }
 
     
-    
+    public event Action OnGunPowderEmpty;
     
     
     public bool IsFallingFromLedge = false;
@@ -110,7 +111,7 @@ public class PlayerStat : MonoBehaviour
         InitializeStats();
     }
 
-    private void InitializeStats()
+    public void InitializeStats()
     {
         if (_playerStatSO != null)
         {
@@ -195,7 +196,21 @@ public class PlayerStat : MonoBehaviour
     public void DecreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount -= amount;
+        /*
+        if(_currentPlayerGunPowderCount <= 0)
+        {
+            _currentPlayerGunPowderCount = 0;
+            OnGunPowderEmpty?.Invoke();
+        }*/
     }
 
-    
+    public void IncreseDamagedCount()
+    {
+        _currentPlayerDamagedCount++;
+    }
+
+    public void ResetDamagedCount()
+    {
+        _currentPlayerDamagedCount = 0;
+    }
 }

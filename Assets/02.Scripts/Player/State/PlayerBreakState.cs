@@ -23,17 +23,17 @@ public class PlayerBreakState : PlayerBaseState
         
 
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Break");
+        _owner.RPC_SetAnimatorTrigger("Break");
     }
 
     public override void OnExit()
     {
         base.OnExit();
         _owner.SetFacingDirection(-_moveDirection);
-        _owner.ResetAnimatorTrigger("Break");
+        _owner.RPC_ResetAnimatorTrigger("Break");
     }
 
-    public override void Update()
+    public override void MineUpdate()
     {
         _breakTimer += Time.deltaTime;
 

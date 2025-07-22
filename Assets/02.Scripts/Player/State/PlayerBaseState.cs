@@ -1,4 +1,5 @@
 using System;
+using Photon.Pun;
 using RaycastPro.RaySensors2D;
 using RobustFSM.Base;
 using UnityEngine;
@@ -13,6 +14,10 @@ public class PlayerBaseState : MonoState
 
     public float BombCoolTime = 0.2f;
     protected BoxRay2D _groundRay2D;
+
+    protected float _normalRecoilForce = 10f;
+    protected float _strongRecoilForce = 20f;
+    protected float _yRecoilForce = 5f;
 
 
 
@@ -43,11 +48,18 @@ public class PlayerBaseState : MonoState
         _playerFSM.ChangeState<PlayerDamagedState>();
     }
 
-    public virtual void Update()
+    public virtual void MineUpdate()
     {
         JumpInput();
     }
 
+    private void Update()
+    {
+        if(_owner.PhotonView.IsMine)
+        {
+            MineUpdate();
+        }
+    }
     // 하위에서 사용하고 싶은 것만 사용한다.
     protected virtual void JumpInput()
     {
@@ -122,17 +134,17 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = Instantiate(_owner.NormalBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        GameObject bomb = InstantiateBomb(_owner.NormalBombPrefab, bombSpawnPoint);
         bomb.GetComponent<Bomb>().PlaceBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             // 점프 공격
-            _owner.SetAnimatorTrigger("JumpAttack");
+            _owner.RPC_SetAnimatorTrigger("PlaceAttack");
         }
         else
         {
-            _owner.SetAnimatorTrigger("Attack");
+            _owner.RPC_SetAnimatorTrigger("PlaceAttack");
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
         SetLastNormalBombTime();
@@ -154,19 +166,20 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = Instantiate(_owner.NormalBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        GameObject bomb = InstantiateBomb(_owner.NormalBombPrefab, bombSpawnPoint);
         bomb.GetComponent<Bomb>().ThrowBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             // 점프 공격
-            _owner.SetAnimatorTrigger("JumpAttack");
+            _owner.RPC_SetAnimatorTrigger("JumpAttack");
         }
         else
         {
-            _owner.SetAnimatorTrigger("Attack");
+            _owner.RPC_SetAnimatorTrigger("Attack");
         }
         
+        ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
         ResetGunPowderDecreaseWithoutAttackTimer();
         SetLastNormalBombTime();
     }
@@ -186,17 +199,17 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = Instantiate(_owner.SpecialBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        GameObject bomb = InstantiateBomb(_owner.SpecialBombPrefab, bombSpawnPoint);
         bomb.GetComponent<Bomb>().PlaceBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             // 점프 공격
-            _owner.SetAnimatorTrigger("JumpAttack");
+            _owner.RPC_SetAnimatorTrigger("JumpAttack");
         }
         else
         {
-            _owner.SetAnimatorTrigger("Attack");
+            _owner.RPC_SetAnimatorTrigger("Attack");
         }
 
         ResetGunPowderDecreaseWithoutAttackTimer();
@@ -218,18 +231,19 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = Instantiate(_owner.SpecialBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        GameObject bomb = InstantiateBomb(_owner.SpecialBombPrefab, bombSpawnPoint);
         bomb.GetComponent<Bomb>().ThrowBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             // 점프 공격
-            _owner.SetAnimatorTrigger("JumpAttack");
+            _owner.RPC_SetAnimatorTrigger("JumpAttack");
         }
         else
         {
-            _owner.SetAnimatorTrigger("Attack");
+            _owner.RPC_SetAnimatorTrigger("Attack");
         }
+        ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
         ResetGunPowderDecreaseWithoutAttackTimer();
         SetLastSpecialBombTime();
     }
@@ -249,32 +263,33 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = Instantiate(_owner.NormalBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        GameObject bomb = InstantiateBomb(_owner.NormalBombPrefab, bombSpawnPoint);
         bomb.GetComponent<Bomb>().ThrowBombStraight(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             if(Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SetAnimatorTrigger("JumpUpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("JumpUpStrongAttack");
             }
             else
             {
-                _owner.SetAnimatorTrigger("JumpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("JumpStrongAttack");
             }
         }
         else
         {
             if(Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SetAnimatorTrigger("UpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("UpStrongAttack");
             }
             else
             {
-                _owner.SetAnimatorTrigger("StrongAttack");
+                _owner.RPC_SetAnimatorTrigger("StrongAttack");
             }
         }
 
+        ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
         ResetGunPowderDecreaseWithoutAttackTimer();
         SetLastNormalBombTime();
     }
@@ -294,33 +309,51 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = Instantiate(_owner.SpecialBombPrefab, bombSpawnPoint.position, Quaternion.identity);
+        GameObject bomb = InstantiateBomb(_owner.SpecialBombPrefab, bombSpawnPoint);
         bomb.GetComponent<Bomb>().ThrowBombStraight(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             if(Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SetAnimatorTrigger("JumpUpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("JumpUpStrongAttack");
             }
             else
             {
-                _owner.SetAnimatorTrigger("JumpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("JumpStrongAttack");
             }
         }
         else
         {
             if(Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SetAnimatorTrigger("UpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("UpStrongAttack");
             }
             else
             {
-                _owner.SetAnimatorTrigger("StrongAttack");
+                _owner.RPC_SetAnimatorTrigger("StrongAttack");
             }
         }
         
+        ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
         ResetGunPowderDecreaseWithoutAttackTimer();
         SetLastSpecialBombTime();
+    }
+
+    private GameObject InstantiateBomb(GameObject bombPrefab, Transform bombSpawnPoint)
+    {
+        GameObject bomb = Instantiate(bombPrefab, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
+        return bomb;
+    }
+
+    // 폭탄 반동 적용 함수
+    protected virtual void ApplyRecoil(Transform bombSpawnPoint, float recoilPower = 5f, float upPower = 1f)
+    {
+        if (_owner.Rigidbody2D == null) return;
+        // 폭탄 스폰 위치에서 플레이어까지의 방향 (x축 반대, y축 위)
+        Vector2 dir = (_owner.transform.position - bombSpawnPoint.position).normalized;
+        Vector2 recoil = new Vector2(dir.x, dir.y).normalized * recoilPower;
+        recoil.y += upPower;
+        _owner.Rigidbody2D.AddForce(recoil, ForceMode2D.Impulse);
     }
 }

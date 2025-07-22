@@ -33,7 +33,7 @@ public class GunPowderBezierCurve : MonoBehaviour
     private Rigidbody2D _rigidbody2D;
     private BoxCollider2D _collider;
 
-    private void Start()
+    private void OnEnable()
     {
         //Random.InitState(RANDOM_SEED);
 
@@ -41,9 +41,9 @@ public class GunPowderBezierCurve : MonoBehaviour
         _collider = GetComponent<BoxCollider2D>();
 
         if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
-        gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = true;
+        gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = false;
 
-        // 땅에 닿으면 Player 레이어를 ExcludeLayers에서 제거
+        // Player 레이어를 ExcludeLayers에서 제거
         int playerLayer = LayerMask.NameToLayer("Player");
         if (_collider != null)
             _collider.excludeLayers &= ~(1 << playerLayer);
@@ -104,7 +104,9 @@ public class GunPowderBezierCurve : MonoBehaviour
                 return;
             }
 
-            _points[3] = GameObject.FindGameObjectWithTag("Player").transform.position;
+            var playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj == null) return;
+            _points[3] = playerObj.transform.position;
             _timerCurrent += Time.deltaTime * _speed;
             transform.position = BezierCurve.BezierCurve2D(_points[0], _points[3], _points[1], _points[2], _timerCurrent/_timerMax);
         }

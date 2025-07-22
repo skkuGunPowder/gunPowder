@@ -35,21 +35,21 @@ public class PlayerWalkState : PlayerBaseState
         _owner.PlayerStat.IsRunning = false;
 
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Walk");
+        _owner.RPC_SetAnimatorTrigger("Walk");
     }
     
     public override void OnExit()
     {
         base.OnExit();
-        _owner.ResetAnimatorTrigger("Walk");
+        _owner.RPC_ResetAnimatorTrigger("Walk");
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    public override void Update()
+    public override void MineUpdate()
     {
-        base.Update();
+        base.MineUpdate();
 
         // 이동 로직
         bool flowControl = WalkMove();

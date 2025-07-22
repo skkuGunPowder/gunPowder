@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using RaycastPro.RaySensors2D;
+using Photon.Pun;
 
 public class Player : MonoBehaviour, IDamagable
 {
@@ -14,6 +15,8 @@ public class Player : MonoBehaviour, IDamagable
 
     private PlayerStat _playerStat;
     public PlayerStat PlayerStat => _playerStat;
+
+    public PhotonView PhotonView;
 
     [Header("Bomb")]
     // 폭탄 스폰 위치 리스트
@@ -49,16 +52,36 @@ public class Player : MonoBehaviour, IDamagable
     public BoxRay2D GroundRay2D => _groundRay2D;
 
 
-    // 테스트용
     public GameObject NormalBombPrefab;
     public GameObject SpecialBombPrefab;
-    public GameObject TestGunPowder;
+    public GameObject GunPowderPrefab;
+    public GameObject DieExplosionPrefab;
+
 
     private void Awake()
     {
         _playerStat = GetComponent<PlayerStat>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _groundRay2D = GetComponent<BoxRay2D>();
+        PhotonView = GetComponent<PhotonView>();
+    }
+
+    private void Start()
+    {
+        _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
+    }
+
+    public void InitializePlayer()
+    {
+        _playerStat.InitializeStats();
+        _attackTimer = 0f;
+        _gunPowderDecreaseTimer = 0f;
+        _gunPowderDecreaseWithoutAttackTimer = 0f;
+    }
+
+    private void HandleGunPowderEmpty()
+    {
+        GetComponent<PlayerFSM>().ChangeState<PlayerDieState>();
     }
 
     private void Update()
@@ -115,10 +138,12 @@ public class Player : MonoBehaviour, IDamagable
         // TODO: 피격 처리
         // 피 달기
         _playerStat.DecreaseGunPowderCount(damage);
+
         // 폭탄 맞은 위치 반 대 방향으로 건파우터 낙출
         ReleaseGunPowder(attacker, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
-
-        // 피격 상태 돌입
+        
+        // 피격 횟수 증가
+        _playerStat.IncreseDamagedCount();
 
         // 피격 이벤트 발생
         OnHit?.Invoke();
@@ -139,7 +164,7 @@ public class Player : MonoBehaviour, IDamagable
             Vector3 dir = rot * baseDir;
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
-            GunPowderBezierCurve gunPowder = Instantiate(TestGunPowder, spawnPos, Quaternion.identity).GetComponent<GunPowderBezierCurve>();
+            GunPowderBezierCurve gunPowder = Instantiate(GunPowderPrefab, spawnPos, Quaternion.identity).GetComponent<GunPowderBezierCurve>();
 
             //TODO: isFallingout에 따라 뭔가 설정
             if (isFallingOut)
@@ -184,7 +209,7 @@ public class Player : MonoBehaviour, IDamagable
             case (1, -1):
                 return _bombSpawnPointList[(int)EBombSpawnPoint.RightDown];
             default:
-                return _bombSpawnPointList[(int)EBombSpawnPoint.Right];
+                return _playerStat.FacingDirection == 1 ? _bombSpawnPointList[(int)EBombSpawnPoint.Right] : _bombSpawnPointList[(int)EBombSpawnPoint.Left];
         }
     }
 
@@ -193,6 +218,7 @@ public class Player : MonoBehaviour, IDamagable
         return _bombSpawnPointList[(int)spawnPoint];
     }
 
+    [PunRPC]
     public void SetAnimatorTrigger(string triggerName)
     {
         foreach (Animator animator in _myAnimatorList)
@@ -201,11 +227,39 @@ public class Player : MonoBehaviour, IDamagable
         }
     }
 
+
+    [PunRPC]
+    public void RPC_SetAnimatorTrigger(string triggerName)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        PhotonView.RPC(nameof(SetAnimatorTrigger), RpcTarget.All, triggerName);
+    }
+
+    [PunRPC]
     public void ResetAnimatorTrigger(string triggerName)
     {
+        if(!PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
         foreach (Animator animator in _myAnimatorList)
         {
             animator.ResetTrigger(triggerName);
         }
+    }
+
+    [PunRPC]
+    public void RPC_ResetAnimatorTrigger(string triggerName)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        PhotonView.RPC(nameof(ResetAnimatorTrigger), RpcTarget.All, triggerName);
     }
 }

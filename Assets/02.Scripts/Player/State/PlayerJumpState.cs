@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerJumpState : PlayerBaseState
 {
-    private float _gravity = -40f; // 더 강한 중력 추천
     private float _yVelocity = 0f;
     private float _xVelocity = 0f;
     private float _timer = 0f;
@@ -22,7 +21,6 @@ public class PlayerJumpState : PlayerBaseState
 
         _owner.PlayerStat.IsJumping = true;
         
-        _gravity = -40f;
         _yVelocity = 0;
         if (_owner.PlayerStat.IsFallingFromLedge)
         {
@@ -36,6 +34,10 @@ public class PlayerJumpState : PlayerBaseState
         {
             _owner.PlayerStat.IncrementJumpCount();
             _yVelocity = _owner.PlayerStat.JumpForce;
+            // 점프 시에만 y속도 설정
+            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+            velocity.y = _yVelocity;
+            _owner.Rigidbody2D.linearVelocity = velocity;
         }
         _timer = 0f;
         _keyReleaseTimer = 0f;
@@ -43,28 +45,28 @@ public class PlayerJumpState : PlayerBaseState
 
     public override void OnExit()
     {
-        _owner.ResetAnimatorTrigger("Jump");
-        _owner.SetAnimatorTrigger("Land");
+        _owner.RPC_ResetAnimatorTrigger("Jump");
+        //_owner.RPC_SetAnimatorTrigger("Land");
         base.OnExit();
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    public override void Update()
+    public override void MineUpdate()
     {
-        base.Update();
+        base.MineUpdate();
 
         _timer += Time.deltaTime;
 
         // 아래키를 누르는 동안 중력 증가
         if(Input.GetKeyDown(KeyCode.DownArrow))
         {
-            _gravity = -60f;
+            
         }
         if(Input.GetKeyUp(KeyCode.DownArrow))
         {
-            _gravity = -40f;
+            
         }
 
         bool flowControl = JumpMove();
@@ -78,9 +80,7 @@ public class PlayerJumpState : PlayerBaseState
 
     private bool JumpMove()
     {
-        // 중력 적용
-        _yVelocity += _gravity * Time.deltaTime;
-        _yVelocity = Mathf.Clamp(_yVelocity, _gravity * 3, _owner.PlayerStat.JumpForce);
+        // y축은 중력에만 맡김 (직접 제어하지 않음)
 
         // 좌우 이동 - 러닝 상태에 따른 처리
         if (_owner.PlayerStat.IsRunning)
@@ -142,18 +142,16 @@ public class PlayerJumpState : PlayerBaseState
         // Rigidbody2D 기반 이동 적용
         Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
         velocity.x = _xVelocity;
-        velocity.y = _yVelocity;
+        // y축은 건드리지 않음 (중력에 맡김)
         _owner.Rigidbody2D.linearVelocity = velocity;
 
         // 더블 점프
-        
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
             _owner.PlayerStat.IncrementJumpCount();
-            _yVelocity = _owner.PlayerStat.JumpForce;
-            // 점프 시 y속도 갱신
+            // 점프 시에만 y속도 설정
             velocity = _owner.Rigidbody2D.linearVelocity;
-            velocity.y = _yVelocity;
+            velocity.y = _owner.PlayerStat.JumpForce;
             _owner.Rigidbody2D.linearVelocity = velocity;
         }
 
@@ -204,6 +202,7 @@ public class PlayerJumpState : PlayerBaseState
             else
             {
                 ThrowNormalBomb();
+                _playerFSM.ChangeState<PlayerNormalRecoilState>();
             }
         }
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
@@ -216,6 +215,7 @@ public class PlayerJumpState : PlayerBaseState
             else
             {
                 ThrowSpecialBomb();
+                _playerFSM.ChangeState<PlayerNormalRecoilState>();
             }
         }
     }
