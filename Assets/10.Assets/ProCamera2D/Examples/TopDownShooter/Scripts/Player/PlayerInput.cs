@@ -21,7 +21,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D.TopDownShooter
         {
             _characterController = GetComponent<CharacterController>();
 
-            var cinematics = FindObjectsOfType<ProCamera2DCinematics>();
+            var cinematics = FindObjectsByType<ProCamera2DCinematics>(FindObjectsSortMode.None);
             for (int i = 0; i < cinematics.Length; i++)
             {
                 cinematics[i].OnCinematicStarted.AddListener(() =>

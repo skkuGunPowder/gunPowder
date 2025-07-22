@@ -1,54 +1,60 @@
 using UnityEngine;
 
-public class MissileBomb : MonoBehaviour, IBomb
+public class MissileBomb : Bomb
 {
-    private string ID;
-    private BombStat bombStat;
+    public const string ID = "B0004";
 
-    private void Awake()
+    private const float PREDELAY = 0.3f;
+    private float _timer;
+
+
+    protected override void Init()
     {
-        Init();
+        base.Init();
+        
+        SetStat(ID);
+        _timer = 0f;
     }
 
-    private void Init()
+    protected override void Update()
     {
-        bombStat = ItemDatabase.Instance.GetStat<BombStat>(ID);
+        base.Update();
+
+        _timer += Time.deltaTime;
+        if (_timer < PREDELAY)
+        {
+            return;
+        }
+
+        transform.position += _fireDirection * _currentSpeed * Time.deltaTime;
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(_fireTransform.forward, _fireTransform.up), 1);
+        
     }
 
-
-
-    public void PlaceBomb(Transform transform)
+    public override void PlaceBomb(Transform fireTransform)
     {
-
+        ThrowBomb(fireTransform);
     }
 
-    public void ThrowBomb(Transform transform)
+    public override void ThrowBomb(Transform fireTransform)
     {
-
+        _fireTransform = fireTransform;
+        _fireDirection = _fireTransform.right;
+        _currentSpeed = _bombStat.Speed;
     }
 
-    public void ThrowBombStraight(Transform transform)
+    public override void ThrowBombStraight(Transform fireTransform)
     {
-
+        ThrowBomb(fireTransform);
     }
 
-    public void BoostBomb(Transform transform)
+    public override void BoostBomb(Transform fireTransform)
     {
-
+        ThrowBomb(fireTransform);
     }
 
-    public void SmashBomb(Transform transform)
+    public override void SmashBomb(Transform fireTransform)
     {
-
-    }
-
-    public void SetLastBombTime()
-    {
-
-    }
-
-    public void TakeDamage()
-    {
-
+        ThrowBomb(fireTransform);
     }
 }

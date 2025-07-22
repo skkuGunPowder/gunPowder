@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class GunPowder : MonoBehaviour
 {
-    private Collider _collider;
+    private BoxCollider2D _collider;
     private float _timer = 0f;
-    private float _colliderOnTime = 2f;
+    private float _colliderOnTime = 0.2f;
 
     private void Start()
     {
-        _collider = GetComponent<Collider>();
+        _collider = GetComponent<BoxCollider2D>();
         _collider.enabled = false;
     }
 
@@ -18,14 +18,6 @@ public class GunPowder : MonoBehaviour
         if(_timer > _colliderOnTime)
         {
             _collider.enabled = true;
-        }
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if(other.gameObject.CompareTag("Player"))
-        {
-            Destroy(gameObject);
         }
     }
 }

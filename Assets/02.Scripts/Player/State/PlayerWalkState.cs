@@ -1,5 +1,3 @@
-using RobustFSM.Base;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerWalkState : PlayerBaseState
@@ -30,7 +28,7 @@ public class PlayerWalkState : PlayerBaseState
 
         // 코요테 타임 초기화
         _coyoteTimer = 0f;
-        _wasGroundedLastFrame = IsGrounded();
+        _wasGroundedLastFrame = IsGrounded2D();
 
         // 플레이어 상태
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
@@ -70,7 +68,7 @@ public class PlayerWalkState : PlayerBaseState
         _keyReleaseTimer += Time.deltaTime;
 
         // 코요테 타임 및 바닥 체크
-        bool isGrounded = IsGrounded();
+        bool isGrounded = IsGrounded2D();
         if (isGrounded)
         {
             _coyoteTimer = 0f;
@@ -89,13 +87,9 @@ public class PlayerWalkState : PlayerBaseState
             return false;
         }
 
-        // 이동
-        // 2D기 때문에 +x, -x로만 이동한다.
-        // 오른쪽 화살표 -> 우측이동, 왼쪽 화살표 -> 좌측이동
         if (Input.GetKey(KeyCode.RightArrow))
         {
             _owner.SetFacingDirection(1);
-            _owner.CharacterController.Move(Vector3.right * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime);
 
             // 키 입력 감지
             if (!_isKeyPressed)
@@ -117,7 +111,6 @@ public class PlayerWalkState : PlayerBaseState
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
             _owner.SetFacingDirection(-1);
-            _owner.CharacterController.Move(Vector3.left * _owner.PlayerStat.MoveSpeed * Time.deltaTime);
 
             // 키 입력 감지
             if (!_isKeyPressed)
@@ -154,6 +147,11 @@ public class PlayerWalkState : PlayerBaseState
             }
         }
 
+        // 실제 이동 처리 (Rigidbody2D 사용)
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        velocity.x = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed;
+        _owner.Rigidbody2D.linearVelocity = velocity;
+
         return true;
     }
 
@@ -162,10 +160,14 @@ public class PlayerWalkState : PlayerBaseState
         if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
             ThrowNormalBomb();
+            _playerFSM.ChangeState<PlayerNormalRecoilState>();
+            return;
         }
         if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
             ThrowSpecialBomb();
+            _playerFSM.ChangeState<PlayerNormalRecoilState>();
+            return;
         }
     }
 }

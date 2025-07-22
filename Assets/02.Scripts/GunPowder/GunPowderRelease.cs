@@ -1,4 +1,6 @@
 using Photon.Pun.UtilityScripts;
+using RaycastPro.RaySensors;
+using RaycastPro.RaySensors2D;
 using UnityEngine;
 
 public class GunPowderRelease : MonoBehaviour
@@ -15,59 +17,75 @@ public class GunPowderRelease : MonoBehaviour
     private float maxHeight;
     private float currentHeight;
 
-    private BoxCollider _collider;
+    private BoxCollider2D _collider;
 
     public float GroundCheckDistance; // 바닥 체크용 Raycast 거리
-    public LayerMask GroundLayer;            // 바닥 레이어 지정(Inspector에서 할당)
 
     public float GroundCheckOffset;
     public float YForceOffset;
 
+    private BoxRay2D _groundRay2D;
+
+    private Rigidbody2D _rigidbody2D;
+
+    //private const int RANDOM_SEED = 1234567890;
+
     void Start()
     {
-        _collider = GetComponent<BoxCollider>();
+        //Random.InitState(RANDOM_SEED);
+
+        _collider = GetComponent<BoxCollider2D>();
+        _groundRay2D = GetComponent<BoxRay2D>();
+        _rigidbody2D = GetComponent<Rigidbody2D>();
         // XZ 평면 랜덤 방향
         Vector2 randXZ = Random.insideUnitCircle.normalized * xzForce;
         direction = new Vector3(randXZ.x, 0, 0);
         GroundCheckDistance = _collider.size.y * 0.5f * transform.localScale.y + 0.05f;
 
-        currentHeight = Random.Range(yForce - YForceOffset, yForce + YForceOffset);
-        maxHeight = currentHeight;
-        Initialize(direction);
+        float yRandom = Random.Range(yForce - YForceOffset, yForce + YForceOffset);
+        maxHeight = yRandom;
+        Initialize(direction, yRandom);
     }
 
     void Update()
     {
         if (!isGrounded)
         {
-            // Y축(상하) 이동
-            currentHeight += -gravity * Time.deltaTime;
-            transform.position += new Vector3(direction.x, currentHeight, direction.z) * Time.deltaTime;
-
             CheckGroundHit();
+        }
+    }
+
+    void Initialize(Vector3 _direction, float yForceValue)
+    {
+        isGrounded = false;
+        direction = _direction;
+        currentBounce++;
+        if (_rigidbody2D != null)
+        {
+            _rigidbody2D.linearVelocity = Vector2.zero;
+            _rigidbody2D.AddForce(new Vector2(direction.x, yForceValue), ForceMode2D.Impulse);
         }
     }
 
     void Initialize(Vector3 _direction)
     {
-        isGrounded = false;
-        maxHeight /= 1.5f;
-        direction = _direction;
-        currentHeight = maxHeight;
-        currentBounce++;
+        float yRandom = Random.Range(yForce - YForceOffset, yForce + YForceOffset);
+        Initialize(_direction, yRandom);
     }
 
     void CheckGroundHit()
     {
-        RaycastHit hit;
-        Vector3 rayOrigin = transform.position + Vector3.up * 0.1f;
-        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, GroundCheckDistance, GroundLayer))
+        if (_groundRay2D == null) return;
+
+        _groundRay2D.Cast();
+
+        if (_groundRay2D.Performed)
         {
-            if (transform.position.y - hit.point.y < transform.localScale.y + GroundCheckOffset && currentHeight < 0)
+            var hit = _groundRay2D.Hit;
+            // Rigidbody2D의 y속도가 0 이하(하강 중)일 때만 튕김 처리
+            if (transform.position.y - hit.point.y < transform.localScale.y + GroundCheckOffset && _rigidbody2D != null && _rigidbody2D.linearVelocity.y <= 0)
             {
-                // 콜라이더 절반 높이만큼 위로 올려서 바닥에 닿게
-                BoxCollider col = GetComponent<BoxCollider>();
-                float halfHeight = col != null ? GroundCheckDistance : 0.5f;
+                float halfHeight = _collider != null ? GroundCheckDistance : 0.5f;
 
                 Vector3 pos = transform.position;
                 pos.y = hit.point.y + halfHeight;
@@ -80,7 +98,15 @@ public class GunPowderRelease : MonoBehaviour
                 else
                 {
                     isGrounded = true;
+                    if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
                     gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = true;
+
+                    // 땅에 닿으면 Player 레이어를 ExcludeLayers에서 제거
+                    int playerLayer = LayerMask.NameToLayer("Player");
+                    if (_collider != null)
+                        _collider.excludeLayers &= ~(1 << playerLayer);
+                    if (_rigidbody2D != null)
+                        _rigidbody2D.excludeLayers &= ~(1 << playerLayer);
                 }
             }
         }

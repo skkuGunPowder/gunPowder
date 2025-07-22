@@ -16,7 +16,7 @@ public class PlayerRunState : PlayerBaseState
         base.OnEnter();
         _keyReleaseTimer = 0f;
         _coyoteTimer = 0f;
-        _wasGroundedLastFrame = IsGrounded();
+        _wasGroundedLastFrame = IsGrounded2D();
 
         // 플레이어 상태
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.RunSpeed;
@@ -48,7 +48,7 @@ public class PlayerRunState : PlayerBaseState
     private bool RunMove()
     {
         // 코요테 타임 및 바닥 체크
-        bool isGrounded = IsGrounded();
+        bool isGrounded = IsGrounded2D();
         if (isGrounded)
         {
             _coyoteTimer = 0f;
@@ -67,22 +67,23 @@ public class PlayerRunState : PlayerBaseState
             return false;
         }
 
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
         if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1
         || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
         {
-            _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime,
-             0, 0));
+            velocity.x = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed;
+            _owner.Rigidbody2D.linearVelocity = velocity;
         }
-        else if (Input.GetKeyUp(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
-        || Input.GetKeyUp(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
+        else if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
+        || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
         {
             _playerFSM.ChangeState<PlayerBreakState>();
         }
         else
         {
             _keyReleaseTimer += Time.deltaTime;
-            _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime,
-             0, 0));
+            velocity.x = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed;
+            _owner.Rigidbody2D.linearVelocity = velocity;
             if (_keyReleaseTimer >= _keyReleaseThreshold)
             {
                 _playerFSM.ChangeState<PlayerIdleState>();
