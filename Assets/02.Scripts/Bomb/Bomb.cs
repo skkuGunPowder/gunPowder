@@ -10,15 +10,22 @@ public class Bomb : MonoBehaviour, IBomb
     protected float _currentSpeed;
     private float _fuzeTimer;
 
+    protected Transform _ownerTransform;
+
     public PhotonView PhotonView;
+
+
     private void Awake()
     {
-        Init();
         PhotonView = GetComponent<PhotonView>();
+        _rigidBody = GetComponent<Rigidbody2D>();
+
+        Init();
     }
+
     protected virtual void Update()
     {
-        if(_stat == null)
+        if (_stat == null)
         {
             return;
         }
@@ -28,14 +35,22 @@ public class Bomb : MonoBehaviour, IBomb
             Explode();
         }
     }
+    
     protected virtual void Init()
     {
-        _rigidBody = GetComponent<Rigidbody2D>();
+
     }
+
+    public void SetOwner(Transform owner)
+    {
+        _ownerTransform = owner;
+    }
+
     protected void SetStat(string id)
     {
         _stat = ItemDatabase.Instance.GetStat<BombStat>(id);
     }
+    
     protected virtual void OnCollisionEnter2D(Collision2D other)
     {
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
@@ -52,6 +67,7 @@ public class Bomb : MonoBehaviour, IBomb
             }
         }
     }
+
     public virtual void Explode()
     {
         // 폭발 프리펩 인스턴싱
@@ -62,31 +78,36 @@ public class Bomb : MonoBehaviour, IBomb
         else
         {
             Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
-            explosion.Explode(_stat.IsFallingOut);
+            explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
         Destroy(gameObject);
     }
+
 
     [PunRPC]
     // 폭탄 두기
     public virtual void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
     }
+
     [PunRPC]
     // 폭탄 던지기 (곡사)
     public virtual void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
     }
+
     [PunRPC]
     // 폭탄 직선으로 던지기
     public virtual void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
     }
+
     [PunRPC]
     // 폭탄 부스트
     public virtual void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
     }
+
     [PunRPC]
     // 폭탄 내려 찍기
     public virtual void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)

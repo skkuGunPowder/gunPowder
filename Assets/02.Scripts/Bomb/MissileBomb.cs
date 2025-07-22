@@ -7,12 +7,15 @@ public class MissileBomb : Bomb
     public const string ID = "B0004";
     private const float PREDELAY = 0.3f;
     private float _timer;
+
+    
     protected override void Init()
     {
         base.Init();
         SetStat(ID);
         _timer = 0f;
     }
+    
     protected override void Update()
     {
         base.Update();
@@ -22,6 +25,7 @@ public class MissileBomb : Bomb
             return;
         }
     }
+
     protected override void OnCollisionEnter2D(Collision2D other)
     {
         base.OnCollisionEnter2D(other);
@@ -31,11 +35,13 @@ public class MissileBomb : Bomb
         }
         Explode();
     }
+
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
+
     [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
@@ -46,6 +52,7 @@ public class MissileBomb : Bomb
             StartCoroutine(AccelerateForward(_fireDirection, 0.5f, _stat.Speed));
         });
     }
+
     private IEnumerator AccelerateForward(Vector3 direction, float accelTime, float maxSpeed)
     {
         float timer = 0f;
@@ -64,16 +71,19 @@ public class MissileBomb : Bomb
             yield return null;
         }
     }
+
     [PunRPC]
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
+
     [PunRPC]
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
+
     [PunRPC]
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {

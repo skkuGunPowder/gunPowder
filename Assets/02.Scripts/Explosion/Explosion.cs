@@ -11,7 +11,7 @@ public class Explosion : MonoBehaviour
         _stat = ItemDatabase.Instance.GetStat<ExplosionStat>(id);
     }
 
-    public virtual void Explode(bool isFallingOut)
+    public virtual void Explode(bool isFallingOut, Transform attacker)
     {
         Instantiate(VFXPrefab, transform.position, Quaternion.identity);
 
@@ -24,13 +24,13 @@ public class Explosion : MonoBehaviour
             // }
 
             if (other.TryGetComponent(out IDamagable damagableObject))
+            {
+                damagableObject.TakeDamage(_stat.AttackPower, attacker, isFallingOut);
+                if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
-                    //damagableObject.TakeDamage(_stat.AttackPower, transform.position, isFallingOut);
-                    if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
-                    {
-                        AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
-                    }
+                    AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
                 }
+            }
         }
     }
 

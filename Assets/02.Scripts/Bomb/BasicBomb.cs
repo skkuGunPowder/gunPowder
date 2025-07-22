@@ -15,12 +15,15 @@ public class BasicBomb : Bomb
     private bool _isFuzeActivate;
     private const float SLOW = 5f;
     private const float NORMAL = 10f;
+
+
     protected override void Init()
     {
         base.Init();
         SetStat(ID);
         _isFuzeActivate = false;
     }
+
     protected override void Update()
     {
         base.Update();
@@ -37,6 +40,7 @@ public class BasicBomb : Bomb
             _bombVelocity = EBombVelocity.SLOW;
         }
     }
+
     protected override void OnCollisionEnter2D(Collision2D other)
     {
         base.OnCollisionEnter2D(other);
@@ -56,6 +60,7 @@ public class BasicBomb : Bomb
             }
         }
     }
+
     private IEnumerator ActivateFuzeCoroutine(float fuzeTime)
     {
         _isFuzeActivate = true;
@@ -64,7 +69,6 @@ public class BasicBomb : Bomb
     }
 
     [PunRPC]
-    // 폭탄 두기기
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
@@ -72,7 +76,6 @@ public class BasicBomb : Bomb
     }
 
     [PunRPC]
-    // 폭탄 던지기 (곡사)
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
@@ -81,7 +84,6 @@ public class BasicBomb : Bomb
     }
 
     [PunRPC]
-    // 폭탄 직선으로 던지기
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
@@ -90,7 +92,6 @@ public class BasicBomb : Bomb
     }
 
     [PunRPC]
-    // 폭탄 부스트
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
@@ -98,7 +99,6 @@ public class BasicBomb : Bomb
     }
 
     [PunRPC]
-    // 폭탄 내려 찍기
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
