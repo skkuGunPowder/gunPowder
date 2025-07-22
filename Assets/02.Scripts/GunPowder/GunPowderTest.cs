@@ -11,9 +11,9 @@ public class GunPowderTest : MonoBehaviour
             // 마우스 위치에 생성
             //Instantiate(_gunPowderPrefab, Camera.main.ScreenToWorldPoint(Input.mousePosition), Quaternion.identity);
 
-            // 마우스 위치에 takedamage 호출
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            player.GetComponent<Player>().TakeDamage(5, Camera.main.ScreenToWorldPoint(Input.mousePosition), false);
+            // // 마우스 위치에 takedamage 호출
+            // GameObject player = GameObject.FindGameObjectWithTag("Player");
+            // player.GetComponent<Player>().TakeDamage(5, Camera.main.ScreenToWorldPoint(Input.mousePosition), false);
         }
 
         if(Input.GetKeyDown(KeyCode.A))
