@@ -23,5 +23,11 @@ public class GunPowderTest : MonoBehaviour
                 Instantiate(_gunPowderPrefab, transform.position, Quaternion.identity);
             }
         }
+
+        if(Input.GetKeyDown(KeyCode.S))
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            player.GetComponent<PlayerFSM>().ChangeState<PlayerDropDeadState>();
+        }
     }
 }

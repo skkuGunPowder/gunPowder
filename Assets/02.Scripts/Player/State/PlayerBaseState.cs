@@ -1,4 +1,5 @@
 using System;
+using Photon.Pun;
 using RaycastPro.RaySensors2D;
 using RobustFSM.Base;
 using UnityEngine;
@@ -43,11 +44,18 @@ public class PlayerBaseState : MonoState
         _playerFSM.ChangeState<PlayerDamagedState>();
     }
 
-    public virtual void Update()
+    public virtual void MineUpdate()
     {
         JumpInput();
     }
 
+    private void Update()
+    {
+        if(_owner.PhotonView.IsMine)
+        {
+            MineUpdate();
+        }
+    }
     // 하위에서 사용하고 싶은 것만 사용한다.
     protected virtual void JumpInput()
     {

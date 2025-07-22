@@ -21,7 +21,7 @@ public class PlayerNormalRecoilState : PlayerBaseState
         base.OnExit();
     }
 
-    public override void Update()
+    public override void MineUpdate()
     {
         _recoilTimer += Time.deltaTime;
 

@@ -611,7 +611,7 @@ Transform:
   m_GameObject: {fileID: 1926425621}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 5.02, z: 0}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 10, y: 1, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -930,6 +930,7 @@ MonoBehaviour:
   - {fileID: 3638370565215094044}
   - {fileID: 5155228637232022648}
   - {fileID: 8945414412189771704}
+  PhotonView: {fileID: 0}
   _bombSpawnPointList:
   - {fileID: 6050197693168315138}
   - {fileID: 4563252338218744870}
@@ -947,7 +948,8 @@ MonoBehaviour:
   _gunPowderSpreadAngle: 90
   NormalBombPrefab: {fileID: 3001153516144104530, guid: b3fb438e801506a4ab38467990bf3887, type: 3}
   SpecialBombPrefab: {fileID: 2493808269564610583, guid: c6c3d386220973f4db5354405d7a56fb, type: 3}
-  TestGunPowder: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
+  GunPowderPrefab: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
+  DieExplosionPrefab: {fileID: 0}
 --- !u!4 &1325043405000511380
 Transform:
   m_ObjectHideFlags: 0
@@ -1389,6 +1391,7 @@ GameObject:
   - component: {fileID: 8700988819181116350}
   - component: {fileID: 8700988819181116351}
   - component: {fileID: 8700988819181116352}
+  - component: {fileID: 8700988819181116353}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -2218,6 +2221,28 @@ MonoBehaviour:
   hitBackside: 0
   direction: {x: 0, y: -1}
   size: {x: 0.88, y: 0.06}
+--- !u!114 &8700988819181116353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4029063190507265427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 1
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &8876072370107119081
 GameObject:
   m_ObjectHideFlags: 0

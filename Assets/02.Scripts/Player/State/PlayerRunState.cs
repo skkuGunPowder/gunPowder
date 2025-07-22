@@ -32,9 +32,9 @@ public class PlayerRunState : PlayerBaseState
         _owner.ResetAnimatorTrigger("Run");
     }
 
-    public override void Update()
+    public override void MineUpdate()
     {
-        base.Update();
+        base.MineUpdate();
 
         RunAttack();
 

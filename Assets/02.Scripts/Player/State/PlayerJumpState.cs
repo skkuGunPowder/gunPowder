@@ -51,9 +51,9 @@ public class PlayerJumpState : PlayerBaseState
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    public override void Update()
+    public override void MineUpdate()
     {
-        base.Update();
+        base.MineUpdate();
 
         _timer += Time.deltaTime;
 

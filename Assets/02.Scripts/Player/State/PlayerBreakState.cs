@@ -33,7 +33,7 @@ public class PlayerBreakState : PlayerBaseState
         _owner.ResetAnimatorTrigger("Break");
     }
 
-    public override void Update()
+    public override void MineUpdate()
     {
         _breakTimer += Time.deltaTime;
 

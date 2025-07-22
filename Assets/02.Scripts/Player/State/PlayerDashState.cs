@@ -29,7 +29,7 @@ public class PlayerDashState : PlayerBaseState
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    public override void Update()
+    public override void MineUpdate()
     {
         _dashTimer += Time.deltaTime;
 

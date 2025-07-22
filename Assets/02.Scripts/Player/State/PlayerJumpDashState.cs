@@ -34,7 +34,7 @@ public class PlayerJumpDashState : PlayerBaseState
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    public override void Update()
+    public override void MineUpdate()
     {
         // 대쉬 시간 종료 후 점프 상태와 같이 움직임
         if(_dashTimer >= _owner.PlayerStat.DashTime)
