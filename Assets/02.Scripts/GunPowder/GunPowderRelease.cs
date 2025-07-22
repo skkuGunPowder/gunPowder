@@ -30,7 +30,7 @@ public class GunPowderRelease : MonoBehaviour
 
     //private const int RANDOM_SEED = 1234567890;
 
-    void Start()
+    void OnEnable()
     {
         //Random.InitState(RANDOM_SEED);
 

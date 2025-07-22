@@ -16,6 +16,8 @@ public class GunPowderTrigger : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
+            gameObject.GetComponent<GunPowder>().SetTarget(collision.transform);
+            
             // 1. 베지어 곡선 이동 활성화
             gameObject.GetComponentInParent<GunPowderBezierCurve>().enabled = true;
 

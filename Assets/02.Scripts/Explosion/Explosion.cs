@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class Explosion : MonoBehaviour
@@ -11,26 +12,26 @@ public class Explosion : MonoBehaviour
         _stat = ItemDatabase.Instance.GetStat<ExplosionStat>(id);
     }
 
-    public virtual void Explode(bool isFallingOut)
+    public virtual void Explode(bool isFallingOut, Transform attacker)
     {
         Instantiate(VFXPrefab, transform.position, Quaternion.identity);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
         {
-            if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
-            {
-                continue;
-            }
+            // if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
+            // {
+            //     continue;
+            // }
 
             if (other.TryGetComponent(out IDamagable damagableObject))
+            {
+                damagableObject.TakeDamage(_stat.AttackPower, transform.position,  attacker.GetComponent<PhotonView>().ViewID, isFallingOut);
+                if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
-                    damagableObject.TakeDamage(_stat.AttackPower, transform.position, isFallingOut);
-                    if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
-                    {
-                        AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
-                    }
+                    AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
                 }
+            }
         }
     }
 

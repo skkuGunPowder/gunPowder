@@ -4,7 +4,7 @@ using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
 
-public class Player : MonoBehaviour, IDamagable
+public class Player : MonoBehaviourPun, IDamagable
 {
     [SerializeField]
     private List<Animator> _myAnimatorList;
@@ -133,15 +133,25 @@ public class Player : MonoBehaviour, IDamagable
         _playerStat.SetFacingDirection(direction);
     }
 
-    public void TakeDamage(int damage, Vector3 attacker, bool isFallingOut)
+    public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
     {
-        // TODO: 피격 처리
-        // 피 달기
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, isFallingOut);
+    }
+
+    [PunRPC]
+    public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        // 체력 감소
         _playerStat.DecreaseGunPowderCount(damage);
 
-        // 폭탄 맞은 위치 반 대 방향으로 건파우터 낙출
-        ReleaseGunPowder(attacker, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
-        
+        // Gunpowder 낙출
+        ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+
         // 피격 횟수 증가
         _playerStat.IncreseDamagedCount();
 
@@ -152,9 +162,15 @@ public class Player : MonoBehaviour, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
-    public void ReleaseGunPowder(Vector3 explosionOrigin, int count = 3, float spreadAngle = 30f,
+    public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
+        // attackerViewId로 Transform 찾기
+        Transform attacker = null;
+        PhotonView attackerView = PhotonView.Find(attackerViewId);
+        if (attackerView != null)
+            attacker = attackerView.transform;
+
         Vector3 baseDir = (transform.position - explosionOrigin).normalized;
 
         for (int i = 0; i < count; i++)
@@ -164,7 +180,9 @@ public class Player : MonoBehaviour, IDamagable
             Vector3 dir = rot * baseDir;
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
-            GunPowderBezierCurve gunPowder = Instantiate(GunPowderPrefab, spawnPos, Quaternion.identity).GetComponent<GunPowderBezierCurve>();
+            GunPowder gunPowder = Instantiate(GunPowderPrefab, spawnPos, Quaternion.identity).GetComponent<GunPowder>();
+            //
+            gunPowder.GetComponent<GunPowder>().SetTarget(attacker);
 
             //TODO: isFallingout에 따라 뭔가 설정
             if (isFallingOut)
@@ -177,6 +195,7 @@ public class Player : MonoBehaviour, IDamagable
                 gunPowder.GetComponent<GunPowderRelease>().enabled = false;
                 gunPowder.GetComponent<GunPowderBezierCurve>().enabled = true;
             }
+
         }
     }
 
