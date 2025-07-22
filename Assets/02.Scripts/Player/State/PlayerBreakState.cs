@@ -29,7 +29,7 @@ public class PlayerBreakState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
-        _owner.SetFacingDirection(-_moveDirection);
+        _owner.RPC_SetFacingDirection(-_moveDirection);
         _owner.RPC_ResetAnimatorTrigger("Break");
     }
 
