@@ -160,7 +160,6 @@ public class PlayerJumpState : PlayerBaseState
         {
             if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
-                Debug.Log("점프 중 왼쪽 더블탭 - 점프 대쉬 상태로 전환");
                 _playerFSM.ChangeState<PlayerJumpDashState>();
                 return false;
             }
@@ -170,7 +169,6 @@ public class PlayerJumpState : PlayerBaseState
         {
             if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
-                Debug.Log("점프 중 오른쪽 더블탭 - 점프 대쉬 상태로 전환");
                 _playerFSM.ChangeState<PlayerJumpDashState>();
                 return false;
             }
@@ -180,7 +178,6 @@ public class PlayerJumpState : PlayerBaseState
         // 착지 체크 (유예 시간 이후에만, 2D Raycast 사용)
         if (_timer > LANDING_GRACE_TIME && IsGrounded2D())
         {
-            Debug.Log("착지!");
             _owner.SetAnimatorTrigger("Land");
             _playerFSM.ChangeState<PlayerIdleState>();
             return false;

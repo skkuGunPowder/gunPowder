@@ -130,7 +130,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void SetFacingDirection(int direction)
     {
-        _playerStat.SetFacingDirection(direction);
+        _playerStat.RPC_SetFacingDirection(direction);
     }
 
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
@@ -141,11 +141,6 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
     {
-        if(!PhotonView.IsMine)
-        {
-            return;
-        }
-
         // 체력 감소
         _playerStat.DecreaseGunPowderCount(damage);
 

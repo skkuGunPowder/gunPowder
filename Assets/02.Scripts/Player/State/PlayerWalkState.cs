@@ -100,7 +100,6 @@ public class PlayerWalkState : PlayerBaseState
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
                 if (_owner.PlayerStat.FacingDirection == 1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStat.DoubleTapTime)
                 {
-                    Debug.Log("WalkState: 오른쪽 더블탭 감지 - DashState로 전환");
                     _playerFSM.ChangeState<PlayerDashState>();
                     return false;
                 }
@@ -121,7 +120,6 @@ public class PlayerWalkState : PlayerBaseState
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
                 if (_owner.PlayerStat.FacingDirection == -1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStat.DoubleTapTime)
                 {
-                    Debug.Log("WalkState: 왼쪽 더블탭 감지 - DashState로 전환");
                     _playerFSM.ChangeState<PlayerDashState>();
                     return false;
                 }
@@ -141,7 +139,6 @@ public class PlayerWalkState : PlayerBaseState
             // 키를 떼고 일정 시간이 지나면 Idle로 전환
             if (_keyReleaseTimer >= KEY_RELEASE_THRESHOLD)
             {
-                Debug.Log("WalkState: 키를 떼어서 IdleState로 전환");
                 _playerFSM.ChangeState<PlayerIdleState>();
                 return false;
             }

@@ -28,7 +28,6 @@ public class PlayerBaseState : MonoState
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
         _groundRay2D = _owner.GroundRay2D;
-        Debug.Log($"Enter {this.GetType().Name} State");
 
         //
         _owner.OnHit += HandleHit;
@@ -37,7 +36,6 @@ public class PlayerBaseState : MonoState
     public override void OnExit()
     {
         base.OnExit();
-        Debug.Log($"Exit {this.GetType().Name} State");
 
         //
         _owner.OnHit -= HandleHit;

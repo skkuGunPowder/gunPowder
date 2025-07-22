@@ -49,7 +49,6 @@ public class PlayerDashState : PlayerBaseState
             {
                 return;
             }
-            Debug.Log("DashState: 반대 방향 키 다운 - BreakState로 전환");
             _playerFSM.ChangeState<PlayerBreakState>();
             return;
         }
@@ -61,7 +60,6 @@ public class PlayerDashState : PlayerBaseState
             if ((_owner.PlayerStat.FacingDirection == 1 && Input.GetKey(KeyCode.RightArrow)) 
             || (_owner.PlayerStat.FacingDirection == -1 && Input.GetKey(KeyCode.LeftArrow)))
             {
-                Debug.Log("DashState: 같은 방향 입력 - RunState로 전환");
                 _playerFSM.ChangeState<PlayerRunState>();
                 return;
             }
@@ -70,7 +68,6 @@ public class PlayerDashState : PlayerBaseState
             {
                 if(IsGrounded2D())
                 {
-                    Debug.Log("DashState: 입력 없음 - IdleState로 전환");
                     _playerFSM.ChangeState<PlayerIdleState>();
                     return;
                 }

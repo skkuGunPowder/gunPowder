@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
@@ -142,6 +143,12 @@ public class PlayerStat : MonoBehaviour
         }
     }
 
+    public void RPC_SetFacingDirection(int direction)
+    {
+        SetFacingDirection(direction);
+    }
+
+    [PunRPC]
     public void SetFacingDirection(int direction)
     {
         _facingDirection = direction;
