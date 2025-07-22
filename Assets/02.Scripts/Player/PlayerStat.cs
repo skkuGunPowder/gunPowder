@@ -196,11 +196,12 @@ public class PlayerStat : MonoBehaviour
     public void DecreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount -= amount;
+        /*
         if(_currentPlayerGunPowderCount <= 0)
         {
             _currentPlayerGunPowderCount = 0;
             OnGunPowderEmpty?.Invoke();
-        }
+        }*/
     }
 
     public void IncreseDamagedCount()

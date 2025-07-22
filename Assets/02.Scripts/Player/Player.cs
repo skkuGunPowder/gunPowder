@@ -218,6 +218,7 @@ public class Player : MonoBehaviour, IDamagable
         return _bombSpawnPointList[(int)spawnPoint];
     }
 
+    [PunRPC]
     public void SetAnimatorTrigger(string triggerName)
     {
         foreach (Animator animator in _myAnimatorList)
@@ -238,6 +239,7 @@ public class Player : MonoBehaviour, IDamagable
         PhotonView.RPC(nameof(SetAnimatorTrigger), RpcTarget.All, triggerName);
     }
 
+    [PunRPC]
     public void ResetAnimatorTrigger(string triggerName)
     {
         if(!PhotonNetwork.IsMasterClient)
