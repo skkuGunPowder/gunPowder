@@ -9,6 +9,8 @@ public enum EProperties
     IsLocked,
     Password,
     PlayerList,
+    IsDead,
+    IsLoad,
     
     Count
 }

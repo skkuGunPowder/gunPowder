@@ -80,8 +80,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
             OnDataChanged?.Invoke();
         }
         
-        SetReady();
-        Debug.Log($"{PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"]}");
+        SetProperties();
         SetCurrentMap();
     }
 
@@ -90,9 +89,13 @@ public class RoomManager : MonoBehaviourPunCallbacks
         PhotonNetwork.Instantiate("PlayerTest", SpawnPoint.position, Quaternion.identity, 0);
     }
     // 플레이어가 레디를 했는지 체크했는지 알아보는 커스텀 프로퍼티
-    private void SetReady()
+    private void SetProperties()
     {
-        Hashtable ready = new Hashtable { { $"{EProperties.IsReady}", false } };
+        Hashtable ready = new Hashtable
+        {
+            { EProperties.IsReady.ToString(), false },
+            { EProperties.IsLoad.ToString() , false }
+        };
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
     }
     // 현재 방의 맵이 무엇인가?
@@ -159,6 +162,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer,Hashtable changedProps)
     {
+        Debug.Log("바뀜");
         if (changedProps.ContainsKey($"{EProperties.IsReady}"))
         {
             OnReadyChanged?.Invoke();

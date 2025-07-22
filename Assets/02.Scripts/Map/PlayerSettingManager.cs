@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -47,6 +48,13 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
         
         // 플레이어 생성
         SpawnPlayer();
+        
+        Hashtable load = new Hashtable()
+        {
+            { EProperties.IsLoad.ToString(), true },
+        };
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(load); 
         // 플레이어 스탯 추가해주기
     }
     
@@ -91,13 +99,14 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
         
         
     }
-
-    public void OnClickReduce(int value)
+    
+    [PunRPC]
+    public void OnClickReduce(int gunpowder, int life, int value, PhotonMessageInfo info)
     {
-        // if (_photonView.IsMine == false)
-        // {
-        //     return;   
-        // }
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
         
         Gunpowder -= value;
         
@@ -107,26 +116,31 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
             Gunpowder = 100;
         }
         
-        TakeDamage(Gunpowder, Life);
+        _photonView.RPC(nameof(RPC_RequestDamage),RpcTarget.All, gunpowder, life, info.Sender.ActorNumber);
     }
-    public void TakeDamage(int gunpowder, int life)
+    public void RequestTakeDamage(int gunpowder, int life, int value)
     {
-        _photonView.RPC(nameof(RPC_TakeDamage),RpcTarget.MasterClient, gunpowder, life);
+        if (_photonView.IsMine == false)
+        {
+            return;
+        }
+        _photonView.RPC(nameof(OnClickReduce),RpcTarget.MasterClient, gunpowder, life, value);
     }
+    
     [PunRPC]
     public void RPC_RequestDamage(int gunpowder, int life, int playerNumber)
     {
         OnDataChanged?.Invoke(playerNumber, gunpowder, life);
     }
-    [PunRPC]
-    public void RPC_TakeDamage(int gunpowder, int life, PhotonMessageInfo info)
-    {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;    
-        }
-        
-        _photonView.RPC(nameof(RPC_RequestDamage), RpcTarget.All, gunpowder, life, info.Sender.ActorNumber);
-    }
+    // [PunRPC]
+    // public void RPC_TakeDamage(int gunpowder, int life, int playerNumber)
+    // {
+    //     if (_photonView.IsMine == false)
+    //     {
+    //         return;    
+    //     }
+    //     
+    //     _photonView.RPC(nameof(RPC_RequestDamage), RpcTarget.All, gunpowder, life, playerNumber);
+    // }
     
 }

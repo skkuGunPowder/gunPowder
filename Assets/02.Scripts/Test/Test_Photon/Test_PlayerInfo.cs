@@ -1,28 +1,43 @@
 using System;
 using Photon.Pun;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using RaycastPro.RaySensors2D;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Test_PlayerInfo : MonoBehaviour
 {
-    public BasicRay2D Ray2D;
 
+    public float timer;
+    private bool _test = false;
 
-    public void Update()
+    private void Update()
     {
-        if (Ray2D.Cast())
+        timer += Time.deltaTime;
+        if (timer == 5f)
         {
-            
+            Generate();
         }
     }
 
-    private void Awake()
+    public void Generate()
     {
-        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"]);
-        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.IsLocked}"]);
-        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"]);
-        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"]);
-        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Password}"]);
-        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"]);
+        PhotonNetwork.Instantiate("Player", new Vector3(0, 5, 0), quaternion.identity, 0);
     }
+
+ 
+    public void OnClickChanged()
+    {
+        Hashtable load = new Hashtable()
+        {
+            { EProperties.IsLoad.ToString() , !_test }, 
+        };
+        
+        PhotonNetwork.LocalPlayer.SetCustomProperties(load);
+        
+        _test = !_test;
+        Debug.Log($"{load[EProperties.IsLoad.ToString()]}");
+        Debug.Log("bool");
+    }
+    
 }
