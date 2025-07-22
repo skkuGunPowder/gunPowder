@@ -133,14 +133,14 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.SetFacingDirection(direction);
     }
 
-    public void TakeDamage(int damage, Transform attacker, bool isFallingOut)
+    public void TakeDamage(int damage, Transform attackerBomb, Transform attacker, bool isFallingOut)
     {
         // TODO: 피격 처리
         // 피 달기
         _playerStat.DecreaseGunPowderCount(damage);
 
         // 폭탄 맞은 위치 반 대 방향으로 건파우터 낙출
-        ReleaseGunPowder(attacker, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+        ReleaseGunPowder(attackerBomb, attacker, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
         
         // 피격 횟수 증가
         _playerStat.IncreseDamagedCount();
@@ -152,7 +152,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
-    public void ReleaseGunPowder(Transform explosionOrigin, int count = 3, float spreadAngle = 30f,
+    public void ReleaseGunPowder(Transform explosionOrigin, Transform attacker, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
         Vector3 baseDir = (transform.position - explosionOrigin.position).normalized;
@@ -165,7 +165,8 @@ public class Player : MonoBehaviourPun, IDamagable
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
             GunPowder gunPowder = Instantiate(GunPowderPrefab, spawnPos, Quaternion.identity).GetComponent<GunPowder>();
-            gunPowder.GetComponent<GunPowder>().SetTarget(explosionOrigin);
+            //
+            gunPowder.GetComponent<GunPowder>().SetTarget(attacker);
 
             //TODO: isFallingout에 따라 뭔가 설정
             if (isFallingOut)

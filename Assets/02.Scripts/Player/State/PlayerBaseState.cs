@@ -119,6 +119,18 @@ public class PlayerBaseState : MonoState
         _owner.ResetGunPowderDecreaseWithoutAttackTimer();
     }
 
+    private void SpawnAndRpcBomb(
+        string prefabName,
+        Transform bombSpawnPoint,
+        string rpcMethodName,
+        object[] rpcArgs)
+    {
+        GameObject bomb = InstantiateBomb(prefabName, bombSpawnPoint);
+        Bomb bombComponent = bomb.GetComponent<Bomb>();
+        bombComponent.SetOwner(_owner.transform);
+        bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
+    }
+
     /// <summary>
     /// 일반 폭탄을 배치하고 자동으로 Reset을 호출합니다.
     /// </summary>
@@ -130,23 +142,18 @@ public class PlayerBaseState : MonoState
             return;
         }
 
-        Transform bombSpawnPoint;
-        if (spawnPoint.HasValue)
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
-        }
-        else
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint();
-        }
-        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
-        Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.PhotonView.RPC(nameof(bombComponent.PlaceBomb), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
+        Transform bombSpawnPoint = spawnPoint.HasValue
+            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
+            : _owner.GetBombSpawnPoint();
+        SpawnAndRpcBomb(
+            "BasicBomb",
+            bombSpawnPoint,
+            nameof(Bomb.PlaceBomb),
+            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
+        );
 
         if (_owner.PlayerStat.IsJumping)
         {
-            // 점프 공격
             _owner.RPC_SetAnimatorTrigger("PlaceAttack");
         }
         else
@@ -168,23 +175,18 @@ public class PlayerBaseState : MonoState
             return;
         }
 
-        Transform bombSpawnPoint;
-        if (spawnPoint.HasValue)
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
-        }
-        else
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint();
-        }
-        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
-        Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.PhotonView.RPC(nameof(bombComponent.ThrowBomb), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
+        Transform bombSpawnPoint = spawnPoint.HasValue
+            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
+            : _owner.GetBombSpawnPoint();
+        SpawnAndRpcBomb(
+            "BasicBomb",
+            bombSpawnPoint,
+            nameof(Bomb.ThrowBomb),
+            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
+        );
 
         if (_owner.PlayerStat.IsJumping)
         {
-            // 점프 공격
             _owner.RPC_SetAnimatorTrigger("JumpAttack");
         }
         else
@@ -208,23 +210,18 @@ public class PlayerBaseState : MonoState
             return;
         }
 
-        Transform bombSpawnPoint;
-        if (spawnPoint.HasValue)
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
-        }
-        else
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint();
-        }
-        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
-        Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.PhotonView.RPC(nameof(bombComponent.PlaceBomb), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
+        Transform bombSpawnPoint = spawnPoint.HasValue
+            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
+            : _owner.GetBombSpawnPoint();
+        SpawnAndRpcBomb(
+            "Missile",
+            bombSpawnPoint,
+            nameof(Bomb.PlaceBomb),
+            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
+        );
 
         if (_owner.PlayerStat.IsJumping)
         {
-            // 점프 공격
             _owner.RPC_SetAnimatorTrigger("JumpAttack");
         }
         else
@@ -247,23 +244,18 @@ public class PlayerBaseState : MonoState
             return;
         }
 
-        Transform bombSpawnPoint;
-        if (spawnPoint.HasValue)
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
-        }
-        else
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint();
-        }
-        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
-        Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.PhotonView.RPC(nameof(bombComponent.ThrowBomb), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
+        Transform bombSpawnPoint = spawnPoint.HasValue
+            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
+            : _owner.GetBombSpawnPoint();
+        SpawnAndRpcBomb(
+            "Missile",
+            bombSpawnPoint,
+            nameof(Bomb.ThrowBomb),
+            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
+        );
 
         if (_owner.PlayerStat.IsJumping)
         {
-            // 점프 공격
             _owner.RPC_SetAnimatorTrigger("JumpAttack");
         }
         else
@@ -286,19 +278,15 @@ public class PlayerBaseState : MonoState
             return;
         }
 
-        Transform bombSpawnPoint;
-        if (spawnPoint.HasValue)
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
-        }
-        else
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint();
-        }
-        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
-        Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.PhotonView.RPC(nameof(bombComponent.ThrowBombStraight), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
+        Transform bombSpawnPoint = spawnPoint.HasValue
+            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
+            : _owner.GetBombSpawnPoint();
+        SpawnAndRpcBomb(
+            "BasicBomb",
+            bombSpawnPoint,
+            nameof(Bomb.ThrowBombStraight),
+            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
+        );
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -339,19 +327,15 @@ public class PlayerBaseState : MonoState
             return;
         }
 
-        Transform bombSpawnPoint;
-        if (spawnPoint.HasValue)
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
-        }
-        else
-        {
-            bombSpawnPoint = _owner.GetBombSpawnPoint();
-        }
-        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
-        Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.PhotonView.RPC(nameof(bombComponent.ThrowBombStraight), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
+        Transform bombSpawnPoint = spawnPoint.HasValue
+            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
+            : _owner.GetBombSpawnPoint();
+        SpawnAndRpcBomb(
+            "Missile",
+            bombSpawnPoint,
+            nameof(Bomb.ThrowBombStraight),
+            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
+        );
 
         if (_owner.PlayerStat.IsJumping)
         {
