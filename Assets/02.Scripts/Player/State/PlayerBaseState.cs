@@ -134,7 +134,7 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = InstantiateBomb(_owner.NormalBombPrefab, bombSpawnPoint);
+        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
         bomb.GetComponent<Bomb>().PlaceBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
@@ -160,13 +160,12 @@ public class PlayerBaseState : MonoState
         if (spawnPoint.HasValue)
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
-            
         }
         else
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = InstantiateBomb(_owner.NormalBombPrefab, bombSpawnPoint);
+        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
         bomb.GetComponent<Bomb>().ThrowBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
@@ -199,7 +198,7 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = InstantiateBomb(_owner.SpecialBombPrefab, bombSpawnPoint);
+        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
         bomb.GetComponent<Bomb>().PlaceBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
@@ -231,7 +230,7 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = InstantiateBomb(_owner.SpecialBombPrefab, bombSpawnPoint);
+        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
         bomb.GetComponent<Bomb>().ThrowBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
@@ -263,7 +262,7 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = InstantiateBomb(_owner.NormalBombPrefab, bombSpawnPoint);
+        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
         bomb.GetComponent<Bomb>().ThrowBombStraight(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
@@ -309,7 +308,7 @@ public class PlayerBaseState : MonoState
         {
             bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
-        GameObject bomb = InstantiateBomb(_owner.SpecialBombPrefab, bombSpawnPoint);
+        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
         bomb.GetComponent<Bomb>().ThrowBombStraight(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
@@ -340,9 +339,9 @@ public class PlayerBaseState : MonoState
         SetLastSpecialBombTime();
     }
 
-    private GameObject InstantiateBomb(GameObject bombPrefab, Transform bombSpawnPoint)
+    private GameObject InstantiateBomb(string prefabName, Transform bombSpawnPoint)
     {
-        GameObject bomb = Instantiate(bombPrefab, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
+        GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
         return bomb;
     }
 
