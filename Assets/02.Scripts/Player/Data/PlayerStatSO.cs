@@ -35,6 +35,11 @@ public class PlayerStatSO : ScriptableObject
     [SerializeField] private float _recoilSpeed;
     public float RecoilSpeed => _recoilSpeed;
 
+    [SerializeField] private float _normalRecoilTime;
+    public float NormalRecoilTime => _normalRecoilTime;
+    [SerializeField] private float _normalRecoilSpeed;
+    public float NormalRecoilSpeed => _normalRecoilSpeed;
+
     [SerializeField] private int _maxGunPoderCount;
     public int MaxGunPoderCount => _maxGunPoderCount;
     [SerializeField] private float _gunPowderDecreaseTime;

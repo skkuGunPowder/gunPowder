@@ -38,6 +38,9 @@ Twitter - http://www.twitter.com/lpfonseca
 
 ## CHANGELOG ##
 
+2.9.8
+- Core - Minor tweaks. Support for Unity 6.0, 6.1 and 6.2 Beta
+
 2.9.7
 - Core - Minor tweaks. Support for Unity 6 Beta
 

@@ -4,6 +4,7 @@ using UnityEngine;
 public class PlayerDashState : PlayerBaseState
 {
     private float _dashTimer = 0f;
+    private float _originalGravityScale;
 
     public override void OnEnter()
     {
@@ -14,32 +15,37 @@ public class PlayerDashState : PlayerBaseState
         // 플레이어 상태
         _owner.PlayerStat.IsRunning = true;
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
+        _originalGravityScale = _owner.Rigidbody2D.gravityScale;
+        _owner.Rigidbody2D.gravityScale = 0f;
 
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Dash");
+        _owner.RPC_SetAnimatorTrigger("Dash");
     }
     public override void OnExit()
     {
         base.OnExit();
-        _owner.ResetAnimatorTrigger("Dash");
+        _owner.Rigidbody2D.gravityScale = _originalGravityScale;
+        _owner.RPC_ResetAnimatorTrigger("Dash");
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    public override void Update()
+    public override void MineUpdate()
     {
         _dashTimer += Time.deltaTime;
 
         // 1. 대시 이동(관성)
-        _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection, 0, 0)
-                                    * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime);
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        velocity.x = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed;
+        velocity.y = 0;
+        _owner.Rigidbody2D.linearVelocity = velocity;
 
         int dir = _owner.PlayerStat.FacingDirection;
         // 2. 대시 중 반대 방향 키 입력 체크 → BreakState로 전환
         if(Input.GetKeyDown(KeyCode.RightArrow) && dir == -1 || Input.GetKeyDown(KeyCode.LeftArrow) && dir == 1)
         {
-            if(!IsGrounded())
+            if(!IsGrounded2D())
             {
                 return;
             }
@@ -62,7 +68,7 @@ public class PlayerDashState : PlayerBaseState
             // 아무 키도 안 누름 → Idle
             else
             {
-                if(IsGrounded())
+                if(IsGrounded2D())
                 {
                     Debug.Log("DashState: 입력 없음 - IdleState로 전환");
                     _playerFSM.ChangeState<PlayerIdleState>();
@@ -71,7 +77,7 @@ public class PlayerDashState : PlayerBaseState
                 else
                 {
                     _owner.PlayerStat.IsFallingFromLedge = true;
-                    _owner.SetAnimatorTrigger("Dash");
+                    _owner.SetAnimatorTrigger("Fall");
                     _playerFSM.ChangeState<PlayerJumpState>();
                     return;
                 }

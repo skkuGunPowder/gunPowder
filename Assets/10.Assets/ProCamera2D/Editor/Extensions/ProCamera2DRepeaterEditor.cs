@@ -91,7 +91,7 @@ namespace Com.LuisPedroFonseca.ProCamera2D
             if (proCamera2DRepeater.CameraToUse == null)
                 proCamera2DRepeater.CameraToUse = proCamera2DRepeater.ProCamera2D.GameCamera;
 
-            var parallax = FindObjectOfType<ProCamera2DParallax>();
+            var parallax = FindAnyObjectByType<ProCamera2DParallax>();
             if (parallax != null)
             {
                 _tooltip = new GUIContent("Camera To Use", "Choose what camera is rendering the object to repeat.");

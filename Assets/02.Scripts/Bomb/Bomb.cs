@@ -1,48 +1,108 @@
+using DG.Tweening;
 using UnityEngine;
 
-public class Bomb : MonoBehaviour
+public class Bomb : MonoBehaviour, IBomb
 {
-    private float _bombCoolTime = 1f;
-    public float BombCoolTime => _bombCoolTime;
+    public Explosion ExplosionPrefab;
 
+    protected Rigidbody2D _rigidBody;
+    protected BombStat _stat;
+    protected Transform _fireTransform;
+    protected Vector3 _fireDirection;
+    protected float _currentSpeed;
 
-    private void Update()
+    private float _fuzeTimer;
+
+    private void Awake()
     {
-        transform.localPosition += transform.right  * 10f * Time.deltaTime;
+        Init();
     }
 
-    // 폭탄 두기기
-    public void PlaceBomb(Transform transform)
+    protected virtual void Update()
     {
-        Debug.Log($"폭탄 두기 {transform.localPosition} {transform.localEulerAngles.z}");
+        if(_stat == null)
+        {
+            return;
+        }
+        
+        _fuzeTimer += Time.deltaTime;
+        if (_fuzeTimer >= _stat.FuzeTime)
+        {
+            Explode();
+        }
+    }
+
+    protected virtual void Init()
+    {
+        _rigidBody = GetComponent<Rigidbody2D>();
+    }
+
+    protected void SetStat(string id)
+    {
+        _stat = ItemDatabase.Instance.GetStat<BombStat>(id);
+    }
+
+    protected virtual void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.TryGetComponent(out Bomb otherBomb))
+        {
+            int otherPriority = otherBomb._stat.Priority;
+            if (_stat.Priority <= otherPriority)
+            {
+                Explode();
+            }
+            else if (_stat.Priority - otherPriority < 2)
+            {
+                _currentSpeed /= 2;
+                return;
+            }
+        }
+    }
+
+    public virtual void Explode()
+    {
+        // 폭발 프리펩 인스턴싱
+        if (ExplosionPrefab == null)
+        {
+            Debug.Log("펑(억장 터지는 소리: ExposionPrefab == null)");
+        }
+        else
+        {
+            Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+            explosion.Explode(_stat.IsFallingOut);
+        }
+
+        Destroy(gameObject);
+    }
+
+
+    // 폭탄 두기
+    public virtual void PlaceBomb(Transform fireTransform)
+    {
+        
     }
 
     // 폭탄 던지기 (곡사)
-    public void ThrowBomb(Transform transform)
+    public virtual void ThrowBomb(Transform fireTransform)
     {
-        Debug.Log($"폭탄 던지기 {transform.localPosition} {transform.localEulerAngles.z}");
+        
     }
 
     // 폭탄 직선으로 던지기
-    public void ThrowBombStraight(Transform transform)
+    public virtual void ThrowBombStraight(Transform fireTransform)
     {
-        Debug.Log($"폭탄 직선으로 던지기 {transform.localPosition} {transform.localEulerAngles.z}");
+        
     }
 
     // 폭탄 부스트
-    public void BoostBomb(Transform transform)
+    public virtual void BoostBomb(Transform fireTransform)
     {
-        Debug.Log($"폭탄 부스트 {transform.localPosition} {transform.localEulerAngles.z}");
+       
     }
 
     // 폭탄 내려 찍기
-    public void SmashBomb(Transform transform)
+    public virtual void SmashBomb(Transform fireTransform)
     {
-        Debug.Log($"폭탄 내려 찍기 {transform.localPosition} {transform.localEulerAngles.z}");
-    }
-
-    public void SetLastBombTime()
-    {
-        _bombCoolTime = Time.time;
+       
     }
 }

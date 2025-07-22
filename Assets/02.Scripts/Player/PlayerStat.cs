@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,6 +41,11 @@ public class PlayerStat : MonoBehaviour
 
     [SerializeField] private float _recoilSpeed;
     public float RecoilSpeed { get => _recoilSpeed; set => _recoilSpeed = value; }
+
+    [SerializeField] private float _normalRecoilTime;
+    public float NormalRecoilTime { get => _normalRecoilTime; set => _normalRecoilTime = value; }
+    [SerializeField] private float _normalRecoilSpeed;
+    public float NormalRecoilSpeed { get => _normalRecoilSpeed; set => _normalRecoilSpeed = value; }
 
 
 
@@ -95,7 +101,7 @@ public class PlayerStat : MonoBehaviour
     public float DamagedTime { get => _damagedTime; set => _damagedTime = value; }
 
     
-    
+    public event Action OnGunPowderEmpty;
     
     
     public bool IsFallingFromLedge = false;
@@ -105,7 +111,7 @@ public class PlayerStat : MonoBehaviour
         InitializeStats();
     }
 
-    private void InitializeStats()
+    public void InitializeStats()
     {
         if (_playerStatSO != null)
         {
@@ -119,6 +125,8 @@ public class PlayerStat : MonoBehaviour
             _maxJumpCount = _playerStatSO.MaxJumpCount;
             _recoilTime = _playerStatSO.RecoilTime;
             _recoilSpeed = _playerStatSO.RecoilSpeed;
+            _normalRecoilTime = _playerStatSO.NormalRecoilTime;
+            _normalRecoilSpeed = _playerStatSO.NormalRecoilSpeed;
             _attackPenaltyTime = _playerStatSO.AttackPenaltyTime;
             _attackPenaltyAmount = _playerStatSO.AttackPenaltyAmount;
             _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;
@@ -188,7 +196,21 @@ public class PlayerStat : MonoBehaviour
     public void DecreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount -= amount;
+        /*
+        if(_currentPlayerGunPowderCount <= 0)
+        {
+            _currentPlayerGunPowderCount = 0;
+            OnGunPowderEmpty?.Invoke();
+        }*/
     }
 
-    
+    public void IncreseDamagedCount()
+    {
+        _currentPlayerDamagedCount++;
+    }
+
+    public void ResetDamagedCount()
+    {
+        _currentPlayerDamagedCount = 0;
+    }
 }

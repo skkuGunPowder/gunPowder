@@ -7,6 +7,7 @@ public class PlayerJumpDashState : PlayerBaseState
     private float _yVelocity = 0f;
     private float _xVelocity = 0f;
     private float _gravity = -40f;
+    private float _originalGravityScale;
 
     public override void OnEnter()
     {
@@ -16,25 +17,25 @@ public class PlayerJumpDashState : PlayerBaseState
         _owner.PlayerStat.IsJumping = true;
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
         _owner.PlayerStat.IncrementJumpDashCount();
+        _originalGravityScale = _owner.Rigidbody2D.gravityScale;
+        _owner.Rigidbody2D.gravityScale = 0f;
         
         _yVelocity = 0f;
         _xVelocity = 0f;
         _dashTimer = 0f;
 
-        // 애니메이션 재생
-        // _owner.MyAnimator.SetTrigger("Dash");
     }
     public override void OnExit()
     {
         base.OnExit();
+        _owner.Rigidbody2D.gravityScale = _originalGravityScale;
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    public override void Update()
+    public override void MineUpdate()
     {
-        
         // 대쉬 시간 종료 후 점프 상태와 같이 움직임
         if(_dashTimer >= _owner.PlayerStat.DashTime)
         {
@@ -44,8 +45,10 @@ public class PlayerJumpDashState : PlayerBaseState
         {
             // 대쉬 이동후 낙하
             _dashTimer += Time.deltaTime;
-            _owner.CharacterController.Move(new Vector3(_owner.PlayerStat.FacingDirection, 0, 0) 
-                                            * _owner.PlayerStat.MyMoveSpeed * Time.deltaTime);
+            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+            velocity.x = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed;
+            velocity.y = 0;
+            _owner.Rigidbody2D.linearVelocity = velocity;
         }
     }
 }

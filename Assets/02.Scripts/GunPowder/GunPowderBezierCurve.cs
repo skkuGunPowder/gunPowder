@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GunPowderBezierCurve : MonoBehaviour
 {
-    private Vector3[] _points = new Vector3[4];
+    private Vector2[] _points = new Vector2[4];
 
     [SerializeField]
     private float _timerMax = 0;
@@ -28,8 +28,28 @@ public class GunPowderBezierCurve : MonoBehaviour
     private bool _bezierFinished = false;
     private float _followSpeed = 5f;
 
-    private void Start()
+    //private const int RANDOM_SEED = 1234567890;
+
+    private Rigidbody2D _rigidbody2D;
+    private BoxCollider2D _collider;
+
+    private void OnEnable()
     {
+        //Random.InitState(RANDOM_SEED);
+
+        _rigidbody2D = GetComponent<Rigidbody2D>();
+        _collider = GetComponent<BoxCollider2D>();
+
+        if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
+        gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = false;
+
+        // Player 레이어를 ExcludeLayers에서 제거
+        int playerLayer = LayerMask.NameToLayer("Player");
+        if (_collider != null)
+            _collider.excludeLayers &= ~(1 << playerLayer);
+        if (_rigidbody2D != null)
+            _rigidbody2D.excludeLayers &= ~(1 << playerLayer);
+
         _start = transform;
         _timerCurrent = 0f;
         // TODO: 경우에 따라 달라질듯
@@ -40,6 +60,7 @@ public class GunPowderBezierCurve : MonoBehaviour
         _speed = _gunPowderSpeed;
         Init(_start, _end, _speed, _newPointDistanceFromStart, _newPointDistanceFromEnd);
     }
+    
 
     public void Init(Transform start, Transform end, float speed, float newPointDistanceFromStart, float newPointDistanceFromEnd)
     {
@@ -54,19 +75,23 @@ public class GunPowderBezierCurve : MonoBehaviour
         // 시작점을 기준으로 랜덤 포인트 지정
         _points[1] = start.position + 
             newPointDistanceFromStart * Random.Range(-1.0f, 1.0f) * start.right +       // X (좌, 우 전체)
-            newPointDistanceFromStart * Random.Range(-0.15f, 1.0f) * start.up +          // Y (아래쪽 조금, 위쪽 전체)
-            newPointDistanceFromStart * Random.Range(-1.0f, -0.8f) * start.forward;      // Z (뒤 쪽만)
+            newPointDistanceFromStart * Random.Range(-0.15f, 1.0f) * start.up;          // Y (아래쪽 조금, 위쪽 전체)
 
         // 끝점을 기준으로 랜덤 포인트 지정
         _points[2] = end.position + 
             newPointDistanceFromEnd * Random.Range(-1.0f, 1.0f) * end.right +       // X (좌, 우 전체)
-            newPointDistanceFromEnd * Random.Range(-1.0f, 1.0f) * end.up +          // Y (아래, 위 전체체)
-            newPointDistanceFromEnd * Random.Range(0.8f, 1.0f) * end.forward;      // Z (앞 쪽만)
+            newPointDistanceFromEnd * Random.Range(-1.0f, 1.0f) * end.up;            // Y (아래, 위 전체체)
 
         // 끝점
         _points[3] = end.position;
 
         transform.position = start.position;
+
+        BoxCollider2D boxCollider = GetComponent<BoxCollider2D>();
+        if (boxCollider != null)
+        {
+            boxCollider.isTrigger = true;
+        }
     }
 
     private void Update()
@@ -79,9 +104,11 @@ public class GunPowderBezierCurve : MonoBehaviour
                 return;
             }
 
-            _points[3] = GameObject.FindGameObjectWithTag("Player").transform.position;
+            var playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj == null) return;
+            _points[3] = playerObj.transform.position;
             _timerCurrent += Time.deltaTime * _speed;
-            transform.position = BezierCurve.BezierCurve3D(_points[0], _points[3], _points[1], _points[2], _timerCurrent/_timerMax);
+            transform.position = BezierCurve.BezierCurve2D(_points[0], _points[3], _points[1], _points[2], _timerCurrent/_timerMax);
         }
         else
         {
@@ -90,6 +117,14 @@ public class GunPowderBezierCurve : MonoBehaviour
             float followSpeed = _speed * _followSpeed; // 직선 이동 속도 (베지어보다 약간 빠르게)
             Vector3 dir = (player.position - transform.position).normalized;
             transform.position += dir * followSpeed * Time.deltaTime;
+        }
+    }
+
+    void OnTriggerStay2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("Player"))
+        {
+            Destroy(gameObject);
         }
     }
 }

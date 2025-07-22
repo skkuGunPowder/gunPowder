@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class PlayerIdleState : PlayerBaseState
 {
+    private bool _firstEnter = false;
 
     public override void OnEnter()
     {
@@ -14,22 +15,29 @@ public class PlayerIdleState : PlayerBaseState
         _owner.PlayerStat.JumpCount = 0;
         _owner.PlayerStat.ResetJumpDashCount();
 
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        velocity.x = 0f;
+        _owner.Rigidbody2D.linearVelocity = velocity;
 
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Idle");
+        if(_firstEnter)
+        {
+            _owner.RPC_SetAnimatorTrigger("Idle");
+        }
+        _firstEnter = true;
     }
     public override void OnExit()
     {
         base.OnExit();
-        _owner.ResetAnimatorTrigger("Idle");
+        _owner.RPC_ResetAnimatorTrigger("Idle");
     }
 
     /// <summary>
     /// 실제 행동 로직
     /// </summary>
-    public override void Update()
+    public override void MineUpdate()
     {
-        base.Update();
+        base.MineUpdate();
         IdleMove();
         
         IdleAttack();
@@ -76,7 +84,6 @@ public class PlayerIdleState : PlayerBaseState
                     PlaceNormalBomb(EBombSpawnPoint.Left);
                 }
             }
-            SetLastNormalBombTime();
         }
     }
 
@@ -111,7 +118,6 @@ public class PlayerIdleState : PlayerBaseState
                     PlaceSpecialBomb(EBombSpawnPoint.Left);
                 }
             }
-            SetLastSpecialBombTime();
         }
     }
 
@@ -120,9 +126,6 @@ public class PlayerIdleState : PlayerBaseState
     /// </summary>
     private void IdleMove()
     {
-        _owner.CharacterController.Move(new Vector3(0, -9f, 0));
-;
-
         // 이동키를 받으면 걷기 상태로 전환
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
         || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))

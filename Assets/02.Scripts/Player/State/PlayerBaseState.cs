@@ -1,4 +1,6 @@
 using System;
+using Photon.Pun;
+using RaycastPro.RaySensors2D;
 using RobustFSM.Base;
 using UnityEngine;
 
@@ -10,6 +12,14 @@ public class PlayerBaseState : MonoState
     private float _lastNormalBombTime = 0f;
     private float _lastSpecialBombTime = 0f;
 
+    public float BombCoolTime = 0.2f;
+    protected BoxRay2D _groundRay2D;
+
+    protected float _normalRecoilForce = 10f;
+    protected float _strongRecoilForce = 20f;
+    protected float _yRecoilForce = 5f;
+
+
 
 
     public override void OnEnter()
@@ -17,6 +27,7 @@ public class PlayerBaseState : MonoState
         base.OnEnter();
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
+        _groundRay2D = _owner.GroundRay2D;
         Debug.Log($"Enter {this.GetType().Name} State");
 
         //
@@ -37,15 +48,23 @@ public class PlayerBaseState : MonoState
         _playerFSM.ChangeState<PlayerDamagedState>();
     }
 
-    public virtual void Update()
+    public virtual void MineUpdate()
     {
         JumpInput();
     }
 
+    private void Update()
+    {
+        if(_owner.PhotonView.IsMine)
+        {
+            MineUpdate();
+        }
+    }
     // 하위에서 사용하고 싶은 것만 사용한다.
     protected virtual void JumpInput()
     {
-        if (_playerFSM.IsCurrentState<PlayerDashState>() || _playerFSM.IsCurrentState<PlayerJumpDashState>())
+        if (_playerFSM.IsCurrentState<PlayerDashState>() 
+        || _playerFSM.IsCurrentState<PlayerJumpDashState>())
             return;
 
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
@@ -55,22 +74,21 @@ public class PlayerBaseState : MonoState
         }
     }
 
-    // Raycast로 바닥 체크
-    protected virtual bool IsGrounded()
+    // 2D Raycast로 바닥 체크
+    protected virtual bool IsGrounded2D()
     {
-        float rayDistance = 0.2f;
-        Vector3 origin = _owner.transform.position;
-        var cc = _owner.GetComponent<CharacterController>();
-        if (cc != null)
+        if(_groundRay2D == null)
         {
-            rayDistance = cc.height / 2f + 0.1f;
+            return false;
         }
-        return Physics.Raycast(origin, Vector3.down, rayDistance);
+
+        _groundRay2D.Cast();
+        return _groundRay2D.Performed;
     }
 
     protected virtual bool CanNormalBomb()
     {
-        if(_owner.AttackTimer - _lastNormalBombTime < _owner.NormalBomb.BombCoolTime)
+        if(_owner.AttackTimer - _lastNormalBombTime < BombCoolTime)
         {
             return false;
         }
@@ -79,7 +97,7 @@ public class PlayerBaseState : MonoState
 
     protected virtual bool CanSpecialBomb()
     {
-        if(_owner.AttackTimer - _lastSpecialBombTime < _owner.SpecialBomb.BombCoolTime)
+        if(_owner.AttackTimer - _lastSpecialBombTime < BombCoolTime)
         {
             return false;
         }
@@ -107,25 +125,29 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void PlaceNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.NormalBomb.PlaceBomb(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
+        bomb.GetComponent<Bomb>().PlaceBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             // 점프 공격
-            _owner.SetAnimatorTrigger("JumpAttack");
+            _owner.RPC_SetAnimatorTrigger("PlaceAttack");
         }
         else
         {
-            _owner.SetAnimatorTrigger("Attack");
+            _owner.RPC_SetAnimatorTrigger("PlaceAttack");
         }
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastNormalBombTime();
     }
 
     /// <summary>
@@ -134,25 +156,31 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.NormalBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
+        bomb.GetComponent<Bomb>().ThrowBomb(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             // 점프 공격
-            _owner.SetAnimatorTrigger("JumpAttack");
+            _owner.RPC_SetAnimatorTrigger("JumpAttack");
         }
         else
         {
-            _owner.SetAnimatorTrigger("Attack");
+            _owner.RPC_SetAnimatorTrigger("Attack");
         }
+        
+        ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastNormalBombTime();
     }
 
     /// <summary>
@@ -161,15 +189,30 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void PlaceSpecialBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.SpecialBomb.PlaceBomb(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
+        bomb.GetComponent<Bomb>().PlaceBomb(bombSpawnPoint);
+
+        if (_owner.PlayerStat.IsJumping)
+        {
+            // 점프 공격
+            _owner.RPC_SetAnimatorTrigger("JumpAttack");
+        }
+        else
+        {
+            _owner.RPC_SetAnimatorTrigger("Attack");
+        }
+
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastSpecialBombTime();
     }
 
     /// <summary>
@@ -178,15 +221,30 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowSpecialBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.SpecialBomb.ThrowBomb(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
+        bomb.GetComponent<Bomb>().ThrowBomb(bombSpawnPoint);
+
+        if (_owner.PlayerStat.IsJumping)
+        {
+            // 점프 공격
+            _owner.RPC_SetAnimatorTrigger("JumpAttack");
+        }
+        else
+        {
+            _owner.RPC_SetAnimatorTrigger("Attack");
+        }
+        ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastSpecialBombTime();
     }
 
     /// <summary>
@@ -195,39 +253,44 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowStraightNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.NormalBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
+        bomb.GetComponent<Bomb>().ThrowBombStraight(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             if(Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SetAnimatorTrigger("JumpUpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("JumpUpStrongAttack");
             }
             else
             {
-                _owner.SetAnimatorTrigger("JumpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("JumpStrongAttack");
             }
         }
         else
         {
             if(Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SetAnimatorTrigger("UpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("UpStrongAttack");
             }
             else
             {
-                _owner.SetAnimatorTrigger("StrongAttack");
+                _owner.RPC_SetAnimatorTrigger("StrongAttack");
             }
         }
 
+        ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastNormalBombTime();
     }
 
     /// <summary>
@@ -236,38 +299,60 @@ public class PlayerBaseState : MonoState
     /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowStraightSpecialBomb(EBombSpawnPoint? spawnPoint = null)
     {
+        Transform bombSpawnPoint;
         if (spawnPoint.HasValue)
         {
-            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint(spawnPoint.Value));
+            bombSpawnPoint = _owner.GetBombSpawnPoint(spawnPoint.Value);
         }
         else
         {
-            _owner.SpecialBomb.ThrowBombStraight(_owner.GetBombSpawnPoint());
+            bombSpawnPoint = _owner.GetBombSpawnPoint();
         }
+        GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
+        bomb.GetComponent<Bomb>().ThrowBombStraight(bombSpawnPoint);
 
         if (_owner.PlayerStat.IsJumping)
         {
             if(Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SetAnimatorTrigger("JumpUpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("JumpUpStrongAttack");
             }
             else
             {
-                _owner.SetAnimatorTrigger("JumpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("JumpStrongAttack");
             }
         }
         else
         {
             if(Input.GetKey(KeyCode.UpArrow))
             {
-                _owner.SetAnimatorTrigger("UpStrongAttack");
+                _owner.RPC_SetAnimatorTrigger("UpStrongAttack");
             }
             else
             {
-                _owner.SetAnimatorTrigger("StrongAttack");
+                _owner.RPC_SetAnimatorTrigger("StrongAttack");
             }
         }
         
+        ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
         ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastSpecialBombTime();
+    }
+
+    private GameObject InstantiateBomb(string prefabName, Transform bombSpawnPoint)
+    {
+        GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
+        return bomb;
+    }
+
+    // 폭탄 반동 적용 함수
+    protected virtual void ApplyRecoil(Transform bombSpawnPoint, float recoilPower = 5f, float upPower = 1f)
+    {
+        if (_owner.Rigidbody2D == null) return;
+        // 폭탄 스폰 위치에서 플레이어까지의 방향 (x축 반대, y축 위)
+        Vector2 dir = (_owner.transform.position - bombSpawnPoint.position).normalized;
+        Vector2 recoil = new Vector2(dir.x, dir.y).normalized * recoilPower;
+        recoil.y += upPower;
+        _owner.Rigidbody2D.AddForce(recoil, ForceMode2D.Impulse);
     }
 }
