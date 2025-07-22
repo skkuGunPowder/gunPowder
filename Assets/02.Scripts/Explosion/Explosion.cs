@@ -18,10 +18,37 @@ public class Explosion : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
         {
-            if (other.TryGetComponent(out IDamagable damagableObject))
+            if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
             {
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, isFallingOut);
+                continue;
             }
+
+            if (other.TryGetComponent(out IDamagable damagableObject))
+                {
+                    damagableObject.TakeDamage(_stat.AttackPower, transform.position, isFallingOut);
+                    if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
+                    {
+                        AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
+                    }
+                }
         }
+    }
+
+    void AddExplosionForce2D(Rigidbody2D rb, float explosionForce, Vector2 explosionPosition, float explosionRadius)
+    {
+        Vector2 direction = rb.position - explosionPosition;
+        float distance = direction.magnitude;
+
+        // 폭발 반경 안에 있는 경우에만 적용
+        if (distance > explosionRadius)
+        {
+            return;
+        }
+
+        // 거리 비례로 감소하는 힘
+        float forceMagnitude = explosionForce * (1 - (distance / explosionRadius));
+        direction.Normalize();
+
+        rb.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
     }
 }
