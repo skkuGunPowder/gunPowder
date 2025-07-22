@@ -1,11 +1,12 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class Bomb : MonoBehaviour, IBomb
 {
-    public GameObject ExplosionPrefab;
+    public Explosion ExplosionPrefab;
 
     protected Rigidbody2D _rigidBody;
-    protected BombStat _bombStat;
+    protected BombStat _stat;
     protected Transform _fireTransform;
     protected Vector3 _fireDirection;
     protected float _currentSpeed;
@@ -19,13 +20,13 @@ public class Bomb : MonoBehaviour, IBomb
 
     protected virtual void Update()
     {
-        if(_bombStat == null)
+        if(_stat == null)
         {
             return;
         }
         
         _fuzeTimer += Time.deltaTime;
-        if (_fuzeTimer >= _bombStat.FuzeTime)
+        if (_fuzeTimer >= _stat.FuzeTime)
         {
             Explode();
         }
@@ -38,19 +39,19 @@ public class Bomb : MonoBehaviour, IBomb
 
     protected void SetStat(string id)
     {
-        _bombStat = ItemDatabase.Instance.GetStat<BombStat>(id);
+        _stat = ItemDatabase.Instance.GetStat<BombStat>(id);
     }
 
     protected virtual void OnCollisionEnter2D(Collision2D other)
     {
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
-            int otherPriority = otherBomb._bombStat.Priority;
-            if (_bombStat.Priority <= otherPriority)
+            int otherPriority = otherBomb._stat.Priority;
+            if (_stat.Priority <= otherPriority)
             {
                 Explode();
             }
-            else if (_bombStat.Priority - otherPriority < 2)
+            else if (_stat.Priority - otherPriority < 2)
             {
                 _currentSpeed /= 2;
                 return;
@@ -67,7 +68,8 @@ public class Bomb : MonoBehaviour, IBomb
         }
         else
         {
-            Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+            Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+            explosion.Explode(_stat.IsFallingOut);
         }
 
         Destroy(gameObject);

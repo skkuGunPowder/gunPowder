@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using DG.Tweening;
 
 public enum EBombVelocity
 {
@@ -87,7 +88,8 @@ public class BasicBomb : Bomb
     public override void ThrowBomb(Transform fireTransform)
     {
         _fireDirection = fireTransform.right;
-        _currentSpeed = _bombStat.Speed;
+        _currentSpeed = _stat.Speed;
+        
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
     }
 
@@ -95,7 +97,8 @@ public class BasicBomb : Bomb
     public override void ThrowBombStraight(Transform fireTransform)
     {
         _fireDirection = fireTransform.right;
-        _currentSpeed = _bombStat.Speed * 1.4f;
+        _currentSpeed = _stat.Speed * 2f;
+
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
     }
 
@@ -110,7 +113,7 @@ public class BasicBomb : Bomb
     public override void SmashBomb(Transform fireTransform)
     {
         _fireDirection = fireTransform.right;
-        _currentSpeed = _bombStat.Speed;
+        _currentSpeed = _stat.Speed;
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
     }
 }

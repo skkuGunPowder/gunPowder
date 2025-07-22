@@ -51,8 +51,19 @@ public class ItemDatabaseRepo
             {
                 if (document.Exists)
                 {
-                    BombStat stat = document.ConvertTo<BombStat>();
-                    statData[document.Id] = stat;
+                    if (document.Id[0] == 'B')
+                    {
+                        BombStat stat = document.ConvertTo<BombStat>();
+                        statData[document.Id] = stat;
+                        continue;
+                    }
+
+                    if (document.Id[0] == 'E')
+                    {
+                        ExplosionStat stat = document.ConvertTo<ExplosionStat>();
+                        statData[document.Id] = stat;
+                        continue;
+                    }
                 }
             }
             Debug.Log("StatData 불러오기 성공!");
@@ -61,7 +72,6 @@ public class ItemDatabaseRepo
         {
             Debug.LogError($"StatData 데이터 로드 실패. 에러코드 {e.ErrorCode} : {e.Message}");
         }
-
         return statData;
     }
 
