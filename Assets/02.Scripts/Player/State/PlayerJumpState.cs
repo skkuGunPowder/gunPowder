@@ -120,7 +120,7 @@ public class PlayerJumpState : PlayerBaseState
                     _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
                 }
                 _xVelocity = 1;
-                _owner.SetFacingDirection(1);
+                _owner.RPC_SetFacingDirection(1);
             }
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
@@ -130,7 +130,7 @@ public class PlayerJumpState : PlayerBaseState
                     _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
                 }
                 _xVelocity = -1;
-                _owner.SetFacingDirection(-1);
+                _owner.RPC_SetFacingDirection(-1);
             }
             else
             {

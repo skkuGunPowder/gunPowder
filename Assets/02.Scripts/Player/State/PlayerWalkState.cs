@@ -89,7 +89,7 @@ public class PlayerWalkState : PlayerBaseState
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            _owner.SetFacingDirection(1);
+            _owner.RPC_SetFacingDirection(1);
 
             // 키 입력 감지
             if (!_isKeyPressed)
@@ -109,7 +109,7 @@ public class PlayerWalkState : PlayerBaseState
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
-            _owner.SetFacingDirection(-1);
+            _owner.RPC_SetFacingDirection(-1);
 
             // 키 입력 감지
             if (!_isKeyPressed)

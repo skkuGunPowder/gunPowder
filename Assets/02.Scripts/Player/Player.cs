@@ -128,11 +128,6 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
 
-    public void SetFacingDirection(int direction)
-    {
-        _playerStat.RPC_SetFacingDirection(direction);
-    }
-
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
     {
         PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, isFallingOut);
@@ -203,7 +198,6 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
-        Debug.Log($"h: {h}, v: {v}");
         switch ((h, v))
         {
             case (1, 0):
@@ -275,5 +269,27 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         PhotonView.RPC(nameof(ResetAnimatorTrigger), RpcTarget.All, triggerName);
+    }
+
+    public void RPC_SetFacingDirection(int direction)
+    {
+        PhotonView.RPC(nameof(SetFacingDirection), RpcTarget.All, direction);
+    }
+
+    [PunRPC]
+    public void SetFacingDirection(int direction)
+    {
+        _playerStat.FacingDirection = direction;
+        foreach (SpriteRenderer spriteRenderer in _playerStat.MySpriteREndererList)
+        {
+            if (_playerStat.FacingDirection == 1)
+            {
+                spriteRenderer.flipX = false;
+            }
+            else
+            {
+                spriteRenderer.flipX = true;
+            }
+        }
     }
 }
