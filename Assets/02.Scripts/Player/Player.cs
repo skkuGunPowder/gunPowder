@@ -4,7 +4,7 @@ using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
 
-public class Player : MonoBehaviour, IDamagable
+public class Player : MonoBehaviourPun, IDamagable
 {
     [SerializeField]
     private List<Animator> _myAnimatorList;

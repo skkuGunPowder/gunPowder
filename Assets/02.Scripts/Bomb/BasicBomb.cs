@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
+using Photon.Pun;
 public enum EBombVelocity
 {
     SLOW,
@@ -61,12 +62,16 @@ public class BasicBomb : Bomb
         yield return new WaitForSeconds(fuzeTime);
         Explode();
     }
+
+    [PunRPC]
     // 폭탄 두기기
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
         _currentSpeed = 0f;
     }
+
+    [PunRPC]
     // 폭탄 던지기 (곡사)
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
@@ -74,6 +79,8 @@ public class BasicBomb : Bomb
         _currentSpeed = _stat.Speed;
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
     }
+
+    [PunRPC]
     // 폭탄 직선으로 던지기
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
@@ -81,12 +88,16 @@ public class BasicBomb : Bomb
         _currentSpeed = _stat.Speed * 2f;
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
     }
+
+    [PunRPC]
     // 폭탄 부스트
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
         Explode();
     }
+
+    [PunRPC]
     // 폭탄 내려 찍기
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {

@@ -141,8 +141,8 @@ public class PlayerBaseState : MonoState
         }
         GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
         Bomb bombComponent = bomb.GetComponent<Bomb>();
-        _owner.PhotonView.RPC(nameof(bombComponent.PlaceBomb), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.position);
+        bombComponent.PhotonView.RPC(nameof(bombComponent.PlaceBomb), RpcTarget.All, 
+        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -179,8 +179,8 @@ public class PlayerBaseState : MonoState
         }
         GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
         Bomb bombComponent = bomb.GetComponent<Bomb>();
-        _owner.PhotonView.RPC(nameof(bombComponent.ThrowBomb), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.position);
+        bombComponent.PhotonView.RPC(nameof(bombComponent.ThrowBomb), RpcTarget.All, 
+        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -219,8 +219,8 @@ public class PlayerBaseState : MonoState
         }
         GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
         Bomb bombComponent = bomb.GetComponent<Bomb>();
-        _owner.PhotonView.RPC(nameof(bombComponent.PlaceBomb), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.position);
+        bombComponent.PhotonView.RPC(nameof(bombComponent.PlaceBomb), RpcTarget.All, 
+        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -258,8 +258,8 @@ public class PlayerBaseState : MonoState
         }
         GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
         Bomb bombComponent = bomb.GetComponent<Bomb>();
-        _owner.PhotonView.RPC(nameof(bombComponent.ThrowBomb), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.position);
+        bombComponent.PhotonView.RPC(nameof(bombComponent.ThrowBomb), RpcTarget.All, 
+        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -297,8 +297,8 @@ public class PlayerBaseState : MonoState
         }
         GameObject bomb = InstantiateBomb("BasicBomb", bombSpawnPoint);
         Bomb bombComponent = bomb.GetComponent<Bomb>();
-        _owner.PhotonView.RPC(nameof(bombComponent.ThrowBombStraight), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.position);
+        bombComponent.PhotonView.RPC(nameof(bombComponent.ThrowBombStraight), RpcTarget.All, 
+        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
 
         if (_owner.PlayerStat.IsJumping)
         {
@@ -350,8 +350,8 @@ public class PlayerBaseState : MonoState
         }
         GameObject bomb = InstantiateBomb("Missile", bombSpawnPoint);
         Bomb bombComponent = bomb.GetComponent<Bomb>();
-        _owner.PhotonView.RPC(nameof(bombComponent.ThrowBombStraight), RpcTarget.All, 
-        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.position);
+        bombComponent.PhotonView.RPC(nameof(bombComponent.ThrowBombStraight), RpcTarget.All, 
+        bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward);
 
         if (_owner.PlayerStat.IsJumping)
         {

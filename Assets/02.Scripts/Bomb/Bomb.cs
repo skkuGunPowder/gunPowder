@@ -9,9 +9,12 @@ public class Bomb : MonoBehaviour, IBomb
     protected Vector3 _fireDirection;
     protected float _currentSpeed;
     private float _fuzeTimer;
+
+    public PhotonView PhotonView;
     private void Awake()
     {
         Init();
+        PhotonView = GetComponent<PhotonView>();
     }
     protected virtual void Update()
     {

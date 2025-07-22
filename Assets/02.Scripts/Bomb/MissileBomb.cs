@@ -1,5 +1,6 @@
 using System.Collections;
 using DG.Tweening;
+using Photon.Pun;
 using UnityEngine;
 public class MissileBomb : Bomb
 {
@@ -30,10 +31,12 @@ public class MissileBomb : Bomb
         }
         Explode();
     }
+    [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
+    [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
@@ -61,14 +64,17 @@ public class MissileBomb : Bomb
             yield return null;
         }
     }
+    [PunRPC]
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
+    [PunRPC]
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
+    [PunRPC]
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
