@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class PlayerIdleState : PlayerBaseState
 {
+    private bool _firstEnter = false;
 
     public override void OnEnter()
     {
@@ -18,14 +19,17 @@ public class PlayerIdleState : PlayerBaseState
         velocity.x = 0f;
         _owner.Rigidbody2D.linearVelocity = velocity;
 
-
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Idle");
+        if(_firstEnter)
+        {
+            _owner.RPC_SetAnimatorTrigger("Idle");
+        }
+        _firstEnter = true;
     }
     public override void OnExit()
     {
         base.OnExit();
-        _owner.ResetAnimatorTrigger("Idle");
+        _owner.RPC_ResetAnimatorTrigger("Idle");
     }
 
     /// <summary>

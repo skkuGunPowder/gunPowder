@@ -12,14 +12,13 @@ public class PlayerDamagedState : PlayerBaseState
 
         _timer = 0f;
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Hit");
-        _owner.PhotonView.RPC(nameof(_owner.SetAnimatorTrigger), RpcTarget.All , "Hit");
+        _owner.RPC_SetAnimatorTrigger("Hit");
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        _owner.ResetAnimatorTrigger("Hit");
+        _owner.RPC_ResetAnimatorTrigger("Hit");
     }
 
     public override void MineUpdate()

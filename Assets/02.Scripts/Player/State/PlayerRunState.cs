@@ -23,26 +23,26 @@ public class PlayerRunState : PlayerBaseState
         _owner.PlayerStat.IsRunning = true;
 
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Run");
+        _owner.RPC_SetAnimatorTrigger("Run");
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        _owner.ResetAnimatorTrigger("Run");
+        _owner.RPC_ResetAnimatorTrigger("Run");
     }
 
     public override void MineUpdate()
     {
         base.MineUpdate();
 
-        RunAttack();
-
         bool flowControl = RunMove();
         if (!flowControl)
         {
             return;
         }
+
+        RunAttack();
     }
 
     private bool RunMove()

@@ -209,7 +209,7 @@ public class Player : MonoBehaviour, IDamagable
             case (1, -1):
                 return _bombSpawnPointList[(int)EBombSpawnPoint.RightDown];
             default:
-                return _bombSpawnPointList[(int)EBombSpawnPoint.Right];
+                return _playerStat.FacingDirection == 1 ? _bombSpawnPointList[(int)EBombSpawnPoint.Right] : _bombSpawnPointList[(int)EBombSpawnPoint.Left];
         }
     }
 

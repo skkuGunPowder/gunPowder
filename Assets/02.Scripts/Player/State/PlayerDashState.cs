@@ -4,6 +4,7 @@ using UnityEngine;
 public class PlayerDashState : PlayerBaseState
 {
     private float _dashTimer = 0f;
+    private float _originalGravityScale;
 
     public override void OnEnter()
     {
@@ -14,16 +15,17 @@ public class PlayerDashState : PlayerBaseState
         // 플레이어 상태
         _owner.PlayerStat.IsRunning = true;
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
+        _originalGravityScale = _owner.Rigidbody2D.gravityScale;
         _owner.Rigidbody2D.gravityScale = 0f;
 
         // 애니메이션 재생
-        _owner.SetAnimatorTrigger("Dash");
+        _owner.RPC_SetAnimatorTrigger("Dash");
     }
     public override void OnExit()
     {
         base.OnExit();
-        _owner.Rigidbody2D.gravityScale = 1f;
-        _owner.ResetAnimatorTrigger("Dash");
+        _owner.Rigidbody2D.gravityScale = _originalGravityScale;
+        _owner.RPC_ResetAnimatorTrigger("Dash");
     }
 
     /// <summary>

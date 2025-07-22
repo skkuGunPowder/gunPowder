@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerRecoilState : PlayerBaseState
 {
     private float _recoilTimer;
-    [SerializeField] private float _yVelocitySpeed = 0.5f;
+    private float _yVelocitySpeed = 2f;
 
     [SerializeField] private float _damping = 5f;       // 감쇠 정도
     [SerializeField] private float _frequency = 10f;     // 반동 진동 빈도
@@ -26,32 +26,13 @@ public class PlayerRecoilState : PlayerBaseState
     public override void MineUpdate()
     {
         _recoilTimer += Time.deltaTime;
-
-        float t = _recoilTimer / _owner.PlayerStat.RecoilTime;
-
-        // 감속 (기본 뒤로 이동)
-        float baseSpeed = Mathf.Lerp(_owner.PlayerStat.RecoilSpeed, 0, t);
-
-        // 탄성 (작은 X축 진동)
-        float oscillation = Mathf.Sin(_recoilTimer * _frequency) 
-                            * Mathf.Exp(-_recoilTimer * _damping) 
-                            * _recoilOscillationScale 
-                            * _owner.PlayerStat.RecoilSpeed;
-
-        // Y축 반동
-        float yBounce = Mathf.Sin(t * Mathf.PI * 2f) * _yVelocitySpeed; 
-        Debug.Log(yBounce);
-
-        // 최종 이동 벡터
-        Vector2 recoilMove = new Vector2(-_owner.PlayerStat.FacingDirection * (baseSpeed + oscillation), yBounce);
-        _owner.Rigidbody2D.linearVelocity = recoilMove;
         
         // 시간이 지나면 아이들 상태로
         if(_recoilTimer >= _owner.PlayerStat.RecoilTime)
         {
             if(_owner.PlayerStat.IsJumping)
             {
-                _owner.SetAnimatorTrigger("Fall");
+                _owner.RPC_SetAnimatorTrigger("Fall");
                 _playerFSM.ChangeState<PlayerJumpState>();
             }
             else
@@ -62,7 +43,7 @@ public class PlayerRecoilState : PlayerBaseState
                 }
                 else
                 {
-                    _owner.SetAnimatorTrigger("Fall");
+                    _owner.RPC_SetAnimatorTrigger("Fall");
                     _playerFSM.ChangeState<PlayerJumpState>();
                 }
             }
