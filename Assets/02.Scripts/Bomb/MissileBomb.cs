@@ -29,6 +29,19 @@ public class MissileBomb : Bomb
         }
     }
 
+    protected override void OnCollisionEnter2D(Collision2D other)
+    {
+        base.OnCollisionEnter2D(other);
+
+        if (other.gameObject.tag == "Player")
+        {
+            return;
+        }
+
+        Explode();
+    }
+
+
     public override void PlaceBomb(Transform fireTransform)
     {
         ThrowBomb(fireTransform);
@@ -39,9 +52,12 @@ public class MissileBomb : Bomb
         _fireTransform = fireTransform;
         _fireDirection = _fireTransform.right;
 
-        transform.DORotateQuaternion(Quaternion.LookRotation(_fireTransform.forward, _fireTransform.up), 0.3f);
-        // transform.DOMove(_fireDirection*100, 3).
-        StartCoroutine(AccelerateForward(_fireDirection, 0.5f, _bombStat.Speed));
+        transform.DORotateQuaternion(Quaternion.LookRotation(_fireTransform.forward, _fireTransform.up), 0.3f)
+        .OnComplete(()=>
+        {
+            StartCoroutine(AccelerateForward(_fireDirection, 0.5f, _stat.Speed));
+        });
+        
     }
     
     private IEnumerator AccelerateForward(Vector3 direction, float accelTime, float maxSpeed)
@@ -55,10 +71,8 @@ public class MissileBomb : Bomb
             timer += Time.deltaTime;
             yield return null;
         }
-
         _currentSpeed = maxSpeed;
 
-        // 계속 이동 (옵션)
         while (true)
         {
             transform.position += direction * _currentSpeed * Time.deltaTime;
