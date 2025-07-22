@@ -10,8 +10,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
 {
     public static RoomManager Instance;
     private Room _room;
-    public Transform SpawnPoint;
-    
+    public PlayerSpawner Spawner;
     //리스트로 정보칸 들어가게 하기 => 플레이어 칸 정하기
     private List<int> _playerSlotList;
     public List<int> PlayerSlotList => _playerSlotList;
@@ -86,7 +85,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     private void GeneratePlayer()
     {
-        PhotonNetwork.Instantiate("PlayerTest", SpawnPoint.position, Quaternion.identity, 0);
+        Spawner.GeneratePlayers(0);
     }
     // 플레이어가 레디를 했는지 체크했는지 알아보는 커스텀 프로퍼티
     private void SetProperties()
