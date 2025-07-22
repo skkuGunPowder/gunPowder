@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1142718578519631266}
   - component: {fileID: 1514872043122900438}
   - component: {fileID: 1146379811775156993}
+  - component: {fileID: -834755267990775819}
   m_Layer: 0
   m_Name: Missile
   m_TagString: Untagged
@@ -101,7 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4975c52e446192f4aa3817f97359e4d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ExplosionPrefab: {fileID: 0}
+  ExplosionPrefab: {fileID: 8546794551365396586, guid: 34ea7666e5a931a42aefde07ec4c49e6, type: 3}
 --- !u!61 &1146379811775156993
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -148,3 +149,30 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!50 &-834755267990775819
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2493808269564610583}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0.1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 128
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
