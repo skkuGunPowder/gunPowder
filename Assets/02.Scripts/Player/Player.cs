@@ -164,7 +164,8 @@ public class Player : MonoBehaviourPun, IDamagable
             Vector3 dir = rot * baseDir;
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
-            GunPowderBezierCurve gunPowder = Instantiate(GunPowderPrefab, spawnPos, Quaternion.identity).GetComponent<GunPowderBezierCurve>();
+            GunPowder gunPowder = Instantiate(GunPowderPrefab, spawnPos, Quaternion.identity).GetComponent<GunPowder>();
+            gunPowder.GetComponent<GunPowder>().SetTarget(explosionOrigin);
 
             //TODO: isFallingout에 따라 뭔가 설정
             if (isFallingOut)
@@ -177,6 +178,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 gunPowder.GetComponent<GunPowderRelease>().enabled = false;
                 gunPowder.GetComponent<GunPowderBezierCurve>().enabled = true;
             }
+
         }
     }
 

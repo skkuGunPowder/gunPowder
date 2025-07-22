@@ -25,7 +25,7 @@ public class Explosion : MonoBehaviour
 
             if (other.TryGetComponent(out IDamagable damagableObject))
                 {
-                    damagableObject.TakeDamage(_stat.AttackPower, transform.position, isFallingOut);
+                    //damagableObject.TakeDamage(_stat.AttackPower, transform.position, isFallingOut);
                     if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                     {
                         AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);

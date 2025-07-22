@@ -5,6 +5,8 @@ public class GunPowder : MonoBehaviour
     private BoxCollider2D _collider;
     private float _timer = 0f;
     private float _colliderOnTime = 0.2f;
+    private Transform _target;
+    public Transform Target => _target;
 
     private void Start()
     {
@@ -19,5 +21,10 @@ public class GunPowder : MonoBehaviour
         {
             _collider.enabled = true;
         }
+    }
+
+    public void SetTarget(Transform target)
+    {
+        _target = target;
     }
 }
