@@ -1,3 +1,5 @@
+using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public class MissileBomb : Bomb
@@ -25,10 +27,6 @@ public class MissileBomb : Bomb
         {
             return;
         }
-
-        transform.position += _fireDirection * _currentSpeed * Time.deltaTime;
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(_fireTransform.forward, _fireTransform.up), 1);
-        
     }
 
     public override void PlaceBomb(Transform fireTransform)
@@ -40,7 +38,32 @@ public class MissileBomb : Bomb
     {
         _fireTransform = fireTransform;
         _fireDirection = _fireTransform.right;
-        _currentSpeed = _bombStat.Speed;
+
+        transform.DORotateQuaternion(Quaternion.LookRotation(_fireTransform.forward, _fireTransform.up), 0.3f);
+        // transform.DOMove(_fireDirection*100, 3).
+        StartCoroutine(AccelerateForward(_fireDirection, 0.5f, _bombStat.Speed));
+    }
+    
+    private IEnumerator AccelerateForward(Vector3 direction, float accelTime, float maxSpeed)
+    {
+        float timer = 0f;
+        while (timer < accelTime)
+        {
+            float t = timer / accelTime;
+            _currentSpeed = Mathf.Lerp(0f, maxSpeed, t);
+            transform.position += direction * _currentSpeed * Time.deltaTime;
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        _currentSpeed = maxSpeed;
+
+        // 계속 이동 (옵션)
+        while (true)
+        {
+            transform.position += direction * _currentSpeed * Time.deltaTime;
+            yield return null;
+        }
     }
 
     public override void ThrowBombStraight(Transform fireTransform)
