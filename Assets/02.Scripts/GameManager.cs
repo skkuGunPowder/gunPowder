@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private EGameState _currentGameState;
     private float _timer;
     public GameObject GameOverScreen;
+    
     private void Awake()
      {
          
@@ -76,6 +77,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel(ESceneList.Map4.ToString());
         });
     }
+    
     private void GameStart()
     {
         if (PlayerLoadSceneCheck() == false)
@@ -84,7 +86,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
 
         Debug.Log($"현재 게임 상태 : {_currentGameState.ToString()}");
-        _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, EGameState.Playing);
+        _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
     
     // 죽은 사람 체크하기
