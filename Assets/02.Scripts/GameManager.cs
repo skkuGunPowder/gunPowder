@@ -61,6 +61,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RPC_GameOver()
     {
+        _currentGameState = EGameState.GameOver;
+        
         if (_currentGameState != EGameState.GameOver)
         {
             return;
@@ -104,7 +106,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 return;
             }
         }
-
+        
         _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
         
     }
