@@ -127,7 +127,7 @@ public class PlayerBaseState : MonoState
     {
         GameObject bomb = InstantiateBomb(prefabName, bombSpawnPoint);
         Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.SetOwner(_owner.transform);
+        bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, _owner.GetComponent<PhotonView>().ViewID);
         bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
     }
 

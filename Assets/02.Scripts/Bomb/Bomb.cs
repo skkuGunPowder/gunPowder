@@ -41,9 +41,10 @@ public class Bomb : MonoBehaviour, IBomb
 
     }
 
-    public void SetOwner(Transform owner)
+    [PunRPC]
+    public void SetOwner(int ownerViewId)
     {
-        _ownerTransform = owner;
+        _ownerTransform = PhotonView.Find(ownerViewId).transform;
     }
 
     protected void SetStat(string id)
