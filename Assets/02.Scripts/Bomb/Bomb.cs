@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Photon.Pun;
 using UnityEngine;
 
 public class Bomb : MonoBehaviour, IBomb
@@ -76,30 +77,35 @@ public class Bomb : MonoBehaviour, IBomb
     }
 
 
+    [PunRPC]
     // 폭탄 두기
     public virtual void PlaceBomb(Transform fireTransform)
     {
         
     }
 
+    [PunRPC]
     // 폭탄 던지기 (곡사)
     public virtual void ThrowBomb(Transform fireTransform)
     {
         
     }
 
+    [PunRPC]
     // 폭탄 직선으로 던지기
     public virtual void ThrowBombStraight(Transform fireTransform)
     {
         
     }
 
+    [PunRPC]
     // 폭탄 부스트
     public virtual void BoostBomb(Transform fireTransform)
     {
        
     }
 
+    [PunRPC]
     // 폭탄 내려 찍기
     public virtual void SmashBomb(Transform fireTransform)
     {
