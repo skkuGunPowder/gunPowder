@@ -135,7 +135,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
     {
-        RPC_TakeDamage(damage, attackerBomb, attackerViewId, isFallingOut);
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, isFallingOut);
     }
 
     [PunRPC]
