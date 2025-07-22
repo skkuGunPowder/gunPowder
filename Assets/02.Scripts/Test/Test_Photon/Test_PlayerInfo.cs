@@ -39,5 +39,14 @@ public class Test_PlayerInfo : MonoBehaviour
         Debug.Log($"{load[EProperties.IsLoad.ToString()]}");
         Debug.Log("bool");
     }
-    
+
+    public void OnclickGameEnd()
+    {
+        Hashtable hash = new Hashtable()
+        {
+            { EProperties.IsDead.ToString(), true }
+        };
+        
+        PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+    }
 }
