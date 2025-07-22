@@ -18,10 +18,10 @@ public class Explosion : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
         {
-            if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
-            {
-                continue;
-            }
+            // if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
+            // {
+            //     continue;
+            // }
 
             if (other.TryGetComponent(out IDamagable damagableObject))
                 {
