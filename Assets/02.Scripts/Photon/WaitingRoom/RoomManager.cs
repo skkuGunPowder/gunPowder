@@ -126,7 +126,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        PhotonNetwork.CurrentRoom.IsVisible = true;
+        PhotonNetwork.CurrentRoom.IsVisible = false;
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
     }
 
