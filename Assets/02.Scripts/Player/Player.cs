@@ -133,15 +133,25 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.SetFacingDirection(direction);
     }
 
-    public void TakeDamage(int damage, Transform attackerBomb, Transform attacker, bool isFallingOut)
+    public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
     {
-        // TODO: 피격 처리
-        // 피 달기
+        RPC_TakeDamage(damage, attackerBomb, attackerViewId, isFallingOut);
+    }
+
+    [PunRPC]
+    public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        // 체력 감소
         _playerStat.DecreaseGunPowderCount(damage);
 
-        // 폭탄 맞은 위치 반 대 방향으로 건파우터 낙출
-        ReleaseGunPowder(attackerBomb, attacker, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
-        
+        // Gunpowder 낙출
+        ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+
         // 피격 횟수 증가
         _playerStat.IncreseDamagedCount();
 
@@ -152,10 +162,16 @@ public class Player : MonoBehaviourPun, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
-    public void ReleaseGunPowder(Transform explosionOrigin, Transform attacker, int count = 3, float spreadAngle = 30f,
+    public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
-        Vector3 baseDir = (transform.position - explosionOrigin.position).normalized;
+        // attackerViewId로 Transform 찾기
+        Transform attacker = null;
+        PhotonView attackerView = PhotonView.Find(attackerViewId);
+        if (attackerView != null)
+            attacker = attackerView.transform;
+
+        Vector3 baseDir = (transform.position - explosionOrigin).normalized;
 
         for (int i = 0; i < count; i++)
         {
