@@ -62,12 +62,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // 방에 들어왔을 때 첫 세팅 하기
     private void Init()
     {
-        _initialized = true;
-        GeneratePlayer();
-        SetRoom();
-        SetProperties();
-        SetCurrentMap();
-        
         if (_room.CustomProperties.ContainsKey(EProperties.PlayerList))
         {
             _playerSlotList = (List<int>)_room.CustomProperties[EProperties.PlayerList];
@@ -77,6 +71,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
             
             return;
         }
+        _initialized = true;
+        GeneratePlayer();
+        SetRoom();
+        SetProperties();
+        SetCurrentMap();
 
         if (PhotonNetwork.IsMasterClient)
         {

@@ -5,6 +5,7 @@ using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 using DG.Tweening;
+
 [RequireComponent(typeof(PhotonView))]
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -21,15 +22,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        Hashtable load = new Hashtable()
-        {
-            { EProperties.IsLoad.ToString(), true }
-        };
-
-        PhotonNetwork.LocalPlayer.SetCustomProperties(load);
-
         _timer = PlayerSettingManager.Instance.PlayTime;
-
     }
 
     // 게임 시작
