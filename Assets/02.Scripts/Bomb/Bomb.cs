@@ -82,7 +82,10 @@ public class Bomb : MonoBehaviour, IBomb
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
 
-        PhotonView.RPC(nameof(RequestDestroy), RpcTarget.MasterClient, PhotonView.ViewID);
+        if (PhotonView.IsMine)
+        {
+            PhotonView.RPC(nameof(RequestDestroy), RpcTarget.MasterClient, PhotonView.ViewID);
+        }
     }
 
     [PunRPC]
