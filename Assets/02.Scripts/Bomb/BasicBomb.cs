@@ -8,6 +8,7 @@ public enum EBombVelocity
     NORMAL,
     FAST
 }
+
 public class BasicBomb : Bomb
 {
     public const string ID = "B0001";
@@ -41,9 +42,10 @@ public class BasicBomb : Bomb
         }
     }
 
-    protected override void OnCollisionEnter2D(Collision2D other)
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        base.OnCollisionEnter2D(other);
+        CheckPriority(other);
+        
         if (_bombVelocity == EBombVelocity.FAST)
         {
             Explode();

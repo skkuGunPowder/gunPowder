@@ -51,8 +51,8 @@ public class Bomb : MonoBehaviour, IBomb
     {
         _stat = ItemDatabase.Instance.GetStat<BombStat>(id);
     }
-    
-    protected virtual void OnCollisionEnter2D(Collision2D other)
+
+    protected void CheckPriority(Collision2D other)
     {
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
