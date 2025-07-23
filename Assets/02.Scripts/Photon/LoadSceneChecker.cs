@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using UnityEngine;
@@ -8,27 +9,67 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class LoadSceneChecker : MonoBehaviourPunCallbacks
 {
     private bool _isLoad = false;
+    private PhotonView _photonView;
+    
+    public event Action OnLoadFinished; 
 
+    private void Awake()
+    {
+        _photonView = GetComponent<PhotonView>();
+    }
+    
     private void Start()
     {
-        Hashtable load = new Hashtable()
+        if (PhotonNetwork.InRoom == false)
         {
-            { EProperties.IsLoad.ToString(), true }
-        };
-
-        PhotonNetwork.LocalPlayer.SetCustomProperties(load);
+            return;
+        }
+        
+        SetLoadState(true);
     }
     
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
-        Debug.Log("좀 돼라");
-        if (changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] != null)
-        {
-            PlayerDeadCheck();
-        }
         if (changedProps.ContainsKey(EProperties.IsLoad.ToString()) && changedProps[EProperties.IsLoad.ToString()] != null)
         {
-            GameStart();
+            PlayerLoadCheck();
         }
     }
+    
+    private void PlayerLoadCheck()
+    {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
+        
+        foreach (PhotonPlayer p in playerList)
+        {
+            bool isLoaded = p.CustomProperties.ContainsKey(EProperties.IsLoad.ToString()) && (bool)p.CustomProperties[EProperties.IsLoad.ToString()];
+            Debug.Log($"Player {p.NickName} - SceneLoaded: {isLoaded}");
+            if (isLoaded == false)
+            {
+                Debug.Log("아직 준비 안됨");
+                return ;
+            }
+        }
+       
+        OnLoadFinished?.Invoke();
+        
+        SetLoadState(false);
+    }
+
+
+    private void SetLoadState(bool isLoad)
+    {
+        Hashtable load = new Hashtable()
+        {
+            { EProperties.IsLoad.ToString(), isLoad }
+        };
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(load);
+    }
+
 }

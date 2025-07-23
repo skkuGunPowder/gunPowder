@@ -6,6 +6,8 @@ using Photon.Realtime;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
+[RequireComponent(typeof(PhotonView))]
+[RequireComponent(typeof(LoadSceneChecker))]
 public class RoomManager : PhotonSingleton<RoomManager>
 {
     private Room _room;
@@ -13,6 +15,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     //리스트로 정보칸 들어가게 하기 => 플레이어 칸 정하기
     private List<int> _playerSlotList;
     public List<int> PlayerSlotList => _playerSlotList;
+    private LoadSceneChecker _loadChecker;
     
     public event Action OnMapChanged;    // UI 변경 => 방장이 맵을 변경했을 때
     public event Action OnDataChanged;  // UI 변경 => 플레이어들이 자리를 이동할 때
@@ -30,38 +33,42 @@ public class RoomManager : PhotonSingleton<RoomManager>
         base.Awake();
         
         _photonView = GetComponent<PhotonView>();
+        _loadChecker = GetComponent<LoadSceneChecker>();
+
+        _loadChecker.OnLoadFinished += Init;
     }
     
-    // 방 세팅 시작 => Init
-    private void Start()
-    {
-        if (PhotonNetwork.InRoom == false)
-        {
-            return;
-        }
-        
-        if (_initialized)
-        {
-            return;
-        }
-        
-        Init();
-    } 
-    
-    // 처음 방에 들어왔을 때 => 세팅 Init
-    public override void OnJoinedRoom()
-    {
-        if (_initialized)
-        {
-            return;
-        }
-        
-        Init();
-    }
+    // // 방 세팅 시작 => Init
+    // private void Start()
+    // {
+    //     if (PhotonNetwork.InRoom == false)
+    //     {
+    //         return;
+    //     }
+    //     
+    //     if (_initialized)
+    //     {
+    //         return;
+    //     }
+    //     
+    //     Init();
+    // } 
+    //
+    // // 처음 방에 들어왔을 때 => 세팅 Init
+    // public override void OnJoinedRoom()
+    // {
+    //     if (_initialized)
+    //     {
+    //         return;
+    //     }
+    //     
+    //     Init();
+    // }
     
     // 방에 들어왔을 때 첫 세팅 하기
     private void Init()
     {
+        SetRoom();
         if (_room.CustomProperties.ContainsKey(EProperties.PlayerList))
         {
             _playerSlotList = (List<int>)_room.CustomProperties[EProperties.PlayerList];
@@ -71,9 +78,9 @@ public class RoomManager : PhotonSingleton<RoomManager>
             
             return;
         }
+        
         _initialized = true;
         GeneratePlayer();
-        SetRoom();
         SetProperties();
         SetCurrentMap();
 
@@ -93,9 +100,9 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         Hashtable ready = new Hashtable
         {
-            { EProperties.IsReady.ToString(), false },
-            { EProperties.IsLoad.ToString() , false }
+            { EProperties.IsReady.ToString(), false }
         };
+        
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
     }
     // 현재 방의 맵이 무엇인가?
@@ -229,12 +236,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         if (propertiesThatChanged.ContainsKey($"{EProperties.MapSelected}") && propertiesThatChanged[$"{EProperties.MapSelected}"] != null)
         { 
-            // string mapName = propertiesThatChanged[$"{EProperties.MapSelected}"].ToString();
-            // if (Enum.TryParse(mapName, out ESceneList parseMap))
-            // {
-            //     SelectedMap = parseMap;
-            //     OnMapChanged?.Invoke();   
-            // }
             SelectedMap = (ESceneList)propertiesThatChanged[$"{EProperties.MapSelected}"];
             OnMapChanged?.Invoke();
         }
