@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+
 
 public class ItemStorage : MonoBehaviour
 {
@@ -30,6 +29,7 @@ public class ItemStorage : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        DontDestroyOnLoad(gameObject);
 
         _repo = new ItemStorageRepo();
         _repo.OnItemStorageLoaded += LoadItemStorageData;
@@ -55,14 +55,14 @@ public class ItemStorage : MonoBehaviour
             _repo.LoadInventory();
         }
 
-        // 아이템 추가 테스트
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            Item newItem = new Item("B0001", EItemType.Bomb, "기본 폭탄", "기본 폭탄", "Assets/05.Images/Item/PunIcon-128.png", null);
-            InventoryItem testItem = new InventoryItem(new ItemDTO(newItem));
+        // // 아이템 추가 테스트
+        // if (Input.GetKeyDown(KeyCode.Q))
+        // {
+        //     Item newItem = new Item("B0001", EItemType.Bomb, "기본 폭탄", "기본 폭탄", "Assets/05.Images/Item/PunIcon-128.png", null);
+        //     InventoryItem testItem = new InventoryItem(new ItemDTO(newItem));
 
-            AddItem(testItem);
-        }
+        //     AddItem(testItem);
+        // }
 
         // 아이템 장착 테스트
         if (Input.GetKeyDown(KeyCode.W))
