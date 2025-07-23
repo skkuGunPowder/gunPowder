@@ -167,6 +167,11 @@ public class Player : MonoBehaviourPun, IDamagable
     public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
+        if(PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+        
         // attackerViewId로 Transform 찾기
         Transform attacker = null;
         PhotonView attackerView = PhotonView.Find(attackerViewId);

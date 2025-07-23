@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class GunPowderBezierCurve : MonoBehaviour
@@ -125,7 +126,7 @@ public class GunPowderBezierCurve : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Player"))
         {
-            Destroy(gameObject);
+            PhotonNetwork.Destroy(gameObject);
         }
     }
 }
