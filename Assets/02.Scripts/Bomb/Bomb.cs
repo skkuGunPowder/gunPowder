@@ -88,12 +88,12 @@ public class Bomb : MonoBehaviour, IBomb
         }
         else if (PhotonNetwork.IsMasterClient)
         {
-            PhotonView.RPC("RequestDestroy", RpcTarget.MasterClient, PhotonView.ViewID);
+            PhotonView.RPC(nameof(RequestDestroy), RpcTarget.MasterClient, PhotonView.ViewID);
         }
     }
 
     [PunRPC]
-    void RequestDestroy(int viewID)
+    public void RequestDestroy(int viewID)
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
