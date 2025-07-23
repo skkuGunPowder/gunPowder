@@ -64,6 +64,12 @@ public class Player : MonoBehaviourPun, IDamagable
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _groundRay2D = GetComponent<BoxRay2D>();
         PhotonView = GetComponent<PhotonView>();
+        LoadItems();
+    }
+
+    private void LoadItems()
+    {
+        // ItemStorage.Instance.Get
     }
 
     private void Start()

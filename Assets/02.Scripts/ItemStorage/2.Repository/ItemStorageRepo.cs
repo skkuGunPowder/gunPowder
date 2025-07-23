@@ -53,12 +53,18 @@ public class ItemStorageRepo
                     {
                         continue;
                     }
-
+                    
+                    List<object> valueList = (List<object>)kvp.Value;
+                    if (valueList == null || valueList.Count == 0)
+                    {
+                        continue;
+                    }
+                    
                     var itemList = new List<InventoryItem>();
                     // 아이템 리스트에 데이터 할당
-                    foreach (var obj in kvp.Value as List<object>)
+                    foreach (var obj in valueList)
                     {
-                        InventoryItem item = ConvertToItemAsync(obj as Dictionary<string, object>);
+                        InventoryItem item = ConvertToItemAsync((Dictionary<string, object>)obj);
                         itemList.Add(item);
                     }
 
@@ -99,7 +105,7 @@ public class ItemStorageRepo
                     }
 
                     // 아이템 데이터 있을 시 Item 객체로 변환하여 할당
-                    equippedItemDict[slot] = ConvertToItemAsync(kvp.Value as Dictionary<string, object>);
+                    equippedItemDict[slot] = ConvertToItemAsync((Dictionary<string, object>)kvp.Value);
                 }
                 Debug.Log("저장된 데이터 불러오기 성공!");
                 OnInventoryLoaded?.Invoke(equippedItemDict);

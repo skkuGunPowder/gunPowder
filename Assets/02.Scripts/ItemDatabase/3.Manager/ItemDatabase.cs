@@ -40,7 +40,7 @@ public class ItemDatabase
         return new ItemDTO(item);
     }
 
-    public T GetStat<T>(string itemID) where T: class, IStat
+    public T GetStat<T>(string itemID) where T : class, IStat
     {
         if (!_stats.TryGetValue(itemID, out IStat stat))
         {
