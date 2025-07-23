@@ -81,7 +81,7 @@ public class Bomb : MonoBehaviour, IBomb
             Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
-        Destroy(gameObject);
+        PhotonNetwork.Destroy(gameObject);
     }
 
 
