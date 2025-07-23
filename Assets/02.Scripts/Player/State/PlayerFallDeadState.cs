@@ -2,7 +2,7 @@ using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
 
-public class PlayerDropDeadState : PlayerBaseState
+public class PlayerFallDeadState : PlayerBaseState
 {
     private bool _isLeft = false;
 
@@ -19,6 +19,10 @@ public class PlayerDropDeadState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+        Debug.Log("PlayerFallDeadState");
+
+        _wailTime = 0f;
+        _owner.PlayerStat.IsFallingDead = true;
 
         // 낙사 판정 구간에 들어가면 부활지점으로 이동해야 한다. 
         // 좌측기준으로 하면 좌측 최하단 -> 좌측 상단 중단점 -> 맵 중앙 상단으로 이동
@@ -26,31 +30,23 @@ public class PlayerDropDeadState : PlayerBaseState
         {
             // 좌측 최하단으로 이동
             _isLeft = true;
-            _startPoint = new Vector3(-5, -5, 0);
+            _startPoint = GameManager.Instance.FallDeadStartPointList[0].position;
         }
         else
         {
             // 우측 최하단으로 이동
             _isLeft = false;
-            _startPoint = new Vector3(5, -5, 0);
+            _startPoint = GameManager.Instance.FallDeadStartPointList[1].position;
         }
         transform.position = _startPoint;
 
         // 중단점 설정
-        _middlePoint = new Vector3(10, 15, 0);
+        _middlePoint = GameManager.Instance.FallDeadPathList[_isLeft ? 0 : 1].position;
         // 도착점 설정
-        _endPoint = new Vector3(0, 5, 0);
+        _endPoint = GameManager.Instance.ResurrectPoint.position;
 
         // 경로 설정 (좌우 반전 적용)
-        Vector3[] path;
-        if (_isLeft)
-        {
-            path = new Vector3[] { _startPoint, new Vector3(-_middlePoint.x, _middlePoint.y, 0), _endPoint };
-        }
-        else
-        {
-            path = new Vector3[] { _startPoint, _middlePoint, _endPoint };
-        }
+        Vector3[] path = new Vector3[] { _startPoint, _middlePoint, _endPoint };
 
         // DOTween 곡선 이동
         _owner.transform.DOPath(path, _totalDuration, PathType.CatmullRom)
@@ -64,6 +60,7 @@ public class PlayerDropDeadState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
+        _owner.PlayerStat.IsFallingDead = false;
     }
 
     public override void MineUpdate()
@@ -79,7 +76,7 @@ public class PlayerDropDeadState : PlayerBaseState
                 // PhotonNetwork.Instantiate("DieExplosion", transform.position, Quaternion.identity);
                 
                 // 15의 건파우더 낙출
-                // _owner.ReleaseGunPowder(transform.position, _owner.GetComponent<PhotonView>().ViewID,15, 30, 1.0f, true);
+                _owner.RPC_ReleaseGunPowder(transform.position, _owner.GetComponent<PhotonView>().ViewID, 15, 30, 1.0f, true);
                 
                 // 피격 상태로 전환
                 _playerFSM.ChangeState<PlayerDamagedState>();

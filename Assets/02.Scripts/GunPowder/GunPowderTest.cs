@@ -27,7 +27,7 @@ public class GunPowderTest : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.S))
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
-            player.GetComponent<PlayerFSM>().ChangeState<PlayerDropDeadState>();
+            player.GetComponent<PlayerFSM>().ChangeState<PlayerFallDeadState>();
         }
     }
 }
