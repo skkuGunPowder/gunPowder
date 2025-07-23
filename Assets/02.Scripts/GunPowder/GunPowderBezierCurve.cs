@@ -126,6 +126,10 @@ public class GunPowderBezierCurve : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Player"))
         {
+            if(!PhotonNetwork.IsMasterClient)
+            {
+                return;
+            }
             PhotonNetwork.Destroy(gameObject);
         }
     }
