@@ -163,6 +163,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
+    [PunRPC]
     public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
@@ -181,7 +182,7 @@ public class Player : MonoBehaviourPun, IDamagable
             Vector3 dir = rot * baseDir;
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
-            GunPowder gunPowder = Instantiate(GunPowderPrefab, spawnPos, Quaternion.identity).GetComponent<GunPowder>();
+            GunPowder gunPowder = PhotonNetwork.Instantiate(GunPowderPrefab.name, spawnPos, Quaternion.identity).GetComponent<GunPowder>();
             //
             gunPowder.GetComponent<GunPowder>().SetTarget(attacker);
 
@@ -198,6 +199,17 @@ public class Player : MonoBehaviourPun, IDamagable
             }
 
         }
+    }
+
+    public void RPC_ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
+     float distance = 1.0f, bool isFallingOut = true)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        PhotonView.RPC(nameof(ReleaseGunPowder), RpcTarget.All, explosionOrigin, attackerViewId, count, spreadAngle, distance, isFallingOut);
     }
 
     /// <summary>

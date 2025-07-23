@@ -76,7 +76,7 @@ public class PlayerFallDeadState : PlayerBaseState
                 // PhotonNetwork.Instantiate("DieExplosion", transform.position, Quaternion.identity);
                 
                 // 15의 건파우더 낙출
-                _owner.ReleaseGunPowder(transform.position, _owner.GetComponent<PhotonView>().ViewID, 15, 30, 1.0f, true);
+                _owner.RPC_ReleaseGunPowder(transform.position, _owner.GetComponent<PhotonView>().ViewID, 15, 30, 1.0f, true);
                 
                 // 피격 상태로 전환
                 _playerFSM.ChangeState<PlayerDamagedState>();
