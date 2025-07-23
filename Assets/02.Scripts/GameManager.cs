@@ -6,16 +6,21 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 using DG.Tweening;
 [RequireComponent(typeof(PhotonView))]
-public class GameManager : MonoBehaviourPunCallbacks
+public class GameManager : PhotonSingleton<GameManager>
 {
     private PhotonView _photonView;
     private EGameState _currentGameState;
     private float _timer;
     public GameObject GameOverScreen;
+
+    public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
+    public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
+    public Transform ResurrectPoint;                   // 부활 지점
     
-    private void Awake()
+    protected override void Awake()
      {
-         
+         base.Awake();
+
          _photonView = GetComponent<PhotonView>();
      }
 
