@@ -78,12 +78,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
         if (!photonView.IsMine)
         {
-            _rigidbody2D.simulated = false;
             _rigidbody2D.gravityScale = 0;
-        }
-        else
-        {
-            _rigidbody2D.simulated = true;
         }
     }
 
