@@ -84,6 +84,10 @@ public class Bomb : MonoBehaviour, IBomb
 
         if (PhotonView.IsMine)
         {
+            PhotonNetwork.Destroy(gameObject);
+        }
+        else
+        {
             PhotonView.RPC(nameof(RequestDestroy), RpcTarget.MasterClient, PhotonView.ViewID);
         }
     }
