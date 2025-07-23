@@ -82,7 +82,7 @@ public class Bomb : MonoBehaviour, IBomb
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
 
-        if (PhotonNetwork.IsMasterClient)
+        if (PhotonView.IsMine || PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.Destroy(gameObject);
         }
