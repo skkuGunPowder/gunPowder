@@ -17,7 +17,7 @@ public class ItemStorageRepo
     public async void SaveItemStorage(Dictionary<EItemType, List<InventoryItem>> itemDict)
     {
         // FireStore에 저장가능한 형태로 데이터 변환
-        Dictionary<string, List<SerializableItem>> saveData = ConvertItemStorageData(itemDict);
+        Dictionary<string, List<SerializableItem>> saveData = ConvertToSaveData(itemDict);
 
         // 데이터 저장
         DocumentReference docRef = FirebaseManager.Instance.DB.Collection("ItemStorage").Document(USER_ID);
@@ -64,13 +64,13 @@ public class ItemStorageRepo
                     // 아이템 리스트에 데이터 할당
                     foreach (var obj in valueList)
                     {
-                        InventoryItem item = ConvertToItemAsync((Dictionary<string, object>)obj);
+                        InventoryItem item = ConvertToItem((Dictionary<string, object>)obj);
                         itemList.Add(item);
                     }
 
                     itemDict[slot] = itemList;
                 }
-                Debug.Log("저장된 데이터 불러오기 성공!");
+                Debug.Log("보유중인 아이템 불러오기 성공!");
                 OnItemStorageLoaded?.Invoke(itemDict);
             }
         }
@@ -97,17 +97,16 @@ public class ItemStorageRepo
                 {
                     string key = kvp.Key;
 
-                    // 아이템 데이터 없을 시 null 할당
-                    if (Enum.TryParse(key, out EItemType slot))
+                    // key -> EItemType 파싱
+                    if (!Enum.TryParse(key, out EItemType slot))
                     {
-                        equippedItemDict[slot] = null;
-                        continue;
+                        throw new Exception($"{key} 아이템 타입을 파싱하는데 실패하였습니다");
                     }
 
                     // 아이템 데이터 있을 시 Item 객체로 변환하여 할당
-                    equippedItemDict[slot] = ConvertToItemAsync((Dictionary<string, object>)kvp.Value);
+                    equippedItemDict[slot] = ConvertToItem((Dictionary<string, object>)kvp.Value);
                 }
-                Debug.Log("저장된 데이터 불러오기 성공!");
+                Debug.Log("장착된 아이템 불러오기 성공!");
                 OnInventoryLoaded?.Invoke(equippedItemDict);
             }
         }
@@ -134,7 +133,7 @@ public class ItemStorageRepo
         }
     }
 
-    public Dictionary<string, List<SerializableItem>> ConvertItemStorageData(Dictionary<EItemType, List<InventoryItem>> itemDict)
+    public Dictionary<string, List<SerializableItem>> ConvertToSaveData(Dictionary<EItemType, List<InventoryItem>> itemDict)
     {
         // 아이템 보관함 데이터 => 저장가능한 데이터로 변환하는 메소드
 
@@ -180,13 +179,33 @@ public class ItemStorageRepo
     }
 
 
-    private InventoryItem ConvertToItemAsync(Dictionary<string, object> dict)
+    private InventoryItem ConvertToItem(Dictionary<string, object> dict)
     {
         // 저장된 데이터 -> Item 객체로 변환하는 메소드
+        if (dict == null)
+        {
+            return null;
+        }
 
         // InventoryItem객체로 변환
-        ItemDTO item = ItemDatabase.Instance.GetItem((string)dict["ID"]);
-        return new InventoryItem(item);
+            ItemDTO item = ItemDatabase.Instance.GetItem((string)dict["ID"]);
+        if (item == null)
+        {
+            Debug.LogError($"{(string)dict["ID"]} : null");
+            return null;
+        }
+
+        InventoryItem inventoryItem = new InventoryItem(item);
+        if ((bool)dict["IsEquipped"])
+        {
+            inventoryItem.Equip();
+        }
+        else
+        {
+            inventoryItem.UnEquip();
+        }
+
+        return inventoryItem;
     }
 }
 
