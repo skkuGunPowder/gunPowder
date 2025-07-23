@@ -82,13 +82,21 @@ public class Bomb : MonoBehaviour, IBomb
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
 
-        // 요청자
-        PhotonView.RPC("RequestDestroy", RpcTarget.MasterClient, PhotonView.ViewID);
+        if (PhotonView.IsMine)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
+        else if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonView.RPC("RequestDestroy", RpcTarget.MasterClient, PhotonView.ViewID);
+        }
     }
 
     [PunRPC]
     void RequestDestroy(int viewID)
     {
+        if (!PhotonNetwork.IsMasterClient) return;
+
         PhotonView target = PhotonView.Find(viewID);
         if (target != null)
         {
