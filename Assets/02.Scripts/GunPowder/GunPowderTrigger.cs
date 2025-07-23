@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class GunPowderTrigger : MonoBehaviour
@@ -16,14 +17,13 @@ public class GunPowderTrigger : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            gameObject.GetComponent<GunPowder>().SetTarget(collision.transform);
-            
+            gameObject.GetComponent<GunPowder>().photonView.RPC(nameof(GunPowder.SetTarget), RpcTarget.All, collision.transform);
+
             // 1. 베지어 곡선 이동 활성화
             gameObject.GetComponentInParent<GunPowderBezierCurve>().enabled = true;
 
             // 2. 상위 콜라이더를 트리거로 전환
-            if (gameObject.TryGetComponent<BoxCollider2D>(out BoxCollider2D boxCollider))
-                boxCollider.isTrigger = true;
+            gameObject.GetComponentInParent<BoxCollider2D>().isTrigger = true;
 
             // 3. (선택) 이 콜라이더는 더 이상 감지하지 않게 비활성화
             gameObject.SetActive(false); // 또는 collider.enabled = false;

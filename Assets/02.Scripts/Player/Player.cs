@@ -187,22 +187,8 @@ public class Player : MonoBehaviourPun, IDamagable
             Vector3 dir = rot * baseDir;
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
-            GunPowder gunPowder = PhotonNetwork.Instantiate(GunPowderPrefab.name, spawnPos, Quaternion.identity).GetComponent<GunPowder>();
-            //
-            gunPowder.GetComponent<GunPowder>().SetTarget(attacker);
-
-            //TODO: isFallingout에 따라 뭔가 설정
-            if (isFallingOut)
-            {
-                gunPowder.GetComponent<GunPowderRelease>().enabled = true;
-                gunPowder.GetComponent<GunPowderBezierCurve>().enabled = false;
-            }
-            else
-            {
-                gunPowder.GetComponent<GunPowderRelease>().enabled = false;
-                gunPowder.GetComponent<GunPowderBezierCurve>().enabled = true;
-            }
-
+            object[] instData = new object[] { attackerViewId, isFallingOut };
+            PhotonNetwork.Instantiate(GunPowderPrefab.name, spawnPos, Quaternion.identity, 0, instData);
         }
     }
 
