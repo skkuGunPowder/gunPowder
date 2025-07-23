@@ -66,20 +66,23 @@ public class RoomManager : PhotonSingleton<RoomManager>
         GeneratePlayer();
         SetRoom();
         SetProperties();
+        SetCurrentMap();
         
+        if (_room.CustomProperties.ContainsKey(EProperties.PlayerList))
+        {
+            _playerSlotList = (List<int>)_room.CustomProperties[EProperties.PlayerList];
+            _room.IsVisible = true;
+            
+            UpdateSlots(_playerSlotList.ToArray());
+            
+            return;
+        }
+
         if (PhotonNetwork.IsMasterClient)
         {
-            if (_room.CustomProperties.ContainsKey(EProperties.PlayerList))
-            {
-                _playerSlotList = (List<int>)_room.CustomProperties[EProperties.PlayerList];
-                _room.IsVisible = true;
-            }
-            
             PlayerPlacement(PhotonNetwork.LocalPlayer);
             OnDataChanged?.Invoke();
-        }
-        
-        SetCurrentMap();
+        };
     }
 
     private void GeneratePlayer()

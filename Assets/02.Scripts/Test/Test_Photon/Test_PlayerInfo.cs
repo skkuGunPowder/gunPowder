@@ -4,6 +4,7 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 using RaycastPro.RaySensors2D;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Test_PlayerInfo : MonoBehaviour
 {
@@ -53,6 +54,6 @@ public class Test_PlayerInfo : MonoBehaviour
 
     public void OnClickLoadScene()
     {
-        PhotonNetwork.LoadLevel(Scene.ToString());
+        SceneManager.LoadScene(Scene.ToString());
     }
 }
