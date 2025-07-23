@@ -35,6 +35,7 @@ public class GunPowderBezierCurve : MonoBehaviour
     private BoxCollider2D _collider;
 
     private Transform _target;
+    private bool _isFallingOut;
 
     private void OnEnable()
     {
@@ -55,13 +56,14 @@ public class GunPowderBezierCurve : MonoBehaviour
 
         _start = transform;
         _timerCurrent = 0f;
-        // TODO: 경우에 따라 달라질듯
-        // 날 때린 플레이어, 가까이 있는 플레이어 등 상태에 따라 달라짐
-        _end = GameObject.FindGameObjectWithTag("Player").transform;
 
+        // GunPowder에서 타겟과 isFallingOut을 받아옴
+        GunPowder gunPowder = GetComponent<GunPowder>();
+        _target = gunPowder.Target;
+        _isFallingOut = gunPowder.IsFallingOut;
 
         _speed = _gunPowderSpeed;
-        Init(_start, _end, _speed, _newPointDistanceFromStart, _newPointDistanceFromEnd);
+        Init(_start, _target, _speed, _newPointDistanceFromStart, _newPointDistanceFromEnd);
     }
     
 
