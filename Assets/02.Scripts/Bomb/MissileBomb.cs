@@ -26,9 +26,10 @@ public class MissileBomb : Bomb
         }
     }
 
-    protected override void OnCollisionEnter2D(Collision2D other)
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        base.OnCollisionEnter2D(other);
+        CheckPriority(other);
+
         if (other.gameObject.tag == "Player")
         {
             return;
