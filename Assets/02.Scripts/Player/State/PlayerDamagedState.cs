@@ -19,6 +19,10 @@ public class PlayerDamagedState : PlayerBaseState
     {
         base.OnExit();
         _owner.RPC_ResetAnimatorTrigger("Hit");
+        _owner.RPC_ResetAnimatorTrigger("Walk");
+        _owner.RPC_ResetAnimatorTrigger("Run");
+        _owner.RPC_ResetAnimatorTrigger("Idle");
+        _owner.RPC_ResetAnimatorTrigger("Dash");
     }
 
     public override void MineUpdate()
