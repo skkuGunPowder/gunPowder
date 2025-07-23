@@ -82,14 +82,7 @@ public class Bomb : MonoBehaviour, IBomb
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
 
-        if (PhotonView.IsMine)
-        {
-            PhotonNetwork.Destroy(gameObject);
-        }
-        else if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonView.RPC(nameof(RequestDestroy), RpcTarget.MasterClient, PhotonView.ViewID);
-        }
+        PhotonView.RPC(nameof(RequestDestroy), RpcTarget.MasterClient, PhotonView.ViewID);
     }
 
     [PunRPC]
