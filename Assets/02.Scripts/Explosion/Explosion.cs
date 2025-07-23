@@ -26,13 +26,14 @@ public class Explosion : MonoBehaviour
 
             if (other.TryGetComponent(out IDamagable damagableObject))
             {
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position,  attacker.GetComponent<PhotonView>().ViewID, isFallingOut);
+                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attacker.GetComponent<PhotonView>().ViewID, isFallingOut);
                 if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
                 }
             }
         }
+        Destroy(gameObject);
     }
 
     void AddExplosionForce2D(Rigidbody2D rb, float explosionForce, Vector2 explosionPosition, float explosionRadius)
