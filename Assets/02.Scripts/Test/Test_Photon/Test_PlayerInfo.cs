@@ -10,7 +10,8 @@ public class Test_PlayerInfo : MonoBehaviour
 
     public float timer;
     private bool _test = false;
-
+    public ESceneList Scene;
+    
     private void Update()
     {
         timer += Time.deltaTime;
@@ -48,5 +49,10 @@ public class Test_PlayerInfo : MonoBehaviour
         };
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+    }
+
+    public void OnClickLoadScene()
+    {
+        PhotonNetwork.LoadLevel(Scene.ToString());
     }
 }

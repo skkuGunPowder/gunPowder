@@ -6,9 +6,8 @@ using Photon.Realtime;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
-public class RoomManager : MonoBehaviourPunCallbacks
+public class RoomManager : PhotonSingleton<RoomManager>
 {
-    public static RoomManager Instance;
     private Room _room;
     public PlayerSpawner Spawner;
     //리스트로 정보칸 들어가게 하기 => 플레이어 칸 정하기
@@ -26,16 +25,10 @@ public class RoomManager : MonoBehaviourPunCallbacks
     
     private PhotonView _photonView;
     
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(this.gameObject);
-        }
+        base.Awake();
+        
         _photonView = GetComponent<PhotonView>();
     }
     
@@ -72,14 +65,20 @@ public class RoomManager : MonoBehaviourPunCallbacks
         _initialized = true;
         GeneratePlayer();
         SetRoom();
+        SetProperties();
         
         if (PhotonNetwork.IsMasterClient)
         {
+            if (_room.CustomProperties.ContainsKey(EProperties.PlayerList))
+            {
+                _playerSlotList = (List<int>)_room.CustomProperties[EProperties.PlayerList];
+                _room.IsVisible = true;
+            }
+            
             PlayerPlacement(PhotonNetwork.LocalPlayer);
             OnDataChanged?.Invoke();
         }
         
-        SetProperties();
         SetCurrentMap();
     }
 
@@ -100,13 +99,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
     // 현재 방의 맵이 무엇인가?
     private void SetCurrentMap()
     {
-        // string mapName = PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.MapSelected}"].ToString();
-        //
-        // if (Enum.TryParse(mapName, out ESceneList parseMap))
-        // {
-        //     SelectedMap = parseMap;
-        //     OnMapChanged?.Invoke();   
-        // }
         SelectedMap = (ESceneList)PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.MapSelected}"];
         OnMapChanged?.Invoke();
     }
@@ -125,7 +117,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        PhotonNetwork.CurrentRoom.IsVisible = false;
+        _room.IsVisible = false;
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
     }
 

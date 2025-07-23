@@ -52,6 +52,7 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
         Hashtable load = new Hashtable()
         {
             { EProperties.IsLoad.ToString(), true },
+            {EProperties.PlayerList.ToString(), _playerList.ToArray()}           
         };
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(load); 
