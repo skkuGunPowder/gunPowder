@@ -11,9 +11,10 @@ public class UI_InGameProfile : MonoBehaviour
     private void Awake()
     {
         PlayerSettingManager.Instance.OnDataChanged += Refresh;
+        PlayerSettingManager.Instance.OnInitCharacter += Init;
     }
 
-    private void Start()
+    private void Init()
     {
         List<int> playerNumberList = new List<int>();
 

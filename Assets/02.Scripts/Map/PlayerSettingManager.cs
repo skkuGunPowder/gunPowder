@@ -21,7 +21,7 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     public PlayerSpawner Spawner;
     public LoadSceneChecker LoadSceneChecker;
     public event Action<int,int,int> OnDataChanged;         // 언제? :
-    
+    public event Action OnInitCharacter;
     // 현재 룸 프로퍼티 가져오기
     protected override void Awake()
     {
@@ -104,7 +104,7 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
             Spawner.GeneratePlayers(i, PlayerGunpowder, PlayerLife);
         }
         
-        
+        OnInitCharacter?.Invoke();
     }
 
     public void RequestTakeDamage(int gunpowder, int life, int value)
