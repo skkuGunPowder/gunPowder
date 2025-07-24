@@ -186,7 +186,7 @@ public class PlayerStat : MonoBehaviour
         _jumpDashCount = 0;
     }
 
-    public void IncreseGunPowderCount(int amount)
+    public void IncreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount += amount;
     }
@@ -201,12 +201,12 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerLife -= 1;
             _currentPlayerGunPowderCount = _initGunpowderCount;
         }
-        /*
-        if(_currentPlayerGunPowderCount <= 0)
+        
+        if(_currentPlayerLife <= 0)
         {
             _currentPlayerGunPowderCount = 0;
             OnGunPowderEmpty?.Invoke();
-        }*/
+        }
     }
 
     public void IncreseDamagedCount()
