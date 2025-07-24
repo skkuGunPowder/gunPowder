@@ -1,5 +1,6 @@
 using System.Collections;
 using DG.Tweening;
+using NUnit.Framework.Constraints;
 using Photon.Pun;
 using UnityEngine;
 public class MissileBomb : Bomb
@@ -28,12 +29,16 @@ public class MissileBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        CheckPriority(other);
-
         if (other.gameObject.tag == "Player")
         {
             return;
         }
+
+        if (CheckPriority(other))
+        {
+            return;
+        }
+
         Explode();
     }
 

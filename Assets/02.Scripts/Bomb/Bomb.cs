@@ -52,7 +52,7 @@ public class Bomb : MonoBehaviour, IBomb
         _stat = ItemDatabase.Instance.GetStat<BombStat>(id);
     }
 
-    protected void CheckPriority(Collision2D other)
+    protected bool CheckPriority(Collision2D other)
     {
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
@@ -63,10 +63,11 @@ public class Bomb : MonoBehaviour, IBomb
             }
             else if (_stat.Priority - otherPriority < 2)
             {
-                _currentSpeed /= 2;
-                return;
+                _rigidBody.linearVelocity /= 2;
+                return true;
             }
         }
+        return false;
     }
 
     public virtual void Explode()

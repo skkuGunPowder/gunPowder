@@ -44,12 +44,20 @@ public class BasicBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        CheckPriority(other);
+        if (other.gameObject.tag == "Player")
+        {
+            return;
+        }
+
+        if (CheckPriority(other))
+        {
+            return;
+        }
         
         if (_bombVelocity == EBombVelocity.FAST)
-        {
-            Explode();
-        }
+            {
+                Explode();
+            }
         if (_bombVelocity == EBombVelocity.NORMAL && !_isFuzeActivate)
         {
             if (other.gameObject.TryGetComponent(out IDamagable damagableObject))
