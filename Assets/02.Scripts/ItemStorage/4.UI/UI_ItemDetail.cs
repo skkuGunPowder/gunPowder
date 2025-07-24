@@ -10,9 +10,9 @@ public class UI_ItemDetail : MonoBehaviour
 
     [Header("아이템 스펙 패널")]
     public GameObject ItemSpecPanel;
-    public Slider AttackPointSlider;
-    public Slider CoastSlider;
-    public Slider CoolTimeSlider;
+    public TextMeshProUGUI AttackPointText;
+    public TextMeshProUGUI CostText;
+    public TextMeshProUGUI PriorityText;
     public Slider ExlposionRadiusSlider;
 
     [SerializeField] private InventoryItem _selectedItem;
@@ -43,8 +43,14 @@ public class UI_ItemDetail : MonoBehaviour
         if (_selectedItem.Item.ItemType == EItemType.Bomb)
         {
             ItemSpecPanel.gameObject.SetActive(true);
-            // TODO
-            // Bomb 도메인 불러와서 슬라이더에 값 전달
+
+            BombStat bombStat = ItemDatabase.Instance.GetStat<BombStat>(_selectedItem.ID);
+            ExplosionStat explosionStat = ItemDatabase.Instance.GetStat<ExplosionStat>(bombStat.ExplosionID);
+
+            AttackPointText.text = $"{explosionStat.AttackPower}";
+            ExlposionRadiusSlider.value = explosionStat.ExplosionRadius;
+            PriorityText.text = $"{bombStat.FuzeTime}";
+            CostText.text = $"{bombStat.Cost}";
         }
         else
         {
