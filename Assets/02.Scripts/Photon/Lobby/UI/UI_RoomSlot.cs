@@ -22,7 +22,7 @@ public class UI_RoomSlot : MonoBehaviour
     
     [Header("참조")]
     public UI_PasswordPopup PasswordPopup;
-    private RoomInfo _roomInfo;
+    public RoomInfo _roomInfo;
     
     public void Refresh(string roomName, int currentPlayerCount, int maxPlayerCount, Sprite mapIcon, RoomInfo roomInfo)
     {

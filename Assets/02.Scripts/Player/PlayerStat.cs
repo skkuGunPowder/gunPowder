@@ -93,6 +93,10 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private int _currentPlayerGunPowderCount;
     public int CurrentPlayerGunPowderCount => _currentPlayerGunPowderCount;    
     [SerializeField] private int _currentPlayerDamagedCount;
+
+    public int CurrentPlayerLife => _currentPlayerLife;
+    [SerializeField] private int _currentPlayerLife;
+    [SerializeField] private int _initGunpowderCount;
     public int CurrentPlayerDamagedCount => _currentPlayerDamagedCount;
 
     [SerializeField]
@@ -140,12 +144,17 @@ public class PlayerStat : MonoBehaviour
             _damagedTime = _playerStatSO.DamagedTime;
 
             // 나중에는 방 설정에 따라 달라질 수 있음.
-            _currentPlayerGunPowderCount = _playerStatSO.MaxGunPoderCount;
+            // _currentPlayerGunPowderCount = _playerStatSO.MaxGunPoderCount;
             _currentPlayerDamagedCount = 0;
         }
     }
 
-    
+    public void SetPlayer(int gunpowder, int life)
+    {
+        _currentPlayerGunPowderCount = gunpowder;
+        _currentPlayerLife = life;
+        _initGunpowderCount = gunpowder;
+    }
 
     public void ResetJumpCount()
     {
@@ -185,6 +194,13 @@ public class PlayerStat : MonoBehaviour
     public void DecreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount -= amount;
+
+
+        if (_currentPlayerGunPowderCount <= 0)
+        {
+            _currentPlayerLife -= 1;
+            _currentPlayerGunPowderCount = _initGunpowderCount;
+        }
         /*
         if(_currentPlayerGunPowderCount <= 0)
         {
@@ -202,4 +218,5 @@ public class PlayerStat : MonoBehaviour
     {
         _currentPlayerDamagedCount = 0;
     }
+    
 }

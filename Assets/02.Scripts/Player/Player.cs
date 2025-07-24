@@ -145,11 +145,11 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
+    public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut,PhotonMessageInfo info)
     {
         // 체력 감소
         _playerStat.DecreaseGunPowderCount(damage);
-
+        PlayerSettingManager.Instance.RequestTakeDamage(_playerStat.CurrentPlayerGunPowderCount, _playerStat.CurrentPlayerLife,info.Sender.ActorNumber);
         // Gunpowder 낙출
         ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
 
