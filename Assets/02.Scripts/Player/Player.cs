@@ -97,6 +97,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Update()
     {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
         _attackTimer += Time.deltaTime;
 
         _gunPowderDecreaseTimer += Time.deltaTime;
