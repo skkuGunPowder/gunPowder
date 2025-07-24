@@ -11,8 +11,12 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     private bool _isFallingOut;
     public bool IsFallingOut => _isFallingOut;
 
-    private void Start()
+    private PhotonView _photonView;
+    public PhotonView PhotonView => _photonView;
+
+    private void Awake()
     {
+        _photonView = GetComponent<PhotonView>();
         _collider = GetComponent<BoxCollider2D>();
         _collider.enabled = false;
     }
@@ -54,8 +58,10 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     }
 
     [PunRPC]
-    public void SetTarget(Transform target)
+    public void SetTarget(int targetViewId)
     {
-        _target = target;
+        PhotonView targetView = PhotonView.Find(targetViewId);
+        if (targetView != null)
+            _target = targetView.transform;
     }
 }
