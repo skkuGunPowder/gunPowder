@@ -2018,90 +2018,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &300853513
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 300853514}
-  - component: {fileID: 300853515}
-  - component: {fileID: 300853516}
-  - component: {fileID: 300853517}
-  m_Layer: 0
-  m_Name: SettingManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &300853514
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 300853513}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &300853515
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 300853513}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b688369ea6dc7d43950d42ef947d047, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PlayerDeclinePowder: 0
-  PlayTime: 0
-  Spawner: {fileID: 1678354690}
-  LoadSceneChecker: {fileID: 300853517}
---- !u!114 &300853516
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 300853513}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 1
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
---- !u!114 &300853517
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 300853513}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02e95d7be5daf6740b9b3232a9765e3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &339670973
 GameObject:
   m_ObjectHideFlags: 0
@@ -2292,6 +2208,7 @@ GameObject:
   - component: {fileID: 381122872}
   - component: {fileID: 381122873}
   - component: {fileID: 381122874}
+  - component: {fileID: 381122875}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2364,6 +2281,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02e95d7be5daf6740b9b3232a9765e3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &381122875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381122870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b688369ea6dc7d43950d42ef947d047, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlayerDeclinePowder: 0
+  PlayTime: 0
+  Spawner: {fileID: 1678354690}
+  LoadSceneChecker: {fileID: 381122874}
 --- !u!1 &648034503
 GameObject:
   m_ObjectHideFlags: 0
@@ -3697,7 +3630,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1324263885}
   - {fileID: 339670976}
-  - {fileID: 300853514}
   - {fileID: 1678354691}
   - {fileID: 783991595}
   - {fileID: 256871862}
