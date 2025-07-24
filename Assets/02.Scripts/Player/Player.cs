@@ -75,6 +75,11 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Start()
     {
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
+
+        if (!photonView.IsMine)
+        {
+            _rigidbody2D.gravityScale = 0;
+        }
     }
 
     public void InitializePlayer()
@@ -158,9 +163,15 @@ public class Player : MonoBehaviourPun, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
+    [PunRPC]
     public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
+        if(!PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+
         // attackerViewId로 Transform 찾기
         Transform attacker = null;
         PhotonView attackerView = PhotonView.Find(attackerViewId);
@@ -176,23 +187,20 @@ public class Player : MonoBehaviourPun, IDamagable
             Vector3 dir = rot * baseDir;
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
-            GunPowder gunPowder = Instantiate(GunPowderPrefab, spawnPos, Quaternion.identity).GetComponent<GunPowder>();
-            //
-            gunPowder.GetComponent<GunPowder>().SetTarget(attacker);
-
-            //TODO: isFallingout에 따라 뭔가 설정
-            if (isFallingOut)
-            {
-                gunPowder.GetComponent<GunPowderRelease>().enabled = true;
-                gunPowder.GetComponent<GunPowderBezierCurve>().enabled = false;
-            }
-            else
-            {
-                gunPowder.GetComponent<GunPowderRelease>().enabled = false;
-                gunPowder.GetComponent<GunPowderBezierCurve>().enabled = true;
-            }
-
+            object[] instData = new object[] { attackerViewId, isFallingOut };
+            PhotonNetwork.Instantiate(GunPowderPrefab.name, spawnPos, Quaternion.identity, 0, instData);
         }
+    }
+
+    public void RPC_ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
+     float distance = 1.0f, bool isFallingOut = true)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        PhotonView.RPC(nameof(ReleaseGunPowder), RpcTarget.All, explosionOrigin, attackerViewId, count, spreadAngle, distance, isFallingOut);
     }
 
     /// <summary>

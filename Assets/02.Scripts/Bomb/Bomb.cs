@@ -51,8 +51,8 @@ public class Bomb : MonoBehaviour, IBomb
     {
         _stat = ItemDatabase.Instance.GetStat<BombStat>(id);
     }
-    
-    protected virtual void OnCollisionEnter2D(Collision2D other)
+
+    protected void CheckPriority(Collision2D other)
     {
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
@@ -82,6 +82,9 @@ public class Bomb : MonoBehaviour, IBomb
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
         Destroy(gameObject);
+
+        // TODO
+        // Pool 만들면 회수 코드 작성
     }
 
 
