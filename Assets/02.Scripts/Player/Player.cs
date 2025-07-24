@@ -72,7 +72,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // ItemStorage.Instance.Get
     }
 
-    private void Start()
+    private void OnEnable()
     {
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
 

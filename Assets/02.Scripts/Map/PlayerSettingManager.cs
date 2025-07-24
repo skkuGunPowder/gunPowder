@@ -40,6 +40,11 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     }
     public void Init()
     {
+        Hashtable dead = new Hashtable()
+        {
+            { EProperties.IsDead.ToString(), false }
+        };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(dead);
         // 캐릭터 순번 세팅
         SpawnSetting();
 
