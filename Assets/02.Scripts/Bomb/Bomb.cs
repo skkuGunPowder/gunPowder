@@ -1,6 +1,7 @@
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.VFX;
 public class Bomb : MonoBehaviour, IBomb
 {
     public Explosion ExplosionPrefab;
@@ -12,6 +13,10 @@ public class Bomb : MonoBehaviour, IBomb
 
     protected Transform _ownerTransform;
 
+    public Transform TrailVFXPosition;
+    public ParticleSystem TrailVFXPrefab;
+    protected ParticleSystem _vfx;
+
     public PhotonView PhotonView;
 
 
@@ -21,14 +26,26 @@ public class Bomb : MonoBehaviour, IBomb
         _rigidBody = GetComponent<Rigidbody2D>();
 
         Init();
+
+        if (TrailVFXPrefab != null)
+        {
+            _vfx = Instantiate(TrailVFXPrefab);
+            _vfx.gameObject.SetActive(false);
+        }
     }
 
     protected virtual void Update()
     {
+        if (_vfx != null)
+        {
+            _vfx.transform.position = TrailVFXPosition.position;
+        }
+
         if (_stat == null)
         {
             return;
         }
+
         _fuzeTimer += Time.deltaTime;
         if (_fuzeTimer >= _stat.FuzeTime)
         {
@@ -52,7 +69,7 @@ public class Bomb : MonoBehaviour, IBomb
         _stat = ItemDatabase.Instance.GetStat<BombStat>(id);
     }
 
-    protected void CheckPriority(Collision2D other)
+    protected bool CheckPriority(Collision2D other)
     {
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
@@ -63,10 +80,11 @@ public class Bomb : MonoBehaviour, IBomb
             }
             else if (_stat.Priority - otherPriority < 2)
             {
-                _currentSpeed /= 2;
-                return;
+                _rigidBody.linearVelocity /= 2;
+                return true;
             }
         }
+        return false;
     }
 
     public virtual void Explode()
@@ -81,6 +99,12 @@ public class Bomb : MonoBehaviour, IBomb
             Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
+
+        if (_vfx != null)
+        {
+            _vfx.transform.SetParent(transform);
+        }
+        
         Destroy(gameObject);
 
         // TODO

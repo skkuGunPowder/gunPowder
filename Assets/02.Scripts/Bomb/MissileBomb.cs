@@ -15,25 +15,25 @@ public class MissileBomb : Bomb
         SetStat(ID);
         _timer = 0f;
     }
+
     
     protected override void Update()
     {
         base.Update();
-        _timer += Time.deltaTime;
-        if (_timer < PREDELAY)
-        {
-            return;
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        CheckPriority(other);
-
         if (other.gameObject.tag == "Player")
         {
             return;
         }
+
+        if (CheckPriority(other))
+        {
+            return;
+        }
+
         Explode();
     }
 
@@ -50,6 +50,7 @@ public class MissileBomb : Bomb
         transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), 0.3f)
         .OnComplete(()=>
         {
+            _vfx.gameObject.SetActive(true);
             StartCoroutine(AccelerateForward(_fireDirection, 0.5f, _stat.Speed));
         });
     }
