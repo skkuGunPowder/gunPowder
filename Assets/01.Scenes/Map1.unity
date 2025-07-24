@@ -2063,13 +2063,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b688369ea6dc7d43950d42ef947d047, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerLife: 0
-  PlayerGunpowder: 0
   PlayerDeclinePowder: 0
   PlayTime: 0
-  Gunpowder: 100
-  Life: 3
   Spawner: {fileID: 1678354690}
+  LoadSceneChecker: {fileID: 0}
 --- !u!114 &300853516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2213,6 +2210,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &367984767
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 367984769}
+  - component: {fileID: 367984768}
+  m_Layer: 0
+  m_Name: PhotonPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &367984768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 367984767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26c627c008eb10e46804f9337895b489, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prewarmSettings:
+  - prefabId: PlayerTest
+    initialCount: 0
+    maxCount: 5
+  - prefabId: BasicBomb
+    initialCount: 50
+    maxCount: 100
+  - prefabId: Missile
+    initialCount: 50
+    maxCount: 100
+  - prefabId: GunPowder
+    initialCount: 50
+    maxCount: 100
+--- !u!4 &367984769
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 367984767}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &381122870
 GameObject:
   m_ObjectHideFlags: 0
@@ -3632,3 +3686,4 @@ SceneRoots:
   - {fileID: 381122871}
   - {fileID: 1741226067}
   - {fileID: 650898781}
+  - {fileID: 367984769}

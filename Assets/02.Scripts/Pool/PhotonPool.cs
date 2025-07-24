@@ -52,6 +52,7 @@ public class PhotonPool : MonoBehaviour, IPunPrefabPool
         Debug.Log($"[PhotonPool] '{prefabId}' {count}개 미리 생성 완료.");
     }
 
+    // 반드시 SetActive(false) 상태로 반환해야 함 (Photon 공식 권장)
     public GameObject Instantiate(string prefabId, Vector3 position, Quaternion rotation)
     {
         if (!poolDict.ContainsKey(prefabId))
@@ -85,11 +86,14 @@ public class PhotonPool : MonoBehaviour, IPunPrefabPool
             obj.name = prefabId;
         }
 
-        obj.SetActive(true);
+        // 반드시 비활성화 상태로 반환 (Photon이 내부적으로 SetActive(true)로 활성화)
+        obj.SetActive(false);
         activeCountDict[prefabId]++;
+        // OnEnable에서 상태 초기화 필수!
         return obj;
     }
 
+    // 오브젝트 반환 (비활성화 후 풀에 저장)
     public void Destroy(GameObject gameObject)
     {
         string prefabId = gameObject.name.Replace("(Clone)", "").Trim();
