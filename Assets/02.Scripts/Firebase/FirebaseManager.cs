@@ -2,6 +2,7 @@ using UnityEngine;
 using Firebase;
 using Firebase.Firestore;
 using System;
+using Firebase.Auth;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class FirebaseManager : MonoBehaviour
 
     public FirebaseApp App { get; private set; }
     public FirebaseFirestore DB { get; private set; }
+    public FirebaseAuth Auth { get; private set; }
 
     private void Awake()
     {
@@ -46,6 +48,9 @@ public class FirebaseManager : MonoBehaviour
 
             DB = FirebaseFirestore.DefaultInstance;
             Debug.Log("Firebase 연결 성공");
+
+            Auth = FirebaseAuth.DefaultInstance;
+            Debug.Log("Firebase Auth 연결 성공");
 
             try
             {
