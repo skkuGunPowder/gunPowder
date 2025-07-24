@@ -113,7 +113,7 @@ public class PlayerStat : MonoBehaviour
     
     public bool IsFallingFromLedge = false;
 
-    void Start()
+    void OnEnable()
     {
         InitializeStats();
     }
