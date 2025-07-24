@@ -26,7 +26,7 @@ public class UI_InGameProfile : MonoBehaviour
             {
                 // 후에 수정
                 UI_InGameProfileSlotList[i].Init(playerNumberList[i]);
-                UI_InGameProfileSlotList[i].Refresh(PlayerSettingManager.Instance.PlayerGunpowder, PlayerSettingManager.Instance.PlayerLife);
+                UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
             }
             else
             {

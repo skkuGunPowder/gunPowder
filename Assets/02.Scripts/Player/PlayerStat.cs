@@ -147,7 +147,7 @@ public class PlayerStat : MonoBehaviour
             // _currentPlayerGunPowderCount = _playerStatSO.MaxGunPoderCount;
             _currentPlayerDamagedCount = 0;
         }
-    }
+    } 
 
     public void SetPlayer(int gunpowder, int life)
     {
