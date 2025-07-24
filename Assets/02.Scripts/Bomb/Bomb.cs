@@ -27,13 +27,19 @@ public class Bomb : MonoBehaviour, IBomb
 
         Init();
 
-        _vfx = Instantiate(TrailVFXPrefab);
-        _vfx.gameObject.SetActive(false);
+        if (TrailVFXPrefab != null)
+        {
+            _vfx = Instantiate(TrailVFXPrefab);
+            _vfx.gameObject.SetActive(false);
+        }
     }
 
     protected virtual void Update()
     {
-        _vfx.transform.position = TrailVFXPosition.position;
+        if (_vfx != null)
+        {
+            _vfx.transform.position = TrailVFXPosition.position;
+        }
 
         if (_stat == null)
         {
@@ -93,7 +99,12 @@ public class Bomb : MonoBehaviour, IBomb
             Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
-        _vfx.transform.SetParent(transform);
+
+        if (_vfx != null)
+        {
+            _vfx.transform.SetParent(transform);
+        }
+        
         Destroy(gameObject);
 
         // TODO
