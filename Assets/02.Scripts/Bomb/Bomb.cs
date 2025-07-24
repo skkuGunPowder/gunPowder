@@ -105,7 +105,7 @@ public class Bomb : MonoBehaviour, IBomb
             _vfx.transform.SetParent(transform);
         }
         
-        Destroy(gameObject);
+        PhotonNetwork.Destroy(gameObject);
 
         // TODO
         // Pool 만들면 회수 코드 작성
