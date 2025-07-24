@@ -111,16 +111,6 @@ public class Player : MonoBehaviourPun, IDamagable
             spriteRenderer.flipX = false; // 기본 방향
             spriteRenderer.color = Color.white; // 기본 색상
         }
-
-        // 7. 상태머신 초기화 (있다면)
-        var fsm = GetComponent<PlayerFSM>();
-        if (fsm != null)
-        {
-            fsm.ChangeState<PlayerIdleState>();
-        }
-
-        // 8. 이펙트/파티클 초기화 (있다면)
-        // 예: _vfx?.Stop();
     }
 
     private void OnDisable()
