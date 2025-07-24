@@ -21,6 +21,8 @@ public class PlayerRecoilState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
+        _owner.RPC_ResetAnimatorTrigger("JumpAttack");
+        _owner.RPC_ResetAnimatorTrigger("JumpStrongAttack");
     }
 
     public override void MineUpdate()

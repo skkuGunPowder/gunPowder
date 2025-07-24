@@ -153,11 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b8c96e2cdc154e848a3d9fe62464d42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CameraTargets:
-  - TargetTransform: {fileID: 0}
-    TargetInfluenceH: 1
-    TargetInfluenceV: 1
-    TargetOffset: {x: 0, y: 0}
+  CameraTargets: []
   CenterTargetOnStart: 1
   Axis: 0
   UpdateType: 0
@@ -192,10 +188,10 @@ MonoBehaviour:
   _serializedAxis: 0
   UseNumericBoundaries: 1
   UseTopBoundary: 0
-  TopBoundary: 10
+  TopBoundary: 11.05
   TargetTopBoundary: 0
   UseBottomBoundary: 1
-  BottomBoundary: -5
+  BottomBoundary: -10
   TargetBottomBoundary: 0
   UseLeftBoundary: 1
   LeftBoundary: -53.62
@@ -230,7 +226,7 @@ MonoBehaviour:
   Progressive: 1
   SpeedMultiplier: 1
   TransitionSmoothness: 0.5
-  MaintainInfluenceOnStop: 1
+  MaintainInfluenceOnStop: 0
   MovementThreshold: {x: 0, y: 0}
   LeftFocus: 0.25
   RightFocus: 0.25

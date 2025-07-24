@@ -2,6 +2,7 @@ using UnityEngine;
 using Firebase;
 using Firebase.Firestore;
 using System;
+using Firebase.Auth;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class FirebaseManager : MonoBehaviour
 
     public FirebaseApp App { get; private set; }
     public FirebaseFirestore DB { get; private set; }
+    public FirebaseAuth Auth { get; private set; }
 
     private void Awake()
     {
@@ -30,9 +32,25 @@ public class FirebaseManager : MonoBehaviour
         var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
         if (dependencyStatus == DependencyStatus.Available)
         {
-            App = FirebaseApp.DefaultInstance;
+            #if UNITY_STANDALONE && !UNITY_EDITOR
+                AppOptions options = new AppOptions()
+                {
+                    ProjectId = "gunpowder-c52bd",
+                    AppId = "1:1043528855185:android:402dbd4fbbd7f250205930",
+                    ApiKey = "AIzaSyDzJBfM-ymyBjYLdqvkw9B9-WlYJJf3HAE",
+                    StorageBucket = "gunpowder-c52bd.firebasestorage.app",
+                };
+
+                App = FirebaseApp.Create(options);
+            #else
+                App = FirebaseApp.DefaultInstance;
+            #endif
+
             DB = FirebaseFirestore.DefaultInstance;
             Debug.Log("Firebase 연결 성공");
+
+            Auth = FirebaseAuth.DefaultInstance;
+            Debug.Log("Firebase Auth 연결 성공");
 
             try
             {
