@@ -81,27 +81,10 @@ public class Bomb : MonoBehaviour, IBomb
             Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
+        Destroy(gameObject);
 
-        if (PhotonView.IsMine)
-        {
-            PhotonNetwork.Destroy(gameObject);
-        }
-        else
-        {
-            PhotonView.RPC(nameof(RequestDestroy), RpcTarget.MasterClient, PhotonView.ViewID);
-        }
-    }
-
-    [PunRPC]
-    public void RequestDestroy(int viewID)
-    {
-        if (!PhotonNetwork.IsMasterClient) return;
-
-        PhotonView target = PhotonView.Find(viewID);
-        if (target != null)
-        {
-            PhotonNetwork.Destroy(target.gameObject);
-        }
+        // TODO
+        // Pool 만들면 회수 코드 작성
     }
 
 
