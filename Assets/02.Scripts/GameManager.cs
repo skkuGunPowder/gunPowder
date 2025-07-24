@@ -5,12 +5,15 @@ using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 using DG.Tweening;
+
 [RequireComponent(typeof(PhotonView))]
+[RequireComponent(typeof(LoadSceneChecker))]
 public class GameManager : PhotonSingleton<GameManager>
 {
     private PhotonView _photonView;
     private EGameState _currentGameState;
     private float _timer;
+    private LoadSceneChecker _loadChecker;
     public GameObject GameOverScreen;
 
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
@@ -22,19 +25,14 @@ public class GameManager : PhotonSingleton<GameManager>
          base.Awake();
 
          _photonView = GetComponent<PhotonView>();
+         _loadChecker = GetComponent<LoadSceneChecker>();
+
+         _loadChecker.OnLoadFinished += GameStart;
      }
 
     private void Start()
     {
-        Hashtable load = new Hashtable()
-        {
-            { EProperties.IsLoad.ToString(), true }
-        };
-
-        PhotonNetwork.LocalPlayer.SetCustomProperties(load);
-
         _timer = PlayerSettingManager.Instance.PlayTime;
-
     }
 
     // 게임 시작
@@ -56,11 +54,10 @@ public class GameManager : PhotonSingleton<GameManager>
         Debug.Log("좀 돼라");
         if (changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] != null)
         {
-            PlayerDeadCheck();
-        }
-        if (changedProps.ContainsKey(EProperties.IsLoad.ToString()) && changedProps[EProperties.IsLoad.ToString()] != null)
-        {
-            GameStart();
+            if (PlayerDeadCheck())
+            {
+                _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+            }
         }
     }
 
@@ -83,42 +80,8 @@ public class GameManager : PhotonSingleton<GameManager>
         });
     }
     
-    private void GameStart()
-    {
-        if (PlayerLoadSceneCheck() == false)
-        {
-            return;
-        }
-
-        Debug.Log($"현재 게임 상태 : {_currentGameState.ToString()}");
-        _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
-    }
-    
-    // 죽은 사람 체크하기
-    private void PlayerDeadCheck()
-    {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-        
-        List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
-        foreach (PhotonPlayer p in playerList)
-        {
-            bool isLoaded = p.CustomProperties.ContainsKey(EProperties.IsLoad.ToString()) && (bool)p.CustomProperties[EProperties.IsLoad.ToString()];
-            Debug.Log($"Player {p.NickName} - SceneLoaded: {isLoaded}");
-            if (isLoaded == false)
-            {
-                Debug.Log("아직 준비 안됨");
-                return;
-            }
-        }
-        
-        _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-        
-    }
     // 모두가 다 들어왔는가?
-    private bool PlayerLoadSceneCheck()
+    private bool PlayerDeadCheck()
     {
         if (PhotonNetwork.IsMasterClient == false)
         {
@@ -128,18 +91,20 @@ public class GameManager : PhotonSingleton<GameManager>
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
 
         int dead = 0;
+        
         foreach (PhotonPlayer p in playerList)
         {
-            bool isLoaded = p.CustomProperties.ContainsKey(EProperties.IsLoad.ToString()) && (bool)p.CustomProperties[EProperties.IsLoad.ToString()];
-            Debug.Log($"Player {p.NickName} - SceneLoaded: {isLoaded}");
-            if (isLoaded == false)
+            bool isDead = p.CustomProperties.ContainsKey(EProperties.IsDead.ToString()) && (bool)p.CustomProperties[EProperties.IsDead.ToString()];
+            Debug.Log($"Player {p.NickName} - Dead: {isDead}");
+            if (isDead == false)
             {
                 Debug.Log("아직 준비 안됨");
                 return false;
             }
             
             dead++;
-            Debug.Log($"Player {p.NickName} - SceneLoaded: {dead}");
+            
+            Debug.Log($"{dead}");
         }
 
         if (dead < playerList.Count)
@@ -148,6 +113,11 @@ public class GameManager : PhotonSingleton<GameManager>
         }
         
         return true;
+    }
+        
+    private void GameStart()
+    {
+        _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
 
     [PunRPC]

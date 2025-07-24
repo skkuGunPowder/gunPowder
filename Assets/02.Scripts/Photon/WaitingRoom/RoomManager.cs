@@ -6,14 +6,16 @@ using Photon.Realtime;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
-public class RoomManager : MonoBehaviourPunCallbacks
+[RequireComponent(typeof(PhotonView))]
+// [RequireComponent(typeof(LoadSceneChecker))]
+public class RoomManager : PhotonSingleton<RoomManager>
 {
-    public static RoomManager Instance;
     private Room _room;
     public PlayerSpawner Spawner;
     //리스트로 정보칸 들어가게 하기 => 플레이어 칸 정하기
     private List<int> _playerSlotList;
     public List<int> PlayerSlotList => _playerSlotList;
+    private LoadSceneChecker _loadChecker;
     
     public event Action OnMapChanged;    // UI 변경 => 방장이 맵을 변경했을 때
     public event Action OnDataChanged;  // UI 변경 => 플레이어들이 자리를 이동할 때
@@ -26,17 +28,17 @@ public class RoomManager : MonoBehaviourPunCallbacks
     
     private PhotonView _photonView;
     
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(this.gameObject);
-        }
+        base.Awake();
+        
         _photonView = GetComponent<PhotonView>();
+        _loadChecker = GetComponent<LoadSceneChecker>();
+
+        // _loadChecker.OnLoadFinished += Init;
+        _room = PhotonNetwork.CurrentRoom;
+
+
     }
     
     // 방 세팅 시작 => Init
@@ -69,44 +71,32 @@ public class RoomManager : MonoBehaviourPunCallbacks
     // 방에 들어왔을 때 첫 세팅 하기
     private void Init()
     {
-        _initialized = true;
-        GeneratePlayer();
         SetRoom();
         
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PlayerPlacement(PhotonNetwork.LocalPlayer);
-            OnDataChanged?.Invoke();
-        }
-        
+        _initialized = true;
+        GeneratePlayer();
         SetProperties();
         SetCurrentMap();
+        
     }
 
     private void GeneratePlayer()
     {
-        Spawner.GeneratePlayers(0);
+        Spawner.GeneratePlayers(0, 10000000, 10000000);
     }
     // 플레이어가 레디를 했는지 체크했는지 알아보는 커스텀 프로퍼티
     private void SetProperties()
     {
         Hashtable ready = new Hashtable
         {
-            { EProperties.IsReady.ToString(), false },
-            { EProperties.IsLoad.ToString() , false }
+            { EProperties.IsReady.ToString(), false }
         };
+        
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
     }
     // 현재 방의 맵이 무엇인가?
     private void SetCurrentMap()
     {
-        // string mapName = PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.MapSelected}"].ToString();
-        //
-        // if (Enum.TryParse(mapName, out ESceneList parseMap))
-        // {
-        //     SelectedMap = parseMap;
-        //     OnMapChanged?.Invoke();   
-        // }
         SelectedMap = (ESceneList)PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.MapSelected}"];
         OnMapChanged?.Invoke();
     }
@@ -124,9 +114,16 @@ public class RoomManager : MonoBehaviourPunCallbacks
         {
             return;
         }
+        
+        Hashtable playerList = new Hashtable()
+        {
+            {EProperties.PlayerList.ToString(), _playerSlotList.ToArray()}
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(playerList);
 
-        PhotonNetwork.CurrentRoom.IsVisible = false;
+        _room.IsVisible = false;
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
+        
     }
 
     // 사람들이 모두 눌렀는가?
@@ -151,13 +148,32 @@ public class RoomManager : MonoBehaviourPunCallbacks
     }
     //현재 이 방에 있는 플레이어들의 계정 정보
     private void SetRoom()
-    {
-        _room = PhotonNetwork.CurrentRoom;
-        
-        _playerSlotList = new List<int>()
+    { 
+        if (_room.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false)
         {
-            0,0,0,0
-        };
+            _playerSlotList = new List<int>()
+            {
+                0,0,0,0
+            };
+         
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PlayerPlacement(PhotonNetwork.LocalPlayer);
+                _room.IsVisible = true;
+                OnDataChanged?.Invoke();
+            };
+            
+            return;
+        }
+
+        int[] players = _room.CustomProperties[EProperties.PlayerList.ToString()] as int[];
+        _playerSlotList = new List<int>(players);
+        
+        Debug.Log(_playerSlotList.Count);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            _photonView.RPC(nameof(UpdateSlots),RpcTarget.All, _playerSlotList.ToArray());
+        }
     }
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer,Hashtable changedProps)
@@ -222,11 +238,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public void UpdateSlots(int[] actorNumbers)
     {
         _playerSlotList = new List<int>(actorNumbers);
-        Hashtable playerList = new Hashtable()
-        {
-            {EProperties.PlayerList.ToString(), _playerSlotList.ToArray()}
-        };
-        PhotonNetwork.CurrentRoom.SetCustomProperties(playerList);
         OnDataChanged?.Invoke();
     }
 
@@ -235,12 +246,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         if (propertiesThatChanged.ContainsKey($"{EProperties.MapSelected}") && propertiesThatChanged[$"{EProperties.MapSelected}"] != null)
         { 
-            // string mapName = propertiesThatChanged[$"{EProperties.MapSelected}"].ToString();
-            // if (Enum.TryParse(mapName, out ESceneList parseMap))
-            // {
-            //     SelectedMap = parseMap;
-            //     OnMapChanged?.Invoke();   
-            // }
             SelectedMap = (ESceneList)propertiesThatChanged[$"{EProperties.MapSelected}"];
             OnMapChanged?.Invoke();
         }
