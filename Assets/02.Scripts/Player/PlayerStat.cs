@@ -116,6 +116,7 @@ public class PlayerStat : MonoBehaviour
     void OnEnable()
     {
         InitializeStats();
+        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife);
     }
 
     public void InitializeStats()
