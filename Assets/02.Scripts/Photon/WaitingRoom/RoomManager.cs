@@ -77,13 +77,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         GeneratePlayer();
         SetProperties();
         SetCurrentMap();
-
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PlayerPlacement(PhotonNetwork.LocalPlayer);
-            _room.IsVisible = true;
-            OnDataChanged?.Invoke();
-        };
+        
     }
 
     private void GeneratePlayer()
@@ -162,6 +156,13 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 0,0,0,0
             };
          
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PlayerPlacement(PhotonNetwork.LocalPlayer);
+                _room.IsVisible = true;
+                OnDataChanged?.Invoke();
+            };
+            
             return;
         }
 

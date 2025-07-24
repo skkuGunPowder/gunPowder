@@ -11,9 +11,10 @@ public class UI_InGameProfile : MonoBehaviour
     private void Awake()
     {
         PlayerSettingManager.Instance.OnDataChanged += Refresh;
+        PlayerSettingManager.Instance.OnInitCharacter += Init;
     }
 
-    private void Start()
+    private void Init()
     {
         List<int> playerNumberList = new List<int>();
 
@@ -23,8 +24,9 @@ public class UI_InGameProfile : MonoBehaviour
         {
             if (i < playerNumberList.Count)
             {
+                // 후에 수정
                 UI_InGameProfileSlotList[i].Init(playerNumberList[i]);
-                UI_InGameProfileSlotList[i].Refresh(PlayerSettingManager.Instance.Gunpowder, PlayerSettingManager.Instance.Life);   
+                UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
             }
             else
             {
