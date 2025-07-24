@@ -1,9 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 [RequireComponent(typeof(PhotonView))]
 public class PlayerSettingManager : Singleton<PlayerSettingManager>
@@ -26,20 +27,47 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     protected override void Awake()
     {
         base.Awake();
+        Debug.Log("awake");
+        _photonView = GetComponent<PhotonView>();
+        _room = PhotonNetwork.CurrentRoom;
+        //
+        // LoadSceneChecker.OnLoadFinished += Init;
+
+        Debug.Log($"{int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"].ToString())}");
+        Debug.Log($"{PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"]}");
+        
+    }
+
+    private void Start()
+    {
+        Debug.Log("start");
+        PlayerLife = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"].ToString());
+        PlayerGunpowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"].ToString()); 
+        PlayerDeclinePowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"].ToString());
+        PlayTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString());
+        
+        Debug.Log($"{int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"].ToString())}");
+        Debug.Log($"{PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"]}");
+        
+        StartCoroutine(spawnPlayer());
+        
+    }
+
+    private IEnumerator spawnPlayer()
+    {
+        yield return new WaitForSeconds(1f);
         
         PlayerLife = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"].ToString());
         PlayerGunpowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"].ToString()); 
         PlayerDeclinePowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"].ToString());
         PlayTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString());
         
-        _photonView = GetComponent<PhotonView>();
-        _room = PhotonNetwork.CurrentRoom;
-
-        LoadSceneChecker.OnLoadFinished += Init;
-
+        Init();
     }
     public void Init()
     {
+        
+
         Hashtable dead = new Hashtable()
         {
             { EProperties.IsDead.ToString(), false }

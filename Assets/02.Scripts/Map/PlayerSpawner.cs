@@ -15,6 +15,8 @@ public class PlayerSpawner : MonoBehaviour
         {
             player.tag = "Player";
 
+            player.GetComponent<PlayerStat>().SetPlayer(gunpowder, life);
+
             ProCamera2D proCamera = Camera.main.GetComponent<ProCamera2D>();
             if (proCamera.CameraTargets.Count == 0)
             {
@@ -26,7 +28,6 @@ public class PlayerSpawner : MonoBehaviour
             player.tag = "enemy";
         }
         
-        player.GetComponent<PlayerStat>().SetPlayer(gunpowder, life);
-
+        
     }
 }

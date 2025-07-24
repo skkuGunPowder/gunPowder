@@ -154,6 +154,8 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerGunPowderCount = gunpowder;
         _currentPlayerLife = life;
         _initGunpowderCount = gunpowder;
+        
+        Debug.Log("SetPlayer");
     }
 
     public void ResetJumpCount()
