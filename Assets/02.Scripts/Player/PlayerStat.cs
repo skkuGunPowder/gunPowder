@@ -56,6 +56,8 @@ public class PlayerStat : MonoBehaviour
 
     [SerializeField] private bool _isJumping = false;
     public bool IsJumping { get => _isJumping; set => _isJumping = value; }
+    [SerializeField] private bool _isFallingDead = false;
+    public bool IsFallingDead { get => _isFallingDead; set => _isFallingDead = value; }
 
     [SerializeField] private float _myMoveSpeed;
     public float MyMoveSpeed { get => _myMoveSpeed; set => _myMoveSpeed = value; }

@@ -51,8 +51,8 @@ public class Bomb : MonoBehaviour, IBomb
     {
         _stat = ItemDatabase.Instance.GetStat<BombStat>(id);
     }
-    
-    protected virtual void OnCollisionEnter2D(Collision2D other)
+
+    protected void CheckPriority(Collision2D other)
     {
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
@@ -81,7 +81,27 @@ public class Bomb : MonoBehaviour, IBomb
             Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
-        Destroy(gameObject);
+
+        if (PhotonView.IsMine)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
+        else
+        {
+            PhotonView.RPC(nameof(RequestDestroy), RpcTarget.MasterClient, PhotonView.ViewID);
+        }
+    }
+
+    [PunRPC]
+    public void RequestDestroy(int viewID)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        PhotonView target = PhotonView.Find(viewID);
+        if (target != null)
+        {
+            PhotonNetwork.Destroy(target.gameObject);
+        }
     }
 
 

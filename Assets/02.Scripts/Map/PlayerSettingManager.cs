@@ -12,7 +12,7 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     public List<int> PlayerList => _playerList;
     public int PlayerLife;
     public int PlayerGunpowder;
-    public int PlayerDeclinePowder;
+    public int PlayerDeclinePowder;         // 몇초당 1 감소 의 몇 초
     public int PlayTime;
     
     private Room _room;
@@ -52,6 +52,7 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
         Hashtable load = new Hashtable()
         {
             { EProperties.IsLoad.ToString(), true },
+            {EProperties.PlayerList.ToString(), _playerList.ToArray()}           
         };
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(load); 
