@@ -19,7 +19,7 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     private PhotonView _photonView;
     
     public PlayerSpawner Spawner;
-
+    public LoadSceneChecker LoadSceneChecker;
     public event Action<int,int,int> OnDataChanged;         // 언제? :
     
     // 현재 룸 프로퍼티 가져오기
@@ -34,39 +34,38 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
         
         _photonView = GetComponent<PhotonView>();
         _room = PhotonNetwork.CurrentRoom;
-    }
 
-    // 플레이어 스탯에 연결해줄 것들 세팅하기
-    private void Start()
+        LoadSceneChecker.OnLoadFinished += Init;
+
+    }
+    public void Init()
     {
         // 캐릭터 순번 세팅
         SpawnSetting();
-        
-        // 플레이어 생성
-        SpawnPlayer();
-        
-        Hashtable load = new Hashtable()
-        {
-            { EProperties.IsLoad.ToString(), true },
-            {EProperties.PlayerList.ToString(), _playerList.ToArray()}           
-        };
 
-        PhotonNetwork.LocalPlayer.SetCustomProperties(load); 
-        // 플레이어 스탯 추가해주기
+        // 플레이어 스탯 추가해주기   
     }
     
     [PunRPC]
     private void Rpc_SpawnPlayer(int[] playerList)
     {
         _playerList = new List<int>(playerList);
+        SpawnPlayer();
     }
     
     // 프로퍼티 불러오기  => 플레이어 리스트
     private void SpawnSetting()
     {
-        if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] is int[] actorNumbers)
+        Debug.Log("spawn");
+        if (PhotonNetwork.IsMasterClient == false)
         {
-            List<int> currentPlayerList = new List<int>(actorNumbers);
+            return;
+        }
+        
+        if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)
+        {
+            int[] players = PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] as int[];   
+            List<int> currentPlayerList = new List<int>(players);
             
             foreach (int actorNumber in currentPlayerList)
             {
@@ -78,19 +77,30 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
                 _playerList.Add(actorNumber);
             }
         }
+        else
+        {
+            List<PhotonPlayer> currentPlayerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
+            foreach (PhotonPlayer player in currentPlayerList)
+            {
+                _playerList.Add(player.ActorNumber);
+            }
+        }
         
         _photonView.RPC(nameof(Rpc_SpawnPlayer), RpcTarget.All, _playerList.ToArray());
     }
-
+    
     private void SpawnPlayer()
     {
         for (int i = 0; i < _playerList.Count; i++)
         {
+            Debug.Log(_playerList[i]);
+            Debug.Log( PhotonNetwork.LocalPlayer.ActorNumber);
             if (_playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
             {
                 continue;
             }
-            
+        
+            Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 가 소환한당");    
             Spawner.GeneratePlayers(i, PlayerGunpowder, PlayerLife);
         }
         

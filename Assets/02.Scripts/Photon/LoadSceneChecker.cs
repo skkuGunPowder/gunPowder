@@ -31,6 +31,11 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
         if (changedProps.ContainsKey(EProperties.IsLoad.ToString()) && changedProps[EProperties.IsLoad.ToString()] != null)
         {
             Debug.Log(targetPlayer + "로딩 체크하기");
@@ -40,11 +45,6 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     
     private void PlayerLoadCheck()
     {
-        // if (PhotonNetwork.IsMasterClient == false)
-        // {
-        //     return;
-        // }
-        //
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
         
         foreach (PhotonPlayer p in playerList)
@@ -59,8 +59,6 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         }
        
         OnLoadFinished?.Invoke();
-        
-        SetLoadState(false);
     }
 
 
