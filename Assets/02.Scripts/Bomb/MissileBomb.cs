@@ -1,6 +1,5 @@
 using System.Collections;
 using DG.Tweening;
-using NUnit.Framework.Constraints;
 using Photon.Pun;
 using UnityEngine;
 public class MissileBomb : Bomb
@@ -16,15 +15,11 @@ public class MissileBomb : Bomb
         SetStat(ID);
         _timer = 0f;
     }
+
     
     protected override void Update()
     {
         base.Update();
-        _timer += Time.deltaTime;
-        if (_timer < PREDELAY)
-        {
-            return;
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -55,6 +50,7 @@ public class MissileBomb : Bomb
         transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), 0.3f)
         .OnComplete(()=>
         {
+            _vfx.gameObject.SetActive(true);
             StartCoroutine(AccelerateForward(_fireDirection, 0.5f, _stat.Speed));
         });
     }

@@ -1,6 +1,7 @@
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.VFX;
 public class Bomb : MonoBehaviour, IBomb
 {
     public Explosion ExplosionPrefab;
@@ -12,6 +13,10 @@ public class Bomb : MonoBehaviour, IBomb
 
     protected Transform _ownerTransform;
 
+    public Transform TrailVFXPosition;
+    public ParticleSystem TrailVFXPrefab;
+    protected ParticleSystem _vfx;
+
     public PhotonView PhotonView;
 
 
@@ -21,14 +26,20 @@ public class Bomb : MonoBehaviour, IBomb
         _rigidBody = GetComponent<Rigidbody2D>();
 
         Init();
+
+        _vfx = Instantiate(TrailVFXPrefab);
+        _vfx.gameObject.SetActive(false);
     }
 
     protected virtual void Update()
     {
+        _vfx.transform.position = TrailVFXPosition.position;
+
         if (_stat == null)
         {
             return;
         }
+
         _fuzeTimer += Time.deltaTime;
         if (_fuzeTimer >= _stat.FuzeTime)
         {
@@ -82,6 +93,7 @@ public class Bomb : MonoBehaviour, IBomb
             Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
+        _vfx.transform.SetParent(transform);
         Destroy(gameObject);
 
         // TODO
