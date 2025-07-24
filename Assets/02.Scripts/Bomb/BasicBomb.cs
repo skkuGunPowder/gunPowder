@@ -44,6 +44,11 @@ public class BasicBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
         if (other.gameObject.tag == "Player")
         {
             return;

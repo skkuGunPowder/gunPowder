@@ -36,6 +36,11 @@ public class Bomb : MonoBehaviour, IBomb
 
     protected virtual void Update()
     {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
         if (_vfx != null)
         {
             _vfx.transform.position = TrailVFXPosition.position;
