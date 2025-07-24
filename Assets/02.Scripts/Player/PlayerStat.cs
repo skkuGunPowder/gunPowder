@@ -113,9 +113,10 @@ public class PlayerStat : MonoBehaviour
     
     public bool IsFallingFromLedge = false;
 
-    void Start()
+    void OnEnable()
     {
         InitializeStats();
+        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife);
     }
 
     public void InitializeStats()
@@ -147,13 +148,15 @@ public class PlayerStat : MonoBehaviour
             // _currentPlayerGunPowderCount = _playerStatSO.MaxGunPoderCount;
             _currentPlayerDamagedCount = 0;
         }
-    }
+    } 
 
     public void SetPlayer(int gunpowder, int life)
     {
         _currentPlayerGunPowderCount = gunpowder;
         _currentPlayerLife = life;
         _initGunpowderCount = gunpowder;
+        
+        Debug.Log("SetPlayer");
     }
 
     public void ResetJumpCount()
@@ -186,7 +189,7 @@ public class PlayerStat : MonoBehaviour
         _jumpDashCount = 0;
     }
 
-    public void IncreseGunPowderCount(int amount)
+    public void IncreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount += amount;
     }
@@ -201,12 +204,12 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerLife -= 1;
             _currentPlayerGunPowderCount = _initGunpowderCount;
         }
-        /*
-        if(_currentPlayerGunPowderCount <= 0)
+        
+        if(_currentPlayerLife <= 0)
         {
             _currentPlayerGunPowderCount = 0;
             OnGunPowderEmpty?.Invoke();
-        }*/
+        }
     }
 
     public void IncreseDamagedCount()

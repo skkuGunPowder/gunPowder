@@ -71,7 +71,7 @@ public class PhotonForTest : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("OnJoinedRoom");
-        Spawner.GeneratePlayers(0, 109,1910);
+        Spawner.GeneratePlayers(0);
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
     {

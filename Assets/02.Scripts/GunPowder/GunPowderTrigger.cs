@@ -17,7 +17,15 @@ public class GunPowderTrigger : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            gameObject.GetComponent<GunPowder>().photonView.RPC(nameof(GunPowder.SetTarget), RpcTarget.All, collision.transform);
+            GunPowder gunPowder = gameObject.GetComponentInParent<GunPowder>();
+            if (gunPowder != null)
+            {
+                PhotonView targetView = collision.GetComponent<PhotonView>();
+                if (targetView != null)
+                {
+                    gunPowder.photonView.RPC(nameof(GunPowder.SetTarget), RpcTarget.All, targetView.ViewID);
+                }
+            }
 
             // 1. 베지어 곡선 이동 활성화
             gameObject.GetComponentInParent<GunPowderBezierCurve>().enabled = true;

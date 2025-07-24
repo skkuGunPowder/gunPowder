@@ -72,7 +72,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // ItemStorage.Instance.Get
     }
 
-    private void Start()
+    private void OnEnable()
     {
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
 
@@ -97,6 +97,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Update()
     {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
         _attackTimer += Time.deltaTime;
 
         _gunPowderDecreaseTimer += Time.deltaTime;
@@ -141,6 +145,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
     {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
         PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, isFallingOut);
     }
 

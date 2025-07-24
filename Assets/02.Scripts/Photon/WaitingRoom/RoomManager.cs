@@ -82,7 +82,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
 
     private void GeneratePlayer()
     {
-        Spawner.GeneratePlayers(0, 10000000, 10000000);
+        Spawner.GeneratePlayers(0);
     }
     // 플레이어가 레디를 했는지 체크했는지 알아보는 커스텀 프로퍼티
     private void SetProperties()

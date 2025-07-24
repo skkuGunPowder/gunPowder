@@ -9,6 +9,8 @@ public class PlayerDieState : PlayerBaseState
     {
         base.OnEnter();
 
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() {{EProperties.IsDead.ToString(), true}});
+
         // 플레이어가 사망할 떄, 사망 폭발이 발생
         //PhotonNetwork.Instantiate("DieExplosion", transform.position, Quaternion.identity);
         Debug.Log("죽음 폭발 발생");

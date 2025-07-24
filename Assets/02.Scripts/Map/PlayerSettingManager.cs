@@ -1,22 +1,22 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 [RequireComponent(typeof(PhotonView))]
 public class PlayerSettingManager : Singleton<PlayerSettingManager>
 {
     private List<int> _playerList = new List<int>(); //현재 있는 플레이어들
     public List<int> PlayerList => _playerList;
-    public int PlayerLife;
-    public int PlayerGunpowder;
-    public int PlayerDeclinePowder;         // 몇초당 1 감소 의 몇 초
-    public int PlayTime;
     
     private Room _room;
     private PhotonView _photonView;
+    
+    public int PlayerDeclinePowder;         // 몇초당 1 감소 의 몇 초
+    public int PlayTime;
     
     public PlayerSpawner Spawner;
     public LoadSceneChecker LoadSceneChecker;
@@ -26,20 +26,24 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     protected override void Awake()
     {
         base.Awake();
+        Debug.Log("awake");
+        _photonView = GetComponent<PhotonView>();
+        _room = PhotonNetwork.CurrentRoom;
         
-        PlayerLife = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"].ToString());
-        PlayerGunpowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"].ToString()); 
+        LoadSceneChecker.OnLoadFinished += Init;
+        
+    }
+
+    public void Init()
+    {
         PlayerDeclinePowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"].ToString());
         PlayTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString());
         
-        _photonView = GetComponent<PhotonView>();
-        _room = PhotonNetwork.CurrentRoom;
-
-        LoadSceneChecker.OnLoadFinished += Init;
-
-    }
-    public void Init()
-    {
+        Hashtable dead = new Hashtable()
+        {
+            { EProperties.IsDead.ToString(), false }
+        };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(dead);
         // 캐릭터 순번 세팅
         SpawnSetting();
 
@@ -101,7 +105,7 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
             }
         
             Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 가 소환한당");    
-            Spawner.GeneratePlayers(i, PlayerGunpowder, PlayerLife);
+            Spawner.GeneratePlayers(i);
         }
         
         OnInitCharacter?.Invoke();

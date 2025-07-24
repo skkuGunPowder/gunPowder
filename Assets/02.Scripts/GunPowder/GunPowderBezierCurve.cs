@@ -128,6 +128,7 @@ public class GunPowderBezierCurve : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Player"))
         {
+            collision.gameObject.GetComponent<Player>().PlayerStat.IncreaseGunPowderCount(1);
             if(!PhotonNetwork.IsMasterClient)
             {
                 return;
