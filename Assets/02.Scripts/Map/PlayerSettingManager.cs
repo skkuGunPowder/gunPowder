@@ -6,6 +6,7 @@ using Photon.Realtime;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
+
 [RequireComponent(typeof(PhotonView))]
 public class PlayerSettingManager : Singleton<PlayerSettingManager>
 {
@@ -17,11 +18,16 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     
     public int PlayerDeclinePowder;         // 몇초당 1 감소 의 몇 초
     public int PlayTime;
+
+    private Dictionary<int, int> _playerScoreDictionary = new Dictionary<int, int>();
     
     public PlayerSpawner Spawner;
     public LoadSceneChecker LoadSceneChecker;
+    
+    public event Action<int> OnTopPlayerChanged; 
     public event Action<int,int,int> OnDataChanged;         // 언제? :
     public event Action OnInitCharacter;
+    
     // 현재 룸 프로퍼티 가져오기
     protected override void Awake()
     {
@@ -77,7 +83,9 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
                 {
                     continue;
                 }
-                
+
+                int score = RoomStatManager.Instance.PlayerLife * RoomStatManager.Instance.PlayerGunpowder;
+                _playerScoreDictionary.Add(actorNumber, score);
                 _playerList.Add(actorNumber);
             }
         }
@@ -117,7 +125,9 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
         {
             return;
         }
+        
         _photonView.RPC(nameof(RPC_RequestDamage),RpcTarget.All, gunpowder, life, value);
+        _photonView.RPC(nameof(CalculateScore),RpcTarget.MasterClient,gunpowder, life);
     }
     
     [PunRPC]
@@ -126,4 +136,44 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
         OnDataChanged?.Invoke(playerNumber, gunpowder, life);
     }
 
+    [PunRPC]
+    private void CalculateScore(int gunpowder, int life, int playerNumber)
+    {
+        if (life == 0)
+        {
+            return;
+        }
+        
+        int score = playerNumber * gunpowder;
+        _playerScoreDictionary[playerNumber] = score;
+        CheckTopPlayer();
+    }
+    
+    
+    private void CheckTopPlayer()
+    {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        int topActor = -1;
+        int topScore = int.MinValue;
+
+        foreach (var kvp in _playerScoreDictionary)
+        {
+            if (kvp.Value > topScore)
+            {
+                topScore = kvp.Value;
+                topActor = kvp.Key;
+            }
+        }
+        _photonView.RPC(nameof(RPC_RequestTopPlayer), RpcTarget.All, topActor);
+    }
+
+    [PunRPC]
+    private void RPC_RequestTopPlayer(int topActor)
+    {
+        OnTopPlayerChanged?.Invoke(topActor);
+    }
 }

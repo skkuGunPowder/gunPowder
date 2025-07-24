@@ -12,6 +12,7 @@ public class UI_InGameProfile : MonoBehaviour
     {
         PlayerSettingManager.Instance.OnDataChanged += Refresh;
         PlayerSettingManager.Instance.OnInitCharacter += Init;
+        PlayerSettingManager.Instance.OnTopPlayerChanged += SetTopPlayer;
     }
 
     private void Init()
@@ -36,6 +37,19 @@ public class UI_InGameProfile : MonoBehaviour
         
     }
 
+
+    private void SetTopPlayer(int playerNumber)
+    {
+        List<int> playerNumberList = new List<int>();
+
+        playerNumberList = PlayerSettingManager.Instance.PlayerList;
+
+        for (int i = 0; i < UI_InGameProfileSlotList.Count; i++)
+        {
+            
+        }
+
+    }
     private void Refresh(int playerNumber, int gunpowder, int life)
     {
         List<int> playerNumberList = new List<int>();
