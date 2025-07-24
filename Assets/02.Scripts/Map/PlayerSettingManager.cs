@@ -18,10 +18,6 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     private Room _room;
     private PhotonView _photonView;
     
-    [Header("더미 데이터")]
-    public int Gunpowder;
-    public int Life;
-    
     public PlayerSpawner Spawner;
 
     public event Action<int,int,int> OnDataChanged;         // 언제? :
@@ -95,37 +91,19 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
                 continue;
             }
             
-            Spawner.GeneratePlayers(i);
+            Spawner.GeneratePlayers(i, PlayerGunpowder, PlayerLife);
         }
         
         
     }
-    
-    [PunRPC]
-    public void OnClickReduce(int gunpowder, int life, int value, PhotonMessageInfo info)
-    {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-        
-        Gunpowder -= value;
-        
-        if (Gunpowder <= 0)
-        {
-            Life -= 1;
-            Gunpowder = 100;
-        }
-        
-        _photonView.RPC(nameof(RPC_RequestDamage),RpcTarget.All, gunpowder, life, info.Sender.ActorNumber);
-    }
+
     public void RequestTakeDamage(int gunpowder, int life, int value)
     {
         if (_photonView.IsMine == false)
         {
             return;
         }
-        _photonView.RPC(nameof(OnClickReduce),RpcTarget.MasterClient, gunpowder, life, value);
+        _photonView.RPC(nameof(RPC_RequestDamage),RpcTarget.All, gunpowder, life, value);
     }
     
     [PunRPC]
@@ -133,15 +111,5 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     {
         OnDataChanged?.Invoke(playerNumber, gunpowder, life);
     }
-    // [PunRPC]
-    // public void RPC_TakeDamage(int gunpowder, int life, int playerNumber)
-    // {
-    //     if (_photonView.IsMine == false)
-    //     {
-    //         return;    
-    //     }
-    //     
-    //     _photonView.RPC(nameof(RPC_RequestDamage), RpcTarget.All, gunpowder, life, playerNumber);
-    // }
-    
+
 }
