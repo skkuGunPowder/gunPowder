@@ -34,6 +34,18 @@ public class Bomb : MonoBehaviour, IBomb
         }
     }
 
+    protected virtual void OnEnable()
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        _fuzeTimer = 0f;
+        _currentSpeed = 0f;
+        _fireDirection = Vector3.zero;
+    }
+
     protected virtual void Update()
     {
         if(!PhotonView.IsMine)
