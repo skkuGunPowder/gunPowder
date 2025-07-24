@@ -2029,6 +2029,7 @@ GameObject:
   - component: {fileID: 300853514}
   - component: {fileID: 300853515}
   - component: {fileID: 300853516}
+  - component: {fileID: 300853517}
   m_Layer: 0
   m_Name: SettingManager
   m_TagString: Untagged
@@ -2066,7 +2067,7 @@ MonoBehaviour:
   PlayerDeclinePowder: 0
   PlayTime: 0
   Spawner: {fileID: 1678354690}
-  LoadSceneChecker: {fileID: 0}
+  LoadSceneChecker: {fileID: 300853517}
 --- !u!114 &300853516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2089,6 +2090,18 @@ MonoBehaviour:
   sceneViewId: 1
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &300853517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 300853513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02e95d7be5daf6740b9b3232a9765e3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &339670973
 GameObject:
   m_ObjectHideFlags: 0
