@@ -23,6 +23,7 @@ public class PlayerFallDeadState : PlayerBaseState
 
         _wailTime = 0f;
         _owner.PlayerStat.IsFallingDead = true;
+        _isGoaled = false;
 
         // 낙사 판정 구간에 들어가면 부활지점으로 이동해야 한다. 
         // 좌측기준으로 하면 좌측 최하단 -> 좌측 상단 중단점 -> 맵 중앙 상단으로 이동
