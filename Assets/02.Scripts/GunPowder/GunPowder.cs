@@ -60,6 +60,10 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     [PunRPC]
     public void SetTarget(int targetViewId)
     {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
         PhotonView targetView = PhotonView.Find(targetViewId);
         if (targetView != null)
             _target = targetView.transform;

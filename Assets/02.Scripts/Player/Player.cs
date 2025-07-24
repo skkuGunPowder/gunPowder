@@ -145,6 +145,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
     {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
         PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, isFallingOut);
     }
 
