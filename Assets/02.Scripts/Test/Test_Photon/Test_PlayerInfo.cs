@@ -54,6 +54,6 @@ public class Test_PlayerInfo : MonoBehaviour
 
     public void OnClickLoadScene()
     {
-        SceneManager.LoadScene(Scene.ToString());
+        PhotonNetwork.LoadLevel(Scene.ToString());
     }
 }

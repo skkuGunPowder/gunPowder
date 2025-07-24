@@ -26,23 +26,25 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         }
         
         SetLoadState(true);
+        
     }
     
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
         if (changedProps.ContainsKey(EProperties.IsLoad.ToString()) && changedProps[EProperties.IsLoad.ToString()] != null)
         {
+            Debug.Log(targetPlayer + "로딩 체크하기");
             PlayerLoadCheck();
         }
     }
     
     private void PlayerLoadCheck()
     {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-        
+        // if (PhotonNetwork.IsMasterClient == false)
+        // {
+        //     return;
+        // }
+        //
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
         
         foreach (PhotonPlayer p in playerList)
@@ -51,7 +53,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
             Debug.Log($"Player {p.NickName} - SceneLoaded: {isLoaded}");
             if (isLoaded == false)
             {
-                Debug.Log("아직 준비 안됨");
+                Debug.Log($"Player {p.NickName} - SceneLoaded: {isLoaded}");
                 return ;
             }
         }
@@ -70,6 +72,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         };
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(load);
+        Debug.Log(PhotonNetwork.LocalPlayer.NickName + $"{PhotonNetwork.LocalPlayer.CustomProperties[EProperties.IsLoad.ToString()]}");
     }
 
 }

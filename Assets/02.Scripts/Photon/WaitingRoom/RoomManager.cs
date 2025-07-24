@@ -7,7 +7,7 @@ using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
 [RequireComponent(typeof(PhotonView))]
-[RequireComponent(typeof(LoadSceneChecker))]
+// [RequireComponent(typeof(LoadSceneChecker))]
 public class RoomManager : PhotonSingleton<RoomManager>
 {
     private Room _room;
@@ -35,49 +35,43 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _photonView = GetComponent<PhotonView>();
         _loadChecker = GetComponent<LoadSceneChecker>();
 
-        _loadChecker.OnLoadFinished += Init;
+        // _loadChecker.OnLoadFinished += Init;
+        _room = PhotonNetwork.CurrentRoom;
+
+
     }
     
-    // // 방 세팅 시작 => Init
-    // private void Start()
-    // {
-    //     if (PhotonNetwork.InRoom == false)
-    //     {
-    //         return;
-    //     }
-    //     
-    //     if (_initialized)
-    //     {
-    //         return;
-    //     }
-    //     
-    //     Init();
-    // } 
-    //
-    // // 처음 방에 들어왔을 때 => 세팅 Init
-    // public override void OnJoinedRoom()
-    // {
-    //     if (_initialized)
-    //     {
-    //         return;
-    //     }
-    //     
-    //     Init();
-    // }
+    // 방 세팅 시작 => Init
+    private void Start()
+    {
+        if (PhotonNetwork.InRoom == false)
+        {
+            return;
+        }
+        
+        if (_initialized)
+        {
+            return;
+        }
+        
+        Init();
+    } 
+    
+    // 처음 방에 들어왔을 때 => 세팅 Init
+    public override void OnJoinedRoom()
+    {
+        if (_initialized)
+        {
+            return;
+        }
+        
+        Init();
+    }
     
     // 방에 들어왔을 때 첫 세팅 하기
     private void Init()
     {
         SetRoom();
-        if (_room.CustomProperties.ContainsKey(EProperties.PlayerList))
-        {
-            _playerSlotList = (List<int>)_room.CustomProperties[EProperties.PlayerList];
-            _room.IsVisible = true;
-            
-            UpdateSlots(_playerSlotList.ToArray());
-            
-            return;
-        }
         
         _initialized = true;
         GeneratePlayer();
@@ -87,6 +81,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         if (PhotonNetwork.IsMasterClient)
         {
             PlayerPlacement(PhotonNetwork.LocalPlayer);
+            _room.IsVisible = true;
             OnDataChanged?.Invoke();
         };
     }
@@ -125,9 +120,16 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             return;
         }
+        
+        Hashtable playerList = new Hashtable()
+        {
+            {EProperties.PlayerList.ToString(), _playerSlotList.ToArray()}
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(playerList);
 
         _room.IsVisible = false;
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
+        
     }
 
     // 사람들이 모두 눌렀는가?
@@ -152,13 +154,25 @@ public class RoomManager : PhotonSingleton<RoomManager>
     }
     //현재 이 방에 있는 플레이어들의 계정 정보
     private void SetRoom()
-    {
-        _room = PhotonNetwork.CurrentRoom;
-        
-        _playerSlotList = new List<int>()
+    { 
+        if (_room.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false)
         {
-            0,0,0,0
-        };
+            _playerSlotList = new List<int>()
+            {
+                0,0,0,0
+            };
+         
+            return;
+        }
+
+        int[] players = _room.CustomProperties[EProperties.PlayerList.ToString()] as int[];
+        _playerSlotList = new List<int>(players);
+        
+        Debug.Log(_playerSlotList.Count);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            _photonView.RPC(nameof(UpdateSlots),RpcTarget.All, _playerSlotList.ToArray());
+        }
     }
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer,Hashtable changedProps)
@@ -223,11 +237,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public void UpdateSlots(int[] actorNumbers)
     {
         _playerSlotList = new List<int>(actorNumbers);
-        Hashtable playerList = new Hashtable()
-        {
-            {EProperties.PlayerList.ToString(), _playerSlotList.ToArray()}
-        };
-        PhotonNetwork.CurrentRoom.SetCustomProperties(playerList);
         OnDataChanged?.Invoke();
     }
 
