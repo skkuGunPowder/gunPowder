@@ -371,11 +371,6 @@ public class PlayerBaseState : MonoState
 
     private GameObject InstantiateBomb(string prefabName, Transform bombSpawnPoint)
     {
-        
-        if(!PhotonNetwork.IsMasterClient)
-        {
-            return null;
-        }
         GameObject bomb = ObjectPoolManager.Instance.GetObject(prefabName);
         bomb.transform.position = bombSpawnPoint.position;
         bomb.transform.rotation = Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0);

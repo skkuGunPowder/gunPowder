@@ -58,13 +58,15 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
     public void ReleaseObject(string prefabName, GameObject obj)
     {
-        if (_poolDict.ContainsKey(prefabName))
+        // (Clone) 제거
+        string key = prefabName.Replace("(Clone)", "").Trim();
+        if (_poolDict.ContainsKey(key) && obj != null)
         {
-            _poolDict[prefabName].Release(obj);
+            _poolDict[key].Release(obj);
         }
         else
         {
-            Debug.LogWarning("No Pool with prefab name : " + prefabName);
+            Debug.LogWarning("No Pool with prefab name : " + key);
         }
     }
 }

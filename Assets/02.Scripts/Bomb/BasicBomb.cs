@@ -18,6 +18,11 @@ public class BasicBomb : Bomb
     private const float SLOW = 5f;
     private const float NORMAL = 10f;
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        Init();
+    }
 
     protected override void Init()
     {
