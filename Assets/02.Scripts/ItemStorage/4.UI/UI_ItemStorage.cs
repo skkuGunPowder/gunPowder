@@ -9,7 +9,7 @@ public class UI_ItemStorage : MonoBehaviour
     public UI_Category UI_Category;
 
     [SerializeField] private List<UI_ItemSlot> _itemSlotList;
-    
+
 
     private ItemStorage _itemStorage;
 
@@ -83,5 +83,28 @@ public class UI_ItemStorage : MonoBehaviour
         {
             ItemNameText.text = _selectedSlot.Item.Item.Name;
         }
+    }
+
+    public void Confirm()
+    {
+        InventoryItem selectedITem = _selectedSlot.Item;
+        if (selectedITem.IsEquipped)
+        {
+            _itemStorage.UnEquipItem(selectedITem);
+        }
+        else
+        {
+            _itemStorage.EquipItem(selectedITem);
+        }
+    }
+
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    public void Close()
+    {
+        gameObject.SetActive(false);
     }
 }
