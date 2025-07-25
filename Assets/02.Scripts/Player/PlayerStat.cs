@@ -116,7 +116,7 @@ public class PlayerStat : MonoBehaviour
     void OnEnable()
     {
         InitializeStats();
-        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife);
+        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime);
     }
 
     public void InitializeStats()
@@ -137,7 +137,7 @@ public class PlayerStat : MonoBehaviour
             _normalRecoilSpeed = _playerStatSO.NormalRecoilSpeed;
             _attackPenaltyTime = _playerStatSO.AttackPenaltyTime;
             _attackPenaltyAmount = _playerStatSO.AttackPenaltyAmount;
-            _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;
+            // _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;
             _dieExplosionDamage = _playerStatSO.DieExplosionDamage;
             _dieExplosionRadius = _playerStatSO.DieExplosionRadius;
             _dieExplosionForce = _playerStatSO.DieExplosionForce;
@@ -150,12 +150,12 @@ public class PlayerStat : MonoBehaviour
         }
     } 
 
-    public void SetPlayer(int gunpowder, int life)
+    public void SetPlayer(int gunpowder, int life, int decrease)
     {
         _currentPlayerGunPowderCount = gunpowder;
         _currentPlayerLife = life;
         _initGunpowderCount = gunpowder;
-        
+        _gunPowderDecreaseTime = decrease;
         Debug.Log("SetPlayer");
     }
 

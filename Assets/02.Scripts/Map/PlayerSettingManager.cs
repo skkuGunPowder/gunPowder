@@ -16,7 +16,6 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     private Room _room;
     private PhotonView _photonView;
     
-    public int PlayerDeclinePowder;         // 몇초당 1 감소 의 몇 초
     public int PlayTime;
 
     private Dictionary<int, int> _playerScoreDictionary = new Dictionary<int, int>();
@@ -32,7 +31,6 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     protected override void Awake()
     {
         base.Awake();
-        Debug.Log("awake");
         _photonView = GetComponent<PhotonView>();
         _room = PhotonNetwork.CurrentRoom;
         
@@ -42,7 +40,6 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
 
     public void Init()
     {
-        PlayerDeclinePowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"].ToString());
         PlayTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString());
         
         Hashtable dead = new Hashtable()
@@ -66,7 +63,6 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     // 프로퍼티 불러오기  => 플레이어 리스트
     private void SpawnSetting()
     {
-        Debug.Log("spawn");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;

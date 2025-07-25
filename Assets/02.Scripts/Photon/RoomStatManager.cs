@@ -6,6 +6,7 @@ public class RoomStatManager : Singleton<RoomStatManager>
 {
     public int PlayerLife;
     public int PlayerGunpowder;
+    public int PlayerDecreaseTime;
 
     protected override void Awake()
     {
@@ -13,6 +14,7 @@ public class RoomStatManager : Singleton<RoomStatManager>
         
         PlayerLife = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"].ToString());
         PlayerGunpowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"].ToString()); 
+        PlayerDecreaseTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"].ToString());
     }
     
     

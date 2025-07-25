@@ -12,7 +12,7 @@ public class GameManager : PhotonSingleton<GameManager>
 {
     private PhotonView _photonView;
     private EGameState _currentGameState;
-    private float _timer;
+    [SerializeField] private float _timer;
     private LoadSceneChecker _loadChecker;
     public GameObject GameOverScreen;
 
@@ -38,15 +38,26 @@ public class GameManager : PhotonSingleton<GameManager>
     // 게임 시작
     private void Update()
     {
+        GameTimer(); 
+    }
+
+    private void GameTimer()
+    {
         if (_currentGameState != EGameState.Playing)
         {
             return;
         }
         
         _timer -= Time.deltaTime;
+
+        if (_timer <= 0)
+        {
+            _currentGameState = EGameState.GameOver;
+            
+        }
         
+        _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
     }
-    
     // 게임 종료
     // 프로퍼티가 바뀌었을 때 호출되는 함수
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
