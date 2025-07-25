@@ -14,6 +14,7 @@ public class BasicBomb : Bomb
     public const string ID = "B0001";
     private EBombVelocity _bombVelocity = EBombVelocity.SLOW;
     private bool _isFuzeActivate;
+    private bool isDestroyed = false; // 중복 파괴 방지 플래그
     private const float SLOW = 5f;
     private const float NORMAL = 10f;
 
@@ -23,6 +24,7 @@ public class BasicBomb : Bomb
         base.Init();
         SetStat(ID);
         _isFuzeActivate = false;
+        isDestroyed = false; // 재사용 시 초기화
     }
 
     protected override void Update()
@@ -59,6 +61,10 @@ public class BasicBomb : Bomb
             return;
         }
         
+        if (isDestroyed) // 이미 파괴된 경우 중복 호출 방지
+        {
+            return;
+        }
         if (_bombVelocity == EBombVelocity.FAST)
             {
                 Explode();
@@ -88,6 +94,7 @@ public class BasicBomb : Bomb
     {
         _fireDirection = fireRightDirection;
         _currentSpeed = 0f;
+        isDestroyed = false; // 재사용 시 초기화
     }
 
     [PunRPC]
@@ -119,5 +126,12 @@ public class BasicBomb : Bomb
         _fireDirection = fireRightDirection;
         _currentSpeed = _stat.Speed;
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
+    }
+
+    public override void Explode()
+    {
+        if (isDestroyed) return; // 중복 파괴 방지
+        isDestroyed = true;
+        base.Explode();
     }
 }
