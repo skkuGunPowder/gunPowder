@@ -3,7 +3,8 @@ using UnityEngine;
 using System.Collections.Generic;
 
 // 커스텀 Prefab Pool
-public class PhotonPool : MonoBehaviour, IPunPrefabPool
+[RequireComponent(typeof(PhotonView))]
+public class PhotonPool : MonoBehaviourPun, IPunPrefabPool
 {
     private readonly Dictionary<string, Queue<GameObject>> poolDict = new();
     private readonly Dictionary<string, int> activeCountDict = new();
