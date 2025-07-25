@@ -25,7 +25,7 @@ public class PlayerSpawner : MonoBehaviour
         else
         {
             Debug.Log("not ismine");
-            player.tag = "enemy";
+            player.tag = "Enemy";
         }
     }
 }

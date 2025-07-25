@@ -120,7 +120,7 @@ public class Player : MonoBehaviourPun, IDamagable
         else
         {
             Debug.Log("Playernot ismine");
-            gameObject.tag = "enemy";
+            gameObject.tag = "Enemy";
         }
     }
 
