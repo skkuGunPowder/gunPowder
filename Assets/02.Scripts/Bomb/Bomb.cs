@@ -122,7 +122,7 @@ public class Bomb : MonoBehaviourPun, IBomb
             _vfx.transform.SetParent(transform);
         }
 
-        if (PhotonNetwork.IsMasterClient || PhotonView.IsMine)
+        if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.Destroy(gameObject);
         }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class PhotonPool : MonoBehaviour, IPunPrefabPool
 {
     private readonly Dictionary<string, Queue<GameObject>> poolDict = new();
-    private readonly Dictionary<string, int> activeCountDict = new(); // 활성화된 오브젝트 수
+    private readonly Dictionary<string, int> activeCountDict = new();
 
     [System.Serializable]
     public class PrewarmInfo
@@ -19,16 +19,20 @@ public class PhotonPool : MonoBehaviour, IPunPrefabPool
     [Header("미리 생성할 프리팹 설정")]
     public List<PrewarmInfo> prewarmSettings = new();
 
+    private readonly HashSet<string> defaultHandledPrefabs = new() { "PlayerTest" }; // ← 기본 방식으로 처리할 프리팹들
+    private DefaultPool defaultPool;
+
     private void Awake()
     {
         PhotonNetwork.PrefabPool = this;
+        defaultPool = new DefaultPool(); // 기본 풀 초기화
+
         foreach (var info in prewarmSettings)
         {
             Prewarm(info.prefabId, info.initialCount);
         }
     }
 
-    // 오브젝트 미리 생성
     public void Prewarm(string prefabId, int count)
     {
         if (!poolDict.ContainsKey(prefabId))
@@ -52,9 +56,14 @@ public class PhotonPool : MonoBehaviour, IPunPrefabPool
         Debug.Log($"[PhotonPool] '{prefabId}' {count}개 미리 생성 완료.");
     }
 
-    // 반드시 SetActive(false) 상태로 반환해야 함 (Photon 공식 권장)
     public GameObject Instantiate(string prefabId, Vector3 position, Quaternion rotation)
     {
+        // ✅ 기본 방식으로 처리할 프리팹 예외 처리
+        if (defaultHandledPrefabs.Contains(prefabId))
+        {
+            return defaultPool.Instantiate(prefabId, position, rotation);
+        }
+
         if (!poolDict.ContainsKey(prefabId))
             poolDict[prefabId] = new Queue<GameObject>();
         if (!activeCountDict.ContainsKey(prefabId))
@@ -86,17 +95,21 @@ public class PhotonPool : MonoBehaviour, IPunPrefabPool
             obj.name = prefabId;
         }
 
-        // 반드시 비활성화 상태로 반환 (Photon이 내부적으로 SetActive(true)로 활성화)
         obj.SetActive(false);
         activeCountDict[prefabId]++;
-        // OnEnable에서 상태 초기화 필수!
         return obj;
     }
 
-    // 오브젝트 반환 (비활성화 후 풀에 저장)
     public void Destroy(GameObject gameObject)
     {
         string prefabId = gameObject.name.Replace("(Clone)", "").Trim();
+
+        // ✅ 기본 처리 프리팹은 기본 방식으로 반환
+        if (defaultHandledPrefabs.Contains(prefabId))
+        {
+            defaultPool.Destroy(gameObject);
+            return;
+        }
 
         if (!poolDict.ContainsKey(prefabId))
             poolDict[prefabId] = new Queue<GameObject>();
@@ -111,6 +124,6 @@ public class PhotonPool : MonoBehaviour, IPunPrefabPool
     private int GetMaxCount(string prefabId)
     {
         var setting = prewarmSettings.Find(x => x.prefabId == prefabId);
-        return setting != null ? setting.maxCount : 100; // 기본 최대값 100
+        return setting != null ? setting.maxCount : 100;
     }
 }
