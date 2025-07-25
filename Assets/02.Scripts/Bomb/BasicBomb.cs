@@ -128,6 +128,7 @@ public class BasicBomb : Bomb
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
     }
 
+    [PunRPC]
     public override void Explode()
     {
         if (isDestroyed) return; // 중복 파괴 방지
