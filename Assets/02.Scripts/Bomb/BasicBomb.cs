@@ -67,13 +67,13 @@ public class BasicBomb : Bomb
         }
         if (_bombVelocity == EBombVelocity.FAST)
             {
-                Explode();
+                photonView.RPC(nameof(Explode), RpcTarget.All);
             }
         if (_bombVelocity == EBombVelocity.NORMAL && !_isFuzeActivate)
         {
             if (other.gameObject.TryGetComponent(out IDamagable damagableObject))
             {
-                Explode();
+                photonView.RPC(nameof(Explode), RpcTarget.All);
             }
             else
             {
@@ -86,7 +86,7 @@ public class BasicBomb : Bomb
     {
         _isFuzeActivate = true;
         yield return new WaitForSeconds(fuzeTime);
-        Explode();
+        photonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
     [PunRPC]
@@ -117,7 +117,7 @@ public class BasicBomb : Bomb
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
-        Explode();
+        photonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
     [PunRPC]

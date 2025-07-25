@@ -1,8 +1,7 @@
-using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
-using UnityEngine.VFX;
-public class Bomb : MonoBehaviour, IBomb
+
+public class Bomb : MonoBehaviourPun, IBomb
 {
     public Explosion ExplosionPrefab;
     protected Rigidbody2D _rigidBody;
@@ -93,7 +92,7 @@ public class Bomb : MonoBehaviour, IBomb
             int otherPriority = otherBomb._stat.Priority;
             if (_stat.Priority <= otherPriority)
             {
-                Explode();
+                photonView.RPC(nameof(Explode), RpcTarget.All);
             }
             else if (_stat.Priority - otherPriority < 2)
             {
@@ -104,6 +103,7 @@ public class Bomb : MonoBehaviour, IBomb
         return false;
     }
 
+    [PunRPC]
     public virtual void Explode()
     {
         // 폭발 프리펩 인스턴싱
@@ -121,12 +121,12 @@ public class Bomb : MonoBehaviour, IBomb
         {
             _vfx.transform.SetParent(transform);
         }
-        
-        if(PhotonNetwork.IsMasterClient || PhotonView.IsMine)
+
+        if (PhotonNetwork.IsMasterClient || PhotonView.IsMine)
         {
             PhotonNetwork.Destroy(gameObject);
         }
-        
+
 
         // TODO
         // Pool 만들면 회수 코드 작성

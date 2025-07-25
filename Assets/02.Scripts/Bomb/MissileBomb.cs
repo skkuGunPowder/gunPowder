@@ -6,14 +6,13 @@ public class MissileBomb : Bomb
 {
     public const string ID = "B0004";
     private const float PREDELAY = 0.3f;
-    private float _timer;
+
 
     
     protected override void Init()
     {
         base.Init();
         SetStat(ID);
-        _timer = 0f;
     }
 
     
@@ -34,7 +33,7 @@ public class MissileBomb : Bomb
             return;
         }
 
-        Explode();
+        photonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
     [PunRPC]
@@ -47,7 +46,7 @@ public class MissileBomb : Bomb
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
-        transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), 0.3f)
+        transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), PREDELAY)
         .OnComplete(()=>
         {
             _vfx.gameObject.SetActive(true);
