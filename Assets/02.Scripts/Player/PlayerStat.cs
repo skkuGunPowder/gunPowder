@@ -192,14 +192,15 @@ public class PlayerStat : MonoBehaviour
     public void IncreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount += amount;
-        DamageChecker.Instance.RequestTakeDamage(_currentPlayerGunPowderCount, _currentPlayerLife, PhotonNetwork.LocalPlayer.ActorNumber);
+        _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
+            _currentPlayerLife);
     }
     
     public void DecreaseGunPowderCount(int amount, int player)
     {
         _currentPlayerGunPowderCount -= amount;
 
-
+        Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 현재 체력 감소 중");
         if (_currentPlayerGunPowderCount <= 0)
         {
             _currentPlayerLife -= 1;
@@ -212,7 +213,14 @@ public class PlayerStat : MonoBehaviour
             OnGunPowderEmpty?.Invoke();
         }
         
-        DamageChecker.Instance.RequestTakeDamage(CurrentPlayerGunPowderCount, CurrentPlayerLife, player);
+        _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
+            _currentPlayerLife);
+    }
+
+    [PunRPC]
+    private void RPC_ChangeGunpowder(int gunpowder, int life, PhotonMessageInfo info)
+    {
+        DamageChecker.Instance.RPC_RequestDamage(gunpowder, life , info.Sender.ActorNumber);
     }
 
     public void IncreseDamagedCount()

@@ -33,13 +33,13 @@ public class PlayerSettingManager : MonoBehaviour
         // 캐릭터 순번 세팅
         SpawnSetting();
 
-        // 플레이어 스탯 추가해주기   
     }
     
     [PunRPC]
     private void Rpc_SpawnPlayer(int[] playerList)
     {
         _playerList = new List<int>(playerList);
+        Debug.Log("RPC로 보내준 리스트의 카운트 :" + _playerList.Count);
         SpawnPlayer();
     }
     
@@ -62,8 +62,6 @@ public class PlayerSettingManager : MonoBehaviour
                 {
                     continue;
                 }
-
-                int score = RoomStatManager.Instance.PlayerLife * RoomStatManager.Instance.PlayerGunpowder;
                 _playerList.Add(actorNumber);
             }
         }
@@ -82,15 +80,17 @@ public class PlayerSettingManager : MonoBehaviour
     
     private void SpawnPlayer()
     {
+        Debug.Log($"지금 소환하는 사람 넘버 : {PhotonNetwork.LocalPlayer.ActorNumber}");
+
         for (int i = 0; i < _playerList.Count; i++)
         {
-            Debug.Log(_playerList[i]);
-            Debug.Log( PhotonNetwork.LocalPlayer.ActorNumber);
+            Debug.Log($"spawnplayer 리스트 갯수 :" + _playerList[i]);
             if (_playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
             {
+                Debug.Log($"{_playerList[i]}는 현재 넘버랑 다릅니다.");
+                Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} ");
                 continue;
             }
-        
             Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 가 소환한당");    
             Spawner.GeneratePlayers(i);
         }

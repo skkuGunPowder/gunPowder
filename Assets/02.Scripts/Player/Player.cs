@@ -118,6 +118,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         if (_gunPowderDecreaseTimer >= PlayerStat.GunPowderDecreaseTime)
         {
+            Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber}의 체력 감소");
             _gunPowderDecreaseTimer = 0f;
             _playerStat.DecreaseGunPowderCount(1,PhotonNetwork.LocalPlayer.ActorNumber);
         }

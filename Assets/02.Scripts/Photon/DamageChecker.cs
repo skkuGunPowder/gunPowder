@@ -11,7 +11,7 @@ public class DamageChecker : Singleton<DamageChecker>
     public event Action<int> OnTopPlayerChanged;        // 순위 변경용  = 1등 체크용
     public event Action<int,int,int> OnDataChanged;    // 체력 감소할 때
     
-    private int _currentTopPlayer = -1;
+    private int _currentTopPlayer = 1;
     
     private Dictionary<int, int> _playerScoreDictionary;
     private List<int>  _playerList;
@@ -39,29 +39,30 @@ public class DamageChecker : Singleton<DamageChecker>
             _playerScoreDictionary.Add(player.ActorNumber, RoomStatManager.Instance.PlayerLife * RoomStatManager.Instance.PlayerGunpowder);
         }
     }
-    public void RequestTakeDamage(int gunpowder, int life, int value)
+    
+    public void RPC_RequestDamage(int gunpowder, int life, int player)
     {
-        if (_photonView.IsMine == false)
-        {
-            return;
-        }
-        
-        _photonView.RPC(nameof(RPC_RequestDamage),RpcTarget.All, gunpowder, life, value);
+        PlayerDataChange(gunpowder, life, player);
         
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting)
         {
             return;
         }
-        _photonView.RPC(nameof(CalculateScore),RpcTarget.MasterClient,gunpowder, life, value);
+        
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        CalculateScore(gunpowder, life, player);
     }
     
-    [PunRPC]
-    public void RPC_RequestDamage(int gunpowder, int life, int playerNumber)
+    private void PlayerDataChange(int gunpowder, int life, int playerNumber)
     {
+        Debug.Log($" 플레이어 넘버 : {playerNumber}를 바꿔주세요 : {gunpowder}, {life}");
         OnDataChanged?.Invoke(playerNumber, gunpowder, life);
     }
-
-    [PunRPC]
+    
     private void CalculateScore(int gunpowder, int life, int playerNumber)
     {
         if (life == 0)
@@ -70,17 +71,13 @@ public class DamageChecker : Singleton<DamageChecker>
         }
         
         int score = playerNumber * gunpowder;
+        
         _playerScoreDictionary[playerNumber] = score;
         CheckTopPlayer();
     }
 
     private void CheckTopPlayer()
     {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-        
         int topActor = _currentTopPlayer;
         int topScore = _playerScoreDictionary[topActor];
 

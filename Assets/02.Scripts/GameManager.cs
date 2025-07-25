@@ -138,9 +138,10 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
-           
-        _timer = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString());;
-        OnProfileInit?.Invoke();
+
+        int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
+        _timer = playtime;
+        Debug.Log($"{_timer}");
         
         _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
@@ -149,6 +150,7 @@ public class GameManager : PhotonSingleton<GameManager>
     public void RPC_RequestGameStart(int state)
     {
         _currentGameState = (EGameState)state;
+        OnProfileInit?.Invoke();
     }
 
     // 타이머가 0이 되었을 때
