@@ -53,7 +53,6 @@ public class GameManager : PhotonSingleton<GameManager>
         if (_timer <= 0)
         {
             _currentGameState = EGameState.GameOver;
-            
         }
         
         _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
@@ -65,6 +64,8 @@ public class GameManager : PhotonSingleton<GameManager>
         Debug.Log("플레이어 프로퍼티 변경");
         if (changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] != null)
         {
+            Debug.Log($"플레이어가 다 죽었습니까? = {PlayerDeadCheck()}");
+            
             if (PlayerDeadCheck())
             {
                 _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
@@ -100,7 +101,9 @@ public class GameManager : PhotonSingleton<GameManager>
         }
         
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
-
+        Debug.Log(playerList.Count);
+        
+        
         int dead = 0;
         
         foreach (PhotonPlayer p in playerList)

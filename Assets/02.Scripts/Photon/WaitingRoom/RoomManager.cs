@@ -232,6 +232,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 break;
             }
         }
+        
+        Debug.Log($"playerplacement  = {player.ActorNumber}");
     }
 
     [PunRPC]
