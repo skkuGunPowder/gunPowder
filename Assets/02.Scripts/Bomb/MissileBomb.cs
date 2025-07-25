@@ -33,7 +33,7 @@ public class MissileBomb : Bomb
             return;
         }
 
-        photonView.RPC(nameof(Explode), RpcTarget.All);
+        PhotonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
     [PunRPC]

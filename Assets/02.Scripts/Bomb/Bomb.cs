@@ -65,7 +65,7 @@ public class Bomb : MonoBehaviourPun, IBomb
         _fuzeTimer += Time.deltaTime;
         if (_fuzeTimer >= _stat.FuzeTime)
         {
-            Explode();
+            PhotonView.RPC(nameof(Explode), RpcTarget.All);
         }
     }
     
@@ -92,7 +92,7 @@ public class Bomb : MonoBehaviourPun, IBomb
             int otherPriority = otherBomb._stat.Priority;
             if (_stat.Priority <= otherPriority)
             {
-                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonView.RPC(nameof(Explode), RpcTarget.All);
             }
             else if (_stat.Priority - otherPriority < 2)
             {
