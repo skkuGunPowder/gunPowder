@@ -14,8 +14,10 @@ public class GameManager : PhotonSingleton<GameManager>
     private PhotonView _photonView;
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
-    public event Action OnProfileInit;
     private float _timer;
+    
+    private Dictionary<int, int> _playTimeDictionary = new Dictionary<int, int>();
+    private Dictionary<int, int> _playerRankDictionary = new Dictionary<int, int>();
     
     private LoadSceneChecker _loadChecker;
     public GameObject GameOverScreen;
@@ -24,6 +26,7 @@ public class GameManager : PhotonSingleton<GameManager>
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
     
+    public event Action OnProfileInit;
     protected override void Awake()
      {
          base.Awake();
@@ -61,6 +64,7 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             _currentGameState = EGameState.GameOver;
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+            GameResultCheck();
         }
     }
     // 게임 종료
@@ -72,8 +76,10 @@ public class GameManager : PhotonSingleton<GameManager>
             if (PlayerDeadCheck())
             {
                 _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+                GameResultCheck();
             }
         }
+        
     }
 
     [PunRPC]
@@ -152,19 +158,25 @@ public class GameManager : PhotonSingleton<GameManager>
         _currentGameState = (EGameState)state;
         OnProfileInit?.Invoke();
     }
-
-    // 타이머가 0이 되었을 때
-    private void GameResultCheck()
+    
+    // 등수 체크하는 방법
+    private void RankCheck()
     {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-        
+        // 이미 죽은 상태면 넘어가고
+        // 살아있는 상태로 끝났다면 점수를 체크해서 스택에 넣어줌
         
     }
     
-    // 순위 체크 (죽을 때 마다)
+    // 타이머가 0이 되었을 때 or 게임이 끝났을 때
+    private void GameResultCheck()
+    {
+        if (PhotonNetwork.IsMasterClient == false && _currentGameState != EGameState.GameOver)
+        {
+            return;
+        }
+        RankCheck();
+        
+    }
     
 }
 

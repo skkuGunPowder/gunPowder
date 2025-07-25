@@ -10,8 +10,8 @@ public class DamageChecker : Singleton<DamageChecker>
     
     public event Action<int> OnTopPlayerChanged;        // 순위 변경용  = 1등 체크용
     public event Action<int,int,int> OnDataChanged;    // 체력 감소할 때
-    
-    private int _currentTopPlayer = 1;
+
+    private int _currentTopPlayer;                 // 처음 1등은 방장
     
     private Dictionary<int, int> _playerScoreDictionary;
     private List<int>  _playerList;
@@ -38,6 +38,8 @@ public class DamageChecker : Singleton<DamageChecker>
             _playerList.Add(player.ActorNumber);
             _playerScoreDictionary.Add(player.ActorNumber, RoomStatManager.Instance.PlayerLife * RoomStatManager.Instance.PlayerGunpowder);
         }
+        
+        _currentTopPlayer = PlayerList[0];
     }
     
     public void RPC_RequestDamage(int gunpowder, int life, int player)
