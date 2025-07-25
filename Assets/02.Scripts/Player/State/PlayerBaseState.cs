@@ -143,6 +143,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "BasicBomb",
             bombSpawnPoint,
@@ -176,6 +177,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "BasicBomb",
             bombSpawnPoint,
@@ -211,6 +213,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "Missile",
             bombSpawnPoint,
@@ -245,6 +248,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "Missile",
             bombSpawnPoint,
@@ -279,6 +283,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "BasicBomb",
             bombSpawnPoint,
@@ -328,6 +333,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "Missile",
             bombSpawnPoint,
@@ -365,8 +371,15 @@ public class PlayerBaseState : MonoState
 
     private GameObject InstantiateBomb(string prefabName, Transform bombSpawnPoint)
     {
+        /*
+        if(!PhotonNetwork.IsMasterClient)
+        {
+            return null;
+        }*/
+        GameObject bomb = ObjectPoolManager.Instance.GetObject(prefabName);
+        bomb.transform.position = bombSpawnPoint.position;
+        bomb.transform.rotation = Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0);
         //GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
-        GameObject bomb = PhotonPool.Instance.RequestInstantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
         return bomb;
     }
 

@@ -124,7 +124,8 @@ public class Bomb : MonoBehaviourPun, IBomb
 
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonPoolManager.Instance.RequestDelete(PhotonView.ViewID);
+            // 플레이어 포톤뷰로 폭탄 회수
+            _ownerTransform.GetComponent<PhotonView>().RPC(nameof(ObjectPoolManager.Instance.ReleaseObject), RpcTarget.All, gameObject.name, gameObject);
         }
 
 

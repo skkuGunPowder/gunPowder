@@ -6619,8 +6619,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1591649683}
-  - component: {fileID: 1591649682}
   - component: {fileID: 1591649684}
+  - component: {fileID: 1591649685}
   m_Layer: 0
   m_Name: PhotonPool
   m_TagString: Untagged
@@ -6628,31 +6628,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1591649682
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1591649681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26c627c008eb10e46804f9337895b489, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  prewarmSettings:
-  - prefabId: PlayerTest
-    initialCount: 0
-    maxCount: 5
-  - prefabId: BasicBomb
-    initialCount: 50
-    maxCount: 100
-  - prefabId: Missile
-    initialCount: 50
-    maxCount: 100
-  - prefabId: GunPowder
-    initialCount: 50
-    maxCount: 100
 --- !u!4 &1591649683
 Transform:
   m_ObjectHideFlags: 0
@@ -6690,6 +6665,28 @@ MonoBehaviour:
   sceneViewId: 2
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &1591649685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591649681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e26eb916bd039d4ab02acd3dd2036b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Pools:
+  - Prefab: {fileID: 3001153516144104530, guid: 0b31de894fdc1a54e9648ce2b4a7332b, type: 3}
+    MinSize: 20
+    MaxSize: 40
+  - Prefab: {fileID: 2493808269564610583, guid: a6599bf25c6a827438187bda7877caee, type: 3}
+    MinSize: 20
+    MaxSize: 40
+  - Prefab: {fileID: 2640530332653095854, guid: 0cd145ad0d7ff62418ec9f0e0c20eba8, type: 3}
+    MinSize: 30
+    MaxSize: 50
 --- !u!1001 &1652000766
 PrefabInstance:
   m_ObjectHideFlags: 0
