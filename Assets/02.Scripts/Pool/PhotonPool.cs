@@ -9,6 +9,8 @@ public class PhotonPool : MonoBehaviourPun, IPunPrefabPool
     private readonly Dictionary<string, Queue<GameObject>> poolDict = new();
     private readonly Dictionary<string, int> activeCountDict = new();
 
+    public static PhotonPool Instance;
+
     [System.Serializable]
     public class PrewarmInfo
     {
@@ -25,6 +27,15 @@ public class PhotonPool : MonoBehaviourPun, IPunPrefabPool
 
     private void Awake()
     {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         PhotonNetwork.PrefabPool = this;
         defaultPool = new DefaultPool(); // 기본 풀 초기화
 
@@ -57,6 +68,7 @@ public class PhotonPool : MonoBehaviourPun, IPunPrefabPool
         Debug.Log($"[PhotonPool] '{prefabId}' {count}개 미리 생성 완료.");
     }
 
+    [PunRPC]
     public GameObject Instantiate(string prefabId, Vector3 position, Quaternion rotation)
     {
         // ✅ 기본 방식으로 처리할 프리팹 예외 처리
@@ -101,6 +113,7 @@ public class PhotonPool : MonoBehaviourPun, IPunPrefabPool
         return obj;
     }
 
+    [PunRPC]
     public void Destroy(GameObject gameObject)
     {
         string prefabId = gameObject.name.Replace("(Clone)", "").Trim();
@@ -126,5 +139,30 @@ public class PhotonPool : MonoBehaviourPun, IPunPrefabPool
     {
         var setting = prewarmSettings.Find(x => x.prefabId == prefabId);
         return setting != null ? setting.maxCount : 100;
+    }
+
+    public void RequestDestroy(int viewID)
+    {
+        if(PhotonNetwork.IsMasterClient)
+        {
+            Destroy(PhotonView.Find(viewID).gameObject);
+        }
+        else
+        {
+            photonView.RPC(nameof(Destroy), RpcTarget.MasterClient, viewID);
+        }
+    }
+
+    public GameObject RequestInstantiate(string prefabId, Vector3 position, Quaternion rotation)
+    {
+        if(PhotonNetwork.IsMasterClient)
+        {
+            return Instantiate(prefabId, position, rotation);
+        }
+        else
+        {
+            photonView.RPC(nameof(Instantiate), RpcTarget.MasterClient, prefabId, position, rotation);
+            return null;
+        }
     }
 }

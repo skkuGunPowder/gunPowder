@@ -124,7 +124,7 @@ public class Bomb : MonoBehaviourPun, IBomb
 
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.Destroy(gameObject);
+            PhotonPoolManager.Instance.RequestDelete(PhotonView.ViewID);
         }
 
 

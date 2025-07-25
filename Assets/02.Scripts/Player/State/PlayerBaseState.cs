@@ -365,8 +365,8 @@ public class PlayerBaseState : MonoState
 
     private GameObject InstantiateBomb(string prefabName, Transform bombSpawnPoint)
     {
-        GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
-        
+        //GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
+        GameObject bomb = PhotonPool.Instance.RequestInstantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
         return bomb;
     }
 
