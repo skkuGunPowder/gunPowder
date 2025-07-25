@@ -29,12 +29,7 @@ public class GameManager : PhotonSingleton<GameManager>
 
          _loadChecker.OnLoadFinished += GameStart;
      }
-
-    private void Start()
-    {
-        _timer = PlayerSettingManager.Instance.PlayTime;
-    }
-
+    
     // 게임 시작
     private void Update()
     {
@@ -43,16 +38,24 @@ public class GameManager : PhotonSingleton<GameManager>
 
     private void GameTimer()
     {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        _timer = PlayerSettingManager.Instance.PlayTime;
+        
         if (_currentGameState != EGameState.Playing)
         {
             return;
         }
         
         _timer -= Time.deltaTime;
-
+        Debug.Log($"timer {_timer}");
         if (_timer <= 0)
         {
             _currentGameState = EGameState.GameOver;
+            Debug.Log($"게임 상태 변경 타이머 : {_currentGameState.ToString()}");
         }
         
         _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
