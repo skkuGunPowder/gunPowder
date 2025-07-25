@@ -27,7 +27,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             ObjectPool<GameObject> objectPool = new ObjectPool<GameObject>(
                 createFunc: () =>
                 {
-                    GameObject newObject = PhotonNetwork.Instantiate("Resources/"+pool.Prefab.name, 
+                    GameObject newObject = PhotonNetwork.Instantiate(pool.Prefab.name, 
                         Vector3.zero, Quaternion.identity);
                     
                     // gameObject하위에 추가
@@ -46,7 +46,6 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         }
     }
 
-    [PunRPC]
     public GameObject GetObject(string prefabName)
     {
         if( _poolDict.ContainsKey(prefabName))
@@ -57,7 +56,6 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         return null;
     }
 
-    [PunRPC]
     public void ReleaseObject(string prefabName, GameObject obj)
     {
         if (_poolDict.ContainsKey(prefabName))
