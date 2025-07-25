@@ -111,6 +111,17 @@ public class Player : MonoBehaviourPun, IDamagable
             spriteRenderer.flipX = false; // 기본 방향
             spriteRenderer.color = Color.white; // 기본 색상
         }
+
+        if(PhotonView.IsMine)
+        {
+            Debug.Log("Playerismine");
+            gameObject.tag = "Player";
+        }
+        else
+        {
+            Debug.Log("Playernot ismine");
+            gameObject.tag = "enemy";
+        }
     }
 
     private void OnDisable()
