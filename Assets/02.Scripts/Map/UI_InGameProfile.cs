@@ -7,6 +7,7 @@ public class UI_InGameProfile : MonoBehaviour
 { 
     [SerializeField]
     private List<UI_InGameProfileSlot> UI_InGameProfileSlotList = new List<UI_InGameProfileSlot>();
+    private List<int> _playerActorNumberList = new List<int>();
     
     private void Awake()
     {
@@ -17,16 +18,14 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void Init()
     {
-        List<int> playerNumberList = new List<int>();
-
-        playerNumberList = PlayerSettingManager.Instance.PlayerList;
+        _playerActorNumberList = PlayerSettingManager.Instance.PlayerList;
 
         for (int i = 0; i < UI_InGameProfileSlotList.Count; i++)
         {
-            if (i < playerNumberList.Count)
+            if (i < _playerActorNumberList.Count)
             {
                 // 후에 수정
-                UI_InGameProfileSlotList[i].Init(playerNumberList[i]);
+                UI_InGameProfileSlotList[i].Init(_playerActorNumberList[i]);
                 UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
             }
             else
@@ -40,13 +39,16 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void SetTopPlayer(int playerNumber)
     {
-        List<int> playerNumberList = new List<int>();
-
-        playerNumberList = PlayerSettingManager.Instance.PlayerList;
-
-        for (int i = 0; i < UI_InGameProfileSlotList.Count; i++)
+        for (int i = 0; i < _playerActorNumberList.Count; i++)
         {
-            
+            if (_playerActorNumberList[i] == playerNumber)
+            {
+                UI_InGameProfileSlotList[i].SetTop(true);
+            }
+            else
+            {
+                UI_InGameProfileSlotList[i].SetTop(false);
+            }
         }
 
     }

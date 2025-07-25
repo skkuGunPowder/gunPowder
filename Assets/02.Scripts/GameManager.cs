@@ -62,7 +62,7 @@ public class GameManager : PhotonSingleton<GameManager>
     // 프로퍼티가 바뀌었을 때 호출되는 함수
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
-        Debug.Log("좀 돼라");
+        Debug.Log("플레이어 프로퍼티 변경");
         if (changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] != null)
         {
             if (PlayerDeadCheck())
@@ -91,7 +91,7 @@ public class GameManager : PhotonSingleton<GameManager>
         });
     }
     
-    // 모두가 다 들어왔는가?
+    // 캐릭터들 사망 체크하기 = 방장만
     private bool PlayerDeadCheck()
     {
         if (PhotonNetwork.IsMasterClient == false)
@@ -110,14 +110,15 @@ public class GameManager : PhotonSingleton<GameManager>
             if (isDead == false)
             {
                 Debug.Log("아직 준비 안됨");
-                return false;
+                continue;
             }
             
             dead++;
             
-            Debug.Log($"{dead}");
         }
 
+        Debug.Log("현재 죽은 인원 " + dead + "명");
+        
         if (dead < playerList.Count)
         {
             return false;
@@ -137,6 +138,8 @@ public class GameManager : PhotonSingleton<GameManager>
         _currentGameState = (EGameState)state;
         Debug.Log($"현재 게임 상태 : {_currentGameState.ToString()}");
     }
+    
+    
 }
 
 

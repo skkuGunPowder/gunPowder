@@ -34,4 +34,9 @@ public class UI_InGameProfileSlot : MonoBehaviour
             }
         }
     }
+
+    public void SetTop(bool isTop)
+    {
+        FirstPlace.SetActive(isTop);
+    }
 }

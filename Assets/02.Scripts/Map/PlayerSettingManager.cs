@@ -19,13 +19,13 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
     public int PlayTime;
 
     private Dictionary<int, int> _playerScoreDictionary = new Dictionary<int, int>();
-    
+    private int _currentTopPlayer = -1;
     public PlayerSpawner Spawner;
     public LoadSceneChecker LoadSceneChecker;
     
-    public event Action<int> OnTopPlayerChanged; 
-    public event Action<int,int,int> OnDataChanged;         // 언제? :
-    public event Action OnInitCharacter;
+    public event Action<int> OnTopPlayerChanged;        // 순위 변경용  = 1등 체크용
+    public event Action<int,int,int> OnDataChanged;    // 체력 감소할 때
+    public event Action OnInitCharacter;               //UI 연동
     
     // 현재 룸 프로퍼티 가져오기
     protected override void Awake()
@@ -93,7 +93,8 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
                 _playerList.Add(player.ActorNumber);
             }
         }
-        
+
+        _currentTopPlayer = _playerList[0];
         _photonView.RPC(nameof(Rpc_SpawnPlayer), RpcTarget.All, _playerList.ToArray());
     }
     
@@ -153,8 +154,8 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
             return;
         }
         
-        int topActor = -1;
-        int topScore = int.MinValue;
+        int topActor = _currentTopPlayer;
+        int topScore = _playerScoreDictionary[topActor];
 
         foreach (var kvp in _playerScoreDictionary)
         {
