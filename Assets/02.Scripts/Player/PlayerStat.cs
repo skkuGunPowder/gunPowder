@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
 {
+    private PhotonView _photonView;
     [Header("Scriptable Object Reference")]
     [SerializeField] private PlayerStatSO _playerStatSO;
     public PlayerStatSO PlayerStatSO => _playerStatSO;
@@ -117,6 +118,7 @@ public class PlayerStat : MonoBehaviour
     {
         InitializeStats();
         SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime);
+        _photonView = GetComponent<PhotonView>();
     }
 
     public void InitializeStats()
@@ -156,7 +158,6 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerLife = life;
         _initGunpowderCount = gunpowder;
         _gunPowderDecreaseTime = decrease;
-        Debug.Log("SetPlayer");
     }
 
     public void ResetJumpCount()
@@ -188,13 +189,13 @@ public class PlayerStat : MonoBehaviour
     {
         _jumpDashCount = 0;
     }
-
     public void IncreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount += amount;
+        DamageChecker.Instance.RequestTakeDamage(_currentPlayerGunPowderCount, _currentPlayerLife, PhotonNetwork.LocalPlayer.ActorNumber);
     }
-
-    public void DecreaseGunPowderCount(int amount)
+    
+    public void DecreaseGunPowderCount(int amount, int player)
     {
         _currentPlayerGunPowderCount -= amount;
 
@@ -210,6 +211,8 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerGunPowderCount = 0;
             OnGunPowderEmpty?.Invoke();
         }
+        
+        DamageChecker.Instance.RequestTakeDamage(CurrentPlayerGunPowderCount, CurrentPlayerLife, player);
     }
 
     public void IncreseDamagedCount()

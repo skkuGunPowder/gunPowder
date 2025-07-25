@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
@@ -11,11 +12,14 @@ using DG.Tweening;
 public class GameManager : PhotonSingleton<GameManager>
 {
     private PhotonView _photonView;
-    private EGameState _currentGameState = EGameState.Ready;
-    [SerializeField] private float _timer;
+    [SerializeField] private EGameState _currentGameState;
+    public EGameState CurrentGameState => _currentGameState;
+    public event Action OnProfileInit;
+    private float _timer;
+    
     private LoadSceneChecker _loadChecker;
     public GameObject GameOverScreen;
-
+    
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
@@ -26,13 +30,21 @@ public class GameManager : PhotonSingleton<GameManager>
 
          _photonView = GetComponent<PhotonView>();
          _loadChecker = GetComponent<LoadSceneChecker>();
-
+         
+         if (_currentGameState == EGameState.Waiting)
+         {
+             return;
+         }
          _loadChecker.OnLoadFinished += GameStart;
      }
     
     // 게임 시작
     private void Update()
     {
+        if (_currentGameState != EGameState.Playing)
+        {
+            return;
+        }
         GameTimer(); 
     }
 
@@ -43,12 +55,8 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
         
-        if (_currentGameState != EGameState.Playing)
-        {
-            return;
-        }
-        
         _timer -= Time.deltaTime;
+        
         if (_timer <= 0)
         {
             _currentGameState = EGameState.GameOver;
@@ -130,8 +138,9 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
-        
-        _timer = PlayerSettingManager.Instance.PlayTime * 60f;
+           
+        _timer = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString());;
+        OnProfileInit?.Invoke();
         
         _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
@@ -141,7 +150,19 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         _currentGameState = (EGameState)state;
     }
+
+    // 타이머가 0이 되었을 때
+    private void GameResultCheck()
+    {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        
+    }
     
+    // 순위 체크 (죽을 때 마다)
     
 }
 
