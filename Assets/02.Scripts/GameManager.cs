@@ -11,7 +11,7 @@ using DG.Tweening;
 public class GameManager : PhotonSingleton<GameManager>
 {
     private PhotonView _photonView;
-    private EGameState _currentGameState;
+    private EGameState _currentGameState = EGameState.Ready;
     [SerializeField] private float _timer;
     private LoadSceneChecker _loadChecker;
     public GameObject GameOverScreen;
@@ -109,7 +109,7 @@ public class GameManager : PhotonSingleton<GameManager>
         foreach (PhotonPlayer p in playerList)
         {
             bool isDead = p.CustomProperties.ContainsKey(EProperties.IsDead.ToString()) && (bool)p.CustomProperties[EProperties.IsDead.ToString()];
-            Debug.Log($"Player {p.NickName} - Dead: {isDead}");
+            Debug.Log($"Player {p.NickName}{p.ActorNumber} - Dead: {isDead}");
             if (isDead == false)
             {
                 Debug.Log("아직 준비 안됨");
