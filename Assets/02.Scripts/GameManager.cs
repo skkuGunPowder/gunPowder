@@ -49,24 +49,18 @@ public class GameManager : PhotonSingleton<GameManager>
         }
         
         _timer -= Time.deltaTime;
-        Debug.Log($"{_timer}");
         if (_timer <= 0)
         {
             _currentGameState = EGameState.GameOver;
-            Debug.Log($"게임 상태 변경 타이머 : {_currentGameState.ToString()}");
+            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
         }
-        
-        _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
     }
     // 게임 종료
     // 프로퍼티가 바뀌었을 때 호출되는 함수
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
-        Debug.Log("플레이어 프로퍼티 변경");
         if (changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] != null)
-        {
-            Debug.Log($"플레이어가 다 죽었습니까? = {PlayerDeadCheck()}");
-            
+        {   
             if (PlayerDeadCheck())
             {
                 _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
@@ -77,7 +71,6 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     private void RPC_GameOver()
     {
-        Debug.Log("왜 게임오버?");
         _currentGameState = EGameState.GameOver;
         
         if (_currentGameState != EGameState.GameOver)
@@ -114,7 +107,6 @@ public class GameManager : PhotonSingleton<GameManager>
             Debug.Log($"Player {p.NickName}{p.ActorNumber} - Dead: {isDead}");
             if (isDead == false)
             {
-                Debug.Log("아직 준비 안됨");
                 continue;
             }
             
@@ -141,7 +133,6 @@ public class GameManager : PhotonSingleton<GameManager>
         
         _timer = PlayerSettingManager.Instance.PlayTime * 60f;
         
-        Debug.Log($"timer {_timer}");
         _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
 
@@ -149,7 +140,6 @@ public class GameManager : PhotonSingleton<GameManager>
     public void RPC_RequestGameStart(int state)
     {
         _currentGameState = (EGameState)state;
-        Debug.Log($"현재 게임 상태 : {_currentGameState.ToString()}");
     }
     
     
