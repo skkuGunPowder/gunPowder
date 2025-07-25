@@ -10,6 +10,7 @@ public class ItemStorage : MonoBehaviour
     private Dictionary<EItemType, List<InventoryItem>> _storedItemDict;
     private Dictionary<EItemType, InventoryItem> _equippedItemDict;
 
+    public EMainCategory CurrentMainCategory { get; private set; }
     public EItemType CurrentCategory { get; private set; }
     public int SelectedItemIndex { get; private set; }
     private InventoryItem _selectedItem;
@@ -82,6 +83,7 @@ public class ItemStorage : MonoBehaviour
     public void Init()
     {
         // 현재 카테고리 초기화
+        CurrentMainCategory = EMainCategory.Character;
         CurrentCategory = EItemType.Head;
 
         // 선택된 아이템 인덱스 초기화
@@ -148,10 +150,41 @@ public class ItemStorage : MonoBehaviour
         return _selectedItem;
     }
 
+    public void ChangeMainCategory(EMainCategory nextMainCategory)
+    {
+        if (nextMainCategory == CurrentMainCategory)
+        {
+            return;
+        }
+
+        // 현재 카테고리 변경
+        CurrentMainCategory = nextMainCategory;
+        if (CurrentMainCategory == EMainCategory.Character)
+        {
+            CurrentCategory = EItemType.Head;
+        }
+        else
+        {
+            CurrentCategory = EItemType.Bomb;
+        }
+        
+
+        // 선택된 아이템 인덱스 초기화
+        SelectedItemIndex = -1;
+
+        // UI 업데이트
+        OnDataChanged?.Invoke(CurrentCategory);
+    }
+
     public void ChangeCategory(EItemType nextCategory)
     {
+        if (nextCategory == CurrentCategory)
+        {
+            return;
+        }
+
         // 현재 카테고리 변경
-        CurrentCategory = nextCategory;
+            CurrentCategory = nextCategory;
 
         // 선택된 아이템 인덱스 초기화
         SelectedItemIndex = -1;

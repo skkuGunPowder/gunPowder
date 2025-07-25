@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Firebase;
 using Firebase.Firestore;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 public class ItemStorageRepo
 {
@@ -54,15 +52,9 @@ public class ItemStorageRepo
                         continue;
                     }
                     
-                    List<object> valueList = (List<object>)kvp.Value;
-                    if (valueList == null || valueList.Count == 0)
-                    {
-                        continue;
-                    }
-                    
-                    var itemList = new List<InventoryItem>();
                     // 아이템 리스트에 데이터 할당
-                    foreach (var obj in valueList)
+                    var itemList = new List<InventoryItem>();
+                    foreach (var obj in (List<object>)kvp.Value)
                     {
                         InventoryItem item = ConvertToItem((Dictionary<string, object>)obj);
                         itemList.Add(item);
