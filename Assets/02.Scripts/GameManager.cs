@@ -43,15 +43,13 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
         
-        _timer = PlayerSettingManager.Instance.PlayTime;
-        
         if (_currentGameState != EGameState.Playing)
         {
             return;
         }
         
         _timer -= Time.deltaTime;
-        Debug.Log($"timer {_timer}");
+        Debug.Log($"{_timer}");
         if (_timer <= 0)
         {
             _currentGameState = EGameState.GameOver;
@@ -79,6 +77,7 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     private void RPC_GameOver()
     {
+        Debug.Log("왜 게임오버?");
         _currentGameState = EGameState.GameOver;
         
         if (_currentGameState != EGameState.GameOver)
@@ -135,6 +134,14 @@ public class GameManager : PhotonSingleton<GameManager>
         
     private void GameStart()
     {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        _timer = PlayerSettingManager.Instance.PlayTime * 60f;
+        
+        Debug.Log($"timer {_timer}");
         _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
 
