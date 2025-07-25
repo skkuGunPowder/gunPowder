@@ -19,6 +19,8 @@ public class PlayerBaseState : MonoState
     protected float _strongRecoilForce = 20f;
     protected float _yRecoilForce = 5f;
 
+    private Bomb _bomb;
+
 
 
 
@@ -123,10 +125,10 @@ public class PlayerBaseState : MonoState
         string rpcMethodName,
         object[] rpcArgs)
     {
-        GameObject bomb = InstantiateBomb(prefabName, bombSpawnPoint);
-        Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, _owner.GetComponent<PhotonView>().ViewID);
-        bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
+        RPC_InstantiateBomb(prefabName, bombSpawnPoint);
+        
+        _bomb.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, _owner.GetComponent<PhotonView>().ViewID);
+        _bomb.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
     }
 
     /// <summary>
@@ -369,12 +371,23 @@ public class PlayerBaseState : MonoState
         SetLastSpecialBombTime();
     }
 
-    private GameObject InstantiateBomb(string prefabName, Transform bombSpawnPoint)
+    
+    private void RPC_InstantiateBomb(string prefabName, Transform bombSpawnPoint)
+    {
+        Quaternion rotation = Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0);
+        _owner.PhotonView.RPC(nameof(InstantiateBomb), RpcTarget.All, prefabName, bombSpawnPoint.position, rotation);
+    }
+
+    [PunRPC]
+    private GameObject InstantiateBomb(string prefabName, Vector3 position, Quaternion rotation)
     {
         GameObject bomb = ObjectPoolManager.Instance.GetObject(prefabName);
-        bomb.transform.position = bombSpawnPoint.position;
-        bomb.transform.rotation = Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0);
-        //GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
+        bomb.transform.position = position;
+        bomb.transform.rotation = rotation;
+        bomb.GetComponent<Bomb>().SetOwner(_owner.GetComponent<PhotonView>().ViewID);
+        Bomb bombComponent = bomb.GetComponent<Bomb>();
+        _bomb = bombComponent;
+
         return bomb;
     }
 
