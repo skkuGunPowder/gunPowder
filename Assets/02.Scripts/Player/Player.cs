@@ -104,6 +104,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _attackTimer += Time.deltaTime;
 
         _gunPowderDecreaseTimer += Time.deltaTime;
+
         DecreaseGunPowderPeriodically();
 
         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
@@ -117,8 +118,9 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         if (_gunPowderDecreaseTimer >= PlayerStat.GunPowderDecreaseTime)
         {
+            Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber}의 체력 감소");
             _gunPowderDecreaseTimer = 0f;
-            _playerStat.DecreaseGunPowderCount(1);
+            _playerStat.DecreaseGunPowderCount(1,PhotonNetwork.LocalPlayer.ActorNumber);
         }
     }
 
@@ -130,7 +132,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
-            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount);
+            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, PhotonNetwork.LocalPlayer.ActorNumber);
         }
     }
 
@@ -156,8 +158,8 @@ public class Player : MonoBehaviourPun, IDamagable
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut,PhotonMessageInfo info)
     {
         // 체력 감소
-        _playerStat.DecreaseGunPowderCount(damage);
-        PlayerSettingManager.Instance.RequestTakeDamage(_playerStat.CurrentPlayerGunPowderCount, _playerStat.CurrentPlayerLife,info.Sender.ActorNumber);
+        _playerStat.DecreaseGunPowderCount(damage, info.Sender.ActorNumber);
+        
         // Gunpowder 낙출
         ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
 

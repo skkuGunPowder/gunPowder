@@ -1,66 +1,51 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
+
 [RequireComponent(typeof(PhotonView))]
-public class PlayerSettingManager : Singleton<PlayerSettingManager>
+public class PlayerSettingManager : MonoBehaviour
 {
     private List<int> _playerList = new List<int>(); //현재 있는 플레이어들
     public List<int> PlayerList => _playerList;
     
-    private Room _room;
     private PhotonView _photonView;
-    
-    public int PlayerDeclinePowder;         // 몇초당 1 감소 의 몇 초
-    public int PlayTime;
     
     public PlayerSpawner Spawner;
     public LoadSceneChecker LoadSceneChecker;
-    public event Action<int,int,int> OnDataChanged;         // 언제? :
-    public event Action OnInitCharacter;
-    // 현재 룸 프로퍼티 가져오기
-    protected override void Awake()
+    
+    // 현재 룸 프로퍼티 가져오기 => 플레이어 세팅해주기
+    private void Awake()
     {
-        base.Awake();
-        Debug.Log("awake");
         _photonView = GetComponent<PhotonView>();
-        _room = PhotonNetwork.CurrentRoom;
-        
         LoadSceneChecker.OnLoadFinished += Init;
-        
     }
 
     public void Init()
     {
-        PlayerDeclinePowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"].ToString());
-        PlayTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString());
-        
         Hashtable dead = new Hashtable()
         {
             { EProperties.IsDead.ToString(), false }
         };
+        
         PhotonNetwork.LocalPlayer.SetCustomProperties(dead);
         // 캐릭터 순번 세팅
         SpawnSetting();
 
-        // 플레이어 스탯 추가해주기   
     }
     
     [PunRPC]
     private void Rpc_SpawnPlayer(int[] playerList)
     {
         _playerList = new List<int>(playerList);
+        Debug.Log("RPC로 보내준 리스트의 카운트 :" + _playerList.Count);
         SpawnPlayer();
     }
     
     // 프로퍼티 불러오기  => 플레이어 리스트
     private void SpawnSetting()
     {
-        Debug.Log("spawn");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
@@ -77,7 +62,6 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
                 {
                     continue;
                 }
-                
                 _playerList.Add(actorNumber);
             }
         }
@@ -89,41 +73,28 @@ public class PlayerSettingManager : Singleton<PlayerSettingManager>
                 _playerList.Add(player.ActorNumber);
             }
         }
-        
+
+
         _photonView.RPC(nameof(Rpc_SpawnPlayer), RpcTarget.All, _playerList.ToArray());
     }
     
     private void SpawnPlayer()
     {
+        Debug.Log($"지금 소환하는 사람 넘버 : {PhotonNetwork.LocalPlayer.ActorNumber}");
+
         for (int i = 0; i < _playerList.Count; i++)
         {
-            Debug.Log(_playerList[i]);
-            Debug.Log( PhotonNetwork.LocalPlayer.ActorNumber);
+            Debug.Log($"spawnplayer 리스트 갯수 :" + _playerList[i]);
             if (_playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
             {
+                Debug.Log($"{_playerList[i]}는 현재 넘버랑 다릅니다.");
+                Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} ");
                 continue;
             }
-        
             Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 가 소환한당");    
             Spawner.GeneratePlayers(i);
         }
-        
-        OnInitCharacter?.Invoke();
     }
 
-    public void RequestTakeDamage(int gunpowder, int life, int value)
-    {
-        if (_photonView.IsMine == false)
-        {
-            return;
-        }
-        _photonView.RPC(nameof(RPC_RequestDamage),RpcTarget.All, gunpowder, life, value);
-    }
     
-    [PunRPC]
-    public void RPC_RequestDamage(int gunpowder, int life, int playerNumber)
-    {
-        OnDataChanged?.Invoke(playerNumber, gunpowder, life);
-    }
-
 }

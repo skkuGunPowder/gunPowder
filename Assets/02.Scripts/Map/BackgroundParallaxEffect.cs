@@ -12,6 +12,7 @@ public class BackgroundParallaxEffect : MonoBehaviour
 
     void Start()
     {
+        Camera = Camera.main;
         _startingPosition = transform.position;
         _startingZ = transform.localPosition.z;
     }

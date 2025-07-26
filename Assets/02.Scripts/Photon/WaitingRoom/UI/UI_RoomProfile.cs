@@ -37,10 +37,6 @@ public class UI_RoomProfile : MonoBehaviour
         List<int> playerSlotList = RoomManager.Instance.PlayerSlotList;
         Debug.Log(playerSlotList.Count);
 
-        foreach (var d in playerSlotList)
-        {
-            Debug.Log(d);
-        }
         for (int i = 0; i < playerSlotList.Count; i++)
         {
             if (playerSlotList[i] == 0)

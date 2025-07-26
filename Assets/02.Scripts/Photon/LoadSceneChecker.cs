@@ -50,10 +50,10 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         foreach (PhotonPlayer p in playerList)
         {
             bool isLoaded = p.CustomProperties.ContainsKey(EProperties.IsLoad.ToString()) && (bool)p.CustomProperties[EProperties.IsLoad.ToString()];
-            Debug.Log($"Player {p.NickName} - SceneLoaded: {isLoaded}");
+            Debug.Log($"Player {p.NickName}{p.ActorNumber} - SceneLoaded: {isLoaded}");
             if (isLoaded == false)
             {
-                Debug.Log($"Player {p.NickName} - SceneLoaded: {isLoaded}");
+                Debug.Log($"Player {p.NickName}{p.ActorNumber} - SceneLoaded: {isLoaded}");
                 return ;
             }
         }
