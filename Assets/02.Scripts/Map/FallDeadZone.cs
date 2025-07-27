@@ -6,9 +6,10 @@ public class FallDeadZone : MonoBehaviour
     {
         if(collision.CompareTag("Player"))
         {
-            if(collision.TryGetComponent<PlayerStat>(out PlayerStat playerStat))
+            Debug.Log("FallDeadZone");
+            if (collision.TryGetComponent<PlayerStat>(out PlayerStat playerStat))
             {
-                if(playerStat.IsFallingDead)
+                if (playerStat.IsFallingDead)
                     return;
             }
 

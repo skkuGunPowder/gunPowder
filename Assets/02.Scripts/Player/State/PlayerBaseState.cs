@@ -19,7 +19,6 @@ public class PlayerBaseState : MonoState
     protected float _strongRecoilForce = 20f;
     protected float _yRecoilForce = 5f;
 
-    private Bomb _bomb;
 
 
 
@@ -125,10 +124,35 @@ public class PlayerBaseState : MonoState
         string rpcMethodName,
         object[] rpcArgs)
     {
-        RPC_InstantiateBomb(prefabName, bombSpawnPoint);
+        // 1. 폭탄 인스턴싱
+        GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position,
+         Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
         
-        _bomb.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, _owner.GetComponent<PhotonView>().ViewID);
-        _bomb.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
+        if (bomb == null)
+        {
+            Debug.LogError($"Failed to instantiate bomb: {prefabName}");
+            return;
+        }
+        
+        // 2. Bomb 컴포넌트 가져오기
+        Bomb bombComponent = bomb.GetComponent<Bomb>();
+        if (bombComponent == null)
+        {
+            Debug.LogError($"Bomb component not found on instantiated object: {prefabName}");
+            return;
+        }
+        
+        // 3. Owner 설정
+        PhotonView ownerPhotonView = _owner.GetComponent<PhotonView>();
+        if (ownerPhotonView == null)
+        {
+            Debug.LogError("Owner PhotonView not found");
+            return;
+        }
+        
+        // 4. RPC 호출 (SetOwner 먼저, 그 다음 폭탄 동작)
+        bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, ownerPhotonView.ViewID);
+        bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
     }
 
     /// <summary>
@@ -371,25 +395,6 @@ public class PlayerBaseState : MonoState
         SetLastSpecialBombTime();
     }
 
-    
-    private void RPC_InstantiateBomb(string prefabName, Transform bombSpawnPoint)
-    {
-        Quaternion rotation = Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0);
-        _owner.PhotonView.RPC(nameof(InstantiateBomb), RpcTarget.All, prefabName, bombSpawnPoint.position, rotation);
-    }
-
-    [PunRPC]
-    private GameObject InstantiateBomb(string prefabName, Vector3 position, Quaternion rotation)
-    {
-        GameObject bomb = ObjectPoolManager.Instance.GetObject(prefabName);
-        bomb.transform.position = position;
-        bomb.transform.rotation = rotation;
-        bomb.GetComponent<Bomb>().SetOwner(_owner.GetComponent<PhotonView>().ViewID);
-        Bomb bombComponent = bomb.GetComponent<Bomb>();
-        _bomb = bombComponent;
-
-        return bomb;
-    }
 
     // 폭탄 반동 적용 함수
     protected virtual void ApplyRecoil(Transform bombSpawnPoint, float recoilPower = 5f, float upPower = 1f)

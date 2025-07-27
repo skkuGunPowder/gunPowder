@@ -77,14 +77,17 @@ public class Player : MonoBehaviourPun, IDamagable
         // 1. 이벤트 핸들러 등록
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
 
-        // 2. Rigidbody2D 초기화
+        // 2. Rigidbody2D 최적화된 초기화
         if (photonView.IsMine)
         {
-            _rigidbody2D.gravityScale = 4; // 기본 중력값
+            //_rigidbody2D.gravityScale = 4; // 기본 중력값
+            _rigidbody2D.interpolation = RigidbodyInterpolation2D.Interpolate; // 보간 활성화
         }
         else
         {
-            _rigidbody2D.gravityScale = 0;
+            //_rigidbody2D.gravityScale = 0;
+            _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            _rigidbody2D.interpolation = RigidbodyInterpolation2D.None; // 보간 비활성화
         }
         
         _rigidbody2D.linearVelocity = Vector2.zero;
