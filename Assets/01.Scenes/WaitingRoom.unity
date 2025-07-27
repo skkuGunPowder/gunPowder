@@ -6621,6 +6621,7 @@ GameObject:
   - component: {fileID: 1591649683}
   - component: {fileID: 1591649684}
   - component: {fileID: 1591649685}
+  - component: {fileID: 1591649686}
   m_Layer: 0
   m_Name: PhotonPool
   m_TagString: Untagged
@@ -6677,6 +6678,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bf74c0c9af20ac4da78423e61fbacd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1591649686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591649681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0dcbb31c341134aab2a80d90909213, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  explosionPrefabs:
+  - {fileID: 913711826124557560, guid: 21fe6366732941941b0b19b289967536, type: 3}
+  - {fileID: 92375336593843931, guid: 34ea7666e5a931a42aefde07ec4c49e6, type: 3}
+  minSize: 10
+  maxSize: 40
 --- !u!1001 &1652000766
 PrefabInstance:
   m_ObjectHideFlags: 0

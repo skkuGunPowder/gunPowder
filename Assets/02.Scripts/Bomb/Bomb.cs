@@ -18,10 +18,6 @@ public class Bomb : MonoBehaviourPun, IBomb
 
     public PhotonView PhotonView;
 
-    // 폭발 상태를 추적하여 중복 폭발 방지
-    private bool _hasExploded = false;
-    private bool _hasRequestedDestroy = false; // 파괴 요청 중복 방지
-
     private void Awake()
     {
         PhotonView = GetComponent<PhotonView>();
@@ -43,8 +39,6 @@ public class Bomb : MonoBehaviourPun, IBomb
         _fuzeTimer = 0f;
         _currentSpeed = 0f;
         _fireDirection = Vector3.zero;
-        _hasExploded = false;
-        _hasRequestedDestroy = false;
     }
 
     protected virtual void Update()
@@ -67,9 +61,8 @@ public class Bomb : MonoBehaviourPun, IBomb
         }
 
         _fuzeTimer += Time.deltaTime;
-        if (_fuzeTimer >= _stat.FuzeTime && !_hasExploded)
+        if (_fuzeTimer >= _stat.FuzeTime)
         {
-            _hasExploded = true;
             PhotonView.RPC(nameof(Explode), RpcTarget.All);
         }
     }
@@ -105,11 +98,7 @@ public class Bomb : MonoBehaviourPun, IBomb
             int otherPriority = otherBomb._stat.Priority;
             if (_stat.Priority <= otherPriority)
             {
-                if (!_hasExploded)
-                {
-                    _hasExploded = true;
-                    PhotonView.RPC(nameof(Explode), RpcTarget.All);
-                }
+                PhotonView.RPC(nameof(Explode), RpcTarget.All);
             }
             else if (_stat.Priority - otherPriority < 2)
             {
@@ -123,13 +112,6 @@ public class Bomb : MonoBehaviourPun, IBomb
     [PunRPC]
     public virtual void Explode()
     {
-        // 중복 폭발 방지
-        if (_hasExploded)
-        {
-            Debug.Log($"[Bomb] Explode called but already exploded: {gameObject.name}");
-            return;
-        }
-        _hasExploded = true;
 
         // 폭발 프리펩 인스턴싱 (로컬에서만)
         if (ExplosionPrefab == null)
@@ -148,10 +130,8 @@ public class Bomb : MonoBehaviourPun, IBomb
         }
 
         // 소유자만 파괴 요청
-        if (PhotonView.IsMine && !_hasRequestedDestroy)
+        if (PhotonView.IsMine)
         {
-            Debug.Log($"[Bomb] Requesting destroy for: {gameObject.name} (ViewID: {PhotonView.ViewID})");
-            _hasRequestedDestroy = true;
             
             // 추가 안전장치: PhotonView가 여전히 유효한지 확인
             if (PhotonView != null && PhotonView.ViewID != 0)
