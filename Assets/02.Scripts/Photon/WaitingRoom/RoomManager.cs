@@ -159,17 +159,17 @@ public class RoomManager : PhotonSingleton<RoomManager>
             if (PhotonNetwork.IsMasterClient)
             {
                 PlayerPlacement(PhotonNetwork.LocalPlayer);
-                _room.IsVisible = true;
                 OnDataChanged?.Invoke();
             };
             
             return;
         }
-
+        
+        
         int[] players = _room.CustomProperties[EProperties.PlayerList.ToString()] as int[];
         _playerSlotList = new List<int>(players);
+        _room.IsVisible = true;
         
-        Debug.Log(_playerSlotList.Count);
         if (PhotonNetwork.IsMasterClient)
         {
             _photonView.RPC(nameof(UpdateSlots),RpcTarget.All, _playerSlotList.ToArray());
@@ -232,6 +232,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 break;
             }
         }
+        
+        Debug.Log($"playerplacement  = {player.ActorNumber}");
     }
 
     [PunRPC]

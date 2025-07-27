@@ -10,6 +10,7 @@ public class ItemStorage : MonoBehaviour
     private Dictionary<EItemType, List<InventoryItem>> _storedItemDict;
     private Dictionary<EItemType, InventoryItem> _equippedItemDict;
 
+    public EMainCategory CurrentMainCategory { get; private set; }
     public EItemType CurrentCategory { get; private set; }
     public int SelectedItemIndex { get; private set; }
     private InventoryItem _selectedItem;
@@ -31,38 +32,33 @@ public class ItemStorage : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
 
-        _repo = new ItemStorageRepo();
-        _repo.OnItemStorageLoaded += LoadItemStorageData;
-        _repo.OnInventoryLoaded += LoadInventoryData;
-
         _storedItemDict = null;
         _equippedItemDict = null;
-    }
 
-    private void OnEnable()
-    {
+        _repo = new ItemStorageRepo();
+
+        // 현재 카테고리 초기화
+        CurrentMainCategory = EMainCategory.Character;
+        CurrentCategory = EItemType.Head;
+
+        // 선택된 아이템 인덱스 초기화
+        SelectedItemIndex = -1;
+
         Init();
     }
 
 #if UNITY_EDITOR
-    public Sprite TestIcon;
+
+    public string AddItemID;
     private void Update()
     {
-        // 저장된 데이터 로드 테스트
-        if (Input.GetKeyDown(KeyCode.Backslash))
+        // 아이템 추가 테스트
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            _repo.LoadItemStorage();
-            _repo.LoadInventory();
+            InventoryItem testItem = new InventoryItem(ItemDatabase.Instance.GetItem(AddItemID));
+
+            AddItem(testItem);
         }
-
-        // // 아이템 추가 테스트
-        // if (Input.GetKeyDown(KeyCode.Q))
-        // {
-        //     Item newItem = new Item("B0001", EItemType.Bomb, "기본 폭탄", "기본 폭탄", "Assets/05.Images/Item/PunIcon-128.png", null);
-        //     InventoryItem testItem = new InventoryItem(new ItemDTO(newItem));
-
-        //     AddItem(testItem);
-        // }
 
         // 아이템 장착 테스트
         if (Input.GetKeyDown(KeyCode.W))
@@ -77,15 +73,12 @@ public class ItemStorage : MonoBehaviour
             }
         }
     }
-    #endif
+#endif
 
-    public void Init()
+    private async void Init()
     {
-        // 현재 카테고리 초기화
-        CurrentCategory = EItemType.Head;
-
-        // 선택된 아이템 인덱스 초기화
-        SelectedItemIndex = -1;
+        _storedItemDict = await _repo.LoadItemStorage();
+        _equippedItemDict = await _repo.LoadInventory();
 
         // 저장된 데이터 없을 시 아이템 보관함 초기화
         if (_storedItemDict == null)
@@ -96,6 +89,8 @@ public class ItemStorage : MonoBehaviour
             {
                 _storedItemDict.Add((EItemType)i, new List<InventoryItem>());
             }
+
+            _repo.SaveItemStorage(_storedItemDict);
         }
 
         // 저장된 데이터 없을 시 인벤토리 초기화
@@ -106,21 +101,8 @@ public class ItemStorage : MonoBehaviour
             {
                 _equippedItemDict.Add((EItemType)i, null);
             }
+            _repo.SaveInventory(_equippedItemDict);
         }
-    }
-
-    private void LoadItemStorageData(Dictionary<EItemType, List<InventoryItem>> itemDict)
-    {
-        _storedItemDict = itemDict;
-
-        OnDataChanged?.Invoke(CurrentCategory);
-    }
-
-    private void LoadInventoryData(Dictionary<EItemType, InventoryItem> equippedItemDict)
-    {
-        _equippedItemDict = equippedItemDict;
-
-        OnDataChanged?.Invoke(CurrentCategory);
     }
 
     public List<InventoryItem> GetStoredItemList(EItemType itemType)
@@ -148,8 +130,39 @@ public class ItemStorage : MonoBehaviour
         return _selectedItem;
     }
 
+    public void ChangeMainCategory(EMainCategory nextMainCategory)
+    {
+        if (nextMainCategory == CurrentMainCategory)
+        {
+            return;
+        }
+
+        // 현재 카테고리 변경
+        CurrentMainCategory = nextMainCategory;
+        if (CurrentMainCategory == EMainCategory.Character)
+        {
+            CurrentCategory = EItemType.Head;
+        }
+        else
+        {
+            CurrentCategory = EItemType.Bomb;
+        }
+
+
+        // 선택된 아이템 인덱스 초기화
+        SelectedItemIndex = -1;
+
+        // UI 업데이트
+        OnDataChanged?.Invoke(CurrentCategory);
+    }
+
     public void ChangeCategory(EItemType nextCategory)
     {
+        if (nextCategory == CurrentCategory)
+        {
+            return;
+        }
+
         // 현재 카테고리 변경
         CurrentCategory = nextCategory;
 
@@ -222,7 +235,7 @@ public class ItemStorage : MonoBehaviour
 
         _repo.SaveInventory(_equippedItemDict);
         _repo.SaveItemStorage(_storedItemDict);
-        
+
         OnDataChanged?.Invoke(item.Item.ItemType);
     }
 

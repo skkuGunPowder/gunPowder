@@ -6,9 +6,10 @@ public class UI_ItemStorage : MonoBehaviour
 {
     public TextMeshProUGUI ItemNameText;
     public UI_EquipmentSlot EquipmentSlot;
+    public UI_Category UI_Category;
 
     [SerializeField] private List<UI_ItemSlot> _itemSlotList;
-    [SerializeField] private List<UI_Category> _categorieList;
+
 
     private ItemStorage _itemStorage;
 
@@ -25,7 +26,11 @@ public class UI_ItemStorage : MonoBehaviour
 
     private void Refresh(EItemType currentCategory)
     {
+        // 아이템 목록 업데이트
         List<InventoryItem> itemList = _itemStorage.GetStoredItemList(currentCategory);
+
+        // 아이템 카테고리 업데이트
+        UI_Category.Refresh(currentCategory, _itemStorage.CurrentMainCategory);
 
         // 아이템 슬롯 업데이트
         for (int i = 0; i < _itemSlotList.Count; i++)
@@ -45,17 +50,6 @@ public class UI_ItemStorage : MonoBehaviour
             }
         }
 
-        // 카테고리 슬롯 업데이트
-        foreach (UI_Category category in _categorieList)
-        {
-            if (category.Category == currentCategory)
-            {
-                category.Select();
-                continue;
-            }
-
-            category.Deselect();
-        }
 
         // 선택된 슬롯 업데이트
         if (_itemStorage.SelectedItemIndex == -1)
@@ -89,5 +83,28 @@ public class UI_ItemStorage : MonoBehaviour
         {
             ItemNameText.text = _selectedSlot.Item.Item.Name;
         }
+    }
+
+    public void Confirm()
+    {
+        InventoryItem selectedITem = _selectedSlot.Item;
+        if (selectedITem.IsEquipped)
+        {
+            _itemStorage.UnEquipItem(selectedITem);
+        }
+        else
+        {
+            _itemStorage.EquipItem(selectedITem);
+        }
+    }
+
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    public void Close()
+    {
+        gameObject.SetActive(false);
     }
 }
