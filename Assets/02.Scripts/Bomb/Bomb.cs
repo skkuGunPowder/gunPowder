@@ -120,7 +120,9 @@ public class Bomb : MonoBehaviourPun, IBomb
         }
         else
         {
-            Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+            //Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+            Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
+            explosion.transform.position = transform.position;
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
 
