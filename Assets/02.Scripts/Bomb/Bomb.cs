@@ -1,8 +1,7 @@
-using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
-using UnityEngine.VFX;
-public class Bomb : MonoBehaviour, IBomb
+
+public class Bomb : MonoBehaviourPun, IBomb
 {
     public Explosion ExplosionPrefab;
     protected Rigidbody2D _rigidBody;
@@ -19,7 +18,6 @@ public class Bomb : MonoBehaviour, IBomb
 
     public PhotonView PhotonView;
 
-
     private void Awake()
     {
         PhotonView = GetComponent<PhotonView>();
@@ -27,6 +25,7 @@ public class Bomb : MonoBehaviour, IBomb
 
         Init();
 
+        // VFX는 모든 클라이언트에서 개별적으로 생성
         if (TrailVFXPrefab != null)
         {
             _vfx = Instantiate(TrailVFXPrefab);
@@ -34,8 +33,23 @@ public class Bomb : MonoBehaviour, IBomb
         }
     }
 
+    protected virtual void OnEnable()
+    {
+        // 모든 클라이언트에서 초기화
+        _fuzeTimer = 0f;
+        _currentSpeed = 0f;
+        _fireDirection = Vector3.zero;
+    }
+
     protected virtual void Update()
     {
+        // 타이머는 소유자만 관리
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        // VFX 위치 업데이트는 모든 클라이언트에서
         if (_vfx != null)
         {
             _vfx.transform.position = TrailVFXPosition.position;
@@ -49,7 +63,7 @@ public class Bomb : MonoBehaviour, IBomb
         _fuzeTimer += Time.deltaTime;
         if (_fuzeTimer >= _stat.FuzeTime)
         {
-            Explode();
+            PhotonView.RPC(nameof(Explode), RpcTarget.All);
         }
     }
     
@@ -61,7 +75,15 @@ public class Bomb : MonoBehaviour, IBomb
     [PunRPC]
     public void SetOwner(int ownerViewId)
     {
-        _ownerTransform = PhotonView.Find(ownerViewId).transform;
+        PhotonView ownerPhotonView = PhotonView.Find(ownerViewId);
+        if (ownerPhotonView != null)
+        {
+            _ownerTransform = ownerPhotonView.transform;
+        }
+        else
+        {
+            Debug.LogWarning($"Owner PhotonView with ID {ownerViewId} not found");
+        }
     }
 
     protected void SetStat(string id)
@@ -76,7 +98,7 @@ public class Bomb : MonoBehaviour, IBomb
             int otherPriority = otherBomb._stat.Priority;
             if (_stat.Priority <= otherPriority)
             {
-                Explode();
+                PhotonView.RPC(nameof(Explode), RpcTarget.All);
             }
             else if (_stat.Priority - otherPriority < 2)
             {
@@ -87,16 +109,20 @@ public class Bomb : MonoBehaviour, IBomb
         return false;
     }
 
+    [PunRPC]
     public virtual void Explode()
     {
-        // 폭발 프리펩 인스턴싱
+
+        // 폭발 프리펩 인스턴싱 (로컬에서만)
         if (ExplosionPrefab == null)
         {
             Debug.Log("펑(억장 터지는 소리: ExposionPrefab == null)");
         }
         else
         {
-            Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+            //Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+            Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
+            explosion.transform.position = transform.position;
             explosion.Explode(_stat.IsFallingOut, _ownerTransform);
         }
 
@@ -104,12 +130,22 @@ public class Bomb : MonoBehaviour, IBomb
         {
             _vfx.transform.SetParent(transform);
         }
-        
-        if(PhotonNetwork.IsMasterClient)
+
+        // 소유자만 파괴 요청
+        if (PhotonView.IsMine)
         {
-            PhotonNetwork.Destroy(gameObject);
+            
+            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
+            if (PhotonView != null && PhotonView.ViewID != 0)
+            {
+                PhotonNetwork.Destroy(gameObject);
+            }
+            else
+            {
+                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
+                Destroy(gameObject);
+            }
         }
-        
 
         // TODO
         // Pool 만들면 회수 코드 작성

@@ -27,14 +27,15 @@ public class GunPowderTrigger : MonoBehaviour
                 }
             }
 
+            // 이 콜라이더는 더 이상 감지하지 않게 비활성화
+            _collider.enabled = false;
+
             // 1. 베지어 곡선 이동 활성화
             gameObject.GetComponentInParent<GunPowderBezierCurve>().enabled = true;
 
             // 2. 상위 콜라이더를 트리거로 전환
             gameObject.GetComponentInParent<BoxCollider2D>().isTrigger = true;
-
-            // 3. (선택) 이 콜라이더는 더 이상 감지하지 않게 비활성화
-            gameObject.SetActive(false); // 또는 collider.enabled = false;
+        
         }
     }
     
