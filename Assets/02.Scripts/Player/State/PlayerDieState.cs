@@ -10,6 +10,7 @@ public class PlayerDieState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+        Debug.Log($"PlayerDieState {_owner.PhotonView.Owner.ActorNumber}");
 
         // 무적
         _owner.gameObject.tag = "Immune";

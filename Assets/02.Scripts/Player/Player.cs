@@ -240,7 +240,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         
         // Gunpowder 낙출
-        ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+        //ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
 
         // 피격 횟수 증가
         _playerStat.IncreseDamagedCount();
