@@ -22,6 +22,7 @@ public class PlayerBaseState : MonoState
 
 
 
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -123,9 +124,34 @@ public class PlayerBaseState : MonoState
         string rpcMethodName,
         object[] rpcArgs)
     {
-        GameObject bomb = InstantiateBomb(prefabName, bombSpawnPoint);
+        // 1. 폭탄 인스턴싱
+        GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position,
+         Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
+        
+        if (bomb == null)
+        {
+            Debug.LogError($"Failed to instantiate bomb: {prefabName}");
+            return;
+        }
+        
+        // 2. Bomb 컴포넌트 가져오기
         Bomb bombComponent = bomb.GetComponent<Bomb>();
-        bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, _owner.GetComponent<PhotonView>().ViewID);
+        if (bombComponent == null)
+        {
+            Debug.LogError($"Bomb component not found on instantiated object: {prefabName}");
+            return;
+        }
+        
+        // 3. Owner 설정
+        PhotonView ownerPhotonView = _owner.GetComponent<PhotonView>();
+        if (ownerPhotonView == null)
+        {
+            Debug.LogError("Owner PhotonView not found");
+            return;
+        }
+        
+        // 4. RPC 호출 (SetOwner 먼저, 그 다음 폭탄 동작)
+        bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, ownerPhotonView.ViewID);
         bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
     }
 
@@ -143,6 +169,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "BasicBomb",
             bombSpawnPoint,
@@ -176,6 +203,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "BasicBomb",
             bombSpawnPoint,
@@ -211,6 +239,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "Missile",
             bombSpawnPoint,
@@ -245,6 +274,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "Missile",
             bombSpawnPoint,
@@ -279,6 +309,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "BasicBomb",
             bombSpawnPoint,
@@ -328,6 +359,7 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
         SpawnAndRpcBomb(
             "Missile",
             bombSpawnPoint,
@@ -363,12 +395,6 @@ public class PlayerBaseState : MonoState
         SetLastSpecialBombTime();
     }
 
-    private GameObject InstantiateBomb(string prefabName, Transform bombSpawnPoint)
-    {
-        GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position, Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
-        
-        return bomb;
-    }
 
     // 폭탄 반동 적용 함수
     protected virtual void ApplyRecoil(Transform bombSpawnPoint, float recoilPower = 5f, float upPower = 1f)

@@ -33,7 +33,8 @@ public class Explosion : MonoBehaviour
                 }
             }
         }
-        Destroy(gameObject);
+        //Destroy(gameObject);
+        ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());
     }
 
     void AddExplosionForce2D(Rigidbody2D rb, float explosionForce, Vector2 explosionPosition, float explosionRadius)
