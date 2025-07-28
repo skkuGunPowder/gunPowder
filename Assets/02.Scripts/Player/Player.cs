@@ -169,15 +169,18 @@ public class Player : MonoBehaviourPun, IDamagable
 
         _gunPowderDecreaseTimer += Time.deltaTime;
 
-        //DecreaseGunPowderPeriodically();
-        PhotonView.RPC(nameof(DecreaseGunPowderPeriodically), RpcTarget.All);
+        DecreaseGunPowderPeriodically();
 
         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
-        //DecreaseGunPowderWithoutAttack();
-        PhotonView.RPC(nameof(DecreaseGunPowderWithoutAttack), RpcTarget.All);
+        DecreaseGunPowderWithoutAttack();
     }
 
     [PunRPC]
+    private void DecreaseGunPowder(int amount)
+    {
+        _playerStat.DecreaseGunPowderCount(amount);
+    }
+
     /// <summary>
     /// 주기적으로 건파우더 감소
     /// </summary>
@@ -187,12 +190,10 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber}의 체력 감소");
             _gunPowderDecreaseTimer = 0f;
-            _playerStat.DecreaseGunPowderCount(1);
-            //PhotonView.RPC(nameof(_playerStat.DecreaseGunPowderCount), RpcTarget.All, 1);
+            PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, 1);
         }
     }
 
-    [PunRPC]
     /// <summary>
     /// 공격을 일정시간 하지 않으면 건파우더 감소
     /// </summary>
@@ -201,8 +202,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
-            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount);
-            //PhotonView.RPC(nameof(_playerStat.DecreaseGunPowderCount), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
+            PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
         }
     }
 
