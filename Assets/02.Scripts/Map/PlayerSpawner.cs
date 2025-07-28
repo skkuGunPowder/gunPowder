@@ -14,6 +14,7 @@ public class PlayerSpawner : MonoBehaviour
         if (player.GetComponent<Player>().PhotonView.IsMine)
         {
             player.tag = "Player";
+            Debug.Log("ismine");
 
             ProCamera2D proCamera = Camera.main.GetComponent<ProCamera2D>();
             if (proCamera.CameraTargets.Count == 0)
@@ -23,7 +24,8 @@ public class PlayerSpawner : MonoBehaviour
         }
         else
         {
-            player.tag = "enemy";
+            Debug.Log("not ismine");
+            player.tag = "Enemy";
         }
     }
 }

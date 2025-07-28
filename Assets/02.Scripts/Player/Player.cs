@@ -74,12 +74,63 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void OnEnable()
     {
+        // 1. 이벤트 핸들러 등록
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
 
-        if (!photonView.IsMine)
+        // 2. Rigidbody2D 최적화된 초기화
+        if (photonView.IsMine)
         {
-            _rigidbody2D.gravityScale = 0;
+            //_rigidbody2D.gravityScale = 4; // 기본 중력값
+            _rigidbody2D.interpolation = RigidbodyInterpolation2D.Interpolate; // 보간 활성화
         }
+        else
+        {
+            //_rigidbody2D.gravityScale = 0;
+            _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            _rigidbody2D.interpolation = RigidbodyInterpolation2D.None; // 보간 비활성화
+        }
+        
+        _rigidbody2D.linearVelocity = Vector2.zero;
+        _rigidbody2D.angularVelocity = 0f;
+
+        // 3. PlayerStat 초기화
+        _playerStat.InitializeStats(); // 체력, 건파우더 등 기본값 세팅
+
+        // 4. 타이머 초기화
+        _attackTimer = 0f;
+        _gunPowderDecreaseTimer = 0f;
+        _gunPowderDecreaseWithoutAttackTimer = 0f;
+
+        // 5. 애니메이터 초기화
+        foreach (var animator in _myAnimatorList)
+        {
+            animator.Rebind(); // 모든 트리거/상태 초기화
+            animator.Update(0f); // 즉시 반영
+        }
+
+        // 6. SpriteRenderer 방향/상태 초기화
+        foreach (var spriteRenderer in _playerStat.MySpriteREndererList)
+        {
+            spriteRenderer.flipX = false; // 기본 방향
+            spriteRenderer.color = Color.white; // 기본 색상
+        }
+
+        if(PhotonView.IsMine)
+        {
+            Debug.Log("Playerismine");
+            gameObject.tag = "Player";
+        }
+        else
+        {
+            Debug.Log("Playernot ismine");
+            gameObject.tag = "Enemy";
+        }
+    }
+
+    private void OnDisable()
+    {
+        // 이벤트 핸들러 해제 (중복 방지)
+        _playerStat.OnGunPowderEmpty -= HandleGunPowderEmpty;
     }
 
     public void InitializePlayer()
@@ -158,7 +209,18 @@ public class Player : MonoBehaviourPun, IDamagable
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut,PhotonMessageInfo info)
     {
         // 체력 감소
-        _playerStat.DecreaseGunPowderCount(damage, info.Sender.ActorNumber);
+        bool isDead = _playerStat.DecreaseGunPowderCount(damage, info.Sender.ActorNumber);
+
+        // 날 때린 사람 딜량 증가
+        PhotonView attackerView = PhotonView.Find(attackerViewId);
+        if(attackerView != null)
+        {
+            attackerView.GetComponent<PlayerStat>().IncreaseTotalDamage(damage);
+        }
+        if(isDead)
+        {
+            attackerView.GetComponent<PlayerStat>().IncreaseTotalKillCount();
+        }
         
         // Gunpowder 낙출
         ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);

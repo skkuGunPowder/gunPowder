@@ -36,6 +36,7 @@ public class GunPowderBezierCurve : MonoBehaviour
 
     private Transform _target;
     private bool _isFallingOut;
+    private bool _hasTriggeredDestroy;
 
     private void OnEnable()
     {
@@ -126,14 +127,14 @@ public class GunPowderBezierCurve : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D collision)
     {
-        if(collision.gameObject.CompareTag("Player"))
+        if(collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
         {
             collision.gameObject.GetComponent<Player>().PlayerStat.IncreaseGunPowderCount(1);
-            if(!PhotonNetwork.IsMasterClient)
+            if (!_hasTriggeredDestroy)
             {
-                return;
+                InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+                _hasTriggeredDestroy = true;
             }
-            PhotonNetwork.Destroy(gameObject);
         }
     }
 }

@@ -14,15 +14,22 @@ public class BasicBomb : Bomb
     public const string ID = "B0001";
     private EBombVelocity _bombVelocity = EBombVelocity.SLOW;
     private bool _isFuzeActivate;
+    private bool isDestroyed = false; // 중복 파괴 방지 플래그
     private const float SLOW = 5f;
     private const float NORMAL = 10f;
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        Init();
+    }
 
     protected override void Init()
     {
         base.Init();
         SetStat(ID);
         _isFuzeActivate = false;
+        isDestroyed = false; // 재사용 시 초기화
     }
 
     protected override void Update()
@@ -44,6 +51,11 @@ public class BasicBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
         if (other.gameObject.tag == "Player")
         {
             return;
@@ -54,15 +66,19 @@ public class BasicBomb : Bomb
             return;
         }
         
+        if (isDestroyed) // 이미 파괴된 경우 중복 호출 방지
+        {
+            return;
+        }
         if (_bombVelocity == EBombVelocity.FAST)
             {
-                Explode();
+                PhotonView.RPC(nameof(Explode), RpcTarget.All);
             }
         if (_bombVelocity == EBombVelocity.NORMAL && !_isFuzeActivate)
         {
             if (other.gameObject.TryGetComponent(out IDamagable damagableObject))
             {
-                Explode();
+                PhotonView.RPC(nameof(Explode), RpcTarget.All);
             }
             else
             {
@@ -75,7 +91,7 @@ public class BasicBomb : Bomb
     {
         _isFuzeActivate = true;
         yield return new WaitForSeconds(fuzeTime);
-        Explode();
+        PhotonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
     [PunRPC]
@@ -83,6 +99,7 @@ public class BasicBomb : Bomb
     {
         _fireDirection = fireRightDirection;
         _currentSpeed = 0f;
+        isDestroyed = false; // 재사용 시 초기화
     }
 
     [PunRPC]
@@ -105,7 +122,7 @@ public class BasicBomb : Bomb
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
-        Explode();
+        PhotonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
     [PunRPC]
@@ -114,5 +131,13 @@ public class BasicBomb : Bomb
         _fireDirection = fireRightDirection;
         _currentSpeed = _stat.Speed;
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
+    }
+
+    [PunRPC]
+    public override void Explode()
+    {
+        if (isDestroyed) return; // 중복 파괴 방지
+        isDestroyed = true;
+        base.Explode();
     }
 }

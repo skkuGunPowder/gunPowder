@@ -108,6 +108,11 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private float _damagedTime;
     public float DamagedTime { get => _damagedTime; set => _damagedTime = value; }
 
+    [Header("Damage, Death")]
+    [SerializeField] private float _totalDamage;
+    public float TotalDamage => _totalDamage;
+    [SerializeField] private float _totalKillCount;
+    public float TotalKillCount => _totalKillCount;
     
     public event Action OnGunPowderEmpty;
     
@@ -196,15 +201,17 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerLife);
     }
     
-    public void DecreaseGunPowderCount(int amount, int player)
+    public bool DecreaseGunPowderCount(int amount, int player)
     {
         _currentPlayerGunPowderCount -= amount;
+        bool isDead = false;
 
         Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 현재 체력 감소 중");
         if (_currentPlayerGunPowderCount <= 0)
         {
             _currentPlayerLife -= 1;
             _currentPlayerGunPowderCount = _initGunpowderCount;
+            isDead = true;
         }
         
         if(_currentPlayerLife <= 0)
@@ -215,6 +222,8 @@ public class PlayerStat : MonoBehaviour
         
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife);
+
+        return isDead;
     }
 
     [PunRPC]
@@ -232,5 +241,24 @@ public class PlayerStat : MonoBehaviour
     {
         _currentPlayerDamagedCount = 0;
     }
+
+    public void IncreaseTotalDamage(float damage)
+    {
+        _totalDamage += damage;
+    }
     
+    public void ResetTotalDamage()
+    {
+        _totalDamage = 0;
+    }
+    
+    public void IncreaseTotalKillCount()
+    {
+        _totalKillCount++;
+    }
+
+    public void ResetTotalKillCount()
+    {
+        _totalKillCount = 0;
+    }
 }
