@@ -130,6 +130,7 @@ public class GunPowderBezierCurve : MonoBehaviour
         if(collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
         {
             collision.gameObject.GetComponent<Player>().PlayerStat.IncreaseGunPowderCount(1);
+            Debug.Log($"{collision.gameObject.GetComponent<Player>().PlayerStat.CurrentPlayerGunPowderCount}");
             if (!_hasTriggeredDestroy)
             {
                 InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
