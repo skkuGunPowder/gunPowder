@@ -108,7 +108,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 70, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8236862935167121959
 CanvasRenderer:
@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -159,6 +159,7 @@ GameObject:
   - component: {fileID: 4584732397087599223}
   - component: {fileID: 2500859461710474294}
   - component: {fileID: 1629610666545150194}
+  - component: {fileID: 4670531710823615785}
   m_Layer: 5
   m_Name: UI_Ping
   m_TagString: Untagged
@@ -225,6 +226,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4670531710823615785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3233042367615100403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d009ffa64dcc9904d89c1156f849bd75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _arm: {fileID: 7034575927947299152}
+  _playerTransform: {fileID: 0}
+  _playerScreenPoint: {x: 0, y: 0, z: 0}
+  _pingScreenPoint: {x: 0, y: 0, z: 0}
 --- !u!1 &7034575927947299152
 GameObject:
   m_ObjectHideFlags: 0
