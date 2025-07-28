@@ -64,5 +64,15 @@ public class UI_RoomStartOption : MonoBehaviour
         MapNameGUGI.text = mapName;
         MapIcon.sprite = map;
     }
+
+    private void OnDestroy()
+    {
+        if (RoomManager.Instance == null)
+        {
+            return;
+        }
+        RoomManager.Instance.OnMapChanged -= MapChange;
+        RoomManager.Instance.OnMasterChanged -= ButtonSetup;
+    }
     
 }

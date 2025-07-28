@@ -58,6 +58,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
             }
         }
        
+        Debug.Log("로드 완료");
         OnLoadFinished?.Invoke();
     }
 

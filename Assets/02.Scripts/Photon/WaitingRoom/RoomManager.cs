@@ -120,7 +120,14 @@ public class RoomManager : PhotonSingleton<RoomManager>
             {EProperties.PlayerList.ToString(), _playerSlotList.ToArray()}
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(playerList);
-
+        
+        Hashtable dead = new Hashtable()
+        {
+            { EProperties.IsDead.ToString(), false }
+        };
+        
+        PhotonNetwork.LocalPlayer.SetCustomProperties(dead);
+        
         _room.IsVisible = false;
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
         

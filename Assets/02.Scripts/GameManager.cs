@@ -113,7 +113,7 @@ public class GameManager : PhotonSingleton<GameManager>
         Debug.Log(playerList.Count);
         
         
-        int dead = 0;
+        int dead = 1;
         
         foreach (PhotonPlayer p in playerList)
         {
@@ -140,6 +140,7 @@ public class GameManager : PhotonSingleton<GameManager>
         
     private void GameStart()
     {
+        Debug.Log("게임 시작");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
@@ -147,7 +148,7 @@ public class GameManager : PhotonSingleton<GameManager>
 
         int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
         _timer = playtime;
-        Debug.Log($"{_timer}");
+        Debug.Log($"게임 시작 : 게임 시간 : {_timer}");
         
         _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
@@ -157,6 +158,11 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         _currentGameState = (EGameState)state;
         OnProfileInit?.Invoke();
+        if (_currentGameState == EGameState.Waiting)
+        {
+            return;
+        }
+        _loadChecker.OnLoadFinished -= GameStart;
     }
     
     // 등수 체크하는 방법

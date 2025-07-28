@@ -23,7 +23,11 @@ public class DamageChecker : Singleton<DamageChecker>
     {
         base.Awake();
         _photonView = GetComponent<PhotonView>();
-        LoadSceneChecker.OnLoadFinished += Init;
+    }
+
+    private void Start()
+    {
+        Init();
     }
 
     private void Init()
