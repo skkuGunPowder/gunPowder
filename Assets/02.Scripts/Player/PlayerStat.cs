@@ -196,6 +196,11 @@ public class PlayerStat : MonoBehaviour
     }
     public void IncreaseGunPowderCount(int amount)
     {
+        if(!_photonView.IsMine)
+        {
+            return;
+        }
+        
         _currentPlayerGunPowderCount += amount;
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife);

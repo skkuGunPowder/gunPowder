@@ -1010,7 +1010,7 @@ MonoBehaviour:
   NormalBombPrefab: {fileID: 3001153516144104530, guid: 0b31de894fdc1a54e9648ce2b4a7332b, type: 3}
   SpecialBombPrefab: {fileID: 2493808269564610583, guid: a6599bf25c6a827438187bda7877caee, type: 3}
   GunPowderPrefab: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
-  DieExplosionPrefab: {fileID: 0}
+  DieExplosionPrefab: {fileID: 913711826124557560, guid: 804d65cb3af63d94f8021d7f15b82be5, type: 3}
 --- !u!114 &4024883436230281669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1075,6 +1075,8 @@ MonoBehaviour:
   - {fileID: 4296287364748657003}
   - {fileID: 1012296347412030769}
   _damagedTime: 0
+  _totalDamage: 0
+  _totalKillCount: 0
   IsFallingFromLedge: 0
 --- !u!70 &975501548764073768
 CapsuleCollider2D:
