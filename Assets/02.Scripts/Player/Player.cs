@@ -232,7 +232,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         // 체력 감소
-        bool isDead = _playerStat.DecreaseGunPowderCount(damage, info.Sender.ActorNumber);
+        bool isDead = _playerStat.DecreaseGunPowderCount(damage);
 
         // 날 때린 사람 딜량 증가
         PhotonView attackerView = PhotonView.Find(attackerViewId);
