@@ -8,11 +8,9 @@ public class UI_InGameProfile : MonoBehaviour
     private List<UI_InGameProfileSlot> UI_InGameProfileSlotList = new List<UI_InGameProfileSlot>();
     private List<PhotonPlayer> _playerActorNumberList = new List<PhotonPlayer>();
     
-    private void Awake()
+    private void OnEnable()
     {
-        DamageChecker.Instance.OnDataChanged += Refresh;
-        DamageChecker.Instance.OnTopPlayerChanged += SetTopPlayer;
-        GameManager.Instance.OnProfileInit += Init;
+        SubscribeEvents();
     }
 
     private void Init()
@@ -32,6 +30,8 @@ public class UI_InGameProfile : MonoBehaviour
                 UI_InGameProfileSlotList[i].gameObject.SetActive(false);
             }
         }
+        
+        GameManager.Instance.OnProfileInit -= Init;
     }
 
 
@@ -59,5 +59,34 @@ public class UI_InGameProfile : MonoBehaviour
             }
         }
 
+    }
+    
+    private void OnDisable()
+    {
+        Debug.Log("온 디스에이블 ");
+        UnsubscribeEvents();
+    }
+
+    private void SubscribeEvents()
+    {
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnDataChanged += Refresh;
+            EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
+        }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnProfileInit += Init;   
+        }
+    }
+
+    private void UnsubscribeEvents()
+    {
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnDataChanged -= Refresh;
+            EventManager.Instance.OnTopPlayerChanged -= SetTopPlayer;
+        }
     }
 }

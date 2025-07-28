@@ -56,7 +56,7 @@ public class BasicBomb : Bomb
             return;
         }
 
-        if (other.gameObject.tag == "Player")
+        if (other.gameObject.tag == "Player" || other.gameObject.tag == "Immune")
         {
             return;
         }

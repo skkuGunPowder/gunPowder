@@ -28,8 +28,8 @@ public class UI_RoomStartOption : MonoBehaviour
 
     private void Start()
     {
-        RoomManager.Instance.OnMapChanged += MapChange;
-        RoomManager.Instance.OnMasterChanged += ButtonSetup;
+        EventManager.Instance.OnMapChanged += MapChange;
+        EventManager.Instance.OnMasterChanged += ButtonSetup;
         
         ButtonSetup();
     }
@@ -64,5 +64,10 @@ public class UI_RoomStartOption : MonoBehaviour
         MapNameGUGI.text = mapName;
         MapIcon.sprite = map;
     }
-    
+
+    private void OnDisable()
+    {
+        EventManager.Instance.OnMapChanged -= MapChange;
+        EventManager.Instance.OnMasterChanged -= ButtonSetup;
+    }
 }
