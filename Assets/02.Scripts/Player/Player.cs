@@ -209,7 +209,18 @@ public class Player : MonoBehaviourPun, IDamagable
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut,PhotonMessageInfo info)
     {
         // 체력 감소
-        _playerStat.DecreaseGunPowderCount(damage, info.Sender.ActorNumber);
+        bool isDead = _playerStat.DecreaseGunPowderCount(damage, info.Sender.ActorNumber);
+
+        // 날 때린 사람 딜량 증가
+        PhotonView attackerView = PhotonView.Find(attackerViewId);
+        if(attackerView != null)
+        {
+            attackerView.GetComponent<PlayerStat>().IncreaseTotalDamage(damage);
+        }
+        if(isDead)
+        {
+            attackerView.GetComponent<PlayerStat>().IncreaseTotalKillCount();
+        }
         
         // Gunpowder 낙출
         ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);

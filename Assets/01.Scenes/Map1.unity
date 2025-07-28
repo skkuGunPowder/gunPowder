@@ -2333,6 +2333,7 @@ GameObject:
   - component: {fileID: 381122873}
   - component: {fileID: 381122874}
   - component: {fileID: 381122875}
+  - component: {fileID: 381122876}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2367,6 +2368,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: addedc4fa375c72408a4b3635edada2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _currentGameState: 0
   GameOverScreen: {fileID: 1766902360}
   FallDeadStartPointList:
   - {fileID: 1758432288}
@@ -2421,9 +2423,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b688369ea6dc7d43950d42ef947d047, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerDeclinePowder: 0
-  PlayTime: 0
   Spawner: {fileID: 1678354690}
+  LoadSceneChecker: {fileID: 381122874}
+--- !u!114 &381122876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381122870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e962144d0591ff4d925c8bbb3a319f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   LoadSceneChecker: {fileID: 381122874}
 --- !u!1001 &406223248
 PrefabInstance:
