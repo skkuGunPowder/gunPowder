@@ -71,6 +71,11 @@ public class GameManager : PhotonSingleton<GameManager>
     // 프로퍼티가 바뀌었을 때 호출되는 함수
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
+        if (_currentGameState == EGameState.Waiting)
+        {
+            return;
+        }
+        
         if (changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] != null)
         {   
             if (PlayerDeadCheck())
@@ -118,7 +123,6 @@ public class GameManager : PhotonSingleton<GameManager>
         foreach (PhotonPlayer p in playerList)
         {
             bool isDead = p.CustomProperties.ContainsKey(EProperties.IsDead.ToString()) && (bool)p.CustomProperties[EProperties.IsDead.ToString()];
-            Debug.Log($"Player {p.NickName}{p.ActorNumber} - Dead: {isDead}");
             if (isDead == false)
             {
                 continue;
@@ -140,7 +144,6 @@ public class GameManager : PhotonSingleton<GameManager>
         
     private void GameStart()
     {
-        Debug.Log("게임 시작");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
@@ -148,7 +151,6 @@ public class GameManager : PhotonSingleton<GameManager>
 
         int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
         _timer = playtime;
-        Debug.Log($"게임 시작 : 게임 시간 : {_timer}");
         
         _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }

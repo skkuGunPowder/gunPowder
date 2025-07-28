@@ -7,9 +7,6 @@ using UnityEngine;
 public class DamageChecker : Singleton<DamageChecker>
 {
     private PhotonView _photonView;
-    
-    public event Action<int> OnTopPlayerChanged;        // 순위 변경용  = 1등 체크용
-    public event Action<int,int,int> OnDataChanged;    // 체력 감소할 때
 
     private int _currentTopPlayer;                 // 처음 1등은 방장
     
@@ -65,8 +62,7 @@ public class DamageChecker : Singleton<DamageChecker>
     
     private void PlayerDataChange(int gunpowder, int life, int playerNumber)
     {
-        Debug.Log($" 플레이어 넘버 : {playerNumber}를 바꿔주세요 : {gunpowder}, {life}");
-        OnDataChanged?.Invoke(playerNumber, gunpowder, life);
+        EventManager.Instance.PlayerDataChange(gunpowder, life, playerNumber);
     }
     
     private void CalculateScore(int gunpowder, int life, int playerNumber)
@@ -101,6 +97,6 @@ public class DamageChecker : Singleton<DamageChecker>
     [PunRPC]
     private void RPC_RequestTopPlayer(int topActor)
     {
-        OnTopPlayerChanged?.Invoke(topActor);
+        EventManager.Instance.SetTopPlayer(topActor);
     }
 }

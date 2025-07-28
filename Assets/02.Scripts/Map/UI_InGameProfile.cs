@@ -30,6 +30,8 @@ public class UI_InGameProfile : MonoBehaviour
                 UI_InGameProfileSlotList[i].gameObject.SetActive(false);
             }
         }
+        
+        GameManager.Instance.OnProfileInit -= Init;
     }
 
 
@@ -67,29 +69,24 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void SubscribeEvents()
     {
-        if (DamageChecker.Instance != null)
+        if (EventManager.Instance != null)
         {
-            DamageChecker.Instance.OnDataChanged += Refresh;
-            DamageChecker.Instance.OnTopPlayerChanged += SetTopPlayer;
+            EventManager.Instance.OnDataChanged += Refresh;
+            EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
         }
 
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.OnProfileInit += Init;
+            GameManager.Instance.OnProfileInit += Init;   
         }
     }
 
     private void UnsubscribeEvents()
     {
-        if (DamageChecker.Instance != null)
+        if (EventManager.Instance != null)
         {
-            DamageChecker.Instance.OnDataChanged -= Refresh;
-            DamageChecker.Instance.OnTopPlayerChanged -= SetTopPlayer;
-        }
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnProfileInit -= Init;
+            EventManager.Instance.OnDataChanged -= Refresh;
+            EventManager.Instance.OnTopPlayerChanged -= SetTopPlayer;
         }
     }
 }

@@ -7,7 +7,6 @@ using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
 [RequireComponent(typeof(PhotonView))]
-// [RequireComponent(typeof(LoadSceneChecker))]
 public class RoomManager : PhotonSingleton<RoomManager>
 {
     private Room _room;
@@ -89,7 +88,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         Hashtable ready = new Hashtable
         {
-            { EProperties.IsReady.ToString(), false }
+            { EProperties.IsReady.ToString(), false },
+            { EProperties.IsDead.ToString(), false }
         };
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
@@ -120,13 +120,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
             {EProperties.PlayerList.ToString(), _playerSlotList.ToArray()}
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(playerList);
-        
-        Hashtable dead = new Hashtable()
-        {
-            { EProperties.IsDead.ToString(), false }
-        };
-        
-        PhotonNetwork.LocalPlayer.SetCustomProperties(dead);
         
         _room.IsVisible = false;
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
@@ -166,7 +159,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
             if (PhotonNetwork.IsMasterClient)
             {
                 PlayerPlacement(PhotonNetwork.LocalPlayer);
-                OnDataChanged?.Invoke();
+                EventManager.Instance.RoomDataChanged();
             };
             
             return;
@@ -188,7 +181,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         Debug.Log("바뀜");
         if (changedProps.ContainsKey($"{EProperties.IsReady}"))
         {
-            OnReadyChanged?.Invoke();
+            EventManager.Instance.ReadyChange();
         }
     }
     
@@ -247,7 +240,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public void UpdateSlots(int[] actorNumbers)
     {
         _playerSlotList = new List<int>(actorNumbers);
-        OnDataChanged?.Invoke();
+        EventManager.Instance.RoomDataChanged();
     }
 
     // 맵 변경시 콜백
@@ -256,14 +249,14 @@ public class RoomManager : PhotonSingleton<RoomManager>
         if (propertiesThatChanged.ContainsKey($"{EProperties.MapSelected}") && propertiesThatChanged[$"{EProperties.MapSelected}"] != null)
         { 
             SelectedMap = (ESceneList)propertiesThatChanged[$"{EProperties.MapSelected}"];
-            OnMapChanged?.Invoke();
+            EventManager.Instance.MapChanged();
         }
     }
     
     // 방장이 바뀌면 콜백
     public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
     {
-        OnMasterChanged?.Invoke();
+        EventManager.Instance.MasterChanged();
     }
     
 }
