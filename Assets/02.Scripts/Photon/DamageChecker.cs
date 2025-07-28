@@ -59,7 +59,7 @@ public class DamageChecker : Singleton<DamageChecker>
     
     private void PlayerDataChange(int gunpowder, int life, int playerNumber)
     {
-        Debug.Log($" 플레이어 넘버 : {playerNumber}를 바꿔주세요 : {gunpowder}, {life}");
+        //Debug.Log($" 플레이어 넘버 : {playerNumber}를 바꿔주세요 : {gunpowder}, {life}");
         OnDataChanged?.Invoke(playerNumber, gunpowder, life);
     }
     

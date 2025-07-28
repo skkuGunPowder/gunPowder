@@ -59,6 +59,8 @@ public class PlayerStat : MonoBehaviour
     public bool IsJumping { get => _isJumping; set => _isJumping = value; }
     [SerializeField] private bool _isFallingDead = false;
     public bool IsFallingDead { get => _isFallingDead; set => _isFallingDead = value; }
+    [SerializeField] private bool _isImmune = false;
+    public bool IsImmune { get => _isImmune; set => _isImmune = value; }
 
     [SerializeField] private float _myMoveSpeed;
     public float MyMoveSpeed { get => _myMoveSpeed; set => _myMoveSpeed = value; }
@@ -77,6 +79,8 @@ public class PlayerStat : MonoBehaviour
 
     [SerializeField] private int _attackPenaltyAmount;
     public int AttackPenaltyAmount { get => _attackPenaltyAmount; set => _attackPenaltyAmount = value; }
+    [SerializeField] private int _initGunpowderCount;
+    public int InitGunpowderCount => _initGunpowderCount;
     
 
     [Header("Die")]
@@ -93,11 +97,10 @@ public class PlayerStat : MonoBehaviour
     // 현재 플레이어가 가지고 있는 수치
     [SerializeField] private int _currentPlayerGunPowderCount;
     public int CurrentPlayerGunPowderCount => _currentPlayerGunPowderCount;    
-    [SerializeField] private int _currentPlayerDamagedCount;
-
-    public int CurrentPlayerLife => _currentPlayerLife;
+    
     [SerializeField] private int _currentPlayerLife;
-    [SerializeField] private int _initGunpowderCount;
+    public int CurrentPlayerLife => _currentPlayerLife;
+    [SerializeField] private int _currentPlayerDamagedCount;
     public int CurrentPlayerDamagedCount => _currentPlayerDamagedCount;
 
     [SerializeField]
@@ -152,7 +155,12 @@ public class PlayerStat : MonoBehaviour
             _damagedTime = _playerStatSO.DamagedTime;
 
             // 나중에는 방 설정에 따라 달라질 수 있음.
-            // _currentPlayerGunPowderCount = _playerStatSO.MaxGunPoderCount;
+            _currentPlayerGunPowderCount = RoomStatManager.Instance.PlayerGunpowder;
+            _initGunpowderCount = RoomStatManager.Instance.PlayerGunpowder;
+            _currentPlayerLife = RoomStatManager.Instance.PlayerLife;
+            _gunPowderDecreaseTime = RoomStatManager.Instance.PlayerDecreaseTime;
+
+            
             _currentPlayerDamagedCount = 0;
         }
     } 
@@ -217,12 +225,12 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerLife -= 1;
             _currentPlayerGunPowderCount = _initGunpowderCount;
             isDead = true;
+            OnGunPowderEmpty?.Invoke();
         }
         
         if(_currentPlayerLife <= 0)
         {
             _currentPlayerGunPowderCount = 0;
-            OnGunPowderEmpty?.Invoke();
         }
         
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
@@ -265,5 +273,10 @@ public class PlayerStat : MonoBehaviour
     public void ResetTotalKillCount()
     {
         _totalKillCount = 0;
+    }
+
+    public void ResurrectPlayerStat()
+    {
+        _currentPlayerGunPowderCount = _initGunpowderCount;
     }
 }

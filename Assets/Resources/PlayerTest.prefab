@@ -1052,20 +1052,21 @@ MonoBehaviour:
   _isRunning: 0
   _isJumping: 0
   _isFallingDead: 0
+  _isImmune: 0
   _myMoveSpeed: 0
   _jumpCount: 0
   _facingDirection: 1
   _gunPowderDecreaseTime: 0
   _attackPenaltyTime: 0
   _attackPenaltyAmount: 0
+  _initGunpowderCount: 0
   _dieExplosionDamage: 0
   _dieExplosionRadius: 0
   _dieExplosionForce: 0
   _invincibleTime: 0
   _currentPlayerGunPowderCount: 0
-  _currentPlayerDamagedCount: 0
   _currentPlayerLife: 0
-  _initGunpowderCount: 0
+  _currentPlayerDamagedCount: 0
   _mySpriteRendererList:
   - {fileID: 4841738079202767485}
   - {fileID: 6646158249678255210}
@@ -1137,7 +1138,7 @@ Rigidbody2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0

@@ -52,7 +52,7 @@ public class PlayerBaseState : MonoState
         JumpInput();
     }
 
-    private void Update()
+    public virtual void Update()
     {
         if(_owner.PhotonView.IsMine)
         {
