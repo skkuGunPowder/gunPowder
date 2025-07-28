@@ -14,10 +14,7 @@ public class GameManager : PhotonSingleton<GameManager>
     private PhotonView _photonView;
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
-    private float _timer;
-    
-    private Dictionary<int, int> _playTimeDictionary = new Dictionary<int, int>();
-    private Dictionary<int, int> _playerRankDictionary = new Dictionary<int, int>();
+    [SerializeField]private float _timer;
     
     private LoadSceneChecker _loadChecker;
     public GameObject GameOverScreen;
@@ -62,9 +59,7 @@ public class GameManager : PhotonSingleton<GameManager>
         
         if (_timer <= 0)
         {
-            _currentGameState = EGameState.GameOver;
-            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-            GameResultCheck();
+            _photonView.RPC(nameof(RPC_GameResultCheck), RpcTarget.All);
         }
     }
     // 게임 종료
@@ -80,15 +75,13 @@ public class GameManager : PhotonSingleton<GameManager>
         {   
             if (PlayerDeadCheck())
             {
-                _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-                GameResultCheck();
+                _photonView.RPC(nameof(RPC_GameResultCheck), RpcTarget.All);
             }
         }
         
     }
-
-    [PunRPC]
-    private void RPC_GameOver()
+    
+    private void GameOver()
     {
         _currentGameState = EGameState.GameOver;
         
@@ -102,7 +95,10 @@ public class GameManager : PhotonSingleton<GameManager>
         gameOverSequence.Append(GameOverScreen.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBounce));
         gameOverSequence.OnComplete(() =>
         {
-            PhotonNetwork.LoadLevel(ESceneList.Map4.ToString());
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.LoadLevel(ESceneList.Map4.ToString());  
+            }
         });
     }
     
@@ -167,25 +163,51 @@ public class GameManager : PhotonSingleton<GameManager>
         _loadChecker.OnLoadFinished -= GameStart;
     }
     
-    // 등수 체크하는 방법
-    private void RankCheck()
+    // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
+    [PunRPC]
+    private void RPC_GameResultCheck()
     {
-        // 이미 죽은 상태면 넘어가고
-        // 살아있는 상태로 끝났다면 점수를 체크해서 스택에 넣어줌
-        
-    }
-    
-    // 타이머가 0이 되었을 때 or 게임이 끝났을 때
-    private void GameResultCheck()
-    {
-        if (PhotonNetwork.IsMasterClient == false && _currentGameState != EGameState.GameOver)
+        PhotonPlayer player = PhotonNetwork.LocalPlayer;
+
+        if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
         {
             return;
         }
-        RankCheck();
         
+        GameObject[] playerObject = GameObject.FindGameObjectsWithTag("Player");
+        PlayerStat mine = null; 
+        foreach (GameObject ob in playerObject)
+        {
+            if (ob.GetComponent<PhotonView>().IsMine)
+            {
+                mine = ob.GetComponent<PlayerStat>();
+                break;
+            }
+        }
+
+        if (mine == null)
+        {
+            throw new Exception("스탯을 찾지 못했습니다.");
+        }
+        
+        Hashtable properties = new Hashtable()
+        {
+            {EProperties.IsDead.ToString(), true},
+            {EProperties.Kill.ToString(), mine.TotalKillCount},
+            {EProperties.Damage.ToString(), mine.TotalDamage},
+            {EProperties.SurvivorTime.ToString(), SurvivorTime()}
+
+        };
+        
+        player.SetCustomProperties(properties);
+        Debug.Log("타임 오버 : 내 자신 프로퍼티 전달" + $"{player.CustomProperties[EProperties.Kill]}");
+        GameOver();
     }
     
+    public int SurvivorTime()
+    {
+        return (int)_timer;
+    }
 }
 
 

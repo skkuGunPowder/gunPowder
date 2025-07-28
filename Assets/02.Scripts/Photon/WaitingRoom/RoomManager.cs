@@ -16,11 +16,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public List<int> PlayerSlotList => _playerSlotList;
     private LoadSceneChecker _loadChecker;
     
-    public event Action OnMapChanged;    // UI 변경 => 방장이 맵을 변경했을 때
-    public event Action OnDataChanged;  // UI 변경 => 플레이어들이 자리를 이동할 때
-    public event Action OnReadyChanged; // UI 변경 => 플레이어들이 레디를 할 때.
-    public event Action OnMasterChanged; // 방장 변경 => 방장 권한 버튼 못 누르게 하기
-    
     public ESceneList SelectedMap;      // 맵 선택하기
     
     private bool _initialized = false;  // Init 한번만 부르게 하기
@@ -98,7 +93,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private void SetCurrentMap()
     {
         SelectedMap = (ESceneList)PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.MapSelected}"];
-        OnMapChanged?.Invoke();
+        EventManager.Instance.MapChanged();
     }
     // 준비가 다 되었다면 마스터가 정한 맵으로 이동시킴
     // 확인이 필요한 것 : 1. 방장인가?
@@ -178,7 +173,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer,Hashtable changedProps)
     {
-        Debug.Log("바뀜");
         if (changedProps.ContainsKey($"{EProperties.IsReady}"))
         {
             EventManager.Instance.ReadyChange();
@@ -189,8 +183,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // => 다른 플레이어들에게 플레이어 리스트를 전달하고 각자 로컬에서 알아서 UI 리프레시하는 방식
     public override void OnPlayerEnteredRoom(PhotonPlayer newPlayer)
     {
-        Debug.Log("OnPlayerEnteredRoom");
-        
         if (PhotonNetwork.IsMasterClient)
         {
             PlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
@@ -233,7 +225,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
             }
         }
         
-        Debug.Log($"playerplacement  = {player.ActorNumber}");
     }
 
     [PunRPC]
