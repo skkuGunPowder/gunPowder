@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
 {
+    private PhotonView _photonView;
     [Header("Scriptable Object Reference")]
     [SerializeField] private PlayerStatSO _playerStatSO;
     public PlayerStatSO PlayerStatSO => _playerStatSO;
@@ -116,7 +117,8 @@ public class PlayerStat : MonoBehaviour
     void OnEnable()
     {
         InitializeStats();
-        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife);
+        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime);
+        _photonView = GetComponent<PhotonView>();
     }
 
     public void InitializeStats()
@@ -137,7 +139,7 @@ public class PlayerStat : MonoBehaviour
             _normalRecoilSpeed = _playerStatSO.NormalRecoilSpeed;
             _attackPenaltyTime = _playerStatSO.AttackPenaltyTime;
             _attackPenaltyAmount = _playerStatSO.AttackPenaltyAmount;
-            _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;
+            // _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;
             _dieExplosionDamage = _playerStatSO.DieExplosionDamage;
             _dieExplosionRadius = _playerStatSO.DieExplosionRadius;
             _dieExplosionForce = _playerStatSO.DieExplosionForce;
@@ -150,13 +152,12 @@ public class PlayerStat : MonoBehaviour
         }
     } 
 
-    public void SetPlayer(int gunpowder, int life)
+    public void SetPlayer(int gunpowder, int life, int decrease)
     {
         _currentPlayerGunPowderCount = gunpowder;
         _currentPlayerLife = life;
         _initGunpowderCount = gunpowder;
-        
-        Debug.Log("SetPlayer");
+        _gunPowderDecreaseTime = decrease;
     }
 
     public void ResetJumpCount()
@@ -188,17 +189,18 @@ public class PlayerStat : MonoBehaviour
     {
         _jumpDashCount = 0;
     }
-
     public void IncreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount += amount;
+        _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
+            _currentPlayerLife);
     }
-
-    public void DecreaseGunPowderCount(int amount)
+    
+    public void DecreaseGunPowderCount(int amount, int player)
     {
         _currentPlayerGunPowderCount -= amount;
 
-
+        Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 현재 체력 감소 중");
         if (_currentPlayerGunPowderCount <= 0)
         {
             _currentPlayerLife -= 1;
@@ -210,6 +212,15 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerGunPowderCount = 0;
             OnGunPowderEmpty?.Invoke();
         }
+        
+        _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
+            _currentPlayerLife);
+    }
+
+    [PunRPC]
+    private void RPC_ChangeGunpowder(int gunpowder, int life, PhotonMessageInfo info)
+    {
+        DamageChecker.Instance.RPC_RequestDamage(gunpowder, life , info.Sender.ActorNumber);
     }
 
     public void IncreseDamagedCount()
