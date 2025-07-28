@@ -215,7 +215,7 @@ public class PlayerStat : MonoBehaviour
     }
     
     [PunRPC]
-    public bool DecreaseGunPowderCount(int amount, int player)
+    public bool DecreaseGunPowderCount(int amount)
     {
         _currentPlayerGunPowderCount -= amount;
         bool isDead = false;
