@@ -184,7 +184,8 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber}의 체력 감소");
             _gunPowderDecreaseTimer = 0f;
-            _playerStat.DecreaseGunPowderCount(1,PhotonNetwork.LocalPlayer.ActorNumber);
+            //_playerStat.DecreaseGunPowderCount(1,PhotonNetwork.LocalPlayer.ActorNumber);
+            PhotonView.RPC(nameof(_playerStat.DecreaseGunPowderCount), RpcTarget.All, 1, PhotonNetwork.LocalPlayer.ActorNumber);
         }
     }
 
@@ -196,7 +197,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
-            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, PhotonNetwork.LocalPlayer.ActorNumber);
+            //_playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, PhotonNetwork.LocalPlayer.ActorNumber);
+            PhotonView.RPC(nameof(_playerStat.DecreaseGunPowderCount), RpcTarget.All, PlayerStat.AttackPenaltyAmount, PhotonNetwork.LocalPlayer.ActorNumber);
         }
     }
 
