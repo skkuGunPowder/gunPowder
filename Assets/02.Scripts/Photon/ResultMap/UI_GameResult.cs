@@ -13,12 +13,13 @@ public class UI_GameResult : MonoBehaviour
     private void Refresh()
     {
         List<GameResultData> dataList = GameResultManager.Instance.ResultDataList;
-
+        
         for (int i = 0; i < UI_GameResultSlotList.Count; i++)
         {
-            GameResultData data = dataList[i];
+
             if (i < dataList.Count)
             {
+                GameResultData data = dataList[i];
                 UI_GameResultSlotList[i].gameObject.SetActive(true);
                 UI_GameResultSlotList[i].Refresh(data.Player.ActorNumber,data.Damage, data.SurviveTime, data.Kill);
             }

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Photon.Pun;
+using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
 public class GameResultManager : Singleton<GameResultManager>
 {
     public List<GameResultData> ResultDataList = new List<GameResultData>();
+    
     
     private void Start()
     {
@@ -15,7 +17,7 @@ public class GameResultManager : Singleton<GameResultManager>
             int damage = Convert.ToInt32(player.CustomProperties[EProperties.Damage.ToString()]);
             int kill = Convert.ToInt32(player.CustomProperties[EProperties.Kill.ToString()]);
             int survieTime = Convert.ToInt32(player.CustomProperties[EProperties.SurvivorTime.ToString()]);
-            
+            Debug.Log(player.ActorNumber +"의 살아남은 시간 : "+ survieTime);
             GameResultData data = new GameResultData(player, damage, kill, survieTime);
             
             ResultDataList.Add(data);
