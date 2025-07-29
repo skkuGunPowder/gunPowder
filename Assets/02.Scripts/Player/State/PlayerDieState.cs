@@ -72,7 +72,18 @@ public class PlayerDieState : PlayerBaseState
                 {EProperties.SurvivorTime.ToString(), GameManager.Instance.SurvivorTime()}
                 
             });
-            InstantiateDestroyManager.Instance.RequestDestroy(gameObject.GetComponent<PhotonView>().ViewID);
+            
+            // 플레이어가 자신의 GameObject를 제거하거나, MasterClient에게 요청
+            if (_owner.PhotonView.IsMine)
+            {
+                // 자신의 GameObject는 직접 제거 가능
+                PhotonNetwork.Destroy(_owner.gameObject);
+            }
+            else
+            {
+                // 다른 플레이어의 GameObject는 MasterClient에게 요청
+                InstantiateDestroyManager.Instance.RequestDestroy(_owner.gameObject.GetComponent<PhotonView>().ViewID);
+            }
         }
         else
         {
