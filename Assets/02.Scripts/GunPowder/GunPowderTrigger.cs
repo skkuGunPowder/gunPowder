@@ -15,7 +15,7 @@ public class GunPowderTrigger : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        if (collision.CompareTag("Player") || collision.CompareTag("Enemy"))
         {
             GunPowder gunPowder = gameObject.GetComponentInParent<GunPowder>();
             if (gunPowder != null)
@@ -35,6 +35,8 @@ public class GunPowderTrigger : MonoBehaviour
 
             // 2. 상위 콜라이더를 트리거로 전환
             gameObject.GetComponentInParent<BoxCollider2D>().isTrigger = true;
+
+            gameObject.SetActive(false);
         
         }
     }

@@ -37,4 +37,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnMasterChanged?.Invoke();
     }
+    public event Action OnGameResult;
+
+    public void ViewGameResult()
+    {
+        OnGameResult?.Invoke();
+    }
 }

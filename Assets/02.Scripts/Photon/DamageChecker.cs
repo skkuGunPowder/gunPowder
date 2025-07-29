@@ -62,6 +62,26 @@ public class DamageChecker : Singleton<DamageChecker>
     
     private void PlayerDataChange(int gunpowder, int life, int playerNumber)
     {
+        // 플레이어 모아서
+        // 뷰 찾아서 같은 애면 스탯 바꿔줌
+        // 특정 ActorNumber의 플레이어 찾기
+        if (PhotonNetwork.CurrentRoom.Players.TryGetValue(playerNumber, out PhotonPlayer player))
+        {
+            // 모든 PlayerStat 컴포넌트를 찾아서 해당 플레이어의 스탯 업데이트
+            PlayerStat[] allPlayerStats = FindObjectsByType<PlayerStat>(FindObjectsSortMode.None);
+            
+            foreach (PlayerStat playerStat in allPlayerStats)
+            {
+                PhotonView playerPhotonView = playerStat.GetComponent<PhotonView>();
+                if (playerPhotonView != null && playerPhotonView.OwnerActorNr == playerNumber)
+                {
+                    // 해당 플레이어의 스탯 업데이트
+                    playerStat.SetPlayerGunPowderCountAndLife(gunpowder, life);
+                    break;
+                }
+            }
+        }
+
         EventManager.Instance.PlayerDataChange(gunpowder, life, playerNumber);
     }
     
