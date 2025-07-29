@@ -121,7 +121,7 @@ public class PlayerDieState : PlayerBaseState
         // 플레이어가 사망할 떄, 사망 폭발이 발생
         Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
         dieExplosion.transform.position = _owner.transform.position;
-        dieExplosion.Explode(true, _owner.transform);
+        dieExplosion.Explode(true, _owner.PhotonView);
         
         Debug.Log("죽음 폭발 발생");
 
