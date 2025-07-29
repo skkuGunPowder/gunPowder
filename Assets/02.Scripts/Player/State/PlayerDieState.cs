@@ -70,8 +70,7 @@ public class PlayerDieState : PlayerBaseState
             {
                 {EProperties.IsDead.ToString(), true},
                 {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
-                {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage},
-                {EProperties.SurvivorTime.ToString(), GameManager.Instance.SurvivorTime()}
+                {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
                 
             });
             

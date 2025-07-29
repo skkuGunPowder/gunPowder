@@ -66,6 +66,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _groundRay2D = GetComponent<BoxRay2D>();
         PhotonView = GetComponent<PhotonView>();
         LoadItems();
+        UI_PingBase.Instance.SetPing(transform);
     }
 
     private void LoadItems()
