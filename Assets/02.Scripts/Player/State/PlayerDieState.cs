@@ -13,6 +13,8 @@ public class PlayerDieState : PlayerBaseState
     {
         base.OnEnter();
 
+        Debug.Log($"PlayerDieState {_owner.PhotonView.Owner.ActorNumber}");
+
         // 네트워크 동기화 - 다른 클라이언트에게 사망 상태 알림
         SyncStateChange<PlayerDieState>();
 
