@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
-using System.Runtime.InteropServices;
+
 
 public class Player : MonoBehaviourPun, IDamagable
 {
@@ -58,6 +58,8 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
 
+    private const int RANDOM_SEED = 123456;
+
 
     private void Awake()
     {
@@ -67,6 +69,8 @@ public class Player : MonoBehaviourPun, IDamagable
         PhotonView = GetComponent<PhotonView>();
         LoadItems();
         UI_PingBase.Instance.SetPing(transform);
+
+        UnityEngine.Random.InitState(RANDOM_SEED);
     }
 
     private void LoadItems()
@@ -119,12 +123,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
         if(PhotonView.IsMine)
         {
-            Debug.Log("Playerismine");
             gameObject.tag = "Player";
         }
         else
         {
-            Debug.Log("Playernot ismine");
             gameObject.tag = "Enemy";
         }
     }
@@ -176,6 +178,12 @@ public class Player : MonoBehaviourPun, IDamagable
         DecreaseGunPowderWithoutAttack();
     }
 
+    [PunRPC]
+    private void DecreaseGunPowder(int amount)
+    {
+        _playerStat.DecreaseGunPowderCount(amount);
+    }
+
     /// <summary>
     /// 주기적으로 건파우더 감소
     /// </summary>
@@ -183,9 +191,9 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         if (_gunPowderDecreaseTimer >= PlayerStat.GunPowderDecreaseTime)
         {
-            Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber}의 체력 감소");
             _gunPowderDecreaseTimer = 0f;
-            _playerStat.DecreaseGunPowderCount(1,PhotonNetwork.LocalPlayer.ActorNumber);
+            PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, 1);
+            //_playerStat.DecreaseGunPowderCount(1);
         }
     }
 
@@ -197,7 +205,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
-            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, PhotonNetwork.LocalPlayer.ActorNumber);
+            PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
+            //_playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount);
         }
     }
 
@@ -227,7 +236,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         // 체력 감소
-        bool isDead = _playerStat.DecreaseGunPowderCount(damage, info.Sender.ActorNumber);
+        bool isDead = _playerStat.DecreaseGunPowderCount(damage);
 
         // 날 때린 사람 딜량 증가
         PhotonView attackerView = PhotonView.Find(attackerViewId);
@@ -277,7 +286,12 @@ public class Player : MonoBehaviourPun, IDamagable
             Vector3 dir = rot * baseDir;
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
-            object[] instData = new object[] { attackerViewId, isFallingOut };
+
+            // 랜덤 시드 추가 (시간 + 인덱슬 고유값 생성)
+            int randomSeed =UnityEngine.Random.Range(0, 9999);
+
+
+            object[] instData = new object[] { attackerViewId, isFallingOut, randomSeed };
             PhotonNetwork.Instantiate(GunPowderPrefab.name, spawnPos, Quaternion.identity, 0, instData);
         }
     }
@@ -394,6 +408,39 @@ public class Player : MonoBehaviourPun, IDamagable
             {
                 spriteRenderer.flipX = true;
             }
+        }
+    }
+
+    [PunRPC]
+    public void RPC_ChangeState(string stateName)
+    {
+        // PlayerFSM 컴포넌트를 찾아서 상태 변경
+        PlayerFSM playerFSM = GetComponent<PlayerFSM>();
+        if (playerFSM != null)
+        {
+            // 다른 클라이언트에서 상태 변경
+            switch (stateName)
+            {
+                case "PlayerIdleState":
+                    playerFSM.ChangeState<PlayerIdleState>();
+                    break;
+                case "PlayerDieState":
+                    playerFSM.ChangeState<PlayerDieState>();
+                    break;
+                case "PlayerDamagedState":
+                    playerFSM.ChangeState<PlayerDamagedState>();
+                    break;
+                case "PlayerFallDeadState":
+                    playerFSM.ChangeState<PlayerFallDeadState>();
+                    break;
+                default:
+                    Debug.LogWarning($"Unknown state: {stateName}");
+                    break;
+            }
+        }
+        else
+        {
+            Debug.LogError("PlayerFSM component not found!");
         }
     }
 }

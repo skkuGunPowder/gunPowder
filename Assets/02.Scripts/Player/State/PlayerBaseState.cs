@@ -59,6 +59,19 @@ public class PlayerBaseState : MonoState
             MineUpdate();
         }
     }
+
+    /// <summary>
+    /// 중요한 상태 변경을 네트워크로 동기화
+    /// </summary>
+    protected virtual void SyncStateChange<T>() where T : PlayerBaseState
+    {
+        Debug.Log($"SyncStateChange {typeof(T).Name}");
+        if (_owner.PhotonView.IsMine)
+        {
+            Debug.Log($"SyncStateChange {typeof(T).Name} {_owner.PhotonView.IsMine}");
+            _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.Others, typeof(T).Name);
+        }
+    }
     // 하위에서 사용하고 싶은 것만 사용한다.
     protected virtual void JumpInput()
     {

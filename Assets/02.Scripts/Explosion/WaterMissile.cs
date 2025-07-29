@@ -1,29 +1,51 @@
 using Photon.Pun;
 using UnityEngine;
+using DG.Tweening;
 
-public class Explosion : MonoBehaviour
+public class WaterMissile : MonoBehaviour
 {
     public GameObject VFXPrefab;
+    private PhotonView _attackerPhotonView;
+    private ExplosionStat _stat;
 
-    protected ExplosionStat _stat;
+    private float _distance;
 
-    protected void SetStat(string id)
+    public void Init(PhotonView attackerPhotonView, float distance, ExplosionStat stat)
     {
-        _stat = ItemDatabase.Instance.GetStat<ExplosionStat>(id);
+        _attackerPhotonView = attackerPhotonView;
+        _distance = distance;
+        _stat = stat;
     }
 
-    public virtual void Explode(bool isFallingOut, PhotonView attackerPhotonView)
+    public void Launch(Vector3 direction)
+    {
+        transform.DOMove(transform.position + direction * _distance, 0.3f)
+        .OnComplete(() =>
+        {
+            Destroy(gameObject, 0.2f); 
+        });
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "TileMap")
+        {
+            Destroy(gameObject);
+        }
+
+        if (collision.tag == "Player" || collision.tag == "Enemy")
+        {
+            Explode();
+        }
+    }
+
+    private void Explode()
     {
         Instantiate(VFXPrefab, transform.position, Quaternion.identity);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
         {
-            if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
-            {
-                continue;
-            }
-            
             if (other.gameObject.tag == "Immune")
             {
                 continue;
@@ -31,14 +53,13 @@ public class Explosion : MonoBehaviour
 
             if (other.TryGetComponent(out IDamagable damagableObject))
             {
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, isFallingOut);
+                damagableObject.TakeDamage(_stat.AttackPower, transform.position, _attackerPhotonView.ViewID);
                 if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
                 }
             }
         }
-        ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());
     }
 
     public void AddExplosionForce2D(Rigidbody2D rb, float explosionForce, Vector2 explosionPosition, float explosionRadius)

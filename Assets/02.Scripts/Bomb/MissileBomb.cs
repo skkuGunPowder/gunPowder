@@ -28,12 +28,6 @@ public class MissileBomb : Bomb
             return;
         }
 
-        if (other.gameObject.tag == "Enemy")
-        {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
-            return;    
-        }
-
         if (CheckPriority(other))
         {
             return;
