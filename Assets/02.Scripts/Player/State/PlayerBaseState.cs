@@ -254,7 +254,7 @@ public class PlayerBaseState : MonoState
             : _owner.GetBombSpawnPoint();
         
         SpawnAndRpcBomb(
-            "Missile",
+            "WaterBomb",
             bombSpawnPoint,
             nameof(Bomb.PlaceBomb),
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
@@ -289,7 +289,7 @@ public class PlayerBaseState : MonoState
             : _owner.GetBombSpawnPoint();
         
         SpawnAndRpcBomb(
-            "Missile",
+            "WaterBomb",
             bombSpawnPoint,
             nameof(Bomb.ThrowBomb),
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
@@ -374,7 +374,7 @@ public class PlayerBaseState : MonoState
             : _owner.GetBombSpawnPoint();
         
         SpawnAndRpcBomb(
-            "Missile",
+            "WaterBomb",
             bombSpawnPoint,
             nameof(Bomb.ThrowBombStraight),
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
