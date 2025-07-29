@@ -8,6 +8,7 @@ public class PlayerIdleState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+
         // 플레이어 상태
         _owner.PlayerStat.IsRunning = false;
         _owner.PlayerStat.IsJumping = false;

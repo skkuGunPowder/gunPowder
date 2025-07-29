@@ -23,9 +23,15 @@ public class MissileBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.gameObject.tag == "Player")
+        if (other.gameObject.tag == "Player" || other.gameObject.tag == "Immune")
         {
             return;
+        }
+
+        if (other.gameObject.tag == "Enemy")
+        {
+            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            return;    
         }
 
         if (CheckPriority(other))

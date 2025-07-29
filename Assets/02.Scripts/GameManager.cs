@@ -14,8 +14,7 @@ public class GameManager : PhotonSingleton<GameManager>
     private PhotonView _photonView;
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
-    public event Action OnProfileInit;
-    private float _timer;
+    [SerializeField]private float _timer;
     
     private LoadSceneChecker _loadChecker;
     public GameObject GameOverScreen;
@@ -24,6 +23,7 @@ public class GameManager : PhotonSingleton<GameManager>
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
     
+    public event Action OnProfileInit;
     protected override void Awake()
      {
          base.Awake();
@@ -45,6 +45,7 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
+        
         GameTimer(); 
     }
 
@@ -59,7 +60,6 @@ public class GameManager : PhotonSingleton<GameManager>
         
         if (_timer <= 0)
         {
-            _currentGameState = EGameState.GameOver;
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
         }
     }
@@ -67,52 +67,76 @@ public class GameManager : PhotonSingleton<GameManager>
     // 프로퍼티가 바뀌었을 때 호출되는 함수
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
-        if (changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] != null)
-        {   
-            if (PlayerDeadCheck())
-            {
-                _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-            }
-        }
-    }
-
-    [PunRPC]
-    private void RPC_GameOver()
-    {
-        _currentGameState = EGameState.GameOver;
+        if (_currentGameState == EGameState.Waiting || _currentGameState == EGameState.GameOver)
+        {
+            return;
+        } 
         
-        if (_currentGameState != EGameState.GameOver)
+        if (!changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] == null)
         {
             return;
         }
         
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        if ((bool)changedProps[EProperties.IsDead.ToString()])
+        { 
+            Hashtable hash = new Hashtable() 
+            {
+                {EProperties.SurvivorTime.ToString(), (int)_timer} 
+            };
+            
+            targetPlayer.SetCustomProperties(hash);
+            Debug.Log($"{targetPlayer.ActorNumber}의 죽은 시간 : {_timer}");
+        }   
+        
+            
+        if (PlayerDeadCheck())
+        { 
+            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+        }
+
+        
+    }
+    
+    [PunRPC]
+    private void RPC_GameOver()
+    {
+     
         Sequence gameOverSequence = DOTween.Sequence();
-        gameOverSequence.Append(GameOverScreen.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBounce));
-        gameOverSequence.Append(GameOverScreen.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBounce));
+        gameOverSequence.Append(GameOverScreen.transform.DOScale(1f, 3f).SetEase(Ease.OutBounce));
+        gameOverSequence.AppendCallback(() =>
+        {
+            GameResultCheck();
+        });
+        gameOverSequence.Append(GameOverScreen.transform.DOScale(1f, 3f).SetEase(Ease.OutBounce));
         gameOverSequence.OnComplete(() =>
         {
-            PhotonNetwork.LoadLevel(ESceneList.Map4.ToString());
+            
+            _currentGameState = EGameState.GameOver;
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.LoadLevel(ESceneList.Map4.ToString());  
+            }
         });
     }
     
     // 캐릭터들 사망 체크하기 = 방장만
     private bool PlayerDeadCheck()
     {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return false;
-        }
-        
+    
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
         Debug.Log(playerList.Count);
         
         
-        int dead = 0;
+        int dead = 1;
         
         foreach (PhotonPlayer p in playerList)
         {
             bool isDead = p.CustomProperties.ContainsKey(EProperties.IsDead.ToString()) && (bool)p.CustomProperties[EProperties.IsDead.ToString()];
-            Debug.Log($"Player {p.NickName}{p.ActorNumber} - Dead: {isDead}");
             if (isDead == false)
             {
                 continue;
@@ -141,7 +165,6 @@ public class GameManager : PhotonSingleton<GameManager>
 
         int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
         _timer = playtime;
-        Debug.Log($"{_timer}");
         
         _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
@@ -151,21 +174,50 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         _currentGameState = (EGameState)state;
         OnProfileInit?.Invoke();
+        if (_currentGameState == EGameState.Waiting)
+        {
+            return;
+        }
+        _loadChecker.OnLoadFinished -= GameStart;
     }
-
-    // 타이머가 0이 되었을 때
+    
+    // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
     private void GameResultCheck()
     {
-        if (PhotonNetwork.IsMasterClient == false)
+        PhotonPlayer player = PhotonNetwork.LocalPlayer;
+
+        if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
         {
             return;
         }
         
-        
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        PlayerStat stat = playerObject.GetComponent<PlayerStat>();
+        Hashtable properties = new Hashtable()
+        {
+            {EProperties.IsDead.ToString(), true},
+            {EProperties.Kill.ToString(), stat.TotalKillCount},
+            {EProperties.Damage.ToString(), stat.TotalDamage}
+
+        };
+        if (PhotonNetwork.IsMasterClient)
+        {
+            properties = new Hashtable()
+            {
+                {EProperties.IsDead.ToString(), true},
+                {EProperties.Kill.ToString(), stat.TotalKillCount},
+                {EProperties.Damage.ToString(), stat.TotalDamage},
+                {EProperties.SurvivorTime.ToString(), (int)_timer}
+            };
+        }
+        player.SetCustomProperties(properties);
+        Debug.Log($"타임 오버 : 내 자신{player.ActorNumber} 프로퍼티 전달" + $"{player.CustomProperties[EProperties.Kill]}");
     }
     
-    // 순위 체크 (죽을 때 마다)
-    
+    public int SurvivorTime()
+    {
+        return (int)_timer;
+    }
 }
 
 

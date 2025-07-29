@@ -19,12 +19,7 @@ public class PhotonForTest : MonoBehaviourPunCallbacks
     [SerializeField] private string _nickName = "Lets Go Home";
 
     public string RoomName; 
-    private void Awake()
-    {
 
-    }
-   
-   
     private void Start()
     {
         // 데이터 송수신 빈도
