@@ -146,9 +146,6 @@ public class Bomb : MonoBehaviourPun, IBomb
                 Destroy(gameObject);
             }
         }
-
-        // TODO
-        // Pool 만들면 회수 코드 작성
     }
 
 

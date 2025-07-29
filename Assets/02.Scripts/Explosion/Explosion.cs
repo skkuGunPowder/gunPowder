@@ -19,11 +19,12 @@ public class Explosion : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
         {
-            // if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
-            // {
-            //     continue;
-            // }
-            if(other.gameObject.tag == "Immune")
+            if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
+            {
+                continue;
+            }
+            
+            if (other.gameObject.tag == "Immune")
             {
                 continue;
             }
@@ -37,7 +38,6 @@ public class Explosion : MonoBehaviour
                 }
             }
         }
-        //Destroy(gameObject);
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());
     }
 
