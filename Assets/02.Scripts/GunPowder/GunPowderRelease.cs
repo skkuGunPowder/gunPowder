@@ -28,15 +28,20 @@ public class GunPowderRelease : MonoBehaviour
 
     private Rigidbody2D _rigidbody2D;
 
-    //private const int RANDOM_SEED = 1234567890;
+    private int _randomSeed;
 
     void OnEnable()
     {
-        //Random.InitState(RANDOM_SEED);
-
         _collider = GetComponent<BoxCollider2D>();
         _groundRay2D = GetComponent<BoxRay2D>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        
+        // 랜덤 시드가 설정되어 있으면 사용
+        if (_randomSeed != 0)
+        {
+            Random.InitState(_randomSeed);
+        }
+        
         // XZ 평면 랜덤 방향
         Vector2 randXZ = Random.insideUnitCircle.normalized * xzForce;
         direction = new Vector3(randXZ.x, 0, 0);
@@ -69,6 +74,12 @@ public class GunPowderRelease : MonoBehaviour
 
     void Initialize(Vector3 _direction)
     {
+        // 랜덤 시드가 설정되어 있으면 사용
+        if (_randomSeed != 0)
+        {
+            Random.InitState(_randomSeed);
+        }
+        
         float yRandom = Random.Range(yForce - YForceOffset, yForce + YForceOffset);
         Initialize(_direction, yRandom);
     }
@@ -110,5 +121,13 @@ public class GunPowderRelease : MonoBehaviour
                 }
             }
         }
+    }
+
+    
+    public void SetRandomSeed(int randomSeed)
+    {
+        _randomSeed = randomSeed;
+        Debug.Log($"SetRandomSeed {_randomSeed}");
+        Random.InitState(_randomSeed);
     }
 }

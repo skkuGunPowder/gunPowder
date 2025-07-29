@@ -70,10 +70,12 @@ public class BasicBomb : Bomb
         {
             return;
         }
+
         if (_bombVelocity == EBombVelocity.FAST)
-            {
-                PhotonView.RPC(nameof(Explode), RpcTarget.All);
-            }
+        {
+            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+        }
+
         if (_bombVelocity == EBombVelocity.NORMAL && !_isFuzeActivate)
         {
             if (other.gameObject.TryGetComponent(out IDamagable damagableObject))

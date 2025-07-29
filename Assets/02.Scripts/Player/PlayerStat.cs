@@ -176,6 +176,12 @@ public class PlayerStat : MonoBehaviour
         Team = team;
     }
 
+    public void SetPlayerGunPowderCountAndLife(int gunpowder, int life)
+    {
+        _currentPlayerGunPowderCount = gunpowder;
+        _currentPlayerLife = life;
+    }
+
     public void ResetJumpCount()
     {
         _jumpCount = 0;
@@ -217,8 +223,13 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerLife);
     }
     
-    public bool DecreaseGunPowderCount(int amount, int player)
+    public bool DecreaseGunPowderCount(int amount)
     {
+        if(!_photonView.IsMine)
+        {
+            return false;
+        }
+
         _currentPlayerGunPowderCount -= amount;
         bool isDead = false;
 
@@ -282,5 +293,6 @@ public class PlayerStat : MonoBehaviour
     public void ResurrectPlayerStat()
     {
         _currentPlayerGunPowderCount = _initGunpowderCount;
+        //_photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife);
     }
 }
