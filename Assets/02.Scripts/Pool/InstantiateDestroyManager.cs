@@ -55,13 +55,26 @@ public class InstantiateDestroyManager : MonoBehaviourPun
         PhotonView photonView = PhotonView.Find(viewID);
         if (photonView == null)
         {
+            Debug.LogWarning($"PhotonView with ID {viewID} not found for destruction");
             return;
         }
 
         GameObject objectToDelete = photonView.gameObject;
-        if (objectToDelete == null) return;
+        if (objectToDelete == null) 
+        {
+            Debug.LogWarning($"GameObject for PhotonView {viewID} is null");
+            return;
+        }
 
-        PhotonNetwork.Destroy(objectToDelete);
+        // 권한 체크: MasterClient이거나 소유자인 경우에만 제거
+        if (PhotonNetwork.IsMasterClient || photonView.IsMine)
+        {
+            PhotonNetwork.Destroy(objectToDelete);
+        }
+        else
+        {
+            Debug.LogWarning($"Cannot destroy GameObject {objectToDelete.name} - not MasterClient or owner. ViewID: {viewID}");
+        }
     }
         
 }

@@ -66,7 +66,6 @@ public class GunPowderBezierCurve : MonoBehaviour
         _speed = _gunPowderSpeed;
         Init(_start, _target, _speed, _newPointDistanceFromStart, _newPointDistanceFromEnd);
     }
-    
 
     public void Init(Transform start, Transform end, float speed, float newPointDistanceFromStart, float newPointDistanceFromEnd)
     {

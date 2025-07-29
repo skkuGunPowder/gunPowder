@@ -77,10 +77,6 @@ public class PlayerFallDeadState : PlayerBaseState
         {
             _owner.gameObject.tag = "Enemy";
         }
-        _owner.PlayerStat.IsImmune = false;
-
-
-
     }
 
     public override void Update()
@@ -100,6 +96,7 @@ public class PlayerFallDeadState : PlayerBaseState
                 dieExplosion.Explode(true, _owner.transform);
                 
                 // 15의 데미지를 받는다.
+                _owner.PlayerStat.IsImmune = false;
                 _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, true);
                 
                 // 피격 상태로 전환
