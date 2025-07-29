@@ -268,6 +268,7 @@ public class PlayerStat : MonoBehaviour
     public void IncreaseTotalKillCount()
     {
         _totalKillCount++;
+        Debug.Log(_totalKillCount);
     }
 
     public void ResetTotalKillCount()
