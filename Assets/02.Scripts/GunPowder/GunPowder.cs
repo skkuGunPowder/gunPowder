@@ -32,7 +32,7 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     }
     
     /// <summary>
-    /// 건파우더 생성 어태커 퓨 아이디, 낙출 여부, 랜덤 시드
+    /// 건파우더 생성 어태커 퓨 아이디, 낙출 여부, 랜덤덤
     /// </summary>
     /// <param name="info"></param>
     public void OnPhotonInstantiate(PhotonMessageInfo info)
@@ -48,11 +48,9 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
             if (attackerView != null)
                 _target = attackerView.transform;
 
-            // 랜덤 시드 설정
-            Random.InitState(_randomSeed);
-
             // 컴포넌트 활성화/비활성화 처리
             var release = GetComponent<GunPowderRelease>();
+            release.SetRandomSeed(_randomSeed);
             var bezier = GetComponent<GunPowderBezierCurve>();
             if (_isFallingOut)
             {

@@ -54,6 +54,8 @@ public class PlayerDieState : PlayerBaseState
 
     public override void Update()
     {   
+        Debug.Log($"PlayerDieState Update called - enabled: {this.enabled}, isActiveAndEnabled: {this.isActiveAndEnabled}");
+        
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
         
         if(_owner.PlayerStat.CurrentPlayerLife <= 0)

@@ -58,6 +58,8 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
 
+    private const int RANDOM_SEED = 123456;
+
 
     private void Awake()
     {
@@ -67,6 +69,8 @@ public class Player : MonoBehaviourPun, IDamagable
         PhotonView = GetComponent<PhotonView>();
         LoadItems();
         UI_PingBase.Instance.SetPing(transform);
+
+        UnityEngine.Random.InitState(RANDOM_SEED);
     }
 
     private void LoadItems()
@@ -284,7 +288,7 @@ public class Player : MonoBehaviourPun, IDamagable
             spawnPos.z = 0f;
 
             // 랜덤 시드 추가 (시간 + 인덱슬 고유값 생성)
-            int randomSeed = (int)(Time.time * 1000 + i + UnityEngine.Random.Range(0, 1000));
+            int randomSeed =UnityEngine.Random.Range(0, 9999);
 
 
             object[] instData = new object[] { attackerViewId, isFallingOut, randomSeed };
