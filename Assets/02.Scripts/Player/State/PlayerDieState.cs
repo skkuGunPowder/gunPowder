@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
@@ -9,10 +11,23 @@ public class PlayerDieState : PlayerBaseState
     {
         base.OnEnter();
 
-        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() {{EProperties.IsDead.ToString(), true}});
+        // 무적
+        _owner.gameObject.tag = "Immune";
+        _owner.PlayerStat.IsImmune = true;
+
+        // 모습 안보이게
+        List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
+        foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+        {
+            spriteRenderer.enabled = false;
+        }
+        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
 
         // 플레이어가 사망할 떄, 사망 폭발이 발생
-        //PhotonNetwork.Instantiate("DieExplosion", transform.position, Quaternion.identity);
+        Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
+        dieExplosion.transform.position = _owner.transform.position;
+        dieExplosion.Explode(true, _owner.transform);
+        
         Debug.Log("죽음 폭발 발생");
     }
 
@@ -20,20 +35,67 @@ public class PlayerDieState : PlayerBaseState
     {
         base.OnExit();
 
-        // 플레이어 초기화
-        _owner.InitializePlayer();
-        
-        //부활
+        // 무적 해제
+        if(_owner.PhotonView.IsMine)
+        {
+            _owner.gameObject.tag = "Player";
+        }
+        else
+        {
+            _owner.gameObject.tag = "Enemy";
+        }
+        _owner.PlayerStat.IsImmune = false;
     }
 
-    public override void MineUpdate()
+    public override void Update()
     {   
-        _timer += Time.deltaTime;
-        
-        // 부활
-        // 목숨이 존재하는 규칙일 경우, 폭발한 플레이어는 몇 초 후 부활한다.
-        //    ㄴ PlayerSettingManager에서 받아올 예정
-        
-        // 부활 위치에 부활하기전 미리 알려주는 이펙트 발생
+        if(_owner.PlayerStat.CurrentPlayerLife <= 0)
+        {
+            // 진짜 죽음
+            // 파괴 요청
+            
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+            {
+                {EProperties.IsDead.ToString(), true},
+                {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
+                {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage},
+                {EProperties.SurvivorTime.ToString(), GameManager.Instance.SurvivorTime()}
+                
+            });
+            InstantiateDestroyManager.Instance.RequestDestroy(gameObject.GetComponent<PhotonView>().ViewID);
+        }
+        else
+        {
+            // 부활 지점에서 몇초 후 부활
+            // 모습 보이게
+            // 부활
+            _timer += Time.deltaTime;
+            if(_timer < 2f)
+            {
+                return;
+
+            }
+            _owner.PlayerStat.IsImmune = true;
+            StartCoroutine(ImmuneCoroutine());
+            
+            _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
+            List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
+            foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+            {
+                spriteRenderer.enabled = true;
+            }
+            _owner.ResurrectPlayer();
+            _playerFSM.ChangeState<PlayerIdleState>();      
+        }
+    }
+
+    /// <summary>
+    /// 3초 동안 무적
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ImmuneCoroutine()
+    {
+        yield return new WaitForSeconds(3f);
+        _owner.PlayerStat.IsImmune = false;
     }
 }

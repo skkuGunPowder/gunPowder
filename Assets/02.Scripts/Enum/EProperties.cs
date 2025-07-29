@@ -11,6 +11,10 @@ public enum EProperties
     PlayerList,
     IsDead,
     IsLoad,
+    SurvivorTime,
+    Kill,
+    Damage,
+    
     
     Count
 }

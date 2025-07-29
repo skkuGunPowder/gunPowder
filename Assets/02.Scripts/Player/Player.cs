@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
+using System.Runtime.InteropServices;
 
 public class Player : MonoBehaviourPun, IDamagable
 {
@@ -65,6 +66,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _groundRay2D = GetComponent<BoxRay2D>();
         PhotonView = GetComponent<PhotonView>();
         LoadItems();
+        UI_PingBase.Instance.SetPing(transform);
     }
 
     private void LoadItems()
@@ -72,7 +74,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // ItemStorage.Instance.Get
     }
 
-    private void OnEnable()
+    private void Start()
     {
         // 1. 이벤트 핸들러 등록
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
@@ -141,6 +143,18 @@ public class Player : MonoBehaviourPun, IDamagable
         _gunPowderDecreaseWithoutAttackTimer = 0f;
     }
 
+    public void ResurrectPlayer()
+    {
+        // 각종 타이머들 초기화
+        _attackTimer = 0f;
+        _gunPowderDecreaseTimer = 0f;
+        _gunPowderDecreaseWithoutAttackTimer = 0f;
+
+        // 플레이어 스탯 초기화 (건파우더 초기화)
+        _playerStat.ResurrectPlayerStat();
+        
+    }
+
     private void HandleGunPowderEmpty()
     {
         GetComponent<PlayerFSM>().ChangeState<PlayerDieState>();
@@ -195,7 +209,6 @@ public class Player : MonoBehaviourPun, IDamagable
         _gunPowderDecreaseWithoutAttackTimer = 0f;
     }
 
-
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
     {
         if(!PhotonView.IsMine)
@@ -208,6 +221,11 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut,PhotonMessageInfo info)
     {
+        if(_playerStat.IsImmune)
+        {
+            return;
+        }
+
         // 체력 감소
         bool isDead = _playerStat.DecreaseGunPowderCount(damage, info.Sender.ActorNumber);
 

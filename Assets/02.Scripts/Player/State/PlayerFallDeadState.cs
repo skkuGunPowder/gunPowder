@@ -19,7 +19,12 @@ public class PlayerFallDeadState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        Debug.Log("PlayerFallDeadState");
+        // 어떤 플레이어가 들어왓는지 로그
+        Debug.Log($"PlayerFallDeadState {_owner.PhotonView.Owner.ActorNumber}");
+        
+        // 무적
+        _owner.gameObject.tag = "Immune";
+        _owner.PlayerStat.IsImmune = true;
 
         _wailTime = 0f;
         _owner.PlayerStat.IsFallingDead = true;
@@ -62,9 +67,23 @@ public class PlayerFallDeadState : PlayerBaseState
     {
         base.OnExit();
         _owner.PlayerStat.IsFallingDead = false;
+        
+        // 무적 해제
+        if(_owner.PhotonView.IsMine)
+        {
+            _owner.gameObject.tag = "Player";
+        }
+        else
+        {
+            _owner.gameObject.tag = "Enemy";
+        }
+        _owner.PlayerStat.IsImmune = false;
+
+
+
     }
 
-    public override void MineUpdate()
+    public override void Update()
     {
         if (_isGoaled)
         {
@@ -73,8 +92,12 @@ public class PlayerFallDeadState : PlayerBaseState
             _wailTime += Time.deltaTime;
             if (_wailTime >= _waitDuration)
             {
+                Debug.Log($"PlayerFallDeadState {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생");
                 // 사망 폭발 발생
-                // PhotonNetwork.Instantiate("DieExplosion", transform.position, Quaternion.identity);
+                // 플레이어가 사망할 떄, 사망 폭발이 발생
+                Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
+                dieExplosion.transform.position = _owner.transform.position;
+                dieExplosion.Explode(true, _owner.transform);
                 
                 // 15의 데미지를 받는다.
                 _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, true);

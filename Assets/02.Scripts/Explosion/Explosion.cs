@@ -23,6 +23,10 @@ public class Explosion : MonoBehaviour
             // {
             //     continue;
             // }
+            if(other.gameObject.tag == "Immune")
+            {
+                continue;
+            }
 
             if (other.TryGetComponent(out IDamagable damagableObject))
             {
@@ -37,7 +41,7 @@ public class Explosion : MonoBehaviour
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());
     }
 
-    void AddExplosionForce2D(Rigidbody2D rb, float explosionForce, Vector2 explosionPosition, float explosionRadius)
+    public void AddExplosionForce2D(Rigidbody2D rb, float explosionForce, Vector2 explosionPosition, float explosionRadius)
     {
         Vector2 direction = rb.position - explosionPosition;
         float distance = direction.magnitude;
