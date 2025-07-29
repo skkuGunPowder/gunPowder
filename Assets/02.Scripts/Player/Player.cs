@@ -118,12 +118,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
         if(PhotonView.IsMine)
         {
-            Debug.Log("Playerismine");
             gameObject.tag = "Player";
         }
         else
         {
-            Debug.Log("Playernot ismine");
             gameObject.tag = "Enemy";
         }
     }
@@ -188,9 +186,9 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         if (_gunPowderDecreaseTimer >= PlayerStat.GunPowderDecreaseTime)
         {
-            Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber}의 체력 감소");
             _gunPowderDecreaseTimer = 0f;
             PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, 1);
+            //_playerStat.DecreaseGunPowderCount(1);
         }
     }
 
@@ -203,6 +201,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
             PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
+            //_playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount);
         }
     }
 
@@ -404,6 +403,39 @@ public class Player : MonoBehaviourPun, IDamagable
             {
                 spriteRenderer.flipX = true;
             }
+        }
+    }
+
+    [PunRPC]
+    public void RPC_ChangeState(string stateName)
+    {
+        // PlayerFSM 컴포넌트를 찾아서 상태 변경
+        PlayerFSM playerFSM = GetComponent<PlayerFSM>();
+        if (playerFSM != null)
+        {
+            // 다른 클라이언트에서 상태 변경
+            switch (stateName)
+            {
+                case "PlayerIdleState":
+                    playerFSM.ChangeState<PlayerIdleState>();
+                    break;
+                case "PlayerDieState":
+                    playerFSM.ChangeState<PlayerDieState>();
+                    break;
+                case "PlayerDamagedState":
+                    playerFSM.ChangeState<PlayerDamagedState>();
+                    break;
+                case "PlayerFallDeadState":
+                    playerFSM.ChangeState<PlayerFallDeadState>();
+                    break;
+                default:
+                    Debug.LogWarning($"Unknown state: {stateName}");
+                    break;
+            }
+        }
+        else
+        {
+            Debug.LogError("PlayerFSM component not found!");
         }
     }
 }

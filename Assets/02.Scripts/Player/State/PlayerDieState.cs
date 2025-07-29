@@ -7,15 +7,19 @@ public class PlayerDieState : PlayerBaseState
 {
     private float _timer = 0f;
     private bool _hasStartedResurrection = false; // 부활 시작 플래그
+    private bool _hasRequestedDestroy = false; // 파괴 요청 플래그
 
     public override void OnEnter()
     {
         base.OnEnter();
-        Debug.Log($"PlayerDieState {_owner.PhotonView.Owner.ActorNumber}");
+
+        // 네트워크 동기화 - 다른 클라이언트에게 사망 상태 알림
+        SyncStateChange<PlayerDieState>();
 
         // 타이머 및 플래그 초기화
         _timer = 0f;
         _hasStartedResurrection = false;
+        _hasRequestedDestroy = false;
 
         // 무적
         _owner.gameObject.tag = "Immune";
@@ -54,7 +58,12 @@ public class PlayerDieState : PlayerBaseState
         {
             // 진짜 죽음
             // 파괴 요청
-            
+            if (_hasRequestedDestroy)
+            {
+                return;
+            }
+            _hasRequestedDestroy = true;
+
             PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
             {
                 {EProperties.IsDead.ToString(), true},
@@ -106,6 +115,7 @@ public class PlayerDieState : PlayerBaseState
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
         
         // 플레이어 부활
+        Debug.Log($"부활 시작 {_owner.PhotonView.Owner.ActorNumber}");
         _owner.ResurrectPlayer();
         
         // 무적 코루틴 시작
