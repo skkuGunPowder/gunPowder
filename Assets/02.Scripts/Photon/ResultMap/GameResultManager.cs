@@ -8,7 +8,8 @@ public class GameResultManager : Singleton<GameResultManager>
 {
     public List<GameResultData> ResultDataList = new List<GameResultData>();
     
-    
+    private float _timer = 0;
+    private float _EndTime = 10f;
     private void Start()
     {
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
@@ -34,4 +35,19 @@ public class GameResultManager : Singleton<GameResultManager>
         });
         EventManager.Instance.ViewGameResult();
     }
+
+    private void Update()
+    {
+        _timer += Time.deltaTime;
+
+        if (_timer >= _EndTime)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
+            }
+        }
+    }
+    
+    
 }

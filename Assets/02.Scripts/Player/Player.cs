@@ -121,6 +121,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             Debug.Log("Playerismine");
             gameObject.tag = "Player";
+            
         }
         else
         {
