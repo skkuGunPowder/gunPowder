@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
-using System.Runtime.InteropServices;
+
 
 public class Player : MonoBehaviourPun, IDamagable
 {
@@ -246,7 +246,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         
         // Gunpowder 낙출
-        //ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+        ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
 
         // 피격 횟수 증가
         _playerStat.IncreseDamagedCount();
@@ -282,7 +282,12 @@ public class Player : MonoBehaviourPun, IDamagable
             Vector3 dir = rot * baseDir;
             Vector3 spawnPos = transform.position + dir * distance;
             spawnPos.z = 0f;
-            object[] instData = new object[] { attackerViewId, isFallingOut };
+
+            // 랜덤 시드 추가 (시간 + 인덱슬 고유값 생성)
+            int randomSeed = (int)(Time.time * 1000 + i + UnityEngine.Random.Range(0, 1000));
+
+
+            object[] instData = new object[] { attackerViewId, isFallingOut, randomSeed };
             PhotonNetwork.Instantiate(GunPowderPrefab.name, spawnPos, Quaternion.identity, 0, instData);
         }
     }
