@@ -2,12 +2,23 @@ using UnityEngine;
 
 public class UI_Ping : MonoBehaviour
 {
-    [SerializeField] private GameObject _arm;
-    [SerializeField] private Transform _playerTransform;
+    public GameObject Content;
+    public GameObject Arm;
+
+    [SerializeField] private int _margin = 100;
+
     private Camera _camera;
+    [SerializeField] private Transform _playerTransform;
+    public Transform PlayerTransform => _playerTransform;
 
     private Vector3 _playerScreenPoint;
     private Vector3 _pingScreenPoint;
+
+    public void Init(Transform playerTransform, int margin)
+    {
+        _playerTransform = playerTransform;
+        _margin = margin;
+    }
 
     private void Awake()
     {
@@ -18,35 +29,45 @@ public class UI_Ping : MonoBehaviour
     {
         if (_playerTransform == null)
         {
-            GameObject enemy = GameObject.FindWithTag("Enemy");
-            if (enemy == null)
-            {
-                return;
-            }
-
-            _playerTransform = enemy.transform;
+            return;
         }
+
+        if (!CheckPlayerIsInCamera())
+        {
+            Content.SetActive(false);
+            return;
+        }
+
+        Content.SetActive(true);
 
         _playerScreenPoint = _camera.WorldToScreenPoint(_playerTransform.position);
 
-        // if (!CheckPlayerIsInCamera())
-        // {
-        //     gameObject.SetActive(false);
-        // }
-        // else
-        // {
-            gameObject.SetActive(true);
-            
-            _pingScreenPoint = _playerScreenPoint;
-            _pingScreenPoint.x = _pingScreenPoint.x < 0 ? 100 : _pingScreenPoint.x;
-            _pingScreenPoint.x = _pingScreenPoint.x > Screen.width ? Screen.width - 100 : _pingScreenPoint.x;
-            _pingScreenPoint.y = _pingScreenPoint.y < 0 ? 100 : _pingScreenPoint.y;
-            _pingScreenPoint.y = _pingScreenPoint.y > Screen.height ? Screen.height - 100 : _pingScreenPoint.y;
-            transform.position = _camera.ScreenToWorldPoint(_pingScreenPoint);
+        SetPingPosition(_margin);
 
-            Vector3 dir = (_playerTransform.position - transform.position).normalized;
-            _arm.transform.localRotation = Quaternion.LookRotation(transform.forward, -dir);
-        // }
+        Vector3 dir = (transform.position - _playerTransform.position).normalized;
+        Arm.transform.localRotation = Quaternion.LookRotation(transform.forward, dir);
+    }
+
+    public void SetPlayerTransform(Transform playerTransform)
+    {
+        _playerTransform = playerTransform;
+    }
+
+    public void SetMargin(int margin)
+    {
+        _margin = margin;
+    }
+
+    private void SetPingPosition(int margin)
+    {
+        _pingScreenPoint = _playerScreenPoint;
+
+        _pingScreenPoint.x = _pingScreenPoint.x < 0 ? margin : _pingScreenPoint.x;
+        _pingScreenPoint.y = _pingScreenPoint.y < 0 ? margin : _pingScreenPoint.y;
+        _pingScreenPoint.x = _pingScreenPoint.x > Screen.width ? Screen.width - margin : _pingScreenPoint.x;
+        _pingScreenPoint.y = _pingScreenPoint.y > Screen.height ? Screen.height - margin : _pingScreenPoint.y;
+
+        transform.position = _camera.ScreenToWorldPoint(_pingScreenPoint);
     }
 
     private bool CheckPlayerIsInCamera()
