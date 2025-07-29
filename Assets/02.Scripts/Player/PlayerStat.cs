@@ -129,6 +129,8 @@ public class PlayerStat : MonoBehaviour
         InitializeStats(); 
         _photonView = GetComponent<PhotonView>();
         SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime, RoomStatManager.Instance.PlayerTeam);
+        
+        Debug.Log($"{Team.ToString()}");
     }
 
     public void InitializeStats()
@@ -225,6 +227,11 @@ public class PlayerStat : MonoBehaviour
     
     public bool DecreaseGunPowderCount(int amount)
     {
+        
+        if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
+        {
+            return false;
+        } 
         if(!_photonView.IsMine)
         {
             return false;
