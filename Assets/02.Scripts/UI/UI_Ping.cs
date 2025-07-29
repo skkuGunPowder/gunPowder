@@ -8,6 +8,7 @@ public class UI_Ping : MonoBehaviour
     [SerializeField] private int _margin = 100;
 
     private Camera _camera;
+    private Camera _renderTexCamera;
     [SerializeField] private Transform _playerTransform;
     public Transform PlayerTransform => _playerTransform;
 
@@ -27,20 +28,21 @@ public class UI_Ping : MonoBehaviour
 
     private void Update()
     {
-        if (_playerTransform == null)
-        {
-            return;
-        }
-
-        if (!CheckPlayerIsInCamera())
+        if (_playerTransform == null || _renderTexCamera == null)
         {
             Content.SetActive(false);
             return;
         }
-
-        Content.SetActive(true);
-
+        _renderTexCamera.transform.position = new Vector3(_playerTransform.position.x, _playerTransform.position.y, _renderTexCamera.transform.position.z);
         _playerScreenPoint = _camera.WorldToScreenPoint(_playerTransform.position);
+
+
+        if (CheckPlayerIsInCamera())
+        {
+            Content.SetActive(false);
+            return;
+        }
+        Content.SetActive(true);
 
         SetPingPosition(_margin);
 
@@ -56,6 +58,11 @@ public class UI_Ping : MonoBehaviour
     public void SetMargin(int margin)
     {
         _margin = margin;
+    }
+
+    public void SetRenderTexCamera(Camera camera)
+    {
+        _renderTexCamera = camera;
     }
 
     private void SetPingPosition(int margin)

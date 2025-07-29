@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Mono.Cecil;
 using UnityEngine;
 
 public class UI_PingBase : MonoBehaviour
@@ -7,6 +6,7 @@ public class UI_PingBase : MonoBehaviour
     public static UI_PingBase Instance;
 
     public List<UI_Ping> PingList;
+    public List<Camera> RenderTexCameraList;
     public int Margin = 100;
 
     private void Awake()
@@ -24,17 +24,21 @@ public class UI_PingBase : MonoBehaviour
         {
             ping.Content.SetActive(false);
         }
-
-        EventManager.Instance.OnPlayerEntered += SetPing;
     }
 
-    public void SetPing()
+    public void SetPing(Transform playerTransform)
     {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-
-        for (int i = 0; i < enemies.Length; i++)
+        int index = 0;
+        foreach (var ping in PingList)
         {
-            PingList[i].SetPlayerTransform(enemies[i].transform);
+            if (ping.PlayerTransform == null)
+            {
+                ping.SetPlayerTransform(playerTransform);
+                ping.SetRenderTexCamera(RenderTexCameraList[index]);
+                return;
+            }
+            ++index;
         }
+        Debug.LogWarning("남아있는 플레이어 핑이 없습니다.");
     }
 }
