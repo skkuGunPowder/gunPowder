@@ -7,11 +7,8 @@ using UnityEngine;
 public class DamageChecker : Singleton<DamageChecker>
 {
     private PhotonView _photonView;
-    
-    public event Action<int> OnTopPlayerChanged;        // 순위 변경용  = 1등 체크용
-    public event Action<int,int,int> OnDataChanged;    // 체력 감소할 때
-    
-    private int _currentTopPlayer = 1;
+
+    private int _currentTopPlayer;                 // 처음 1등은 방장
     
     private Dictionary<int, int> _playerScoreDictionary;
     private List<int>  _playerList;
@@ -23,7 +20,11 @@ public class DamageChecker : Singleton<DamageChecker>
     {
         base.Awake();
         _photonView = GetComponent<PhotonView>();
-        LoadSceneChecker.OnLoadFinished += Init;
+    }
+
+    private void Start()
+    {
+        Init();
     }
 
     private void Init()
@@ -38,6 +39,8 @@ public class DamageChecker : Singleton<DamageChecker>
             _playerList.Add(player.ActorNumber);
             _playerScoreDictionary.Add(player.ActorNumber, RoomStatManager.Instance.PlayerLife * RoomStatManager.Instance.PlayerGunpowder);
         }
+        
+        _currentTopPlayer = PlayerList[0];
     }
     
     public void RPC_RequestDamage(int gunpowder, int life, int player)
@@ -59,8 +62,7 @@ public class DamageChecker : Singleton<DamageChecker>
     
     private void PlayerDataChange(int gunpowder, int life, int playerNumber)
     {
-        //Debug.Log($" 플레이어 넘버 : {playerNumber}를 바꿔주세요 : {gunpowder}, {life}");
-        OnDataChanged?.Invoke(playerNumber, gunpowder, life);
+        EventManager.Instance.PlayerDataChange(gunpowder, life, playerNumber);
     }
     
     private void CalculateScore(int gunpowder, int life, int playerNumber)
@@ -95,6 +97,6 @@ public class DamageChecker : Singleton<DamageChecker>
     [PunRPC]
     private void RPC_RequestTopPlayer(int topActor)
     {
-        OnTopPlayerChanged?.Invoke(topActor);
+        EventManager.Instance.SetTopPlayer(topActor);
     }
 }

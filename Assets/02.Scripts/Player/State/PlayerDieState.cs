@@ -54,7 +54,15 @@ public class PlayerDieState : PlayerBaseState
         {
             // 진짜 죽음
             // 파괴 요청
-            PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() {{EProperties.IsDead.ToString(), true}});
+            
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+            {
+                {EProperties.IsDead.ToString(), true},
+                {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
+                {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage},
+                {EProperties.SurvivorTime.ToString(), GameManager.Instance.SurvivorTime()}
+                
+            });
             InstantiateDestroyManager.Instance.RequestDestroy(gameObject.GetComponent<PhotonView>().ViewID);
         }
         else

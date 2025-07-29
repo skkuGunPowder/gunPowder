@@ -10,8 +10,8 @@ public class UI_RoomProfile : MonoBehaviour
 
     private void Start()
     {
-        RoomManager.Instance.OnDataChanged += Refresh;
-        RoomManager.Instance.OnReadyChanged += ReadyCheck;
+        EventManager.Instance.OnRoomDataChanged += Refresh;
+        EventManager.Instance.OnReadyChanged += ReadyCheck;
     }
 
     public void Refresh()
@@ -49,6 +49,13 @@ public class UI_RoomProfile : MonoBehaviour
             UI_ProfileSlotList[i].ReadyCheck((bool)player.CustomProperties[$"{EProperties.IsReady}"]);   
         }
     }
+
+    private void OnEnable()
+    {
+        EventManager.Instance.OnRoomDataChanged -= Refresh;
+        EventManager.Instance.OnReadyChanged -= ReadyCheck;
+    }
+
     //  ⊂_ヽ
     //　  ＼＼  Λ＿Λ
     //　　 ＼( ‘ㅅ' ) 두둠칫
