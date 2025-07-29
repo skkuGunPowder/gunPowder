@@ -10,7 +10,7 @@ public class Bomb : MonoBehaviourPun, IBomb
     protected float _currentSpeed;
     private float _fuzeTimer;
 
-    protected Transform _ownerTransform;
+    protected PhotonView _ownerPhotonview;
 
     public Transform TrailVFXPosition;
     public ParticleSystem TrailVFXPrefab;
@@ -78,7 +78,7 @@ public class Bomb : MonoBehaviourPun, IBomb
         PhotonView ownerPhotonView = PhotonView.Find(ownerViewId);
         if (ownerPhotonView != null)
         {
-            _ownerTransform = ownerPhotonView.transform;
+            _ownerPhotonview = ownerPhotonView;
         }
         else
         {
@@ -112,19 +112,11 @@ public class Bomb : MonoBehaviourPun, IBomb
     [PunRPC]
     public virtual void Explode()
     {
-
         // 폭발 프리펩 인스턴싱 (로컬에서만)
-        if (ExplosionPrefab == null)
-        {
-            Debug.Log("펑(억장 터지는 소리: ExposionPrefab == null)");
-        }
-        else
-        {
-            //Explosion explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
-            Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
-            explosion.transform.position = transform.position;
-            explosion.Explode(_stat.IsFallingOut, _ownerTransform);
-        }
+        Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
+        explosion.transform.position = transform.position;
+        explosion.transform.rotation = Quaternion.identity;
+        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);   
 
         if (_vfx != null)
         {

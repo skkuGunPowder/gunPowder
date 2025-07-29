@@ -97,7 +97,7 @@ public class PlayerFallDeadState : PlayerBaseState
                 // 플레이어가 사망할 떄, 사망 폭발이 발생
                 Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
                 dieExplosion.transform.position = _owner.transform.position;
-                dieExplosion.Explode(true, _owner.transform);
+                dieExplosion.Explode(true, _owner.PhotonView);
                 
                 // 15의 데미지를 받는다.
                 _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, true);

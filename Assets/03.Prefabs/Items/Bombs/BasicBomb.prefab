@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7047712776187153575}
   - component: {fileID: -378163045493960610}
   - component: {fileID: 8147243018835788596}
+  - component: {fileID: 9168520333893642162}
   m_Layer: 0
   m_Name: BasicBomb
   m_TagString: Untagged
@@ -104,6 +105,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ExplosionPrefab: {fileID: 9065054331334902831, guid: 21fe6366732941941b0b19b289967536, type: 3}
+  TrailVFXPosition: {fileID: 0}
+  TrailVFXPrefab: {fileID: 0}
   PhotonView: {fileID: 0}
 --- !u!58 &7047712776187153575
 CircleCollider2D:
@@ -140,7 +143,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.12
+  m_Radius: 0.32
 --- !u!50 &-378163045493960610
 Rigidbody2D:
   serializedVersion: 5
@@ -190,3 +193,25 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &9168520333893642162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3001153516144104530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
