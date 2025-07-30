@@ -169,6 +169,14 @@ public class UI_LoginScene : MonoBehaviour
         }
     }
 
+    public void OnClickGoogleLogOut()
+    {
+        if (GoogleLogIn.Instance != null)
+        {
+            GoogleLogIn.Instance.SignOut();
+        }
+    }
+
     // 구글 로그인 결과 처리
     private void OnGoogleLoginResult(string message)
     {
