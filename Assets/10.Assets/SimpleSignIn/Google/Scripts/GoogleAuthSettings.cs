@@ -32,6 +32,18 @@ namespace Assets.SimpleSignIn.Google.Scripts
         [Tooltip("Use Safari API on iOS instead of a default web browser. This option is required for passing App Store review.")]
         public bool UseSafariViewController = true;
 
+        public void SetWindowsCredentials(string clientId, string clientSecret)
+        {
+            ClientIdWindows = clientId;
+            ClientSecretWindows = clientSecret;
+        }
+
+        public void SetDesktopCredentials(string clientId, string clientSecret)
+        {
+            ClientIdDesktop = clientId;
+            ClientSecretDesktop = clientSecret;
+        }
+
         #if UNITY_EDITOR
 
         public string ClientId => ClientIdDesktop;
