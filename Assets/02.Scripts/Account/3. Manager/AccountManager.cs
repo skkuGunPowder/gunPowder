@@ -8,7 +8,7 @@ using NUnit.Framework.Constraints;
 using Unity.VisualScripting;
 using Firebase.Auth;
 
-public class AccountManager : Singleton<AccountManager>
+public class AccountManager : DontDestroySingleton<AccountManager>
 {
     private Account _myAccount;
     public AccountDTO CurrencAccount => _myAccount.ToDTO();

@@ -10,9 +10,9 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public GameObject FirstPlace;
     public List<GameObject> LifeList;
 
-    public void Init(int playerNumber)
+    public void Init(string playerName)
     {
-        NicknameTextUGUI.text = playerNumber.ToString();
+        NicknameTextUGUI.text = playerName;
     }
     public void Refresh(int gunpowder, int life)
     {

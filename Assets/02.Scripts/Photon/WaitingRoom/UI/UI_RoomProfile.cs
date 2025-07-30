@@ -26,6 +26,7 @@ public class UI_RoomProfile : MonoBehaviour
                 continue;
             }
             
+            Debug.Log($"{i}");
             PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
             UI_ProfileSlotList[i].Refresh(player);
             
@@ -46,7 +47,14 @@ public class UI_RoomProfile : MonoBehaviour
             
             PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
             
-            UI_ProfileSlotList[i].ReadyCheck((bool)player.CustomProperties[$"{EProperties.IsReady}"]);   
+            if (player.IsMasterClient)
+            {
+               UI_ProfileSlotList[i].MasterCheck(true);   
+            }
+            else
+            {
+                UI_ProfileSlotList[i].ReadyCheck((bool)player.CustomProperties[$"{EProperties.IsReady}"]);
+            }
         }
     }
 
