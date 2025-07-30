@@ -92,7 +92,7 @@ public class DamageChecker : Singleton<DamageChecker>
             return;
         }
         
-        int score = playerNumber * gunpowder;
+        int score = (life * 300) + gunpowder;
         
         _playerScoreDictionary[playerNumber] = score;
         CheckTopPlayer();

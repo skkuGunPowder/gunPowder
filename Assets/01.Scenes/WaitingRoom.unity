@@ -4755,8 +4755,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1100518658}
-  - component: {fileID: 1100518659}
-  - component: {fileID: 1100518660}
   m_Layer: 0
   m_Name: RoomManager
   m_TagString: Untagged
@@ -4779,42 +4777,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1883959559}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1100518659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1100518657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f558eef26229b4e499249c59f2c6e232, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Spawner: {fileID: 1183357148}
-  SelectedMap: 2
---- !u!114 &1100518660
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1100518657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 1
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1 &1115072517
 GameObject:
   m_ObjectHideFlags: 0
@@ -9162,6 +9124,7 @@ GameObject:
   - component: {fileID: 1954018484}
   - component: {fileID: 1954018482}
   - component: {fileID: 1954018481}
+  - component: {fileID: 1954018486}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -9216,7 +9179,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents: []
-  sceneViewId: 4
+  sceneViewId: 1
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!114 &1954018484
@@ -9249,6 +9212,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02e95d7be5daf6740b9b3232a9765e3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1954018486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954018479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f558eef26229b4e499249c59f2c6e232, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Spawner: {fileID: 1183357148}
+  SelectedMap: 2
 --- !u!1001 &1970089876
 PrefabInstance:
   m_ObjectHideFlags: 0

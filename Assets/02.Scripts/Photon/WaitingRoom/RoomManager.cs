@@ -1,9 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 
 [RequireComponent(typeof(PhotonView))]
@@ -42,7 +43,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             return;
         }
-        
+
         if (_initialized)
         {
             return;
@@ -61,19 +62,18 @@ public class RoomManager : PhotonSingleton<RoomManager>
         
         Init();
     }
-    
     // 방에 들어왔을 때 첫 세팅 하기
     private void Init()
     {
+        Debug.Log("ininninininininininininininininininit");
+        SetProperties();
         SetRoom();
         
         _initialized = true;
         GeneratePlayer();
-        SetProperties();
         SetCurrentMap();
         
     }
-
     private void GeneratePlayer()
     {
         Spawner.GeneratePlayers(0);
@@ -91,7 +91,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             ready.Add(EProperties.Team.ToString(), (int)EInGameTeam.Red);
         }
-        
+
+        if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.NickName] == null)
+        {
+            ready.Add(EProperties.NickName.ToString(), AccountManager.Instance.CurrencAccount.Nickname);
+        }
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
     }
     // 현재 방의 맵이 무엇인가?
@@ -159,7 +163,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
             if (PhotonNetwork.IsMasterClient)
             {
                 PlayerPlacement(PhotonNetwork.LocalPlayer);
-                EventManager.Instance.RoomDataChanged();
             };
             
             return;
@@ -182,12 +185,18 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             EventManager.Instance.ReadyChange();
         }
+
+        if (changedProps.ContainsKey($"{EProperties.NickName}"))
+        {
+            EventManager.Instance.RoomDataChanged();
+        }
     }
     
     // 다른 플레이어가 방에 들어왔을 때 위치를 정해준다. => 마스터가 다른 플레이어들에게 RPC를 쏴주는 방식
     // => 다른 플레이어들에게 플레이어 리스트를 전달하고 각자 로컬에서 알아서 UI 리프레시하는 방식
     public override void OnPlayerEnteredRoom(PhotonPlayer newPlayer)
     {
+        
         if (PhotonNetwork.IsMasterClient)
         {
             PlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
@@ -235,8 +244,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     [PunRPC]
     public void UpdateSlots(int[] actorNumbers)
     {
+        Debug.Log("UpdateSlots");
         _playerSlotList = new List<int>(actorNumbers);
-        EventManager.Instance.RoomDataChanged();
     }
 
     // 맵 변경시 콜백
