@@ -20,7 +20,6 @@ public class UI_ItemStorage : MonoBehaviour
     {
         _itemStorage = ItemStorage.Instance;
         _itemStorage.OnDataChanged += Refresh;
-
         Refresh(_itemStorage.CurrentCategory);
     }
 
@@ -96,6 +95,7 @@ public class UI_ItemStorage : MonoBehaviour
         {
             _itemStorage.EquipItem(selectedITem);
         }
+        _itemStorage.SetPlayerCustomProperties();
     }
 
     public void Show()
