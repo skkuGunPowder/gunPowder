@@ -18,6 +18,10 @@ public class PlayerJumpState : PlayerBaseState
 
     private float _originalGravity;
 
+    private float _explosionOverrideTimer = 0f;
+private const float EXPLOSION_OVERRIDE_DURATION = 0.3f; // n초 동안 velocity.x 덮어쓰기 차단
+
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -42,6 +46,7 @@ public class PlayerJumpState : PlayerBaseState
             velocity.y = _yVelocity;
             _owner.Rigidbody2D.linearVelocity = velocity;
         }
+
         _timer = 0f;
         _keyReleaseTimer = 0f;
 
@@ -65,15 +70,19 @@ public class PlayerJumpState : PlayerBaseState
         //base.MineUpdate();
 
         _timer += Time.deltaTime;
+        if (_explosionOverrideTimer > 0f)
+        {
+            _explosionOverrideTimer -= Time.deltaTime;
+        }
 
         // 아래키를 누르는 동안 중력 증가
         if(Input.GetKeyDown(KeyCode.DownArrow))
         {
-            _owner.Rigidbody2D.gravityScale += 2;
+            //_owner.Rigidbody2D.gravityScale += 2;
         }
         if(Input.GetKeyUp(KeyCode.DownArrow)) 
         {
-            _owner.Rigidbody2D.gravityScale = _originalGravity;
+            //_owner.Rigidbody2D.gravityScale = _originalGravity;
         }
 
         bool flowControl = JumpMove();
@@ -148,25 +157,25 @@ public class PlayerJumpState : PlayerBaseState
 
         // Rigidbody2D 기반 이동 적용
         Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-        velocity.x = _xVelocity;
-        // y축은 건드리지 않음 (중력에 맡김)
-        _owner.Rigidbody2D.linearVelocity = velocity;
+
+        if (_explosionOverrideTimer <= 0f)
+        {
+            velocity.x = _xVelocity;
+            // y축은 건드리지 않음 (중력에 맡김)
+            _owner.Rigidbody2D.linearVelocity = velocity;
+        }
 
         // 더블 점프
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
-            Debug.Log("Bomb Dash");
             _owner.PlayerStat.IncrementJumpCount();
-            // 점프 시에만 y속도 설정
-            /*
-            velocity = _owner.Rigidbody2D.linearVelocity;
-            velocity.y = _owner.PlayerStat.JumpForce;
-            _owner.Rigidbody2D.linearVelocity = velocity;*/
-            Vector3 position = _owner.GetBombSpawnPoint().position;
+
+            Vector3 position = _owner.GetExplosionSpawnPoint().position;
             GameObject prefab = PhotonNetwork.Instantiate(nameof(_owner.DashExplosionPrefab), position, Quaternion.identity);
             if(prefab.TryGetComponent(out Explosion explosion))
             {
                 explosion.Explode(false, _owner.PhotonView);
+                _explosionOverrideTimer = EXPLOSION_OVERRIDE_DURATION;
             }
         }
 

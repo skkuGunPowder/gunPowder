@@ -25,6 +25,9 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField]
     private List<Transform> _bombSpawnPointList;
     [SerializeField]
+    private List<Transform> _explosionSpawnPointList;
+
+    [SerializeField]
     private Bomb _normalBomb;
     public Bomb NormalBomb => _normalBomb;
     [SerializeField]
@@ -338,6 +341,33 @@ public class Player : MonoBehaviourPun, IDamagable
                 return _bombSpawnPointList[(int)EBombSpawnPoint.RightDown];
             default:
                 return _playerStat.FacingDirection == 1 ? _bombSpawnPointList[(int)EBombSpawnPoint.Right] : _bombSpawnPointList[(int)EBombSpawnPoint.Left];
+        }
+    }
+
+    public Transform GetExplosionSpawnPoint()
+    {
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        switch ((h, v))
+        {
+            case (-1, 0):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Right];
+            case (-1, 1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.RightUp];
+            case (0, 1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Up];
+            case (1, 1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.LeftUp];
+            case (1, 0):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Left];
+            case (-1, -1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.LeftDown];
+            case (0, -1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Down];
+            case (1, -1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.RightDown];
+            default:
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Down];
         }
     }
 
