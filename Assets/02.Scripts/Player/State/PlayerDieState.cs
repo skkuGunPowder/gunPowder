@@ -54,7 +54,7 @@ public class PlayerDieState : PlayerBaseState
 
     public override void Update()
     {   
-        Debug.Log($"PlayerDieState Update called - enabled: {this.enabled}, isActiveAndEnabled: {this.isActiveAndEnabled}");
+        Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 플레이어 PlayerDieState Update called - enabled: {this.enabled}, isActiveAndEnabled: {this.isActiveAndEnabled}");
         
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
         
@@ -68,24 +68,19 @@ public class PlayerDieState : PlayerBaseState
             }
             _hasRequestedDestroy = true;
 
-            PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
-            {
-                {EProperties.IsDead.ToString(), true},
-                {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
-                {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
-                
-            });
             
             // 플레이어가 자신의 GameObject를 제거하거나, MasterClient에게 요청
             if (_owner.PhotonView.IsMine)
             {
-                // 자신의 GameObject는 직접 제거 가능
-                PhotonNetwork.Destroy(_owner.gameObject);
-            }
-            else
-            {
-                // 다른 플레이어의 GameObject는 MasterClient에게 요청
+               // 다른 플레이어의 GameObject는 MasterClient에게 요청
                 InstantiateDestroyManager.Instance.RequestDestroy(_owner.gameObject.GetComponent<PhotonView>().ViewID);
+                PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+                {
+                    {EProperties.IsDead.ToString(), true},
+                    {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
+                    {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
+                    
+                });
             }
         }
         else

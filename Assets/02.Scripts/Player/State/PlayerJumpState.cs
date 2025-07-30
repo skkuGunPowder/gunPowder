@@ -1,4 +1,5 @@
 using System;
+using Photon.Pun;
 using RobustFSM.Base;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ public class PlayerJumpState : PlayerBaseState
     private float _keyReleaseThreshold = 0.3f;
     private float _lastLeftTapTime = 0f;
     private float _lastRightTapTime = 0f;
+
+    private float _originalGravity;
 
     public override void OnEnter()
     {
@@ -41,12 +44,16 @@ public class PlayerJumpState : PlayerBaseState
         }
         _timer = 0f;
         _keyReleaseTimer = 0f;
+
+        _originalGravity = _owner.Rigidbody2D.gravityScale;
     }
 
     public override void OnExit()
     {
         _owner.RPC_ResetAnimatorTrigger("Jump");
         //_owner.RPC_SetAnimatorTrigger("Land");
+
+        _owner.Rigidbody2D.gravityScale = _originalGravity;
         base.OnExit();
     }
 
@@ -55,18 +62,18 @@ public class PlayerJumpState : PlayerBaseState
     /// </summary>
     public override void MineUpdate()
     {
-        base.MineUpdate();
+        //base.MineUpdate();
 
         _timer += Time.deltaTime;
 
         // 아래키를 누르는 동안 중력 증가
         if(Input.GetKeyDown(KeyCode.DownArrow))
         {
-            
+            _owner.Rigidbody2D.gravityScale += 2;
         }
-        if(Input.GetKeyUp(KeyCode.DownArrow))
+        if(Input.GetKeyUp(KeyCode.DownArrow)) 
         {
-            
+            _owner.Rigidbody2D.gravityScale = _originalGravity;
         }
 
         bool flowControl = JumpMove();
@@ -148,11 +155,19 @@ public class PlayerJumpState : PlayerBaseState
         // 더블 점프
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
+            Debug.Log("Bomb Dash");
             _owner.PlayerStat.IncrementJumpCount();
             // 점프 시에만 y속도 설정
+            /*
             velocity = _owner.Rigidbody2D.linearVelocity;
             velocity.y = _owner.PlayerStat.JumpForce;
-            _owner.Rigidbody2D.linearVelocity = velocity;
+            _owner.Rigidbody2D.linearVelocity = velocity;*/
+            Vector3 position = _owner.GetBombSpawnPoint().position;
+            GameObject prefab = PhotonNetwork.Instantiate(nameof(_owner.DashExplosionPrefab), position, Quaternion.identity);
+            if(prefab.TryGetComponent(out Explosion explosion))
+            {
+                explosion.Explode(false, _owner.PhotonView);
+            }
         }
 
         // 방향키 더블 클릭 체크 (점프 대쉬)

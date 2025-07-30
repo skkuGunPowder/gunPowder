@@ -13,15 +13,16 @@ public class UI_GameResult : MonoBehaviour
     private void Refresh()
     {
         List<GameResultData> dataList = GameResultManager.Instance.ResultDataList;
-        
+        Debug.Log($"ui : 데이타 리스트 {dataList.Count}");
         for (int i = 0; i < UI_GameResultSlotList.Count; i++)
         {
 
             if (i < dataList.Count)
             {
                 GameResultData data = dataList[i];
+                Debug.Log(data.Team.ToString());
                 UI_GameResultSlotList[i].gameObject.SetActive(true);
-                UI_GameResultSlotList[i].Refresh(data.Player.ActorNumber,data.Damage, data.SurviveTime, data.Kill);
+                UI_GameResultSlotList[i].Refresh(data.Player.ActorNumber,data.Damage, data.SurviveTime, data.Kill,data.Team);
             }
             else
             {
@@ -33,5 +34,5 @@ public class UI_GameResult : MonoBehaviour
 
     private void OnDisable()
     {
-        EventManager.Instance.OnGameResult -= Refresh;    }
+        EventManager.Instance.OnGameResult -= Refresh;}
 }

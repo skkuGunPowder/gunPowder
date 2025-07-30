@@ -117,6 +117,8 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private float _totalKillCount;
     public float TotalKillCount => _totalKillCount;
     
+    [Header("Team")]
+    public EInGameTeam Team { get; set; }
     public event Action OnGunPowderEmpty;
     
     
@@ -124,9 +126,11 @@ public class PlayerStat : MonoBehaviour
 
     void OnEnable()
     {
-        InitializeStats();
-        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime);
+        InitializeStats(); 
         _photonView = GetComponent<PhotonView>();
+        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime, RoomStatManager.Instance.PlayerTeam);
+        
+        Debug.Log($"{Team.ToString()}");
     }
 
     public void InitializeStats()
@@ -165,12 +169,13 @@ public class PlayerStat : MonoBehaviour
         }
     } 
 
-    public void SetPlayer(int gunpowder, int life, int decrease)
+    public void SetPlayer(int gunpowder, int life, int decrease, EInGameTeam team)
     {
         _currentPlayerGunPowderCount = gunpowder;
         _currentPlayerLife = life;
         _initGunpowderCount = gunpowder;
         _gunPowderDecreaseTime = decrease;
+        Team = team;
     }
 
     public void SetPlayerGunPowderCountAndLife(int gunpowder, int life)
@@ -222,6 +227,11 @@ public class PlayerStat : MonoBehaviour
     
     public bool DecreaseGunPowderCount(int amount)
     {
+        
+        if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
+        {
+            return false;
+        } 
         if(!_photonView.IsMine)
         {
             return false;
