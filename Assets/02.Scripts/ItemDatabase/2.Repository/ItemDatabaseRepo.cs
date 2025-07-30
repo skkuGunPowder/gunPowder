@@ -78,17 +78,23 @@ public class ItemDatabaseRepo
     private async Task<Item> ConvertToItemAsync(string id, Dictionary<string, object> dict)
     {
         // 저장된 데이터 -> Item 객체로 변환하는 메소드
-
         string imageAddress = (string)dict["ImageAddress"];
+        string prefabAddress = (string)dict["PrefabAddress"];
 
         // 유효성 검사
         if (string.IsNullOrEmpty(imageAddress))
         {
-            throw new Exception("어드레서블 주소가 없습니다.");
+            throw new Exception("이미지 어드레서블 주소가 없습니다.");
         }
 
-        // 어드레서블 이미지 로드
+        if (string.IsNullOrEmpty(prefabAddress))
+        {
+            throw new Exception("프리펩 어드레서블 주소가 없습니다.");
+        }
+
+        // 어드레서블 로드
         Sprite itemImage = await Addressables.LoadAssetAsync<Sprite>(imageAddress).Task;
+        GameObject itemPrefab = await Addressables.LoadAssetAsync<GameObject>(prefabAddress).Task;
 
         // Item객체로 반환
         return new Item(
@@ -97,7 +103,9 @@ public class ItemDatabaseRepo
             name: (string)dict["Name"],
             explanation: (string)dict["Explanation"],
             imageAddress: imageAddress,
-            image : itemImage
+            prefabAddress:prefabAddress,
+            image : itemImage,
+            prefab: itemPrefab
         );
     }
 }
