@@ -14,7 +14,7 @@ public enum EProperties
     SurvivorTime,
     Kill,
     Damage,
-    
+    Team,
     
     Count
 }

@@ -84,8 +84,13 @@ public class RoomManager : PhotonSingleton<RoomManager>
         Hashtable ready = new Hashtable
         {
             { EProperties.IsReady.ToString(), false },
-            { EProperties.IsDead.ToString(), false }
+            { EProperties.IsDead.ToString(), false },
         };
+
+        if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team] == null)
+        {
+            ready.Add(EProperties.Team.ToString(), (int)EInGameTeam.Red);
+        }
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
     }

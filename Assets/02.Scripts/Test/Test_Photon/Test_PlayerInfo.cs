@@ -1,59 +1,58 @@
-using System;
-using Photon.Pun;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
-using RaycastPro.RaySensors2D;
-using Unity.Mathematics;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-
-public class Test_PlayerInfo : MonoBehaviour
-{
-
-    public float timer;
-    private bool _test = false;
-    public ESceneList Scene;
-    
-    private void Update()
-    {
-        timer += Time.deltaTime;
-        if (timer == 5f)
-        {
-            Generate();
-        }
-    }
-
-    public void Generate()
-    {
-        PhotonNetwork.Instantiate("Player", new Vector3(0, 5, 0), quaternion.identity, 0);
-    }
-
- 
-    public void OnClickChanged()
-    {
-        Hashtable load = new Hashtable()
-        {
-            { EProperties.IsLoad.ToString() , !_test }, 
-        };
-        
-        PhotonNetwork.LocalPlayer.SetCustomProperties(load);
-        
-        _test = !_test;
-        Debug.Log($"{load[EProperties.IsLoad.ToString()]}");
-        Debug.Log("bool");
-    }
-
-    public void OnclickGameEnd()
-    {
-        Hashtable hash = new Hashtable()
-        {
-            { EProperties.IsDead.ToString(), true }
-        };
-        
-        PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
-    }
-
-    public void OnClickLoadScene()
-    {
-        PhotonNetwork.LoadLevel(Scene.ToString());
-    }
-}
+// using System;
+// using System.Collections.Generic;
+// using System.Linq;
+// using Photon.Pun;
+// using UnityEngine;
+// using PhotonPlayer = Photon.Realtime.Player;
+// public class Test_PlayerInfo : MonoBehaviour
+// {
+//     public List<GameResultData>ResultDataList = new List<GameResultData>();
+//     private void Start()
+//     {
+//         List<int> playerList = new List<int>() { 1, 2, 3, 4 };
+//             
+//         Debug.Log($"결과 : 플레이어 리스트 {playerList.Count}");
+//         List<GameResultData> allResults = new();
+//
+//         for (int i = 0; i < playerList.Count; i++)
+//         {
+//             int damage = 100 * i;
+//             int kill = 1 + i;
+//             int survieTime = 100 * i;
+//             int team = 1;
+//
+//             if (i == 3)
+//             {
+//                 team = 2;
+//             }
+//             GameResultData data = new GameResultData(i, damage, kill, survieTime, (EInGameTeam)team);
+//             ResultDataList.Add(data);   
+//             
+//         }
+//         
+//         // 팀별로 묶기
+//         var groupedTeams = ResultDataList
+//             .GroupBy(p => p.Team)
+//             .Select(g => g.OrderByDescending(p => p.SurviveTime).ToList())
+//             .Where(g => g.Count > 0) // 빈 그룹 제거
+//             .OrderByDescending(teamGroup => teamGroup[0].SurviveTime) // 각 팀 대표의 생존시간 기준
+//             .ToList();
+//         
+//         Debug.Log($"그룹화 결과 : 그룹화 1 {groupedTeams.Count}");
+//         Debug.Log($"결과 : 정렬 전 데이터 리스트 {ResultDataList.Count}");
+//         
+//         
+//         ResultDataList.Clear();
+//         foreach (var teamGroup in groupedTeams)
+//         {
+//             Debug.Log(teamGroup.Count);
+//             foreach (var team in teamGroup)
+//             {
+//                 Debug.Log($"{team.Team} : {team.SurviveTime}");
+//             }
+//             ResultDataList.AddRange(teamGroup); // 팀별 생존시간 내림차순
+//         }
+//         Debug.Log($"결과 : 데이터 리스트 {ResultDataList.Count}");
+//     }
+//
+// }

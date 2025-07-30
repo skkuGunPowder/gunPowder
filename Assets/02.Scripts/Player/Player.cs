@@ -124,6 +124,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if(PhotonView.IsMine)
         {
             gameObject.tag = "Player";
+            
         }
         else
         {

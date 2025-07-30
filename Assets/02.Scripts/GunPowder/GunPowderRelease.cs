@@ -127,7 +127,7 @@ public class GunPowderRelease : MonoBehaviour
     public void SetRandomSeed(int randomSeed)
     {
         _randomSeed = randomSeed;
-        Debug.Log($"SetRandomSeed {_randomSeed}");
+        // Debug.Log($"SetRandomSeed {_randomSeed}");
         Random.InitState(_randomSeed);
     }
 }
