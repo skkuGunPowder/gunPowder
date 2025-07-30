@@ -6,6 +6,8 @@ public class InstantiateDestroyManager : MonoBehaviourPun
 {
     private static InstantiateDestroyManager _instance;
     public static InstantiateDestroyManager Instance => _instance;
+    
+    private PhotonView _photonView;
 
     private void Awake()
     {
@@ -17,6 +19,8 @@ public class InstantiateDestroyManager : MonoBehaviourPun
         {
             Destroy(gameObject);
         }
+        
+        _photonView = GetComponent<PhotonView>();
     }
 
     public void RequestInstantiate(string prefabName, Vector3 position, Quaternion rotation)
@@ -27,7 +31,7 @@ public class InstantiateDestroyManager : MonoBehaviourPun
         }
         else
         {
-            photonView.RPC(nameof(Create), RpcTarget.MasterClient, prefabName, position, rotation);
+            _photonView.RPC(nameof(Create), RpcTarget.MasterClient, prefabName, position, rotation);
         }
     }
 
@@ -45,7 +49,7 @@ public class InstantiateDestroyManager : MonoBehaviourPun
         }
         else
         {
-            photonView.RPC(nameof(Destroy), RpcTarget.MasterClient, viewID);
+            _photonView.RPC(nameof(Destroy), RpcTarget.MasterClient, viewID);
         }
     }
 

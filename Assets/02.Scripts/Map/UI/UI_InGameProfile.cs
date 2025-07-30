@@ -22,7 +22,7 @@ public class UI_InGameProfile : MonoBehaviour
             if (i < _playerActorNumberList.Count)
             {
                 // 후에 수정
-                UI_InGameProfileSlotList[i].Init(_playerActorNumberList[i].ActorNumber);
+                UI_InGameProfileSlotList[i].Init(_playerActorNumberList[i].CustomProperties[EProperties.NickName.ToString()].ToString());
                 UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
             }
             else

@@ -15,6 +15,7 @@ public enum EProperties
     Kill,
     Damage,
     Team,
+    NickName,
     
     Count
 }

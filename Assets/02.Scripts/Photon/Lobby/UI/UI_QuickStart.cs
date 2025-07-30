@@ -1,3 +1,4 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using UnityEngine;
 public class UI_QuickStart : MonoBehaviour
@@ -5,7 +6,12 @@ public class UI_QuickStart : MonoBehaviour
     // 개인으로 만들어진 방 랜덤으로 들어가기
     public void OnClickQuickJoinRoom()
     {
-        PhotonNetwork.JoinRandomRoom();
+        Hashtable hash = new Hashtable()
+        {
+            {EProperties.IsLocked.ToString(), false}   
+        };
+        PhotonNetwork.JoinRandomRoom(hash, 0);
+        
     }
 
     // 팀으로 만들어진 방 중 랜덤으로 들어가기

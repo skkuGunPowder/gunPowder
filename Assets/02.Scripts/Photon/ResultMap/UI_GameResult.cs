@@ -22,7 +22,7 @@ public class UI_GameResult : MonoBehaviour
                 GameResultData data = dataList[i];
                 Debug.Log(data.Team.ToString());
                 UI_GameResultSlotList[i].gameObject.SetActive(true);
-                UI_GameResultSlotList[i].Refresh(data.Player.ActorNumber,data.Damage, data.SurviveTime, data.Kill,data.Team);
+                UI_GameResultSlotList[i].Refresh(data.Player,data.Damage, data.SurviveTime, data.Kill,data.Team);
             }
             else
             {

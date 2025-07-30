@@ -7,6 +7,7 @@ public class UI_ProfileSlot : MonoBehaviour
     public TextMeshProUGUI NicknameTextUGUI;
     public GameObject Ready;
     public GameObject NotReady;
+    public GameObject Master;
     public Image ProfileImage;
      
     // 후에 프로필 이미지 추가하기
@@ -17,8 +18,8 @@ public class UI_ProfileSlot : MonoBehaviour
             NoPlayer();
             return;
         }
-        
-        NicknameTextUGUI.text = player.NickName + player.ActorNumber;
+
+        NicknameTextUGUI.text = player.CustomProperties[EProperties.NickName.ToString()].ToString();
         
     }
 
@@ -26,6 +27,7 @@ public class UI_ProfileSlot : MonoBehaviour
     {
         
         NicknameTextUGUI.gameObject.SetActive(true);
+        Master.gameObject.SetActive(false);
         
         if (isReady)
         {
@@ -39,6 +41,12 @@ public class UI_ProfileSlot : MonoBehaviour
         }
     }
 
+    public void MasterCheck(bool isMaster)
+    {
+        Master.gameObject.SetActive(isMaster);
+        Ready.gameObject.SetActive(!isMaster);
+        NotReady.gameObject.SetActive(!isMaster);
+    }
     public void NoPlayer()
     {
         NotReady.SetActive(false);

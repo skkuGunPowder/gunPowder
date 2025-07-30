@@ -15,6 +15,8 @@ public class GameManager : PhotonSingleton<GameManager>
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
     [SerializeField]private float _timer;
+    public float Timer => _timer;
+    private float _InitTime = 0;
     
     private LoadSceneChecker _loadChecker;
     public GameObject GameOverScreen;
@@ -35,7 +37,7 @@ public class GameManager : PhotonSingleton<GameManager>
          {
              return;
          }
-         _loadChecker.OnLoadFinished += GameStart;
+         _loadChecker.OnLoadFinished += Init;
      }
     
     // 게임 시작
@@ -51,13 +53,14 @@ public class GameManager : PhotonSingleton<GameManager>
 
     private void GameTimer()
     {
+
+        _timer -= Time.deltaTime;
+
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
-        
-        _timer -= Time.deltaTime;
-        
+
         if (_timer <= 0)
         {
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
@@ -83,17 +86,17 @@ public class GameManager : PhotonSingleton<GameManager>
         }
         
         if ((bool)changedProps[EProperties.IsDead.ToString()])
-        { 
+        {
+            int playtime = (int)Mathf.Abs(_timer - _InitTime);
             Hashtable hash = new Hashtable() 
             {
-                {EProperties.SurvivorTime.ToString(), (int)_timer} 
+                {EProperties.SurvivorTime.ToString(), playtime} 
             };
             
             targetPlayer.SetCustomProperties(hash);
-            Debug.Log($"{targetPlayer.ActorNumber}의 죽은 시간 : {_timer}");
+            Debug.Log($"{targetPlayer.ActorNumber}의 죽은 시간 : {playtime}");
         }   
-        
-            
+        Debug.Log(targetPlayer.ActorNumber + "현재 죽은 사람 테스트");
         if (PlayerDeadCheck())
         { 
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
@@ -127,10 +130,8 @@ public class GameManager : PhotonSingleton<GameManager>
     // 캐릭터들 사망 체크하기 = 방장만
     private bool PlayerDeadCheck()
     {
-    
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
         Debug.Log(playerList.Count);
-        
         
         int dead = 1;
         
@@ -155,17 +156,14 @@ public class GameManager : PhotonSingleton<GameManager>
         
         return true;
     }
-        
-    private void GameStart()
+
+    private void Init()
     {
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
 
-        int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
-        _timer = playtime;
-        
         _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
     }
 
@@ -174,11 +172,15 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         _currentGameState = (EGameState)state;
         OnProfileInit?.Invoke();
-        if (_currentGameState == EGameState.Waiting)
-        {
-            return;
-        }
-        _loadChecker.OnLoadFinished -= GameStart;
+
+        int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
+        
+        _InitTime = playtime;
+
+        _timer = _InitTime;
+        Debug.Log($"플레이 타임 : {playtime}");
+        
+        _loadChecker.OnLoadFinished -= Init;
     }
     
     // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
@@ -190,7 +192,8 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
-        
+
+        int playTime = (int)Mathf.Abs(_timer - _InitTime);
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         PlayerStat stat = playerObject.GetComponent<PlayerStat>();
         Hashtable properties = new Hashtable()
@@ -207,7 +210,7 @@ public class GameManager : PhotonSingleton<GameManager>
                 {EProperties.IsDead.ToString(), true},
                 {EProperties.Kill.ToString(), stat.TotalKillCount},
                 {EProperties.Damage.ToString(), stat.TotalDamage},
-                {EProperties.SurvivorTime.ToString(), (int)_timer}
+                {EProperties.SurvivorTime.ToString(), playTime}
             };
         }
         player.SetCustomProperties(properties);

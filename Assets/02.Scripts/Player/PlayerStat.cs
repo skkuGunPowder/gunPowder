@@ -126,8 +126,14 @@ public class PlayerStat : MonoBehaviour
 
     void OnEnable()
     {
-        InitializeStats(); 
+        
         _photonView = GetComponent<PhotonView>();
+        
+        if (_photonView.IsMine == false)
+        {
+            return;
+        }
+        InitializeStats(); 
         SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime, RoomStatManager.Instance.PlayerTeam);
         
         Debug.Log($"{Team.ToString()}");

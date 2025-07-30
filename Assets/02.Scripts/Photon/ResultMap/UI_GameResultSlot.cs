@@ -1,7 +1,8 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
+using PhotonPlayer = Photon.Realtime.Player;
 public class UI_GameResultSlot : MonoBehaviour
 {
     public TextMeshProUGUI PlayerName;
@@ -10,12 +11,12 @@ public class UI_GameResultSlot : MonoBehaviour
     public TextMeshProUGUI KillTextMeshProUGUI;
     public TextMeshProUGUI SurvivorTimeTextMeshProUGUI;
 
-    public void Refresh(int player,int damage, int surviveTime, int kill, EInGameTeam team)
+    public void Refresh(PhotonPlayer player,int damage, int surviveTime, int kill, EInGameTeam team)
     {
-        PlayerName.text = player.ToString();
+        PlayerName.text = player.CustomProperties[EProperties.NickName.ToString()].ToString();
         DamageTextMeshProUGUI.text = damage.ToString();
         KillTextMeshProUGUI.text = kill.ToString();
-        SurvivorTimeTextMeshProUGUI.text = surviveTime.ToString();
+        SurvivorTimeTextMeshProUGUI.text = TimeSpan.FromSeconds(surviveTime).ToString(@"mm\:ss");;
         
         Color color = new Color();
         switch (team)
