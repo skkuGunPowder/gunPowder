@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using ExitGames.Client.Photon;
+using Photon.Pun;
 using UnityEngine;
 
 
@@ -260,5 +262,15 @@ public class ItemStorage : MonoBehaviour
         _repo.SaveItemStorage(_storedItemDict);
 
         OnDataChanged?.Invoke(item.Item.ItemType);
+    }
+
+    public void Confirm()
+    {
+        Hashtable equipedItems = new Hashtable();
+        foreach (var kvp in _equippedItemDict)
+        {
+            equipedItems[kvp.Key] = kvp.Value.ID;
+        }
+        PhotonNetwork.LocalPlayer.SetCustomProperties(equipedItems);
     }
 }

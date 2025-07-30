@@ -28,6 +28,9 @@ public class ItemDatabase
         {
             throw new System.Exception("아이템 스탯 데이터를 불러오는데 실패하였습니다.");
         }
+
+        PhotonServerManager.Instance.SetPhotonPrefabPool(_items);
+        Debug.Log("포톤 풀 등록 요청");
     }
 
     public ItemDTO GetItem(string itemID)
