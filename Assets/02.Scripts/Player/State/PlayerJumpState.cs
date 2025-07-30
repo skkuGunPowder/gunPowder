@@ -166,7 +166,7 @@ public class PlayerJumpState : PlayerBaseState
             GameObject prefab = PhotonNetwork.Instantiate(nameof(_owner.DashExplosionPrefab), position, Quaternion.identity);
             if(prefab.TryGetComponent(out Explosion explosion))
             {
-                explosion.Explode(false, _owner.transform);
+                explosion.Explode(false, _owner.PhotonView);
             }
         }
 
