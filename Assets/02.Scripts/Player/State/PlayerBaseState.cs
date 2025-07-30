@@ -239,9 +239,11 @@ public class PlayerBaseState : MonoState
                             : action == "ThrowStraight" ? nameof(Bomb.ThrowBombStraight)
                             : action == "Boost" ? nameof(Bomb.BoostBomb)
                             : null;
+                            
+        Debug.LogWarning($"{_owner.EquipedItemDict[EItemType.Bomb].name} 던지기");
 
         SpawnAndRpcBomb(
-            "Missile",
+            _owner.EquipedItemDict[EItemType.Bomb].name,
             bombSpawnPoint,
             methodName,
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }

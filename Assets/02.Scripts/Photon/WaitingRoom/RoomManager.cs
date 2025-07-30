@@ -16,17 +16,17 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private List<int> _playerSlotList;
     public List<int> PlayerSlotList => _playerSlotList;
     private LoadSceneChecker _loadChecker;
-    
+
     public ESceneList SelectedMap;      // 맵 선택하기
-    
+
     private bool _initialized = false;  // Init 한번만 부르게 하기
-    
+
     private PhotonView _photonView;
-    
+
     protected override void Awake()
     {
         base.Awake();
-        
+
         _photonView = GetComponent<PhotonView>();
         _loadChecker = GetComponent<LoadSceneChecker>();
 
@@ -35,7 +35,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
 
 
     }
-    
+
     // 방 세팅 시작 => Init
     private void Start()
     {
@@ -48,10 +48,10 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             return;
         }
-        
+
         Init();
-    } 
-    
+    }
+
     // 처음 방에 들어왔을 때 => 세팅 Init
     public override void OnJoinedRoom()
     {
@@ -59,7 +59,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             return;
         }
-        
+
         Init();
     }
     // 방에 들어왔을 때 첫 세팅 하기
@@ -68,11 +68,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
         Debug.Log("ininninininininininininininininininit");
         SetProperties();
         SetRoom();
-        
+
         _initialized = true;
         GeneratePlayer();
         SetCurrentMap();
-        
+        ApplyEquipment(PhotonNetwork.LocalPlayer);
     }
     private void GeneratePlayer()
     {
@@ -118,16 +118,16 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             return;
         }
-        
+
         Hashtable playerList = new Hashtable()
         {
             {EProperties.PlayerList.ToString(), _playerSlotList.ToArray()}
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(playerList);
-        
+
         _room.IsVisible = false;
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
-        
+
     }
 
     // 사람들이 모두 눌렀는가?
@@ -152,34 +152,35 @@ public class RoomManager : PhotonSingleton<RoomManager>
     }
     //현재 이 방에 있는 플레이어들의 계정 정보
     private void SetRoom()
-    { 
+    {
         if (_room.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false)
         {
             _playerSlotList = new List<int>()
             {
                 0,0,0,0
             };
-         
+
             if (PhotonNetwork.IsMasterClient)
             {
                 PlayerPlacement(PhotonNetwork.LocalPlayer);
-            };
-            
+            }
+            ;
+
             return;
         }
-        
-        
+
+
         int[] players = _room.CustomProperties[EProperties.PlayerList.ToString()] as int[];
         _playerSlotList = new List<int>(players);
         _room.IsVisible = true;
-        
+
         if (PhotonNetwork.IsMasterClient)
         {
-            _photonView.RPC(nameof(UpdateSlots),RpcTarget.All, _playerSlotList.ToArray());
+            _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray());
         }
     }
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
-    public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer,Hashtable changedProps)
+    public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer, Hashtable changedProps)
     {
         if (changedProps.ContainsKey($"{EProperties.IsReady}"))
         {
@@ -191,18 +192,18 @@ public class RoomManager : PhotonSingleton<RoomManager>
             EventManager.Instance.RoomDataChanged();
         }
     }
-    
+
     // 다른 플레이어가 방에 들어왔을 때 위치를 정해준다. => 마스터가 다른 플레이어들에게 RPC를 쏴주는 방식
     // => 다른 플레이어들에게 플레이어 리스트를 전달하고 각자 로컬에서 알아서 UI 리프레시하는 방식
     public override void OnPlayerEnteredRoom(PhotonPlayer newPlayer)
     {
-        
         if (PhotonNetwork.IsMasterClient)
         {
             PlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
             _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray()); // 전달
         }
-        
+
+        ApplyEquipment(newPlayer);
     }
 
     public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
@@ -212,7 +213,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
             PlayerLeft(otherPlayer);
             _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray());
         }
-        
+
     }
 
     public void PlayerLeft(PhotonPlayer player)
@@ -225,7 +226,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
             {
                 _playerSlotList[i] = 0;
                 break;
-            };
+            }
+            ;
         }
     }
     public void PlayerPlacement(PhotonPlayer player)
@@ -238,7 +240,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 break;
             }
         }
-        
+
     }
 
     [PunRPC]
@@ -252,18 +254,41 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
         if (propertiesThatChanged.ContainsKey($"{EProperties.MapSelected}") && propertiesThatChanged[$"{EProperties.MapSelected}"] != null)
-        { 
+        {
             SelectedMap = (ESceneList)propertiesThatChanged[$"{EProperties.MapSelected}"];
             EventManager.Instance.MapChanged();
         }
     }
-    
+
     // 방장이 바뀌면 콜백
     public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
     {
         EventManager.Instance.MasterChanged();
     }
-    
+
+    private void ApplyEquipment(PhotonPlayer player)
+    {
+        // if (!PhotonNetwork.GetPhotonView(player.ActorNumber).TryGetComponent(out Player playerCharacter))
+        // {
+        //     Debug.LogError("새로운 플레이어의 장착 아이템 불러오는데 실패하였습니다.");
+        //     return;
+        // }
+        
+        // if (player.CustomProperties.TryGetValue(EItemType.Bomb, out object itemID))
+        // {
+        //     GameObject itemPrefab = ItemDatabase.Instance.GetItem((string)itemID).Prefab;
+        //     playerCharacter.SetItems(EItemType.Bomb, itemPrefab);
+        // }
+
+        // for (int i = 0; i < (int)EItemType.None; i++)
+        // {
+        //     if (player.CustomProperties.TryGetValue((EItemType)i, out object itemID))
+        //     {
+        //         GameObject itemPrefab = ItemDatabase.Instance.GetItem((string)itemID).Prefab;
+        //         playerCharacter.SetItems((EItemType)i, itemPrefab);
+        //     }
+        // }
+    }
 }
     
     
