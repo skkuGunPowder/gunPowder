@@ -57,6 +57,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject SpecialBombPrefab;
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
+    public GameObject DashExplosionPrefab;
 
     private const int RANDOM_SEED = 123456;
 
