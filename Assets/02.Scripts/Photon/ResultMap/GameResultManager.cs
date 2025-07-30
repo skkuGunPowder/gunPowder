@@ -16,6 +16,7 @@ public class GameResultManager : Singleton<GameResultManager>
     {
         _nextScene = false;
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
+        Debug.Log($"결과 : 플레이어 리스트 {playerList.Count}");
         List<GameResultData> allResults = new();
         foreach (PhotonPlayer player in playerList)
         {
@@ -31,18 +32,24 @@ public class GameResultManager : Singleton<GameResultManager>
         }
         
         // 팀별로 묶기
-        var groupedTeams = allResults
+        var groupedTeams = ResultDataList
             .GroupBy(p => p.Team)
             .Select(g => g.OrderByDescending(p => p.SurviveTime).ToList())
-            .OrderByDescending(teamGroup => teamGroup[0].SurviveTime) // 팀 대표 생존 시간 기준
+            .Where(g => g.Count > 0) // 빈 그룹 제거
+            .OrderByDescending(teamGroup => teamGroup[0].SurviveTime) // 각 팀 대표의 생존시간 기준
             .ToList();
-        
+        Debug.Log($"그룹화 결과 : 그룹화 1 {groupedTeams.Count}");
+        Debug.Log($"결과 : 정렬 전 데이터 리스트 {ResultDataList.Count}");
         ResultDataList.Clear();
         foreach (var teamGroup in groupedTeams)
         {
-            ResultDataList.AddRange(teamGroup); // 생존시간 내림차순된 팀 구성원
+            ResultDataList.AddRange(teamGroup); // 팀별 생존시간 내림차순
+            foreach (var team in teamGroup)
+            {
+                Debug.Log(team.Team.ToString());
+            }
         }
-
+        Debug.Log($"결과 : 데이터 리스트 {ResultDataList.Count}");
         EventManager.Instance.ViewGameResult();
     }
 
