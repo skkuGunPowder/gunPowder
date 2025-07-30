@@ -72,8 +72,6 @@ public class PlayerDieState : PlayerBaseState
             // 플레이어가 자신의 GameObject를 제거하거나, MasterClient에게 요청
             if (_owner.PhotonView.IsMine)
             {
-               // 다른 플레이어의 GameObject는 MasterClient에게 요청
-                InstantiateDestroyManager.Instance.RequestDestroy(_owner.gameObject.GetComponent<PhotonView>().ViewID);
                 PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
                 {
                     {EProperties.IsDead.ToString(), true},
@@ -81,6 +79,8 @@ public class PlayerDieState : PlayerBaseState
                     {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
                     
                 });
+                // 다른 플레이어의 GameObject는 MasterClient에게 요청
+                PhotonNetwork.Destroy(_owner.gameObject);
             }
         }
         else

@@ -3,9 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-using System.Security.Cryptography;
-using System.Text;
-using UnityEngine.SceneManagement;
 
 [Serializable]
 public class UI_InputFields
@@ -34,16 +31,30 @@ public class UI_LoginScene : MonoBehaviour
 
     [Header("닉네임")]
     public UI_InputFields NicknameInputFields;
-    private string _pendingEmail;
-    private string _pendingPassword;
-
-    private const string PREFIX = "ID_";
-    private const string SALT = "1006247";
 
     private void Start()
     {
         OnClickGoToLoginButton();
         LoginCheck();
+        
+        // 구글 로그인 이벤트 구독
+        if (GoogleLogIn.Instance != null)
+        {
+            GoogleLogIn.Instance.OnLoginResult += OnGoogleLoginResult;
+            GoogleLogIn.Instance.OnLoginSuccess += OnGoogleLoginSuccess;
+            GoogleLogIn.Instance.OnLoginError += OnGoogleLoginError;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // 이벤트 구독 해제
+        if (GoogleLogIn.Instance != null)
+        {
+            GoogleLogIn.Instance.OnLoginResult -= OnGoogleLoginResult;
+            GoogleLogIn.Instance.OnLoginSuccess -= OnGoogleLoginSuccess;
+            GoogleLogIn.Instance.OnLoginError -= OnGoogleLoginError;
+        }
     }
 
     public void OnClickGoToSignupButton()
@@ -56,6 +67,7 @@ public class UI_LoginScene : MonoBehaviour
     {
         LoginPanel.SetActive(true);
         SignupPanel.SetActive(false);
+        NicknamePanel.SetActive(false);
     }
 
     public void LoginCheck()
@@ -68,8 +80,20 @@ public class UI_LoginScene : MonoBehaviour
     public async void OnClickSendVerificationEmail()
     {
         string email = SignupInputFields.IDInputField.text;
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            SignupInputFields.ResultText.text = "이메일을 입력해주세요.";
+            return;
+        }
+        
         var result = await AccountManager.Instance.RequestEmailVerification(email);
         SignupInputFields.ResultText.text = result.Message;
+        
+        if (!result.IsSuccess)
+        {
+            SignupInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
+        }
     }
 
     // 2. 인증 완료 확인
@@ -125,17 +149,51 @@ public class UI_LoginScene : MonoBehaviour
         if (result.IsSuccess)
         {
             // 닉네임이 없으면 닉네임 입력 패널 표시
-            if (string.IsNullOrEmpty(AccountManager.Instance.CurrencAccount.Nickname))
+            if (!AccountManager.Instance.HasNickname())
             {
                 NicknamePanel.SetActive(true);
-                _pendingEmail = email;
-                _pendingPassword = password;
             }
             else
             {
                 PhotonServerManager.Instance.Connect();
             }
         }
+    }
+
+    // 구글 로그인 버튼에 연결
+    public void OnClickGoogleLogin()
+    {
+        if (GoogleLogIn.Instance != null)
+        {
+            GoogleLogIn.Instance.SignIn();
+        }
+    }
+
+    // 구글 로그인 결과 처리
+    private void OnGoogleLoginResult(string message)
+    {
+        LoginInputFields.ResultText.text = message;
+    }
+
+    // 구글 로그인 성공 처리
+    private void OnGoogleLoginSuccess(Firebase.Auth.FirebaseUser user, Assets.SimpleSignIn.Google.Scripts.UserInfo userInfo)
+    {
+        // 닉네임이 없으면 닉네임 입력 패널 표시
+        if (!AccountManager.Instance.HasNickname())
+        {
+            NicknamePanel.SetActive(true);
+        }
+        else
+        {
+            PhotonServerManager.Instance.Connect();
+        }
+    }
+
+    // 구글 로그인 에러 처리
+    private void OnGoogleLoginError(string error)
+    {
+        LoginInputFields.ResultText.text = $"구글 로그인 실패: {error}";
+        LoginInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
     }
 
     // 닉네임 저장 버튼에 연결
@@ -151,7 +209,7 @@ public class UI_LoginScene : MonoBehaviour
         NicknameInputFields.ResultText.text = result.Message;
         if (result.IsSuccess)
         {
-            // NicknamePanel.SetActive(false);
+            NicknamePanel.SetActive(false);
             PhotonServerManager.Instance.Connect();
         }
     }
