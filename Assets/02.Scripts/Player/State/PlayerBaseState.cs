@@ -168,244 +168,155 @@ public class PlayerBaseState : MonoState
         bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
     }
 
-    /// <summary>
-    /// 일반 폭탄을 배치하고 자동으로 Reset을 호출합니다.
-    /// </summary>
-    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    // [리팩토링] 일반 폭탄 처리 메서드
+    protected virtual void HandleNormalBomb(string action, EBombSpawnPoint? spawnPoint = null)
+    {
+        if(!_owner.PhotonView.IsMine)
+        {
+            return;
+        }
+
+        Transform bombSpawnPoint = spawnPoint.HasValue
+            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
+            : _owner.GetBombSpawnPoint();
+
+        string methodName = action == "Place" ? nameof(Bomb.PlaceBomb)
+                            : action == "Throw" ? nameof(Bomb.ThrowBomb)
+                            : action == "ThrowStraight" ? nameof(Bomb.ThrowBombStraight)
+                            : action == "Boost" ? nameof(Bomb.BoostBomb)
+                            : null;
+
+        SpawnAndRpcBomb(
+            "BasicBomb",
+            bombSpawnPoint,
+            methodName,
+            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
+        );
+
+        switch (action)
+        {
+            case "ThrowStraight":
+                if (_owner.PlayerStat.IsJumping)
+                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
+                else
+                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
+                ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
+                break;
+            case "Throw":
+                if (_owner.PlayerStat.IsJumping)
+                    _owner.RPC_SetAnimatorTrigger("JumpAttack");
+                else
+                    _owner.RPC_SetAnimatorTrigger("Attack");
+                ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
+                break;
+            case "Place":
+                _owner.RPC_SetAnimatorTrigger("PlaceAttack");
+                break;
+            case "Boost":
+                _owner.RPC_SetAnimatorTrigger("PlaceAttack");
+                break;
+            default:
+                _owner.RPC_SetAnimatorTrigger("PlaceAttack");
+                break;
+        }
+
+        ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastNormalBombTime();
+    }
+
+    // [리팩토링] 특수 폭탄 처리 메서드
+    protected virtual void HandleSpecialBomb(string action, EBombSpawnPoint? spawnPoint = null)
+    {
+        if(!_owner.PhotonView.IsMine)
+            return;
+
+        Transform bombSpawnPoint = spawnPoint.HasValue
+            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
+            : _owner.GetBombSpawnPoint();
+
+        string methodName = action == "Place" ? nameof(Bomb.PlaceBomb)
+                            : action == "Throw" ? nameof(Bomb.ThrowBomb)
+                            : action == "ThrowStraight" ? nameof(Bomb.ThrowBombStraight)
+                            : action == "Boost" ? nameof(Bomb.BoostBomb)
+                            : null;
+
+        SpawnAndRpcBomb(
+            "Missile",
+            bombSpawnPoint,
+            methodName,
+            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
+        );
+
+        switch (action)
+        {
+            case "ThrowStraight":
+                if (_owner.PlayerStat.IsJumping)
+                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
+                else
+                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
+                ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
+                break;
+            case "Throw":
+                if (_owner.PlayerStat.IsJumping)
+                    _owner.RPC_SetAnimatorTrigger("JumpAttack");
+                else
+                    _owner.RPC_SetAnimatorTrigger("Attack");
+                ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
+                break;
+            case "Place":
+                _owner.RPC_SetAnimatorTrigger("PlaceAttack");
+                break;
+            case "Boost":
+                _owner.RPC_SetAnimatorTrigger("PlaceAttack");
+                break;
+            default:
+                _owner.RPC_SetAnimatorTrigger(_owner.PlayerStat.IsJumping ? "JumpAttack" : "Attack");
+                break;
+        }
+
+        ResetGunPowderDecreaseWithoutAttackTimer();
+        SetLastSpecialBombTime();
+    }
+
     protected virtual void PlaceNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
-        if(!_owner.PhotonView.IsMine)
-        {
-            return;
-        }
-
-        Transform bombSpawnPoint = spawnPoint.HasValue
-            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
-            : _owner.GetBombSpawnPoint();
-        
-        SpawnAndRpcBomb(
-            "BasicBomb",
-            bombSpawnPoint,
-            nameof(Bomb.PlaceBomb),
-            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
-        );
-
-        if (_owner.PlayerStat.IsJumping)
-        {
-            _owner.RPC_SetAnimatorTrigger("PlaceAttack");
-        }
-        else
-        {
-            _owner.RPC_SetAnimatorTrigger("PlaceAttack");
-        }
-        ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastNormalBombTime();
+        HandleNormalBomb("Place", spawnPoint);
     }
 
-    /// <summary>
-    /// 일반 폭탄을 던지고 자동으로 Reset을 호출합니다.
-    /// </summary>
-    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
-        if(!_owner.PhotonView.IsMine)
-        {
-            return;
-        }
-
-        Transform bombSpawnPoint = spawnPoint.HasValue
-            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
-            : _owner.GetBombSpawnPoint();
-        
-        SpawnAndRpcBomb(
-            "BasicBomb",
-            bombSpawnPoint,
-            nameof(Bomb.ThrowBomb),
-            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
-        );
-
-        if (_owner.PlayerStat.IsJumping)
-        {
-            _owner.RPC_SetAnimatorTrigger("JumpAttack");
-        }
-        else
-        {
-            _owner.RPC_SetAnimatorTrigger("Attack");
-        }
-        
-        ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
-        ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastNormalBombTime();
+        HandleNormalBomb("Throw", spawnPoint);
     }
-
-    /// <summary>
-    /// 특수 폭탄을 배치하고 자동으로 Reset을 호출합니다.
-    /// </summary>
-    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
-    protected virtual void PlaceSpecialBomb(EBombSpawnPoint? spawnPoint = null)
-    {
-        if(!_owner.PhotonView.IsMine)
-        {
-            return;
-        }
-
-        Transform bombSpawnPoint = spawnPoint.HasValue
-            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
-            : _owner.GetBombSpawnPoint();
-        
-        SpawnAndRpcBomb(
-            "WaterBomb",
-            bombSpawnPoint,
-            nameof(Bomb.PlaceBomb),
-            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
-        );
-
-        if (_owner.PlayerStat.IsJumping)
-        {
-            _owner.RPC_SetAnimatorTrigger("JumpAttack");
-        }
-        else
-        {
-            _owner.RPC_SetAnimatorTrigger("Attack");
-        }
-
-        ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastSpecialBombTime();
-    }
-
-    /// <summary>
-    /// 특수 폭탄을 던지고 자동으로 Reset을 호출합니다.
-    /// </summary>
-    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
-    protected virtual void ThrowSpecialBomb(EBombSpawnPoint? spawnPoint = null)
-    {
-        if(!_owner.PhotonView.IsMine)
-        {
-            return;
-        }
-
-        Transform bombSpawnPoint = spawnPoint.HasValue
-            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
-            : _owner.GetBombSpawnPoint();
-        
-        SpawnAndRpcBomb(
-            "WaterBomb",
-            bombSpawnPoint,
-            nameof(Bomb.ThrowBomb),
-            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
-        );
-
-        if (_owner.PlayerStat.IsJumping)
-        {
-            _owner.RPC_SetAnimatorTrigger("JumpAttack");
-        }
-        else
-        {
-            _owner.RPC_SetAnimatorTrigger("Attack");
-        }
-        ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
-        ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastSpecialBombTime();
-    }
-
-    /// <summary>
-    /// 일반 폭탄을 직선으로 던지고 자동으로 Reset을 호출합니다.
-    /// </summary>
-    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
     protected virtual void ThrowStraightNormalBomb(EBombSpawnPoint? spawnPoint = null)
     {
-        if(!_owner.PhotonView.IsMine)
-        {
-            return;
-        }
-
-        Transform bombSpawnPoint = spawnPoint.HasValue
-            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
-            : _owner.GetBombSpawnPoint();
-        
-        SpawnAndRpcBomb(
-            "BasicBomb",
-            bombSpawnPoint,
-            nameof(Bomb.ThrowBombStraight),
-            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
-        );
-
-        if (_owner.PlayerStat.IsJumping)
-        {
-            if(Input.GetKey(KeyCode.UpArrow))
-            {
-                _owner.RPC_SetAnimatorTrigger("JumpUpStrongAttack");
-            }
-            else
-            {
-                _owner.RPC_SetAnimatorTrigger("JumpStrongAttack");
-            }
-        }
-        else
-        {
-            if(Input.GetKey(KeyCode.UpArrow))
-            {
-                _owner.RPC_SetAnimatorTrigger("UpStrongAttack");
-            }
-            else
-            {
-                _owner.RPC_SetAnimatorTrigger("StrongAttack");
-            }
-        }
-
-        ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
-        ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastNormalBombTime();
+        HandleNormalBomb("ThrowStraight", spawnPoint);
     }
 
-    /// <summary>
-    /// 특수 폭탄을 직선으로 던지고 자동으로 Reset을 호출합니다.
-    /// </summary>
-    /// <param name="spawnPoint">스폰 포인트 (기본값: 기본 스폰 포인트)</param>
+    protected virtual void PlaceSpecialBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        HandleSpecialBomb("Place", spawnPoint);
+    }
+
+    protected virtual void ThrowSpecialBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        HandleSpecialBomb("Throw", spawnPoint);
+    }
+
     protected virtual void ThrowStraightSpecialBomb(EBombSpawnPoint? spawnPoint = null)
     {
-        if(!_owner.PhotonView.IsMine)
-        {
-            return;
-        }
+        HandleSpecialBomb("ThrowStraight", spawnPoint);
+    }
 
-        Transform bombSpawnPoint = spawnPoint.HasValue
-            ? _owner.GetBombSpawnPoint(spawnPoint.Value)
-            : _owner.GetBombSpawnPoint();
-        
-        SpawnAndRpcBomb(
-            "WaterBomb",
-            bombSpawnPoint,
-            nameof(Bomb.ThrowBombStraight),
-            new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
-        );
+    // 일반 폭탄 부스트
+    protected virtual void BoostNormalBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        HandleNormalBomb("Boost", spawnPoint);  
+    }
 
-        if (_owner.PlayerStat.IsJumping)
-        {
-            if(Input.GetKey(KeyCode.UpArrow))
-            {
-                _owner.RPC_SetAnimatorTrigger("JumpUpStrongAttack");
-            }
-            else
-            {
-                _owner.RPC_SetAnimatorTrigger("JumpStrongAttack");
-            }
-        }
-        else
-        {
-            if(Input.GetKey(KeyCode.UpArrow))
-            {
-                _owner.RPC_SetAnimatorTrigger("UpStrongAttack");
-            }
-            else
-            {
-                _owner.RPC_SetAnimatorTrigger("StrongAttack");
-            }
-        }
-        
-        ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
-        ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastSpecialBombTime();
+    // 특수 폭탄 부스트
+    protected virtual void BoostSpecialBomb(EBombSpawnPoint? spawnPoint = null)
+    {
+        HandleSpecialBomb("Boost", spawnPoint);
     }
 
 
