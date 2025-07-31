@@ -1,16 +1,13 @@
-using System.Collections.Generic;
+using System;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
-using PhotonPlayer = Photon.Realtime.Player;
+using UnityEngine.SceneManagement;
 
-public class PhotonServerManager : MonoBehaviourPunCallbacks
+public class PhotonTest : MonoBehaviourPunCallbacks
 {
-    public static PhotonServerManager Instance;
-
-    public List<RoomInfo> CachedRoomList { get; set; } = new List<RoomInfo>();
-    // 게임이 시작 될 때 연결되는 포톤 서버 매니저
-
+    public static PhotonTest Instance;
+    
     [Header("DataFrameRate")]
     [SerializeField] private int _sendRate = 30;
     [SerializeField] private int _serializationRate = 30;
@@ -30,8 +27,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
             Destroy(this.gameObject);
         }
     }
-
-
+    
     private void Start()
     {
         // 데이터 송수신 빈도
@@ -39,6 +35,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         PhotonNetwork.SerializationRate = _serializationRate;
 
         PhotonNetwork.AutomaticallySyncScene = true;
+        Connect();
     }
 
     // 서버를 연결하겠다.
@@ -62,41 +59,14 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         Debug.Log("OnConnectedToMaster");
         PhotonNetwork.JoinLobby(TypedLobby.Default);
     }
-
     public override void OnJoinedLobby()
     {
         Debug.Log("OnJoinedLobby");
-        PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
-
     }
-    public override void OnJoinRandomFailed(short returnCode, string message)
+
+    public override void OnLeftRoom()
     {
-        Debug.Log("OnJoinRandomFailed");
+        SceneManager.LoadScene("Test");
     }
-
-    public override void OnCreatedRoom()
-    {
-        PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
-    }
-
-    public void SetPhotonPrefabPool(Dictionary<string, Item> itemDict)
-    {
-        DefaultPool pool = (DefaultPool)PhotonNetwork.PrefabPool;
-        foreach (var kvp in itemDict)
-        {
-            pool.ResourceCache.TryAdd(kvp.Value.Prefab.name, kvp.Value.Prefab);
-        }
-        Debug.Log("포톤 풀 등록 완료");
-    }
-
-    public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
-    {
-
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-        Debug.Log($"{otherPlayer.ActorNumber} 플레이어 나감요");
-        EventManager.Instance.PlayerLeftRoom(otherPlayer);
-    }
+    
 }

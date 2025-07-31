@@ -18,8 +18,6 @@ public class UI_RoomMakerPopup : UI_Popup
     public UI_RoomSetupButton Life;
     public UI_RoomSetupButton Gunpowder;
     public UI_RoomSetupButton Decline;
-    
-    public List<UI_RoomSetupButton> SetupButtonList = new List<UI_RoomSetupButton>();
 
     private void OnEnable()
     {
