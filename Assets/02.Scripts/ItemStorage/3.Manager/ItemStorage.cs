@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using ExitGames.Client.Photon;
+using Photon.Pun;
 using UnityEngine;
 
 
@@ -25,12 +27,12 @@ public class ItemStorage : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
-        DontDestroyOnLoad(gameObject);
 
         _storedItemDict = null;
         _equippedItemDict = null;
@@ -58,19 +60,6 @@ public class ItemStorage : MonoBehaviour
             InventoryItem testItem = new InventoryItem(ItemDatabase.Instance.GetItem(AddItemID));
 
             AddItem(testItem);
-        }
-
-        // 아이템 장착 테스트
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            if (_selectedItem.IsEquipped)
-            {
-                UnEquipItem(_selectedItem);
-            }
-            else
-            {
-                EquipItem(_selectedItem);
-            }
         }
     }
 #endif
@@ -103,6 +92,8 @@ public class ItemStorage : MonoBehaviour
             }
             _repo.SaveInventory(_equippedItemDict);
         }
+
+        SetPlayerCustomProperties();
     }
 
     public List<InventoryItem> GetStoredItemList(EItemType itemType)
@@ -260,5 +251,19 @@ public class ItemStorage : MonoBehaviour
         _repo.SaveItemStorage(_storedItemDict);
 
         OnDataChanged?.Invoke(item.Item.ItemType);
+    }
+
+    public void SetPlayerCustomProperties()
+    {
+        Hashtable equipedItems = new Hashtable();
+        foreach (var kvp in _equippedItemDict)
+        {
+            if (kvp.Value == null)
+            {
+                continue;
+            }
+            equipedItems.Add(kvp.Key.ToString(), kvp.Value.ID);
+        }
+        PhotonNetwork.LocalPlayer.SetCustomProperties(equipedItems);
     }
 }

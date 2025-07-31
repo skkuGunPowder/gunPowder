@@ -19,11 +19,6 @@ public class Explosion : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
         {
-            if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
-            {
-                continue;
-            }
-            
             if (other.gameObject.tag == "Immune")
             {
                 continue;
@@ -31,11 +26,16 @@ public class Explosion : MonoBehaviour
 
             if (other.TryGetComponent(out IDamagable damagableObject))
             {
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, isFallingOut);
                 if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
                 }
+
+                if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
+                {
+                    continue;
+                }
+                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, isFallingOut);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());

@@ -240,8 +240,9 @@ public class PlayerBaseState : MonoState
                             : action == "Boost" ? nameof(Bomb.BoostBomb)
                             : null;
 
+
         SpawnAndRpcBomb(
-            "Missile",
+            _owner.EquipedItemDict[EItemType.Bomb].name,
             bombSpawnPoint,
             methodName,
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
