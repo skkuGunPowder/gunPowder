@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-
+using PhotonPlayer = Photon.Realtime.Player;
 public class EventManager : DontDestroySingleton<EventManager> // Start is called once before the first execution of Update after the MonoBehaviour is created
 {
     public event Action<int> OnTopPlayerChanged;        // 순위 변경용  = 1등 체크용
@@ -42,5 +42,12 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     public void ViewGameResult()
     {
         OnGameResult?.Invoke();
+    }
+
+    public event Action<PhotonPlayer> OnPlayerChanged;
+
+    public void PlayerLeftRoom(PhotonPlayer player)
+    {
+        OnPlayerChanged?.Invoke(player);    
     }
 }

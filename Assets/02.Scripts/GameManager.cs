@@ -70,8 +70,10 @@ public class GameManager : PhotonSingleton<GameManager>
     // 프로퍼티가 바뀌었을 때 호출되는 함수
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
+        Debug.Log("OnPlayerPropertiesUpdate");
         if (_currentGameState == EGameState.Waiting || _currentGameState == EGameState.GameOver)
         {
+            
             return;
         } 
         
@@ -216,11 +218,8 @@ public class GameManager : PhotonSingleton<GameManager>
         player.SetCustomProperties(properties);
         Debug.Log($"타임 오버 : 내 자신{player.ActorNumber} 프로퍼티 전달" + $"{player.CustomProperties[EProperties.Kill]}");
     }
+
     
-    public int SurvivorTime()
-    {
-        return (int)_timer;
-    }
 }
 
 

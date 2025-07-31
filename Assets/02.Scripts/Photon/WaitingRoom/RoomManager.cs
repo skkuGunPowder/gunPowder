@@ -1,12 +1,10 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
-
+using System.Linq;
 [RequireComponent(typeof(PhotonView))]
 public class RoomManager : PhotonSingleton<RoomManager>
 {
@@ -29,13 +27,15 @@ public class RoomManager : PhotonSingleton<RoomManager>
 
         _photonView = GetComponent<PhotonView>();
         _loadChecker = GetComponent<LoadSceneChecker>();
-
-        // _loadChecker.OnLoadFinished += Init;
         _room = PhotonNetwork.CurrentRoom;
-
-
+        
     }
 
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        EventManager.Instance.OnPlayerChanged += PlayerLeft;
+    }
     // 방 세팅 시작 => Init
     private void Start()
     {
@@ -65,7 +65,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // 방에 들어왔을 때 첫 세팅 하기
     private void Init()
     {
-        Debug.Log("ininninininininininininininininininit");
         SetProperties();
         SetRoom();
 
@@ -85,7 +84,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
             { EProperties.IsReady.ToString(), false },
             { EProperties.IsDead.ToString(), false },
         };
-
         if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team] == null)
         {
             ready.Add(EProperties.Team.ToString(), (int)EInGameTeam.Red);
@@ -95,6 +93,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             ready.Add(EProperties.NickName.ToString(), AccountManager.Instance.CurrencAccount.Nickname);
         }
+        
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
     }
     // 현재 방의 맵이 무엇인가?
@@ -175,7 +174,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
 
         if (PhotonNetwork.IsMasterClient)
         {
-            _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray());
+            _photonView.RPC(nameof(Rpc_OnEnterUpdateSlots),RpcTarget.All, _playerSlotList.ToArray());
         }
     }
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
@@ -199,24 +198,18 @@ public class RoomManager : PhotonSingleton<RoomManager>
         if (PhotonNetwork.IsMasterClient)
         {
             PlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
-            _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray()); // 전달
+            _photonView.RPC(nameof(Rpc_OnEnterUpdateSlots), RpcTarget.All, _playerSlotList.ToArray()); // 전달
         }
     }
-
-    public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PlayerLeft(otherPlayer);
-            _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray());
-        }
-
-    }
-
     public void PlayerLeft(PhotonPlayer player)
     {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
         int num = player.ActorNumber;
-
+        
         for (int i = 0; i < _playerSlotList.Count; i++)
         {
             if (_playerSlotList[i] == num)
@@ -226,6 +219,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
             }
             ;
         }
+        _photonView.RPC(nameof(Rpc_OnLeftUpdateSlots), RpcTarget.All, _playerSlotList.ToArray());
+        
     }
     public void PlayerPlacement(PhotonPlayer player)
     {
@@ -241,12 +236,17 @@ public class RoomManager : PhotonSingleton<RoomManager>
     }
 
     [PunRPC]
-    public void UpdateSlots(int[] actorNumbers)
+    public void Rpc_OnLeftUpdateSlots(int[] actorNumbers)
     {
-        Debug.Log("UpdateSlots");
+        _playerSlotList = new List<int>(actorNumbers);
+        EventManager.Instance.RoomDataChanged();
+        
+    }
+    [PunRPC]
+    public void Rpc_OnEnterUpdateSlots(int[] actorNumbers)
+    {
         _playerSlotList = new List<int>(actorNumbers);
     }
-
     // 맵 변경시 콜백
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
@@ -261,7 +261,25 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
     {
         EventManager.Instance.MasterChanged();
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        Hashtable table = new Hashtable()
+        {
+            {EProperties.IsReady.ToString(), false}
+        };
+        newMasterClient.SetCustomProperties(table);
+        
+        
     }
+  
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        EventManager.Instance.OnPlayerChanged -= PlayerLeft;
+    }
+
 }
     
     

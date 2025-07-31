@@ -762,6 +762,8 @@ namespace Photon.Realtime
         /// </remarks>
         public string CurrentCluster { get; private set; }
 
+        public object InRoomCallbacks { get; set; }
+
         /// <summary>Contains the list if enabled regions this client may use. Null, unless the client got a response to OpGetRegions.</summary>
         public RegionHandler RegionHandler;
 
