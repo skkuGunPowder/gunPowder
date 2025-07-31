@@ -24,11 +24,14 @@ public class PlayerJumpDashState : PlayerBaseState
         _xVelocity = 0f;
         _dashTimer = 0f;
 
+        _owner.RPC_SetAnimatorTrigger("JumpDash");
+
     }
     public override void OnExit()
     {
         base.OnExit();
         _owner.Rigidbody2D.gravityScale = _originalGravityScale;
+        _owner.RPC_ResetAnimatorTrigger("JumpDash");
     }
 
     /// <summary>

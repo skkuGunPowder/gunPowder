@@ -14,6 +14,7 @@ public class PlayerDashState : PlayerBaseState
 
         // 플레이어 상태
         _owner.PlayerStat.IsRunning = true;
+        _owner.PlayerStat.IsJumping = false;
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
         _originalGravityScale = _owner.Rigidbody2D.gravityScale;
         _owner.Rigidbody2D.gravityScale = 0f;
