@@ -18,9 +18,10 @@ public class UI_ProfileSlot : MonoBehaviour
             NoPlayer();
             return;
         }
-
+        
         NicknameTextUGUI.text = player.CustomProperties[EProperties.NickName.ToString()].ToString();
         
+
     }
 
     public void ReadyCheck(bool isReady)
@@ -52,6 +53,7 @@ public class UI_ProfileSlot : MonoBehaviour
         NotReady.SetActive(false);
         Ready.SetActive(false);
         NicknameTextUGUI.gameObject.SetActive(false);
+        Master.SetActive(false);
         
     }
 }

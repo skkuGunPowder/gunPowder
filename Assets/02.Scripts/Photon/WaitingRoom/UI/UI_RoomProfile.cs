@@ -26,7 +26,6 @@ public class UI_RoomProfile : MonoBehaviour
                 continue;
             }
             
-            Debug.Log($"{i}");
             PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
             UI_ProfileSlotList[i].Refresh(player);
             
@@ -36,7 +35,6 @@ public class UI_RoomProfile : MonoBehaviour
     public void ReadyCheck()
     {
         List<int> playerSlotList = RoomManager.Instance.PlayerSlotList;
-        Debug.Log(playerSlotList.Count);
 
         for (int i = 0; i < playerSlotList.Count; i++)
         {

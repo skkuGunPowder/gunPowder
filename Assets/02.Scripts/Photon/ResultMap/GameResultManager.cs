@@ -17,7 +17,6 @@ public class GameResultManager : Singleton<GameResultManager>
         _nextScene = false;
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
         Debug.Log($"결과 : 플레이어 리스트 {playerList.Count}");
-        List<GameResultData> allResults = new();
         foreach (PhotonPlayer player in playerList)
         {
             int damage = Convert.ToInt32(player.CustomProperties[EProperties.Damage.ToString()]);
@@ -31,6 +30,25 @@ public class GameResultManager : Singleton<GameResultManager>
             ResultDataList.Add(data);
         }
         
+        int maxDamage = Mathf.Max(ResultDataList.Max(d => d.Damage),1);
+        int maxKill = Mathf.Max(ResultDataList.Max(k => k.Kill),1);
+        int maxSurviveTime = Mathf.Max(ResultDataList.Max(s =>s.SurviveTime),1);
+
+        foreach (var data in ResultDataList)
+        {   
+            data.CalculateDamageRate(maxDamage);
+            data.CalculateKillRate(maxKill);
+            data.CalculateSurviveTimeRate(maxSurviveTime);
+        }
+
+        Arrange();
+        
+        EventManager.Instance.ViewGameResult();
+    }
+
+    private void Arrange()
+    {
+                
         // 팀별로 묶기
         var groupedTeams = ResultDataList
             .GroupBy(p => p.Team)
@@ -40,6 +58,7 @@ public class GameResultManager : Singleton<GameResultManager>
             .ToList();
         Debug.Log($"그룹화 결과 : 그룹화 1 {groupedTeams.Count}");
         Debug.Log($"결과 : 정렬 전 데이터 리스트 {ResultDataList.Count}");
+        
         ResultDataList.Clear();
         foreach (var teamGroup in groupedTeams)
         {
@@ -50,9 +69,7 @@ public class GameResultManager : Singleton<GameResultManager>
             }
         }
         Debug.Log($"결과 : 데이터 리스트 {ResultDataList.Count}");
-        EventManager.Instance.ViewGameResult();
     }
-
     private void Update()
     {
         _timer += Time.deltaTime;

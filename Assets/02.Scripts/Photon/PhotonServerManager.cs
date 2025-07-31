@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using PhotonPlayer = Photon.Realtime.Player;
 
 public class PhotonServerManager : MonoBehaviourPunCallbacks
 {
@@ -89,5 +87,16 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
             pool.ResourceCache.TryAdd(kvp.Value.Prefab.name, kvp.Value.Prefab);
         }
         Debug.Log("포톤 풀 등록 완료");
+    }
+
+    public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
+    {
+
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        Debug.Log($"{otherPlayer.ActorNumber} 플레이어 나감요");
+        EventManager.Instance.PlayerLeftRoom(otherPlayer);
     }
 }

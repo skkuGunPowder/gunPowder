@@ -28,7 +28,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     // 방에 보내기
     public void MakeRoom(string roomName, int maxPlayers, int playTime, int life, int gunpowder, int decline, bool isLocked, string password = null)
     {
-        Debug.Log($"{password}");
         // 룸 프로퍼티에 들어가야할 것들 : 시간, 목숨, 시작 건파우더, 시간 당 감소
         Hashtable roomProperties = new Hashtable
         {
@@ -92,12 +91,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
                     _roomInfoList.Add(roomInfo);
                 }
             }
-            //
-            // if (roomInfo.CustomProperties.ContainsKey($"{EProperties.MapSelected}"))
-            // {
-            //     string mapName = roomInfo.CustomProperties[$"{EProperties.MapSelected}"].ToString();
-            //     Debug.Log($"방 이름: {roomInfo.Name}, 맵: {mapName}");
-            // }
+
         }
         
         
