@@ -201,17 +201,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
             _photonView.RPC(nameof(Rpc_OnEnterUpdateSlots), RpcTarget.All, _playerSlotList.ToArray()); // 전달
         }
     }
-
-    public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PlayerLeft(otherPlayer);
-            _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray());
-        }
-
-    }
-
     public void PlayerLeft(PhotonPlayer player)
     {
         if (PhotonNetwork.IsMasterClient == false)
