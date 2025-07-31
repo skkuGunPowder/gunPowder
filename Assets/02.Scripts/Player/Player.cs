@@ -91,14 +91,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID).Prefab);
             }
         }
-        Debug.Log("플레이어 장착한 아이템 로드 완료!");
     }
-
-    // public void SetItems(EItemType itemType, GameObject itemPrefab)
-    // {
-    //     EquipedItemDict[itemType] = itemPrefab;
-    //     Debug.Log($"{itemType} : 장착 아이템 로드!");
-    // }
 
     private void Start()
     {

@@ -72,7 +72,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _initialized = true;
         GeneratePlayer();
         SetCurrentMap();
-        ApplyEquipment(PhotonNetwork.LocalPlayer);
     }
     private void GeneratePlayer()
     {
@@ -202,8 +201,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
             PlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
             _photonView.RPC(nameof(UpdateSlots), RpcTarget.All, _playerSlotList.ToArray()); // 전달
         }
-
-        ApplyEquipment(newPlayer);
     }
 
     public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
@@ -264,30 +261,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
     {
         EventManager.Instance.MasterChanged();
-    }
-
-    private void ApplyEquipment(PhotonPlayer player)
-    {
-        // if (!PhotonNetwork.GetPhotonView(player.ActorNumber).TryGetComponent(out Player playerCharacter))
-        // {
-        //     Debug.LogError("새로운 플레이어의 장착 아이템 불러오는데 실패하였습니다.");
-        //     return;
-        // }
-        
-        // if (player.CustomProperties.TryGetValue(EItemType.Bomb, out object itemID))
-        // {
-        //     GameObject itemPrefab = ItemDatabase.Instance.GetItem((string)itemID).Prefab;
-        //     playerCharacter.SetItems(EItemType.Bomb, itemPrefab);
-        // }
-
-        // for (int i = 0; i < (int)EItemType.None; i++)
-        // {
-        //     if (player.CustomProperties.TryGetValue((EItemType)i, out object itemID))
-        //     {
-        //         GameObject itemPrefab = ItemDatabase.Instance.GetItem((string)itemID).Prefab;
-        //         playerCharacter.SetItems((EItemType)i, itemPrefab);
-        //     }
-        // }
     }
 }
     
