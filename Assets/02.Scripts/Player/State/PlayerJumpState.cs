@@ -160,12 +160,12 @@ private const float EXPLOSION_OVERRIDE_DURATION = 0.3f; // n초 동안 velocity.
 
         if (_explosionOverrideTimer <= 0f)
         {
-            velocity.x = _xVelocity;
+            velocity.x = Mathf.Lerp(velocity.x, _xVelocity, 1 * Time.deltaTime);
             // y축은 건드리지 않음 (중력에 맡김)
             _owner.Rigidbody2D.linearVelocity = velocity;
         }
 
-        // 더블 점프
+        // 폭탄 대쉬
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
             _owner.PlayerStat.IncrementJumpCount();
