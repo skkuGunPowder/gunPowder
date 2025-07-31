@@ -1,18 +1,33 @@
-using Photon.Pun;
+using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(PhotonView))]
-[RequireComponent(typeof(PhotonTransformView))]
-public class RotationPlatform : MonoBehaviourPun
+public class RotationPlatform : MonoBehaviour
 {
-    [SerializeField] private float _margin = 1f;
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        if (collision.gameObject.tag == "Player" && Input.GetKeyDown(KeyCode.DownArrow))
-        {
+    public List<SidePlatform> SidePlatforms;
+    private Vector3 _rotation;
+    private Quaternion _initRotation;
 
+    private void Awake()
+    {
+        _initRotation = transform.rotation;
+        foreach (var sidePlatform in SidePlatforms)
+        {
+            sidePlatform.Init(this);
         }
+    }
+
+    public void Rotate(bool isClockWise)
+    {
+        if (isClockWise)
+        {
+            _rotation = new Vector3(0, 0, 180);
+        }
+        else
+        {
+            _rotation = new Vector3(0, 0, -180);
+        }
+        transform.DORotate(_rotation, 1.5f);
+        // .OnComplete(() => transform.rotation = _initRotation);
     }
 }
