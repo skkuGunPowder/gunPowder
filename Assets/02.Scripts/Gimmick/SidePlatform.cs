@@ -30,7 +30,7 @@ public class SidePlatform : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Player" && Input.GetKeyDown(KeyCode.DownArrow))
+        if (collision.gameObject.tag == "Player" && Input.GetKey(KeyCode.DownArrow))
         {
             _owner.Rotate(_isRightSide);
         }

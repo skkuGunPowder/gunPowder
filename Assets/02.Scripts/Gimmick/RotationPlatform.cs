@@ -7,9 +7,11 @@ public class RotationPlatform : MonoBehaviour
     public List<SidePlatform> SidePlatforms;
     private Vector3 _rotation;
     private Quaternion _initRotation;
+    private bool _isRotate = false;
 
     private void Awake()
     {
+        // transform.eulerAngles = new Vector3(90, 90, 90);
         _initRotation = transform.rotation;
         foreach (var sidePlatform in SidePlatforms)
         {
@@ -19,15 +21,26 @@ public class RotationPlatform : MonoBehaviour
 
     public void Rotate(bool isClockWise)
     {
-        if (isClockWise)
+        if (_isRotate)
         {
-            _rotation = new Vector3(0, 0, 180);
+            return;
         }
-        else
+
+        if (isClockWise)
         {
             _rotation = new Vector3(0, 0, -180);
         }
-        transform.DORotate(_rotation, 1.5f);
-        // .OnComplete(() => transform.rotation = _initRotation);
+        else
+        {
+            _rotation = new Vector3(0, 0, 180);
+        }
+        
+        _isRotate = true;
+
+        transform.DORotate(transform.eulerAngles + _rotation, 1f)
+        .OnComplete(() =>
+        {
+            _isRotate = false;   
+        });
     }
 }
