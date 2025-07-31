@@ -8,7 +8,7 @@ public class DamageChecker : Singleton<DamageChecker>
 {
     private PhotonView _photonView;
 
-    private int _currentTopPlayer;                 // 처음 1등은 방장
+    private int _currentTopPlayer;                           // 처음 1등은 방장
     
     private Dictionary<int, int> _playerScoreDictionary;
     private List<int>  _playerList;

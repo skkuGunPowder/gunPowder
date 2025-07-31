@@ -16,7 +16,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private LoadSceneChecker _loadChecker;
 
     public ESceneList SelectedMap;      // 맵 선택하기
-
+    public EInGameTeam SelectedTeam;
+    
     private bool _initialized = false;  // Init 한번만 부르게 하기
 
     private PhotonView _photonView;
@@ -188,6 +189,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
         if (changedProps.ContainsKey($"{EProperties.NickName}"))
         {
             EventManager.Instance.RoomDataChanged();
+        }
+
+        if (changedProps.ContainsKey($"{EProperties.Team}") && targetPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+        {
+            SelectedTeam = (EInGameTeam)changedProps[$"{EProperties.Team}"];
+            EventManager.Instance.TeamChanged();
         }
     }
 

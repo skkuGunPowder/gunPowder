@@ -12,8 +12,9 @@ public class UI_RoomProfile : MonoBehaviour
     {
         EventManager.Instance.OnRoomDataChanged += Refresh;
         EventManager.Instance.OnReadyChanged += ReadyCheck;
+        EventManager.Instance.OnTeamChanged += TeamChange;
     }
-
+    
     public void Refresh()
     {
         List<int> playerSlotList = RoomManager.Instance.PlayerSlotList;
@@ -56,10 +57,28 @@ public class UI_RoomProfile : MonoBehaviour
         }
     }
 
+    public void TeamChange()
+    {
+        List<int> playerSlotList = RoomManager.Instance.PlayerSlotList;
+        
+        for (int i = 0; i < playerSlotList.Count; i++)
+        {
+            if (playerSlotList[i] == 0)
+            {
+                continue;
+            }
+            
+            PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
+            EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+            
+            UI_ProfileSlotList[i].TeamSet(team);
+        }
+    }
     private void OnDisable()
     {
         EventManager.Instance.OnRoomDataChanged -= Refresh;
         EventManager.Instance.OnReadyChanged -= ReadyCheck;
+        EventManager.Instance.OnTeamChanged -= TeamChange;
     }
 
     //  ⊂_ヽ
