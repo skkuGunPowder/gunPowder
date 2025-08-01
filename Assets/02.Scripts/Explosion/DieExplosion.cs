@@ -3,10 +3,11 @@ using UnityEngine;
 
 public class DieExplosion : Explosion
 {
-    public const string ID = "E0002";
+    public const string ID = "EP0002";
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         SetStat(ID);
     }
 }

@@ -2,11 +2,12 @@ using UnityEngine;
 
 public class MissileExplosion : Explosion
 {
-    public const string ID = "E0004";
+    public const string ID = "EP0004";
 
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         SetStat(ID);
     }
 }

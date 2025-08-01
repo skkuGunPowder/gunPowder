@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CrossExplosion : Explosion
 {
-    public const string ID = "E0005";
+    public const string ID = "EP0005";
 
     public WaterMissile WaterMissilePrefab;
 
@@ -11,8 +11,9 @@ public class CrossExplosion : Explosion
 
     private Vector3[] _directions = { new Vector3(1, 0, 0), new Vector3(-1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, -1, 0) };
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         SetStat(ID);
     }
 
