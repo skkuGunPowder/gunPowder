@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Com.LuisPedroFonseca.ProCamera2D;
 using Photon.Pun;
 using UnityEngine;
 
@@ -9,22 +8,18 @@ public class PlayerSpawner : MonoBehaviour
 
     public void GeneratePlayers(int count)
     {
-        var player = PhotonNetwork.Instantiate("PlayerTest", SpawnPoints[count].position, Quaternion.identity, 0);
+        GameObject playerInstance = PhotonNetwork.Instantiate("PlayerTest", SpawnPoints[count].position, Quaternion.identity, 0);
+        Player player = playerInstance.GetComponent<Player>();
 
-        if (player.GetComponent<Player>().PhotonView.IsMine)
+        if (player.PhotonView.IsMine)
         {
             player.tag = "Player";
-            Debug.Log("ismine");
 
-            ProCamera2D proCamera = Camera.main.GetComponent<ProCamera2D>();
-            if (proCamera.CameraTargets.Count == 0)
-            {
-                proCamera.AddCameraTarget(player.transform);
-            }
+            CameraController proCamera = Camera.main.GetComponent<CameraController>();
+            proCamera.SetTarget(player);
         }
         else
         {
-            Debug.Log("not ismine");
             player.tag = "Enemy";
         }
     }
