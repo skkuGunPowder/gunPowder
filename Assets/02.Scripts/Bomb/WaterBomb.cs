@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class WaterBomb : Bomb
 {
-    public const string ID = "B0005";
+    public const string ID = "BO0005";
 
 
     protected override void Init()

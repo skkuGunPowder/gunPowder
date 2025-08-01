@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class DieExplosion : Explosion
 {
-    public const string ID = "E0002";
+    public const string ID = "EP0002";
 
     protected override void Awake()
     {
