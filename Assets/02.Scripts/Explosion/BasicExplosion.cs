@@ -5,8 +5,9 @@ public class BasicExplosion : Explosion
     public const string ID = "E0001";
 
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         SetStat(ID);
     }
 }

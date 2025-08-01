@@ -5,8 +5,9 @@ public class DieExplosion : Explosion
 {
     public const string ID = "E0002";
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         SetStat(ID);
     }
 }
