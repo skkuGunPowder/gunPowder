@@ -188,8 +188,8 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     private void DecreaseGunPowder(int amount)
     {
-        _playerStat.DecreaseGunPowderCount(amount);
-        
+        // _playerStat.DecreaseGunPowderCount(amount);
+        //
         float initCount = (float)_playerStat.InitGunpowderCount;
         float currentCount = (float)_playerStat.CurrentPlayerGunPowderCount;
         float newDamping = 1 - (initCount - currentCount) / initCount * 0.5f;
@@ -205,7 +205,8 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _gunPowderDecreaseTimer = 0f;
             //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, 1);
-            DecreaseGunPowder(1);
+            _playerStat.DecreaseGunPowderCount(1, photonView.OwnerActorNr);
+
         }
     }
 
@@ -218,7 +219,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
             //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
-            DecreaseGunPowder(PlayerStat.AttackPenaltyAmount);
+            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr);
         }
     }
 
@@ -230,17 +231,17 @@ public class Player : MonoBehaviourPun, IDamagable
         _gunPowderDecreaseWithoutAttackTimer = 0f;
     }
 
-    public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut)
+    public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber ,bool isFallingOut)
     {
         if(!PhotonView.IsMine)
         {
             return;
         }
-        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, isFallingOut);
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut,PhotonMessageInfo info)
+    public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut,PhotonMessageInfo info)
     {
         Debug.Log($"TakeDamage : {damage}");
         if(_playerStat.IsImmune)
@@ -249,7 +250,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         // 체력 감소
-        bool isDead = _playerStat.DecreaseGunPowderCount(damage);
+        bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber);
 
         // 날 때린 사람 딜량 증가
         PhotonView attackerView = PhotonView.Find(attackerViewId);
@@ -275,7 +276,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
-    [PunRPC]
+    // [PunRPC]
     public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {

@@ -56,5 +56,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnTeamChanged?.Invoke();    
     }
-    
+
+    public event Action<int, int> OnUpdateKillLog;
+    public void OnUpdateLog(int kill , int death)
+    {
+        OnUpdateKillLog?.Invoke(kill, death);
+    }
 }

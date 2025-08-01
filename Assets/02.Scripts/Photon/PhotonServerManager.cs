@@ -17,7 +17,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
 
     [Header("GameVersion")]
     [SerializeField] private string _gameVersion = "1.0.0";
-    [SerializeField] private string _nickName = "Lets Go Home";
     private void Awake()
     {
         if (Instance == null)
@@ -46,7 +45,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     {
         // 게임 버전 설정
         PhotonNetwork.GameVersion = _gameVersion;
-        PhotonNetwork.NickName = _nickName;
+        PhotonNetwork.NickName = AccountManager.Instance.CurrencAccount.Nickname;
+        Debug.Log( PhotonNetwork.NickName);
         PhotonNetwork.ConnectUsingSettings();
     }
 

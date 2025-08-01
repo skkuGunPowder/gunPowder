@@ -22,10 +22,11 @@ public class UI_InGameProfile : MonoBehaviour
             if (i < _playerActorNumberList.Count)
             {
                 // 후에 수정
-                string playerName = _playerActorNumberList[i].CustomProperties[EProperties.NickName.ToString()]
-                    .ToString();
+                ItemDTO item = ItemDatabase.Instance.GetItem(_playerActorNumberList[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
+                Sprite bomb = item.Image;
+                string playerName = _playerActorNumberList[i].NickName;
                 EInGameTeam team = (EInGameTeam)_playerActorNumberList[i].CustomProperties[EProperties.Team.ToString()];
-                UI_InGameProfileSlotList[i].Init(playerName, team);
+                UI_InGameProfileSlotList[i].Init(playerName,bomb, team);
                 UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
             }
             else

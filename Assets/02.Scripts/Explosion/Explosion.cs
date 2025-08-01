@@ -44,7 +44,7 @@ public class Explosion : MonoBehaviour
                 {
                     continue;
                 }
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, isFallingOut);
+                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());

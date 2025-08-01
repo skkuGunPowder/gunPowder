@@ -20,4 +20,9 @@ public class UI_SelectTeam : MonoBehaviour
             teamButton.Refresh(team);
         }
     }
+
+    private void OnDisable()
+    {
+        EventManager.Instance.OnTeamChanged -= TeamSelected;
+    }
 }

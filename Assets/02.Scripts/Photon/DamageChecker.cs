@@ -26,7 +26,6 @@ public class DamageChecker : Singleton<DamageChecker>
     {
         Init();
     }
-
     private void Init()
     {
         _playerList = new List<int>();
@@ -42,14 +41,24 @@ public class DamageChecker : Singleton<DamageChecker>
         
         _currentTopPlayer = PlayerList[0];
     }
-    
-    public void RPC_RequestDamage(int gunpowder, int life, int player)
+
+    private void ActiveKillLog(int killer, int death)
     {
-        PlayerDataChange(gunpowder, life, player);
+        EventManager.Instance.OnUpdateLog(killer, death);
+    }
+    public void RPC_RequestDamage(int gunpowder, int life, int player,int attacker)
+    {
         
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting)
         {
             return;
+        }
+        
+        PlayerDataChange(gunpowder, life, player);
+        
+        if (gunpowder <= 0 && attacker != 0)
+        {
+            ActiveKillLog(attacker ,player);
         }
         
         if (PhotonNetwork.IsMasterClient == false)

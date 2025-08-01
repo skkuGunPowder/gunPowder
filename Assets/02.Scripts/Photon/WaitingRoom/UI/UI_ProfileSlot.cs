@@ -6,12 +6,17 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class UI_ProfileSlot : MonoBehaviour
 {
     public TextMeshProUGUI NicknameTextUGUI;
+    
     public GameObject Ready;
     public GameObject NotReady;
     public GameObject Master;
+    
     public Image ProfileImage;
-    public List<Color32> TeamColorCodeList;
+    public Image BombImage;
     public Image ProfileOutline;
+    
+    public Sprite EmptyImage;
+    public List<Color32> TeamColorCodeList;
     
     // 후에 프로필 이미지 추가하기
     public void Refresh(PhotonPlayer player = null)
@@ -22,9 +27,21 @@ public class UI_ProfileSlot : MonoBehaviour
             return;
         }
         
-        NicknameTextUGUI.text = player.CustomProperties[EProperties.NickName.ToString()].ToString();
-        ProfileOutline.color = TeamColorSet(EInGameTeam.Red);    
+        NicknameTextUGUI.text = player.NickName;
+        Debug.Log(player.NickName);
         
+        ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
+        BombImage.sprite = item.Image;
+        
+        if(player.CustomProperties[EProperties.Team.ToString()] == null)
+        {
+            ProfileOutline.color = TeamColorSet(EInGameTeam.Red);    
+        }
+        else
+        {
+            EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+            ProfileOutline.color = TeamColorSet(team);
+        }
     }
 
     public void ReadyCheck(bool isReady)
@@ -57,6 +74,8 @@ public class UI_ProfileSlot : MonoBehaviour
         Ready.SetActive(false);
         NicknameTextUGUI.gameObject.SetActive(false);
         Master.SetActive(false);
+        ProfileOutline.color = TeamColorSet(EInGameTeam.Default);
+        BombImage.sprite = EmptyImage;
     }
 
     public void TeamSet(EInGameTeam team)
@@ -76,6 +95,8 @@ public class UI_ProfileSlot : MonoBehaviour
                 return TeamColorCodeList[2];
             case EInGameTeam.Yellow:
                 return TeamColorCodeList[3];
+            case EInGameTeam.Default:
+                return TeamColorCodeList[4];
             default:
                 return TeamColorCodeList[0];
         }
