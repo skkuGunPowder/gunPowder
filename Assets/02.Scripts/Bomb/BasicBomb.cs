@@ -11,7 +11,7 @@ public enum EBombVelocity
 
 public class BasicBomb : Bomb
 {
-    public const string ID = "B0001";
+    public const string ID = "BO0001";
     private EBombVelocity _bombVelocity = EBombVelocity.SLOW;
     private bool _isFuzeActivate;
     private bool isDestroyed = false; // 중복 파괴 방지 플래그
