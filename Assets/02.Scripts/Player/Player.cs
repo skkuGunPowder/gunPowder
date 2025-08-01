@@ -4,6 +4,8 @@ using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
+using DG.Tweening;
+
 
 
 public class Player : MonoBehaviourPun, IDamagable
@@ -56,6 +58,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private float _gunPowderSpreadAngle = 90f;
     private float _gunPowderSpreadDistance = 1.0f;
 
+    public event Action OnAttack;
     public event Action OnHit;
 
     [SerializeField]
@@ -187,6 +190,11 @@ public class Player : MonoBehaviourPun, IDamagable
     private void DecreaseGunPowder(int amount)
     {
         _playerStat.DecreaseGunPowderCount(amount);
+        
+        float initCount = (float)_playerStat.InitGunpowderCount;
+        float currentCount = (float)_playerStat.CurrentPlayerGunPowderCount;
+        float newDamping = 1 - (initCount - currentCount) / initCount * 0.5f;
+        _rigidbody2D.linearDamping = newDamping;
     }
 
     /// <summary>
@@ -235,6 +243,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut,PhotonMessageInfo info)
     {
+        Debug.Log($"TakeDamage : {damage}");
         if(_playerStat.IsImmune)
         {
             return;
@@ -474,5 +483,10 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             Debug.LogError("PlayerFSM component not found!");
         }
+    }
+
+    public void InvokeAttack()
+    {
+        OnAttack?.Invoke();
     }
 }
