@@ -4,7 +4,6 @@ using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
-using DG.Tweening;
 
 
 
@@ -205,8 +204,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseTimer >= PlayerStat.GunPowderDecreaseTime)
         {
             _gunPowderDecreaseTimer = 0f;
-            PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, 1);
-            //_playerStat.DecreaseGunPowderCount(1);
+            //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, 1);
+            DecreaseGunPowder(1);
         }
     }
 
@@ -218,8 +217,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
-            PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
-            //_playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount);
+            //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
+            DecreaseGunPowder(PlayerStat.AttackPenaltyAmount);
         }
     }
 

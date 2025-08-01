@@ -27,6 +27,11 @@ public class PlayerDieState : PlayerBaseState
         _owner.gameObject.tag = "Immune";
         _owner.PlayerStat.IsImmune = true;
 
+        // 플레이어가 사망할 떄, 사망 폭발이 발생
+        Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
+        dieExplosion.transform.position = _owner.transform.position;
+        dieExplosion.Explode(true, _owner.PhotonView);
+
         // 모습 안보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
         foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
@@ -106,22 +111,15 @@ public class PlayerDieState : PlayerBaseState
     /// </summary>
     private void StartResurrection()
     {
+        // 부활 위치로 이동
+        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
+
         // 모습 보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
         foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
         {
             spriteRenderer.enabled = true;
         }
-
-        // 플레이어가 사망할 떄, 사망 폭발이 발생
-        Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
-        dieExplosion.transform.position = _owner.transform.position;
-        dieExplosion.Explode(true, _owner.PhotonView);
-        
-        Debug.Log("죽음 폭발 발생");
-
-        // 부활 위치로 이동
-        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
         
         // 플레이어 부활
         Debug.Log($"부활 시작 {_owner.PhotonView.Owner.ActorNumber}");
