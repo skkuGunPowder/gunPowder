@@ -1,6 +1,7 @@
 using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
 
 public class PlayerFallDeadState : PlayerBaseState
 {
@@ -61,6 +62,13 @@ public class PlayerFallDeadState : PlayerBaseState
                 _isGoaled = true;
                 _owner.transform.position = _endPoint;
             });
+
+        // 모습 보이게
+        List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
+        foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+        {
+            spriteRenderer.enabled = true;
+        }
     }
 
     public override void OnExit()

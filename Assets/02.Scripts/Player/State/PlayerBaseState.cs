@@ -81,7 +81,7 @@ public class PlayerBaseState : MonoState
 
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
-            _owner.SetAnimatorTrigger("Jump");
+            _owner.RPC_SetAnimatorTrigger("Jump");
             _playerFSM.ChangeState<PlayerJumpState>();
         }
     }
@@ -176,6 +176,9 @@ public class PlayerBaseState : MonoState
             return;
         }
 
+        // 공격 이벤트 발생
+        _owner.InvokeAttack();
+
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
@@ -229,6 +232,9 @@ public class PlayerBaseState : MonoState
     {
         if(!_owner.PhotonView.IsMine)
             return;
+
+        // 공격 이벤트 발생
+        _owner.InvokeAttack();
 
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)

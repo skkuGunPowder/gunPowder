@@ -6,6 +6,7 @@ using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
 
 
+
 public class Player : MonoBehaviourPun, IDamagable
 {
     [SerializeField]
@@ -28,11 +29,17 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField]
     private List<Transform> _bombSpawnPointList;
     [SerializeField]
+    private List<Transform> _explosionSpawnPointList;
+
+    [SerializeField]
     private Bomb _normalBomb;
     public Bomb NormalBomb => _normalBomb;
     [SerializeField]
     private Bomb _specialBomb;
     public Bomb SpecialBomb => _specialBomb;
+    [SerializeField]
+    private Bomb _dashBomb;
+    public Bomb DashBomb => _dashBomb;
 
     [Header("Timer")]
     [SerializeField]
@@ -50,17 +57,15 @@ public class Player : MonoBehaviourPun, IDamagable
     private float _gunPowderSpreadAngle = 90f;
     private float _gunPowderSpreadDistance = 1.0f;
 
+    public event Action OnAttack;
     public event Action OnHit;
 
+    [SerializeField]
     private BoxRay2D _groundRay2D;
     public BoxRay2D GroundRay2D => _groundRay2D;
 
-
-    public GameObject NormalBombPrefab;
-    public GameObject SpecialBombPrefab;
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
-    public GameObject DashExplosionPrefab;
 
     private const int RANDOM_SEED = 123456;
 
@@ -121,20 +126,6 @@ public class Player : MonoBehaviourPun, IDamagable
         _attackTimer = 0f;
         _gunPowderDecreaseTimer = 0f;
         _gunPowderDecreaseWithoutAttackTimer = 0f;
-
-        // 5. 애니메이터 초기화
-        foreach (var animator in _myAnimatorList)
-        {
-            animator.Rebind(); // 모든 트리거/상태 초기화
-            animator.Update(0f); // 즉시 반영
-        }
-
-        // 6. SpriteRenderer 방향/상태 초기화
-        foreach (var spriteRenderer in _playerStat.MySpriteREndererList)
-        {
-            spriteRenderer.flipX = false; // 기본 방향
-            spriteRenderer.color = Color.white; // 기본 색상
-        }
 
         if(PhotonView.IsMine)
         {
@@ -198,6 +189,11 @@ public class Player : MonoBehaviourPun, IDamagable
     private void DecreaseGunPowder(int amount)
     {
         _playerStat.DecreaseGunPowderCount(amount);
+        
+        float initCount = (float)_playerStat.InitGunpowderCount;
+        float currentCount = (float)_playerStat.CurrentPlayerGunPowderCount;
+        float newDamping = 1 - (initCount - currentCount) / initCount * 0.5f;
+        _rigidbody2D.linearDamping = newDamping;
     }
 
     /// <summary>
@@ -208,8 +204,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseTimer >= PlayerStat.GunPowderDecreaseTime)
         {
             _gunPowderDecreaseTimer = 0f;
-            PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, 1);
-            //_playerStat.DecreaseGunPowderCount(1);
+            //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, 1);
+            DecreaseGunPowder(1);
         }
     }
 
@@ -221,8 +217,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
-            PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
-            //_playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount);
+            //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
+            DecreaseGunPowder(PlayerStat.AttackPenaltyAmount);
         }
     }
 
@@ -246,6 +242,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, bool isFallingOut,PhotonMessageInfo info)
     {
+        Debug.Log($"TakeDamage : {damage}");
         if(_playerStat.IsImmune)
         {
             return;
@@ -355,6 +352,33 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
+    public Transform GetExplosionSpawnPoint()
+    {
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        switch ((h, v))
+        {
+            case (-1, 0):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Right];
+            case (-1, -1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.RightUp];
+            case (0, -1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Up];
+            case (1, -1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.LeftUp];
+            case (1, 0):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Left];
+            case (1, 1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.LeftDown];
+            case (0, 1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Down];
+            case (-1, 1):
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.RightDown];
+            default:
+                return _explosionSpawnPointList[(int)EBombSpawnPoint.Down];
+        }
+    }
+
     public Transform GetBombSpawnPoint(EBombSpawnPoint spawnPoint)
     {
         return _bombSpawnPointList[(int)spawnPoint];
@@ -458,5 +482,10 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             Debug.LogError("PlayerFSM component not found!");
         }
+    }
+
+    public void InvokeAttack()
+    {
+        OnAttack?.Invoke();
     }
 }
