@@ -9,10 +9,6 @@ public class PlayerBaseState : MonoState
     protected PlayerFSM _playerFSM;
     protected Player _owner;
 
-    private float _lastNormalBombTime = 0f;
-    private float _lastSpecialBombTime = 0f;
-
-    public float BombCoolTime = 0.2f;
     protected BoxRay2D _groundRay2D;
 
     protected float _normalRecoilForce = 10f;
@@ -100,30 +96,22 @@ public class PlayerBaseState : MonoState
 
     protected virtual bool CanNormalBomb()
     {
-        if(_owner.AttackTimer - _lastNormalBombTime < BombCoolTime)
-        {
-            return false;
-        }
-        return true;
+        return _owner.CanNormalBomb();
     }
 
     protected virtual bool CanSpecialBomb()
     {
-        if(_owner.AttackTimer - _lastSpecialBombTime < BombCoolTime)
-        {
-            return false;
-        }
-        return true;
+        return _owner.CanSpecialBomb();
     }
 
     protected virtual void SetLastNormalBombTime()
     {
-        _lastNormalBombTime = _owner.AttackTimer;
+        _owner.SetLastNormalBombTime();
     }
 
     protected virtual void SetLastSpecialBombTime()
     {
-        _lastSpecialBombTime = _owner.AttackTimer;
+        _owner.SetLastSpecialBombTime();
     }
 
     protected virtual void ResetGunPowderDecreaseWithoutAttackTimer()
@@ -143,7 +131,6 @@ public class PlayerBaseState : MonoState
         
         if (bomb == null)
         {
-            Debug.LogError($"Failed to instantiate bomb: {prefabName}");
             return;
         }
         
@@ -151,7 +138,6 @@ public class PlayerBaseState : MonoState
         Bomb bombComponent = bomb.GetComponent<Bomb>();
         if (bombComponent == null)
         {
-            Debug.LogError($"Bomb component not found on instantiated object: {prefabName}");
             return;
         }
         
@@ -159,7 +145,6 @@ public class PlayerBaseState : MonoState
         PhotonView ownerPhotonView = _owner.GetComponent<PhotonView>();
         if (ownerPhotonView == null)
         {
-            Debug.LogError("Owner PhotonView not found");
             return;
         }
         
@@ -175,6 +160,9 @@ public class PlayerBaseState : MonoState
         {
             return;
         }
+
+        // 공격 이벤트 발생
+        _owner.InvokeAttack();
 
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
@@ -230,6 +218,9 @@ public class PlayerBaseState : MonoState
         if(!_owner.PhotonView.IsMine)
             return;
 
+        // 공격 이벤트 발생
+        _owner.InvokeAttack();
+
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
@@ -242,7 +233,7 @@ public class PlayerBaseState : MonoState
 
 
         SpawnAndRpcBomb(
-            _owner.EquipedItemDict[EItemType.Bomb].name,
+            _owner.EquipedItemDict[EItemType.Bomb].Prefab.name,
             bombSpawnPoint,
             methodName,
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }

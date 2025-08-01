@@ -4,6 +4,12 @@ using UnityEngine;
 public class PlayerIdleState : PlayerBaseState
 {
     private bool _firstEnter = false;
+    
+    // 방향 변경 감지용
+    private int _lastFacingDirection = 0;
+
+    private const float MAX_FALL_SPEED = -20f; // 최대 낙하 속도
+    private const float MAX_JUMP_SPEED = 30f;  // 최대 점프 속도
 
     public override void OnEnter()
     {
@@ -132,8 +138,27 @@ public class PlayerIdleState : PlayerBaseState
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
         || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
         {
-            _owner.RPC_SetFacingDirection(Input.GetKey(KeyCode.LeftArrow) ? -1 : 1);
+            int newDirection = Input.GetKey(KeyCode.LeftArrow) ? -1 : 1;
+            // 방향이 바뀔 때만 RPC 호출
+            if (_lastFacingDirection != newDirection)
+            {
+                _owner.RPC_SetFacingDirection(newDirection);
+                _lastFacingDirection = newDirection;
+            }
             _playerFSM.ChangeState<PlayerWalkState>();
         }
+    }
+
+    private void LimitYVelocity()
+    {
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        
+        // 낙하 속도 제한 (음수)
+        if (velocity.y < MAX_FALL_SPEED)
+        {
+            velocity.y = MAX_FALL_SPEED;
+        }
+        
+        _owner.Rigidbody2D.linearVelocity = velocity;
     }
 }

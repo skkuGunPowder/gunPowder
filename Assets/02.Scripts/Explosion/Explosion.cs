@@ -40,7 +40,7 @@ public class Explosion : MonoBehaviour
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
                 }
 
-                if (other.gameObject.tag == "Player" && !_stat.IsSelfDamage)
+                if (attackerPhotonView.IsMine && !_stat.IsSelfDamage)
                 {
                     continue;
                 }
@@ -64,6 +64,8 @@ public class Explosion : MonoBehaviour
         // 거리 비례로 감소하는 힘
         float forceMagnitude = explosionForce * (1 - (distance / explosionRadius));
         direction.Normalize();
+        
+        // 허정범 테스트
 
         rb.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
     }
