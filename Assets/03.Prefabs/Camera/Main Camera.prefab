@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 1746503965656212863}
   - component: {fileID: 4019933377098660913}
   - component: {fileID: 6688180221441323649}
+  - component: {fileID: 598473460444119424}
+  - component: {fileID: 3257289808474687121}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -255,3 +257,39 @@ MonoBehaviour:
   MaxLeftTargetDistance: 0.8
   LimitRightCameraDistance: 1
   MaxRightTargetDistance: 0.8
+--- !u!114 &598473460444119424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420445649814059649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ac0ec3d6ad5f4a3d9d184bc3773a3a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pc2D: {fileID: 808785234075494698}
+  _serializedAxis: 0
+  ShakePresets:
+  - {fileID: 11400000, guid: 6c47cdba9ce634971ba9d84eb91de2d4, type: 2}
+  - {fileID: 11400000, guid: a4b0b25580a794d259ee085755a1b142, type: 2}
+  - {fileID: 11400000, guid: 865c0998fbb884706bc8e9216bc17d0c, type: 2}
+  - {fileID: 11400000, guid: bdeb758c7bbd24b29bc19493062ef65e, type: 2}
+  ConstantShakePresets: []
+  StartConstantShakePreset: {fileID: 0}
+  CurrentConstantShakePreset: {fileID: 0}
+--- !u!114 &3257289808474687121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420445649814059649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fba39765ddbca1e47baeebab5dcae167, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _mainCamera: {fileID: 0}
+  _proCamera: {fileID: 0}

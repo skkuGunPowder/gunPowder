@@ -6,6 +6,12 @@ public class Explosion : MonoBehaviour
     public GameObject VFXPrefab;
 
     protected ExplosionStat _stat;
+    protected CameraController _cameraController;
+
+    protected virtual void Awake()
+    {
+        _cameraController = Camera.main.GetComponent<CameraController>();
+    }
 
     protected void SetStat(string id)
     {
@@ -15,6 +21,9 @@ public class Explosion : MonoBehaviour
     public virtual void Explode(bool isFallingOut, PhotonView attackerPhotonView)
     {
         Instantiate(VFXPrefab, transform.position, Quaternion.identity);
+
+        Debug.LogWarning($"폭발 발생");
+        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
