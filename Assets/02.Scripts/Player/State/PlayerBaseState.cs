@@ -12,7 +12,6 @@ public class PlayerBaseState : MonoState
     private float _lastNormalBombTime = 0f;
     private float _lastSpecialBombTime = 0f;
 
-    public float BombCoolTime = 0.2f;
     protected BoxRay2D _groundRay2D;
 
     protected float _normalRecoilForce = 10f;
@@ -100,7 +99,7 @@ public class PlayerBaseState : MonoState
 
     protected virtual bool CanNormalBomb()
     {
-        if(_owner.AttackTimer - _lastNormalBombTime < BombCoolTime)
+        if(_owner.AttackTimer - _lastNormalBombTime <_owner.NormalBomb.GetBombStat().CoolTime)
         {
             return false;
         }
@@ -109,7 +108,8 @@ public class PlayerBaseState : MonoState
 
     protected virtual bool CanSpecialBomb()
     {
-        if(_owner.AttackTimer - _lastSpecialBombTime < BombCoolTime)
+        BombStat bombStat = _owner.EquipedItemDict[EItemType.Bomb].GetComponent<Bomb>().GetBombStat();
+        if(_owner.AttackTimer - _lastSpecialBombTime < bombStat.CoolTime)
         {
             return false;
         }

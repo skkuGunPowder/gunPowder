@@ -35,9 +35,6 @@ public class Player : MonoBehaviourPun, IDamagable
     private Bomb _normalBomb;
     public Bomb NormalBomb => _normalBomb;
     [SerializeField]
-    private Bomb _specialBomb;
-    public Bomb SpecialBomb => _specialBomb;
-    [SerializeField]
     private Bomb _dashBomb;
     public Bomb DashBomb => _dashBomb;
 
