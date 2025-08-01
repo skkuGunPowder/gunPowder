@@ -21,7 +21,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public PhotonView PhotonView;
 
-    public Dictionary<EItemType, GameObject> EquipedItemDict;
+    public Dictionary<EItemType, ItemDTO> EquipedItemDict;
 
     [Header("Bomb")]
     // 폭탄 스폰 위치 리스트
@@ -31,7 +31,6 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField]
     private List<Transform> _explosionSpawnPointList;
 
-    [SerializeField]
     private Bomb _normalBomb;
     public Bomb NormalBomb => _normalBomb;
     [SerializeField]
@@ -65,7 +64,16 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject DieExplosionPrefab;
 
     private const int RANDOM_SEED = 123456;
+    private const string BASIC_BOMB_ID =  "BO0001";
+    public BombStat BasicBombStat;
+    public BombStat SpecialBombStat;
 
+    // 쿨타임 체크용 변수
+    private float _lastNormalBombTime = 0f;
+    private float _lastSpecialBombTime = 0f;
+
+    public float LastNormalBombTime => _lastNormalBombTime;
+    public float LastSpecialBombTime => _lastSpecialBombTime;
 
     private void Awake()
     {
@@ -74,8 +82,16 @@ public class Player : MonoBehaviourPun, IDamagable
         _groundRay2D = GetComponent<BoxRay2D>();
         PhotonView = GetComponent<PhotonView>();
 
-        EquipedItemDict = new Dictionary<EItemType, GameObject>();
+        EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         LoadItems();
+
+        // 폭탄 정보 받아오기
+        GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
+        _normalBomb = basicBomb.GetComponent<Bomb>();
+        BombStat bombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
+        BasicBombStat = bombStat;
+        BombStat specialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
+        SpecialBombStat = specialBombStat;
 
         UI_PingBase.Instance.SetPing(transform);
 
@@ -90,7 +106,7 @@ public class Player : MonoBehaviourPun, IDamagable
             EItemType itemType = (EItemType)i;
             if (photonPlayer.CustomProperties.TryGetValue(itemType.ToString(), out object itemID))
             {
-                EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID).Prefab);
+                EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID));
             }
         }
     }
@@ -484,5 +500,26 @@ public class Player : MonoBehaviourPun, IDamagable
     public void InvokeAttack()
     {
         OnAttack?.Invoke();
+    }
+
+    
+    public bool CanNormalBomb()
+    {
+        return AttackTimer - _lastNormalBombTime >= BasicBombStat.CoolTime;
+    }
+
+    public bool CanSpecialBomb()
+    {
+        return AttackTimer - _lastSpecialBombTime >= SpecialBombStat.CoolTime;
+    }
+
+    public void SetLastNormalBombTime()
+    {
+        _lastNormalBombTime = AttackTimer;
+    }
+
+    public void SetLastSpecialBombTime()
+    {
+        _lastSpecialBombTime = AttackTimer;
     }
 }
