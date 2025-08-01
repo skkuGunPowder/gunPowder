@@ -205,6 +205,7 @@ public class PlayerJumpState : PlayerBaseState
             GameObject prefab = PhotonNetwork.Instantiate("BasicBomb", position, Quaternion.identity);
             if(prefab.TryGetComponent(out Bomb bomb))
             {
+                bomb.PhotonView.RPC(nameof(bomb.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
                 bomb.PhotonView.RPC(nameof(bomb.Explode), RpcTarget.All);
                 _explosionOverrideTimer = EXPLOSION_OVERRIDE_DURATION;
             }
