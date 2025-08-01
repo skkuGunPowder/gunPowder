@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
+using PhotonPlayer = Photon.Realtime.Player;
 
 
 public class Player : MonoBehaviourPun, IDamagable
@@ -19,6 +20,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public PhotonView PhotonView;
 
+    public Dictionary<EItemType, GameObject> EquipedItemDict;
 
     [Header("Bomb")]
     // 폭탄 스폰 위치 리스트
@@ -72,7 +74,10 @@ public class Player : MonoBehaviourPun, IDamagable
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _groundRay2D = GetComponent<BoxRay2D>();
         PhotonView = GetComponent<PhotonView>();
+
+        EquipedItemDict = new Dictionary<EItemType, GameObject>();
         LoadItems();
+
         UI_PingBase.Instance.SetPing(transform);
 
         UnityEngine.Random.InitState(RANDOM_SEED);
@@ -80,7 +85,15 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void LoadItems()
     {
-        // ItemStorage.Instance.Get
+        PhotonPlayer photonPlayer = PhotonView.Owner;
+        for(int i=0; i<(int)EItemType.None; i++)
+        {
+            EItemType itemType = (EItemType)i;
+            if (photonPlayer.CustomProperties.TryGetValue(itemType.ToString(), out object itemID))
+            {
+                EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID).Prefab);
+            }
+        }
     }
 
     private void Start()
