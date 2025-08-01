@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BasicExplosion : Explosion
 {
-    public const string ID = "E0001";
+    public const string ID = "EP0001";
 
 
     protected override void Awake()
