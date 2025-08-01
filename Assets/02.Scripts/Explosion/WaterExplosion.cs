@@ -2,8 +2,9 @@ public class WaterExplosion : Explosion
 {
     public const string ID = "E0005";
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         SetStat(ID);
     }
 }

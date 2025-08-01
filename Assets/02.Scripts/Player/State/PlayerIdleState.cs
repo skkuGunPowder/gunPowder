@@ -30,6 +30,7 @@ public class PlayerIdleState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
+        _owner.RPC_ResetAnimatorTrigger("Land");
         _owner.RPC_ResetAnimatorTrigger("Idle");
     }
 

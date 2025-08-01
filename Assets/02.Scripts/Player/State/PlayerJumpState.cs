@@ -18,12 +18,23 @@ public class PlayerJumpState : PlayerBaseState
 
     private float _originalGravity;
 
+    private float _explosionOverrideTimer = 0f;
+    private const float EXPLOSION_OVERRIDE_DURATION = 0.3f; // n초 동안 velocity.x 덮어쓰기 차단
+
+    // 착지 직전 감지용 변수
+    private bool _wasGroundedLastFrame = false;
+    private float _airborneTimer = 0f;
+    private const float MIN_AIRBORNE_TIME = 0.01f;
+
+    private bool _isLanding = false;
+
     public override void OnEnter()
     {
         base.OnEnter();
 
+        _isLanding = false;
+
         _owner.PlayerStat.IsJumping = true;
-        
         _yVelocity = 0;
         if (_owner.PlayerStat.IsFallingFromLedge)
         {
@@ -42,18 +53,23 @@ public class PlayerJumpState : PlayerBaseState
             velocity.y = _yVelocity;
             _owner.Rigidbody2D.linearVelocity = velocity;
         }
+
         _timer = 0f;
         _keyReleaseTimer = 0f;
-
         _originalGravity = _owner.Rigidbody2D.gravityScale;
+
+        // 착지 직전 감지 변수 초기화
+        _groundRay2D.Cast();
+        _wasGroundedLastFrame = _groundRay2D.Performed;
+        _airborneTimer = 0f;
     }
 
     public override void OnExit()
     {
         _owner.RPC_ResetAnimatorTrigger("Jump");
         //_owner.RPC_SetAnimatorTrigger("Land");
-
         _owner.Rigidbody2D.gravityScale = _originalGravity;
+        _owner.PlayerStat.IsJumping = false;
         base.OnExit();
     }
 
@@ -62,18 +78,42 @@ public class PlayerJumpState : PlayerBaseState
     /// </summary>
     public override void MineUpdate()
     {
-        //base.MineUpdate();
-
         _timer += Time.deltaTime;
+        if (_explosionOverrideTimer > 0f)
+        {
+            _explosionOverrideTimer -= Time.deltaTime;
+        }
 
         // 아래키를 누르는 동안 중력 증가
         if(Input.GetKeyDown(KeyCode.DownArrow))
         {
-            _owner.Rigidbody2D.gravityScale += 2;
+            //_owner.Rigidbody2D.gravityScale += 2;
         }
         if(Input.GetKeyUp(KeyCode.DownArrow)) 
         {
-            _owner.Rigidbody2D.gravityScale = _originalGravity;
+            //_owner.Rigidbody2D.gravityScale = _originalGravity;
+        }
+
+        // 착지 직전 감지
+        _groundRay2D.Cast();
+        bool isGroundedNow = _groundRay2D.Performed;
+        if (!isGroundedNow)
+            _airborneTimer += Time.deltaTime;
+        bool isLandingSoon = !_wasGroundedLastFrame && isGroundedNow && _airborneTimer > MIN_AIRBORNE_TIME;
+        if (isLandingSoon)
+        {
+            Debug.Log("착지 직전!");
+            // 여기서 이펙트, 애니메이션 등만 처리 (상태 전환 X)
+             _owner.RPC_SetAnimatorTrigger("Land");
+             _isLanding = true;
+        }
+        _wasGroundedLastFrame = isGroundedNow;
+
+        // 완전히 땅에 닿았을 때만 IdleState로 변경
+        if (isGroundedNow && _airborneTimer > MIN_AIRBORNE_TIME)
+        {
+            _playerFSM.ChangeState<PlayerIdleState>();
+            return;
         }
 
         bool flowControl = JumpMove();
@@ -148,25 +188,26 @@ public class PlayerJumpState : PlayerBaseState
 
         // Rigidbody2D 기반 이동 적용
         Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-        velocity.x = _xVelocity;
-        // y축은 건드리지 않음 (중력에 맡김)
-        _owner.Rigidbody2D.linearVelocity = velocity;
 
-        // 더블 점프
+        if (_explosionOverrideTimer <= 0f)
+        {
+            velocity.x = Mathf.Lerp(velocity.x, _xVelocity, 1 * Time.deltaTime);
+            // y축은 건드리지 않음 (중력에 맡김)
+            _owner.Rigidbody2D.linearVelocity = velocity;
+        }
+
+        // 폭탄 대쉬
         if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
-            Debug.Log("Bomb Dash");
             _owner.PlayerStat.IncrementJumpCount();
-            // 점프 시에만 y속도 설정
-            /*
-            velocity = _owner.Rigidbody2D.linearVelocity;
-            velocity.y = _owner.PlayerStat.JumpForce;
-            _owner.Rigidbody2D.linearVelocity = velocity;*/
-            Vector3 position = _owner.GetBombSpawnPoint().position;
-            GameObject prefab = PhotonNetwork.Instantiate(nameof(_owner.DashExplosionPrefab), position, Quaternion.identity);
-            if(prefab.TryGetComponent(out Explosion explosion))
+
+            Vector3 position = _owner.GetExplosionSpawnPoint().position;
+            GameObject prefab = PhotonNetwork.Instantiate("BasicBomb", position, Quaternion.identity);
+            if(prefab.TryGetComponent(out Bomb bomb))
             {
-                explosion.Explode(false, _owner.PhotonView);
+                bomb.PhotonView.RPC(nameof(bomb.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
+                bomb.PhotonView.RPC(nameof(bomb.Explode), RpcTarget.All);
+                _explosionOverrideTimer = EXPLOSION_OVERRIDE_DURATION;
             }
         }
 
@@ -188,14 +229,6 @@ public class PlayerJumpState : PlayerBaseState
                 return false;
             }
             _lastRightTapTime = Time.time;
-        }
-
-        // 착지 체크 (유예 시간 이후에만, 2D Raycast 사용)
-        if (_timer > LANDING_GRACE_TIME && IsGrounded2D())
-        {
-            _owner.SetAnimatorTrigger("Land");
-            _playerFSM.ChangeState<PlayerIdleState>();
-            return false;
         }
 
         return true;

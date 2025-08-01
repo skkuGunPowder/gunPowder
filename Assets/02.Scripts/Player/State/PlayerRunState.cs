@@ -21,6 +21,7 @@ public class PlayerRunState : PlayerBaseState
         // 플레이어 상태
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.RunSpeed;
         _owner.PlayerStat.IsRunning = true;
+        _owner.PlayerStat.IsJumping = false;
 
         // 애니메이션 재생
         _owner.RPC_SetAnimatorTrigger("Run");
