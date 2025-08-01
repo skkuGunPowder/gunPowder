@@ -227,8 +227,14 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         if(!PhotonView.IsMine)
         {
+            // 피격 VFX 재생
+            VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
             return;
         }
+
+        // 피격 VFX 재생
+        VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
+
         PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, isFallingOut);
     }
 
