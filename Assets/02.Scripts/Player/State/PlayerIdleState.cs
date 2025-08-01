@@ -139,12 +139,13 @@ public class PlayerIdleState : PlayerBaseState
         || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
         {
             int newDirection = Input.GetKey(KeyCode.LeftArrow) ? -1 : 1;
+            /*
             // 방향이 바뀔 때만 RPC 호출
             if (_lastFacingDirection != newDirection)
             {
                 _owner.RPC_SetFacingDirection(newDirection);
                 _lastFacingDirection = newDirection;
-            }
+            }*/
             _playerFSM.ChangeState<PlayerWalkState>();
         }
     }

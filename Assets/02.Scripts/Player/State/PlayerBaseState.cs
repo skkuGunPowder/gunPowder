@@ -40,7 +40,7 @@ public class PlayerBaseState : MonoState
 
     protected virtual void HandleHit()
     {
-        _playerFSM.ChangeState<PlayerDamagedState>();
+        _playerFSM.ChangeState<PlayerHitStopState>();
     }
 
     public virtual void MineUpdate()
