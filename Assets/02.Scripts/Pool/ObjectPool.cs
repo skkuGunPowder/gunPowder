@@ -58,7 +58,6 @@ public class ObjectPool<T> where T : Behaviour
 
         if (queue.Count > 0)
         {
-            Debug.Log("정상 호출");
             T obj = queue.Dequeue();
             obj.gameObject.SetActive(true);
             return obj;

@@ -102,7 +102,6 @@ public class PlayerJumpState : PlayerBaseState
         bool isLandingSoon = !_wasGroundedLastFrame && isGroundedNow && _airborneTimer > MIN_AIRBORNE_TIME;
         if (isLandingSoon)
         {
-            Debug.Log("착지 직전!");
             // 여기서 이펙트, 애니메이션 등만 처리 (상태 전환 X)
              _owner.RPC_SetAnimatorTrigger("Land");
              _isLanding = true;
