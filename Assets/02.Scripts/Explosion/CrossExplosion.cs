@@ -22,7 +22,7 @@ public class CrossExplosion : Explosion
         for (int i = 0; i < 4; i++)
         {
             WaterMissile waterMissile = Instantiate(WaterMissilePrefab, transform.position, Quaternion.identity);
-            waterMissile.Init(attackerPhotonView, _distance, _stat);
+            waterMissile.Init(_cameraController, attackerPhotonView, _distance, _stat);
             waterMissile.Launch(_directions[i]);
         }
 

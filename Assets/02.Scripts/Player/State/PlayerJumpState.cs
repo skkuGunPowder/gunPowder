@@ -11,8 +11,8 @@ public class PlayerJumpState : PlayerBaseState
     private const float LANDING_GRACE_TIME = 0.2f;
     
     // Y축 속도 제한
-    private const float MAX_FALL_SPEED = -15f; // 최대 낙하 속도
-    private const float MAX_JUMP_SPEED = 30f;  // 최대 점프 속도
+    private const float MAX_FALL_SPEED = -20f; // 최대 낙하 속도
+    private const float MAX_JUMP_SPEED = 25f;  // 최대 점프 속도
 
     // 키 릴리즈 타이머 추가
     private float _keyReleaseTimer = 0f;

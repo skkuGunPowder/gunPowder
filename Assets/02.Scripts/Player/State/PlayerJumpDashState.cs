@@ -39,10 +39,18 @@ public class PlayerJumpDashState : PlayerBaseState
     /// </summary>
     public override void MineUpdate()
     {
-        // 대쉬 시간 종료 후 점프 상태와 같이 움직임
+        // 대쉬 시간 종료 후 바닥 체크
         if(_dashTimer >= _owner.PlayerStat.DashTime)
         {
-            _playerFSM.ChangeState<PlayerJumpState>();
+            // 바닥에 있는지 체크
+            if (IsGrounded2D())
+            {
+                _playerFSM.ChangeState<PlayerIdleState>();
+            }
+            else
+            {
+                _playerFSM.ChangeState<PlayerJumpState>();
+            }
         }
         else
         {

@@ -140,6 +140,10 @@ public class Bomb : MonoBehaviourPun, IBomb
         }
     }
 
+    public BombStat GetBombStat()
+    {
+        return _stat;
+    }
 
     [PunRPC]
     // 폭탄 두기

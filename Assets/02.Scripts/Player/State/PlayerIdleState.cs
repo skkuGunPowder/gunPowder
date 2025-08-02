@@ -8,6 +8,9 @@ public class PlayerIdleState : PlayerBaseState
     // 방향 변경 감지용
     private int _lastFacingDirection = 0;
 
+    private const float MAX_FALL_SPEED = -20f; // 최대 낙하 속도
+    private const float MAX_JUMP_SPEED = 30f;  // 최대 점프 속도
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -144,5 +147,18 @@ public class PlayerIdleState : PlayerBaseState
             }
             _playerFSM.ChangeState<PlayerWalkState>();
         }
+    }
+
+    private void LimitYVelocity()
+    {
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        
+        // 낙하 속도 제한 (음수)
+        if (velocity.y < MAX_FALL_SPEED)
+        {
+            velocity.y = MAX_FALL_SPEED;
+        }
+        
+        _owner.Rigidbody2D.linearVelocity = velocity;
     }
 }
