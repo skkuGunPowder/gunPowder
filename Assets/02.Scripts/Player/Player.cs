@@ -187,7 +187,18 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void HandleGunPowderEmpty()
     {
-        GetComponent<PlayerFSM>().ChangeState<PlayerDieState>();
+        // PlayerFSM을 통해 SyncStateChange 호출
+        PlayerFSM playerFSM = GetComponent<PlayerFSM>();
+        if (playerFSM != null)
+        {
+            // 네트워크 동기화된 상태 변경
+            playerFSM.SyncStateChange<PlayerDieState>();
+        }
+        else
+        {
+            // PlayerFSM이 없는 경우 직접 변경
+            GetComponent<PlayerFSM>().ChangeState<PlayerDieState>();
+        }
     }
 
     private void Update()

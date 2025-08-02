@@ -16,10 +16,24 @@ public class PlayerFallDeadState : PlayerBaseState
     private float _totalDuration = 2.0f; // 전체 이동 시간
     private float _waitDuration = 2.0f; // 대기 시간
     private float _wailTime = 0f;
+    
+    // DOTween 저장용
+    private Tween _moveTween;
+    
+    // 안전성 체크용
+    private bool _isInitialized = false;
 
     public override void OnEnter()
     {
         base.OnEnter();
+        
+        // 안전성 체크
+        if (GameManager.Instance == null)
+        {
+            Debug.LogError("GameManager.Instance is null in PlayerFallDeadState");
+            return;
+        }
+        
         // 어떤 플레이어가 들어왓는지 로그
         Debug.Log($"PlayerFallDeadState {_owner.PhotonView.Owner.ActorNumber}");
         
@@ -55,8 +69,8 @@ public class PlayerFallDeadState : PlayerBaseState
         // 경로 설정 (좌우 반전 적용)
         Vector3[] path = new Vector3[] { _startPoint, _middlePoint, _endPoint };
 
-        // DOTween 곡선 이동
-        _owner.transform.DOPath(path, _totalDuration, PathType.CatmullRom)
+        // DOTween 곡선 이동 - Tween 저장
+        _moveTween = _owner.transform.DOPath(path, _totalDuration, PathType.CatmullRom)
             .SetEase(Ease.InOutSine)
             .OnComplete(() => {
                 _isGoaled = true;
@@ -69,11 +83,21 @@ public class PlayerFallDeadState : PlayerBaseState
         {
             spriteRenderer.enabled = true;
         }
+        
+        _isInitialized = true;
     }
 
     public override void OnExit()
     {
         base.OnExit();
+        
+        // DOTween 중단
+        if (_moveTween != null && _moveTween.IsActive())
+        {
+            _moveTween.Kill();
+            _moveTween = null;
+        }
+        
         _owner.PlayerStat.IsFallingDead = false;
         
         // 무적 해제
@@ -89,6 +113,12 @@ public class PlayerFallDeadState : PlayerBaseState
 
     public override void Update()
     {
+        // 초기화되지 않았으면 실행하지 않음
+        if (!_isInitialized)
+        {
+            return;
+        }
+        
         if (_isGoaled)
         {
             transform.position = _endPoint;
@@ -97,18 +127,24 @@ public class PlayerFallDeadState : PlayerBaseState
             if (_wailTime >= _waitDuration)
             {
                 Debug.Log($"PlayerFallDeadState {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생");
-                // 사망 폭발 발생
-                // 플레이어가 사망할 떄, 사망 폭발이 발생
+                
+                // 안전성 체크
+                if (ExplosionPool.Instance == null || _owner.DieExplosionPrefab == null)
+                {
+                    Debug.LogError("ExplosionPool or DieExplosionPrefab is null");
+                    return;
+                }
+                
                 Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
-                dieExplosion.transform.position = _owner.transform.position;
-                dieExplosion.Explode(true, _owner.PhotonView);
+                if (dieExplosion != null)
+                {
+                    dieExplosion.transform.position = _owner.transform.position;
+                    dieExplosion.Explode(true, _owner.PhotonView);
+                }
                 
                 // 15의 데미지를 받는다.
                 _owner.PlayerStat.IsImmune = false;
                 _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, true);
-                
-                // 피격 상태로 전환
-                _playerFSM.ChangeState<PlayerDamagedState>();
             }
         }
     }

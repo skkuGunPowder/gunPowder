@@ -246,7 +246,6 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerGunPowderCount -= amount;
         bool isDead = false;
 
-        Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 현재 체력 감소 중");
         if (_currentPlayerGunPowderCount <= 0)
         {
             _currentPlayerLife -= 1;

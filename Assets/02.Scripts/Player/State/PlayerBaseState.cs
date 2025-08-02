@@ -40,7 +40,20 @@ public class PlayerBaseState : MonoState
 
     protected virtual void HandleHit()
     {
-        SyncStateChange<PlayerHitStopState>();
+        // 이미 히트스탑 상태라면 추가 히트 처리
+        if (_playerFSM.IsCurrentState<PlayerHitStopState>())
+        {
+            PlayerHitStopState currentHitStopState = _playerFSM.GetCurrentState<PlayerHitStopState>();
+            if (currentHitStopState != null)
+            {
+                currentHitStopState.OnAdditionalHit();
+            }
+        }
+        else
+        {
+            // 새로운 히트스탑 상태로 전환
+            SyncStateChange<PlayerHitStopState>();
+        }
     }
 
     public virtual void MineUpdate()
@@ -91,6 +104,37 @@ public class PlayerBaseState : MonoState
 
         _groundRay2D.Cast();
         return _groundRay2D.Performed;
+    }
+
+    /// <summary>
+    /// 개선된 착지 감지 메서드
+    /// </summary>
+    /// <param name="wasGroundedLastFrame">이전 프레임의 착지 상태</param>
+    /// <param name="airborneTimer">공중 시간</param>
+    /// <param name="minAirborneTime">최소 공중 시간</param>
+    /// <returns>현재 착지 상태</returns>
+    protected virtual bool IsGrounded2DImproved(ref bool wasGroundedLastFrame, ref float airborneTimer, float minAirborneTime = 0.05f)
+    {
+        if(_groundRay2D == null)
+        {
+            return false;
+        }
+
+        _groundRay2D.Cast();
+        bool isGroundedNow = _groundRay2D.Performed;
+        
+        // 공중 시간 계산
+        if (!isGroundedNow)
+        {
+            airborneTimer += Time.deltaTime;
+        }
+        
+        // 착지 감지 (이전에 공중이었다가 지금 땅에 닿음)
+        bool isLandingSoon = !wasGroundedLastFrame && isGroundedNow && airborneTimer > minAirborneTime;
+        
+        wasGroundedLastFrame = isGroundedNow;
+        
+        return isGroundedNow;
     }
 
     protected virtual bool CanNormalBomb()

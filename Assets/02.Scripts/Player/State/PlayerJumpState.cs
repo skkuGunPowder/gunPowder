@@ -28,21 +28,46 @@ public class PlayerJumpState : PlayerBaseState
     private float _explosionOverrideTimer = 0f;
     private const float EXPLOSION_OVERRIDE_DURATION = 0.3f; // n초 동안 velocity.x 덮어쓰기 차단
 
-    // 착지 직전 감지용 변수
+    // 착지 감지 개선
     private bool _wasGroundedLastFrame = false;
     private float _airborneTimer = 0f;
-    private const float MIN_AIRBORNE_TIME = 0.01f;
-
+    private const float MIN_AIRBORNE_TIME = 0.05f; // 최소 공중 시간 증가
+    private const float LANDING_CHECK_DELAY = 0.1f; // 착지 확인 지연
+    private float _landingCheckTimer = 0f;
     private bool _isLanding = false;
+    private bool _landingConfirmed = false;
 
     public override void OnEnter()
     {
         base.OnEnter();
 
         _isLanding = false;
+        _landingConfirmed = false;
+        _landingCheckTimer = 0f;
 
         _owner.PlayerStat.IsJumping = true;
         _yVelocity = 0;
+        
+        // 공중 생성 시 처리를 위한 초기 상태 확인
+        bool isInitialAirborne = false;
+        
+        // 현재 상태가 땅에 닿아있는지 확인
+        _groundRay2D.Cast();
+        bool isCurrentlyGrounded = _groundRay2D.Performed;
+        
+        // 공중에서 생성된 경우 (땅에 닿아있지 않음)
+        if (!isCurrentlyGrounded)
+        {
+            isInitialAirborne = true;
+            _airborneTimer = 0.1f; // 최소 공중 시간 설정
+            _wasGroundedLastFrame = false;
+        }
+        else
+        {
+            _wasGroundedLastFrame = true;
+            _airborneTimer = 0f;
+        }
+        
         if (_owner.PlayerStat.IsFallingFromLedge)
         {
             _yVelocity = 0f; // 낙하
@@ -51,7 +76,9 @@ public class PlayerJumpState : PlayerBaseState
         else if(!_playerFSM.IsPreviousState<PlayerJumpDashState>()
             && !_playerFSM.IsPreviousState<PlayerRecoilState>()
             && !_playerFSM.IsPreviousState<PlayerNormalRecoilState>()
-            && !_playerFSM.IsPreviousState<PlayerBreakState>())
+            && !_playerFSM.IsPreviousState<PlayerBreakState>()
+            && !_playerFSM.IsPreviousState<PlayerDamagedState>()
+            && !isInitialAirborne) // 공중 생성이 아닌 경우에만 점프 카운트 증가
         {
             _owner.PlayerStat.IncrementJumpCount();
             _yVelocity = _owner.PlayerStat.JumpForce;
@@ -64,17 +91,11 @@ public class PlayerJumpState : PlayerBaseState
         _timer = 0f;
         _keyReleaseTimer = 0f;
         _originalGravity = _owner.Rigidbody2D.gravityScale;
-
-        // 착지 직전 감지 변수 초기화
-        _groundRay2D.Cast();
-        _wasGroundedLastFrame = _groundRay2D.Performed;
-        _airborneTimer = 0f;
     }
 
     public override void OnExit()
     {
         _owner.RPC_ResetAnimatorTrigger("Jump");
-        //_owner.RPC_SetAnimatorTrigger("Land");
         _owner.Rigidbody2D.gravityScale = _originalGravity;
         _owner.PlayerStat.IsJumping = false;
         base.OnExit();
@@ -94,33 +115,25 @@ public class PlayerJumpState : PlayerBaseState
         // Y축 속도 제한 적용
         LimitYVelocity();
 
-        // 아래키를 누르는 동안 중력 증가
-        if(Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            //_owner.Rigidbody2D.gravityScale += 2;
-        }
-        if(Input.GetKeyUp(KeyCode.DownArrow)) 
-        {
-            //_owner.Rigidbody2D.gravityScale = _originalGravity;
-        }
-
-        // 착지 직전 감지
-        _groundRay2D.Cast();
-        bool isGroundedNow = _groundRay2D.Performed;
-        if (!isGroundedNow)
-            _airborneTimer += Time.deltaTime;
-        bool isLandingSoon = !_wasGroundedLastFrame && isGroundedNow && _airborneTimer > MIN_AIRBORNE_TIME;
-        if (isLandingSoon)
-        {
-            // 여기서 이펙트, 애니메이션 등만 처리 (상태 전환 X)
-             _owner.RPC_SetAnimatorTrigger("Land");
-             _isLanding = true;
-        }
-        _wasGroundedLastFrame = isGroundedNow;
+        // 착지 감지 개선
+        HandleLandingDetection();
 
         // 완전히 땅에 닿았을 때만 IdleState로 변경
-        if (isGroundedNow && _airborneTimer > MIN_AIRBORNE_TIME)
+        if (_landingConfirmed)
         {
+            // DamagedState에서 온 경우가 아니라면 착지 플래그 설정
+            try
+            {
+                if (!_playerFSM.IsPreviousState<PlayerDamagedState>())
+                {
+                    PlayerIdleState.SetLandingFromJump(); // 착지 플래그 설정
+                }
+            }
+            catch
+            {
+                // 이전 상태가 없는 경우 (초기 상태)
+                PlayerIdleState.SetLandingFromJump(); // 착지 플래그 설정
+            }
             _playerFSM.ChangeState<PlayerIdleState>();
             return;
         }
@@ -132,6 +145,46 @@ public class PlayerJumpState : PlayerBaseState
         }
 
         JumpAttack();
+    }
+
+    /// <summary>
+    /// 착지 감지 로직 개선
+    /// </summary>
+    private void HandleLandingDetection()
+    {
+        _groundRay2D.Cast();
+        bool isGroundedNow = _groundRay2D.Performed;
+        
+        // 공중 시간 계산
+        if (!isGroundedNow)
+        {
+            _airborneTimer += Time.deltaTime;
+        }
+        
+        // 착지 감지 (이전에 공중이었다가 지금 땅에 닿음)
+        // 공중 생성 시에는 더 긴 공중 시간이 필요할 수 있음
+        float requiredAirborneTime = _airborneTimer > 0.1f ? MIN_AIRBORNE_TIME : MIN_AIRBORNE_TIME * 2f;
+        bool isLandingSoon = !_wasGroundedLastFrame && isGroundedNow && _airborneTimer > requiredAirborneTime;
+        
+        if (isLandingSoon)
+        {
+            // 착지 애니메이션 트리거
+            _owner.RPC_SetAnimatorTrigger("Land");
+            _isLanding = true;
+            _landingCheckTimer = 0f;
+        }
+        
+        // 착지 확인 (일정 시간 후 상태 전환)
+        if (_isLanding)
+        {
+            _landingCheckTimer += Time.deltaTime;
+            if (_landingCheckTimer >= LANDING_CHECK_DELAY && isGroundedNow)
+            {
+                _landingConfirmed = true;
+            }
+        }
+        
+        _wasGroundedLastFrame = isGroundedNow;
     }
 
     private bool JumpMove()
