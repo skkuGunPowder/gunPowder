@@ -9,6 +9,10 @@ public class PlayerJumpState : PlayerBaseState
     private float _xVelocity = 0f;
     private float _timer = 0f;
     private const float LANDING_GRACE_TIME = 0.2f;
+    
+    // Y축 속도 제한
+    private const float MAX_FALL_SPEED = -20f; // 최대 낙하 속도
+    private const float MAX_JUMP_SPEED = 25f;  // 최대 점프 속도
 
     // 키 릴리즈 타이머 추가
     private float _keyReleaseTimer = 0f;
@@ -17,6 +21,9 @@ public class PlayerJumpState : PlayerBaseState
     private float _lastRightTapTime = 0f;
 
     private float _originalGravity;
+    
+    // 방향 변경 감지용
+    private int _lastFacingDirection = 0;
 
     private float _explosionOverrideTimer = 0f;
     private const float EXPLOSION_OVERRIDE_DURATION = 0.3f; // n초 동안 velocity.x 덮어쓰기 차단
@@ -84,6 +91,9 @@ public class PlayerJumpState : PlayerBaseState
             _explosionOverrideTimer -= Time.deltaTime;
         }
 
+        // Y축 속도 제한 적용
+        LimitYVelocity();
+
         // 아래키를 누르는 동안 중력 증가
         if(Input.GetKeyDown(KeyCode.DownArrow))
         {
@@ -102,7 +112,6 @@ public class PlayerJumpState : PlayerBaseState
         bool isLandingSoon = !_wasGroundedLastFrame && isGroundedNow && _airborneTimer > MIN_AIRBORNE_TIME;
         if (isLandingSoon)
         {
-            Debug.Log("착지 직전!");
             // 여기서 이펙트, 애니메이션 등만 처리 (상태 전환 X)
              _owner.RPC_SetAnimatorTrigger("Land");
              _isLanding = true;
@@ -167,7 +176,12 @@ public class PlayerJumpState : PlayerBaseState
                     _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
                 }
                 _xVelocity = 1;
-                _owner.RPC_SetFacingDirection(1);
+                // 방향이 바뀔 때만 RPC 호출
+                if (_lastFacingDirection != 1)
+                {
+                    _owner.RPC_SetFacingDirection(1);
+                    _lastFacingDirection = 1;
+                }
             }
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
@@ -177,7 +191,12 @@ public class PlayerJumpState : PlayerBaseState
                     _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
                 }
                 _xVelocity = -1;
-                _owner.RPC_SetFacingDirection(-1);
+                // 방향이 바뀔 때만 RPC 호출
+                if (_lastFacingDirection != -1)
+                {
+                    _owner.RPC_SetFacingDirection(-1);
+                    _lastFacingDirection = -1;
+                }
             }
             else
             {
@@ -232,6 +251,28 @@ public class PlayerJumpState : PlayerBaseState
         }
 
         return true;
+    }
+    
+    /// <summary>
+    /// Y축 속도를 제한하여 너무 빠르게 떨어지거나 올라가는 것을 방지
+    /// </summary>
+    private void LimitYVelocity()
+    {
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        
+        // 낙하 속도 제한 (음수)
+        if (velocity.y < MAX_FALL_SPEED)
+        {
+            velocity.y = MAX_FALL_SPEED;
+        }
+        
+        // 점프 속도 제한 (양수)
+        if (velocity.y > MAX_JUMP_SPEED)
+        {
+            velocity.y = MAX_JUMP_SPEED;
+        }
+        
+        _owner.Rigidbody2D.linearVelocity = velocity;
     }
 
 

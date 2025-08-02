@@ -1,6 +1,7 @@
 using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
 
 public class PlayerFallDeadState : PlayerBaseState
 {
@@ -61,6 +62,13 @@ public class PlayerFallDeadState : PlayerBaseState
                 _isGoaled = true;
                 _owner.transform.position = _endPoint;
             });
+
+        // 모습 보이게
+        List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
+        foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+        {
+            spriteRenderer.enabled = true;
+        }
     }
 
     public override void OnExit()
@@ -97,7 +105,7 @@ public class PlayerFallDeadState : PlayerBaseState
                 
                 // 15의 데미지를 받는다.
                 _owner.PlayerStat.IsImmune = false;
-                _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, true);
+                _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr ,true);
                 
                 // 피격 상태로 전환
                 _playerFSM.ChangeState<PlayerDamagedState>();

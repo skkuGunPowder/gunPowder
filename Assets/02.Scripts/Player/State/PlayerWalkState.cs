@@ -16,6 +16,9 @@ public class PlayerWalkState : PlayerBaseState
     private float _coyoteTimer = 0f;
     private const float COYOTE_TIME = 0.15f;
     private bool _wasGroundedLastFrame = true;
+    
+    // 방향 변경 감지용
+    private int _lastFacingDirection = 0;
 
     public override void OnEnter()
     {
@@ -90,7 +93,12 @@ public class PlayerWalkState : PlayerBaseState
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            _owner.RPC_SetFacingDirection(1);
+            // 방향이 바뀔 때만 RPC 호출
+            if (_lastFacingDirection != 1)
+            {
+                _owner.RPC_SetFacingDirection(1);
+                _lastFacingDirection = 1;
+            }
 
             // 키 입력 감지
             if (!_isKeyPressed)
@@ -110,7 +118,12 @@ public class PlayerWalkState : PlayerBaseState
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
-            _owner.RPC_SetFacingDirection(-1);
+            // 방향이 바뀔 때만 RPC 호출
+            if (_lastFacingDirection != -1)
+            {
+                _owner.RPC_SetFacingDirection(-1);
+                _lastFacingDirection = -1;
+            }
 
             // 키 입력 감지
             if (!_isKeyPressed)

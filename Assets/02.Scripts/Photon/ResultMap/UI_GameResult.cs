@@ -34,5 +34,7 @@ public class UI_GameResult : MonoBehaviour
 
     private void OnDisable()
     {
-        EventManager.Instance.OnGameResult -= Refresh;}
+        EventManager.Instance.OnGameResult -= Refresh;
+        
+    }
 }
