@@ -10,7 +10,12 @@ public class UI_KillLogSlot : MonoBehaviour
     
     public TextMeshProUGUI KillPlayerNickname;
     public TextMeshProUGUI DeathPlayerNickname;
+    public Image KillIcon;
 
+    [Header("색상")] 
+    [Tooltip("적군일 경우 들어갈 색상")] public Color32 EnemyColor;
+    [Tooltip("아군일 경우 들어갈 색상")] public Color32 PlayerColor;
+    
     [Header("시간")] 
     [Tooltip("킬로그 등장 퇴장에 관련된 시간")] public float MoveSpeed;
     [Tooltip("킬로그가 머무르는 시간")] public float StayTime;
@@ -21,7 +26,6 @@ public class UI_KillLogSlot : MonoBehaviour
     private Vector2 _midlePosition = Vector2.zero;
     [SerializeField] private Vector2 _endPosition;
     
-    public Image KillIcon;
     [Header("아이콘")]
     public Sprite Icon;
 

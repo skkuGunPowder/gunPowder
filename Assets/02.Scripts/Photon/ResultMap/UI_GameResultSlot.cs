@@ -6,14 +6,16 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class UI_GameResultSlot : MonoBehaviour
 {
     public TextMeshProUGUI PlayerName;
+    public TextMeshProUGUI PlayerRank;
     public Image TeamColor;
     public TextMeshProUGUI DamageTextMeshProUGUI;
     public TextMeshProUGUI KillTextMeshProUGUI;
     public TextMeshProUGUI SurvivorTimeTextMeshProUGUI;
 
-    public void Refresh(PhotonPlayer player,int damage, int surviveTime, int kill, EInGameTeam team)
+    public void Refresh(PhotonPlayer player,int damage, int rank, int surviveTime, int kill, EInGameTeam team)
     {
         PlayerName.text = player.NickName;
+        PlayerRank.text = $"#{rank.ToString()}";
         DamageTextMeshProUGUI.text = damage.ToString();
         KillTextMeshProUGUI.text = kill.ToString();
         SurvivorTimeTextMeshProUGUI.text = TimeSpan.FromSeconds(surviveTime).ToString(@"mm\:ss");;
