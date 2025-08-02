@@ -14,7 +14,7 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
     public event Action<FirebaseUser, UserInfo> OnLoginSuccess;
     public event Action<string> OnLoginError;
 
-    protected void Awake()
+    protected override void Awake()
     {
         base.Awake();
         Init();
