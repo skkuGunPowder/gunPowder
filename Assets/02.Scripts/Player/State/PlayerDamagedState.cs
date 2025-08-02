@@ -17,6 +17,16 @@ public class PlayerDamagedState : PlayerBaseState
         _timer = 0f;
         // 애니메이션 재생
         _owner.RPC_SetAnimatorTrigger("Hit");
+
+         // 무적
+        _owner.gameObject.tag = "Immune";
+        _owner.PlayerStat.IsImmune = true;
+        
+        // 히트스탑에서 저장된 속도가 있다면 복원
+        if (_owner.HasStoredVelocity)
+        {
+            _owner.RestoreVelocity();
+        }
         
         // Knockback 효과 적용
         // 플레이어의 건파우더가 50퍼 이하라면
@@ -34,6 +44,20 @@ public class PlayerDamagedState : PlayerBaseState
         _owner.RPC_ResetAnimatorTrigger("Run");
         _owner.RPC_ResetAnimatorTrigger("Idle");
         _owner.RPC_ResetAnimatorTrigger("Dash");
+
+        // 무적 해제
+        if(_owner.PhotonView.IsMine)
+        {
+            _owner.gameObject.tag = "Player";
+        }
+        else
+        {
+            _owner.gameObject.tag = "Enemy";
+        }
+        _owner.PlayerStat.IsImmune = false;
+        
+        // 저장된 속도 상태 초기화
+        _owner.ClearStoredVelocity();
         
         // Knockback 효과 정리
         CleanupKnockbackEffect();

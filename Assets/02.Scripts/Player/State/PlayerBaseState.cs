@@ -40,7 +40,7 @@ public class PlayerBaseState : MonoState
 
     protected virtual void HandleHit()
     {
-        _playerFSM.ChangeState<PlayerHitStopState>();
+        SyncStateChange<PlayerHitStopState>();
     }
 
     public virtual void MineUpdate()
@@ -61,11 +61,10 @@ public class PlayerBaseState : MonoState
     /// </summary>
     protected virtual void SyncStateChange<T>() where T : PlayerBaseState
     {
-        Debug.Log($"SyncStateChange {typeof(T).Name}");
         if (_owner.PhotonView.IsMine)
         {
-            Debug.Log($"SyncStateChange {typeof(T).Name} {_owner.PhotonView.IsMine}");
-            _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.Others, typeof(T).Name);
+            // 모든 클라이언트에서 상태 변경 (자신 포함)
+            _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.All, typeof(T).Name);
         }
     }
     // 하위에서 사용하고 싶은 것만 사용한다.

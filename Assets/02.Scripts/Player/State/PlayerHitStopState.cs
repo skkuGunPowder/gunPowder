@@ -10,6 +10,17 @@ public class PlayerHitStopState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+
+        _timer = 0f;
+        
+        // 현재 속도를 저장
+        _owner.StoreVelocity();
+        
+        // 히트스탑 중에는 속도를 0으로 설정
+        if (_owner.Rigidbody2D != null)
+        {
+            _owner.Rigidbody2D.linearVelocity = Vector2.zero;
+        }
         
         // 캐릭터 흔들림 효과 시작 (PhotonTransformView가 자동 동기화)
         StartShakeEffect();
@@ -33,8 +44,7 @@ public class PlayerHitStopState : PlayerBaseState
 
         if(_timer > _hitStopTime)
         {
-            //_playerFSM.ChangeState<PlayerDamagedState>();
-            _playerFSM.ChangeState<PlayerIdleState>();
+            _playerFSM.ChangeState<PlayerDamagedState>();
         }
     }
     
