@@ -13,6 +13,8 @@ public class UI_KillLogSlot : MonoBehaviour
     public Image KillIcon;
 
     [Header("색상")] 
+    [Tooltip("킬한 사람의 배경화면")]public Image KillBackground;
+    [Tooltip("데스한 사람의 배경화면")]public Image DeathBackground;
     [Tooltip("적군일 경우 들어갈 색상")] public Color32 EnemyColor;
     [Tooltip("아군일 경우 들어갈 색상")] public Color32 PlayerColor;
     
@@ -26,6 +28,8 @@ public class UI_KillLogSlot : MonoBehaviour
     private Vector2 _midlePosition = Vector2.zero;
     [SerializeField] private Vector2 _endPosition;
     
+    
+    
     [Header("아이콘")]
     public Sprite Icon;
 
@@ -35,11 +39,13 @@ public class UI_KillLogSlot : MonoBehaviour
 
     }
 
-    public void Refresh(string kill,string death)
+    public void Refresh(string kill,string death, bool killTeam, bool deathTeam)
     {
         KillPlayerNickname.text = kill;
         DeathPlayerNickname.text = death;
         KillIcon.sprite = Icon;
+
+        TeamCheck(killTeam, deathTeam);
         
         Tween_KillLog();
     }
@@ -53,6 +59,29 @@ public class UI_KillLogSlot : MonoBehaviour
         {
             this.gameObject.SetActive(false);
         });
+    }
+
+    // 킬로그에 나온 사람이 누구 팀인가?
+    private void TeamCheck(bool killTeam, bool deathTeam)
+    {
+        if (killTeam)
+        {
+            KillBackground.color = PlayerColor;
+        }
+        else
+        {
+            KillBackground.color = EnemyColor;
+        }
+
+        if (deathTeam)
+        {
+            DeathBackground.color = PlayerColor;
+        }
+        else
+        {
+            
+            DeathBackground.color = EnemyColor;
+        }
     }
 
     private void OnDisable()
