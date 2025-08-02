@@ -228,12 +228,11 @@ public class PlayerStat : MonoBehaviour
         
         _currentPlayerGunPowderCount += amount;
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
-            _currentPlayerLife);
+            _currentPlayerLife, 0);
     }
     
-    public bool DecreaseGunPowderCount(int amount)
+    public bool DecreaseGunPowderCount(int amount, int attacker)
     {
-        
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
         {
             return false;
@@ -243,14 +242,18 @@ public class PlayerStat : MonoBehaviour
             return false;
         }
 
+        if (_isImmune)
+        {
+            return false;
+        }
+        
         _currentPlayerGunPowderCount -= amount;
         bool isDead = false;
 
-        Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 현재 체력 감소 중");
+        // Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 현재 체력 감소 중");
         if (_currentPlayerGunPowderCount <= 0)
         {
             _currentPlayerLife -= 1;
-            _currentPlayerGunPowderCount = _initGunpowderCount;
             isDead = true;
             OnGunPowderEmpty?.Invoke();
         }
@@ -261,15 +264,15 @@ public class PlayerStat : MonoBehaviour
         }
         
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
-            _currentPlayerLife);
+            _currentPlayerLife, attacker);
 
         return isDead;
     }
 
     [PunRPC]
-    private void RPC_ChangeGunpowder(int gunpowder, int life, PhotonMessageInfo info)
+    private void RPC_ChangeGunpowder(int gunpowder, int life, int attacker, PhotonMessageInfo info)
     {
-        DamageChecker.Instance.RPC_RequestDamage(gunpowder, life , info.Sender.ActorNumber);
+        DamageChecker.Instance.RPC_RequestDamage(gunpowder, life , info.Sender.ActorNumber, attacker);
     }
 
     public void IncreseDamagedCount()
@@ -305,7 +308,12 @@ public class PlayerStat : MonoBehaviour
 
     public void ResurrectPlayerStat()
     {
+        if(!_photonView.IsMine)
+        {
+            return;
+        }
+        
         _currentPlayerGunPowderCount = _initGunpowderCount;
-        //_photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife);
+        _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife,0);
     }
 }

@@ -4,7 +4,7 @@ public enum EInGameTeam
     Blue,
     Green,
     Yellow,
-    
+    Default,
     Count
     
 }

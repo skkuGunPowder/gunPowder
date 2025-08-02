@@ -1,7 +1,6 @@
 using Photon.Pun;
 using UnityEngine;
 
-
 public class Explosion : MonoBehaviour
 {
     public GameObject VFXPrefab;
@@ -21,8 +20,9 @@ public class Explosion : MonoBehaviour
 
     public virtual void Explode(bool isFallingOut, PhotonView attackerPhotonView)
     {
-        VFXPool.Instance.Play(VFXPrefab.name, transform.position);
+        Instantiate(VFXPrefab, transform.position, Quaternion.identity);
 
+        Debug.LogWarning($"폭발 발생");
         _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
@@ -44,8 +44,7 @@ public class Explosion : MonoBehaviour
                 {
                     continue;
                 }
-
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, isFallingOut);
+                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());
@@ -67,6 +66,7 @@ public class Explosion : MonoBehaviour
         direction.Normalize();
         
         // 허정범 테스트
+        direction.y += 1f;
 
         rb.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
     }

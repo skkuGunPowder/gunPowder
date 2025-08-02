@@ -59,7 +59,7 @@ public class PlayerDieState : PlayerBaseState
 
     public override void Update()
     {   
-        Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 플레이어 PlayerDieState Update called - enabled: {this.enabled}, isActiveAndEnabled: {this.isActiveAndEnabled}");
+        // Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 플레이어 PlayerDieState Update called - enabled: {this.enabled}, isActiveAndEnabled: {this.isActiveAndEnabled}");
         
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
         
@@ -141,5 +141,6 @@ public class PlayerDieState : PlayerBaseState
         // 이미 무적 상태이므로 추가 설정 불필요
         yield return new WaitForSeconds(3f);
         _owner.PlayerStat.IsImmune = false;
+
     }
 }
