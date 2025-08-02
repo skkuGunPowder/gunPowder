@@ -13,7 +13,7 @@ public class UI_GameResultSlot : MonoBehaviour
 
     public void Refresh(PhotonPlayer player,int damage, int surviveTime, int kill, EInGameTeam team)
     {
-        PlayerName.text = player.CustomProperties[EProperties.NickName.ToString()].ToString();
+        PlayerName.text = player.NickName;
         DamageTextMeshProUGUI.text = damage.ToString();
         KillTextMeshProUGUI.text = kill.ToString();
         SurvivorTimeTextMeshProUGUI.text = TimeSpan.FromSeconds(surviveTime).ToString(@"mm\:ss");;

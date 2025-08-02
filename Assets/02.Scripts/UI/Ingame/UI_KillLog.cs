@@ -2,12 +2,14 @@ using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
+
 public class UI_KillLog : MonoBehaviour
 {
     // 슬롯 리스트를 가지고 있다.
     public List<UI_KillLogSlot> KillLogSlotList = new List<UI_KillLogSlot>();
     private List<PhotonPlayer> _playerList = new List<PhotonPlayer>();
     // 슬롯 리스트들 확인해서 현재 사용중인 슬롯인가 체크
+
     private void OnEnable()
     {
         EventManager.Instance.OnUpdateKillLog += Refresh;

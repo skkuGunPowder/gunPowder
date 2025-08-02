@@ -243,7 +243,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut,PhotonMessageInfo info)
     {
-        Debug.Log($"TakeDamage : {damage}");
+        // Debug.Log($"TakeDamage : {damage}");
         if(_playerStat.IsImmune)
         {
             return;

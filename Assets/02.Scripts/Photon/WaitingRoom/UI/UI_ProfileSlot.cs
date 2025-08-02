@@ -39,7 +39,8 @@ public class UI_ProfileSlot : MonoBehaviour
         }
         else
         {
-            EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+            int teamNumber = (int)player.CustomProperties[EProperties.Team.ToString()];
+            EInGameTeam team = (EInGameTeam)teamNumber;
             ProfileOutline.color = TeamColorSet(team);
         }
     }
