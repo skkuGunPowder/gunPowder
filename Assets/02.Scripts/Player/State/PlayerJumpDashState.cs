@@ -9,6 +9,15 @@ public class PlayerJumpDashState : PlayerBaseState
     private float _gravity = -40f;
     private float _originalGravityScale;
 
+    // 착지 감지 개선
+    private bool _wasGroundedLastFrame = false;
+    private float _airborneTimer = 0f;
+    private const float MIN_AIRBORNE_TIME = 0.05f;
+    private const float LANDING_CHECK_DELAY = 0.1f;
+    private float _landingCheckTimer = 0f;
+    private bool _isLanding = false;
+    private bool _landingConfirmed = false;
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -24,9 +33,17 @@ public class PlayerJumpDashState : PlayerBaseState
         _xVelocity = 0f;
         _dashTimer = 0f;
 
-        _owner.RPC_SetAnimatorTrigger("JumpDash");
+        // 착지 감지 변수 초기화
+        _isLanding = false;
+        _landingConfirmed = false;
+        _landingCheckTimer = 0f;
+        _groundRay2D.Cast();
+        _wasGroundedLastFrame = _groundRay2D.Performed;
+        _airborneTimer = 0f;
 
+        _owner.RPC_SetAnimatorTrigger("JumpDash");
     }
+
     public override void OnExit()
     {
         base.OnExit();
@@ -39,6 +56,21 @@ public class PlayerJumpDashState : PlayerBaseState
     /// </summary>
     public override void MineUpdate()
     {
+        // 착지 감지 개선
+        HandleLandingDetection();
+
+        // 착지 확인되면 상태 전환
+        if (_landingConfirmed)
+        {
+            // DamagedState에서 온 경우가 아니라면 착지 플래그 설정
+            if (!_playerFSM.IsPreviousState<PlayerDamagedState>())
+            {
+                PlayerIdleState.SetLandingFromJump(); // 착지 플래그 설정
+            }
+            _playerFSM.ChangeState<PlayerIdleState>();
+            return;
+        }
+
         // 대쉬 시간 종료 후 바닥 체크
         if(_dashTimer >= _owner.PlayerStat.DashTime)
         {
@@ -61,5 +93,43 @@ public class PlayerJumpDashState : PlayerBaseState
             velocity.y = 0;
             _owner.Rigidbody2D.linearVelocity = velocity;
         }
+    }
+
+    /// <summary>
+    /// 착지 감지 로직 개선
+    /// </summary>
+    private void HandleLandingDetection()
+    {
+        _groundRay2D.Cast();
+        bool isGroundedNow = _groundRay2D.Performed;
+        
+        // 공중 시간 계산
+        if (!isGroundedNow)
+        {
+            _airborneTimer += Time.deltaTime;
+        }
+        
+        // 착지 감지 (이전에 공중이었다가 지금 땅에 닿음)
+        bool isLandingSoon = !_wasGroundedLastFrame && isGroundedNow && _airborneTimer > MIN_AIRBORNE_TIME;
+        
+        if (isLandingSoon)
+        {
+            // 착지 애니메이션 트리거
+            _owner.RPC_SetAnimatorTrigger("Land");
+            _isLanding = true;
+            _landingCheckTimer = 0f;
+        }
+        
+        // 착지 확인 (일정 시간 후 상태 전환)
+        if (_isLanding)
+        {
+            _landingCheckTimer += Time.deltaTime;
+            if (_landingCheckTimer >= LANDING_CHECK_DELAY && isGroundedNow)
+            {
+                _landingConfirmed = true;
+            }
+        }
+        
+        _wasGroundedLastFrame = isGroundedNow;
     }
 }

@@ -254,6 +254,7 @@ public class PlayerStat : MonoBehaviour
         if (_currentPlayerGunPowderCount <= 0)
         {
             _currentPlayerLife -= 1;
+            _currentPlayerGunPowderCount = _initGunpowderCount;
             isDead = true;
             OnGunPowderEmpty?.Invoke();
         }

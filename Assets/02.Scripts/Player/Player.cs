@@ -48,6 +48,14 @@ public class Player : MonoBehaviourPun, IDamagable
     private float _gunPowderDecreaseWithoutAttackTimer;
     public float GunPowderDecreaseWithoutAttackTimer => _gunPowderDecreaseWithoutAttackTimer;
 
+    [Header("HitStop")]
+    [SerializeField]
+    private Vector2 _storedVelocity = Vector2.zero;
+    public Vector2 StoredVelocity => _storedVelocity;
+    [SerializeField]
+    private bool _hasStoredVelocity = false;
+    public bool HasStoredVelocity => _hasStoredVelocity;
+
     [Header("GunPowder")]
     [SerializeField]
     private float _gunPowderSpreadAngle = 90f;
@@ -188,7 +196,18 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void HandleGunPowderEmpty()
     {
-        GetComponent<PlayerFSM>().ChangeState<PlayerDieState>();
+        // PlayerFSM을 통해 SyncStateChange 호출
+        PlayerFSM playerFSM = GetComponent<PlayerFSM>();
+        if (playerFSM != null)
+        {
+            // 네트워크 동기화된 상태 변경
+            playerFSM.SyncStateChange<PlayerDieState>();
+        }
+        else
+        {
+            // PlayerFSM이 없는 경우 직접 변경
+            GetComponent<PlayerFSM>().ChangeState<PlayerDieState>();
+        }
     }
 
     private void Update()
@@ -503,6 +522,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerFallDeadState":
                     playerFSM.ChangeState<PlayerFallDeadState>();
                     break;
+                case "PlayerHitStopState":
+                    playerFSM.ChangeState<PlayerHitStopState>();
+                    break;
                 default:
                     Debug.LogWarning($"Unknown state: {stateName}");
                     break;
@@ -538,5 +560,41 @@ public class Player : MonoBehaviourPun, IDamagable
     public void SetLastSpecialBombTime()
     {
         _lastSpecialBombTime = AttackTimer;
+    }
+
+    /// <summary>
+    /// 히트스탑 중에 받은 속도를 저장
+    /// </summary>
+    public void StoreVelocity()
+    {
+        if (_rigidbody2D != null)
+        {
+            _storedVelocity = _rigidbody2D.linearVelocity;
+            _hasStoredVelocity = true;
+            Debug.Log($"속도 저장: {_storedVelocity}");
+        }
+    }
+
+    /// <summary>
+    /// 저장된 속도를 복원하고 저장 상태 초기화
+    /// </summary>
+    public void RestoreVelocity()
+    {
+        if (_hasStoredVelocity && _rigidbody2D != null)
+        {
+            _rigidbody2D.linearVelocity = _storedVelocity;
+            Debug.Log($"속도 복원: {_storedVelocity}");
+            _hasStoredVelocity = false;
+            _storedVelocity = Vector2.zero;
+        }
+    }
+
+    /// <summary>
+    /// 저장된 속도 상태 초기화
+    /// </summary>
+    public void ClearStoredVelocity()
+    {
+        _hasStoredVelocity = false;
+        _storedVelocity = Vector2.zero;
     }
 }

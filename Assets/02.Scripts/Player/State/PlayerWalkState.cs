@@ -28,6 +28,7 @@ public class PlayerWalkState : PlayerBaseState
         _lastKeyPressTime = 0f;
         _isKeyPressed = false;
         _keyReleaseTimer = 0f;
+        _lastFacingDirection = _owner.PlayerStat.FacingDirection;
 
         // 코요테 타임 초기화
         _coyoteTimer = 0f;
