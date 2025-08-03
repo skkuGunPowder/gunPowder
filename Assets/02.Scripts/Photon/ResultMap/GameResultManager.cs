@@ -12,10 +12,12 @@ public class GameResultManager : Singleton<GameResultManager>
     private float _timer = 0;
     private float _EndTime = 10f;
     private bool _nextScene;
+    
     private void Start()
     {
         _nextScene = false;
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
+ 
         Debug.Log($"결과 : 플레이어 리스트 {playerList.Count}");
         foreach (PhotonPlayer player in playerList)
         {
@@ -23,10 +25,10 @@ public class GameResultManager : Singleton<GameResultManager>
             int kill = Convert.ToInt32(player.CustomProperties[EProperties.Kill.ToString()]);
             int survieTime = Convert.ToInt32(player.CustomProperties[EProperties.SurvivorTime.ToString()]);
             int team = Convert.ToInt32(player.CustomProperties[EProperties.Team.ToString()]);
+            
             GameResultData data = new GameResultData(player, damage, kill, survieTime, (EInGameTeam)team);
             Debug.Log(player.ActorNumber +"의 살아남은 시간 : "+ survieTime);
 
-            
             ResultDataList.Add(data);
         }
         
@@ -40,7 +42,7 @@ public class GameResultManager : Singleton<GameResultManager>
             data.CalculateKillRate(maxKill);
             data.CalculateSurviveTimeRate(maxSurviveTime);
         }
-
+        
         Arrange();
         
         EventManager.Instance.ViewGameResult();
@@ -48,7 +50,6 @@ public class GameResultManager : Singleton<GameResultManager>
 
     private void Arrange()
     {
-                
         // 팀별로 묶기
         var groupedTeams = ResultDataList
             .GroupBy(p => p.Team)
@@ -60,9 +61,20 @@ public class GameResultManager : Singleton<GameResultManager>
         Debug.Log($"결과 : 정렬 전 데이터 리스트 {ResultDataList.Count}");
         
         ResultDataList.Clear();
+
+        int currentRank = 1;
         foreach (var teamGroup in groupedTeams)
-        {
+        {  
+            foreach (var data in teamGroup)
+            {
+                data.Rank = currentRank;
+            }
+
+            // 등수 건너뛰기: 해당 팀 인원 수 만큼 증가
+            currentRank += teamGroup.Count;
+            
             ResultDataList.AddRange(teamGroup); // 팀별 생존시간 내림차순
+            
             foreach (var team in teamGroup)
             {
                 Debug.Log(team.Team.ToString());
@@ -70,6 +82,7 @@ public class GameResultManager : Singleton<GameResultManager>
         }
         Debug.Log($"결과 : 데이터 리스트 {ResultDataList.Count}");
     }
+    
     private void Update()
     {
         _timer += Time.deltaTime;

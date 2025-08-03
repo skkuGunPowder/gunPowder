@@ -9,6 +9,7 @@ public class ExplosionPool : Singleton<ExplosionPool>
 
     protected override void Awake()
     {
+        base.Awake();
         _pool = new ObjectPool<Explosion>(ExplosionPrefabList, PoolSize, transform);
     }
 

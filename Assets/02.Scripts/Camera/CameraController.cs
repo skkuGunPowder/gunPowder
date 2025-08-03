@@ -39,6 +39,7 @@ public class CameraController : MonoBehaviour
         }
         _target = player;
         _target.OnHit += HitShake;
+        _target.OnAttack += GunShotShake;
 
         _proCamera.RemoveAllCameraTargets();
         _proCamera.AddCameraTarget(player.transform);
@@ -57,20 +58,15 @@ public class CameraController : MonoBehaviour
     public void ExplosionShake(Transform explosionTransform, float explosionRadius)
     {
         float distance = Vector3.Distance(_target.transform.position, explosionTransform.position);
-        Debug.LogWarning($"폭발 발생 : {distance} 거리 | 폭발 반경 {explosionRadius}");
         if (distance < explosionRadius * 1.8f)
         {
-            Debug.LogWarning("큰 폭발");
             ProCamera2DShake.Instance.Shake("LargeExplosion");
             return;
         }
         if (distance < explosionRadius * 6f)
         {
-            Debug.LogWarning("작은 폭발");
             ProCamera2DShake.Instance.Shake("SmallExplosion");
         }
-
-        
     }
 
     private void OnDisable()
@@ -78,6 +74,7 @@ public class CameraController : MonoBehaviour
         if (_target != null)
         {
             _target.OnHit -= HitShake;
+            _target.OnAttack -= GunShotShake;
             _target = null;
         }
 

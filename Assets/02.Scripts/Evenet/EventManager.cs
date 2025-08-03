@@ -50,4 +50,16 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnPlayerChanged?.Invoke(player);    
     }
+    
+    public event Action OnTeamChanged;
+    public void TeamChanged()
+    {
+        OnTeamChanged?.Invoke();    
+    }
+
+    public event Action<int, int> OnUpdateKillLog;
+    public void OnUpdateLog(int kill , int death)
+    {
+        OnUpdateKillLog?.Invoke(kill, death);
+    }
 }

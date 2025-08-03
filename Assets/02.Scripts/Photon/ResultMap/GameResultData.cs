@@ -8,7 +8,8 @@ public class GameResultData
     public readonly int Kill;
     public readonly int SurviveTime;
     public readonly EInGameTeam Team;
-
+    public int Rank;
+    
     public float SurviveTimeRate;
     public float DamageRate;
     public float KillRate;

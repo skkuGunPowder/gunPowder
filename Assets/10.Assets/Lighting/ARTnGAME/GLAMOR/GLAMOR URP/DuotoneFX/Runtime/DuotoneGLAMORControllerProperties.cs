@@ -45,8 +45,7 @@ public sealed partial class DuotoneGLAMORController
     //v0.1
     [field: SerializeField]
     public Vector4 DuoToneStrength { get; set; } = new Vector4(1,1,1,1);
-
-        [field: SerializeField]
+    
         public Material Material => UpdateMaterial();
 
     #endregion

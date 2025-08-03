@@ -54,6 +54,9 @@ public class PlayerDieState : PlayerBaseState
         }
         
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
+
+        // 플레이어 사망 사운드 재생
+        SoundManager.Instance.PlayLocalRandomSound("PlayerDeath", transform, 1, 3);
     }
 
     public override void OnExit()
@@ -203,5 +206,6 @@ public class PlayerDieState : PlayerBaseState
         yield return new WaitForSeconds(3f);
         
         _owner.PlayerStat.IsImmune = false;
+
     }
 }

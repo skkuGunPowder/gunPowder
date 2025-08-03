@@ -12,7 +12,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public List<RoomInfo> RoomInfoList => _roomInfoList;
     
     public event Action OnDataChanged;
-    public event Action OnMapChanged;
     private void Awake()
     {
         if (Instance == null)

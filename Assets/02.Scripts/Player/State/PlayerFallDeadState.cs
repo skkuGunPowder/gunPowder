@@ -172,7 +172,7 @@ public class PlayerFallDeadState : PlayerBaseState
 
                 // 15의 데미지를 받는다.
                 _owner.PlayerStat.IsImmune = false;
-                _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, true);
+                _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr ,true);
             }
         }
     }

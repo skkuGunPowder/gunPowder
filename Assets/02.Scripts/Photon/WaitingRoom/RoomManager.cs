@@ -16,7 +16,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private LoadSceneChecker _loadChecker;
 
     public ESceneList SelectedMap;      // 맵 선택하기
-
+    public EInGameTeam SelectedTeam;
+    
     private bool _initialized = false;  // Init 한번만 부르게 하기
 
     private PhotonView _photonView;
@@ -84,14 +85,10 @@ public class RoomManager : PhotonSingleton<RoomManager>
             { EProperties.IsReady.ToString(), false },
             { EProperties.IsDead.ToString(), false },
         };
-        if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team] == null)
+        
+        if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()] == null)
         {
             ready.Add(EProperties.Team.ToString(), (int)EInGameTeam.Red);
-        }
-
-        if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.NickName] == null)
-        {
-            ready.Add(EProperties.NickName.ToString(), AccountManager.Instance.CurrencAccount.Nickname);
         }
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
@@ -155,14 +152,14 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             _playerSlotList = new List<int>()
             {
-                0,0,0,0
+                0, 0, 0, 0
             };
 
             if (PhotonNetwork.IsMasterClient)
             {
                 PlayerPlacement(PhotonNetwork.LocalPlayer);
+                EventManager.Instance.RoomDataChanged();
             }
-            ;
 
             return;
         }
@@ -184,10 +181,18 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             EventManager.Instance.ReadyChange();
         }
-
-        if (changedProps.ContainsKey($"{EProperties.NickName}"))
+        
+        if (changedProps.ContainsKey($"{EProperties.Team}"))
         {
-            EventManager.Instance.RoomDataChanged();
+            if (targetPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+            {
+                SelectedTeam = (EInGameTeam)changedProps[$"{EProperties.Team}"];
+            }
+            EventManager.Instance.TeamChanged();
+        }
+        if(changedProps.ContainsKey(EItemType.Bomb.ToString()))
+        {
+            Debug.Log(targetPlayer.CustomProperties[(EItemType.Bomb.ToString())].ToString());
         }
     }
 
@@ -246,6 +251,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public void Rpc_OnEnterUpdateSlots(int[] actorNumbers)
     {
         _playerSlotList = new List<int>(actorNumbers);
+        EventManager.Instance.RoomDataChanged();
     }
     // 맵 변경시 콜백
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)

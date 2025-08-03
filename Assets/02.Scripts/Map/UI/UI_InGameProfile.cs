@@ -22,7 +22,11 @@ public class UI_InGameProfile : MonoBehaviour
             if (i < _playerActorNumberList.Count)
             {
                 // 후에 수정
-                UI_InGameProfileSlotList[i].Init(_playerActorNumberList[i].CustomProperties[EProperties.NickName.ToString()].ToString());
+                ItemDTO item = ItemDatabase.Instance.GetItem(_playerActorNumberList[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
+                Sprite bomb = item.Image;
+                string playerName = _playerActorNumberList[i].NickName;
+                EInGameTeam team = (EInGameTeam)_playerActorNumberList[i].CustomProperties[EProperties.Team.ToString()];
+                UI_InGameProfileSlotList[i].Init(playerName,bomb, team);
                 UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
             }
             else
@@ -33,8 +37,7 @@ public class UI_InGameProfile : MonoBehaviour
         
         GameManager.Instance.OnProfileInit -= Init;
     }
-
-
+    
     private void SetTopPlayer(int playerNumber)
     {
         for (int i = 0; i < _playerActorNumberList.Count; i++)
@@ -49,6 +52,7 @@ public class UI_InGameProfile : MonoBehaviour
             }
         }
     }
+    
     private void Refresh(int playerNumber, int gunpowder, int life)
     {
         for (int i = 0; i < _playerActorNumberList.Count; i++)
@@ -60,7 +64,6 @@ public class UI_InGameProfile : MonoBehaviour
         }
 
     }
-    
     private void OnDisable()
     {
         Debug.Log("온 디스에이블 ");

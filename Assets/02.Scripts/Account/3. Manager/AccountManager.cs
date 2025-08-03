@@ -11,8 +11,9 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     private AccountRepository _accountRepository;
     private const string SALT = "12315";
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Init();
         DontDestroyOnLoad(gameObject);
     }

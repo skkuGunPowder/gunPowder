@@ -4,14 +4,15 @@ using DG.Tweening;
 
 public class WaterMissile : MonoBehaviour
 {
-    public GameObject VFXPrefab;
+    public VFX VFXPrefab;
     private PhotonView _attackerPhotonView;
     private ExplosionStat _stat;
-
+    private CameraController _cameraController;
     private float _distance;
 
-    public void Init(PhotonView attackerPhotonView, float distance, ExplosionStat stat)
+    public void Init(CameraController cameraController, PhotonView attackerPhotonView, float distance, ExplosionStat stat)
     {
+        _cameraController = cameraController;
         _attackerPhotonView = attackerPhotonView;
         _distance = distance;
         _stat = stat;
@@ -41,7 +42,9 @@ public class WaterMissile : MonoBehaviour
 
     private void Explode()
     {
-        Instantiate(VFXPrefab, transform.position, Quaternion.identity);
+        VFXPool.Instance.Play(VFXPrefab.name, transform.position);
+
+        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
@@ -53,7 +56,7 @@ public class WaterMissile : MonoBehaviour
 
             if (other.TryGetComponent(out IDamagable damagableObject))
             {
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, _attackerPhotonView.ViewID);
+                damagableObject.TakeDamage(_stat.AttackPower, transform.position, _attackerPhotonView.ViewID, _attackerPhotonView.OwnerActorNr);
                 if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);

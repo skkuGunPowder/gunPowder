@@ -206,6 +206,7 @@ public class PlayerBaseState : MonoState
 
         // 공격 이벤트 발생
         _owner.InvokeAttack();
+        SoundManager.Instance.PlayLocalRandomSound("PlayerShot", transform, 1, 2);
 
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
@@ -263,6 +264,7 @@ public class PlayerBaseState : MonoState
 
         // 공격 이벤트 발생
         _owner.InvokeAttack();
+        SoundManager.Instance.PlayLocalRandomSound("PlayerShot", transform, 1, 2);
 
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
