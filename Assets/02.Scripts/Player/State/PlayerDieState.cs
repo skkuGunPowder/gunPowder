@@ -34,11 +34,14 @@ public class PlayerDieState : PlayerBaseState
 
         // 모습 안보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
-        foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+        foreach (SpriteRenderer spriteRenderer in playerSpriteRendererList)
         {
             spriteRenderer.enabled = false;
         }
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
+
+        // 플레이어 사망 사운드 재생
+        SoundManager.Instance.PlayLocalRandomSound("PlayerDeath", transform, 1, 3);
     }
 
     public override void OnExit()

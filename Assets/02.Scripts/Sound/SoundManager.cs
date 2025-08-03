@@ -78,7 +78,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
         sound.Play(_audioMixer.FindMatchingGroups(type.ToString())[0], delay, isLoop);
     }
 
-    public void PlayerGlobalRandomSound(string clipName, int min, int max, SoundType type = SoundType.SFX, float delay = 0f, bool isLoop = false)
+    public void PlayGlobalRandomSound(string clipName, int min, int max, SoundType type = SoundType.SFX, float delay = 0f, bool isLoop = false)
     {
         string randomClipName = $"{clipName}_{Random.Range(min, max + 1)}";
         PlayGlobalSound(randomClipName, type, delay, isLoop);
