@@ -104,6 +104,8 @@ public class Player : MonoBehaviourPun, IDamagable
         UI_PingBase.Instance.SetPing(transform);
 
         UnityEngine.Random.InitState(RANDOM_SEED);
+
+        EventManager.Instance.OnPlayerItemChanged += LoadItems;
     }
 
     private void LoadItems()
@@ -114,7 +116,14 @@ public class Player : MonoBehaviourPun, IDamagable
             EItemType itemType = (EItemType)i;
             if (photonPlayer.CustomProperties.TryGetValue(itemType.ToString(), out object itemID))
             {
-                EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID));
+                if(EquipedItemDict.ContainsKey((EItemType)i))
+                {
+                    EquipedItemDict[(EItemType)i] = ItemDatabase.Instance.GetItem((string)itemID);
+                }
+                else
+                {
+                    EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID));
+                }
             }
         }
     }
