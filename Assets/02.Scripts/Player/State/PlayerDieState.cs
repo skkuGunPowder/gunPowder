@@ -8,16 +8,9 @@ public class PlayerDieState : PlayerBaseState
     private float _timer = 0f;
     private bool _hasStartedResurrection = false; // 부활 시작 플래그
     private bool _hasRequestedDestroy = false; // 파괴 요청 플래그
-    private bool _hasInitialized = false; // 초기화 완료 플래그
 
     public override void OnEnter()
     {
-        // 이미 초기화되었다면 중복 실행 방지
-        if (_hasInitialized)
-        {
-            return;
-        }
-
         // base.OnEnter()를 먼저 호출하여 _owner 초기화
         base.OnEnter();
         
@@ -33,12 +26,10 @@ public class PlayerDieState : PlayerBaseState
             return;
         }
 
-
         // 타이머 및 플래그 초기화
         _timer = 0f;
         _hasStartedResurrection = false;
         _hasRequestedDestroy = false;
-        _hasInitialized = true; // 초기화 완료 표시
 
         // 무적
         _owner.gameObject.tag = "Immune";
@@ -51,9 +42,15 @@ public class PlayerDieState : PlayerBaseState
 
         // 모습 안보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
-        foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+        if (playerSpriteRendererList != null)
         {
-            spriteRenderer.enabled = false;
+            foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+            {
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.enabled = false;
+                }
+            }
         }
         
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
@@ -79,9 +76,24 @@ public class PlayerDieState : PlayerBaseState
             _owner.gameObject.tag = "Enemy";
         }
         _owner.PlayerStat.IsImmune = false;
+
+        // 모습 보이게
+        List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
+        if (playerSpriteRendererList != null)
+        {
+            foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+            {
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.enabled = true;
+                }
+            }
+        }
         
-        // 초기화 플래그 리셋
-        _hasInitialized = false;
+        // 모든 플래그와 타이머 리셋 (다음 죽음 상태 진입을 위해)
+        _timer = 0f;
+        _hasStartedResurrection = false;
+        _hasRequestedDestroy = false;
     }
 
     public override void Update()
@@ -92,18 +104,10 @@ public class PlayerDieState : PlayerBaseState
             return;
         }
 
-        // 초기화되지 않았다면 실행하지 않음
-        if (!_hasInitialized)
-        {
-            return;
-        }
-
-        
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
         
         if(_owner.PlayerStat.CurrentPlayerLife <= 0)
         {
-            
             // 진짜 죽음
             // 파괴 요청
             if (_hasRequestedDestroy)
@@ -112,29 +116,22 @@ public class PlayerDieState : PlayerBaseState
             }
             _hasRequestedDestroy = true;
 
-            
             // 플레이어가 자신의 GameObject를 제거하거나, MasterClient에게 요청
             if (_owner.PhotonView.IsMine)
             {
-                
                 PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
                 {
                     {EProperties.IsDead.ToString(), true},
                     {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
                     {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
-                    
                 });
                 
                 // 다른 플레이어의 GameObject는 MasterClient에게 요청
                 PhotonNetwork.Destroy(_owner.gameObject);
             }
-            else
-            {
-            }
         }
         else
         {
-            
             // 부활 지점에서 몇초 후 부활
             _timer += Time.deltaTime;
             
@@ -149,7 +146,6 @@ public class PlayerDieState : PlayerBaseState
                 _hasStartedResurrection = true;
                 StartResurrection();
             }
-
         }
     }
 
@@ -165,15 +161,20 @@ public class PlayerDieState : PlayerBaseState
             return;
         }
 
-        
         // 부활 위치로 이동
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
 
         // 모습 보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
-        foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+        if (playerSpriteRendererList != null)
         {
-            spriteRenderer.enabled = true;
+            foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+            {
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.enabled = true;
+                }
+            }
         }
         
         // 플레이어 부활
@@ -198,7 +199,6 @@ public class PlayerDieState : PlayerBaseState
             yield break;
         }
 
-        
         // 이미 무적 상태이므로 추가 설정 불필요
         yield return new WaitForSeconds(3f);
         
