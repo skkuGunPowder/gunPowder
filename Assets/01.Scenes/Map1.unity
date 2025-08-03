@@ -176,6 +176,26 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: df9bac59a74d59043aa06d50952c5f2b, type: 3}
+--- !u!20 &71665069 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 1401585610830970518, guid: df9bac59a74d59043aa06d50952c5f2b, type: 3}
+  m_PrefabInstance: {fileID: 71665068}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &71665070 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 2159107106481896612, guid: df9bac59a74d59043aa06d50952c5f2b, type: 3}
+  m_PrefabInstance: {fileID: 71665068}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &71665071 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 382410165020715277, guid: df9bac59a74d59043aa06d50952c5f2b, type: 3}
+  m_PrefabInstance: {fileID: 71665068}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &71665072 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 5244964453576367993, guid: df9bac59a74d59043aa06d50952c5f2b, type: 3}
+  m_PrefabInstance: {fileID: 71665068}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &159222018
 GameObject:
   m_ObjectHideFlags: 0
@@ -8440,6 +8460,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 737806639}
     m_Modifications:
+    - target: {fileID: 4425357254108863804, guid: b6172d3da95daab4ebaf588d83512dc0, type: 3}
+      propertyPath: RenderTexCameraList.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4425357254108863804, guid: b6172d3da95daab4ebaf588d83512dc0, type: 3}
+      propertyPath: 'RenderTexCameraList.Array.data[0]'
+      value: 
+      objectReference: {fileID: 71665072}
+    - target: {fileID: 4425357254108863804, guid: b6172d3da95daab4ebaf588d83512dc0, type: 3}
+      propertyPath: 'RenderTexCameraList.Array.data[1]'
+      value: 
+      objectReference: {fileID: 71665071}
+    - target: {fileID: 4425357254108863804, guid: b6172d3da95daab4ebaf588d83512dc0, type: 3}
+      propertyPath: 'RenderTexCameraList.Array.data[2]'
+      value: 
+      objectReference: {fileID: 71665070}
+    - target: {fileID: 4425357254108863804, guid: b6172d3da95daab4ebaf588d83512dc0, type: 3}
+      propertyPath: 'RenderTexCameraList.Array.data[3]'
+      value: 
+      objectReference: {fileID: 71665069}
     - target: {fileID: 6750867011764793833, guid: b6172d3da95daab4ebaf588d83512dc0, type: 3}
       propertyPath: m_Name
       value: PingPanel
