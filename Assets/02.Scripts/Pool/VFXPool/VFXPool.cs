@@ -66,7 +66,6 @@ public class VFXPool : Singleton<VFXPool>
 
         if (queue.Count > 0)
         {
-            Debug.Log("정상 호출");
             VFX vfx = queue.Dequeue();
             vfx.gameObject.SetActive(true);
             return vfx;
