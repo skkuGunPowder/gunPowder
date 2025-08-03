@@ -14,7 +14,11 @@ public class VFX : MonoBehaviour
     public void Play()
     {
         _vfx.Play();
-        SoundManager.Instance.PlayLocalRandomSound(VFXSoundClips[0].name.Split('_')[0], transform, 1, VFXSoundClips.Count);
+
+        if(VFXSoundClips.Count > 0)
+        {
+            SoundManager.Instance.PlayLocalRandomSound(VFXSoundClips[0].name.Split('_')[0], transform, 1, VFXSoundClips.Count);
+        }
     }
 
     private void OnParticleSystemStopped()

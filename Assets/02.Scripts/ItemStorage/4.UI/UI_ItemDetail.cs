@@ -60,4 +60,9 @@ public class UI_ItemDetail : MonoBehaviour
         ItemNameText.text = _selectedItem.Item.Name;
         ExplanationText.text = _selectedItem.Item.Explanation;
     }
+
+    private void OnDestroy()
+    {
+        ItemStorage.Instance.OnDataChanged -= Refresh;
+    }
 }

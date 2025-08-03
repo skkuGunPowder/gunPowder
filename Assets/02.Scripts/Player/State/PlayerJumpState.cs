@@ -48,7 +48,7 @@ public class PlayerJumpState : PlayerBaseState
             _yVelocity = 0f; // 낙하
             _owner.PlayerStat.IsFallingFromLedge = false;
         }
-        else if(!_playerFSM.IsPreviousState<PlayerJumpDashState>()
+        else if (!_playerFSM.IsPreviousState<PlayerJumpDashState>()
             && !_playerFSM.IsPreviousState<PlayerRecoilState>()
             && !_playerFSM.IsPreviousState<PlayerNormalRecoilState>()
             && !_playerFSM.IsPreviousState<PlayerBreakState>())
@@ -69,6 +69,8 @@ public class PlayerJumpState : PlayerBaseState
         _groundRay2D.Cast();
         _wasGroundedLastFrame = _groundRay2D.Performed;
         _airborneTimer = 0f;
+        
+        SoundManager.Instance.PlayLocalSound("PlayerJump_1", transform);
     }
 
     public override void OnExit()
