@@ -91,8 +91,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2103683556270304147}
   - {fileID: 2094579975124460001}
+  - {fileID: 2103683556270304147}
   - {fileID: 3661281399140681971}
   - {fileID: 1983487828810585812}
   - {fileID: 8326006976486984971}
@@ -1001,14 +1001,13 @@ MonoBehaviour:
   - {fileID: 4015795063107501776}
   - {fileID: 7054018878759433881}
   - {fileID: 8243912509341469781}
-  _normalBomb: {fileID: 6483128911171500335, guid: 75311855345bce044ab3e26252e8fef7, type: 3}
-  _specialBomb: {fileID: 6483128911171500335, guid: 75311855345bce044ab3e26252e8fef7, type: 3}
+  _explosionSpawnPointList: []
+  _dashBomb: {fileID: 0}
   _attackTimer: 0
   _gunPowderDecreaseTimer: 0
   _gunPowderDecreaseWithoutAttackTimer: 0
   _gunPowderSpreadAngle: 90
-  NormalBombPrefab: {fileID: 3001153516144104530, guid: b3fb438e801506a4ab38467990bf3887, type: 3}
-  SpecialBombPrefab: {fileID: 2493808269564610583, guid: c6c3d386220973f4db5354405d7a56fb, type: 3}
+  _groundRay2D: {fileID: 0}
   GunPowderPrefab: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
   DieExplosionPrefab: {fileID: 0}
 --- !u!114 &4024883436230281669
@@ -1051,17 +1050,21 @@ MonoBehaviour:
   _normalRecoilSpeed: 0
   _isRunning: 0
   _isJumping: 0
+  _isFallingDead: 0
+  _isImmune: 0
   _myMoveSpeed: 0
   _jumpCount: 0
   _facingDirection: 1
   _gunPowderDecreaseTime: 0
   _attackPenaltyTime: 0
   _attackPenaltyAmount: 0
+  _initGunpowderCount: 0
   _dieExplosionDamage: 0
   _dieExplosionRadius: 0
   _dieExplosionForce: 0
   _invincibleTime: 0
   _currentPlayerGunPowderCount: 0
+  _currentPlayerLife: 0
   _currentPlayerDamagedCount: 0
   _mySpriteRendererList:
   - {fileID: 4841738079202767485}
@@ -1072,6 +1075,8 @@ MonoBehaviour:
   - {fileID: 4296287364748657003}
   - {fileID: 1012296347412030769}
   _damagedTime: 0
+  _totalDamage: 0
+  _totalKillCount: 0
   IsFallingFromLedge: 0
 --- !u!70 &975501548764073768
 CapsuleCollider2D:
