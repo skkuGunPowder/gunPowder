@@ -12,7 +12,7 @@ public class PlayerJumpState : PlayerBaseState
     
     // Y축 속도 제한
     private const float MAX_FALL_SPEED = -20f; // 최대 낙하 속도
-    private const float MAX_JUMP_SPEED = 30f;  // 최대 점프 속도
+    private const float MAX_JUMP_SPEED = 40f;  // 최대 점프 속도
 
     // 키 릴리즈 타이머 추가
     private float _keyReleaseTimer = 0f;
@@ -78,7 +78,7 @@ public class PlayerJumpState : PlayerBaseState
             && !_playerFSM.IsPreviousState<PlayerNormalRecoilState>()
             && !_playerFSM.IsPreviousState<PlayerBreakState>()
             && !_playerFSM.IsPreviousState<PlayerDamagedState>()
-            && !isInitialAirborne) // 공중 생성이 아닌 경우에만 점프 카운트 증가
+            && !isInitialAirborne)
         {
             _owner.PlayerStat.IncrementJumpCount();
             _yVelocity = _owner.PlayerStat.JumpForce;
@@ -96,6 +96,7 @@ public class PlayerJumpState : PlayerBaseState
     public override void OnExit()
     {
         _owner.RPC_ResetAnimatorTrigger("Jump");
+        _owner.RPC_ResetAnimatorTrigger("Fall");
         _owner.Rigidbody2D.gravityScale = _originalGravity;
         _owner.PlayerStat.IsJumping = false;
         base.OnExit();

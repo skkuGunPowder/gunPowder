@@ -34,9 +34,6 @@ public class PlayerFallDeadState : PlayerBaseState
             return;
         }
         
-        // 어떤 플레이어가 들어왓는지 로그
-        Debug.Log($"PlayerFallDeadState {_owner.PhotonView.Owner.ActorNumber}");
-        
         // 무적
         _owner.gameObject.tag = "Immune";
         _owner.PlayerStat.IsImmune = true;
@@ -135,12 +132,13 @@ public class PlayerFallDeadState : PlayerBaseState
                     return;
                 }
                 
+                /*
                 Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
                 if (dieExplosion != null)
                 {
                     dieExplosion.transform.position = _owner.transform.position;
                     dieExplosion.Explode(true, _owner.PhotonView);
-                }
+                }*/
                 
                 // 15의 데미지를 받는다.
                 _owner.PlayerStat.IsImmune = false;

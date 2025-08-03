@@ -8,7 +8,8 @@ public class PlayerDamagedState : PlayerBaseState
     private float _timer = 0f;
     private float _originalDrag;
     private Tween _dragTween;
-    private float _targetLinearDamping = 8f;
+    private float _startLinearDamping = 0.1f;
+    private float _targetLinearDamping = 3f;
 
     public override void OnEnter()
     {
@@ -39,14 +40,14 @@ public class PlayerDamagedState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
-        /*
+        
         _owner.RPC_ResetAnimatorTrigger("Hit");
         _owner.RPC_ResetAnimatorTrigger("Walk");
         _owner.RPC_ResetAnimatorTrigger("Run");
         _owner.RPC_ResetAnimatorTrigger("Idle");
         _owner.RPC_ResetAnimatorTrigger("Dash");
         _owner.RPC_ResetAnimatorTrigger("Fall");
-        */
+        
 
         // 무적 해제
         if(_owner.PhotonView.IsMine)
@@ -76,14 +77,11 @@ public class PlayerDamagedState : PlayerBaseState
         {
             if(IsGrounded2D())
             {
-                // 바닥에 있을 때는 Idle로 전환
-                // DamagedState에서 Idle로 가는 경우는 착지 플래그를 설정하지 않음
                 _playerFSM.ChangeState<PlayerIdleState>();
                 return;
             }
             else
             {
-                // 공중에 있을 때는 Jump로 전환 (낙하 상태)
                 _owner.PlayerStat.IsFallingFromLedge = true;
                 _owner.RPC_SetAnimatorTrigger("Fall");
                 _playerFSM.ChangeState<PlayerJumpState>();
@@ -96,6 +94,8 @@ public class PlayerDamagedState : PlayerBaseState
     {
         // 원래 drag 값 저장
         _originalDrag = _owner.Rigidbody2D.linearDamping;
+
+        _owner.Rigidbody2D.linearDamping = _startLinearDamping;
         
         // 시간이 지나면서 마찰을 점점 증가시켜 감속
         _dragTween?.Kill();
@@ -103,7 +103,7 @@ public class PlayerDamagedState : PlayerBaseState
         {
             _owner.Rigidbody2D.linearDamping = x;
         }, _targetLinearDamping, _owner.PlayerStat.DamagedTime)
-        .SetEase(Ease.InExpo);  
+        .SetEase(Ease.InOutBack);  
     }
     
     private void CleanupKnockbackEffect()
