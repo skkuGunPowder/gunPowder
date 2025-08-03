@@ -17,12 +17,25 @@ public class PlayerFallDeadState : PlayerBaseState
     private float _waitDuration = 2.0f; // 대기 시간
     private float _wailTime = 0f;
 
+    private const float MAX_FALL_SPEED = -20f;
+
+    // DOTween 저장용
+    private Tween _moveTween;
+
+    // 안전성 체크용
+    private bool _isInitialized = false;
+
     public override void OnEnter()
     {
         base.OnEnter();
-        // 어떤 플레이어가 들어왓는지 로그
-        Debug.Log($"PlayerFallDeadState {_owner.PhotonView.Owner.ActorNumber}");
-        
+
+        // 안전성 체크
+        if (GameManager.Instance == null)
+        {
+            Debug.LogError("GameManager.Instance is null in PlayerFallDeadState");
+            return;
+        }
+
         // 무적
         _owner.gameObject.tag = "Immune";
         _owner.PlayerStat.IsImmune = true;
@@ -55,29 +68,55 @@ public class PlayerFallDeadState : PlayerBaseState
         // 경로 설정 (좌우 반전 적용)
         Vector3[] path = new Vector3[] { _startPoint, _middlePoint, _endPoint };
 
-        // DOTween 곡선 이동
-        _owner.transform.DOPath(path, _totalDuration, PathType.CatmullRom)
+        // DOTween 곡선 이동 - Tween 저장
+        _moveTween = _owner.transform.DOPath(path, _totalDuration, PathType.CatmullRom)
             .SetEase(Ease.InOutSine)
-            .OnComplete(() => {
+            .OnComplete(() =>
+            {
                 _isGoaled = true;
                 _owner.transform.position = _endPoint;
+                
+                // DOTween 완료 후 Rigidbody2D 속도 초기화
+                if (_owner.Rigidbody2D != null)
+                {
+                    Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+                    velocity.x = 0f;
+                    velocity.y = 0f;
+                    _owner.Rigidbody2D.linearVelocity = velocity;
+                }
             });
 
         // 모습 보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
-        foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
+        if (playerSpriteRendererList != null)
         {
-            spriteRenderer.enabled = true;
+            foreach (SpriteRenderer spriteRenderer in playerSpriteRendererList)
+            {
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.enabled = true;
+                }
+            }
         }
+
+        _isInitialized = true;
     }
 
     public override void OnExit()
     {
         base.OnExit();
+
+        // DOTween 중단
+        if (_moveTween != null && _moveTween.IsActive())
+        {
+            _moveTween.Kill();
+            _moveTween = null;
+        }
+
         _owner.PlayerStat.IsFallingDead = false;
-        
+
         // 무적 해제
-        if(_owner.PhotonView.IsMine)
+        if (_owner.PhotonView.IsMine)
         {
             _owner.gameObject.tag = "Player";
         }
@@ -85,31 +124,71 @@ public class PlayerFallDeadState : PlayerBaseState
         {
             _owner.gameObject.tag = "Enemy";
         }
+        
+        // 상태 전환 시 Rigidbody2D 속도 초기화
+        if (_owner.Rigidbody2D != null)
+        {
+            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+            velocity.x = 0f;
+            velocity.y = 0f;
+            _owner.Rigidbody2D.linearVelocity = velocity;
+        }
     }
 
     public override void Update()
     {
+        // 초기화되지 않았으면 실행하지 않음
+        if (!_isInitialized)
+        {
+            return;
+        }
+
         if (_isGoaled)
         {
             transform.position = _endPoint;
+            
+            // _isGoaled 상태에서도 속도 제한 적용
+            LimitYVelocity();
+            
             // 2초 대기
             _wailTime += Time.deltaTime;
             if (_wailTime >= _waitDuration)
             {
                 Debug.Log($"PlayerFallDeadState {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생");
-                // 사망 폭발 발생
-                // 플레이어가 사망할 떄, 사망 폭발이 발생
+
+                // 안전성 체크
+                if (ExplosionPool.Instance == null || _owner.DieExplosionPrefab == null)
+                {
+                    Debug.LogError("ExplosionPool or DieExplosionPrefab is null");
+                    return;
+                }
+
                 Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
-                dieExplosion.transform.position = _owner.transform.position;
-                dieExplosion.Explode(true, _owner.PhotonView);
-                
+                if (dieExplosion != null)
+                {
+                    dieExplosion.transform.position = _owner.transform.position;
+                    dieExplosion.Explode(true, _owner.PhotonView);
+                }
+
                 // 15의 데미지를 받는다.
                 _owner.PlayerStat.IsImmune = false;
                 _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr ,true);
-                
-                // 피격 상태로 전환
-                _playerFSM.ChangeState<PlayerDamagedState>();
             }
         }
+    }
+    
+    private void LimitYVelocity()
+    {
+        if (_owner.Rigidbody2D == null) return;
+        
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        
+        // 낙하 속도 제한 (음수)
+        if (velocity.y < MAX_FALL_SPEED)
+        {
+            velocity.y = MAX_FALL_SPEED;
+        }
+        
+        _owner.Rigidbody2D.linearVelocity = velocity;
     }
 }
