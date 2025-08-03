@@ -39,6 +39,7 @@ public class CameraController : MonoBehaviour
         }
         _target = player;
         _target.OnHit += HitShake;
+        _target.OnAttack += GunShotShake;
 
         _proCamera.RemoveAllCameraTargets();
         _proCamera.AddCameraTarget(player.transform);
@@ -73,6 +74,7 @@ public class CameraController : MonoBehaviour
         if (_target != null)
         {
             _target.OnHit -= HitShake;
+            _target.OnAttack -= GunShotShake;
             _target = null;
         }
 

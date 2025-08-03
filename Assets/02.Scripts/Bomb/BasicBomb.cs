@@ -2,6 +2,8 @@ using System.Collections;
 using UnityEngine;
 using DG.Tweening;
 using Photon.Pun;
+using Unity.VisualScripting;
+using DG.Tweening.Core.Easing;
 public enum EBombVelocity
 {
     SLOW,
@@ -30,6 +32,7 @@ public class BasicBomb : Bomb
         SetStat(ID);
         _isFuzeActivate = false;
         isDestroyed = false; // 재사용 시 초기화
+        SoundManager.Instance.PlayLocalSound(this.GetType().Name, transform, 0, true);
     }
 
     protected override void Update()

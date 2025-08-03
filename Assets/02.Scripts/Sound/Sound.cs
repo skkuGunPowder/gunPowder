@@ -7,6 +7,7 @@ public class Sound : MonoBehaviour
     [SerializeField] private AudioClip _clip;
 
     private AudioSource _audioSource;
+    private const float RANDOMPERCENT = 10;
 
     private void Awake()
     {
@@ -19,12 +20,14 @@ public class Sound : MonoBehaviour
     {
         _clip = clip;
         _audioSource.clip = _clip;
+        _audioSource.pitch *= 1 + Random.Range(-RANDOMPERCENT / 100, RANDOMPERCENT / 100);
     }
 
     public void InitLocalClip(AudioClip clip, float minDistance = 1f, float maxDistance = 50f)
     {
         _clip = clip;
         _audioSource.clip = _clip;
+        _audioSource.pitch *= 1 + Random.Range(-RANDOMPERCENT / 100, RANDOMPERCENT / 100);
         _audioSource.spatialBlend = 1f;
         _audioSource.rolloffMode = AudioRolloffMode.Linear;
         _audioSource.minDistance = minDistance;
@@ -37,7 +40,7 @@ public class Sound : MonoBehaviour
         _audioSource.loop = isLoop;
         _audioSource.Play();
 
-        if (!isLoop)
+        if (!isLoop && gameObject != null)
         {
             Destroy(gameObject, _clip.length + delay);
         }

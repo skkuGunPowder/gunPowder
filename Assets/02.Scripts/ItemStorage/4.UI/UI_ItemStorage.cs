@@ -107,4 +107,9 @@ public class UI_ItemStorage : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    private void OnDestroy()
+    {
+        _itemStorage.OnDataChanged -= Refresh;
+    }
 }

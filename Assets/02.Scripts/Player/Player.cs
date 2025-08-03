@@ -96,6 +96,8 @@ public class Player : MonoBehaviourPun, IDamagable
         UI_PingBase.Instance.SetPing(transform);
 
         UnityEngine.Random.InitState(RANDOM_SEED);
+
+        EventManager.Instance.OnPlayerItemChanged += LoadItems;
     }
 
     private void LoadItems()
@@ -106,7 +108,14 @@ public class Player : MonoBehaviourPun, IDamagable
             EItemType itemType = (EItemType)i;
             if (photonPlayer.CustomProperties.TryGetValue(itemType.ToString(), out object itemID))
             {
-                EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID));
+                if(EquipedItemDict.ContainsKey((EItemType)i))
+                {
+                    EquipedItemDict[(EItemType)i] = ItemDatabase.Instance.GetItem((string)itemID);
+                }
+                else
+                {
+                    EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID));
+                }
             }
         }
     }
@@ -244,9 +253,9 @@ public class Player : MonoBehaviourPun, IDamagable
         _gunPowderDecreaseWithoutAttackTimer = 0f;
     }
 
-    public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber ,bool isFallingOut)
+    public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             // 피격 VFX 재생
             VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
@@ -256,6 +265,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 피격 VFX 재생
         VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
+        SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
+        SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 4, 0f, false, SoundType.SFX, true, 1f, 50f);
     }
 
     [PunRPC]

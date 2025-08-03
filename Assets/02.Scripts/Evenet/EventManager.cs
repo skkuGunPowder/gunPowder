@@ -8,7 +8,7 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnTopPlayerChanged?.Invoke(topActor);
     }
-    public event Action<int,int,int> OnDataChanged;    // 체력 감소할 때
+    public event Action<int, int, int> OnDataChanged;    // 체력 감소할 때
     public void PlayerDataChange(int gunpowder, int life, int playerNumber)
     {
         OnDataChanged?.Invoke(playerNumber, gunpowder, life);
@@ -48,18 +48,24 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
 
     public void PlayerLeftRoom(PhotonPlayer player)
     {
-        OnPlayerChanged?.Invoke(player);    
+        OnPlayerChanged?.Invoke(player);
     }
-    
+
     public event Action OnTeamChanged;
     public void TeamChanged()
     {
-        OnTeamChanged?.Invoke();    
+        OnTeamChanged?.Invoke();
     }
 
     public event Action<int, int> OnUpdateKillLog;
-    public void OnUpdateLog(int kill , int death)
+    public void OnUpdateLog(int kill, int death)
     {
         OnUpdateKillLog?.Invoke(kill, death);
+    }
+
+    public event Action OnPlayerItemChanged;
+    public void PlayerItemChanged()
+    {
+        OnPlayerItemChanged?.Invoke();
     }
 }

@@ -190,9 +190,14 @@ public class RoomManager : PhotonSingleton<RoomManager>
             }
             EventManager.Instance.TeamChanged();
         }
-        if(changedProps.ContainsKey(EItemType.Bomb.ToString()))
+        if (changedProps.ContainsKey($"{EItemType.Bomb}"))
         {
             Debug.Log(targetPlayer.CustomProperties[(EItemType.Bomb.ToString())].ToString());
+            
+            if (targetPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+            {
+                EventManager.Instance.PlayerItemChanged();
+            }
         }
     }
 
@@ -276,8 +281,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
             {EProperties.IsReady.ToString(), false}
         };
         newMasterClient.SetCustomProperties(table);
-        
-        
     }
   
     public override void OnDisable()
