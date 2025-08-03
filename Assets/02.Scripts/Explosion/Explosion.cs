@@ -20,9 +20,8 @@ public class Explosion : MonoBehaviour
 
     public virtual void Explode(bool isFallingOut, PhotonView attackerPhotonView)
     {
-        Instantiate(VFXPrefab, transform.position, Quaternion.identity);
+        VFXPool.Instance.Play(VFXPrefab.name, transform.position);
 
-        Debug.LogWarning($"폭발 발생");
         _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
