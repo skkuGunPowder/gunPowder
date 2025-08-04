@@ -277,15 +277,14 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
+        // 피격 VFX 재생
         if (tag == "Player")
         {
-            // 피격 VFX 재생
-            VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
+            VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
         }
         else
         {
-            // 피격 VFX 재생
-            VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
+            VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
         }
         SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
         SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 4, 0f, false, SoundType.SFX, true, 1f, 50f);
