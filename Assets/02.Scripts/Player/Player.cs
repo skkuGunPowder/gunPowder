@@ -524,6 +524,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerHitStopState":
                     playerFSM.ChangeState<PlayerHitStopState>();
                     break;
+                case "PlayerJumpState":
+                    playerFSM.ChangeState<PlayerJumpState>();
+                    break;
                 default:
                     Debug.LogWarning($"Unknown state: {stateName}");
                     break;

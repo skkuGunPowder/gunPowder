@@ -187,7 +187,7 @@ public class PlayerDieState : PlayerBaseState
         StartCoroutine(ImmuneCoroutine());
         
         // 상태 전환
-        _playerFSM.ChangeState<PlayerIdleState>();
+        SyncStateChange<PlayerIdleState>();
     }
 
     /// <summary>
