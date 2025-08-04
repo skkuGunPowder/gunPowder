@@ -98,6 +98,7 @@ public class PlayerJumpState : PlayerBaseState
         // 착지 감지 (간단하게)
         if (HandleLandingDetection())
         {
+            /*
             // DamagedState에서 온 경우가 아니라면 착지 플래그 설정
             try
             {
@@ -110,7 +111,9 @@ public class PlayerJumpState : PlayerBaseState
             {
                 // 이전 상태가 없는 경우 (초기 상태)
                 PlayerIdleState.SetLandingFromJump(); // 착지 플래그 설정
-            }
+            }*/
+            // 이전 상태가 없는 경우 (초기 상태)
+            PlayerIdleState.SetLandingFromJump(); // 착지 플래그 설정
             _playerFSM.ChangeState<PlayerIdleState>();
             return;
         }

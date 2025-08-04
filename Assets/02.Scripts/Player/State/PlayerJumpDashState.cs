@@ -74,6 +74,7 @@ public class PlayerJumpDashState : PlayerBaseState
         // 대쉬 시간 종료 후 바닥 체크
         if(_dashTimer >= _owner.PlayerStat.DashTime)
         {
+            /*
             // 바닥에 있는지 체크
             if (IsGrounded2D())
             {
@@ -82,7 +83,9 @@ public class PlayerJumpDashState : PlayerBaseState
             else
             {
                 _playerFSM.ChangeState<PlayerJumpState>();
-            }
+            }*/
+            _playerFSM.ChangeState<PlayerJumpState>();
+            return;
         }
         else
         {
