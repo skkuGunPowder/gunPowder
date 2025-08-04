@@ -74,6 +74,7 @@ public class PlayerWalkState : PlayerBaseState
 
         // 코요테 타임 및 바닥 체크
         bool isGrounded = IsGrounded2D();
+        
         if (isGrounded)
         {
             _coyoteTimer = 0f;
