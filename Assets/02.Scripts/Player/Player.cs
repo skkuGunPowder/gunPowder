@@ -93,13 +93,10 @@ public class Player : MonoBehaviourPun, IDamagable
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         LoadItems();
 
-        // 폭탄 정보 받아오기
+        // 기본 폭탄 정보 가져오기
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
         _normalBomb = basicBomb.GetComponent<Bomb>();
-        BombStat bombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
-        BasicBombStat = bombStat;
-        BombStat specialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
-        SpecialBombStat = specialBombStat;
+        BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
 
         UI_PingBase.Instance.SetPing(transform);
 
@@ -111,12 +108,12 @@ public class Player : MonoBehaviourPun, IDamagable
     private void LoadItems()
     {
         PhotonPlayer photonPlayer = PhotonView.Owner;
-        for(int i=0; i<(int)EItemType.None; i++)
+        for (int i = 0; i < (int)EItemType.None; i++)
         {
             EItemType itemType = (EItemType)i;
             if (photonPlayer.CustomProperties.TryGetValue(itemType.ToString(), out object itemID))
             {
-                if(EquipedItemDict.ContainsKey((EItemType)i))
+                if (EquipedItemDict.ContainsKey((EItemType)i))
                 {
                     EquipedItemDict[(EItemType)i] = ItemDatabase.Instance.GetItem((string)itemID);
                 }
@@ -126,6 +123,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 }
             }
         }
+        
+        // 특수폭탄 정보 받아오기
+        SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
     }
 
     private void Start()
