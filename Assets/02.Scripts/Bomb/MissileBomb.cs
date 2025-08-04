@@ -8,14 +8,14 @@ public class MissileBomb : Bomb
     private const float PREDELAY = 0.3f;
 
 
-    
+
     protected override void Init()
     {
         base.Init();
         SetStat(ID);
     }
 
-    
+
     protected override void Update()
     {
         base.Update();
@@ -38,6 +38,7 @@ public class MissileBomb : Bomb
             return;
         }
 
+        Debug.Log($"MissileBomb OnCollisionEnter2D {other.gameObject.name}");
         PhotonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
@@ -52,7 +53,7 @@ public class MissileBomb : Bomb
     {
         _fireDirection = fireRightDirection;
         transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), PREDELAY)
-        .OnComplete(()=>
+        .OnComplete(() =>
         {
             _vfx.gameObject.SetActive(true);
             StartCoroutine(AccelerateForward(_fireDirection, 0.5f, _stat.Speed));
@@ -94,5 +95,11 @@ public class MissileBomb : Bomb
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
+    }
+
+    private void OnDestroy()
+    {
+        // 코루틴 중지
+        StopAllCoroutines();
     }
 }
