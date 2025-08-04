@@ -87,7 +87,6 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _playerStat = GetComponent<PlayerStat>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
-        _groundRay2D = GetComponent<BoxRay2D>();
         PhotonView = GetComponent<PhotonView>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
