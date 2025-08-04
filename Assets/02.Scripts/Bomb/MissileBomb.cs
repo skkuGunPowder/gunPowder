@@ -23,7 +23,12 @@ public class MissileBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.gameObject.tag == "Player" || other.gameObject.tag == "Immune")
+        if (other.gameObject.tag == "Player" && other.gameObject.GetComponent<PhotonView>().IsMine)
+        {
+            return;
+        }
+
+        if (other.gameObject.tag == "Immune")
         {
             return;
         }
