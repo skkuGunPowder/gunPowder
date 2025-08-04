@@ -23,22 +23,21 @@ public class MissileBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.gameObject.tag == "Player" && other.gameObject.GetComponent<PhotonView>().IsMine)
+        if (other.gameObject == _ownerPhotonview.gameObject)
         {
             return;
         }
 
         if (other.gameObject.tag == "Immune")
-        {
-            return;
-        }
+            {
+                return;
+            }
 
         if (CheckPriority(other))
         {
             return;
         }
-
-        Debug.Log($"MissileBomb OnCollisionEnter2D {other.gameObject.name}");
+    
         PhotonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
