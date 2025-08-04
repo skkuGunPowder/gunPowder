@@ -423,7 +423,7 @@ Transform:
   m_GameObject: {fileID: 2735571579870557211}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.75, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -484,14 +484,14 @@ MonoBehaviour:
   onEndDetect:
     m_PersistentCalls:
       m_Calls: []
-  minDepth: 0.5
-  maxDepth: -0.5
+  minDepth: 2
+  maxDepth: -2
   normalFilter: 0
   minAngle: 0
   maxAngle: 90
   hitBackside: 0
   direction: {x: 0, y: -1}
-  size: {x: 0.88, y: 0}
+  size: {x: 0.88, y: 0.5}
 --- !u!1 &2829095108224008417
 GameObject:
   m_ObjectHideFlags: 0

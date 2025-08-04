@@ -92,11 +92,6 @@ public class PlayerDieState : PlayerBaseState
                 }
             }
         }
-        
-        // 모든 플래그와 타이머 리셋 (다음 죽음 상태 진입을 위해)
-        _timer = 0f;
-        _hasStartedResurrection = false;
-        _hasRequestedDestroy = false;
     }
 
     public override void Update()
@@ -160,9 +155,9 @@ public class PlayerDieState : PlayerBaseState
         // null 체크
         if (_owner == null || _owner.PhotonView == null)
         {
-            Debug.LogError("[PlayerDieState] _owner or PhotonView is null in StartResurrection");
             return;
         }
+
 
         // 부활 위치로 이동
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
@@ -186,8 +181,16 @@ public class PlayerDieState : PlayerBaseState
         // 무적 코루틴 시작
         StartCoroutine(ImmuneCoroutine());
         
-        // 상태 전환
-        _playerFSM.ChangeState<PlayerIdleState>();
+        // 상태 전환 - 네트워크 동기화 사용
+        if (_owner.PhotonView.IsMine)
+        {
+            SyncStateChange<PlayerIdleState>();
+        }
+        else
+        {
+            // 다른 클라이언트에서는 직접 상태 변경
+            _playerFSM.ChangeState<PlayerIdleState>();
+        }
     }
 
     /// <summary>
@@ -206,6 +209,5 @@ public class PlayerDieState : PlayerBaseState
         yield return new WaitForSeconds(3f);
         
         _owner.PlayerStat.IsImmune = false;
-
     }
 }

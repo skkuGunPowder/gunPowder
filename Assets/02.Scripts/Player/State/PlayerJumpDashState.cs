@@ -67,13 +67,14 @@ public class PlayerJumpDashState : PlayerBaseState
             {
                 PlayerIdleState.SetLandingFromJump(); // 착지 플래그 설정
             }
-            _playerFSM.ChangeState<PlayerIdleState>();
+            SyncStateChange<PlayerIdleState>();
             return;
         }
 
         // 대쉬 시간 종료 후 바닥 체크
         if(_dashTimer >= _owner.PlayerStat.DashTime)
         {
+            
             // 바닥에 있는지 체크
             if (IsGrounded2D())
             {
@@ -83,6 +84,7 @@ public class PlayerJumpDashState : PlayerBaseState
             {
                 _playerFSM.ChangeState<PlayerJumpState>();
             }
+            return;
         }
         else
         {
@@ -100,6 +102,12 @@ public class PlayerJumpDashState : PlayerBaseState
     /// </summary>
     private void HandleLandingDetection()
     {
+        // 레이캐스트는 로컬 플레이어에서만 실행
+        if (!_owner.PhotonView.IsMine)
+        {
+            return;
+        }
+
         _groundRay2D.Cast();
         bool isGroundedNow = _groundRay2D.Performed;
         
@@ -127,6 +135,7 @@ public class PlayerJumpDashState : PlayerBaseState
             if (_landingCheckTimer >= LANDING_CHECK_DELAY && isGroundedNow)
             {
                 _landingConfirmed = true;
+                Debug.Log("[PlayerJumpDashState] Landing confirmed, transitioning to IdleState");
             }
         }
         

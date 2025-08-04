@@ -87,7 +87,6 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _playerStat = GetComponent<PlayerStat>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
-        _groundRay2D = GetComponent<BoxRay2D>();
         PhotonView = GetComponent<PhotonView>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
@@ -188,10 +187,14 @@ public class Player : MonoBehaviourPun, IDamagable
         _attackTimer = 0f;
         _gunPowderDecreaseTimer = 0f;
         _gunPowderDecreaseWithoutAttackTimer = 0f;
+        _lastNormalBombTime = 0f;
+        _lastSpecialBombTime = 0f;
+
+        // 저장된 속도 상태 초기화
+        ClearStoredVelocity();
 
         // 플레이어 스탯 초기화 (건파우더 초기화)
         _playerStat.ResurrectPlayerStat();
-        
     }
 
     private void HandleGunPowderEmpty()
@@ -297,7 +300,6 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut,PhotonMessageInfo info)
     {
-        // Debug.Log($"TakeDamage : {damage}");
         if(_playerStat.IsImmune)
         {
             return;
@@ -509,6 +511,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_ChangeState(string stateName)
     {
+        
         // PlayerFSM 컴포넌트를 찾아서 상태 변경
         PlayerFSM playerFSM = GetComponent<PlayerFSM>();
         if (playerFSM != null)
@@ -519,11 +522,35 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerIdleState":
                     playerFSM.ChangeState<PlayerIdleState>();
                     break;
-                case "PlayerDieState":
-                    playerFSM.ChangeState<PlayerDieState>();
+                case "PlayerWalkState":
+                    playerFSM.ChangeState<PlayerWalkState>();
+                    break;
+                case "PlayerJumpState":
+                    playerFSM.ChangeState<PlayerJumpState>();
+                    break;
+                case "PlayerDashState":
+                    playerFSM.ChangeState<PlayerDashState>();
+                    break;
+                case "PlayerRunState":
+                    playerFSM.ChangeState<PlayerRunState>();
+                    break;
+                case "PlayerBreakState":
+                    playerFSM.ChangeState<PlayerBreakState>();
+                    break;
+                case "PlayerJumpDashState":
+                    playerFSM.ChangeState<PlayerJumpDashState>();
+                    break;
+                case "PlayerRecoilState":
+                    playerFSM.ChangeState<PlayerRecoilState>();
                     break;
                 case "PlayerDamagedState":
                     playerFSM.ChangeState<PlayerDamagedState>();
+                    break;
+                case "PlayerNormalRecoilState":
+                    playerFSM.ChangeState<PlayerNormalRecoilState>();
+                    break;
+                case "PlayerDieState":
+                    playerFSM.ChangeState<PlayerDieState>();
                     break;
                 case "PlayerFallDeadState":
                     playerFSM.ChangeState<PlayerFallDeadState>();
@@ -532,7 +559,6 @@ public class Player : MonoBehaviourPun, IDamagable
                     playerFSM.ChangeState<PlayerHitStopState>();
                     break;
                 default:
-                    Debug.LogWarning($"Unknown state: {stateName}");
                     break;
             }
         }
@@ -577,7 +603,6 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _storedVelocity = _rigidbody2D.linearVelocity;
             _hasStoredVelocity = true;
-            Debug.Log($"속도 저장: {_storedVelocity}");
         }
     }
 
@@ -589,7 +614,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_hasStoredVelocity && _rigidbody2D != null)
         {
             _rigidbody2D.linearVelocity = _storedVelocity;
-            Debug.Log($"속도 복원: {_storedVelocity}");
+
             _hasStoredVelocity = false;
             _storedVelocity = Vector2.zero;
         }

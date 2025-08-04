@@ -73,21 +73,19 @@ public class PlayerDamagedState : PlayerBaseState
 
         if (_timer >= _owner.PlayerStat.DamagedTime)
         {
-            /*
+            
             if (IsGrounded2D())
             {
-                _playerFSM.ChangeState<PlayerIdleState>();
-                return;
+                SyncStateChange<PlayerIdleState>();
             }
             else
             {
                 _owner.PlayerStat.IsFallingFromLedge = true;
                 _owner.RPC_SetAnimatorTrigger("Fall");
-                _playerFSM.ChangeState<PlayerJumpState>();
-                return;
-            }*/
-            
-            _playerFSM.ChangeState<PlayerIdleState>();
+                SyncStateChange<PlayerJumpState>();
+            }
+            //SyncStateChange<PlayerIdleState>();
+            return;
         }
     }
     
