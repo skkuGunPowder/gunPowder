@@ -314,7 +314,20 @@ public class PlayerStat : MonoBehaviour
             return;
         }
         
+        // 건파우더 초기화
         _currentPlayerGunPowderCount = _initGunpowderCount;
-        _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife,0);
+        
+        // 플레이어 상태 초기화
+        _isRunning = false;
+        _isJumping = false;
+        _myMoveSpeed = _moveSpeed;
+        _jumpCount = 0;
+        _facingDirection = 1;
+        _isFallingDead = false;
+        
+        // 네트워크 동기화
+        _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife, 0);
+        
+        Debug.Log($"[PlayerStat] ResurrectPlayerStat - Life: {_currentPlayerLife}, GunPowder: {_currentPlayerGunPowderCount}");
     }
 }

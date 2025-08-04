@@ -69,7 +69,7 @@ public class PlayerHitStopState : PlayerBaseState
 
         if(_timer > _hitStopTime)
         {
-            _playerFSM.ChangeState<PlayerDamagedState>();
+            SyncStateChange<PlayerDamagedState>();
         }
     }
     
@@ -153,7 +153,6 @@ public class PlayerHitStopState : PlayerBaseState
     /// </summary>
     public void OnAdditionalHit()
     {
-        Debug.Log("OnAdditionalHit");
         // 타이머 리셋
         _timer = 0f;
         

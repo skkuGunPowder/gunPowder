@@ -97,6 +97,12 @@ public class PlayerBaseState : MonoState
     // 2D Raycast로 바닥 체크
     protected virtual bool IsGrounded2D()
     {
+        // 레이캐스트는 로컬 플레이어에서만 실행
+        if (!_owner.PhotonView.IsMine)
+        {
+            return false;
+        }
+
         if(_groundRay2D == null)
         {
             return false;
