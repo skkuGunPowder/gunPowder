@@ -8,6 +8,7 @@ using Assets.SimpleSignIn.Google.Scripts;
 public class GoogleLogIn : Singleton<GoogleLogIn>
 {
     public GoogleAuth GoogleAuth;
+    private GoogleAuthSettings _googleAuthSettings;
 
     // 이벤트 - UI에서 구독하여 사용
     public event Action<string> OnLoginResult;
@@ -17,12 +18,30 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
     protected override void Awake()
     {
         base.Awake();
+        //Init();
+    }
+
+    private void Start()
+    {
         Init();
     }
 
     private void Init()
     {
-        GoogleAuth = new GoogleAuth();
+        // GoogleAuthManager에서 설정한 GoogleAuthSettings를 찾아서 사용
+        var googleAuthManager = FindAnyObjectByType<GoogleAuthManager>();
+        if (googleAuthManager != null && googleAuthManager.GoogleAuthSettings != null)
+        {
+            _googleAuthSettings = googleAuthManager.GoogleAuthSettings;
+            GoogleAuth = new GoogleAuth(_googleAuthSettings);
+            Debug.Log("GoogleAuthManager의 설정을 사용하여 GoogleAuth 초기화");
+        }
+        else
+        {
+            // GoogleAuthManager가 없으면 기본 설정 사용
+            GoogleAuth = new GoogleAuth();
+            Debug.LogWarning("GoogleAuthManager를 찾을 수 없어 기본 설정을 사용합니다.");
+        }
     }
 
     /// <summary>
