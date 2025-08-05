@@ -105,11 +105,22 @@ public class PlayerBaseState : MonoState
 
         if(_groundRay2D == null)
         {
+            Debug.LogWarning("[IsGrounded2D] _groundRay2D is null!");
             return false;
         }
 
         _groundRay2D.Cast();
-        return _groundRay2D.Performed;
+        bool isGrounded = _groundRay2D.Performed;
+        
+        // 디버그 로그 추가
+        Debug.Log($"[IsGrounded2D] Player: {_owner.name}, IsGrounded: {isGrounded}");
+        Debug.Log($"[IsGrounded2D] RayCast Info - Performed: {_groundRay2D.Performed}");
+        
+        // Box Ray2D 설정값들도 로그로 출력 (실제 사용 가능한 속성들만)
+        Debug.Log($"[IsGrounded2D] Box Ray2D Settings - Direction: {_groundRay2D.Direction}");
+        Debug.Log($"[IsGrounded2D] Box Ray2D Settings - Influence: {_groundRay2D.Influence}");
+        
+        return isGrounded;
     }
 
     /// <summary>
@@ -123,6 +134,7 @@ public class PlayerBaseState : MonoState
     {
         if(_groundRay2D == null)
         {
+            Debug.LogWarning("[IsGrounded2DImproved] _groundRay2D is null!");
             return false;
         }
 
@@ -137,6 +149,11 @@ public class PlayerBaseState : MonoState
         
         // 착지 감지 (이전에 공중이었다가 지금 땅에 닿음)
         bool isLandingSoon = !wasGroundedLastFrame && isGroundedNow && airborneTimer > minAirborneTime;
+        
+        // 디버그 로그 추가
+        Debug.Log($"[IsGrounded2DImproved] Player: {_owner.name}, IsGroundedNow: {isGroundedNow}, WasGroundedLastFrame: {wasGroundedLastFrame}");
+        Debug.Log($"[IsGrounded2DImproved] AirborneTimer: {airborneTimer}, IsLandingSoon: {isLandingSoon}");
+        Debug.Log($"[IsGrounded2DImproved] RayCast Info - Performed: {_groundRay2D.Performed}");
         
         wasGroundedLastFrame = isGroundedNow;
         

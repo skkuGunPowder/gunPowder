@@ -73,7 +73,6 @@ public class PlayerDamagedState : PlayerBaseState
 
         if (_timer >= _owner.PlayerStat.DamagedTime)
         {
-            
             if (IsGrounded2D())
             {
                 SyncStateChange<PlayerIdleState>();
