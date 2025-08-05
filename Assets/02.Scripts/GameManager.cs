@@ -5,9 +5,9 @@ using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(PhotonView))]
-[RequireComponent(typeof(LoadSceneChecker))]
 public class GameManager : PhotonSingleton<GameManager>
 {
     private PhotonView _photonView;
@@ -37,7 +37,8 @@ public class GameManager : PhotonSingleton<GameManager>
          {
              return;
          }
-         _loadChecker.OnLoadFinished += Init;
+
+         EventManager.Instance.OnLoadFinished += Init;
      }
     
     // 게임 시작
@@ -171,6 +172,7 @@ public class GameManager : PhotonSingleton<GameManager>
     public void RPC_RequestGameStart(int state)
     {
         _currentGameState = (EGameState)state;
+        SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());;
         OnProfileInit?.Invoke();
 
         int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
@@ -180,7 +182,7 @@ public class GameManager : PhotonSingleton<GameManager>
         _timer = _InitTime;
         Debug.Log($"플레이 타임 : {playtime}");
         
-        _loadChecker.OnLoadFinished -= Init;
+        EventManager.Instance.OnLoadFinished -= Init;
     }
     
     // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.

@@ -34,6 +34,12 @@ public class UI_RoomSetupButton : MonoBehaviour
         Value.text = _currentValue.ToString();
     }
 
+    public void Reset(int value)
+    {
+        Value.text = value.ToString();
+        _currentValue = value;
+    }
+
     public int CurrentValue()
     {
         return _currentValue;

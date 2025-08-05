@@ -5,6 +5,8 @@ using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 using System.Linq;
+using UnityEngine.SceneManagement;
+
 [RequireComponent(typeof(PhotonView))]
 public class RoomManager : PhotonSingleton<RoomManager>
 {

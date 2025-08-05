@@ -5,14 +5,12 @@ using Photon.Pun;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
-[RequireComponent(typeof(PhotonView))]
 public class LoadSceneChecker : MonoBehaviourPunCallbacks
 {
     private bool _isLoad = false;
     private PhotonView _photonView;
     
-    public event Action OnLoadFinished; 
-
+    public event Action<int, bool> OnLoading;
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
@@ -20,25 +18,20 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     
     private void Start()
     {
-        if (PhotonNetwork.InRoom == false)
-        {
-            return;
-        }
-        
-        SetLoadState(true);
-        
     }
     
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
         
         if (changedProps.ContainsKey(EProperties.IsLoad.ToString()) && changedProps[EProperties.IsLoad.ToString()] != null)
         {
             Debug.Log(targetPlayer + "로딩 체크하기");
+            OnLoading?.Invoke(targetPlayer.ActorNumber, (bool)changedProps[EProperties.IsLoad.ToString()]);
+            
+            if (PhotonNetwork.IsMasterClient == false)
+            {
+                return;
+            }
             PlayerLoadCheck();
         }
     }
@@ -59,7 +52,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         }
        
         Debug.Log("로드 완료");
-        OnLoadFinished?.Invoke();
+        EventManager.Instance.LoadFinished();
     }
 
 

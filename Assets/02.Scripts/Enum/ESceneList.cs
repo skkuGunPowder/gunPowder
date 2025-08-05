@@ -7,6 +7,8 @@ public enum ESceneList
     Map3,
     Map4,
     
+    StartSequence,
+    
     Count
     
 }
