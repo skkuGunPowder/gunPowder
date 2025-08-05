@@ -24,7 +24,6 @@ public class TwoPlayersDotween : MonoBehaviour
     
     private void OnDisable()
     {
-        FirstPlayer.DOAnchorPos(new Vector2(0,0), 1);
-        SecondPlayer.DOAnchorPos(new Vector2(0,0), 1);    
+        // 초기 위치로 리셋하기
     }
 }

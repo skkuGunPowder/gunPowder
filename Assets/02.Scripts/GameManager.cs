@@ -4,25 +4,28 @@ using Photon.Pun;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
-using DG.Tweening;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(PhotonView))]
-public class GameManager : PhotonSingleton<GameManager>
+public class GameManager : PhotonSingleton<GameManager> 
 {
     private PhotonView _photonView;
+    
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
+    
+    [Header("게임 지속시간")]
     [SerializeField]private float _timer;
     public float Timer => _timer;
-    private float _InitTime = 0;
+    private float _initTime = 0;
     
-    private LoadSceneChecker _loadChecker;
-    public GameObject GameOverScreen;
-    
+    [Header("게임 종료시 연출")]
+    public GameOverProduction GameOverProduction;
+    [Header("플레이어 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
+    
     
     public event Action OnProfileInit;
     
@@ -31,7 +34,6 @@ public class GameManager : PhotonSingleton<GameManager>
          base.Awake();
 
          _photonView = GetComponent<PhotonView>();
-         _loadChecker = GetComponent<LoadSceneChecker>();
          
          if (_currentGameState == EGameState.Waiting)
          {
@@ -74,8 +76,8 @@ public class GameManager : PhotonSingleton<GameManager>
         if (_currentGameState == EGameState.Waiting || _currentGameState == EGameState.GameOver)
         {
             return;
-        } 
-        
+        }
+
         if (!changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] == null)
         {
             return;
@@ -88,7 +90,7 @@ public class GameManager : PhotonSingleton<GameManager>
         
         if ((bool)changedProps[EProperties.IsDead.ToString()])
         {
-            int playtime = (int)Mathf.Abs(_timer - _InitTime);
+            int playtime = (int)Mathf.Abs(_timer - _initTime);
             Hashtable hash = new Hashtable() 
             {
                 {EProperties.SurvivorTime.ToString(), playtime} 
@@ -109,23 +111,8 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     private void RPC_GameOver()
     {
-     
-        Sequence gameOverSequence = DOTween.Sequence();
-        gameOverSequence.Append(GameOverScreen.transform.DOScale(1f, 3f).SetEase(Ease.OutBounce));
-        gameOverSequence.AppendCallback(() =>
-        {
-            GameResultCheck();
-        });
-        gameOverSequence.Append(GameOverScreen.transform.DOScale(1f, 3f).SetEase(Ease.OutBounce));
-        gameOverSequence.OnComplete(() =>
-        {
-            
-            _currentGameState = EGameState.GameOver;
-            if (PhotonNetwork.IsMasterClient)
-            {
-                PhotonNetwork.LoadLevel(ESceneList.Map4.ToString());  
-            }
-        });
+        GameOverProduction.gameObject.SetActive(true);
+        GameOverProduction.Play();
     }
     
     // 캐릭터들 사망 체크하기 = 방장만
@@ -171,22 +158,22 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     public void RPC_RequestGameStart(int state)
     {
-        _currentGameState = (EGameState)state;
+        GameStateChange((EGameState)state);
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());;
         OnProfileInit?.Invoke();
 
         int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
         
-        _InitTime = playtime;
+        _initTime = playtime;
 
-        _timer = _InitTime;
+        _timer = _initTime;
         Debug.Log($"플레이 타임 : {playtime}");
         
         EventManager.Instance.OnLoadFinished -= Init;
     }
     
     // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
-    private void GameResultCheck()
+    public void GameResultCheck()
     {
         PhotonPlayer player = PhotonNetwork.LocalPlayer;
 
@@ -195,7 +182,7 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
 
-        int playTime = (int)Mathf.Abs(_timer - _InitTime);
+        int playTime = (int)Mathf.Abs(_timer - _initTime);
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         PlayerStat stat = playerObject.GetComponent<PlayerStat>();
         Hashtable properties = new Hashtable()
@@ -205,20 +192,16 @@ public class GameManager : PhotonSingleton<GameManager>
             {EProperties.Damage.ToString(), stat.TotalDamage}
 
         };
-        if (PhotonNetwork.IsMasterClient)
-        {
-            properties = new Hashtable()
-            {
-                {EProperties.IsDead.ToString(), true},
-                {EProperties.Kill.ToString(), stat.TotalKillCount},
-                {EProperties.Damage.ToString(), stat.TotalDamage},
-                {EProperties.SurvivorTime.ToString(), playTime}
-            };
-        }
+        
         player.SetCustomProperties(properties);
+        Debug.Log("방장 타임 잽니다.");
         Debug.Log($"타임 오버 : 내 자신{player.ActorNumber} 프로퍼티 전달" + $"{player.CustomProperties[EProperties.Kill]}");
     }
-
+    
+    public void GameStateChange(EGameState state)
+    {
+        _currentGameState = state;
+    }
     
 }
 

@@ -230,6 +230,7 @@ GameObject:
   - component: {fileID: 68037604}
   - component: {fileID: 68037606}
   - component: {fileID: 68037607}
+  - component: {fileID: 68037608}
   m_Layer: 5
   m_Name: FourPlayersMode
   m_TagString: Untagged
@@ -342,6 +343,22 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &68037608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 68037602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 840274fffee4665498bbbff1a13af213, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Player1: {fileID: 1758736685}
+  Player2: {fileID: 1747162760}
+  Player3: {fileID: 421321594}
+  Player4: {fileID: 670369494}
 --- !u!1 &303328671
 GameObject:
   m_ObjectHideFlags: 0
@@ -1225,6 +1242,7 @@ GameObject:
   - component: {fileID: 1441386276}
   - component: {fileID: 1441386275}
   - component: {fileID: 1441386277}
+  - component: {fileID: 1441386279}
   - component: {fileID: 1441386278}
   m_Layer: 5
   m_Name: ThreePlayersMode
@@ -1336,6 +1354,21 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1441386279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441386273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db9f5a8d66478084b806b19eb14bb3a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Player1: {fileID: 1816372218}
+  Player2: {fileID: 404789717}
+  Player3: {fileID: 1738031438}
 --- !u!1 &1550166730
 GameObject:
   m_ObjectHideFlags: 0
