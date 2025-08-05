@@ -34,6 +34,7 @@ public class Cannon : MonoBehaviour
     {
         _isLoaded = true;
 
+        InputHandler.BlockInput = true;
         target.linearVelocity = Vector2.zero;
         target.bodyType = RigidbodyType2D.Kinematic;
         target.transform.DOMove(_barrel.transform.position, 0.3f).SetEase(Ease.InQuad)
@@ -58,6 +59,10 @@ public class Cannon : MonoBehaviour
         target.bodyType = RigidbodyType2D.Dynamic;
         Vector2 fireDir = _barrel.transform.right.normalized;
         target.AddForce(fireDir * _fireForce, ForceMode2D.Impulse);
+
+        yield return null;
+        
+        InputHandler.BlockInput = false;
 
         _barrel.transform.DORotate(Vector3.zero, 0.5f).SetEase(Ease.InOutSine);
         yield return new WaitForSeconds(0.5f);
