@@ -10,6 +10,8 @@ public class PlayerDieState : PlayerBaseState
     private bool _hasStartedResurrection = false; // 부활 시작 플래그
     private bool _hasRequestedDestroy = false; // 파괴 요청 플래그
 
+    private float power = 30f;
+
     public override void OnEnter()
     {
         // base.OnEnter()를 먼저 호출하여 _owner 초기화
