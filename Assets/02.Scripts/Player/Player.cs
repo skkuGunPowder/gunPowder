@@ -449,6 +449,14 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
+    [PunRPC]
+    public void SetAnimatorBool(string boolName, bool value)
+    {
+        foreach (Animator animator in _myAnimatorList)
+        {
+            animator.SetBool(boolName, value);
+        }
+    }
 
     [PunRPC]
     public void RPC_SetAnimatorTrigger(string triggerName)
@@ -459,6 +467,17 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         PhotonView.RPC(nameof(SetAnimatorTrigger), RpcTarget.All, triggerName);
+    }
+
+    [PunRPC]
+    public void RPC_SetAnimatorBool(string boolName, bool value)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        PhotonView.RPC(nameof(SetAnimatorBool), RpcTarget.All, boolName, value);
     }
 
     [PunRPC]

@@ -36,6 +36,8 @@ public class PlayerJumpState : PlayerBaseState
     {
         base.OnEnter();
 
+        _owner.RPC_SetAnimatorBool("LandBool", false);
+
         _owner.PlayerStat.IsJumping = true;
         _yVelocity = 0;
         
@@ -139,7 +141,7 @@ public class PlayerJumpState : PlayerBaseState
         if (!_wasGroundedLastFrame && isGroundedNow)
         {
             // 착지 애니메이션 트리거
-            _owner.RPC_SetAnimatorTrigger("Land");
+            _owner.RPC_SetAnimatorBool("LandBool", true);
             _landingTimer = 0f;
         }
         
