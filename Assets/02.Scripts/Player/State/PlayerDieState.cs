@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using DG.Tweening;
 
 public class PlayerDieState : PlayerBaseState
 {
@@ -26,6 +27,10 @@ public class PlayerDieState : PlayerBaseState
             return;
         }
 
+        // 사망 효과
+        DieEffect();
+
+
         // 타이머 및 플래그 초기화
         _timer = 0f;
         _hasStartedResurrection = false;
@@ -41,6 +46,7 @@ public class PlayerDieState : PlayerBaseState
         dieExplosion.Explode(true, _owner.PhotonView);
 
         // 모습 안보이게
+        
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
         if (playerSpriteRendererList != null)
         {
@@ -52,8 +58,6 @@ public class PlayerDieState : PlayerBaseState
                 }
             }
         }
-        
-        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
 
         // 플레이어 사망 사운드 재생
         SoundManager.Instance.PlayLocalRandomSound("PlayerDeath", transform, 1, 3);
@@ -102,7 +106,6 @@ public class PlayerDieState : PlayerBaseState
             return;
         }
 
-        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
         
         if(_owner.PlayerStat.CurrentPlayerLife <= 0)
         {
@@ -133,7 +136,7 @@ public class PlayerDieState : PlayerBaseState
             // 부활 지점에서 몇초 후 부활
             _timer += Time.deltaTime;
             
-            if(_timer < 2f)
+            if(_timer < 3f)
             {
                 return;
             }
@@ -160,6 +163,7 @@ public class PlayerDieState : PlayerBaseState
 
 
         // 부활 위치로 이동
+        DOTween.Kill(_owner.transform);
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
 
         // 모습 보이게
@@ -209,5 +213,50 @@ public class PlayerDieState : PlayerBaseState
         yield return new WaitForSeconds(3f);
         
         _owner.PlayerStat.IsImmune = false;
+    }
+
+    private void DieEffect()
+    {
+        float power = 20f;
+        foreach(GameObject diePart in _owner.HeadPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(0, 1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.BodyPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(0, -1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.LeftArmPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(-1, 1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.LeftLegPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(-1, -1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.RightArmPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(1, 1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.RightLegPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(1, -1).normalized, power);
+        }
+        
+    }
+
+    private void AddForceToDiePart(GameObject diePart, Vector2 direction, float power)
+    {
+        Rigidbody2D rigidbody2D = diePart.GetComponent<Rigidbody2D>();
+        if(rigidbody2D != null)
+        {
+            diePart.SetActive(true);
+            rigidbody2D.AddForce(direction * power, ForceMode2D.Impulse);
+        }
     }
 }
