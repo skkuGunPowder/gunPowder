@@ -93,7 +93,7 @@ public class PlayerWalkState : PlayerBaseState
             return false;
         }
 
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (InputHandler.GetKey(KeyCode.RightArrow))
         {
             // 방향이 바뀔 때만 RPC 호출
             if (_lastFacingDirection != 1)
@@ -118,7 +118,7 @@ public class PlayerWalkState : PlayerBaseState
                 _lastKeyPressTime = currentTime;
             }
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        else if (InputHandler.GetKey(KeyCode.LeftArrow))
         {
             // 방향이 바뀔 때만 RPC 호출
             if (_lastFacingDirection != -1)
@@ -170,13 +170,13 @@ public class PlayerWalkState : PlayerBaseState
 
     private void WalkAttack()
     {
-        if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
             ThrowNormalBomb();
             _playerFSM.ChangeState<PlayerNormalRecoilState>();
             return;
         }
-        if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
             ThrowSpecialBomb();
             _playerFSM.ChangeState<PlayerNormalRecoilState>();

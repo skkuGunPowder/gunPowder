@@ -170,14 +170,15 @@ public class PlayerJumpState : PlayerBaseState
         // 좌우 이동 - 러닝 상태에 따른 처리
         if (_owner.PlayerStat.IsRunning)
         {
-            if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1 || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
+            if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1 || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
             {
                 _keyReleaseTimer = 0;
                 _xVelocity = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.RunSpeed;
             }
-            else if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
+            else if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
             {
                 _owner.PlayerStat.IsRunning = false;
+                _owner.RPC_SetFacingDirection(-_owner.PlayerStat.FacingDirection);
                 _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
                 _keyReleaseTimer = 0;
             }
@@ -197,7 +198,7 @@ public class PlayerJumpState : PlayerBaseState
         }
         else
         {
-            if (Input.GetKey(KeyCode.RightArrow))
+            if (InputHandler.GetKey(KeyCode.RightArrow))
             {
                 if (_owner.PlayerStat.FacingDirection == -1)
                 {
@@ -212,7 +213,7 @@ public class PlayerJumpState : PlayerBaseState
                     _lastFacingDirection = 1;
                 }
             }
-            else if (Input.GetKey(KeyCode.LeftArrow))
+            else if (InputHandler.GetKey(KeyCode.LeftArrow))
             {
                 if (_owner.PlayerStat.FacingDirection == 1)
                 {
@@ -245,7 +246,7 @@ public class PlayerJumpState : PlayerBaseState
         }
 
         // 폭탄 대쉬
-        if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
+        if (InputHandler.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
             _owner.PlayerStat.IncrementJumpCount();
 
@@ -260,7 +261,7 @@ public class PlayerJumpState : PlayerBaseState
         }
 
         // 방향키 더블 클릭 체크 (점프 대쉬)
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (InputHandler.GetKeyDown(KeyCode.LeftArrow))
         {
             if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
@@ -269,7 +270,7 @@ public class PlayerJumpState : PlayerBaseState
             }
             _lastLeftTapTime = Time.time;
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (InputHandler.GetKeyDown(KeyCode.RightArrow))
         {
             if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
@@ -306,7 +307,7 @@ public class PlayerJumpState : PlayerBaseState
 
     private void JumpAttack()
     {
-        if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
             if(_owner.PlayerStat.IsRunning)
             {
@@ -319,7 +320,7 @@ public class PlayerJumpState : PlayerBaseState
                 _playerFSM.ChangeState<PlayerNormalRecoilState>();
             }
         }
-        if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
             if(_owner.PlayerStat.IsRunning)
             {

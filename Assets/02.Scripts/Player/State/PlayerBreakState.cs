@@ -45,8 +45,8 @@ public class PlayerBreakState : PlayerBaseState
         // 브레이크 타임 내에 같은 방향 키가 한 번 더 눌리면 Run
         if(_doubleTapReady && _breakTimer <= _owner.PlayerStat.DoubleTapTime)
         {
-            if(Input.GetKeyDown(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 
-            || Input.GetKeyDown(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
+            if(InputHandler.GetKeyDown(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 
+            || InputHandler.GetKeyDown(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
             {
                 _isDoubleTapped = true;
                 _doubleTapReady = false; // 더 이상 체크하지 않음

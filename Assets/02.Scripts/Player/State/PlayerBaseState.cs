@@ -87,7 +87,7 @@ public class PlayerBaseState : MonoState
         || _playerFSM.IsCurrentState<PlayerJumpDashState>())
             return;
 
-        if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
+        if (InputHandler.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
             _owner.RPC_SetAnimatorTrigger("Jump");
             _playerFSM.ChangeState<PlayerJumpState>();
@@ -235,9 +235,9 @@ public class PlayerBaseState : MonoState
         {
             case "ThrowStraight":
                 if (_owner.PlayerStat.IsJumping)
-                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
+                    _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
                 else
-                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
+                    _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
                 ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
                 break;
             case "Throw":
@@ -294,9 +294,9 @@ public class PlayerBaseState : MonoState
         {
             case "ThrowStraight":
                 if (_owner.PlayerStat.IsJumping)
-                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
+                    _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
                 else
-                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
+                    _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
                 ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
                 break;
             case "Throw":

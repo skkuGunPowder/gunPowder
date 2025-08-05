@@ -69,14 +69,14 @@ public class PlayerRunState : PlayerBaseState
         }
 
         Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-        if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1
-        || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
+        if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1
+        || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
         {
             velocity.x = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed;
             _owner.Rigidbody2D.linearVelocity = velocity;
         }
-        else if (Input.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
-        || Input.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
+        else if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1
+        || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
         {
             _playerFSM.ChangeState<PlayerBreakState>();
         }
@@ -96,13 +96,13 @@ public class PlayerRunState : PlayerBaseState
 
     private void RunAttack()
     {
-        if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
             ThrowStraightNormalBomb();
             _playerFSM.ChangeState<PlayerRecoilState>();
             return;
         }
-        if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
             ThrowStraightSpecialBomb();
             _playerFSM.ChangeState<PlayerRecoilState>();

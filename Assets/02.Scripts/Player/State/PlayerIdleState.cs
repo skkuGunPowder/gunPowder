@@ -115,18 +115,18 @@ public class PlayerIdleState : PlayerBaseState
 
     private void IdleNormalAttack()
     {
-        if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
-            if (Input.GetKey(KeyCode.UpArrow))
+            if (InputHandler.GetKey(KeyCode.UpArrow))
             {
-                if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+                if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
                 {
                     ThrowNormalBomb(EBombSpawnPoint.Up);
                 }
             }
-            else if (Input.GetKey(KeyCode.DownArrow))
+            else if (InputHandler.GetKey(KeyCode.DownArrow))
             {
-                if (Input.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+                if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
                 {
                     ThrowNormalBomb(EBombSpawnPoint.Down);
                 }
@@ -148,18 +148,18 @@ public class PlayerIdleState : PlayerBaseState
 
     private void IdleSpecialAttack()
     {
-        if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
-            if (Input.GetKey(KeyCode.UpArrow))
+            if (InputHandler.GetKey(KeyCode.UpArrow))
             {
-                if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+                if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
                 {
                     ThrowSpecialBomb(EBombSpawnPoint.Up);
                 }
             }
-            else if (Input.GetKey(KeyCode.DownArrow))
+            else if (InputHandler.GetKey(KeyCode.DownArrow))
             {
-                if (Input.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+                if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
                 {
                     ThrowSpecialBomb(EBombSpawnPoint.Down);
                 }
@@ -186,10 +186,10 @@ public class PlayerIdleState : PlayerBaseState
     private void IdleMove()
     {
         // 이동키를 받으면 걷기 상태로 전환
-        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
-        || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
+        if (InputHandler.GetKeyDown(KeyCode.LeftArrow) || InputHandler.GetKeyDown(KeyCode.RightArrow)
+        || InputHandler.GetKey(KeyCode.LeftArrow) || InputHandler.GetKey(KeyCode.RightArrow))
         {
-            int newDirection = Input.GetKey(KeyCode.LeftArrow) ? -1 : 1;
+            int newDirection = InputHandler.GetKey(KeyCode.LeftArrow) ? -1 : 1;
             /*
             // 방향이 바뀔 때만 RPC 호출
             if (_lastFacingDirection != newDirection)
