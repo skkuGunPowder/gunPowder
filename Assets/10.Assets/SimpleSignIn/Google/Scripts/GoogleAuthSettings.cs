@@ -44,6 +44,12 @@ namespace Assets.SimpleSignIn.Google.Scripts
             ClientSecretDesktop = clientSecret;
         }
 
+        public void SetGenericCredentials(string clientId, string customUriScheme)
+        {
+            ClientIdGeneric = clientId;
+            CustomUriSchemeGeneric = customUriScheme;
+        }
+
         #if UNITY_EDITOR
 
         public string ClientId => ClientIdDesktop;
