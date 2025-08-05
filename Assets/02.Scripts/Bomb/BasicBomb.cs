@@ -20,6 +20,10 @@ public class BasicBomb : Bomb
     private const float SLOW = 5f;
     private const float NORMAL = 10f;
 
+    private Tween _pulseTween;
+    [SerializeField] private float pulseScale = 2f; // 펄스 크기
+    [SerializeField] private float pulseDuration = 0.1f; // 펄스 지속 시간
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -33,6 +37,12 @@ public class BasicBomb : Bomb
         _isFuzeActivate = false;
         isDestroyed = false; // 재사용 시 초기화
         SoundManager.Instance.PlayLocalSound(this.GetType().Name, transform, 0, true);
+          Vector3 originalScale = transform.localScale;
+
+        // DOTween으로 무한 반복 펄스 트윈 생성
+        _pulseTween = transform.DOScale(originalScale * pulseScale, pulseDuration / 2f)
+        .SetLoops(-1, LoopType.Yoyo)
+        .SetEase(Ease.InOutSine); // 부드러운 감속/가속
     }
 
     protected override void Update()
@@ -143,6 +153,12 @@ public class BasicBomb : Bomb
     {
         if (isDestroyed) return; // 중복 파괴 방지
         isDestroyed = true;
+
+        if (_pulseTween != null && _pulseTween.IsActive())
+        {
+            _pulseTween.Kill();
+        }
+
         base.Explode();
     }
 }
