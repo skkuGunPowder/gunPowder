@@ -40,12 +40,16 @@ public class PlayerJumpState : PlayerBaseState
         _owner.PlayerStat.IsJumping = true;
         _yVelocity = 0;
         
-        _owner.PlayerStat.IncrementJumpCount();
-        _yVelocity = _owner.PlayerStat.JumpForce;
-        // 점프 시에만 y속도 설정
-        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-        velocity.y = _yVelocity;
-        _owner.Rigidbody2D.linearVelocity = velocity;
+        if(!_playerFSM.IsPreviousState<PlayerFallState>())
+        {
+            _owner.PlayerStat.IncrementJumpCount();
+            _yVelocity = _owner.PlayerStat.JumpForce;
+            // 점프 시에만 y속도 설정
+            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+            velocity.y = _yVelocity;
+            _owner.Rigidbody2D.linearVelocity = velocity;
+        }
+        
 
         _timer = 0f;
         _keyReleaseTimer = 0f;

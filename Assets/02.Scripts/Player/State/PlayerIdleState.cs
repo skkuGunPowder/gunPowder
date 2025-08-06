@@ -32,6 +32,7 @@ public class PlayerIdleState : PlayerBaseState
         _owner.PlayerStat.IsJumping = false;
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;  // 기본 이동속도
         _owner.PlayerStat.JumpCount = 0;
+        _owner.PlayerStat.IsDownJump = false;
         _owner.PlayerStat.ResetJumpDashCount();
 
         Vector2 velocity = _owner.Rigidbody2D.linearVelocity;

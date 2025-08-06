@@ -85,6 +85,13 @@ public class PlayerFallState : PlayerBaseState
         // Y축 속도 제한 적용
         LimitYVelocity();
 
+        // Y속도가 양수가 되면 점프 상태로 전환
+        if (_owner.Rigidbody2D.linearVelocity.y > 5f)
+        {
+            _playerFSM.ChangeState<PlayerJumpState>();
+            return;
+        }
+
         // 착지 감지 (간단하게)
         if (HandleLandingDetection())
         {
