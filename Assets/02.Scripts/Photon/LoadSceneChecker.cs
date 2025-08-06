@@ -11,13 +11,10 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     private PhotonView _photonView;
     
     public event Action<int, bool> OnLoading;
+    public event Action OnLoadEnd;
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
-    }
-    
-    private void Start()
-    {
     }
     
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
@@ -52,7 +49,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         }
        
         Debug.Log("로드 완료");
-        EventManager.Instance.LoadFinished();
+        OnLoadEnd?.Invoke();
     }
 
 
