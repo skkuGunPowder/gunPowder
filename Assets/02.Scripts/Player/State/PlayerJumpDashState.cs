@@ -82,7 +82,7 @@ public class PlayerJumpDashState : PlayerBaseState
             }
             else
             {
-                _playerFSM.ChangeState<PlayerJumpState>();
+                _playerFSM.ChangeState<PlayerFallState>();
             }
             return;
         }

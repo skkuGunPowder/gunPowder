@@ -650,6 +650,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerHitStopState":
                     playerFSM.ChangeState<PlayerHitStopState>();
                     break;
+                case "PlayerFallState":
+                    playerFSM.ChangeState<PlayerFallState>();
+                    break;
                 default:
                     break;
             }

@@ -76,7 +76,7 @@ public class PlayerDashState : PlayerBaseState
                 {
                     _owner.PlayerStat.IsFallingFromLedge = true;
                     _owner.SetAnimatorTrigger("Fall");
-                    _playerFSM.ChangeState<PlayerJumpState>();
+                    _playerFSM.ChangeState<PlayerFallState>();
                     return;
                 }
             }

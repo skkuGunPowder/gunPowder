@@ -1093,7 +1093,7 @@ Animator:
   m_GameObject: {fileID: 4890471182584963523}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 5d4e55eb693eaab45abc858f013aa044, type: 2}
+  m_Controller: {fileID: 9100000, guid: 8b928d77c03f5e54fb2be20b3016b7c7, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1591,9 +1591,9 @@ GameObject:
   - component: {fileID: 3208017360404246875}
   - component: {fileID: 975501548764073768}
   - component: {fileID: 9132079472274357184}
-  - component: {fileID: 3291587386075111323}
   - component: {fileID: 2161372930500741118}
   - component: {fileID: 1694469692039550700}
+  - component: {fileID: 7545203195311051648}
   m_Layer: 7
   m_Name: PlayerTest
   m_TagString: Player
@@ -1867,69 +1867,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &3291587386075111323
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6871245214315820508}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a535485ea5f07aa48b73d926842d87a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  influence: 1
-  triggerInteraction: 0
-  detectLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  autoUpdate: 1
-  colorProfile: {fileID: 0}
-  gizmosUpdate: 0
-  liner: {fileID: 0}
-  linerClamped: 0
-  linerCutOnHit: 0
-  linerFixCut: 1
-  linerEndPosition: 1
-  linerBasePosition: 0
-  stamp: {fileID: 0}
-  local: 1
-  scalable: 0
-  stampOnHit: 0
-  stampAutoHide: 0
-  stampOffset: 0
-  syncStamp:
-    axis: 0
-    syncAxis: 0
-    flipAxis: 0
-  planarSensitive: 0
-  _planar: {fileID: 0}
-  planers: []
-  anyPlanar: 1
-  onCast:
-    m_PersistentCalls:
-      m_Calls: []
-  onDetect:
-    m_PersistentCalls:
-      m_Calls: []
-  onChange:
-    m_PersistentCalls:
-      m_Calls: []
-  onBeginDetect:
-    m_PersistentCalls:
-      m_Calls: []
-  onEndDetect:
-    m_PersistentCalls:
-      m_Calls: []
-  minDepth: 0.5
-  maxDepth: -0.5
-  normalFilter: 0
-  minAngle: 0
-  maxAngle: 90
-  hitBackside: 0
-  direction: {x: 0, y: -1}
-  size: {x: 0.88, y: 0.06}
 --- !u!114 &2161372930500741118
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1969,6 +1906,18 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &7545203195311051648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af53c1e7c27a34e4cbfa263d7c2ea40e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6883906685738839930
 GameObject:
   m_ObjectHideFlags: 0

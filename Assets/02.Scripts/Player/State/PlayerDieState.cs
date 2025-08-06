@@ -29,6 +29,10 @@ public class PlayerDieState : PlayerBaseState
             return;
         }
 
+        // 무적
+        _owner.gameObject.tag = "Immune";
+        _owner.PlayerStat.IsImmune = true;
+
         // 사망 효과
         DieEffect();
 
@@ -38,17 +42,12 @@ public class PlayerDieState : PlayerBaseState
         _hasStartedResurrection = false;
         _hasRequestedDestroy = false;
 
-        // 무적
-        _owner.gameObject.tag = "Immune";
-        _owner.PlayerStat.IsImmune = true;
-
         // 플레이어가 사망할 떄, 사망 폭발이 발생
         Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
         dieExplosion.transform.position = _owner.transform.position;
         dieExplosion.Explode(true, _owner.PhotonView);
 
         // 모습 안보이게
-        
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
         if (playerSpriteRendererList != null)
         {
@@ -75,7 +74,7 @@ public class PlayerDieState : PlayerBaseState
         
         base.OnExit();
 
-        // 무적 해제
+        // 태그 설정 (무적은 ImmuneCoroutine에서 관리)
         if(_owner.PhotonView.IsMine)
         {
             _owner.gameObject.tag = "Player";
@@ -84,7 +83,6 @@ public class PlayerDieState : PlayerBaseState
         {
             _owner.gameObject.tag = "Enemy";
         }
-        _owner.PlayerStat.IsImmune = false;
 
         // 모습 보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
@@ -100,7 +98,7 @@ public class PlayerDieState : PlayerBaseState
         }
     }
 
-    public override void Update()
+    public override void MineUpdate()
     {   
         // null 체크
         if (_owner == null || _owner.PhotonView == null)
@@ -187,16 +185,8 @@ public class PlayerDieState : PlayerBaseState
         // 무적 코루틴 시작
         StartCoroutine(ImmuneCoroutine());
         
-        // 상태 전환 - 네트워크 동기화 사용
-        if (_owner.PhotonView.IsMine)
-        {
-            SyncStateChange<PlayerIdleState>();
-        }
-        else
-        {
-            // 다른 클라이언트에서는 직접 상태 변경
-            _playerFSM.ChangeState<PlayerIdleState>();
-        }
+        // 상태 전환 - 네트워크 동기화 사용 (모든 경우에 일관성 있게)
+        SyncStateChange<PlayerIdleState>();
     }
 
     /// <summary>
@@ -219,7 +209,6 @@ public class PlayerDieState : PlayerBaseState
 
     private void DieEffect()
     {
-        float power = 20f;
         foreach(GameObject diePart in _owner.HeadPartList)
         {
             AddForceToDiePart(diePart, new Vector2(0, 1).normalized, power);

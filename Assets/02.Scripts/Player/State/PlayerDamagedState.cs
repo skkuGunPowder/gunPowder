@@ -81,7 +81,7 @@ public class PlayerDamagedState : PlayerBaseState
             {
                 _owner.PlayerStat.IsFallingFromLedge = true;
                 _owner.RPC_SetAnimatorTrigger("Fall");
-                SyncStateChange<PlayerJumpState>();
+                SyncStateChange<PlayerFallState>();
             }
             //SyncStateChange<PlayerIdleState>();
             return;
