@@ -106,6 +106,7 @@ public class UI_LoginScene : MonoBehaviour
     // 3. 최종 회원가입 (비밀번호 입력 후)
     public async void OnClickCompleteRegister()
     {
+        string email = SignupInputFields.IDInputField.text;
         string password = SignupInputFields.PasswordInputField.text;
         string confirmPwd = SignupInputFields.PasswordConfirmInputField.text;
 
@@ -115,7 +116,7 @@ public class UI_LoginScene : MonoBehaviour
             return;
         }
 
-        var result = await AccountManager.Instance.CompleteRegister(password);
+        var result = await AccountManager.Instance.CompleteRegister(email, password);
         SignupInputFields.ResultText.text = result.Message;
 
         if (result.IsSuccess)

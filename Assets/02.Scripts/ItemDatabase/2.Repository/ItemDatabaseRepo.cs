@@ -1,111 +1,105 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Firebase;
-using Firebase.Firestore;
+using BackEnd;
+using LitJson;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+
 
 public class ItemDatabaseRepo
 {
-    public event Action<Dictionary<string, Item>> OnLoadItemData;
+    private const int ITEM_DATA_FOLDER_ID = 2594;
+
+    public event Action<Dictionary<string, Item>, Dictionary<string, IStat>> OnitemDataLoaded;
+
+    private bool _isItemLoadDone = false;
+    private bool _isExplosionLoadDone = false;
 
 
-    public async Task<Dictionary<string, Item>> LoadItemData()
+    public void Init()
     {
-        Dictionary<string, Item> itemData = new Dictionary<string, Item>();
-
-        CollectionReference itemDatabaseRef = FirebaseManager.Instance.DB.Collection("Items");
-        try
-        {
-            QuerySnapshot snapshots = await itemDatabaseRef.GetSnapshotAsync();
-            foreach (DocumentSnapshot document in snapshots.Documents)
-            {
-                if (document.Exists)
-                {
-                    Dictionary<string, object> itemRawData = document.ToDictionary();
-                    Item item = await ConvertToItemAsync(document.Id, itemRawData);
-                    itemData[document.Id] = item;
-                }
-            }
-            Debug.Log("ItemData 불러오기 성공!");
-        }
-        catch (FirebaseException e)
-        {
-            Debug.LogError($"ItemData 데이터 로드 실패. 에러코드 {e.ErrorCode} : {e.Message}");
-        }
-
-        return itemData;
+        LoadItemDataAsync();
     }
 
-    public async Task<Dictionary<string, IStat>> LoadStatData()
+    private void CheckComplete(Dictionary<string, Item> itemDataDict, Dictionary<string, IStat> statDataDict)
     {
-        Dictionary<string, IStat> statData = new Dictionary<string, IStat>();
-
-        CollectionReference itemDatabaseRef = FirebaseManager.Instance.DB.Collection("Stats");
-        try
+        if (_isExplosionLoadDone && _isItemLoadDone)
         {
+            OnitemDataLoaded?.Invoke(itemDataDict, statDataDict);
+        }
+    }
 
-            QuerySnapshot snapshots = await itemDatabaseRef.GetSnapshotAsync();
-            foreach (DocumentSnapshot document in snapshots.Documents)
+
+    public void LoadItemDataAsync()
+    {
+        Dictionary<string, Item> itemDataDict = new Dictionary<string, Item>();
+        Dictionary<string, IStat> statDataDict = new Dictionary<string, IStat>();
+
+        Backend.Chart.GetChartListByFolderV2(ITEM_DATA_FOLDER_ID, result =>
+        {
+            if (!result.IsSuccess())
             {
-                if (document.Exists)
-                {
-                    if (document.Id[0] == 'B')
-                    {
-                        BombStat stat = document.ConvertTo<BombStat>();
-                        statData[document.Id] = stat;
-                        continue;
-                    }
+                Debug.LogError($"아이템 데이터 불러오기 실패: {result.GetMessage()}");
+                return;
+            }
 
-                    if (document.Id[0] == 'E')
+            foreach (JsonData chart in result.FlattenRows())
+            {
+                var itemResult = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
+                if (!itemResult.IsSuccess())
+                {
+                    Debug.LogError($"아이템 데이터 불러오기 실패: {itemResult.GetMessage()}");
+                    continue;
+                }
+
+                foreach (JsonData iteminfo in itemResult.FlattenRows())
+                {
+                    Item item = new Item(iteminfo);
+                    itemDataDict.Add(item.ID, item);
+
+                    if (item.ID[0] == 'B')
                     {
-                        ExplosionStat stat = document.ConvertTo<ExplosionStat>();
-                        statData[document.Id] = stat;
-                        continue;
+                        BombStat bombStat = new BombStat(iteminfo);
+                        statDataDict.Add(item.ID, bombStat);
                     }
                 }
             }
-            Debug.Log("StatData 불러오기 성공!");
-        }
-        catch (FirebaseException e)
+            Debug.Log("아이템 데이터 불러오기 성공");
+            _isItemLoadDone = true;
+            CheckComplete(itemDataDict, statDataDict);
+        });
+
+        Backend.Chart.GetChartListV2(result =>
         {
-            Debug.LogError($"StatData 데이터 로드 실패. 에러코드 {e.ErrorCode} : {e.Message}");
-        }
-        return statData;
-    }
+            if (!result.IsSuccess())
+            {
+                Debug.LogError($"폭발 데이터 불러오기 실패: {result.GetMessage()}");
+                return;
+            }
 
-    private async Task<Item> ConvertToItemAsync(string id, Dictionary<string, object> dict)
-    {
-        // 저장된 데이터 -> Item 객체로 변환하는 메소드
-        string imageAddress = (string)dict["ImageAddress"];
-        string prefabAddress = (string)dict["PrefabAddress"];
+            foreach (JsonData chart in result.FlattenRows())
+            {
+                if (chart["chartName"].ToString() != "Explosion")
+                {
+                    continue;
+                }
 
-        // 유효성 검사
-        if (string.IsNullOrEmpty(imageAddress))
-        {
-            throw new Exception("이미지 어드레서블 주소가 없습니다.");
-        }
+                var chartContents = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
+                if (!chartContents.IsSuccess())
+                {
+                    Debug.LogError($"폭발 데이터 불러오기 실패: {chartContents.GetMessage()}");
+                    continue;
+                }
 
-        if (string.IsNullOrEmpty(prefabAddress))
-        {
-            throw new Exception("프리펩 어드레서블 주소가 없습니다.");
-        }
-
-        // 어드레서블 로드
-        Sprite itemImage = await Addressables.LoadAssetAsync<Sprite>(imageAddress).Task;
-        GameObject itemPrefab = await Addressables.LoadAssetAsync<GameObject>(prefabAddress).Task;
-
-        // Item객체로 반환
-        return new Item(
-            id: id,
-            itemType: Enum.TryParse((string)dict["ItemType"], out EItemType slot) ? slot : EItemType.None,
-            name: (string)dict["Name"],
-            explanation: (string)dict["Explanation"],
-            imageAddress: imageAddress,
-            prefabAddress:prefabAddress,
-            image : itemImage,
-            prefab: itemPrefab
-        );
+                foreach (JsonData explosioninfo in chartContents.FlattenRows())
+                {
+                    ExplosionStat explosionStat = new ExplosionStat(explosioninfo);
+                    statDataDict.Add((string)explosioninfo["ItemID"], explosionStat);
+                }
+            }
+            Debug.Log("폭발 데이터 불러오기 성공");
+            _isExplosionLoadDone = true;
+            CheckComplete(itemDataDict, statDataDict);
+        });  
     }
 }

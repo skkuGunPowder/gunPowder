@@ -1,11 +1,18 @@
-using Firebase.Firestore;
+using LitJson;
 
 
-[FirestoreData]
 public class ExplosionStat : IStat
 {
-    [FirestoreProperty] public int AttackPower {get; private set;}
-    [FirestoreProperty] public float ExplosionRadius {get; private set;}
-    [FirestoreProperty] public float ExplosivePower {get; private set;}
-    [FirestoreProperty] public bool IsSelfDamage {get; private set;}
+    public readonly int AttackPower;
+    public readonly float ExplosionRadius;
+    public readonly float ExplosivePower;
+    public readonly bool IsSelfDamage;
+
+    public ExplosionStat(JsonData json)
+    {
+        AttackPower = int.Parse(json["AttackPower"].ToString());
+        ExplosionRadius = float.Parse(json["ExplosionRadius"].ToString());
+        ExplosivePower = float.Parse(json["ExplosivePower"].ToString());
+        IsSelfDamage = bool.Parse(json["IsSelfDamage"].ToString());
+    }
 }
