@@ -277,15 +277,14 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
+        // 피격 VFX 재생
         if (tag == "Player")
         {
-            // 피격 VFX 재생
-            VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
+            VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
         }
         else
         {
-            // 피격 VFX 재생
-            VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
+            VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
         }
         SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
         SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 4, 0f, false, SoundType.SFX, true, 1f, 50f);
@@ -450,6 +449,14 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
+    [PunRPC]
+    public void SetAnimatorBool(string boolName, bool value)
+    {
+        foreach (Animator animator in _myAnimatorList)
+        {
+            animator.SetBool(boolName, value);
+        }
+    }
 
     [PunRPC]
     public void RPC_SetAnimatorTrigger(string triggerName)
@@ -460,6 +467,17 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         PhotonView.RPC(nameof(SetAnimatorTrigger), RpcTarget.All, triggerName);
+    }
+
+    [PunRPC]
+    public void RPC_SetAnimatorBool(string boolName, bool value)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        PhotonView.RPC(nameof(SetAnimatorBool), RpcTarget.All, boolName, value);
     }
 
     [PunRPC]

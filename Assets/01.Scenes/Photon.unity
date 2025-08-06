@@ -2676,7 +2676,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b003891f09630614e819f09f9bfa9050, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GoogleAuthSettings: {fileID: 11400000, guid: 021de58464d02e1478b2645fa01c4adb, type: 2}
+  GoogleAuthSettings: {fileID: 11400000, guid: dc4b8b219bc9f794e82d8b8731b9b8c1, type: 2}
 --- !u!1 &739250825
 GameObject:
   m_ObjectHideFlags: 0
@@ -6060,11 +6060,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6366703919517488418}
   - {fileID: 5043439416554781246}
   - {fileID: 668138674}
   - {fileID: 3427786319976489320}
   - {fileID: 1256531675}
+  - {fileID: 6366703919517488418}
   m_Father: {fileID: 1713536469903301514}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -11307,11 +11307,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1437969474}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 321}
-  m_SizeDelta: {x: 1106, y: 200}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1106, y: 170}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6451079697619698083
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -12714,11 +12714,11 @@ MonoBehaviour:
     ConfirmButton: {fileID: 8095671715460063178}
   SignupInputFields:
     ResultText: {fileID: 8764956371272390684}
-    IDInputField: {fileID: 7442161799129155926}
+    IDInputField: {fileID: 771739441}
     NicknameInputField: {fileID: 0}
-    PasswordInputField: {fileID: 3144685100048471621}
-    PasswordConfirmInputField: {fileID: 2025437062224507950}
-    ConfirmButton: {fileID: 3359601715205578324}
+    PasswordInputField: {fileID: 1654764737}
+    PasswordConfirmInputField: {fileID: 990494024}
+    ConfirmButton: {fileID: 206614255}
   NicknameInputFields:
     ResultText: {fileID: 8764956371272390684}
     IDInputField: {fileID: 0}
@@ -12876,7 +12876,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4285229931
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -12894,8 +12894,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 55
-  m_fontSizeBase: 55
+  m_fontSize: 48
+  m_fontSizeBase: 48
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
