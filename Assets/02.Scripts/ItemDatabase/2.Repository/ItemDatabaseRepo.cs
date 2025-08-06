@@ -1,111 +1,85 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Firebase;
-using Firebase.Firestore;
+using BackEnd;
+using LitJson;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
+
 public class ItemDatabaseRepo
 {
-    public event Action<Dictionary<string, Item>> OnLoadItemData;
+    private const int ITEM_DATA_FOLDER_ID = 2594;
+
+    public event Action<Dictionary<string, Item>, Dictionary<string, IStat>> OnitemDataLoaded;
 
 
-    public async Task<Dictionary<string, Item>> LoadItemData()
+    public void Init()
     {
-        Dictionary<string, Item> itemData = new Dictionary<string, Item>();
-
-        CollectionReference itemDatabaseRef = FirebaseManager.Instance.DB.Collection("Items");
-        try
-        {
-            QuerySnapshot snapshots = await itemDatabaseRef.GetSnapshotAsync();
-            foreach (DocumentSnapshot document in snapshots.Documents)
-            {
-                if (document.Exists)
-                {
-                    Dictionary<string, object> itemRawData = document.ToDictionary();
-                    Item item = await ConvertToItemAsync(document.Id, itemRawData);
-                    itemData[document.Id] = item;
-                }
-            }
-            Debug.Log("ItemData 불러오기 성공!");
-        }
-        catch (FirebaseException e)
-        {
-            Debug.LogError($"ItemData 데이터 로드 실패. 에러코드 {e.ErrorCode} : {e.Message}");
-        }
-
-        return itemData;
+        LoadItemDataAsync();
     }
 
-    public async Task<Dictionary<string, IStat>> LoadStatData()
+    public void LoadItemDataAsync()
     {
-        Dictionary<string, IStat> statData = new Dictionary<string, IStat>();
+        Dictionary<string, Item> itemDataDict = new Dictionary<string, Item>();
+        Dictionary<string, IStat> statDataDict = new Dictionary<string, IStat>();
 
-        CollectionReference itemDatabaseRef = FirebaseManager.Instance.DB.Collection("Stats");
-        try
+
+        Backend.Chart.GetChartListByFolderV2(ITEM_DATA_FOLDER_ID, result =>
         {
-
-            QuerySnapshot snapshots = await itemDatabaseRef.GetSnapshotAsync();
-            foreach (DocumentSnapshot document in snapshots.Documents)
+            if (!result.IsSuccess())
             {
-                if (document.Exists)
+                Debug.LogError($"아이템 데이터 불러오기 실패: {result.GetMessage()}");
+                return;
+            }
+
+            JsonData chartListData = result.GetReturnValuetoJSON();
+            foreach (JsonData chart in chartListData["rows"])
+            {
+                var itemResult = Backend.Chart.GetChartContents(chart["selectedChartFileId"]["N"].ToString());
+                if (!itemResult.IsSuccess())
                 {
-                    if (document.Id[0] == 'B')
+                    Debug.LogError($"아이템 데이터 불러오기 실패: {itemResult.GetMessage()}");
+                    continue;
+                }
+
+                foreach (JsonData iteminfo in itemResult.GetReturnValuetoJSON()["rows"])
+                {
+                    Item itemObj = ConvertToItem(iteminfo);
+                    itemDataDict[itemObj.ID] = itemObj;
+
+                    if (itemObj.ID[0] == 'B')
                     {
-                        BombStat stat = document.ConvertTo<BombStat>();
-                        statData[document.Id] = stat;
+                        BombStat bombStat = new BombStat(iteminfo);
+                        statDataDict[itemObj.ID] = bombStat;
                         continue;
                     }
 
-                    if (document.Id[0] == 'E')
+                    if (itemObj.ID[0] == 'E')
                     {
-                        ExplosionStat stat = document.ConvertTo<ExplosionStat>();
-                        statData[document.Id] = stat;
+                        ExplosionStat bombStat = new ExplosionStat(iteminfo);
+                        statDataDict[itemObj.ID] = bombStat;
                         continue;
                     }
                 }
             }
-            Debug.Log("StatData 불러오기 성공!");
-        }
-        catch (FirebaseException e)
-        {
-            Debug.LogError($"StatData 데이터 로드 실패. 에러코드 {e.ErrorCode} : {e.Message}");
-        }
-        return statData;
+            Debug.Log("아이템 데이터 불러오기 성공");
+
+            OnitemDataLoaded?.Invoke(itemDataDict, statDataDict);
+        });
     }
 
-    private async Task<Item> ConvertToItemAsync(string id, Dictionary<string, object> dict)
+    private Item ConvertToItem(JsonData json)
     {
-        // 저장된 데이터 -> Item 객체로 변환하는 메소드
-        string imageAddress = (string)dict["ImageAddress"];
-        string prefabAddress = (string)dict["PrefabAddress"];
+        string id = json["MYID"].ToString();
+        EItemType itemType = (EItemType)Enum.Parse(typeof(EItemType), json["ItemType"].ToString());
+        string name = json["Name"].ToString();
+        string explanation = json["Explanation"].ToString();
+        string imageAddress = json["ImageAddress"].ToString();
+        string prefabAddress = json["PrefabAddress"].ToString();
 
-        // 유효성 검사
-        if (string.IsNullOrEmpty(imageAddress))
-        {
-            throw new Exception("이미지 어드레서블 주소가 없습니다.");
-        }
+        Sprite itemImage = Addressables.LoadAssetAsync<Sprite>(imageAddress).WaitForCompletion();
+        GameObject itemPrefab = Addressables.LoadAssetAsync<GameObject>(prefabAddress).WaitForCompletion();
 
-        if (string.IsNullOrEmpty(prefabAddress))
-        {
-            throw new Exception("프리펩 어드레서블 주소가 없습니다.");
-        }
-
-        // 어드레서블 로드
-        Sprite itemImage = await Addressables.LoadAssetAsync<Sprite>(imageAddress).Task;
-        GameObject itemPrefab = await Addressables.LoadAssetAsync<GameObject>(prefabAddress).Task;
-
-        // Item객체로 반환
-        return new Item(
-            id: id,
-            itemType: Enum.TryParse((string)dict["ItemType"], out EItemType slot) ? slot : EItemType.None,
-            name: (string)dict["Name"],
-            explanation: (string)dict["Explanation"],
-            imageAddress: imageAddress,
-            prefabAddress:prefabAddress,
-            image : itemImage,
-            prefab: itemPrefab
-        );
+        return new Item(id, itemType, name, explanation, imageAddress, prefabAddress, itemImage, itemPrefab);
     }
 }

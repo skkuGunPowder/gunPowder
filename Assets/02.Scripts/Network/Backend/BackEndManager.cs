@@ -3,8 +3,10 @@ using BackEnd;
 
 public class BackendManager : DontDestroySingleton<BackendManager>
 {
-    private void OnEnable()
+    protected override void Awake()
     {
+        base.Awake();
+        
         var bro = Backend.Initialize(); // 뒤끝 초기화
 
         // 뒤끝 초기화에 대한 응답값
@@ -16,13 +18,5 @@ public class BackendManager : DontDestroySingleton<BackendManager>
         {
             Debug.LogError("초기화 실패 : " + bro); // 실패일 경우 statusCode 400대 에러 발생
         }
-
-        Test();
     }
-
-    private void Test()
-    {
-
-    }
-    
 }
