@@ -39,7 +39,10 @@ public class PlayerFallState : PlayerBaseState
 
         // 점프 상태에서 떨어지면 점프 횟수 증가하지 않음
         if(!_playerFSM.IsPreviousState<PlayerJumpState>()
-        && !_playerFSM.IsPreviousState<PlayerJumpDashState>())
+        && !_playerFSM.IsPreviousState<PlayerJumpDashState>()
+        && !_playerFSM.IsPreviousState<PlayerRecoilState>()
+        && !_playerFSM.IsPreviousState<PlayerNormalRecoilState>()
+        )
         {
             _owner.PlayerStat.IncrementJumpCount();
         }
@@ -107,6 +110,18 @@ public class PlayerFallState : PlayerBaseState
     {
         _groundRay2D.Cast();
         bool isGroundedNow = _groundRay2D.Performed;
+
+        if(_owner.PlayerStat.IsDownJump)
+        {
+            RaycastHit2D hit = _groundRay2D.Hit;
+            if(hit.collider != null)
+            {
+                if(hit.collider.CompareTag("OneWayPlatform"))
+                {
+                    return false;
+                }
+            }
+        }
         
         // 착지 감지: 이전에 공중이었다가 지금 땅에 닿음
         if (!_wasGroundedLastFrame && isGroundedNow)

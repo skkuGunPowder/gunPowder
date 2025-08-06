@@ -4,6 +4,7 @@ using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
+using System.Collections;
 
 
 
@@ -722,5 +723,27 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _hasStoredVelocity = false;
         _storedVelocity = Vector2.zero;
+    }
+
+    public void SetDownJump()
+    {
+        gameObject.layer = LayerMask.NameToLayer("DownJump");
+        // 하위 오브젝트 들도 모드 변경
+        foreach(Transform child in transform)
+        {
+            child.gameObject.layer = LayerMask.NameToLayer("DownJump");
+        }
+        StartCoroutine(ResetDownJump());
+    }
+
+    public IEnumerator ResetDownJump()
+    {
+        yield return new WaitForSeconds(0.5f);
+        gameObject.layer = LayerMask.NameToLayer("Player");
+        _playerStat.IsDownJump = false;
+        foreach(Transform child in transform)
+        {
+            child.gameObject.layer = LayerMask.NameToLayer("Player");
+        }
     }
 }
