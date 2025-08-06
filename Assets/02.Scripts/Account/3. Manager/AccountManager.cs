@@ -9,7 +9,9 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     public AccountDTO CurrencAccount => _myAccount.ToDTO();
 
     private AccountRepository _accountRepository;
+    private BackendLogin _backendLogin;
     private const string SALT = "12315";
+
 
     protected override void Awake()
     {
@@ -21,6 +23,7 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     private void Init()
     {
         _accountRepository = new AccountRepository();
+        _backendLogin = new BackendLogin();
     }
 
     public async Task<Result> TryRegister(AccountDTO dto)
@@ -58,6 +61,7 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     public async Task<Result> TryLogin(string loginId, string password)
     {
         string encryptedPassword = CryptoUtil.Encryption(password, SALT);
+
         AccountDTO accountDTO = await _accountRepository.GetAccount(new AccountDTO(
             "",
             loginId,
@@ -74,6 +78,10 @@ public class AccountManager : DontDestroySingleton<AccountManager>
             Debug.Log("로그인 실패");
             return new Result(false, "로그인에 실패하였습니다");
         }
+
+        // 뒤끝 로그인
+        _backendLogin.CustomLogin(loginId, encryptedPassword);
+
         _myAccount = new Account(
             accountDTO.Account_ID,
             accountDTO.Login_ID,
@@ -128,12 +136,17 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     }
 
     // 3. 비밀번호/닉네임 설정 및 회원가입 완료
-    public async Task<Result> CompleteRegister(string password)
+    public async Task<Result> CompleteRegister(string email, string password)
     {
         string encryptedPassword = CryptoUtil.Encryption(password, SALT);
         bool updated = await _accountRepository.UpdatePassword(encryptedPassword);
         if (!updated)
+        {
             return new Result(false, "비밀번호 설정에 실패하였습니다.");
+        }
+
+        // 뒤끝 회원가입
+        _backendLogin.CustomSignUp(email, encryptedPassword);
 
         return new Result(true, "회원가입이 완료되었습니다.");
     }
@@ -146,6 +159,9 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         
         bool updated = await _accountRepository.UpdateNickname(nickname);
         _myAccount.SetNickname(nickname, discriminator);
+
+        // 뒤끝 닉네임 업데이트
+        _backendLogin.UpdateNickName(nickname);
         
         if (updated)
             return new Result(true, "닉네임이 저장되었습니다.");
@@ -190,7 +206,7 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     /// <summary>
     /// 구글 로그인 후 현재 계정 정보 설정
     /// </summary>
-    public async Task<Result> SetCurrentAccount(AccountDTO accountDTO)
+    public Result SetCurrentAccount(AccountDTO accountDTO)
     {
         try
         {
@@ -218,7 +234,7 @@ public class AccountManager : DontDestroySingleton<AccountManager>
 
             return new Result(true, "구글 로그인 성공!");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"구글 계정 정보 설정 실패: {e.Message}");
             return new Result(false, $"구글 계정 정보 설정 실패: {e.Message}");
