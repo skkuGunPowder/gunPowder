@@ -1,6 +1,6 @@
 public class WaterExplosion : Explosion
 {
-    public const string ID = "EP0005";
+    public const string ID = "EP0007";
 
     protected override void Awake()
     {

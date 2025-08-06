@@ -30,12 +30,12 @@ public class Item
             throw new Exception("Json이 유효하지 않습니다");
         }
 
-        ID = json["ItemID"]["S"].ToString();
-        ItemType = (EItemType)Enum.Parse(typeof(EItemType), json["ItemType"]["S"].ToString());
-        Name = json["Name"]["S"].ToString();
-        Explanation = json["Explanation"]["S"].ToString();
-        ImageAddress = json["ImageAddress"]["S"].ToString();
-        PrefabAddress = json["PrefabAddress"]["S"].ToString();
+        ID = json["ItemID"].ToString();
+        ItemType = (EItemType)Enum.Parse(typeof(EItemType), json["ItemType"].ToString());
+        Name = json["Name"].ToString();
+        Explanation = json["Explanation"].ToString();
+        ImageAddress = json["ImageAddress"].ToString();
+        PrefabAddress = json["PrefabAddress"].ToString();
 
         Image = Addressables.LoadAssetAsync<Sprite>(ImageAddress).WaitForCompletion();
         Prefab = Addressables.LoadAssetAsync<GameObject>(PrefabAddress).WaitForCompletion();
