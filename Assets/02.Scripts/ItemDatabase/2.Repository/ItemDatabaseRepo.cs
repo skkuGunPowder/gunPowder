@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BackEnd;
+using Google.MiniJSON;
 using LitJson;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -44,7 +45,8 @@ public class ItemDatabaseRepo
 
                 foreach (JsonData iteminfo in itemResult.GetReturnValuetoJSON()["rows"])
                 {
-                    Item itemObj = ConvertToItem(iteminfo);
+                    Item itemObj = new Item(iteminfo);
+                    var json = iteminfo.ToJson();
                     itemDataDict[itemObj.ID] = itemObj;
 
                     if (itemObj.ID[0] == 'B')
@@ -66,20 +68,5 @@ public class ItemDatabaseRepo
 
             OnitemDataLoaded?.Invoke(itemDataDict, statDataDict);
         });
-    }
-
-    private Item ConvertToItem(JsonData json)
-    {
-        string id = json["MYID"].ToString();
-        EItemType itemType = (EItemType)Enum.Parse(typeof(EItemType), json["ItemType"].ToString());
-        string name = json["Name"].ToString();
-        string explanation = json["Explanation"].ToString();
-        string imageAddress = json["ImageAddress"].ToString();
-        string prefabAddress = json["PrefabAddress"].ToString();
-
-        Sprite itemImage = Addressables.LoadAssetAsync<Sprite>(imageAddress).WaitForCompletion();
-        GameObject itemPrefab = Addressables.LoadAssetAsync<GameObject>(prefabAddress).WaitForCompletion();
-
-        return new Item(id, itemType, name, explanation, imageAddress, prefabAddress, itemImage, itemPrefab);
     }
 }

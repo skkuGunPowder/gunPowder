@@ -4,7 +4,7 @@ using Photon.Pun;
 using UnityEngine;
 public class MissileBomb : Bomb
 {
-    public const string ID = "BO0004";
+    public const string ID = "BO0005";
     private const float PREDELAY = 0.3f;
 
 

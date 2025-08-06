@@ -1,4 +1,6 @@
+// using System.Diagnostics;
 using LitJson;
+using UnityEngine;
 
 
 public class BombStat : IStat
@@ -13,12 +15,12 @@ public class BombStat : IStat
 
     public BombStat(JsonData json)
     {
-        Priority = int.Parse(json["Priority"].ToString());
-        Cost = int.Parse(json["Cost"].ToString());
-        CoolTime = float.Parse(json["CoolTime"].ToString());
-        Speed = float.Parse(json["Speed"].ToString());
-        FuzeTime = float.Parse(json["FuzeTime"].ToString());
-        IsFallingOut = bool.Parse(json["IsFallingOut"].ToString());
-        ExplosionID = json["ExplosionID"].ToString();
+        Priority = int.Parse(json["Priority"]["S"].ToString());
+        Cost = int.Parse(json["Cost"]["S"].ToString());
+        CoolTime = float.Parse(json["CoolTime"]["S"].ToString());
+        Speed = float.Parse(json["ThrowingSpeed"]["S"].ToString());
+        FuzeTime = float.Parse(json["AutoExplodeDelay"]["S"].ToString());
+        IsFallingOut = bool.Parse(json["IsFallingOut"]["S"].ToString());
+        ExplosionID = json["ExplosionID"]["S"].ToString();
     }
 }
