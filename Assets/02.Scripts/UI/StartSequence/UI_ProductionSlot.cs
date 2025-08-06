@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class UI_ProductionSlot : MonoBehaviour
 {
@@ -15,7 +16,9 @@ public class UI_ProductionSlot : MonoBehaviour
     public List<Color32> TeamColorCodeList;
     // 현재 장착중인 무기
     public Image Bomb;
-    
+
+    public RectTransform Shine;
+    public Image Glow;
     
     // 함수 = Init (로딩 제외)
     public void Init(string nickname, EInGameTeam team, Sprite bombImage)
@@ -23,7 +26,6 @@ public class UI_ProductionSlot : MonoBehaviour
         PlayerNicknameText.text = nickname;
         Bomb.sprite = bombImage;
         PlayerProfileImage.color = TeamColorSet(team);
-
     }
 
     public void LoadCheck(bool isLoad)
@@ -48,5 +50,25 @@ public class UI_ProductionSlot : MonoBehaviour
                 return TeamColorCodeList[0];
         }
     }
-    // 로딩이 되었는지 체크하는 칸
+
+    public void ShineOn()
+    {
+        Sequence sequence = DOTween.Sequence();
+
+        sequence.Append(Shine.DOAnchorPos(new Vector2(800, 0), 1f));
+        sequence.Insert(0.4f, Glow.DOFade(0.2f, 0.2f));
+        sequence.Insert(0.6f, Glow.DOFade(0f, 0.2f));
+
+    }
+
+    public void Shake()
+    {
+        gameObject.transform.DOShakePosition(0.5f, 10f, 20, 90, false, true);
+    }
+    
+    private void OnDisable()
+    {
+        Shine.anchoredPosition = new Vector2(-700, 0);
+        Glow.color = new Color(1,1,1, 0);
+    }   
 }
