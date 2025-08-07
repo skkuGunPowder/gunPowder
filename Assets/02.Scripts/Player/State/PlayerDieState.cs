@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using DG.Tweening;
 
 public class PlayerDieState : PlayerBaseState
 {
     private float _timer = 0f;
     private bool _hasStartedResurrection = false; // 부활 시작 플래그
     private bool _hasRequestedDestroy = false; // 파괴 요청 플래그
+
+    private float power = 30f;
 
     public override void OnEnter()
     {
@@ -26,14 +29,18 @@ public class PlayerDieState : PlayerBaseState
             return;
         }
 
+        // 무적
+        _owner.gameObject.tag = "Immune";
+        _owner.PlayerStat.IsImmune = true;
+
+        // 사망 효과
+        DieEffect();
+
+
         // 타이머 및 플래그 초기화
         _timer = 0f;
         _hasStartedResurrection = false;
         _hasRequestedDestroy = false;
-
-        // 무적
-        _owner.gameObject.tag = "Immune";
-        _owner.PlayerStat.IsImmune = true;
 
         // 플레이어가 사망할 떄, 사망 폭발이 발생
         Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
@@ -52,8 +59,6 @@ public class PlayerDieState : PlayerBaseState
                 }
             }
         }
-        
-        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
 
         // 플레이어 사망 사운드 재생
         SoundManager.Instance.PlayLocalRandomSound("PlayerDeath", transform, 1, 3);
@@ -69,7 +74,7 @@ public class PlayerDieState : PlayerBaseState
         
         base.OnExit();
 
-        // 무적 해제
+        // 태그 설정 (무적은 ImmuneCoroutine에서 관리)
         if(_owner.PhotonView.IsMine)
         {
             _owner.gameObject.tag = "Player";
@@ -78,7 +83,6 @@ public class PlayerDieState : PlayerBaseState
         {
             _owner.gameObject.tag = "Enemy";
         }
-        _owner.PlayerStat.IsImmune = false;
 
         // 모습 보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
@@ -94,7 +98,7 @@ public class PlayerDieState : PlayerBaseState
         }
     }
 
-    public override void Update()
+    public override void MineUpdate()
     {   
         // null 체크
         if (_owner == null || _owner.PhotonView == null)
@@ -102,7 +106,6 @@ public class PlayerDieState : PlayerBaseState
             return;
         }
 
-        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
         
         if(_owner.PlayerStat.CurrentPlayerLife <= 0)
         {
@@ -133,7 +136,7 @@ public class PlayerDieState : PlayerBaseState
             // 부활 지점에서 몇초 후 부활
             _timer += Time.deltaTime;
             
-            if(_timer < 2f)
+            if(_timer < 3f)
             {
                 return;
             }
@@ -160,6 +163,7 @@ public class PlayerDieState : PlayerBaseState
 
 
         // 부활 위치로 이동
+        DOTween.Kill(_owner.transform);
         _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
 
         // 모습 보이게
@@ -181,16 +185,8 @@ public class PlayerDieState : PlayerBaseState
         // 무적 코루틴 시작
         StartCoroutine(ImmuneCoroutine());
         
-        // 상태 전환 - 네트워크 동기화 사용
-        if (_owner.PhotonView.IsMine)
-        {
-            SyncStateChange<PlayerIdleState>();
-        }
-        else
-        {
-            // 다른 클라이언트에서는 직접 상태 변경
-            _playerFSM.ChangeState<PlayerIdleState>();
-        }
+        // 상태 전환 - 네트워크 동기화 사용 (모든 경우에 일관성 있게)
+        SyncStateChange<PlayerIdleState>();
     }
 
     /// <summary>
@@ -209,5 +205,49 @@ public class PlayerDieState : PlayerBaseState
         yield return new WaitForSeconds(3f);
         
         _owner.PlayerStat.IsImmune = false;
+    }
+
+    private void DieEffect()
+    {
+        foreach(GameObject diePart in _owner.HeadPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(0, 1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.BodyPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(0, -1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.LeftArmPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(-1, 1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.LeftLegPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(-1, -1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.RightArmPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(1, 1).normalized, power);
+        }
+
+        foreach(GameObject diePart in _owner.RightLegPartList)
+        {
+            AddForceToDiePart(diePart, new Vector2(1, -1).normalized, power);
+        }
+        
+    }
+
+    private void AddForceToDiePart(GameObject diePart, Vector2 direction, float power)
+    {
+        Rigidbody2D rigidbody2D = diePart.GetComponent<Rigidbody2D>();
+        if(rigidbody2D != null)
+        {
+            diePart.SetActive(true);
+            rigidbody2D.AddForce(direction * power, ForceMode2D.Impulse);
+        }
     }
 }

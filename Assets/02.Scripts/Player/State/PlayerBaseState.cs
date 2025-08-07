@@ -19,6 +19,7 @@ public class PlayerBaseState : MonoState
 
 
 
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -87,11 +88,54 @@ public class PlayerBaseState : MonoState
         || _playerFSM.IsCurrentState<PlayerJumpDashState>())
             return;
 
-        if (Input.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
+        if (InputHandler.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
         {
-            _owner.RPC_SetAnimatorTrigger("Jump");
-            _playerFSM.ChangeState<PlayerJumpState>();
+            if(InputHandler.GetKey(KeyCode.DownArrow) && IsOneWayPlatform())
+            {
+                _owner.PlayerStat.IsDownJump = true;
+                _playerFSM.ChangeState<PlayerFallState>();
+                _owner.SetDownJump();
+            }
+            else if(InputHandler.GetKey(KeyCode.DownArrow))
+            {
+            }
+            else
+            {
+                _playerFSM.ChangeState<PlayerJumpState>();
+            }
+            
         }
+    }
+
+    protected virtual bool IsOneWayPlatform()
+    {
+        if (!_owner.PhotonView.IsMine)
+        {
+            return false;
+        }
+        if(_groundRay2D == null)
+        {
+            return false;
+        }
+
+        // 레이캐스트 실행
+        _groundRay2D.Cast();
+        
+        // 레이캐스트가 성공했는지 확인
+        if (!_groundRay2D.Performed)
+        {
+            return false;
+        }
+
+        // 레이캐스트로 탐지된 오브젝트의 태그 확인
+        RaycastHit2D hit = _groundRay2D.Hit;
+        if (hit.collider != null)
+        {
+            // OneWayPlatform 태그인지 확인
+            return hit.collider.CompareTag("OneWayPlatform");
+        }
+
+        return false;
     }
 
     // 2D Raycast로 바닥 체크
@@ -109,38 +153,9 @@ public class PlayerBaseState : MonoState
         }
 
         _groundRay2D.Cast();
-        return _groundRay2D.Performed;
-    }
-
-    /// <summary>
-    /// 개선된 착지 감지 메서드
-    /// </summary>
-    /// <param name="wasGroundedLastFrame">이전 프레임의 착지 상태</param>
-    /// <param name="airborneTimer">공중 시간</param>
-    /// <param name="minAirborneTime">최소 공중 시간</param>
-    /// <returns>현재 착지 상태</returns>
-    protected virtual bool IsGrounded2DImproved(ref bool wasGroundedLastFrame, ref float airborneTimer, float minAirborneTime = 0.05f)
-    {
-        if(_groundRay2D == null)
-        {
-            return false;
-        }
-
-        _groundRay2D.Cast();
-        bool isGroundedNow = _groundRay2D.Performed;
+        bool isGrounded = _groundRay2D.Performed;
         
-        // 공중 시간 계산
-        if (!isGroundedNow)
-        {
-            airborneTimer += Time.deltaTime;
-        }
-        
-        // 착지 감지 (이전에 공중이었다가 지금 땅에 닿음)
-        bool isLandingSoon = !wasGroundedLastFrame && isGroundedNow && airborneTimer > minAirborneTime;
-        
-        wasGroundedLastFrame = isGroundedNow;
-        
-        return isGroundedNow;
+        return isGrounded;
     }
 
     protected virtual bool CanNormalBomb()
@@ -235,9 +250,9 @@ public class PlayerBaseState : MonoState
         {
             case "ThrowStraight":
                 if (_owner.PlayerStat.IsJumping)
-                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
+                    _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
                 else
-                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
+                    _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
                 ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
                 break;
             case "Throw":
@@ -294,9 +309,9 @@ public class PlayerBaseState : MonoState
         {
             case "ThrowStraight":
                 if (_owner.PlayerStat.IsJumping)
-                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
+                    _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
                 else
-                    _owner.RPC_SetAnimatorTrigger(Input.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
+                    _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
                 ApplyRecoil(bombSpawnPoint, _strongRecoilForce, _yRecoilForce);
                 break;
             case "Throw":

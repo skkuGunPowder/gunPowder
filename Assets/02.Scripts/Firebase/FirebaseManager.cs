@@ -52,16 +52,6 @@ public class FirebaseManager : MonoBehaviour
 
             Auth = FirebaseAuth.DefaultInstance;
             Debug.Log("Firebase Auth 연결 성공");
-
-            try
-            {
-                ItemDatabase.Instance.Init();
-                Debug.Log("아이템 데이터 로드 성공");
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.Message);
-            }
         }
         else
         {

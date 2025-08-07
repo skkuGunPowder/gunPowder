@@ -20,6 +20,7 @@ public class PlayerFSM : MonoFSM<Player>
         AddState<PlayerDieState>();
         AddState<PlayerFallDeadState>();
         AddState<PlayerHitStopState>();
+        AddState<PlayerFallState>();
 
         // 초기 상태 설정
         SetInitialState<PlayerIdleState>();

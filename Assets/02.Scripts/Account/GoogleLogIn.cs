@@ -282,7 +282,7 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
                 // AccountManager에 로그인 정보 설정
                 if (AccountManager.Instance != null)
                 {
-                    await AccountManager.Instance.SetCurrentAccount(accountDTO);
+                    AccountManager.Instance.SetCurrentAccount(accountDTO);
                 }
                 
                 Debug.Log($"AccountManager 설정 완료: 닉네임='{nickname}'");

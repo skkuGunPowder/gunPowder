@@ -4,6 +4,7 @@ using System;
 using RaycastPro.RaySensors2D;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
+using System.Collections;
 
 
 
@@ -12,6 +13,23 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField]
     private List<Animator> _myAnimatorList;
     public List<Animator> MyAnimatorList => _myAnimatorList;
+
+    [Header("DieParts")]
+    [SerializeField]
+    private List<GameObject> _myDiePartList;
+    public List<GameObject> MyDiePartList => _myDiePartList;
+    private List<GameObject> _headPartList;
+    public List<GameObject> HeadPartList => _headPartList;
+    private List<GameObject> _bodyPartList;
+    public List<GameObject> BodyPartList => _bodyPartList;
+    private List<GameObject> _leftArmPartList;
+    public List<GameObject> LeftArmPartList => _leftArmPartList;
+    private List<GameObject> _leftLegPartList;
+    public List<GameObject> LeftLegPartList => _leftLegPartList;
+    private List<GameObject> _rightArmPartList;
+    public List<GameObject> RightArmPartList => _rightArmPartList;
+    private List<GameObject> _rightLegPartList;
+    public List<GameObject> RightLegPartList => _rightLegPartList;
 
     private Rigidbody2D _rigidbody2D;
     public Rigidbody2D Rigidbody2D => _rigidbody2D;
@@ -102,6 +120,63 @@ public class Player : MonoBehaviourPun, IDamagable
         UnityEngine.Random.InitState(RANDOM_SEED);
 
         EventManager.Instance.OnPlayerItemChanged += LoadItems;
+
+        InitializeBodyParts();
+    }
+
+    private void InitializeBodyParts()
+    {
+        _headPartList = new List<GameObject>();
+        _bodyPartList = new List<GameObject>();
+        _leftArmPartList = new List<GameObject>();
+        _leftLegPartList = new List<GameObject>();
+        _rightArmPartList = new List<GameObject>();
+        _rightLegPartList = new List<GameObject>();
+
+        _headPartList.Add(_myDiePartList[0]);
+        _headPartList.Add(_myDiePartList[2]);
+        _headPartList.Add(_myDiePartList[3]);
+
+        _bodyPartList.Add(_myDiePartList[1]);
+
+        _leftArmPartList.Add(_myDiePartList[4]);
+        _leftLegPartList.Add(_myDiePartList[5]);
+
+        _rightArmPartList.Add(_myDiePartList[6]);
+        _rightLegPartList.Add(_myDiePartList[7]);
+    }
+
+    public void SetBodyPosition()
+    {
+        foreach(GameObject headPart in _headPartList)
+        {
+            headPart.transform.position = transform.position;
+        }
+
+        foreach(GameObject bodyPart in _bodyPartList)
+        {
+            bodyPart.transform.position = transform.position;
+        }
+
+        foreach(GameObject leftArmPart in _leftArmPartList) 
+        {
+            leftArmPart.transform.position = transform.position;
+        }
+
+        foreach(GameObject leftLegPart in _leftLegPartList)
+        {
+            leftLegPart.transform.position = transform.position;
+        }
+
+        foreach(GameObject rightArmPart in _rightArmPartList)
+        {
+            rightArmPart.transform.position = transform.position;
+        }   
+
+        foreach(GameObject rightLegPart in _rightLegPartList)
+        {
+            rightLegPart.transform.position = transform.position;
+        }           
     }
 
     private void LoadItems()
@@ -576,6 +651,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerHitStopState":
                     playerFSM.ChangeState<PlayerHitStopState>();
                     break;
+                case "PlayerFallState":
+                    playerFSM.ChangeState<PlayerFallState>();
+                    break;
                 default:
                     break;
             }
@@ -645,5 +723,27 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _hasStoredVelocity = false;
         _storedVelocity = Vector2.zero;
+    }
+
+    public void SetDownJump()
+    {
+        gameObject.layer = LayerMask.NameToLayer("DownJump");
+        // 하위 오브젝트 들도 모드 변경
+        foreach(Transform child in transform)
+        {
+            child.gameObject.layer = LayerMask.NameToLayer("DownJump");
+        }
+        StartCoroutine(ResetDownJump());
+    }
+
+    public IEnumerator ResetDownJump()
+    {
+        yield return new WaitForSeconds(0.5f);
+        gameObject.layer = LayerMask.NameToLayer("Player");
+        _playerStat.IsDownJump = false;
+        foreach(Transform child in transform)
+        {
+            child.gameObject.layer = LayerMask.NameToLayer("Player");
+        }
     }
 }

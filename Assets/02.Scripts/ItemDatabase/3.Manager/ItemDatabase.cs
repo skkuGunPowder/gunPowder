@@ -10,20 +10,25 @@ public class ItemDatabase
 
     private ItemDatabaseRepo _repo;
 
-    private ItemDatabase()
+
+    public void Init()
     {
         _repo = new ItemDatabaseRepo();
+        _repo.OnitemDataLoaded += SetData;
+        _repo.Init();
     }
 
-    public async void Init()
+    public void SetData(Dictionary<string, Item> itemDict, Dictionary<string, IStat> statDict)
     {
-        _items = await _repo.LoadItemData();
+        _items = itemDict;
+        _stats = statDict;
+        Debug.Log("아이템 데이터 초기화 완료");
+
         if (_items == null)
         {
             throw new System.Exception("아이템 데이터를 불러오는데 실패하였습니다.");
         }
 
-        _stats = await _repo.LoadStatData();
         if (_stats == null)
         {
             throw new System.Exception("아이템 스탯 데이터를 불러오는데 실패하였습니다.");
@@ -44,7 +49,7 @@ public class ItemDatabase
     }
 
     public T GetStat<T>(string itemID) where T : class, IStat
-    {
+    {      
         if (!_stats.TryGetValue(itemID, out IStat stat))
         {
             Debug.LogError($"{this} || 존재하지 않는 아이템이거나, 스탯이 존재하지 않는 아이템입니다. ({itemID})");

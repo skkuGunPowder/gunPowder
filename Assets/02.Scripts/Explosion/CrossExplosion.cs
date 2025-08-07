@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CrossExplosion : Explosion
 {
-    public const string ID = "EP0005";
+    public const string ID = "EP0007";
 
     public WaterMissile WaterMissilePrefab;
 
