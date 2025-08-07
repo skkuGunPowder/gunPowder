@@ -75,4 +75,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnLoadFinished?.Invoke();   
     }
+    
+    public event Action OnProfileInit;
+    
+    public void ProfileInit()
+    {
+        OnProfileInit?.Invoke();
+    }
 }

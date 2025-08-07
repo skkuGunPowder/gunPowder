@@ -24,6 +24,7 @@ public class PlayerSettingManager : MonoBehaviour
 
     public void Init()
     {
+        Debug.Log("플레이어 세팅매니저 이벤트");
         // 캐릭터 순번 세팅
         SpawnSetting();
     }

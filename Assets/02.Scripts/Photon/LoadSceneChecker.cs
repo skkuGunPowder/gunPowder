@@ -29,11 +29,15 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
             {
                 return;
             }
-            PlayerLoadCheck();
+
+            if (PlayerLoadCheck())
+            {
+                _photonView.RPC(nameof(Rpc_LoadEnd), RpcTarget.All);
+            }
         }
     }
     
-    private void PlayerLoadCheck()
+    private bool PlayerLoadCheck()
     {
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
         
@@ -44,14 +48,19 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
             if (isLoaded == false)
             {
                 Debug.Log($"Player {p.NickName}{p.ActorNumber} - SceneLoaded: {isLoaded}");
-                return ;
+                return false ;
             }
         }
        
         Debug.Log("로드 완료");
-        OnLoadEnd?.Invoke();
+        return true;
     }
 
+    [PunRPC]
+    private void Rpc_LoadEnd()
+    {
+        OnLoadEnd?.Invoke();
+    }
 
     private void SetLoadState(bool isLoad)
     {

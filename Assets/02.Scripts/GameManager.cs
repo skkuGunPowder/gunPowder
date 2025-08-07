@@ -26,9 +26,6 @@ public class GameManager : PhotonSingleton<GameManager>
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
     
-    
-    public event Action OnProfileInit;
-    
     protected override void Awake()
      {
          base.Awake();
@@ -39,7 +36,7 @@ public class GameManager : PhotonSingleton<GameManager>
          {
              return;
          }
-
+         Debug.Log("게임 매니저 액션 시작");
          EventManager.Instance.OnLoadFinished += Init;
      }
     
@@ -147,6 +144,7 @@ public class GameManager : PhotonSingleton<GameManager>
 
     private void Init()
     {
+        Debug.Log("이닛");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
@@ -158,9 +156,9 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     public void RPC_RequestGameStart(int state)
     {
-        GameStateChange((EGameState)state);
-        SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());;
-        OnProfileInit?.Invoke();
+        
+        Debug.Log("게임 시작");
+        EventManager.Instance.ProfileInit();
 
         int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
         
@@ -168,6 +166,9 @@ public class GameManager : PhotonSingleton<GameManager>
 
         _timer = _initTime;
         Debug.Log($"플레이 타임 : {playtime}");
+        
+        SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
+        GameStateChange((EGameState)state);
         
         EventManager.Instance.OnLoadFinished -= Init;
     }
@@ -202,7 +203,11 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         _currentGameState = state;
     }
-    
+
+    public void OnDestroy()
+    {
+        Debug.Log("게임 매니저 터짐");
+    }
 }
 
 

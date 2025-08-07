@@ -14,7 +14,8 @@ public class TwoPlayersDotween : MonoBehaviour
     public RectTransform SecondPlayer;
     public RectTransform Versus;
     public List<UI_ProductionSlot> SlotList = new List<UI_ProductionSlot>();
-
+    public Image Black;
+    
     [Header("파티클")] 
     public GameObject VSParicle;
     public GameObject BoomParicle;
@@ -22,6 +23,7 @@ public class TwoPlayersDotween : MonoBehaviour
     
     private void OnEnable()
     {
+        LoadChecker.OnLoadEnd += OnLoadEnd;
         Play();
     }
 
@@ -41,7 +43,7 @@ public class TwoPlayersDotween : MonoBehaviour
         sequence.Insert(1.2f,FirstPlayer.DOAnchorPos(new Vector2(610, -540), 10f));
         sequence.Insert(1.2f, SecondPlayer.DOAnchorPos(new Vector2(1300, -540), 10f));
         sequence.InsertCallback(2f,LoadEnd);
-        sequence.InsertCallback(2f, OnLoadEnd);
+        // sequence.InsertCallback(2f, OnLoadEnd);
 
     }
 
@@ -55,8 +57,9 @@ public class TwoPlayersDotween : MonoBehaviour
         sequence.Insert(0.2f , SecondPlayer.DOAnchorPos(new Vector2(1300, -1500f), 1f).SetEase(Ease.InBack));   
         sequence.Insert(0.3f , SecondPlayer.DORotate(new Vector3(0,0,-3f),0.5f).SetEase(Ease.InBack));
         sequence.Insert(0.3f, Versus.DOAnchorPos(new Vector2(0, -1500f), 1f).SetEase(Ease.InBack));
-        
-        // EventManager.Instance.LoadFinished();
+        sequence.Insert(0.3f, Black.DOFade(0, 1f));
+        sequence.InsertCallback(2f, EventManager.Instance.LoadFinished);
+
     }
     private void LoadEnd()
     {
@@ -68,11 +71,7 @@ public class TwoPlayersDotween : MonoBehaviour
         
         Debug.Log("LoadEnd");
     }
-
-    private void ObjectSetActive()
-    {
-        Versus.gameObject.SetActive(true);
-    }
+    
     private void OnDisable()
     {
         // 초기 위치로 리셋하기
@@ -84,6 +83,8 @@ public class TwoPlayersDotween : MonoBehaviour
         Versus.localScale = new Vector3(0, 0, 0);
         VSParicle.gameObject.SetActive(false);
         DOTween.KillAll();
+        
+        LoadChecker.OnLoadEnd -= OnLoadEnd;
     }
 
     

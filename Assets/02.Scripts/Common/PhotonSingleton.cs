@@ -25,9 +25,10 @@ public class PhotonSingleton<T> : MonoBehaviourPunCallbacks where T : MonoBehavi
         if (instance == null)
         {
             instance = this as T;
+            
         }
         else
-        {
+        { 
             Destroy(gameObject);
         }
     }
