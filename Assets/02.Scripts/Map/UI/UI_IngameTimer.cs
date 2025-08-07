@@ -7,6 +7,11 @@ public class UI_IngameTimer : MonoBehaviour
     private float _timer;
     private void Update()
     {
+        // if (GameManager.Instance.CurrentGameState != EGameState.Playing)
+        // {
+        //     return;
+        // }
+        
         _timer = GameManager.Instance.Timer;
         
         if (_timer <= 0)

@@ -70,6 +70,7 @@ public class GameManager : PhotonSingleton<GameManager>
     // 프로퍼티가 바뀌었을 때 호출되는 함수
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
+        Debug.Log("isdead 1");
         if (_currentGameState == EGameState.Waiting || _currentGameState == EGameState.GameOver)
         {
             return;
@@ -201,6 +202,7 @@ public class GameManager : PhotonSingleton<GameManager>
     
     public void GameStateChange(EGameState state)
     {
+        Debug.Log("gamestateChange 1");
         _currentGameState = state;
     }
 

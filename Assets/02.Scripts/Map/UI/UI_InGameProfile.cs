@@ -10,10 +10,7 @@ public class UI_InGameProfile : MonoBehaviour
     
     private void OnEnable()
     {
-        if (GameManager.Instance == null)
-        {
-            Debug.Log("게임매니저가 널입니다.");
-        }
+        Debug.Log("인게임 프로필 온인에이블");
         SubscribeEvents();
     }
 
