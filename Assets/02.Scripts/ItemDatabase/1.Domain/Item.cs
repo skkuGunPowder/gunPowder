@@ -1,5 +1,7 @@
 using System;
+using LitJson;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 
 [Serializable]
@@ -19,6 +21,24 @@ public class Item
     public Item()
     {
 
+    }
+
+    public Item(JsonData json)
+    {
+        if (json == null)
+        {
+            throw new Exception("Json이 유효하지 않습니다");
+        }
+
+        ID = json["ItemID"].ToString();
+        ItemType = (EItemType)Enum.Parse(typeof(EItemType), json["ItemType"].ToString());
+        Name = json["Name"].ToString();
+        Explanation = json["Explanation"].ToString();
+        ImageAddress = json["ImageAddress"].ToString();
+        PrefabAddress = json["PrefabAddress"].ToString();
+
+        Image = Addressables.LoadAssetAsync<Sprite>(ImageAddress).WaitForCompletion();
+        Prefab = Addressables.LoadAssetAsync<GameObject>(PrefabAddress).WaitForCompletion();
     }
 
     public Item(string id, EItemType itemType, string name, string explanation, string imageAddress, string prefabAddress, Sprite image, GameObject prefab)
