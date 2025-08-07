@@ -64,4 +64,13 @@ public class InputHandler
         
         return Input.GetKeyDown(key);
     }
+
+    public static bool GetKey(KeyCode key)
+    {
+        if (_blockInput)
+        {
+            return false;
+        }
+        return Input.GetKey(key);
+    }
 }

@@ -31,7 +31,7 @@ public class PlayerNormalRecoilState : PlayerBaseState
             if(_owner.PlayerStat.IsJumping)
             {
                 _owner.RPC_SetAnimatorTrigger("Fall");
-                _playerFSM.ChangeState<PlayerJumpState>();
+                _playerFSM.ChangeState<PlayerFallState>();
             }
             else
             {
@@ -42,7 +42,7 @@ public class PlayerNormalRecoilState : PlayerBaseState
                 else
                 {
                     _owner.RPC_SetAnimatorTrigger("Fall");
-                    _playerFSM.ChangeState<PlayerJumpState>();
+                    _playerFSM.ChangeState<PlayerFallState>();
                 }
             }
             return;
