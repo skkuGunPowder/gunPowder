@@ -18,7 +18,7 @@ public class PlayerDamagedState : PlayerBaseState
         _timer = 0f;
         // 애니메이션 재생
         _owner.RPC_SetAnimatorTrigger("Hit");
-
+        
          // 무적
         _owner.gameObject.tag = "Immune";
         _owner.PlayerStat.IsImmune = true;
@@ -29,10 +29,17 @@ public class PlayerDamagedState : PlayerBaseState
             _owner.RestoreVelocity();
         }
         
+        // 맞은 횟수에 따른 추가 힘 적용
+        ApplyDamageBasedForce();
+        
         // Knockback 효과 적용
         // 플레이어의 건파우더가 50퍼 이하라면 (현재 피가 최대 피보다 클 수 있으므로 안전하게 처리)
         float currentHealthRatio = Mathf.Clamp01((float)_owner.PlayerStat.CurrentPlayerGunPowderCount / _owner.PlayerStat.InitGunpowderCount);
         ApplyKnockbackEffect(currentHealthRatio);
+
+        // 히트 이펙트 활성화 및 방향 설정
+        _owner.HitTrail.Play();
+        SetHitEffectDirection();
     }
 
     public override void OnExit()
@@ -45,7 +52,7 @@ public class PlayerDamagedState : PlayerBaseState
         _owner.RPC_ResetAnimatorTrigger("Idle");
         _owner.RPC_ResetAnimatorTrigger("Dash");
         _owner.RPC_ResetAnimatorTrigger("Fall");
-        
+        _owner.HitTrail.Stop();
 
         // 무적 해제
         if(_owner.PhotonView.IsMine)
@@ -125,5 +132,64 @@ public class PlayerDamagedState : PlayerBaseState
         
         // 원래 drag 값으로 복원
         _owner.Rigidbody2D.linearDamping = _originalDrag;
+    }
+    
+    /// <summary>
+    /// 피 비율에 따라 추가 힘을 적용
+    /// </summary>
+    private void ApplyDamageBasedForce()
+    {
+        if (_owner.Rigidbody2D == null) return;
+        
+        // 현재 피 비율 계산 (0~1 범위, 최대 1.0으로 제한)
+        float currentHealthRatio = Mathf.Clamp01((float)_owner.PlayerStat.CurrentPlayerGunPowderCount / _owner.PlayerStat.InitGunpowderCount);
+        
+        // 피 비율에 따른 추가 힘 계산
+        // 피 100%일 때 추가 힘 0, 피 0%일 때 추가 힘 10
+        float additionalForceMagnitude = (1.0f - currentHealthRatio) * 10.0f;
+        
+        // 현재 속도 방향으로 추가 힘 적용
+        Vector2 currentVelocity = _owner.Rigidbody2D.linearVelocity;
+        if (currentVelocity.magnitude > 0.1f) // 속도가 있을 때만 적용
+        {
+            Vector2 velocityDirection = currentVelocity.normalized;
+            Vector2 additionalForce = velocityDirection * additionalForceMagnitude;
+            
+            // 추가 힘 적용
+            _owner.Rigidbody2D.AddForce(additionalForce, ForceMode2D.Impulse);
+            _owner.Rigidbody2D.AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
+            
+            Debug.Log($"Health Ratio: {currentHealthRatio:F2}, Additional Force: {additionalForceMagnitude:F2}, Total Force: {additionalForce}");
+        }
+    }
+    
+    /// <summary>
+    /// 히트 이펙트의 방향을 플레이어 속도의 반대 방향으로 설정
+    /// </summary>
+    private void SetHitEffectDirection()
+    {
+        if (_owner.HitEffectPrefab == null || _owner.Rigidbody2D == null) return;
+        
+        Vector2 currentVelocity = _owner.Rigidbody2D.linearVelocity;
+        
+        // 속도가 있을 때만 방향 설정
+        if (currentVelocity.magnitude > 0.1f)
+        {
+            // 속도의 반대 방향 계산
+            Vector2 oppositeDirection = -currentVelocity.normalized;
+            
+            // Y축을 기준으로 회전 (파티클이 위쪽을 향하도록)
+            float angle = Mathf.Atan2(oppositeDirection.y, oppositeDirection.x) * Mathf.Rad2Deg;
+            
+            // 히트 이펙트의 회전 설정
+            _owner.HitEffectPrefab.transform.rotation = Quaternion.Euler(0, 0, angle);
+            
+            Debug.Log($"Hit Effect Direction: {oppositeDirection}, Angle: {angle}");
+        }
+        else
+        {
+            // 속도가 없으면 기본 방향 (위쪽)으로 설정
+            _owner.HitEffectPrefab.transform.rotation = Quaternion.Euler(0, 0, 90f);
+        }
     }
 }
