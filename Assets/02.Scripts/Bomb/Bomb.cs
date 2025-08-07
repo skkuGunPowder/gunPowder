@@ -145,6 +145,11 @@ public class Bomb : MonoBehaviourPun, IBomb
         return _stat;
     }
 
+    public void ResetFuze()
+    {
+        _fuzeTimer = 0f;
+    }
+
     [PunRPC]
     // 폭탄 두기
     public virtual void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
