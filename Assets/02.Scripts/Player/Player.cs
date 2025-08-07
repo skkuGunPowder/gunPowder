@@ -89,7 +89,6 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
     public GameObject HitEffectPrefab;
-    public ParticleSystem HitTrail;
 
     private const int RANDOM_SEED = 123456;
     private const string BASIC_BOMB_ID =  "BO0001";

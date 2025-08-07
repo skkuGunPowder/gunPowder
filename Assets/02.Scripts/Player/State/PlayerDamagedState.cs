@@ -2,6 +2,7 @@ using Photon.Pun;
 using RobustFSM.Base;
 using UnityEngine;
 using DG.Tweening;
+using System.Collections;
 
 public class PlayerDamagedState : PlayerBaseState
 {
@@ -38,7 +39,7 @@ public class PlayerDamagedState : PlayerBaseState
         ApplyKnockbackEffect(currentHealthRatio);
 
         // 히트 이펙트 활성화 및 방향 설정
-        _owner.HitTrail.Play();
+        _owner.HitEffectPrefab.SetActive(true);
         SetHitEffectDirection();
     }
 
@@ -52,7 +53,7 @@ public class PlayerDamagedState : PlayerBaseState
         _owner.RPC_ResetAnimatorTrigger("Idle");
         _owner.RPC_ResetAnimatorTrigger("Dash");
         _owner.RPC_ResetAnimatorTrigger("Fall");
-        _owner.HitTrail.Stop();
+        _owner.StartCoroutine(HitEffectSetDeActiveCoroutine());
 
         // 무적 해제
         if(_owner.PhotonView.IsMine)
@@ -72,25 +73,27 @@ public class PlayerDamagedState : PlayerBaseState
         CleanupKnockbackEffect();
     }
 
+    private IEnumerator HitEffectSetDeActiveCoroutine()
+    {
+        yield return new WaitForSeconds(0.5f);
+        _owner.HitEffectPrefab.SetActive(false);
+    }
+
     public override void MineUpdate()
     {
-        // 피격 시간 로직
-        // 피격 시간이 끝나면 피격 상태 종료
+        // 최소 피격 시간 보장
         _timer += Time.deltaTime;
-
-        if (_timer >= _owner.PlayerStat.DamagedTime)
+        
+        // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
+        if (_timer < _owner.PlayerStat.DamagedTime)
         {
-            if (IsGrounded2D())
-            {
-                SyncStateChange<PlayerIdleState>();
-            }
-            else
-            {
-                _owner.PlayerStat.IsFallingFromLedge = true;
-                _owner.RPC_SetAnimatorTrigger("Fall");
-                SyncStateChange<PlayerFallState>();
-            }
-            //SyncStateChange<PlayerIdleState>();
+            return;
+        }
+        
+        // 최소 시간이 지난 후에 바닥에 닿으면 Idle 상태로 변환
+        if (IsGrounded2D())
+        {
+            SyncStateChange<PlayerIdleState>();
             return;
         }
     }
