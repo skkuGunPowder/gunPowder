@@ -35,6 +35,8 @@ public class TwoPlayersDotween : MonoBehaviour
         sequence.Insert(0.75f, FirstPlayer.DOAnchorPos(new Vector2(600, -540), 0.1f).SetEase(Ease.InCirc));
         sequence.Insert(0.75f, SecondPlayer.DOAnchorPos(new Vector2(1310, -540), 0.1f).SetEase(Ease.InCirc));
         sequence.InsertCallback(0.9f, ShakeOn);
+        sequence.InsertCallback(0.9f, LightningOn);
+        sequence.InsertCallback(0.9f, FlashOn);
         sequence.InsertCallback(1f, ShineOn);
         sequence.Insert(1.2f,FirstPlayer.DOAnchorPos(new Vector2(610, -540), 10f));
         sequence.Insert(1.2f, SecondPlayer.DOAnchorPos(new Vector2(1300, -540), 10f));
@@ -52,7 +54,7 @@ public class TwoPlayersDotween : MonoBehaviour
         sequence.Join(FirstPlayer.DORotate(new Vector3(0,0,3f),0.5f).SetEase(Ease.InBack));
         sequence.Insert(0.2f , SecondPlayer.DOAnchorPos(new Vector2(1300, -1500f), 1f).SetEase(Ease.InBack));   
         sequence.Insert(0.3f , SecondPlayer.DORotate(new Vector3(0,0,-3f),0.5f).SetEase(Ease.InBack));
-        sequence.Insert(0.3f, Versus.DOAnchorPos(new Vector2(960, -1500f), 1f).SetEase(Ease.InBack));
+        sequence.Insert(0.3f, Versus.DOAnchorPos(new Vector2(0, -1500f), 1f).SetEase(Ease.InBack));
         
         // EventManager.Instance.LoadFinished();
     }
@@ -78,8 +80,9 @@ public class TwoPlayersDotween : MonoBehaviour
         FirstPlayer.rotation = Quaternion.Euler(0, 0, 0);
         SecondPlayer.anchoredPosition = new Vector2(1310, -540);
         SecondPlayer.rotation = Quaternion.Euler(0, 0, 0);
-        Versus.anchoredPosition = new Vector2(960 , -540);
+        Versus.anchoredPosition = new Vector2(0 , -0);
         Versus.localScale = new Vector3(0, 0, 0);
+        VSParicle.gameObject.SetActive(false);
         DOTween.KillAll();
     }
 
@@ -91,11 +94,24 @@ public class TwoPlayersDotween : MonoBehaviour
             slot.ShineOn();
         }
     }
+
+    private void FlashOn()
+    {
+        foreach (UI_ProductionSlot slot in SlotList)
+        {
+            slot.FlashOn();
+        }
+    }
     private void ShakeOn()
     {
         foreach (UI_ProductionSlot slot in SlotList)
         {
             slot.Shake();
         }
+    }
+
+    private void LightningOn()
+    {
+        VSParicle.gameObject.SetActive(true);
     }
 }

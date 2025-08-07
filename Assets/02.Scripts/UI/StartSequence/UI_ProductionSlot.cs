@@ -16,7 +16,7 @@ public class UI_ProductionSlot : MonoBehaviour
     public List<Color32> TeamColorCodeList;
     // 현재 장착중인 무기
     public Image Bomb;
-
+    public RectTransform BombObject;
     public RectTransform Shine;
     public Image Glow;
     
@@ -53,14 +53,22 @@ public class UI_ProductionSlot : MonoBehaviour
 
     public void ShineOn()
     {
-        Sequence sequence = DOTween.Sequence();
-
-        sequence.Append(Shine.DOAnchorPos(new Vector2(800, 0), 1f));
-        sequence.Insert(0.4f, Glow.DOFade(0.2f, 0.2f));
-        sequence.Insert(0.6f, Glow.DOFade(0f, 0.2f));
-
+        Shine.DOAnchorPos(new Vector2(800, 0), 1f);
     }
 
+    public void FlashOn()
+    {
+        Sequence sequence = DOTween.Sequence();
+        sequence.Append(Glow.DOFade(0.4f, 0.2f));
+        sequence.InsertCallback(0.1f, BombOn);
+        sequence.Append(Glow.DOFade(0, 0.2f));
+    }
+
+    private void BombOn()
+    {
+        BombObject.gameObject.SetActive(true);
+        BombObject.DOScale(new Vector3(1, 1, 1), 0.2f).SetEase(Ease.OutBack);
+    }
     public void Shake()
     {
         gameObject.transform.DOShakePosition(0.5f, 10f, 20, 90, false, true);
@@ -68,7 +76,10 @@ public class UI_ProductionSlot : MonoBehaviour
     
     private void OnDisable()
     {
+        DOTween.KillAll();
         Shine.anchoredPosition = new Vector2(-700, 0);
         Glow.color = new Color(1,1,1, 0);
+        BombObject.localScale = new Vector3(0.9f, 0.9f, 0.9f);
+        BombObject.gameObject.SetActive(false);
     }   
 }
