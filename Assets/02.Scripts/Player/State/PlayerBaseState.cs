@@ -28,7 +28,7 @@ public class PlayerBaseState : MonoState
         _groundRay2D = _owner.GroundRay2D;
 
         //
-        _owner.OnHit += HandleHit;
+        // _owner.OnHit += HandleHit;
     }
 
     public override void OnExit()
@@ -36,26 +36,26 @@ public class PlayerBaseState : MonoState
         base.OnExit();
 
         //
-        _owner.OnHit -= HandleHit;
+        // _owner.OnHit -= HandleHit;
     }
 
-    protected virtual void HandleHit()
-    {
-        // 이미 히트스탑 상태라면 추가 히트 처리
-        if (_playerFSM.IsCurrentState<PlayerHitStopState>())
-        {
-            PlayerHitStopState currentHitStopState = _playerFSM.GetCurrentState<PlayerHitStopState>();
-            if (currentHitStopState != null)
-            {
-                currentHitStopState.OnAdditionalHit();
-            }
-        }
-        else
-        {
-            // 새로운 히트스탑 상태로 전환
-            SyncStateChange<PlayerHitStopState>();
-        }
-    }
+    // protected virtual void HandleHit()
+    // {
+    //     // 이미 히트스탑 상태라면 추가 히트 처리
+    //     if (_playerFSM.IsCurrentState<PlayerHitStopState>())
+    //     {
+    //         PlayerHitStopState currentHitStopState = _playerFSM.GetCurrentState<PlayerHitStopState>();
+    //         if (currentHitStopState != null)
+    //         {
+    //             currentHitStopState.OnAdditionalHit();
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // 새로운 히트스탑 상태로 전환
+    //         SyncStateChange<PlayerHitStopState>();
+    //     }
+    // }
 
     public virtual void MineUpdate()
     {

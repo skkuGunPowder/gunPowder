@@ -28,10 +28,6 @@ public class UI_RoomSetting : MonoBehaviour
     {
         Room currentRoom = PhotonNetwork.CurrentRoom;
         
-        
-        Debug.Log(currentRoom.CustomProperties.ToString());
-        Debug.Log(currentRoom.CustomProperties[properties.ToString()]);
-        Debug.Log(currentRoom.CustomProperties[properties.ToString()].GetType());
         int value = int.Parse(currentRoom.CustomProperties[properties.ToString()].ToString());
         
         button.InitValue = value;
@@ -53,20 +49,18 @@ public class UI_RoomSetting : MonoBehaviour
         };
         
         currentRoom.SetCustomProperties(roomProperties);
-        
+
+        PlaytimeInit = Playtime.CurrentValue();
+        PowderInit = Powder.CurrentValue();
+        DeclineInit = Decline.CurrentValue();
+        LifeInit = Life.CurrentValue();
     }
 
     public void CancelButton()
     {
-        SetupButtonInit(Playtime, PlaytimeInit);
-        SetupButtonInit(Powder, PowderInit);
-        SetupButtonInit(Decline, DeclineInit);
-        SetupButtonInit(Life, LifeInit);
-    }
-
-    private void SetupButtonInit(UI_RoomSetupButton button, int value)
-    {
-        button.InitValue = value;
-        button.Init();
+       Playtime.Reset(PlaytimeInit);
+       Powder.Reset(PowderInit);
+       Decline.Reset(DeclineInit);
+       Life.Reset(LifeInit);
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -66,7 +67,14 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("OnJoinedLobby");
+        Hashtable propertiesToRemove = new Hashtable
+        {
+            { EProperties.Team.ToString(), null }
+        };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(propertiesToRemove);
+
         PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
+        
 
     }
     public override void OnJoinRandomFailed(short returnCode, string message)

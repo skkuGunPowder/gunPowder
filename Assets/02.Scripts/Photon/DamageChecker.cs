@@ -13,7 +13,6 @@ public class DamageChecker : Singleton<DamageChecker>
     private Dictionary<int, int> _playerScoreDictionary;
     private List<int>  _playerList;
     public  List<int> PlayerList => _playerList;
-    public LoadSceneChecker LoadSceneChecker;
     
     
     protected override void Awake()
