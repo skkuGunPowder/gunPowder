@@ -5,5 +5,6 @@ public class MapDataSO : ScriptableObject
 {
     public ESceneList MapSceneList;
     public string MapName;
+    public Sprite MapIcon;
     public Sprite MapSprite;
 }

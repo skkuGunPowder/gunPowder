@@ -5,45 +5,39 @@ using Photon.Pun;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
-[RequireComponent(typeof(PhotonView))]
 public class LoadSceneChecker : MonoBehaviourPunCallbacks
 {
     private bool _isLoad = false;
     private PhotonView _photonView;
     
-    public event Action OnLoadFinished; 
-
+    public event Action<int, bool> OnLoading;
+    public event Action OnLoadEnd;
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
     }
     
-    private void Start()
-    {
-        if (PhotonNetwork.InRoom == false)
-        {
-            return;
-        }
-        
-        SetLoadState(true);
-        
-    }
-    
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
         
         if (changedProps.ContainsKey(EProperties.IsLoad.ToString()) && changedProps[EProperties.IsLoad.ToString()] != null)
         {
             Debug.Log(targetPlayer + "로딩 체크하기");
-            PlayerLoadCheck();
+            OnLoading?.Invoke(targetPlayer.ActorNumber, (bool)changedProps[EProperties.IsLoad.ToString()]);
+            
+            if (PhotonNetwork.IsMasterClient == false)
+            {
+                return;
+            }
+
+            if (PlayerLoadCheck())
+            {
+                _photonView.RPC(nameof(Rpc_LoadEnd), RpcTarget.All);
+            }
         }
     }
     
-    private void PlayerLoadCheck()
+    private bool PlayerLoadCheck()
     {
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
         
@@ -54,14 +48,19 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
             if (isLoaded == false)
             {
                 Debug.Log($"Player {p.NickName}{p.ActorNumber} - SceneLoaded: {isLoaded}");
-                return ;
+                return false ;
             }
         }
        
         Debug.Log("로드 완료");
-        OnLoadFinished?.Invoke();
+        return true;
     }
 
+    [PunRPC]
+    private void Rpc_LoadEnd()
+    {
+        OnLoadEnd?.Invoke();
+    }
 
     private void SetLoadState(bool isLoad)
     {
