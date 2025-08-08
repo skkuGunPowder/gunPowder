@@ -65,7 +65,7 @@ public class Explosion : MonoBehaviour
         direction.Normalize();
 
         // 허정범 테스트
-        direction.y += 0.5f;
+        direction.y += 0.3f;
 
         rb.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
     }

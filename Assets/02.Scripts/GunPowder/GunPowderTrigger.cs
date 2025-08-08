@@ -20,6 +20,10 @@ public class GunPowderTrigger : MonoBehaviour
             GunPowder gunPowder = gameObject.GetComponentInParent<GunPowder>();
             if (gunPowder != null)
             {
+                if(gunPowder.SourceViewId == collision.GetComponent<PhotonView>().ViewID)
+                {
+                    return;
+                }
                 PhotonView targetView = collision.GetComponent<PhotonView>();
                 if (targetView != null)
                 {
