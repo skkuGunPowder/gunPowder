@@ -16,6 +16,7 @@ public class PlayerFallDeadState : PlayerBaseState
     private float _totalDuration = 2.0f; // 전체 이동 시간
     private float _waitDuration = 2.0f; // 대기 시간
     private float _wailTime = 0f;
+    private bool _hasTriggeredDeathEvents = false; // 사망 이벤트가 한 번만 발생하도록 하는 플래그
 
     private const float MAX_FALL_SPEED = -20f;
 
@@ -118,6 +119,7 @@ public class PlayerFallDeadState : PlayerBaseState
 
         _owner.PlayerStat.IsImmune = false;
         _owner.PlayerStat.IsFallingDead = false;
+        _hasTriggeredDeathEvents = false; // 플래그 리셋
 
         // 무적 해제
         if (_owner.PhotonView.IsMine)
@@ -154,34 +156,39 @@ public class PlayerFallDeadState : PlayerBaseState
             // _isGoaled 상태에서도 속도 제한 적용
             LimitYVelocity();
             
-            // 2초 대기
-            _wailTime += Time.deltaTime;
-            if (_wailTime >= _waitDuration)
+            // 2초 대기 후 한 번만 사망 이벤트 발생
+            if (!_hasTriggeredDeathEvents)
             {
-                Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생 - IsMine: {_owner.PhotonView.IsMine}, IsMasterClient: {PhotonNetwork.IsMasterClient}");
-
-                // 안전성 체크
-                if (ExplosionPool.Instance == null || _owner.DieExplosionPrefab == null)
+                _wailTime += Time.deltaTime;
+                if (_wailTime >= _waitDuration)
                 {
-                    Debug.LogError("ExplosionPool or DieExplosionPrefab is null");
-                    return;
-                }
+                    _hasTriggeredDeathEvents = true; // 플래그 설정으로 중복 실행 방지
+                    
+                    Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생 - IsMine: {_owner.PhotonView.IsMine}, IsMasterClient: {PhotonNetwork.IsMasterClient}");
 
-                Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
-                if (dieExplosion != null)
-                {
-                    dieExplosion.transform.position = _owner.transform.position;
-                    dieExplosion.Explode(true, _owner.PhotonView);
-                }
+                    // 안전성 체크
+                    if (ExplosionPool.Instance == null || _owner.DieExplosionPrefab == null)
+                    {
+                        Debug.LogError("ExplosionPool or DieExplosionPrefab is null");
+                        return;
+                    }
 
-                // 15의 데미지를 받는다.
-                _owner.PlayerStat.IsImmune = false;
-                Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} - Calling TakeDamage, IsMine: {_owner.PhotonView.IsMine}");
-                if(_owner.PhotonView.IsMine)
-                {
-                    // IsImmune을 네트워크로 동기화
-                    _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
-                    _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr ,true);
+                    Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
+                    if (dieExplosion != null)
+                    {
+                        dieExplosion.transform.position = _owner.transform.position;
+                        dieExplosion.Explode(true, _owner.PhotonView);
+                    }
+
+                    // 15의 데미지를 받는다.
+                    _owner.PlayerStat.IsImmune = false;
+                    Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} - Calling TakeDamage, IsMine: {_owner.PhotonView.IsMine}");
+                    if(_owner.PhotonView.IsMine)
+                    {
+                        // IsImmune을 네트워크로 동기화
+                        _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
+                        _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr ,true);
+                    }
                 }
             }
         }
