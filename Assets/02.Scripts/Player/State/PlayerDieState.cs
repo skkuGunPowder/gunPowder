@@ -37,6 +37,7 @@ public class PlayerDieState : PlayerBaseState
         DieEffect();
 
 
+
         // 타이머 및 플래그 초기화
         _timer = 0f;
         _hasStartedResurrection = false;
@@ -63,6 +64,14 @@ public class PlayerDieState : PlayerBaseState
         // 플레이어 사망 사운드 재생
         SoundManager.Instance.PlayLocalRandomSound("PlayerDeath", transform, 1, 3);
     }
+
+    /*
+    private IEnumerator DieEffectCoroutine()
+    {
+        _owner.DieEffectPrefab.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        _owner.DieEffectPrefab.SetActive(false);
+    }*/
 
     public override void OnExit()
     {

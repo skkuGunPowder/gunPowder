@@ -38,7 +38,10 @@ public class PlayerFallDeadState : PlayerBaseState
 
         // 무적
         _owner.gameObject.tag = "Immune";
-        _owner.PlayerStat.IsImmune = true;
+        if(_owner.PhotonView.IsMine)
+        {
+            _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, true);
+        }
 
         _wailTime = 0f;
         _owner.PlayerStat.IsFallingDead = true;
@@ -113,6 +116,7 @@ public class PlayerFallDeadState : PlayerBaseState
             _moveTween = null;
         }
 
+        _owner.PlayerStat.IsImmune = false;
         _owner.PlayerStat.IsFallingDead = false;
 
         // 무적 해제
@@ -154,7 +158,7 @@ public class PlayerFallDeadState : PlayerBaseState
             _wailTime += Time.deltaTime;
             if (_wailTime >= _waitDuration)
             {
-                Debug.Log($"PlayerFallDeadState {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생");
+                Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생 - IsMine: {_owner.PhotonView.IsMine}, IsMasterClient: {PhotonNetwork.IsMasterClient}");
 
                 // 안전성 체크
                 if (ExplosionPool.Instance == null || _owner.DieExplosionPrefab == null)
@@ -172,7 +176,13 @@ public class PlayerFallDeadState : PlayerBaseState
 
                 // 15의 데미지를 받는다.
                 _owner.PlayerStat.IsImmune = false;
-                _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr ,true);
+                Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} - Calling TakeDamage, IsMine: {_owner.PhotonView.IsMine}");
+                if(_owner.PhotonView.IsMine)
+                {
+                    // IsImmune을 네트워크로 동기화
+                    _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
+                    _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr ,true);
+                }
             }
         }
     }

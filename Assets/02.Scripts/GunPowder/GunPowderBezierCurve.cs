@@ -50,10 +50,18 @@ public class GunPowderBezierCurve : MonoBehaviour
 
         // Player 레이어를 ExcludeLayers에서 제거
         int playerLayer = LayerMask.NameToLayer("Player");
+        int enemyLayer = LayerMask.NameToLayer("Enemy");
         if (_collider != null)
+        {
             _collider.excludeLayers &= ~(1 << playerLayer);
+            _collider.excludeLayers &= ~(1 << enemyLayer);
+        }
         if (_rigidbody2D != null)
+        {
             _rigidbody2D.excludeLayers &= ~(1 << playerLayer);
+            _rigidbody2D.excludeLayers &= ~(1 << enemyLayer);
+        }
+
 
         _start = transform;
         _timerCurrent = 0f;
@@ -128,8 +136,11 @@ public class GunPowderBezierCurve : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
         {
+            if(collision.GetComponent<PhotonView>().ViewID == GetComponent<GunPowder>().SourceViewId)
+            {
+                return;
+            }
             collision.gameObject.GetComponent<Player>().PlayerStat.IncreaseGunPowderCount(1);
-            // Debug.Log($"{collision.gameObject.GetComponent<Player>().PlayerStat.CurrentPlayerGunPowderCount}");
             if (!_hasTriggeredDestroy)
             {
                 InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);

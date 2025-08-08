@@ -88,6 +88,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
+    public GameObject HitEffectPrefab;
 
     private const int RANDOM_SEED = 123456;
     private const string BASIC_BOMB_ID =  "BO0001";
@@ -234,11 +235,13 @@ public class Player : MonoBehaviourPun, IDamagable
         if(PhotonView.IsMine)
         {
             gameObject.tag = "Player";
+            gameObject.layer = LayerMask.NameToLayer("Player");
             
         }
         else
-        {
-            gameObject.tag = "Enemy";
+        {   
+            gameObject.tag = "Enemy";   
+            gameObject.layer = LayerMask.NameToLayer("Enemy");
         }
     }
 
@@ -435,7 +438,7 @@ public class Player : MonoBehaviourPun, IDamagable
             int randomSeed =UnityEngine.Random.Range(0, 9999);
 
 
-            object[] instData = new object[] { attackerViewId, isFallingOut, randomSeed };
+            object[] instData = new object[] { attackerViewId, isFallingOut, randomSeed, PhotonView.ViewID, PhotonNetwork.LocalPlayer.ActorNumber };
             PhotonNetwork.Instantiate(GunPowderPrefab.name, spawnPos, Quaternion.identity, 0, instData);
         }
     }
@@ -723,6 +726,13 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _hasStoredVelocity = false;
         _storedVelocity = Vector2.zero;
+    }
+
+    [PunRPC]
+    public void RPC_SetIsImmune(bool isImmune)
+    {
+        _playerStat.IsImmune = isImmune;
+        Debug.Log($"[RPC_SetIsImmune] Player {PhotonView.Owner.ActorNumber} - IsImmune set to: {isImmune}");
     }
 
     public void SetDownJump()
