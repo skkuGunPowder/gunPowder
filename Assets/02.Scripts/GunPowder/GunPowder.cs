@@ -11,6 +11,10 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     private bool _isFallingOut;
     public bool IsFallingOut => _isFallingOut;
     private int _randomSeed; // 랜덤 시드
+    private int _sourceViewId; // 건파우더 출발 주체 ViewID
+    public int SourceViewId => _sourceViewId;
+    private int _sourceActorNumber; // 건파우더 출발 주체 ActorNumber
+    public int SourceActorNumber => _sourceActorNumber;
 
     private PhotonView _photonView;
     public PhotonView PhotonView => _photonView;
@@ -43,6 +47,14 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
             int attackerViewId = (int)instData[0];
             _isFallingOut = (bool)instData[1];
             _randomSeed = (int)instData[2]; // 랜덤 시드 추가
+            if(instData.Length >= 4)
+            {
+                _sourceViewId = (int)instData[3]; // 건파우더 출발 주체 ViewID 추가
+            }
+            if(instData.Length >= 5)
+            {
+                _sourceActorNumber = (int)instData[4]; // 건파우더 출발 주체 ActorNumber 추가
+            }
             
             PhotonView attackerView = PhotonView.Find(attackerViewId);
             if (attackerView != null)

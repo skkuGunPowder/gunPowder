@@ -24,6 +24,12 @@ public class PlayerDamagedState : PlayerBaseState
         _owner.gameObject.tag = "Immune";
         _owner.PlayerStat.IsImmune = true;
         
+        // IsImmune을 네트워크로 동기화
+        if (_owner.PhotonView.IsMine)
+        {
+            _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, true);
+        }
+        
         // 히트스탑에서 저장된 속도가 있다면 복원
         if (_owner.HasStoredVelocity)
         {
@@ -65,6 +71,12 @@ public class PlayerDamagedState : PlayerBaseState
             _owner.gameObject.tag = "Enemy";
         }
         _owner.PlayerStat.IsImmune = false;
+        
+        // IsImmune을 네트워크로 동기화
+        if (_owner.PhotonView.IsMine)
+        {
+            _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
+        }
         
         // 저장된 속도 상태 초기화
         _owner.ClearStoredVelocity();
