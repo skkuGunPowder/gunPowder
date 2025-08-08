@@ -36,6 +36,7 @@ public class CameraController : MonoBehaviour
         if (_target != null)
         {
             _target.OnHit -= HitShake;
+            _target.OnAttack += GunShotShake;
         }
         _target = player;
         _target.OnHit += HitShake;
