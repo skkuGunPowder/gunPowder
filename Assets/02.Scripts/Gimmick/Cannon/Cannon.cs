@@ -1,7 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
-using Unity.VisualScripting;
 
 public class Cannon : MonoBehaviour
 {
@@ -12,11 +11,6 @@ public class Cannon : MonoBehaviour
 
     private Rigidbody2D _firedProjectile;
     bool _isLoaded = false;
-
-    private void Fire()
-    {
-        _firedProjectile.AddForce(_barrel.transform.right * _fireForce, ForceMode2D.Impulse);
-    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -32,9 +26,18 @@ public class Cannon : MonoBehaviour
 
     private IEnumerator FireRoutine(Rigidbody2D target)
     {
+        if (target.CompareTag("Player"))
+        {
+            InputHandler.BlockInput = true;
+        }
+
+        if (target.CompareTag("Bomb"))
+        {
+            target.GetComponent<Bomb>().ResetFuze();
+        }
+
         _isLoaded = true;
 
-        InputHandler.BlockInput = true;
         target.linearVelocity = Vector2.zero;
         target.bodyType = RigidbodyType2D.Kinematic;
         target.transform.DOMove(_barrel.transform.position, 0.3f).SetEase(Ease.InQuad)
@@ -42,7 +45,8 @@ public class Cannon : MonoBehaviour
         {
             target.gameObject.SetActive(false);  
         });
-        
+
+
         transform.DOScale(Vector3.one * 1.2f, 0.15f)
         .SetLoops(2, LoopType.Yoyo);
         yield return new WaitForSeconds(0.3f);
@@ -61,8 +65,11 @@ public class Cannon : MonoBehaviour
         target.AddForce(fireDir * _fireForce, ForceMode2D.Impulse);
 
         yield return null;
-        
-        InputHandler.BlockInput = false;
+
+        if (target.gameObject.tag == "Player")
+        {
+            InputHandler.BlockInput = false;
+        }
 
         _barrel.transform.DORotate(Vector3.zero, 0.5f).SetEase(Ease.InOutSine);
         yield return new WaitForSeconds(0.5f);

@@ -17,6 +17,7 @@ public class PlayerSpawner : MonoBehaviour
 
             CameraController proCamera = Camera.main.GetComponent<CameraController>();
             proCamera.SetTarget(player);
+            UltimateManager.Instance.SetPlayer(player);
         }
         else
         {

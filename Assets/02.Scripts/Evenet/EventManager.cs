@@ -68,4 +68,18 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnPlayerItemChanged?.Invoke();
     }
+    
+    public event Action OnLoadFinished;
+
+    public void LoadFinished()
+    {
+        OnLoadFinished?.Invoke();   
+    }
+    
+    public event Action OnProfileInit;
+    
+    public void ProfileInit()
+    {
+        OnProfileInit?.Invoke();
+    }
 }

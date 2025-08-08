@@ -35,7 +35,6 @@ public class ItemDatabase
         }
 
         PhotonServerManager.Instance.SetPhotonPrefabPool(_items);
-        Debug.Log("포톤 풀 등록 요청");
     }
 
     public ItemDTO GetItem(string itemID)

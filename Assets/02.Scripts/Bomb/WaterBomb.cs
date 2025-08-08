@@ -6,8 +6,8 @@ public class WaterBomb : Bomb
 {
     public const string ID = "BO0007";
 
-    public float _wobbleAmount = 0.2f;     // 출렁이는 크기 변화 비율
-    public float _wobbleDuration = 0.3f;   // 출렁이는 애니메이션 시간
+    private float _wobbleAmount = 0.6f;     // 출렁이는 크기 변화 비율
+    private float _wobbleDuration = 0.1f;   // 출렁이는 애니메이션 시간
     private Vector3 _originalScale;
     private Tween _wobbleTween;
 
