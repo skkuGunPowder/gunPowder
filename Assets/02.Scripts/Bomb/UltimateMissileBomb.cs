@@ -1,13 +1,12 @@
-using System.Collections;
+using UnityEngine;
 using DG.Tweening;
 using Photon.Pun;
-using UnityEngine;
-public class MissileBomb : Bomb
+using System.Collections;
+
+public class UltimateMissileBomb : Bomb
 {
-    public const string ID = "BO0005";
+    public const string ID = "BO0006";
     protected const float PREDELAY = 0.3f;
-
-
 
     protected override void Init()
     {
