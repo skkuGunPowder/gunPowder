@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Firebase.Auth;
 using System.Collections.Generic;
 using Assets.SimpleSignIn.Google.Scripts;
+using BackEnd;
 
 public class GoogleLogIn : Singleton<GoogleLogIn>
 {
@@ -67,7 +68,7 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
         {
             OnLoginResult?.Invoke($"구글 로그인 성공 : {userInfo.name}");
             Debug.Log($"구글 로그인 성공: {userInfo.name} ({userInfo.email})");
-            
+
             // Firebase Auth에 구글 계정으로 로그인
             await SignInToFirebaseWithGoogle(userInfo);
         }
@@ -92,7 +93,7 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
                 if (tokenSuccess)
                 {
                     Debug.Log("구글 ID Token 획득 성공");
-                    
+
                     // 2. Firebase Auth에 구글 계정으로 로그인
                     await SignInToFirebaseWithGoogleToken(userInfo, tokenResponse.IdToken);
                 }
@@ -123,23 +124,38 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             Credential credential = GoogleAuthProvider.GetCredential(idToken, null);
             var result = await FirebaseManager.Instance.Auth.SignInWithCredentialAsync(credential);
             FirebaseUser user = result;
-            
+
             Debug.Log($"Firebase Auth 로그인 성공: {user.DisplayName} ({user.UserId})");
             
             // 3. Firestore에 사용자 정보 저장/업데이트 (닉네임은 빈 문자열로)
             await SaveUserInfoToFirestore(user, userInfo);
-            
+
             // 4. AccountManager에 로그인 정보 설정
             await SetAccountInfo(user, userInfo);
-            
+
+
+            // 뒤끝 서버 구글 로그인
+            var backEndResult = Backend.BMember.AuthorizeFederation(idToken, FederationType.Google);
+            if (backEndResult.IsSuccess())
+            {
+                Debug.Log($"Message : {backEndResult.GetMessage()}");
+                Debug.Log($"Code : {backEndResult.GetCode()}");
+            }
+            else
+            {
+                Debug.LogError($"Message : {backEndResult.GetErrorMessage()}");
+                Debug.LogError($"Code : {backEndResult.GetErrorCode()}");
+            }
+
+
             OnLoginResult?.Invoke($"Firebase 로그인 성공: {user.DisplayName}");
             OnLoginSuccess?.Invoke(user, userInfo);
-            
+
         }
         catch (Firebase.FirebaseException fe)
         {
             Debug.LogError($"Firebase Auth 로그인 실패: {fe.Message}");
-            
+
             // 기존 계정이 없는 경우 새로 생성
             if (fe.ErrorCode == (int)Firebase.Auth.AuthError.UserNotFound)
             {
@@ -168,10 +184,10 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
         {
             // 임시 비밀번호 생성 (구글 계정이므로 실제로는 사용되지 않음)
             string tempPassword = Guid.NewGuid().ToString("N");
-            
+
             // Firebase Auth에 새 계정 생성
             FirebaseUser user = (await FirebaseManager.Instance.Auth.CreateUserWithEmailAndPasswordAsync(userInfo.email, tempPassword)).User;
-            
+
             // 사용자 프로필 업데이트 (닉네임은 빈 문자열로)
             UserProfile profile = new UserProfile
             {
@@ -179,18 +195,18 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
                 PhotoUrl = new System.Uri(userInfo.picture)
             };
             await user.UpdateUserProfileAsync(profile);
-            
+
             Debug.Log($"새 Firebase 계정 생성 성공: {user.UserId}");
-            
+
             // Firestore에 사용자 정보 저장
             await SaveUserInfoToFirestore(user, userInfo);
-            
+
             // AccountManager에 로그인 정보 설정
             await SetAccountInfo(user, userInfo);
-            
+
             OnLoginResult?.Invoke($"새 계정 생성 및 로그인 성공");
             OnLoginSuccess?.Invoke(user, userInfo);
-            
+
         }
         catch (Exception e)
         {
@@ -208,10 +224,10 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
         try
         {
             var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
-            
+
             // 기존 사용자 정보 확인
             var snapshot = await userDoc.GetSnapshotAsync();
-            
+
             if (snapshot.Exists)
             {
                 // 기존 사용자 정보 업데이트 (닉네임은 변경하지 않음)
@@ -259,13 +275,13 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             // Firestore에서 사용자 정보 가져오기
             var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
             var snapshot = await userDoc.GetSnapshotAsync();
-            
+
             if (snapshot.Exists)
             {
                 var data = snapshot.ToDictionary();
                 string nickname = data.ContainsKey("nickname") ? data["nickname"].ToString() : "";
                 string discriminator = data.ContainsKey("discriminator") ? data["discriminator"].ToString() : "";
-                
+
                 // AccountManager에 로그인 정보 설정
                 var accountDTO = new AccountDTO(
                     user.UserId,
@@ -278,13 +294,13 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
                     userInfo.email_verified,
                     AccountFlags.None
                 );
-                
+
                 // AccountManager에 로그인 정보 설정
                 if (AccountManager.Instance != null)
                 {
                     AccountManager.Instance.SetCurrentAccount(accountDTO);
                 }
-                
+
                 Debug.Log($"AccountManager 설정 완료: 닉네임='{nickname}'");
             }
         }
