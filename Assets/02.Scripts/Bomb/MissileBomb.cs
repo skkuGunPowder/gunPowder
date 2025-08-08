@@ -5,7 +5,7 @@ using UnityEngine;
 public class MissileBomb : Bomb
 {
     public const string ID = "BO0005";
-    private const float PREDELAY = 0.3f;
+    protected const float PREDELAY = 0.3f;
 
 
 
@@ -59,7 +59,7 @@ public class MissileBomb : Bomb
         });
     }
 
-    private IEnumerator AccelerateForward(Vector3 direction, float accelTime, float maxSpeed)
+    protected IEnumerator AccelerateForward(Vector3 direction, float accelTime, float maxSpeed)
     {
         float timer = 0f;
         while (timer < accelTime)

@@ -114,6 +114,7 @@ public class GunPowderRelease : MonoBehaviour
 
                     // 땅에 닿으면 Player 레이어를 ExcludeLayers에서 제거
                     int playerLayer = LayerMask.NameToLayer("Player");
+                    int enemyLayer = LayerMask.NameToLayer("Enemy");
                     if (_collider != null)
                         _collider.excludeLayers &= ~(1 << playerLayer);
                     if (_rigidbody2D != null)
