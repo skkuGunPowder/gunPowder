@@ -43,7 +43,6 @@ public class TwoPlayersDotween : MonoBehaviour
         sequence.Insert(1.2f,FirstPlayer.DOAnchorPos(new Vector2(610, -540), 10f));
         sequence.Insert(1.2f, SecondPlayer.DOAnchorPos(new Vector2(1300, -540), 10f));
         sequence.InsertCallback(2f,LoadEnd);
-        // sequence.InsertCallback(2f, OnLoadEnd);
 
     }
 

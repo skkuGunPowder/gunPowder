@@ -50,6 +50,7 @@ public class UI_StartProduction : MonoBehaviour
     }
     private void OnDisable()
     {
+        _playerList.Clear();
         LoadChecker.OnLoading -= LoadCheck;
     }
 }

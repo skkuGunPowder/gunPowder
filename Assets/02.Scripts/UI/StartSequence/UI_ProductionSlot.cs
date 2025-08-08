@@ -19,6 +19,11 @@ public class UI_ProductionSlot : MonoBehaviour
     public RectTransform BombObject;
     public RectTransform Shine;
     public Image Glow;
+
+
+    [Header("ForDotween")]
+    public Vector2 ShineEndPosition = new Vector2(800, 0);
+    public Vector2 ShineStartPosition = new Vector2(-700, 0);
     
     // 함수 = Init (로딩 제외)
     public void Init(string nickname, EInGameTeam team, Sprite bombImage)
@@ -30,7 +35,7 @@ public class UI_ProductionSlot : MonoBehaviour
 
     public void LoadCheck(bool isLoad)
     {
-        LoadingImage.SetActive(!isLoad);
+        LoadingImage.SetActive(isLoad);
     }
     private Color32 TeamColorSet(EInGameTeam team)
     {
@@ -53,7 +58,7 @@ public class UI_ProductionSlot : MonoBehaviour
 
     public void ShineOn()
     {
-        Shine.DOAnchorPos(new Vector2(800, 0), 1f);
+        Shine.DOAnchorPos(ShineEndPosition, 1f);
     }
 
     public void FlashOn()
@@ -77,7 +82,7 @@ public class UI_ProductionSlot : MonoBehaviour
     private void OnDisable()
     {
         DOTween.KillAll();
-        Shine.anchoredPosition = new Vector2(-700, 0);
+        Shine.anchoredPosition = ShineStartPosition;
         Glow.color = new Color(1,1,1, 0);
         BombObject.localScale = new Vector3(0.9f, 0.9f, 0.9f);
         BombObject.gameObject.SetActive(false);

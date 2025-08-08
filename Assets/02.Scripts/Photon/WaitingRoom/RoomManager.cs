@@ -86,6 +86,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             { EProperties.IsReady.ToString(), false },
             { EProperties.IsDead.ToString(), false },
+            {EProperties.IsLoad.ToString(), false}
         };
         
         if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()] == null)

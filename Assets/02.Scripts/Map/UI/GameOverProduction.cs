@@ -49,6 +49,11 @@ public class GameOverProduction : MonoBehaviour
             {
                 return;
             }
+            
+            if (!PhotonNetwork.IsMessageQueueRunning)
+                return; // 또는 로딩 상태 체크
+
+            PhotonNetwork.IsMessageQueueRunning = false;
 
             PhotonNetwork.LoadLevel(ESceneList.Map4.ToString());
         });
@@ -63,5 +68,9 @@ public class GameOverProduction : MonoBehaviour
     private void CameraOff()
     {
         BlackOut.SetActive(true);
+    }
+    private void OnDisable()
+    {
+        DOTween.KillAll();
     }
 }
