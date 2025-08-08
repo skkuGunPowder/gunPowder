@@ -95,7 +95,7 @@ public class UI_RoomSearchPopup : UI_Popup
         Debug.Log(map);
         if (MapDataDictionary.TryGetValue(map, out var mapData))
         { 
-            return mapData.MapSprite;
+            return mapData.MapIcon;
         }
         
         return null;

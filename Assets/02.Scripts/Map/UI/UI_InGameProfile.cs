@@ -10,6 +10,7 @@ public class UI_InGameProfile : MonoBehaviour
     
     private void OnEnable()
     {
+        Debug.Log("인게임 프로필 온인에이블");
         SubscribeEvents();
     }
 
@@ -35,7 +36,7 @@ public class UI_InGameProfile : MonoBehaviour
             }
         }
         
-        GameManager.Instance.OnProfileInit -= Init;
+        EventManager.Instance.OnProfileInit -= Init;
     }
     
     private void SetTopPlayer(int playerNumber)
@@ -76,11 +77,7 @@ public class UI_InGameProfile : MonoBehaviour
         {
             EventManager.Instance.OnDataChanged += Refresh;
             EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
-        }
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnProfileInit += Init;   
+            EventManager.Instance.OnProfileInit += Init;   
         }
     }
 

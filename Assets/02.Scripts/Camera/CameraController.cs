@@ -57,6 +57,7 @@ public class CameraController : MonoBehaviour
 
     public void ExplosionShake(Transform explosionTransform, float explosionRadius)
     {
+        if(_target == null) return;
         float distance = Vector3.Distance(_target.transform.position, explosionTransform.position);
         if (distance < explosionRadius * 1.8f)
         {
