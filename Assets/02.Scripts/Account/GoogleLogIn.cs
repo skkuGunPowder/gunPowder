@@ -140,6 +140,7 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             {
                 Debug.Log($"Message : {backEndResult.GetMessage()}");
                 Debug.Log($"Code : {backEndResult.GetCode()}");
+                ItemDatabase.Instance.Init();
             }
             else
             {
