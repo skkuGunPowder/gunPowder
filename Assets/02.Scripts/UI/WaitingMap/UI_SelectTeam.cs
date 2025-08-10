@@ -6,9 +6,15 @@ public class UI_SelectTeam : MonoBehaviour
 {
     public List<UI_TeamSelcetButton> TeamButtonList = new List<UI_TeamSelcetButton>();
 
-    private void Awake()
+    private void OnEnable()
     {
         EventManager.Instance.OnTeamChanged += TeamSelected;
+        
+    }
+    
+    private void Start()
+    {
+        TeamSelected();
     }
 
     private void TeamSelected()

@@ -29,8 +29,13 @@ public class DamageChecker : Singleton<DamageChecker>
     {
         _playerList = new List<int>();
         _playerScoreDictionary = new Dictionary<int, int>();
-        
+
         List<PhotonPlayer> playerlist = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
+        
+        if (_playerList.Count == 0 && playerlist.Count == 0)
+        {
+            return;       
+        }
 
         foreach (var player in playerlist)
         {

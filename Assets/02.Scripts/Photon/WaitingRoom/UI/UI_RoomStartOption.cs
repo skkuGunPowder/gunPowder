@@ -24,13 +24,13 @@ public class UI_RoomStartOption : MonoBehaviour
             MapDataDictionary.Add(dataSo.MapSceneList.ToString(), dataSo);
         }
 
+        EventManager.Instance.OnMapChanged += MapChange;
+        EventManager.Instance.OnMasterChanged += ButtonSetup;
+
     }
 
     private void Start()
     {
-        EventManager.Instance.OnMapChanged += MapChange;
-        EventManager.Instance.OnMasterChanged += ButtonSetup;
-        
         ButtonSetup();
     }
     
