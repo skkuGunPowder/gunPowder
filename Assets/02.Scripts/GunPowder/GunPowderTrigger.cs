@@ -40,6 +40,13 @@ public class GunPowderTrigger : MonoBehaviour
             // 2. 상위 콜라이더를 트리거로 전환
             gameObject.GetComponentInParent<BoxCollider2D>().isTrigger = true;
 
+            // 3. 파티클 재생 (부모의 GunPowderRelease에 요청)
+            var release = gameObject.GetComponentInParent<GunPowderRelease>();
+            if (release != null)
+            {
+                release.ResumeParticles();
+            }
+
             gameObject.SetActive(false);
         
         }

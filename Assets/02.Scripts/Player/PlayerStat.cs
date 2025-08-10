@@ -232,6 +232,19 @@ public class PlayerStat : MonoBehaviour
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife, 0);
     }
+
+    [PunRPC]
+    public void RPC_RequestIncreaseGunPowder(int amount, PhotonMessageInfo info)
+    {
+        // 소유자만 처리 (마스터가 보내더라도 최종 처리는 로컬 소유자 권한)
+        if (!_photonView.IsMine)
+        {
+            return;
+        }
+        _currentPlayerGunPowderCount += amount;
+        _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
+            _currentPlayerLife, 0);
+    }
     
     public bool DecreaseGunPowderCount(int amount, int attacker)
     {
