@@ -30,11 +30,14 @@ public class GunPowderRelease : MonoBehaviour
 
     private int _randomSeed;
 
+    private ParticleSystem[] _childParticleSystems;
+
     void OnEnable()
     {
         _collider = GetComponent<BoxCollider2D>();
         _groundRay2D = GetComponent<BoxRay2D>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        _childParticleSystems = GetComponentsInChildren<ParticleSystem>(true);
         
         // 랜덤 시드가 설정되어 있으면 사용
         if (_randomSeed != 0)
@@ -109,9 +112,21 @@ public class GunPowderRelease : MonoBehaviour
                 else
                 {
                     isGrounded = true;
-                    if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
+                    if (_rigidbody2D != null) 
+                    {
+                        _rigidbody2D.linearVelocity = Vector2.zero;
+                        _rigidbody2D.gravityScale = 0f; // 중력 비활성화
+                        _rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll; // 모든 이동 고정
+                    }
+                    if (_collider != null)
+                    {
+                        _collider.isTrigger = true; // Collider를 Trigger로 변경
+                    }
                     gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = true;
 
+                    // 착지 시 파티클 정지 (재생 가능하게 StopEmitting)
+                    StopParticles();
+                    
                     // 땅에 닿으면 Player 레이어를 ExcludeLayers에서 제거
                     int playerLayer = LayerMask.NameToLayer("Player");
                     int enemyLayer = LayerMask.NameToLayer("Enemy");
@@ -130,5 +145,31 @@ public class GunPowderRelease : MonoBehaviour
         _randomSeed = randomSeed;
         // Debug.Log($"SetRandomSeed {_randomSeed}");
         Random.InitState(_randomSeed);
+    }
+
+    public void StopParticles()
+    {
+        if (_childParticleSystems == null || _childParticleSystems.Length == 0)
+        {
+            _childParticleSystems = GetComponentsInChildren<ParticleSystem>(true);
+        }
+        foreach (var ps in _childParticleSystems)
+        {
+            if (ps == null) continue;
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
+    }
+
+    public void ResumeParticles()
+    {
+        if (_childParticleSystems == null || _childParticleSystems.Length == 0)
+        {
+            _childParticleSystems = GetComponentsInChildren<ParticleSystem>(true);
+        }
+        foreach (var ps in _childParticleSystems)
+        {
+            if (ps == null) continue;
+            ps.Play(true);
+        }
     }
 }

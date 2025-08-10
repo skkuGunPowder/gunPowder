@@ -50,18 +50,17 @@ public class GunPowderBezierCurve : MonoBehaviour
 
         // Player 레이어를 ExcludeLayers에서 제거
         int playerLayer = LayerMask.NameToLayer("Player");
-        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        //int enemyLayer = LayerMask.NameToLayer("Enemy");
         if (_collider != null)
         {
             _collider.excludeLayers &= ~(1 << playerLayer);
-            _collider.excludeLayers &= ~(1 << enemyLayer);
+            //_collider.excludeLayers &= ~(1 << enemyLayer);
         }
         if (_rigidbody2D != null)
         {
             _rigidbody2D.excludeLayers &= ~(1 << playerLayer);
-            _rigidbody2D.excludeLayers &= ~(1 << enemyLayer);
+            //_rigidbody2D.excludeLayers &= ~(1 << enemyLayer);
         }
-
 
         _start = transform;
         _timerCurrent = 0f;
@@ -136,15 +135,35 @@ public class GunPowderBezierCurve : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
         {
+            // 자신이 생성한 건파우더인지 확인
             if(collision.GetComponent<PhotonView>().ViewID == GetComponent<GunPowder>().SourceViewId)
             {
                 return;
             }
-            collision.gameObject.GetComponent<Player>().PlayerStat.IncreaseGunPowderCount(1);
-            if (!_hasTriggeredDestroy)
+
+            // 플레이어 컴포넌트 확인
+            Player player = collision.gameObject.GetComponent<Player>();
+            if (player != null && player.PlayerStat != null)
             {
-                InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
-                _hasTriggeredDestroy = true;
+                // 건파우더 제거
+                if (!_hasTriggeredDestroy)
+                {
+                    var myView = GetComponent<PhotonView>();
+                    var targetView = player.GetComponent<PhotonView>();
+                    Debug.Log($"[GPBezier Pickup-try] isMaster={PhotonNetwork.IsMasterClient} gpView={myView?.ViewID} targetOwner={targetView?.OwnerActorNr} collider={collision.name}");
+
+                    // 마스터가 단일 권한으로 판정 → 힐 + 파괴 모두 마스터에서만 수행
+                    PhotonView targetPlayerView = targetView;
+                    if (PhotonNetwork.IsMasterClient && targetPlayerView != null)
+                    {
+                        Debug.Log($"[GPBezier Heal-RPC] send to owner={targetPlayerView.OwnerActorNr}");
+                        targetPlayerView.RPC("RPC_RequestIncreaseGunPowder", targetPlayerView.Owner, 1);
+
+                        Debug.Log($"[GPBezier Destroy-req] gpView={myView?.ViewID}");
+                        InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+                        _hasTriggeredDestroy = true;
+                    }
+                }
             }
         }
     }
