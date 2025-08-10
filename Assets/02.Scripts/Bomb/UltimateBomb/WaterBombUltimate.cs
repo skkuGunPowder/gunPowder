@@ -4,6 +4,7 @@ using UnityEngine;
 public class WaterBombUltimate : Ultimate
 {
     [SerializeField] private GameObject FireTruckPrefab;
+    private GameObject _fireTruckObj;
 
     public override void Init()
     {
@@ -14,9 +15,20 @@ public class WaterBombUltimate : Ultimate
 
     public override void ExcuteUltimate()
     {
-        GameObject fireTruckObj = PhotonNetwork.Instantiate(FireTruckPrefab.name, transform.position, Quaternion.identity);
-        FireTruck fireTruck = fireTruckObj.GetComponent<FireTruck>();
-        fireTruck.SetPlayer(_owner);
+        bool isFacingRight = false;
+        if (_owner.PlayerStat.FacingDirection == 1)
+        {
+            _fireTruckObj = PhotonNetwork.Instantiate(FireTruckPrefab.name, transform.position, Quaternion.Euler(0, 180, 0));
+            isFacingRight = true;
+        }
+        else
+        {
+            _fireTruckObj = PhotonNetwork.Instantiate(FireTruckPrefab.name, transform.position, Quaternion.identity);
+            isFacingRight = false;
+        }
+
+        FireTruck fireTruck = _fireTruckObj.GetComponent<FireTruck>();
+        fireTruck.Init(_owner, isFacingRight);
         fireTruck.Summon();
     }
 }

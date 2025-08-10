@@ -2,104 +2,115 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
-using Photon.Pun;
 
 public class FireTruck : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform cannonTransform;
-    [SerializeField] private Collider2D damageArea;
-    [SerializeField] private SpriteRenderer truckRenderer;
-    [SerializeField] private ParticleSystem waterEffect;
-    
+    [SerializeField] private Collider2D _damageCollider;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
+    [SerializeField] private ParticleSystem _vfx;
+
 
     [Header("Settings")]
-    [SerializeField] private float fadeInTime = 0.5f;
-    [SerializeField] private float deployTime = 1f;
-    [SerializeField] private float activeTime = 5f;
-    [SerializeField] private float damageInterval = 0.3f;
-    [SerializeField] private int damageAmount = 10; // 물풍선 피해량
-    [SerializeField] private Vector2 range = new Vector2(15f, 8f);
+    [SerializeField] private float _fadeTime = 0.5f;
+    [SerializeField] private float _duration = 5f;
+    [SerializeField] private float _damageInterval = 0.3f;
+    [SerializeField] private int _damageAmount = 3;
+    [SerializeField] private Vector2 _attackRange = new Vector2(15f, 8f);
+    [SerializeField] private float _startOffsetDistance = 5f;
+    [SerializeField] private float _rayDistance = 10f;
+    [SerializeField] private LayerMask _groundLayer;
 
     private Player _player;
     private Vector3 _spawnPosition;
+    private Animator _animator;
     private List<IDamagable> targetsInRange = new List<IDamagable>();
+
     private Coroutine damageCoroutine;
+
 
     private void Awake()
     {
-        if (damageArea is BoxCollider2D box)
+        if (_damageCollider is BoxCollider2D box)
         {
-            box.size = range;
+            box.size = _attackRange;
             box.isTrigger = true;
         }
 
-        truckRenderer.color = new Color(1, 1, 1, 0); // 투명 시작
-        cannonTransform.localScale = Vector3.zero;
-        damageArea.enabled = false;
+        _animator = GetComponentInChildren<Animator>();
+        _spriteRenderer.color = new Color(1, 1, 1, 0);
+        _damageCollider.enabled = false;
     }
 
-    public void SetPlayer(Player player)
+    public void Init(Player player, bool isFacingRight)
     {
         _player = player;
-        _spawnPosition = _player.transform.position;
+        if (isFacingRight)
+        {
+            _startOffsetDistance *= -1;
+        }
     }
 
     public void Summon()
     {
-        transform.position = _spawnPosition + new Vector3(4f, 0f, 0f);
+        RaycastHit2D hit = Physics2D.Raycast(_player.transform.position, Vector2.down, _rayDistance, _groundLayer);
+        if (hit.collider != null)
+        {
+            Debug.LogError("땅 체크됨");
+            _spawnPosition = hit.point;
+        }
+        else
+        {
+            Debug.LogError("땅 체크 안됨");
+            _spawnPosition = _player.transform.position;
+        }
 
+        transform.position = _spawnPosition + new Vector3(_startOffsetDistance, 0f, 0f);
+        
         Sequence seq = DOTween.Sequence();
 
-        // 1. FadeIn
-        seq.Append(truckRenderer.DOFade(1f, fadeInTime)); // 페이드 인
-        seq.Join(transform.DOMove(_spawnPosition, fadeInTime).SetEase(Ease.OutQuad)); // 앞으로 이동
+        seq.Append(_spriteRenderer.DOFade(1f, _fadeTime));
+        seq.Join(transform.DOMove(_spawnPosition, _fadeTime).SetEase(Ease.OutQuad));
 
-        // 2. 대포 꺼내기
         seq.AppendCallback(() =>
         {
-            cannonTransform.DOScale(Vector3.one, deployTime).SetEase(Ease.OutBack)
-            .OnComplete(() =>
-            {
-                waterEffect.Play();
-
-                // 3. 발사 시작
-                damageArea.enabled = true;
-                damageCoroutine = StartCoroutine(DamageOverTime());
-                Debug.LogError("공격 중지 예정");
-                // 4. activeTime 후 종료
-                DOVirtual.DelayedCall(activeTime, StopFireTruck);
-            });
+            StartCoroutine(StartAttackCoroutine());
         });
     }
 
     private void StopFireTruck()
     {
-        Debug.LogError("공격 중지");
-
         if (damageCoroutine != null)
         {
             StopCoroutine(damageCoroutine);
         }
 
-        waterEffect.Stop();
+        _vfx.Stop();
+        _damageCollider.enabled = false;
+        _animator.SetBool("IsAttack", false);
 
-        damageArea.enabled = false;
-
-
-        // 대포 접기 & 소방차 사라지기
-        cannonTransform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack)
-        .OnComplete(() =>
-        {           
-            Sequence seq = DOTween.Sequence();
-            seq.Append(truckRenderer.DOFade(0f, 0.5f));
-            seq.Join(transform.DOMove(transform.position  + new Vector3(4f, 0, 0), fadeInTime).SetEase(Ease.OutQuad)).OnComplete(() =>
-            {
-                Destroy(gameObject);
-            });
+        Sequence seq = DOTween.Sequence();
+        seq.Append(_spriteRenderer.DOFade(0f, 0.5f));
+        seq.Join(transform.DOMove(transform.position + new Vector3(_startOffsetDistance, 0, 0), _fadeTime).SetEase(Ease.OutQuad)).OnComplete(() =>
+        {
+            Destroy(gameObject);
         });
 
         targetsInRange.Clear();
+    }
+    
+    private IEnumerator StartAttackCoroutine()
+    {
+        while (_animator.GetCurrentAnimatorStateInfo(0).IsName("FireTruckLanding") && _animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+        {
+            yield return null;
+        }
+
+        _vfx.Play();
+        _damageCollider.enabled = true;
+        _animator.SetBool("IsAttack", true);
+        damageCoroutine = StartCoroutine(DamageOverTime());
+        DOVirtual.DelayedCall(_duration, StopFireTruck);
     }
 
     private IEnumerator DamageOverTime()
@@ -108,9 +119,9 @@ public class FireTruck : MonoBehaviour
         {
             foreach (var target in targetsInRange)
             {
-                target.TakeDamage(3, transform.position, _player.PhotonView.ViewID, _player.PhotonView.OwnerActorNr);
+                target.TakeDamage(_damageAmount, transform.position, _player.PhotonView.ViewID, _player.PhotonView.OwnerActorNr);
             }
-            yield return new WaitForSeconds(damageInterval);
+            yield return new WaitForSeconds(_damageInterval);
         }
     }
 

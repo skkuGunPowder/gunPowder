@@ -4,7 +4,6 @@ using UnityEngine;
 public class MissileUltimate : Ultimate
 {
     [SerializeField] private GameObject BomberJetPrefab;
-    [SerializeField] private GameObject MissileUitimateBombPrefab;
 
     public override void Init()
     {
