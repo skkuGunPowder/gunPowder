@@ -15,7 +15,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     //리스트로 정보칸 들어가게 하기 => 플레이어 칸 정하기
     private List<int> _playerSlotList;
     public List<int> PlayerSlotList => _playerSlotList;
-    private LoadSceneChecker _loadChecker;
 
     public ESceneList SelectedMap;      // 맵 선택하기
     public EInGameTeam SelectedTeam;
@@ -29,19 +28,18 @@ public class RoomManager : PhotonSingleton<RoomManager>
         base.Awake();
 
         _photonView = GetComponent<PhotonView>();
-        _loadChecker = GetComponent<LoadSceneChecker>();
         _room = PhotonNetwork.CurrentRoom;
         
     }
 
+
+    // 방 세팅 시작 => Init
     public override void OnEnable()
     {
         base.OnEnable();
         EventManager.Instance.OnPlayerChanged += PlayerLeft;
-    }
-    // 방 세팅 시작 => Init
-    private void Start()
-    {
+        
+        
         if (PhotonNetwork.InRoom == false)
         {
             return;
@@ -53,6 +51,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         }
 
         Init();
+        
     }
 
     // 처음 방에 들어왔을 때 => 세팅 Init
@@ -86,12 +85,16 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             { EProperties.IsReady.ToString(), false },
             { EProperties.IsDead.ToString(), false },
-            {EProperties.IsLoad.ToString(), false}
+            { EProperties.IsLoad.ToString(), false}
         };
         
         if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()] == null)
         {
             ready.Add(EProperties.Team.ToString(), (int)EInGameTeam.Red);
+        }
+        else
+        {
+            SelectedTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
         }
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
@@ -264,7 +267,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // 맵 변경시 콜백
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
-        if (propertiesThatChanged.ContainsKey($"{EProperties.MapSelected}") && propertiesThatChanged[$"{EProperties.MapSelected}"] != null)
+        if (propertiesThatChanged.ContainsKey(EProperties.MapSelected.ToString()) && propertiesThatChanged[EProperties.MapSelected.ToString()] != null)
         {
             SelectedMap = (ESceneList)propertiesThatChanged[$"{EProperties.MapSelected}"];
             EventManager.Instance.MapChanged();

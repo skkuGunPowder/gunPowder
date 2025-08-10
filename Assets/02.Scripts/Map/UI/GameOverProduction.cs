@@ -131,7 +131,6 @@ public class GameOverProduction : MonoBehaviour
         CameraObject.gameObject.SetActive(false);
         BlackOut.gameObject.SetActive(false);
         GameOverProductionPanel.anchoredPosition = GameSetStartPosition;
-        _camera.orthographicSize = CamerZoomAmount;
         CameraObject.localScale = new Vector3(CameraScale,CameraScale,CameraScale);
         BlackOut.color = new Color(0, 0, 0, 0);
         ProfileSlot.anchoredPosition = ProfileSlotStartPosition;
