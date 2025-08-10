@@ -28,7 +28,6 @@ public class WaterBombUltimate : Ultimate
         }
 
         FireTruck fireTruck = _fireTruckObj.GetComponent<FireTruck>();
-        fireTruck.Init(_owner, isFacingRight);
-        fireTruck.Summon();
+        fireTruck.PhotonView.RPC(nameof(fireTruck.Launch), RpcTarget.All, _owner.PhotonView.ViewID, isFacingRight);
     }
 }

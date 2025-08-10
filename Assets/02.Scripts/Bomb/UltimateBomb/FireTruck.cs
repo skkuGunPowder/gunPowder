@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using Photon.Pun;
 
 public class FireTruck : MonoBehaviour
 {
@@ -21,7 +22,9 @@ public class FireTruck : MonoBehaviour
     [SerializeField] private float _rayDistance = 10f;
     [SerializeField] private LayerMask _groundLayer;
 
-    private Player _player;
+    private PhotonView _photonView;
+    public PhotonView PhotonView => _photonView;
+    private Player _owner;
     private Vector3 _spawnPosition;
     private Animator _animator;
     private List<IDamagable> targetsInRange = new List<IDamagable>();
@@ -37,23 +40,27 @@ public class FireTruck : MonoBehaviour
             box.isTrigger = true;
         }
 
+        _photonView = GetComponent<PhotonView>();
         _animator = GetComponentInChildren<Animator>();
         _spriteRenderer.color = new Color(1, 1, 1, 0);
         _damageCollider.enabled = false;
     }
 
-    public void Init(Player player, bool isFacingRight)
+    [PunRPC]
+    public void Launch(int ownerPhotonViewID, bool isFacingRight)
     {
-        _player = player;
+        _owner = PhotonView.Find(ownerPhotonViewID).GetComponent<Player>();
         if (isFacingRight)
         {
             _startOffsetDistance *= -1;
         }
+
+        Summon();
     }
 
     public void Summon()
     {
-        RaycastHit2D hit = Physics2D.Raycast(_player.transform.position, Vector2.down, _rayDistance, _groundLayer);
+        RaycastHit2D hit = Physics2D.Raycast(_owner.transform.position, Vector2.down, _rayDistance, _groundLayer);
         if (hit.collider != null)
         {
             Debug.LogError("땅 체크됨");
@@ -62,7 +69,7 @@ public class FireTruck : MonoBehaviour
         else
         {
             Debug.LogError("땅 체크 안됨");
-            _spawnPosition = _player.transform.position;
+            _spawnPosition = _owner.transform.position;
         }
 
         transform.position = _spawnPosition + new Vector3(_startOffsetDistance, 0f, 0f);
@@ -119,7 +126,7 @@ public class FireTruck : MonoBehaviour
         {
             foreach (var target in targetsInRange)
             {
-                target.TakeDamage(_damageAmount, transform.position, _player.PhotonView.ViewID, _player.PhotonView.OwnerActorNr);
+                target.TakeDamage(_damageAmount, transform.position, _owner.PhotonView.ViewID, _owner.PhotonView.OwnerActorNr);
             }
             yield return new WaitForSeconds(_damageInterval);
         }
@@ -127,6 +134,11 @@ public class FireTruck : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.gameObject == _owner.gameObject)
+        {
+            return;    
+        }
+        
         if (collision.TryGetComponent(out IDamagable dmg))
         {
             if (!targetsInRange.Contains(dmg))
@@ -138,6 +150,11 @@ public class FireTruck : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+        if (collision.gameObject == _owner.gameObject)
+        {
+            return;    
+        }
+
         if (collision.TryGetComponent(out IDamagable dmg))
         {
             if (targetsInRange.Contains(dmg))
