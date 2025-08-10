@@ -783,6 +783,7 @@ GameObject:
   - component: {fileID: 6754169695411598310}
   - component: {fileID: 5178426168741272479}
   - component: {fileID: 8925706436949446248}
+  - component: {fileID: 2108587632911256289}
   m_Layer: 5
   m_Name: UI_GameResultSlot
   m_TagString: Untagged
@@ -899,6 +900,23 @@ MonoBehaviour:
   DamageTextMeshProUGUI: {fileID: 8909959214650902367}
   KillTextMeshProUGUI: {fileID: 2121875621432197204}
   SurvivorTimeTextMeshProUGUI: {fileID: 2952187662512020606}
+--- !u!114 &2108587632911256289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6480370726169851941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8805eafacd5f3e24885e1f635a183961, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MyRectTransform: {fileID: 3063594649956157251}
+  MoveSpeed: 0.2
+  StartPosition: {x: 0, y: 40}
+  EndPosition: {x: 0, y: 0}
+  EaseType: 9
 --- !u!1 &7186033167900569961
 GameObject:
   m_ObjectHideFlags: 0
