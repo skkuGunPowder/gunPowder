@@ -27,6 +27,11 @@ public class UltimateMissileBomb : Bomb
             return;
         }
 
+        if (other.gameObject.tag == "Bomb")
+        {
+            return;
+        }
+
         if (other.gameObject.tag == "Immune")
             {
                 return;
