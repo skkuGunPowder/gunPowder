@@ -1,21 +1,47 @@
 using Photon.Pun;
 using UnityEngine;
+using DG.Tweening;
 
 public class MissileUltimate : Ultimate
 {
     [SerializeField] private GameObject BomberJetPrefab;
-    [SerializeField] private GameObject MissileUitimateBombPrefab;
+    [SerializeField] private GameObject BackgroundJet;
+    [SerializeField] private GameObject ForegroundJet;
+
+    [SerializeField] private float _backgroundDuration = 2f;
+    [SerializeField] private float _foregroundDuration = 1f;
+
+    private Transform _startTransform;
+    private Transform _endTransform;
 
     public override void Init()
     {
         base.Init();
 
         _ownerBombID = "BO0005";
+        _startTransform = GameObject.FindWithTag("StartTransform").transform;
+        _endTransform = GameObject.FindWithTag("EndTransform").transform;
     }
 
     public override void ExcuteUltimate()
     {
-        GameObject bomberjet = PhotonNetwork.Instantiate(BomberJetPrefab.name, transform.position, Quaternion.identity);
-        bomberjet.GetComponent<BomberJet>().SetPlayer(_owner);
+        GameObject backgroundJet = PhotonNetwork.Instantiate(BackgroundJet.name, _startTransform.position, Quaternion.identity);
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(backgroundJet.transform.DOMove(_endTransform.position, _backgroundDuration)
+        .OnComplete(() => PhotonNetwork.Destroy(backgroundJet)));
+
+        seq.AppendCallback(() =>
+        {
+            GameObject foregroundJet = PhotonNetwork.Instantiate(ForegroundJet.name, _endTransform.position, Quaternion.identity);
+            foregroundJet.transform.DOMove(_startTransform.position, _foregroundDuration)
+            .OnComplete(() => PhotonNetwork.Destroy(foregroundJet));
+        });
+
+        seq.AppendCallback(() =>
+        {
+            GameObject bomberjet = PhotonNetwork.Instantiate(BomberJetPrefab.name, transform.position, Quaternion.identity);
+            bomberjet.GetComponent<BomberJet>().SetPlayer(_owner);
+        });
     }
 }

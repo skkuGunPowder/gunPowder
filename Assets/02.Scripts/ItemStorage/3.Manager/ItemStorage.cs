@@ -77,6 +77,13 @@ public class ItemStorage : MonoBehaviour
             for (int i = 0; i < (int)EItemType.None; i++)
             {
                 _storedItemDict.Add((EItemType)i, new List<InventoryItem>());
+
+                // 스타터 아이템 지급(미사일)
+                if ((EItemType)i == EItemType.Bomb)
+                {
+                    ItemDTO starterItem = ItemDatabase.Instance.GetItem("BO0005");
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(starterItem));
+                }
             }
 
             _repo.SaveItemStorage(_storedItemDict);
@@ -92,6 +99,9 @@ public class ItemStorage : MonoBehaviour
             }
             _repo.SaveInventory(_equippedItemDict);
         }
+
+        // 스타터 아이템 장착(미사일)
+        EquipItem(_storedItemDict[EItemType.Bomb][0]);
 
         SetPlayerCustomProperties();
     }

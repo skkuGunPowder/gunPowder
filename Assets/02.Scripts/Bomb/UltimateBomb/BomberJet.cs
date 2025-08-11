@@ -14,7 +14,6 @@ public class BomberJet : Jet
 
     protected override void DropItem()
     {
-        Debug.LogWarning($"{_dropItemList.Count} || {_dropItemList[0].name}");
         GameObject dropItem = PhotonNetwork.Instantiate(_dropItemList[0].name, _dropTransfrom.position, Quaternion.identity);
         UltimateMissileBomb missile = dropItem.GetComponent<UltimateMissileBomb>();
         missile.PhotonView.RPC(nameof(missile.SetOwner), RpcTarget.All, _player.PhotonView.ViewID);
