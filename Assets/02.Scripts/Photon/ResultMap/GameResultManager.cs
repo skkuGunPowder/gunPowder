@@ -11,11 +11,9 @@ public class GameResultManager : Singleton<GameResultManager>
     
     private float _timer = 0;
     private float _EndTime = 10f;
-    private bool _nextScene;
     
     private void Start()
     {
-        _nextScene = false;
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
  
         Debug.Log($"결과 : 플레이어 리스트 {playerList.Count}");
@@ -44,8 +42,6 @@ public class GameResultManager : Singleton<GameResultManager>
         }
         
         Arrange();
-        
-        EventManager.Instance.ViewGameResult();
     }
 
     private void Arrange()
@@ -83,23 +79,12 @@ public class GameResultManager : Singleton<GameResultManager>
         Debug.Log($"결과 : 데이터 리스트 {ResultDataList.Count}");
     }
     
-    private void Update()
+    public void LoadScene()
     {
-        _timer += Time.deltaTime;
-
-        if (_timer >= _EndTime && _nextScene == false)
+        if (PhotonNetwork.IsMasterClient)
         {
-            _nextScene = true;
-            _timer = 0;
-       
-            if (PhotonNetwork.IsMasterClient)
-            {
-                PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
+            PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
                 
-            }
-            
         }
     }
-    
-    
 }

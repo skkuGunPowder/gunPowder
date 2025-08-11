@@ -1,6 +1,8 @@
+using System;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
+[Serializable]
 public class GameResultData
 {
     public readonly PhotonPlayer Player;
