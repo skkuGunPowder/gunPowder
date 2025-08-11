@@ -6,6 +6,7 @@ public enum ESceneList
     Map2,
     Map3,
     Map4,
+    ResultScene,
     
     StartSequence,
     

@@ -14,6 +14,11 @@ public class UI_KillLog : MonoBehaviour
     
     private void Awake()
     {
+        if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.Team.ToString()) == false)
+        {
+            return;
+        }
+        
         _myTeam = (int)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
     }
 
@@ -39,7 +44,7 @@ public class UI_KillLog : MonoBehaviour
             bool killerTeam = TeamCheck(kill);
             bool deathTeam = TeamCheck(death);
             
-            slot.gameObject.SetActive(true);
+            slot.gameObject.SetActive(true); 
             slot.Refresh(killPlayer, deathPlayer, killerTeam, deathTeam);
             break;
         }

@@ -190,6 +190,7 @@ public class PlayerIdleState : PlayerBaseState
         if (InputHandler.GetKeyDown(KeyCode.LeftArrow) || InputHandler.GetKeyDown(KeyCode.RightArrow)
         || InputHandler.GetKey(KeyCode.LeftArrow) || InputHandler.GetKey(KeyCode.RightArrow))
         {
+            _owner.RPC_SetFacingDirection(InputHandler.GetKey(KeyCode.LeftArrow) ? -1 : 1);
             _playerFSM.ChangeState<PlayerWalkState>();
         }
     }

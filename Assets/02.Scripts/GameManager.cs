@@ -36,7 +36,6 @@ public class GameManager : PhotonSingleton<GameManager>
          {
              return;
          }
-         Debug.Log("게임 매니저 액션 시작");
          EventManager.Instance.OnLoadFinished += Init;
      }
     
@@ -70,7 +69,6 @@ public class GameManager : PhotonSingleton<GameManager>
     // 프로퍼티가 바뀌었을 때 호출되는 함수
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
-        Debug.Log("isdead 1");
         if (_currentGameState == EGameState.Waiting || _currentGameState == EGameState.GameOver)
         {
             return;
@@ -95,9 +93,8 @@ public class GameManager : PhotonSingleton<GameManager>
             };
             
             targetPlayer.SetCustomProperties(hash);
-            Debug.Log($"{targetPlayer.ActorNumber}의 죽은 시간 : {playtime}");
         }   
-        Debug.Log(targetPlayer.ActorNumber + "현재 죽은 사람 테스트");
+        
         if (PlayerDeadCheck())
         { 
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
@@ -132,8 +129,6 @@ public class GameManager : PhotonSingleton<GameManager>
             dead++;
             
         }
-
-        Debug.Log("현재 죽은 인원 " + dead + "명");
         
         if (dead < playerList.Count)
         {
@@ -145,7 +140,6 @@ public class GameManager : PhotonSingleton<GameManager>
 
     private void Init()
     {
-        Debug.Log("이닛");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
@@ -157,8 +151,6 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     public void RPC_RequestGameStart(int state)
     {
-        
-        Debug.Log("게임 시작");
         EventManager.Instance.ProfileInit();
 
         int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
@@ -166,7 +158,6 @@ public class GameManager : PhotonSingleton<GameManager>
         _initTime = playtime;
 
         _timer = _initTime;
-        Debug.Log($"플레이 타임 : {playtime}");
         
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
         GameStateChange((EGameState)state);
@@ -196,20 +187,13 @@ public class GameManager : PhotonSingleton<GameManager>
         };
         
         player.SetCustomProperties(properties);
-        Debug.Log("방장 타임 잽니다.");
-        Debug.Log($"타임 오버 : 내 자신{player.ActorNumber} 프로퍼티 전달" + $"{player.CustomProperties[EProperties.Kill]}");
     }
     
     public void GameStateChange(EGameState state)
     {
-        Debug.Log("gamestateChange 1");
         _currentGameState = state;
     }
 
-    public void OnDestroy()
-    {
-        Debug.Log("게임 매니저 터짐");
-    }
 }
 
 
