@@ -38,6 +38,11 @@ public class UltimateManager : Singleton<UltimateManager>
         {
             GetUltimate("BO0007", _player).ExcuteUltimate();
         }
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            GetUltimate("BO0011", _player).ExcuteUltimate();
+        }
     }
 
     public Ultimate GetUltimate(string bombID, Player player)

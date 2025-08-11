@@ -8,7 +8,7 @@ public class Bomb : MonoBehaviourPun, IBomb
     protected BombStat _stat;
     protected Vector3 _fireDirection;
     protected float _currentSpeed;
-    private float _fuzeTimer;
+    protected float _fuzeTimer;
 
     protected PhotonView _ownerPhotonview;
 
