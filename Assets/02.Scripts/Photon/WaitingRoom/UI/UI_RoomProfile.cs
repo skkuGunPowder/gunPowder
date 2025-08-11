@@ -10,9 +10,11 @@ public class UI_RoomProfile : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("roomprofile awake");
         EventManager.Instance.OnRoomDataChanged += Refresh;
         EventManager.Instance.OnReadyChanged += ReadyCheck;
         EventManager.Instance.OnTeamChanged += TeamChange;
+        
     }
     
     public void Refresh()
@@ -61,6 +63,7 @@ public class UI_RoomProfile : MonoBehaviour
     {
         List<int> playerSlotList = RoomManager.Instance.PlayerSlotList;
         
+        Debug.Log($"{playerSlotList.Count}");
         for (int i = 0; i < playerSlotList.Count; i++)
         {
             if (playerSlotList[i] == 0)

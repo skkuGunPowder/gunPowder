@@ -6,10 +6,10 @@ public class UI_SelectTeam : MonoBehaviour
 {
     public List<UI_TeamSelcetButton> TeamButtonList = new List<UI_TeamSelcetButton>();
 
-    private void OnEnable()
+    private void Awake()
     {
+        Debug.Log("SelectTeam Awake");
         EventManager.Instance.OnTeamChanged += TeamSelected;
-        
     }
     
     private void Start()
