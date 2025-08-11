@@ -238,13 +238,13 @@ public class Player : MonoBehaviourPun, IDamagable
         if(PhotonView.IsMine)
         {
             gameObject.tag = "Player";
-            gameObject.layer = LayerMask.NameToLayer("Player");
+            //gameObject.layer = LayerMask.NameToLayer("Player");
             
         }
         else
         {   
             gameObject.tag = "Enemy";   
-            gameObject.layer = LayerMask.NameToLayer("Enemy");
+            //gameObject.layer = LayerMask.NameToLayer("Enemy");
         }
     }
 
@@ -441,7 +441,7 @@ public class Player : MonoBehaviourPun, IDamagable
             int randomSeed =UnityEngine.Random.Range(0, 9999);
 
 
-            object[] instData = new object[] { attackerViewId, isFallingOut, randomSeed, PhotonView.ViewID, PhotonNetwork.LocalPlayer.ActorNumber };
+            object[] instData = new object[] { attackerViewId, isFallingOut, randomSeed, PhotonView.ViewID };
             PhotonNetwork.Instantiate(GunPowderPrefab.name, spawnPos, Quaternion.identity, 0, instData);
         }
     }
