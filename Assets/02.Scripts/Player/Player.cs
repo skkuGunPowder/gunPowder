@@ -186,7 +186,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // 특수폭탄 정보 받아오기
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
-        if(UltimateManager.HasInstance)
+        if(UltimateManager.Instance != null)
         {
             _ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
         }
