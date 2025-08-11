@@ -1,6 +1,24 @@
 using UnityEngine;
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
+     // Check if an instance exists in the scene without creating a new one
+    public static bool HasInstance
+    {
+        get
+        {
+            if (instance != null) return true;
+            instance = FindAnyObjectByType<T>();
+            return instance != null;
+        }
+    }
+
+    // Try to get an existing instance without auto-creation (returns null if not found)
+    public static T TryGetInstance()
+    {
+        if (instance != null) return instance;
+        instance = FindAnyObjectByType<T>();
+        return instance;
+    }
     private static T instance;
     public static T Instance
     {
