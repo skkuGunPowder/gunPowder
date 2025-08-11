@@ -33,6 +33,9 @@ public class PlayerDieState : PlayerBaseState
         _owner.gameObject.tag = "Immune";
         _owner.PlayerStat.IsImmune = true;
 
+        // 히트 이벤트로 인한 상태 전환 방지
+        _owner.OnHit -= HandleHit;
+
         // 사망 효과
         DieEffect();
 
