@@ -102,6 +102,9 @@ public class Player : MonoBehaviourPun, IDamagable
     public float LastNormalBombTime => _lastNormalBombTime;
     public float LastSpecialBombTime => _lastSpecialBombTime;
 
+    private Ultimate _ultimate;
+    public Ultimate Ultimate => _ultimate;
+
     private void Awake()
     {
         _playerStat = GetComponent<PlayerStat>();
