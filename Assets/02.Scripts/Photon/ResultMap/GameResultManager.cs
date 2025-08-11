@@ -79,7 +79,7 @@ public class GameResultManager : Singleton<GameResultManager>
         Debug.Log($"결과 : 데이터 리스트 {ResultDataList.Count}");
     }
     
-    private void LoadScene()
+    public void LoadScene()
     {
         if (PhotonNetwork.IsMasterClient)
         {

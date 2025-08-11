@@ -43,6 +43,9 @@ public class UI_GameResult : MonoBehaviour
             yield return new WaitForSeconds(Timer);
          
         }
+        
+        yield return new WaitForSeconds(Timer);
+        GameResultManager.Instance.LoadScene();
     }
 
     private void SlotOff()
@@ -57,7 +60,7 @@ public class UI_GameResult : MonoBehaviour
         SlotOff();
         Header.SetActive(false);
         StopAllCoroutines();
-        // EventManager.Instance.OnGameResult -= Refresh;
+        EventManager.Instance.OnGameResult -= Refresh;
         
     }
 }

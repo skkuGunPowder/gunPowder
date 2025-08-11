@@ -61,7 +61,6 @@ public class ResultProduction : MonoBehaviour
     private void OnDisable()
     {
         DOTween.KillAll();
-        _camera.orthographicSize = CameraOthorSize;
         CameraObject.localScale = CameraImageScale;
         BlackOut.color = FadeColor;
     }
