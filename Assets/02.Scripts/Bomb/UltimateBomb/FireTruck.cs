@@ -25,6 +25,7 @@ public class FireTruck : MonoBehaviour
     private PhotonView _photonView;
     public PhotonView PhotonView => _photonView;
     private Player _owner;
+    private CameraController _cameraController;
     private Vector3 _spawnPosition;
     private Animator _animator;
     private List<IDamagable> targetsInRange = new List<IDamagable>();
@@ -42,6 +43,7 @@ public class FireTruck : MonoBehaviour
 
         _photonView = GetComponent<PhotonView>();
         _animator = GetComponentInChildren<Animator>();
+        _cameraController = Camera.main.GetComponent<CameraController>();
         _spriteRenderer.color = new Color(1, 1, 1, 0);
         _damageCollider.enabled = false;
     }
@@ -63,12 +65,10 @@ public class FireTruck : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(_owner.transform.position, Vector2.down, _rayDistance, _groundLayer);
         if (hit.collider != null)
         {
-            Debug.LogError("땅 체크됨");
             _spawnPosition = hit.point;
         }
         else
         {
-            Debug.LogError("땅 체크 안됨");
             _spawnPosition = _owner.transform.position;
         }
 
@@ -97,7 +97,7 @@ public class FireTruck : MonoBehaviour
         _animator.SetBool("IsAttack", false);
 
         Sequence seq = DOTween.Sequence();
-        seq.Append(_spriteRenderer.DOFade(0f, 0.5f));
+        seq.Append(_spriteRenderer.DOFade(0f, _fadeTime));
         seq.Join(transform.DOMove(transform.position + new Vector3(_startOffsetDistance, 0, 0), _fadeTime).SetEase(Ease.OutQuad)).OnComplete(() =>
         {
             Destroy(gameObject);
@@ -124,6 +124,8 @@ public class FireTruck : MonoBehaviour
     {
         while (true)
         {
+            _cameraController.SmallShakeAt(transform, 4f);
+
             foreach (var target in targetsInRange)
             {
                 target.TakeDamage(_damageAmount, transform.position, _owner.PhotonView.ViewID, _owner.PhotonView.OwnerActorNr);

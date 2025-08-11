@@ -1,3 +1,4 @@
+using System.Collections;
 using Com.LuisPedroFonseca.ProCamera2D;
 using UnityEngine;
 
@@ -38,6 +39,7 @@ public class CameraController : MonoBehaviour
             _target.OnHit -= HitShake;
             _target.OnAttack += GunShotShake;
         }
+        
         _target = player;
         _target.OnHit += HitShake;
         _target.OnAttack += GunShotShake;
@@ -65,7 +67,18 @@ public class CameraController : MonoBehaviour
             ProCamera2DShake.Instance.Shake("LargeExplosion");
             return;
         }
+
         if (distance < explosionRadius * 6f)
+        {
+            ProCamera2DShake.Instance.Shake("SmallExplosion");
+        }
+    }
+
+    public void SmallShakeAt(Transform shakeTransform, float radius)
+    {
+        if (_target == null) return;
+        float distance = Vector3.Distance(_target.transform.position, shakeTransform.position);
+         if (distance < radius * 6f)
         {
             ProCamera2DShake.Instance.Shake("SmallExplosion");
         }
