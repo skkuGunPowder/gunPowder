@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +10,11 @@ public class ResultProduction : MonoBehaviour
     private Camera _camera;
     public RectTransform CameraObject;
     public Image BlackOut;
+    private float _timer;
+    public float FireWorksTime;
+    public float FireWorksSpacingTime;
+    public int FireWorksPercent;
+    public List<GameObject> FireWorksParticle;
     
     [Header("For Dotween")]
     [Header("암전 관련")]
@@ -48,6 +55,11 @@ public class ResultProduction : MonoBehaviour
         Play();
     }
 
+    private void Update()
+    {
+        _timer += Time.deltaTime;
+        FireWorks();
+    }
     private void Play()
     {
         Sequence sequence = DOTween.Sequence();
@@ -63,5 +75,34 @@ public class ResultProduction : MonoBehaviour
         DOTween.KillAll();
         CameraObject.localScale = CameraImageScale;
         BlackOut.color = FadeColor;
+    }
+
+    private void FireWorks()
+    {
+        if (_timer < FireWorksTime)
+        {
+            return;
+        }
+
+        _timer = 0;
+        StartCoroutine(Coroutine_FireWorks());
+
+    }
+
+    private IEnumerator Coroutine_FireWorks()
+    {
+        foreach (GameObject particle in FireWorksParticle)
+        {
+            int random = UnityEngine.Random.Range(0, FireWorksPercent);
+            
+            if (random != 0)
+            {
+                continue;
+            }
+            
+            particle.SetActive(true);
+            
+            yield return new WaitForSeconds(FireWorksSpacingTime);
+        }
     }
 }
