@@ -27,10 +27,15 @@ public class UltimateMissileBomb : Bomb
             return;
         }
 
+        if (other.gameObject.tag == "Bomb")
+        {
+            return;
+        }
+
         if (other.gameObject.tag == "Immune")
-            {
-                return;
-            }
+        {
+            return;
+        }
 
         if (CheckPriority(other))
         {
@@ -41,17 +46,10 @@ public class UltimateMissileBomb : Bomb
     }
 
     [PunRPC]
-    public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
-    {
-        ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
-    }
-
-    [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
-        transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), PREDELAY)
-        .OnComplete(() =>
+        transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), PREDELAY).OnComplete(() =>
         {
             _vfx.gameObject.SetActive(true);
             StartCoroutine(AccelerateForward(_fireDirection, 0.5f, _stat.Speed));
@@ -78,6 +76,12 @@ public class UltimateMissileBomb : Bomb
     }
 
     [PunRPC]
+    public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
+    {
+        ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
+    }
+
+    [PunRPC]
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
@@ -97,7 +101,6 @@ public class UltimateMissileBomb : Bomb
 
     private void OnDestroy()
     {
-        // 코루틴 중지
         StopAllCoroutines();
     }
 }

@@ -104,6 +104,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Awake()
     {
+                
+        Debug.Log("플레이어 어웨이크1");
         _playerStat = GetComponent<PlayerStat>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         PhotonView = GetComponent<PhotonView>();
@@ -115,8 +117,9 @@ public class Player : MonoBehaviourPun, IDamagable
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
         _normalBomb = basicBomb.GetComponent<Bomb>();
         BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
-
-        UI_PingBase.Instance.SetPing(transform);
+        
+        Debug.Log("플레이어 어웨이크2");
+        UI_PingBase.Instance.SetPing(this.transform);
 
         UnityEngine.Random.InitState(RANDOM_SEED);
 

@@ -30,16 +30,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _photonView = GetComponent<PhotonView>();
         _room = PhotonNetwork.CurrentRoom;
         
-    }
-
-
-    // 방 세팅 시작 => Init
-    public override void OnEnable()
-    {
-        base.OnEnable();
         EventManager.Instance.OnPlayerChanged += PlayerLeft;
-        
-        
+    }
+    // 방 세팅 시작 => Init
+    public void Start()
+    {
         if (PhotonNetwork.InRoom == false)
         {
             return;
@@ -51,7 +46,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
         }
 
         Init();
-        
     }
 
     // 처음 방에 들어왔을 때 => 세팅 Init
@@ -73,6 +67,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _initialized = true;
         GeneratePlayer();
         SetCurrentMap();
+        
     }
     private void GeneratePlayer()
     {
@@ -95,6 +90,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         else
         {
             SelectedTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
+            Debug.Log($"{SelectedTeam.ToString()}");
         }
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
@@ -164,7 +160,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
             if (PhotonNetwork.IsMasterClient)
             {
                 PlayerPlacement(PhotonNetwork.LocalPlayer);
-                EventManager.Instance.RoomDataChanged();
             }
 
             return;
@@ -175,10 +170,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _playerSlotList = new List<int>(players);
         _room.IsVisible = true;
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            _photonView.RPC(nameof(Rpc_OnEnterUpdateSlots),RpcTarget.All, _playerSlotList.ToArray());
-        }
+        
+        EventManager.Instance.RoomDataChanged();
+        // if (PhotonNetwork.IsMasterClient)
+        // {
+        //     _photonView.RPC(nameof(Rpc_OnEnterUpdateSlots),RpcTarget.All, _playerSlotList.ToArray());
+        // }
     }
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer, Hashtable changedProps)
@@ -256,7 +253,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         _playerSlotList = new List<int>(actorNumbers);
         EventManager.Instance.RoomDataChanged();
-        
     }
     [PunRPC]
     public void Rpc_OnEnterUpdateSlots(int[] actorNumbers)

@@ -11,7 +11,7 @@ public class UI_GameResultSlot : MonoBehaviour
     public TextMeshProUGUI DamageTextMeshProUGUI;
     public TextMeshProUGUI KillTextMeshProUGUI;
     public TextMeshProUGUI SurvivorTimeTextMeshProUGUI;
-
+    
     public void Refresh(PhotonPlayer player,int damage, int rank, int surviveTime, int kill, EInGameTeam team)
     {
         PlayerName.text = player.NickName;
