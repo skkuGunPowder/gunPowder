@@ -139,8 +139,7 @@ public class PlayerDieState : PlayerBaseState
                     {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
                 });
                 
-                // 다른 플레이어의 GameObject는 MasterClient에게 요청
-                PhotonNetwork.Destroy(_owner.gameObject);
+                SyncStateChange<PlayerObserveState>();
             }
         }
         else

@@ -54,6 +54,8 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField]
     private Bomb _dashBomb;
     public Bomb DashBomb => _dashBomb;
+    private Bomb _headBomb;
+    public Bomb HeadBomb => _headBomb;
 
     [Header("Timer")]
     [SerializeField]
@@ -86,6 +88,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private BoxRay2D _groundRay2D;
     public BoxRay2D GroundRay2D => _groundRay2D;
 
+    public GameObject HeadBombPrefab;
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
     public GameObject HitEffectPrefab;
@@ -117,8 +120,6 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Awake()
     {
-                
-        Debug.Log("플레이어 어웨이크1");
         _playerStat = GetComponent<PlayerStat>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         PhotonView = GetComponent<PhotonView>();
@@ -132,7 +133,6 @@ public class Player : MonoBehaviourPun, IDamagable
         _normalBomb = basicBomb.GetComponent<Bomb>();
         BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
         
-        Debug.Log("플레이어 어웨이크2");
         UI_PingBase.Instance.SetPing(this.transform);
 
         UnityEngine.Random.InitState(RANDOM_SEED);
@@ -822,4 +822,21 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
     
+    public void Observe()
+    {
+        // 관전 상태가 되서 상호작용도 안하고 모습도 안보이게 해야함
+
+        /*
+        foreach(SpriteRenderer spriteRenderer in _playerStat.MySpriteREndererList)
+        {
+            spriteRenderer.enabled = false;
+        }*/
+
+        foreach(Transform child in transform)
+        {
+            child.gameObject.SetActive(false);
+        }
+
+        _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+    }
 }

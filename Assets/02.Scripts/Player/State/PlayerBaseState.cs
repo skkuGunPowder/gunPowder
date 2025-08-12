@@ -250,9 +250,16 @@ public class PlayerBaseState : MonoState
                             : action == "ThrowStraight" ? nameof(Bomb.ThrowBombStraight)
                             : action == "Boost" ? nameof(Bomb.BoostBomb)
                             : null;
+        string prefabName = "BasicBomb";
+
+        /*
+        if(spawnPoint == EBombSpawnPoint.Up || spawnPoint == EBombSpawnPoint.LeftUp || spawnPoint == EBombSpawnPoint.RightUp)
+        {
+            prefabName = _owner.HeadBombPrefab.name;
+        }*/
 
         SpawnAndRpcBomb(
-            "BasicBomb",
+            prefabName,
             bombSpawnPoint,
             methodName,
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
