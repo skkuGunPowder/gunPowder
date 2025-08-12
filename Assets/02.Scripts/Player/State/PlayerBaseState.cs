@@ -8,7 +8,7 @@ public class PlayerBaseState : MonoState
 {
     protected PlayerFSM _playerFSM;
     protected Player _owner;
-
+    protected CameraController _cameraController;
     protected BoxRay2D _groundRay2D;
 
     protected float _normalRecoilForce = 10f;
