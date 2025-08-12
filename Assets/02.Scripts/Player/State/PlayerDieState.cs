@@ -132,14 +132,13 @@ public class PlayerDieState : PlayerBaseState
             // 플레이어가 자신의 GameObject를 제거하거나, MasterClient에게 요청
             if (_owner.PhotonView.IsMine)
             {
+                SyncStateChange<PlayerObserveState>();
                 PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
                 {
                     {EProperties.IsDead.ToString(), true},
                     {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
                     {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
                 });
-                
-                SyncStateChange<PlayerObserveState>();
             }
         }
         else

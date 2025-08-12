@@ -136,6 +136,6 @@ public class GameOverProduction : MonoBehaviour
         ProfileSlot.anchoredPosition = ProfileSlotStartPosition;
         ProfileSlot.localScale = new Vector3(1,1,1);
         Timer.anchoredPosition = TimerOriginPosition;
-        DOTween.KillAll();
+        DOTween.Kill(this);
     }
 }

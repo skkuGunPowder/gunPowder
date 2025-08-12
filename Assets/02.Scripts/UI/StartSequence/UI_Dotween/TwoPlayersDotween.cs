@@ -48,7 +48,7 @@ public class TwoPlayersDotween : MonoBehaviour
 
     private void OnLoadEnd()
     {
-        DOTween.KillAll();
+        DOTween.Kill(this);
         
         Sequence sequence = DOTween.Sequence();
         sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(610, -1500f), 1f).SetEase(Ease.InBack));
@@ -81,7 +81,7 @@ public class TwoPlayersDotween : MonoBehaviour
         Versus.anchoredPosition = new Vector2(0 , -0);
         Versus.localScale = new Vector3(0, 0, 0);
         VSParicle.gameObject.SetActive(false);
-        DOTween.KillAll();
+        DOTween.Kill(this);
         
         LoadChecker.OnLoadEnd -= OnLoadEnd;
     }

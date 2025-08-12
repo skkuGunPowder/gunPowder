@@ -127,10 +127,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 26353325161368699, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
-      propertyPath: Test
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 563711446067507309, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -214,10 +210,6 @@ PrefabInstance:
     - target: {fileID: 1629965489536266788, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
       propertyPath: m_Name
       value: InGameHUD
-      objectReference: {fileID: 0}
-    - target: {fileID: 2403866682721215137, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2489019269790388313, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
       propertyPath: m_AnchorMax.y
@@ -522,6 +514,10 @@ PrefabInstance:
     - target: {fileID: 6440138630373558431, guid: df9bac59a74d59043aa06d50952c5f2b, type: 3}
       propertyPath: m_Name
       value: RenderTexCameras
+      objectReference: {fileID: 0}
+    - target: {fileID: 6440138630373558431, guid: df9bac59a74d59043aa06d50952c5f2b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7660572328772886041, guid: df9bac59a74d59043aa06d50952c5f2b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4577,6 +4573,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PhotonPool
       objectReference: {fileID: 0}
+    - target: {fileID: 576789657501203865, guid: e9e8edd7730622e4d8abb0c881513091, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 639095667025915432, guid: e9e8edd7730622e4d8abb0c881513091, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -6571,6 +6571,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Summer Day Background
       objectReference: {fileID: 0}
+    - target: {fileID: 2668405540953763918, guid: 7ce37e7feef9a134f9d3bd9b101a09a1, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3082468188283339502, guid: 7ce37e7feef9a134f9d3bd9b101a09a1, type: 3}
       propertyPath: Camera
       value: 
@@ -7034,6 +7038,7 @@ MonoBehaviour:
   - {fileID: 648034504}
   - {fileID: 2060442974}
   - {fileID: 1753680537}
+  RankSpawnPointList: []
 --- !u!4 &1678354691
 Transform:
   m_ObjectHideFlags: 0

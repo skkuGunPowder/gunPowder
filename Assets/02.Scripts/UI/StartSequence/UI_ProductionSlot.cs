@@ -81,7 +81,7 @@ public class UI_ProductionSlot : MonoBehaviour
     
     private void OnDisable()
     {
-        DOTween.KillAll();
+        DOTween.Kill(this);
         Shine.anchoredPosition = ShineStartPosition;
         Glow.color = new Color(1,1,1, 0);
         BombObject.localScale = new Vector3(0.9f, 0.9f, 0.9f);

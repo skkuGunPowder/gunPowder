@@ -82,4 +82,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnProfileInit?.Invoke();
     }
+    
+    public event Action OnTargetChanged;
+    
+    public void TargetChanged()
+    {
+        OnTargetChanged?.Invoke();
+    }
 }

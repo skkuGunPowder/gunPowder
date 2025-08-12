@@ -7,8 +7,9 @@ public class UI_GameResult : MonoBehaviour
 {
     public List<UI_GameResultSlot> UI_GameResultSlotList = new List<UI_GameResultSlot>();
     public GameObject Header;
-    public  List<GameResultData> dataList = new List<GameResultData>();
+    // public  List<GameResultData> dataList = new List<GameResultData>();
     public float Timer = 0.4f;
+    public float LoadTime = 1.5f;
 
     private void Awake()
     {
@@ -24,27 +25,26 @@ public class UI_GameResult : MonoBehaviour
 
     private IEnumerator Coroutine_Refresh()
     {
-        // List<GameResultData> dataList = GameResultManager.Instance.ResultDataList;
+        List<GameResultData> dataList = GameResultManager.Instance.ResultDataList;
         
         for (int i = 0; i < UI_GameResultSlotList.Count; i++)
         {
-            
+            yield return new WaitForSeconds(Timer);
+         
             if (i < dataList.Count)
             {
                 GameResultData data = dataList[i];
                 UI_GameResultSlotList[i].gameObject.SetActive(true);
-                // UI_GameResultSlotList[i].Refresh(data.Player,data.Damage, data.Rank, data.SurviveTime, data.Kill,data.Team);
+                UI_GameResultSlotList[i].Refresh(data.Player,data.Damage, data.Rank, data.SurviveTime, data.Kill,data.Team);
             }
             else
             {
                 UI_GameResultSlotList[i].gameObject.SetActive(false);
             }
-            
-            yield return new WaitForSeconds(Timer);
          
         }
         
-        yield return new WaitForSeconds(Timer);
+        yield return new WaitForSeconds(LoadTime);
         GameResultManager.Instance.LoadScene();
     }
 

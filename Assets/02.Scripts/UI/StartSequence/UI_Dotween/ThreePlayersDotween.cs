@@ -71,7 +71,7 @@ public class ThreePlayersDotween : MonoBehaviour
     // 모든 사람들의 로드가 끝난 후 적용되는 Dotween
     private void OnLoadEnd()
     {
-        DOTween.KillAll();
+        DOTween.Kill(this);
         
         Sequence sequence = DOTween.Sequence();
         sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(500, -1500f), 1f).SetEase(Ease.InBack));
@@ -151,7 +151,7 @@ public class ThreePlayersDotween : MonoBehaviour
         ThirdPlayer.rotation = Quaternion.Euler(0, 0, 0);
         Layout.enabled = true;
         LoadChecker.OnLoadEnd -= OnLoadEnd;
-        DOTween.KillAll();
+        DOTween.Kill(this);
         
     }
 }
