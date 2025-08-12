@@ -93,6 +93,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject DieExplosionPrefab;
     public GameObject HitEffectPrefab;
     public GameObject UltimateEffectPrefab;
+    public GameObject JumpDashEffectPrefab;
 
 
     private const int RANDOM_SEED = 123456;
@@ -333,6 +334,41 @@ public class Player : MonoBehaviourPun, IDamagable
     public void UltimateEffect(bool isOn)
     {
         UltimateEffectPrefab.SetActive(isOn);
+    }
+
+    public void RPC_JumpDashEffect(bool isOn)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(JumpDashEffect), RpcTarget.All, isOn);
+    }
+
+    [PunRPC]
+    public void JumpDashEffect(bool isOn)
+    {
+        JumpDashEffectPrefab.SetActive(isOn);
+    }
+
+    // GhostTrail Toggle -------------------------------------------------------
+    public void RPC_SetGhostTrail(bool isOn)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(SetGhostTrail), RpcTarget.All, isOn);
+    }
+
+    [PunRPC]
+    public void SetGhostTrail(bool isOn)
+    {
+        GhostTrail trail = GetComponent<GhostTrail>();
+        if (trail != null)
+        {
+            trail.enabled = isOn;
+        }
     }
 
     [PunRPC]
@@ -667,8 +703,9 @@ public class Player : MonoBehaviourPun, IDamagable
         PlayerFSM fsmForGuard = GetComponent<PlayerFSM>();
         if (fsmForGuard != null)
         {
-            if (fsmForGuard.IsCurrentState<PlayerDieState>() && stateName != nameof(PlayerIdleState) &&
-                stateName != nameof(PlayerObserveState))
+            if (fsmForGuard.IsCurrentState<PlayerDieState>() 
+            && stateName != nameof(PlayerIdleState)
+            && stateName != nameof(PlayerObserveState))
             {
                 return;
             }
