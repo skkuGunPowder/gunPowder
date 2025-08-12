@@ -83,6 +83,11 @@ public class PlayerIdleState : PlayerBaseState
         
         IdleMove();
         IdleAttack();
+
+        if(InputHandler.GetKeyDown(KeyCode.Q))
+        {
+            _playerFSM.ChangeState<PlayerConfuseState>();
+        }
     }
 
     /// <summary>

@@ -760,6 +760,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerObserveState":
                     playerFSM.ChangeState<PlayerObserveState>();
                     break;
+                case "PlayerConfuseState":
+                    playerFSM.ChangeState<PlayerConfuseState>();
+                    break;
                 default:
                     break;
             }
