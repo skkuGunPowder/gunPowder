@@ -28,7 +28,11 @@ public class PlayerBaseState : MonoState
         _groundRay2D = _owner.GroundRay2D;
 
         
-        _owner.OnHit += HandleHit;
+        // 사망상태에서는 히트에 의한 상태 전환을 막기 위해 구독하지 않음
+        if (!_playerFSM.IsCurrentState<PlayerDieState>())
+        {
+            _owner.OnHit += HandleHit;
+        }
     }
 
     public override void OnExit()
@@ -59,6 +63,7 @@ public class PlayerBaseState : MonoState
     public virtual void MineUpdate()
     {
         JumpInput();
+        UltimateInput();
     }
 
     public virtual void Update()
@@ -66,6 +71,14 @@ public class PlayerBaseState : MonoState
         if(_owner.PhotonView.IsMine)
         {
             MineUpdate();
+        }
+    }
+
+    protected virtual void UltimateInput()
+    {
+        if(InputHandler.GetKeyDown(KeyCode.C))
+        {
+            _owner.ExecuteUltimate();
         }
     }
 
@@ -237,9 +250,16 @@ public class PlayerBaseState : MonoState
                             : action == "ThrowStraight" ? nameof(Bomb.ThrowBombStraight)
                             : action == "Boost" ? nameof(Bomb.BoostBomb)
                             : null;
+        string prefabName = "BasicBomb";
+
+        /*
+        if(spawnPoint == EBombSpawnPoint.Up || spawnPoint == EBombSpawnPoint.LeftUp || spawnPoint == EBombSpawnPoint.RightUp)
+        {
+            prefabName = _owner.HeadBombPrefab.name;
+        }*/
 
         SpawnAndRpcBomb(
-            "BasicBomb",
+            prefabName,
             bombSpawnPoint,
             methodName,
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
