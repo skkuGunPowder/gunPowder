@@ -1186,6 +1186,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 618955359}
     - target: {fileID: 2982785862916926680, guid: 7e2b38f2dab26e34c822b7fae0f90bd7, type: 3}
+      propertyPath: GameOverProduction
+      value: 
+      objectReference: {fileID: 543480451}
+    - target: {fileID: 2982785862916926680, guid: 7e2b38f2dab26e34c822b7fae0f90bd7, type: 3}
       propertyPath: 'FallDeadPathList.Array.data[0]'
       value: 
       objectReference: {fileID: 594159350}
@@ -2016,6 +2020,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
+--- !u!114 &543480451 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 26353325161368699, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
+  m_PrefabInstance: {fileID: 543480450}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e602cf5ac011554db3a2895bb70c207, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &594159349
 GameObject:
   m_ObjectHideFlags: 0
@@ -10419,7 +10434,7 @@ Tilemap:
       - {fileID: -547152429, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: -12183806, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: 1776429012, guid: b9ed25721137402438b691f5b79386fe, type: 3}
-      m_AnimationSpeed: 5.0000005
+      m_AnimationSpeed: 5
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -15, y: -1, z: 0}
