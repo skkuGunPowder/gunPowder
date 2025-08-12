@@ -78,7 +78,9 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
-        
+        // 현재 살아있는 사람들 체크
+        EventManager.Instance.TargetChanged();
+        // 게임오버 체크
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
@@ -194,6 +196,10 @@ public class GameManager : PhotonSingleton<GameManager>
         _currentGameState = state;
     }
 
+    private void OnDisable()
+    {
+        Debug.Log("disable");
+    }
 }
 
 

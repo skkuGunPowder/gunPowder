@@ -1888,9 +1888,12 @@ MonoBehaviour:
   _hasStoredVelocity: 0
   _gunPowderSpreadAngle: 90
   _groundRay2D: {fileID: 2224881741138849301}
+  HeadBombPrefab: {fileID: 0}
   GunPowderPrefab: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
   DieExplosionPrefab: {fileID: 913711826124557560, guid: 804d65cb3af63d94f8021d7f15b82be5, type: 3}
   HitEffectPrefab: {fileID: 8841075394196172437}
+  UltimateEffectPrefab: {fileID: 0}
+  _ultimateChanceTimer: 0
 --- !u!114 &4024883436230281669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1961,6 +1964,10 @@ MonoBehaviour:
   _totalDamage: 0
   _totalKillCount: 0
   IsFallingFromLedge: 0
+  _hasUltimateChance: 0
+  _hasUsedUltimateThisLife: 0
+  _ultimateChanceDuration: 5
+  _ultimateTriggerThreshold: 30
 --- !u!70 &975501548764073768
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

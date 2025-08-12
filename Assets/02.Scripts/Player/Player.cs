@@ -667,7 +667,8 @@ public class Player : MonoBehaviourPun, IDamagable
         PlayerFSM fsmForGuard = GetComponent<PlayerFSM>();
         if (fsmForGuard != null)
         {
-            if (fsmForGuard.IsCurrentState<PlayerDieState>() && stateName != nameof(PlayerIdleState))
+            if (fsmForGuard.IsCurrentState<PlayerDieState>() && stateName != nameof(PlayerIdleState) &&
+                stateName != nameof(PlayerObserveState))
             {
                 return;
             }
@@ -721,6 +722,9 @@ public class Player : MonoBehaviourPun, IDamagable
                     break;
                 case "PlayerFallState":
                     playerFSM.ChangeState<PlayerFallState>();
+                    break;
+                case "PlayerObserveState":
+                    playerFSM.ChangeState<PlayerObserveState>();
                     break;
                 default:
                     break;

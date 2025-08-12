@@ -1,4 +1,5 @@
-using System.Collections;
+using System;
+using System.Collections.Generic;
 using Com.LuisPedroFonseca.ProCamera2D;
 using UnityEngine;
 
@@ -8,10 +9,23 @@ public class CameraController : MonoBehaviour
     [SerializeField] private ProCamera2D _proCamera;
 
     private Player _target;
-
+    
+    private List<Player> _currentTargetList = new List<Player>();
+    private int _currentTargetIndex = 0;
     private void Awake()
     {
         Init();
+        
+    }
+
+    private void Start()
+    {
+        if (GameManager.Instance.CurrentGameState == EGameState.Waiting)
+        {
+            return;
+        }
+
+        EventManager.Instance.OnTargetChanged += TargetListUp;
     }
 
     private void Init()
@@ -84,6 +98,44 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    private void TargetListUp()
+    {
+        PlayerFSM[] playerStates = FindObjectsByType<PlayerFSM>(FindObjectsSortMode.None);
+        _currentTargetList.Clear();
+        foreach (var fsm in playerStates)
+        {
+            if (fsm.IsCurrentState<PlayerObserveState>())
+            {
+                continue;
+            }
+            
+            Player player = fsm.GetComponent<Player>();
+            _currentTargetList.Add(player);
+        }
+        
+        Debug.Log($"타겟으로 정할 수 있는 플레이어 수 {_currentTargetList.Count}");
+    }
+
+    public void SelectTarget(int index)
+    {
+        _currentTargetIndex += index;
+        if (_currentTargetIndex < 0)
+        {
+            _currentTargetIndex = _currentTargetList.Count - 1;
+        }
+        else if (_currentTargetIndex >= _currentTargetList.Count)
+        {
+            _currentTargetIndex = 0;
+        }
+        
+        Player player = _currentTargetList[_currentTargetIndex];
+        SetTarget(player);
+    }
+    // private void TargetChange(Player player)
+    // {
+    //     _target = player;
+    // }
+    
     private void OnDisable()
     {
         if (_target != null)
@@ -97,5 +149,7 @@ public class CameraController : MonoBehaviour
         {
             _proCamera.RemoveAllCameraTargets();
         }
+        
+        EventManager.Instance.OnTargetChanged -= TargetListUp;
     }
 }

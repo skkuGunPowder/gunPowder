@@ -198,7 +198,7 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerGunPowderCount = gunpowder;
         _currentPlayerLife = life;
         _initGunpowderCount = gunpowder;
-        _gunPowderDecreaseTime = decrease / 10;
+        _gunPowderDecreaseTime = decrease;
         Team = team;
     }
 
