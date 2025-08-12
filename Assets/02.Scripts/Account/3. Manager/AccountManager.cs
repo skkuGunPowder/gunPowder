@@ -12,6 +12,8 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     private BackendLogin _backendLogin;
     private const string SALT = "12315";
 
+    private string _sessoinID;
+
 
     protected override void Awake()
     {
@@ -78,6 +80,7 @@ public class AccountManager : DontDestroySingleton<AccountManager>
             Debug.Log("로그인 실패");
             return new Result(false, "로그인에 실패하였습니다");
         }
+
 
         // 뒤끝 로그인
         _backendLogin.CustomLogin(loginId, encryptedPassword);

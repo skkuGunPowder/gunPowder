@@ -5,6 +5,7 @@ using Firebase.Auth;
 using System.Collections.Generic;
 using Assets.SimpleSignIn.Google.Scripts;
 using BackEnd;
+using Firebase.Firestore;
 
 public class GoogleLogIn : Singleton<GoogleLogIn>
 {
@@ -126,7 +127,22 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             FirebaseUser user = result;
 
             Debug.Log($"Firebase Auth 로그인 성공: {user.DisplayName} ({user.UserId})");
+
+
+
+            // Firestore에서 사용자 정보 가져오기
+            var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
+
+            // 세션 아이디생성;
+            string sessionID = Guid.NewGuid().ToString();
+            Debug.LogWarning($"SessionID :: {sessionID}");
+
+            // 세션정보 저장
+            await userDoc.SetAsync(new { activeSession = sessionID }, SetOptions.MergeAll);
+            ListenForSessionChanges(user.UserId, sessionID);
+
             
+
             // 3. Firestore에 사용자 정보 저장/업데이트 (닉네임은 빈 문자열로)
             await SaveUserInfoToFirestore(user, userInfo);
 
@@ -338,5 +354,29 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
     private void OnValidateSignature(bool success, string error)
     {
         OnLoginResult?.Invoke(success ? "JWT signature validated" : error);
+    }
+    
+    private void ListenForSessionChanges(string uid, string currentSeccsionID)
+    {
+        FirebaseManager.Instance.DB.Collection("users").Document(uid).Listen(snapshot =>
+        {
+            if (snapshot.Exists && snapshot.TryGetValue("activeSession", out string activeSession))
+            {
+                if (activeSession != currentSeccsionID)
+                {
+                    Debug.LogWarning("다른 기기에서 로그인됨. 로그아웃");
+                    FirebaseManager.Instance.Auth.SignOut();
+
+                    // TODO
+                    // 중복로그인 알림 팝업 띄우기
+
+                    #if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false;
+                    #else
+                            Application.Quit();
+                    #endif
+                }
+            }
+        });
     }
 }

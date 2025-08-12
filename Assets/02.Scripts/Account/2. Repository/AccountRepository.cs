@@ -4,7 +4,9 @@ using Firebase;
 using Firebase.Auth;
 using System;
 using System.Collections.Generic; // Added for HashSet
-using System.Linq; // Added for Count() method
+using System.Linq;
+using System.Data.Common;
+using Firebase.Firestore; // Added for Count() method
 
 public class AccountRepository
 {
@@ -19,13 +21,13 @@ public class AccountRepository
             var usersRef = FirebaseManager.Instance.DB.Collection("users");
             var query = usersRef.WhereEqualTo("email", email);
             var snapshot = await query.GetSnapshotAsync();
-            
+
             if (snapshot.Count > 0)
             {
                 Debug.Log($"이메일이 이미 존재합니다: {email}");
                 return true;
             }
-            
+
             // 2. Firebase Auth에서도 확인 (추가 안전장치)
             try
             {
@@ -42,7 +44,7 @@ public class AccountRepository
                 Debug.LogWarning($"Firebase Auth 이메일 체크 중 오류: {e.Message}");
                 // Firestore에서 이미 확인했으므로 계속 진행
             }
-            
+
             return false;
         }
         catch (Exception e)
@@ -90,7 +92,8 @@ public class AccountRepository
     private async Task SaveUserInfoToFirestore(FirebaseUser user, AccountDTO account, string discriminator)
     {
         var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
-        await userDoc.SetAsync(new {
+        await userDoc.SetAsync(new
+        {
             nickname = account.Nickname,
             discriminator = discriminator,
             email = account.Login_ID,
@@ -127,21 +130,31 @@ public class AccountRepository
         try
         {
             FirebaseUser user = (await FirebaseManager.Instance.Auth.SignInWithEmailAndPasswordAsync(account.Login_ID, account.Password_Hash)).User;
-            
+
+            // 세션 아이디생성;
+            string sessionID = Guid.NewGuid().ToString();
+            Debug.LogWarning($"SessionID :: {sessionID}");
+
             // Firestore에서 사용자 정보 가져오기
             var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
+
+            // 세션정보 저장
+            await userDoc.SetAsync(new { activeSession = sessionID }, SetOptions.MergeAll);
+            ListenForSessionChanges(user.UserId, sessionID);
+
+
             var snapshot = await userDoc.GetSnapshotAsync();
-            
+
             string nickname = "";
             string discriminator = "";
-            
+
             if (snapshot.Exists)
             {
                 var data = snapshot.ToDictionary();
                 nickname = data.ContainsKey("nickname") ? data["nickname"].ToString() : "";
                 discriminator = data.ContainsKey("discriminator") ? data["discriminator"].ToString() : "";
             }
-            
+
             AccountDTO result = new AccountDTO(
                 user.UserId,
                 user.Email,
@@ -181,10 +194,11 @@ public class AccountRepository
 
             // 2. Firebase Auth 계정 생성
             FirebaseUser user = (await FirebaseManager.Instance.Auth.CreateUserWithEmailAndPasswordAsync(email, password)).User;
-            
+
             // 3. Firestore에 임시 사용자 정보 저장 (닉네임은 빈 문자열)
             var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
-            await userDoc.SetAsync(new {
+            await userDoc.SetAsync(new
+            {
                 nickname = "",
                 discriminator = "",
                 email = email,
@@ -193,7 +207,7 @@ public class AccountRepository
                 lastLogin = DateTime.UtcNow,
                 authProvider = "Local"
             });
-            
+
             // 4. 인증 메일 발송
             await user.SendEmailVerificationAsync();
             Debug.Log("인증 메일 발송 완료");
@@ -242,11 +256,11 @@ public class AccountRepository
         {
             // 1. Discriminator 생성
             string discriminator = await GenerateDiscriminatorForNickname(nickname);
-            
+
             // 2. Firebase Auth 프로필 업데이트
             UserProfile profile = new UserProfile { DisplayName = nickname };
             await user.UpdateUserProfileAsync(profile);
-            
+
             // 3. Firestore에 닉네임과 discriminator 업데이트
             var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
             var updateData = new Dictionary<string, object>
@@ -255,7 +269,7 @@ public class AccountRepository
                 { "discriminator", discriminator }
             };
             await userDoc.UpdateAsync(updateData);
-            
+
             Debug.Log($"닉네임 업데이트 성공: {nickname}#{discriminator}");
             return true;
         }
@@ -265,4 +279,26 @@ public class AccountRepository
             return false;
         }
     }
+
+    private void ListenForSessionChanges(string uid, string currentSeccsionID)
+    {
+        FirebaseManager.Instance.DB.Collection("users").Document(uid).Listen(snapshot =>
+        {
+            if (snapshot.Exists && snapshot.TryGetValue("activeSession", out string activeSession))
+            {
+                if (activeSession != currentSeccsionID)
+                {
+                    Debug.LogWarning("다른 기기에서 로그인됨. 로그아웃");
+                    FirebaseManager.Instance.Auth.SignOut();
+
+                    #if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false;
+                    #else
+                            Application.Quit();
+                    #endif
+                }
+            }
+        });
+    }
+
 }
