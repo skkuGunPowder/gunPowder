@@ -174,6 +174,29 @@ public class ItemStorage : MonoBehaviour
         OnDataChanged?.Invoke(CurrentCategory);
     }
 
+    public void AddItem(string itemID)
+    {
+        // null 검사
+        if (string.IsNullOrEmpty(itemID))
+        {
+            throw new Exception($"유효하지 않은 아이템입니다!");
+        }
+
+        InventoryItem newItem = new InventoryItem(ItemDatabase.Instance.GetItem(itemID));
+
+        // Item 객체 생성 및 컨테이너에 추가
+        _storedItemDict[newItem.Item.ItemType].Add(newItem);
+
+        // 현재 카테고리 변경
+        CurrentCategory = newItem.Item.ItemType;
+
+        // 데이터 저장
+        _repo.SaveItemStorage(_storedItemDict);
+
+        // UI 업데이트
+        OnDataChanged?.Invoke(CurrentCategory);
+    }
+
     public void AddItem(InventoryItem newItem)
     {
         // null 검사
