@@ -12,6 +12,8 @@ public class GameResultManager : Singleton<GameResultManager>
     private float _timer = 0;
     private float _EndTime = 10f;
     
+    public PlayerSpawner Spawner;
+    
     private void Start()
     {
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
@@ -42,6 +44,7 @@ public class GameResultManager : Singleton<GameResultManager>
         }
         
         Arrange();
+        GeneratePlayer();
     }
 
     private void Arrange()
@@ -70,15 +73,42 @@ public class GameResultManager : Singleton<GameResultManager>
             currentRank += teamGroup.Count;
             
             ResultDataList.AddRange(teamGroup); // 팀별 생존시간 내림차순
-            
-            foreach (var team in teamGroup)
+        }
+    }
+
+
+    private void GeneratePlayer()
+    {
+        int my = PhotonNetwork.LocalPlayer.ActorNumber;
+    
+        foreach (GameResultData data in ResultDataList)
+        {
+            if (my == data.Player.ActorNumber)
             {
-                Debug.Log(team.Team.ToString());
+                // 같은 등수에서 몇 번째인지 계산
+                int count = GetIndexInSameRank(data);
+                Spawner.GeneratePlayers(data.Rank, count);
+                break;
             }
         }
-        Debug.Log($"결과 : 데이터 리스트 {ResultDataList.Count}");
     }
+
     
+    private int GetIndexInSameRank(GameResultData targetData)
+    {
+        int index = 0;
+        foreach (var data in ResultDataList)
+        {
+            if (data.Rank == targetData.Rank)
+            {
+                if (data.Player.ActorNumber == targetData.Player.ActorNumber)
+                    return index;
+                index++;
+            }
+        }
+        return 0;
+    }
+
     public void LoadScene()
     {
         if (PhotonNetwork.IsMasterClient)

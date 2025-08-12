@@ -49,6 +49,8 @@ public class PlayerStat : MonoBehaviour
     public float NormalRecoilTime { get => _normalRecoilTime; set => _normalRecoilTime = value; }
     [SerializeField] private float _normalRecoilSpeed;
     public float NormalRecoilSpeed { get => _normalRecoilSpeed; set => _normalRecoilSpeed = value; }
+    [SerializeField] private float _confuseTime = 10f;
+    public float ConfuseTime { get => _confuseTime; set => _confuseTime = value; }
 
 
 
@@ -351,7 +353,7 @@ public class PlayerStat : MonoBehaviour
             return;
         }
 
-        Debug.Log("ResurrectPlayerStat");
+        Debug.Log("플레이어 부활");
         
         // 건파우더 초기화
         _currentPlayerGunPowderCount = _initGunpowderCount;
@@ -370,5 +372,10 @@ public class PlayerStat : MonoBehaviour
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife, 0);
         
         Debug.Log($"[PlayerStat] ResurrectPlayerStat - Life: {_currentPlayerLife}, GunPowder: {_currentPlayerGunPowderCount}");
+    }
+
+    public void SetConfuseTime(float time)
+    {
+        _confuseTime = time;
     }
 }

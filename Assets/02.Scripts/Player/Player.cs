@@ -93,6 +93,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject DieExplosionPrefab;
     public GameObject HitEffectPrefab;
     public GameObject UltimateEffectPrefab;
+    public GameObject JumpDashEffectPrefab;
 
 
     private const int RANDOM_SEED = 123456;
@@ -335,6 +336,41 @@ public class Player : MonoBehaviourPun, IDamagable
         UltimateEffectPrefab.SetActive(isOn);
     }
 
+    public void RPC_JumpDashEffect(bool isOn)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(JumpDashEffect), RpcTarget.All, isOn);
+    }
+
+    [PunRPC]
+    public void JumpDashEffect(bool isOn)
+    {
+        JumpDashEffectPrefab.SetActive(isOn);
+    }
+
+    // GhostTrail Toggle -------------------------------------------------------
+    public void RPC_SetGhostTrail(bool isOn)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(SetGhostTrail), RpcTarget.All, isOn);
+    }
+
+    [PunRPC]
+    public void SetGhostTrail(bool isOn)
+    {
+        GhostTrail trail = GetComponent<GhostTrail>();
+        if (trail != null)
+        {
+            trail.enabled = isOn;
+        }
+    }
+
     [PunRPC]
     public void SetMaterial(byte id)
     {
@@ -515,58 +551,55 @@ public class Player : MonoBehaviourPun, IDamagable
     /// 8방향으로 나누어져 있다.
     /// </summary>
     /// <returns></returns>
-    public Transform GetBombSpawnPoint()
+    public (Transform transform, EBombSpawnPoint point) GetBombSpawnInfo()
     {
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
+        EBombSpawnPoint point;
         switch ((h, v))
         {
-            case (1, 0):
-                return _bombSpawnPointList[(int)EBombSpawnPoint.Right];
-            case (1, 1):
-                return _bombSpawnPointList[(int)EBombSpawnPoint.RightUp];
-            case (0, 1):
-                return _bombSpawnPointList[(int)EBombSpawnPoint.Up];
-            case (-1, 1):
-                return _bombSpawnPointList[(int)EBombSpawnPoint.LeftUp];
-            case (-1, 0):
-                return _bombSpawnPointList[(int)EBombSpawnPoint.Left];
-            case (-1, -1):
-                return _bombSpawnPointList[(int)EBombSpawnPoint.LeftDown];
-            case (0, -1):
-                return _bombSpawnPointList[(int)EBombSpawnPoint.Down];
-            case (1, -1):
-                return _bombSpawnPointList[(int)EBombSpawnPoint.RightDown];
+            case (1, 0): point = EBombSpawnPoint.Right; break;
+            case (1, 1): point = EBombSpawnPoint.RightUp; break;
+            case (0, 1): point = EBombSpawnPoint.Up; break;
+            case (-1, 1): point = EBombSpawnPoint.LeftUp; break;
+            case (-1, 0): point = EBombSpawnPoint.Left; break;
+            case (-1, -1): point = EBombSpawnPoint.LeftDown; break;
+            case (0, -1): point = EBombSpawnPoint.Down; break;
+            case (1, -1): point = EBombSpawnPoint.RightDown; break;
             default:
-                return _playerStat.FacingDirection == 1 ? _bombSpawnPointList[(int)EBombSpawnPoint.Right] : _bombSpawnPointList[(int)EBombSpawnPoint.Left];
+                point = _playerStat.FacingDirection == 1 ? EBombSpawnPoint.Right : EBombSpawnPoint.Left; break;
         }
+        return (_bombSpawnPointList[(int)point], point);
+    }
+
+    public Transform GetBombSpawnPoint()
+    {
+        return GetBombSpawnInfo().transform;
+    }
+
+    public (Transform transform, EBombSpawnPoint point) GetExplosionSpawnInfo()
+    {
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        EBombSpawnPoint point;
+        switch ((h, v))
+        {
+            case (-1, 0): point = EBombSpawnPoint.Right; break;
+            case (-1, -1): point = EBombSpawnPoint.RightUp; break;
+            case (0, -1): point = EBombSpawnPoint.Up; break;
+            case (1, -1): point = EBombSpawnPoint.LeftUp; break;
+            case (1, 0): point = EBombSpawnPoint.Left; break;
+            case (1, 1): point = EBombSpawnPoint.LeftDown; break;
+            case (0, 1): point = EBombSpawnPoint.Down; break;
+            case (-1, 1): point = EBombSpawnPoint.RightDown; break;
+            default: point = EBombSpawnPoint.Down; break;
+        }
+        return (_explosionSpawnPointList[(int)point], point);
     }
 
     public Transform GetExplosionSpawnPoint()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-        switch ((h, v))
-        {
-            case (-1, 0):
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.Right];
-            case (-1, -1):
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.RightUp];
-            case (0, -1):
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.Up];
-            case (1, -1):
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.LeftUp];
-            case (1, 0):
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.Left];
-            case (1, 1):
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.LeftDown];
-            case (0, 1):
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.Down];
-            case (-1, 1):
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.RightDown];
-            default:
-                return _explosionSpawnPointList[(int)EBombSpawnPoint.Down];
-        }
+        return GetExplosionSpawnInfo().transform;
     }
 
     public Transform GetBombSpawnPoint(EBombSpawnPoint spawnPoint)
@@ -667,7 +700,9 @@ public class Player : MonoBehaviourPun, IDamagable
         PlayerFSM fsmForGuard = GetComponent<PlayerFSM>();
         if (fsmForGuard != null)
         {
-            if (fsmForGuard.IsCurrentState<PlayerDieState>() && stateName != nameof(PlayerIdleState))
+            if (fsmForGuard.IsCurrentState<PlayerDieState>() 
+            && stateName != nameof(PlayerIdleState)
+            && stateName != nameof(PlayerObserveState))
             {
                 return;
             }
@@ -721,6 +756,9 @@ public class Player : MonoBehaviourPun, IDamagable
                     break;
                 case "PlayerFallState":
                     playerFSM.ChangeState<PlayerFallState>();
+                    break;
+                case "PlayerObserveState":
+                    playerFSM.ChangeState<PlayerObserveState>();
                     break;
                 default:
                     break;
@@ -838,5 +876,33 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+    }
+
+    public void RPC_HeadSpriteOnOff()
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(HeadSpriteOnOff), RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void HeadSpriteOnOff()
+    {
+        StartCoroutine(HeadSpriteOnOffCoroutine());
+    }       
+
+    private IEnumerator HeadSpriteOnOffCoroutine()
+    {
+        _playerStat.MySpriteREndererList[0].enabled = false;
+        _playerStat.MySpriteREndererList[2].enabled = false;
+        _playerStat.MySpriteREndererList[3].enabled = false;
+
+        yield return new WaitForSeconds(BasicBombStat.CoolTime);
+        
+        _playerStat.MySpriteREndererList[0].enabled = true;
+        _playerStat.MySpriteREndererList[2].enabled = true;
+        _playerStat.MySpriteREndererList[3].enabled = true;
     }
 }

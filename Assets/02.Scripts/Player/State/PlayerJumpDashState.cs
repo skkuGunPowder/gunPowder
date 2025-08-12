@@ -1,5 +1,6 @@
 using UnityEngine;
 using RobustFSM.Base;
+using System.Collections;
 
 public class PlayerJumpDashState : PlayerBaseState
 {
@@ -17,6 +18,8 @@ public class PlayerJumpDashState : PlayerBaseState
     private float _landingCheckTimer = 0f;
     private bool _isLanding = false;
     private bool _landingConfirmed = false;
+
+    private float _jumpDashEffectOffTime = 0.5f;
 
     public override void OnEnter()
     {
@@ -42,6 +45,8 @@ public class PlayerJumpDashState : PlayerBaseState
         _airborneTimer = 0f;
 
         _owner.RPC_SetAnimatorTrigger("JumpDash");
+        _owner.RPC_JumpDashEffect(true);
+        _owner.RPC_SetGhostTrail(true);
     }
 
     public override void OnExit()
@@ -49,6 +54,14 @@ public class PlayerJumpDashState : PlayerBaseState
         base.OnExit();
         _owner.Rigidbody2D.gravityScale = _originalGravityScale;
         _owner.RPC_ResetAnimatorTrigger("JumpDash");
+        StartCoroutine(JumpDashEffectOffCoroutine());
+       
+    }
+
+    private IEnumerator JumpDashEffectOffCoroutine()
+    {
+        yield return new WaitForSeconds(_jumpDashEffectOffTime);
+         _owner.RPC_SetGhostTrail(false);
     }
 
     /// <summary>
