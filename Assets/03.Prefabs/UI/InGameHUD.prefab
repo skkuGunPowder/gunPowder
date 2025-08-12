@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1221952231792139577
 RectTransform:
   m_ObjectHideFlags: 0
@@ -94,7 +94,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5580968889432273469
 RectTransform:
   m_ObjectHideFlags: 0
@@ -398,6 +398,7 @@ GameObject:
   - component: {fileID: 4605534070802416733}
   - component: {fileID: 57060181375101059}
   - component: {fileID: 3426369551804530868}
+  - component: {fileID: 1068425991267199376}
   m_Layer: 5
   m_Name: InGameHUD
   m_TagString: Untagged
@@ -492,6 +493,27 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &1068425991267199376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1629965489536266788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29df4e7274cfb94f867ed86d15d1e8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Timer: {fileID: 5185763261738897326}
+  Profile: {fileID: 971503226772540338}
+  DotweenDuration: 1
+  TimerEndPosition: {x: 0, y: 0}
+  TimerEase: 9
+  ProfileEndPosition: {x: 0, y: 53.19}
+  ProfileEase: 9
+  TimerOriginPosition: {x: 0, y: 100}
+  ProfileOriginPosition: {x: 0, y: -200}
 --- !u!1 &2403866682721215137
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,7 +532,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3664165183843406640
 RectTransform:
   m_ObjectHideFlags: 0
@@ -584,7 +606,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MyAnimator: {fileID: 8677336444714712677}
-  Test: 1
+  Test: 0
   GameOverProductionPanel: {fileID: 1221952231792139577}
   ProfileSlot: {fileID: 971503226772540338}
   Timer: {fileID: 5185763261738897326}
@@ -602,8 +624,8 @@ MonoBehaviour:
   CameraScaleEase: 20
   CameraButtonTime: 0.5
   BlackOutTime: 0.08
-  NextSceneTime: 0.5
-  BlackOutFadeTime: 0.28
+  NextSceneTime: 1
+  BlackOutFadeTime: 0.4
   BlackOutFadeEase: 20
   ProfileSlotTime: 0.5
   ProfileSlotEndPosition: {x: 0, y: -200}
@@ -653,7 +675,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 99.999985}
   m_SizeDelta: {x: 300, y: 90}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &8612183562350689296
@@ -1169,7 +1191,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 53.190002}
+  m_AnchoredPosition: {x: 0, y: -199.99998}
   m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &6754995219660591443

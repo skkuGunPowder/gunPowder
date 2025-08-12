@@ -72,7 +72,7 @@ public class ResultProduction : MonoBehaviour
 
     private void OnDisable()
     {
-        DOTween.KillAll();
+        DOTween.Kill(this);
         CameraObject.localScale = CameraImageScale;
         BlackOut.color = FadeColor;
     }
