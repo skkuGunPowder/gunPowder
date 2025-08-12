@@ -244,6 +244,11 @@ public class PlayerBaseState : MonoState
         Transform bombSpawnPoint = spawnPoint.HasValue
             ? _owner.GetBombSpawnPoint(spawnPoint.Value)
             : _owner.GetBombSpawnPoint();
+        
+        if(!spawnPoint.HasValue)
+        {
+            spawnPoint = _owner.GetBombSpawnInfo().point;
+        }
 
         string methodName = action == "Place" ? nameof(Bomb.PlaceBomb)
                             : action == "Throw" ? nameof(Bomb.ThrowBomb)
@@ -252,11 +257,12 @@ public class PlayerBaseState : MonoState
                             : null;
         string prefabName = "BasicBomb";
 
-        /*
-        if(spawnPoint == EBombSpawnPoint.Up || spawnPoint == EBombSpawnPoint.LeftUp || spawnPoint == EBombSpawnPoint.RightUp)
+        
+        if(spawnPoint == EBombSpawnPoint.Up && action == "ThrowStraight")
         {
             prefabName = _owner.HeadBombPrefab.name;
-        }*/
+            _owner.RPC_HeadSpriteOnOff();
+        }
 
         SpawnAndRpcBomb(
             prefabName,
