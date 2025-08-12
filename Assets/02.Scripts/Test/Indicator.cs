@@ -7,12 +7,14 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class Indicator : MonoBehaviour
 {
     [SerializeField] private PhotonView _photonView;
-    
+
     private void Start()
     {
-        if (GameManager.Instance == null ||
-            GameManager.Instance.CurrentGameState == EGameState.Playing ||
-            GameManager.Instance.CurrentGameState == EGameState.Ready)
+        if (GameManager.Instance == null)
+        {
+            this.gameObject.SetActive(false);
+        }
+        else
         {
             if (_photonView.IsMine)
             {
@@ -23,5 +25,6 @@ public class Indicator : MonoBehaviour
                 this.gameObject.SetActive(false);
             }
         }
-    }
+
+}
 }

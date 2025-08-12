@@ -192,6 +192,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 SelectedTeam = (EInGameTeam)changedProps[$"{EProperties.Team}"];
             }
             EventManager.Instance.TeamChanged();
+            EventManager.Instance.PlayerColorChanged(targetPlayer.ActorNumber, (EInGameTeam)changedProps[$"{EProperties.Team}"]);;;
         }
         if (changedProps.ContainsKey($"{EItemType.Bomb}"))
         {
