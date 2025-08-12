@@ -351,7 +351,7 @@ public class PlayerStat : MonoBehaviour
             return;
         }
 
-        Debug.Log("ResurrectPlayerStat");
+        Debug.Log("플레이어 부활");
         
         // 건파우더 초기화
         _currentPlayerGunPowderCount = _initGunpowderCount;
