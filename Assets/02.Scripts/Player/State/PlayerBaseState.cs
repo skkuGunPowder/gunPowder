@@ -288,7 +288,10 @@ public class PlayerBaseState : MonoState
                 ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
                 break;
             case "Place":
-                _owner.RPC_SetAnimatorTrigger("PlaceAttack");
+                if (_owner.PlayerStat.IsJumping)
+                    _owner.RPC_SetAnimatorTrigger("JumpDropAttack");
+                else
+                    _owner.RPC_SetAnimatorTrigger("PlaceAttack");
                 break;
             case "Boost":
                 _owner.RPC_SetAnimatorTrigger("PlaceAttack");
@@ -300,6 +303,21 @@ public class PlayerBaseState : MonoState
 
         ResetGunPowderDecreaseWithoutAttackTimer();
         SetLastNormalBombTime();
+    }
+
+    /// <summary>
+    /// 방향키(좌/우/상/하) 또는 축 입력이 있는지 여부를 반환한다.
+    /// </summary>
+    protected bool HasDirectionalInput()
+    {
+        if (InputHandler.GetKey(KeyCode.LeftArrow) || InputHandler.GetKey(KeyCode.RightArrow)
+            || InputHandler.GetKey(KeyCode.UpArrow) || InputHandler.GetKey(KeyCode.DownArrow))
+        {
+            return true;
+        }
+        float h = InputHandler.GetAxisRaw("Horizontal");
+        float v = InputHandler.GetAxisRaw("Vertical");
+        return Mathf.Abs(h) > 0.01f || Mathf.Abs(v) > 0.01f;
     }
 
     // [리팩토링] 특수 폭탄 처리 메서드
@@ -347,7 +365,10 @@ public class PlayerBaseState : MonoState
                 ApplyRecoil(bombSpawnPoint, _normalRecoilForce, _yRecoilForce);
                 break;
             case "Place":
-                _owner.RPC_SetAnimatorTrigger("PlaceAttack");
+                if (_owner.PlayerStat.IsJumping)
+                    _owner.RPC_SetAnimatorTrigger("JumpDropAttack");
+                else
+                    _owner.RPC_SetAnimatorTrigger("PlaceAttack");
                 break;
             case "Boost":
                 _owner.RPC_SetAnimatorTrigger("PlaceAttack");
