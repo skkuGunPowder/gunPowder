@@ -267,7 +267,14 @@ public class PlayerJumpState : PlayerBaseState
             }
             else
             {
-                ThrowNormalBomb();
+                if(HasDirectionalInput())
+                {
+                    ThrowNormalBomb();
+                }
+                else
+                {
+                    PlaceNormalBomb();
+                }
                 _playerFSM.ChangeState<PlayerNormalRecoilState>();
             }
         }
@@ -280,7 +287,14 @@ public class PlayerJumpState : PlayerBaseState
             }
             else
             {
-                ThrowSpecialBomb();
+                if(HasDirectionalInput())
+                {
+                    ThrowSpecialBomb();
+                }
+                else
+                {
+                    PlaceSpecialBomb();
+                }
                 _playerFSM.ChangeState<PlayerNormalRecoilState>();
             }
         }
