@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Photon.Pun;
+using Photon.Pun.Demo.Cockpit;
 using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
@@ -125,6 +126,21 @@ public class PlayerStat : MonoBehaviour
     
     
     public bool IsFallingFromLedge = false;
+
+    [Header("Ultimate")]
+    // 궁극기 사용 기회 관련 상태값
+    [SerializeField] private bool _hasUltimateChance = false; // 궁극기 사용가능 상태
+    public bool HasUltimateChance { get => _hasUltimateChance; set => _hasUltimateChance = value; }
+
+    [SerializeField] private bool _hasUsedUltimateThisLife = false; // 현재 라이프에서 이미 궁극기를 사용했는지
+    public bool HasUsedUltimateThisLife { get => _hasUsedUltimateThisLife; set => _hasUsedUltimateThisLife = value; }
+
+    [SerializeField] private float _ultimateChanceDuration = 5f; // 기회가 지속되는 시간(초)
+    public float UltimateChanceDuration { get => _ultimateChanceDuration; set => _ultimateChanceDuration = value; }
+
+    [SerializeField] private int _ultimateTriggerThreshold = 30; // 건파우더(체력)가 이 값 이하가 되면 기회 발생 조건 충족
+    public int UltimateTriggerThreshold { get => _ultimateTriggerThreshold; set => _ultimateTriggerThreshold = value; }
+
 
     void OnEnable()
     {
@@ -265,7 +281,13 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerGunPowderCount -= amount;
         bool isDead = false;
 
-        // Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 현재 체력 감소 중");
+        // 피가 30이하가 되면 궁극기 사용기회 주어짐
+        // 라이프당 1번만 기회가 주어짐
+        if(_currentPlayerGunPowderCount <= _ultimateTriggerThreshold && !_hasUltimateChance && !_hasUsedUltimateThisLife)
+        {
+            _hasUltimateChance = true;
+        }
+
         if (_currentPlayerGunPowderCount <= 0)
         {
             _currentPlayerLife -= 1;
@@ -328,6 +350,8 @@ public class PlayerStat : MonoBehaviour
         {
             return;
         }
+
+        Debug.Log("ResurrectPlayerStat");
         
         // 건파우더 초기화
         _currentPlayerGunPowderCount = _initGunpowderCount;
@@ -339,6 +363,8 @@ public class PlayerStat : MonoBehaviour
         _jumpCount = 0;
         _facingDirection = 1;
         _isFallingDead = false;
+        _hasUsedUltimateThisLife = false;
+        _hasUltimateChance = false;
         
         // 네트워크 동기화
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife, 0);

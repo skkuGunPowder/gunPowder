@@ -36,6 +36,7 @@ public class VFXPool : Singleton<VFXPool>
                 for (int i = 0; i < initialSize; i++)
                 {
                     VFX vfx = Instantiate(prefab, _parent);
+                    vfx.PoolKey = key;
                     vfx.gameObject.SetActive(false);
                     queue.Enqueue(vfx);
                 }
@@ -67,6 +68,7 @@ public class VFXPool : Singleton<VFXPool>
         if (queue.Count > 0)
         {
             VFX vfx = queue.Dequeue();
+            vfx.PoolKey = vfxName;
             vfx.gameObject.SetActive(true);
             return vfx;
         }
@@ -74,6 +76,7 @@ public class VFXPool : Singleton<VFXPool>
         {
             VFX prefab = _prefabDict[vfxName];
             VFX vfx = Instantiate(prefab, _parent);
+            vfx.PoolKey = vfxName;
             return vfx;
         }
     }
@@ -92,14 +95,23 @@ public class VFXPool : Singleton<VFXPool>
 
     public void Return(VFX vfx)
     {
-        vfx.gameObject.SetActive(false);
+        if (vfx == null) return;
 
-        if (!_poolDict.ContainsKey(vfx.name))
+        // 풀로 복귀 시 계층 정리: 항상 풀 트랜스폼 하위로 되돌린다
+        if (vfx.transform.parent != _parent)
         {
-            _poolDict[vfx.name] = new Queue<VFX>();
+            vfx.transform.SetParent(_parent, true);
         }
 
-        _poolDict[vfx.name].Enqueue(vfx);
+        vfx.gameObject.SetActive(false);
+
+        string key = string.IsNullOrEmpty(vfx.PoolKey) ? vfx.name : vfx.PoolKey;
+        if (!_poolDict.ContainsKey(key))
+        {
+            _poolDict[key] = new Queue<VFX>();
+        }
+
+        _poolDict[key].Enqueue(vfx);
     }
 
     public void Play(string vfxName, Vector3 position)

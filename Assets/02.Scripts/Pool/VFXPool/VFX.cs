@@ -4,15 +4,23 @@ using UnityEngine;
 public class VFX : MonoBehaviour
 {
     [SerializeField] private List<AudioClip> VFXSoundClips;
-    private ParticleSystem _vfx;
+    protected ParticleSystem _vfx;
+    
+    // Pool key to map this instance back to its prefab queue
+    public string PoolKey { get; set; }
 
-    private void Awake()
+    protected virtual void Awake()
     {
         _vfx = GetComponent<ParticleSystem>();
     }
 
     public void Play()
     {
+        if (_vfx == null)
+            return;
+
+        // Ensure a clean restart when reused from pool
+        _vfx.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         _vfx.Play();
 
         if(VFXSoundClips.Count > 0)
@@ -21,7 +29,7 @@ public class VFX : MonoBehaviour
         }
     }
 
-    private void OnParticleSystemStopped()
+    protected virtual void OnParticleSystemStopped()
     {
         VFXPool.Instance.Return(this);
     }

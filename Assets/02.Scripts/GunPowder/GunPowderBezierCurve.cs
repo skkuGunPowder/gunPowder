@@ -37,6 +37,9 @@ public class GunPowderBezierCurve : MonoBehaviour
     private Transform _target;
     private bool _isFallingOut;
     private bool _hasTriggeredDestroy;
+    private bool _hasPlayedDestroyVFX;
+
+    public GameObject VFXPrefab;
 
     private void OnEnable()
     {
@@ -145,25 +148,38 @@ public class GunPowderBezierCurve : MonoBehaviour
             Player player = collision.gameObject.GetComponent<Player>();
             if (player != null && player.PlayerStat != null)
             {
-                // 건파우더 제거
-                if (!_hasTriggeredDestroy)
+                // 건파우더 제거 - 마스터에서만 처리
+                if (!_hasTriggeredDestroy && PhotonNetwork.IsMasterClient)
                 {
-                    var myView = GetComponent<PhotonView>();
                     var targetView = player.GetComponent<PhotonView>();
-                    Debug.Log($"[GPBezier Pickup-try] isMaster={PhotonNetwork.IsMasterClient} gpView={myView?.ViewID} targetOwner={targetView?.OwnerActorNr} collider={collision.name}");
-
-                    // 마스터가 단일 권한으로 판정 → 힐 + 파괴 모두 마스터에서만 수행
                     PhotonView targetPlayerView = targetView;
-                    if (PhotonNetwork.IsMasterClient && targetPlayerView != null)
+                    if (targetPlayerView != null)
                     {
-                        Debug.Log($"[GPBezier Heal-RPC] send to owner={targetPlayerView.OwnerActorNr}");
-                        targetPlayerView.RPC("RPC_RequestIncreaseGunPowder", targetPlayerView.Owner, 1);
-
-                        Debug.Log($"[GPBezier Destroy-req] gpView={myView?.ViewID}");
+                        targetPlayerView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGunPowder), targetPlayerView.Owner, 1);
                         InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
                         _hasTriggeredDestroy = true;
                     }
                 }
+            }
+        }
+    }
+
+    
+    private void OnDisable()
+    {
+        // 파괴(네트워크 동기화 포함) 시 로컬에서 VFX 재생
+        if (_hasPlayedDestroyVFX)
+        {
+            return;
+        }
+        _hasPlayedDestroyVFX = true;
+
+        if (VFXPrefab != null)
+        {
+            FollowVFX vfx = VFXPool.Instance.Get(VFXPrefab.name) as FollowVFX;
+            if (vfx != null)
+            {
+                vfx.PlayAttached(_target);
             }
         }
     }
