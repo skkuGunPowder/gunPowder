@@ -19,7 +19,7 @@ public class FireTruck : MonoBehaviour
     [SerializeField] private int _damageAmount = 3;
     [SerializeField] private Vector2 _attackRange = new Vector2(15f, 8f);
     [SerializeField] private float _startOffsetDistance = 5f;
-    [SerializeField] private float _rayDistance = 10f;
+    [SerializeField] private float _rayDistance = 20f;
     [SerializeField] private LayerMask _groundLayer;
 
     private PhotonView _photonView;
@@ -92,12 +92,12 @@ public class FireTruck : MonoBehaviour
             StopCoroutine(damageCoroutine);
         }
 
-        _vfx.Stop();
+        Destroy(_vfx.gameObject);
         _damageCollider.enabled = false;
         _animator.SetBool("IsAttack", false);
 
         Sequence seq = DOTween.Sequence();
-        seq.Append(_spriteRenderer.DOFade(0f, _fadeTime));
+        seq.Append(DOVirtual.DelayedCall(0.5f, () => _spriteRenderer.DOFade(0f, _fadeTime)));
         seq.Join(transform.DOMove(transform.position + new Vector3(_startOffsetDistance, 0, 0), _fadeTime).SetEase(Ease.OutQuad)).OnComplete(() =>
         {
             Destroy(gameObject);
