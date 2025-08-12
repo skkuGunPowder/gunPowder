@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 
-public class Shop : Singleton<Shop>
+public class Shop : DontDestroySingleton<Shop>
 {
     private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
 

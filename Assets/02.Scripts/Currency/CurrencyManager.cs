@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CurrencyManager : Singleton<CurrencyManager>
+public class CurrencyManager : DontDestroySingleton<CurrencyManager>
 {
     public Gold PlayerGold { get; private set; }
     public Exp PlayerExp { get; private set; }

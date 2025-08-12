@@ -5,10 +5,8 @@ using Photon.Pun;
 using UnityEngine;
 
 
-public class ItemStorage : MonoBehaviour
+public class ItemStorage : DontDestroySingleton<ItemStorage>
 {
-    public static ItemStorage Instance { get; private set; }
-
     private Dictionary<EItemType, List<InventoryItem>> _storedItemDict;
     private Dictionary<EItemType, InventoryItem> _equippedItemDict;
 
@@ -22,17 +20,9 @@ public class ItemStorage : MonoBehaviour
     public event Action<EItemType> OnDataChanged;
 
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        base.Awake();
 
         _storedItemDict = null;
         _equippedItemDict = null;
