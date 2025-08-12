@@ -291,11 +291,7 @@ public class AccountRepository
                     Debug.LogWarning("다른 기기에서 로그인됨. 로그아웃");
                     FirebaseManager.Instance.Auth.SignOut();
 
-                    #if UNITY_EDITOR
-                        UnityEditor.EditorApplication.isPlaying = false;
-                    #else
-                            Application.Quit();
-                    #endif
+                    ClientManager.Quit();
                 }
             }
         });

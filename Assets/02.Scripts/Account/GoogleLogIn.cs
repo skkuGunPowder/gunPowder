@@ -370,11 +370,7 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
                     // TODO
                     // 중복로그인 알림 팝업 띄우기
 
-                    #if UNITY_EDITOR
-                        UnityEditor.EditorApplication.isPlaying = false;
-                    #else
-                            Application.Quit();
-                    #endif
+                    ClientManager.Quit();
                 }
             }
         });
