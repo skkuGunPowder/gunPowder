@@ -5,10 +5,8 @@ using Photon.Pun;
 using UnityEngine;
 
 
-public class ItemStorage : MonoBehaviour
+public class ItemStorage : DontDestroySingleton<ItemStorage>
 {
-    public static ItemStorage Instance { get; private set; }
-
     private Dictionary<EItemType, List<InventoryItem>> _storedItemDict;
     private Dictionary<EItemType, InventoryItem> _equippedItemDict;
 
@@ -22,17 +20,9 @@ public class ItemStorage : MonoBehaviour
     public event Action<EItemType> OnDataChanged;
 
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        base.Awake();
 
         _storedItemDict = null;
         _equippedItemDict = null;
@@ -169,6 +159,29 @@ public class ItemStorage : MonoBehaviour
 
         // 선택된 아이템 인덱스 초기화
         SelectedItemIndex = -1;
+
+        // UI 업데이트
+        OnDataChanged?.Invoke(CurrentCategory);
+    }
+
+    public void AddItem(string itemID)
+    {
+        // null 검사
+        if (string.IsNullOrEmpty(itemID))
+        {
+            throw new Exception($"유효하지 않은 아이템입니다!");
+        }
+
+        InventoryItem newItem = new InventoryItem(ItemDatabase.Instance.GetItem(itemID));
+
+        // Item 객체 생성 및 컨테이너에 추가
+        _storedItemDict[newItem.Item.ItemType].Add(newItem);
+
+        // 현재 카테고리 변경
+        CurrentCategory = newItem.Item.ItemType;
+
+        // 데이터 저장
+        _repo.SaveItemStorage(_storedItemDict);
 
         // UI 업데이트
         OnDataChanged?.Invoke(CurrentCategory);

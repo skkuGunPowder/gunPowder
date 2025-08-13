@@ -7,5 +7,11 @@ public enum EItemType
     Bomb,
     BombSkin,
     BombVFX,
-    None
+    BonusCard,
+    None,
+    LastBomb,
+    Player,
+    GoldPowder,
+    DiamondPowder,
+    Count
 }

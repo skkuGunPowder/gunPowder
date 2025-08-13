@@ -28,7 +28,7 @@ public class Gold
         _amount += amount;
     }
 
-    public void Subtract(int amount)
+    public bool Subtract(int amount)
     {
         if (amount < 0)
         {
@@ -38,9 +38,10 @@ public class Gold
         if (_amount < amount)
         {
             Debug.LogWarning($"금액이 부족합니다. 현재 금액: {_amount} | 차감할 금액: {amount}");
-            return;
+            return false;
         }
 
         _amount -= amount;
+        return true;
     }
 }

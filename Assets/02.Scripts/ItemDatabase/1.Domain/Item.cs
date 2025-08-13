@@ -38,6 +38,11 @@ public class Item
         PrefabAddress = json["PrefabAddress"].ToString();
 
         Image = Addressables.LoadAssetAsync<Sprite>(ImageAddress).WaitForCompletion();
+        
+        if (PrefabAddress == null || string.IsNullOrEmpty(PrefabAddress))
+        {
+            return;
+        }
         Prefab = Addressables.LoadAssetAsync<GameObject>(PrefabAddress).WaitForCompletion();
     }
 

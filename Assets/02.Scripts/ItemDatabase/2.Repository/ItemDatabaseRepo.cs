@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using BackEnd;
 using LitJson;
 using UnityEngine;
@@ -56,11 +55,27 @@ public class ItemDatabaseRepo
                 {
                     Item item = new Item(iteminfo);
                     itemDataDict.Add(item.ID, item);
+                    string prefix = item.ID.Substring(0, 2);
 
-                    if (item.ID[0] == 'B')
+                    if (item.ItemType == EItemType.Bomb)
                     {
                         BombStat bombStat = new BombStat(iteminfo);
                         statDataDict.Add(item.ID, bombStat);
+                        continue;
+                    }
+
+                    if (item.ItemType == EItemType.BonusCard)
+                    {
+                        BonusCardStat bonusCardStat = new BonusCardStat(iteminfo);
+                        statDataDict.Add(item.ID, bonusCardStat);
+                        continue;
+                    }
+
+                    if (prefix == "CP")
+                    {
+                        CurrencyPackageStat currencyPackageStat = new CurrencyPackageStat(iteminfo);
+                        statDataDict.Add(item.ID, currencyPackageStat);
+                        continue;
                     }
                 }
             }
