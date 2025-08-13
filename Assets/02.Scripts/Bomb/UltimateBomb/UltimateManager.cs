@@ -32,16 +32,19 @@ public class UltimateManager : Singleton<UltimateManager>
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             GetUltimate("BO0005", _player).ExcuteUltimate();
+               
         }
 
         if (Input.GetKeyDown(KeyCode.R))
         {
             GetUltimate("BO0007", _player).ExcuteUltimate();
+            EventManager.Instance.Ultimate("BO0007");
         }
 
         if (Input.GetKeyDown(KeyCode.T))
         {
             GetUltimate("BO0011", _player).ExcuteUltimate();
+            
         }
     }
 
@@ -52,7 +55,7 @@ public class UltimateManager : Singleton<UltimateManager>
             ultimate.SetOwner(player);
             return ultimate;
         }
-
+        
         Debug.LogError($"[{bombID}]는 궁극기가 없습니다.");
         return null;
     }
