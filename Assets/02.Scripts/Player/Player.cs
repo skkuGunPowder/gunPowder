@@ -239,10 +239,12 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    private void OnDisable()
+    void OnEnable()
     {
-        // 이벤트 핸들러 해제 (중복 방지)
-        _playerStat.OnGunPowderEmpty -= HandleGunPowderEmpty;
+        if(_playerFSM != null)
+        {
+            _playerFSM.SyncStateChange<PlayerIdleState>();
+        }
     }
 
     public void ResurrectPlayer()
@@ -282,7 +284,11 @@ public class Player : MonoBehaviourPun, IDamagable
         // 테스트
         if(InputHandler.GetKeyDown(KeyCode.Q))
         {
-            Confuse();
+            SetPlayerWet();
+        }
+        else if(InputHandler.GetKeyDown(KeyCode.W))
+        {
+            ResetPlayerWet();
         }
 
         // ------------------------------------------------------------
@@ -376,7 +382,15 @@ public class Player : MonoBehaviourPun, IDamagable
         GhostTrail trail = GetComponent<GhostTrail>();
         if (trail != null)
         {
-            trail.enabled = isOn;
+            if (isOn)
+            {
+                trail.enabled = true;
+            }
+            else
+            {
+                // sequentially turn off, then disable component
+                trail.TurnOffSequentiallyThenDisable();
+            }
         }
     }
 
@@ -921,5 +935,15 @@ public class Player : MonoBehaviourPun, IDamagable
     public void Confuse()
     {
         _playerFSM.ChangeState<PlayerConfuseState>();
+    }
+
+    public void SetPlayerWet()
+    {
+        _playerStat.SetWetState();
+    }
+
+    public void ResetPlayerWet()
+    {
+        _playerStat.ResetWetState();
     }
 }
