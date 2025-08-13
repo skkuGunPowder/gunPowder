@@ -18,46 +18,46 @@ public class TwoPlayersDotween : MonoBehaviour
     
     [Header("파티클")] 
     public GameObject VSParicle;
-    public GameObject BoomParicle;
     
     
     private void OnEnable()
     {
-        LoadChecker.OnLoadEnd += OnLoadEnd;
+        EventManager.Instance.OnLoadEnd += OnLoadEnd;
         Play();
     }
 
     private void Play()
     {
-        Sequence sequence = DOTween.Sequence();
-        sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(530, -540), 0.7f).SetEase(Ease.OutCubic));
-        sequence.Join(SecondPlayer.DOAnchorPos(new Vector2(1380, -540), 0.7f).SetEase(Ease.OutCubic));
-        sequence.Insert(0.15f,Versus.DOScale(new Vector3(1.5f, 1.5f, 1.5f), 0.2f).SetEase(Ease.OutCirc));
-        sequence.Insert(0.7f,Versus.DOScale(new Vector3(1, 1, 1), 0.15f).SetEase(Ease.InCirc));
-        sequence.Insert(0.75f, FirstPlayer.DOAnchorPos(new Vector2(600, -540), 0.1f).SetEase(Ease.InCirc));
-        sequence.Insert(0.75f, SecondPlayer.DOAnchorPos(new Vector2(1310, -540), 0.1f).SetEase(Ease.InCirc));
-        sequence.InsertCallback(0.9f, ShakeOn);
-        sequence.InsertCallback(0.9f, LightningOn);
-        sequence.InsertCallback(0.9f, FlashOn);
-        sequence.InsertCallback(1f, ShineOn);
-        sequence.Insert(1.2f,FirstPlayer.DOAnchorPos(new Vector2(610, -540), 10f));
-        sequence.Insert(1.2f, SecondPlayer.DOAnchorPos(new Vector2(1300, -540), 10f));
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
+        sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(530, -540), 0.7f).SetEase(Ease.OutCubic).SetUpdate(true));
+        sequence.Join(SecondPlayer.DOAnchorPos(new Vector2(1380, -540), 0.7f).SetEase(Ease.OutCubic).SetUpdate(true));
+        sequence.Insert(0.15f,Versus.DOScale(new Vector3(1.5f, 1.5f, 1.5f), 0.2f).SetEase(Ease.OutCirc).SetUpdate(true));
+        sequence.Insert(0.7f,Versus.DOScale(new Vector3(1, 1, 1), 0.15f).SetEase(Ease.InCirc).SetUpdate(true));
+        sequence.Insert(0.75f, FirstPlayer.DOAnchorPos(new Vector2(600, -540), 0.1f).SetEase(Ease.InCirc).SetUpdate(true));
+        sequence.Insert(0.75f, SecondPlayer.DOAnchorPos(new Vector2(1310, -540), 0.1f).SetEase(Ease.InCirc).SetUpdate(true));
+        sequence.InsertCallback(0.9f, ShakeOn).SetUpdate(true);
+        sequence.InsertCallback(0.9f, LightningOn).SetUpdate(true);
+        sequence.InsertCallback(0.9f, FlashOn).SetUpdate(true);
+        sequence.InsertCallback(1f, ShineOn).SetUpdate(true);
+        sequence.Insert(1.2f,FirstPlayer.DOAnchorPos(new Vector2(610, -540), 10f).SetUpdate(true));
+        sequence.Insert(1.2f, SecondPlayer.DOAnchorPos(new Vector2(1300, -540), 10f).SetUpdate(true));
         sequence.InsertCallback(2f,LoadEnd);
 
     }
 
     private void OnLoadEnd()
     {
-        DOTween.Kill(this);
+        Debug.Log("killllllllllllllllllllllllllll");
+        DOTween.KillAll();
         
-        Sequence sequence = DOTween.Sequence();
-        sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(610, -1500f), 1f).SetEase(Ease.InBack));
-        sequence.Join(FirstPlayer.DORotate(new Vector3(0,0,3f),0.5f).SetEase(Ease.InBack));
-        sequence.Insert(0.2f , SecondPlayer.DOAnchorPos(new Vector2(1300, -1500f), 1f).SetEase(Ease.InBack));   
-        sequence.Insert(0.3f , SecondPlayer.DORotate(new Vector3(0,0,-3f),0.5f).SetEase(Ease.InBack));
-        sequence.Insert(0.3f, Versus.DOAnchorPos(new Vector2(0, -1500f), 1f).SetEase(Ease.InBack));
-        sequence.Insert(0.3f, Black.DOFade(0, 1f));
-        sequence.InsertCallback(2f, EventManager.Instance.LoadFinished);
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
+        sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(610, -1500f), 1f).SetEase(Ease.InBack).SetUpdate(true));
+        sequence.Join(FirstPlayer.DORotate(new Vector3(0,0,3f),0.5f).SetEase(Ease.InBack).SetUpdate(true));
+        sequence.Insert(0.2f , SecondPlayer.DOAnchorPos(new Vector2(1300, -1500f), 1f).SetEase(Ease.InBack).SetUpdate(true));   
+        sequence.Insert(0.3f , SecondPlayer.DORotate(new Vector3(0,0,-3f),0.5f).SetEase(Ease.InBack).SetUpdate(true));
+        sequence.Insert(0.3f, Versus.DOAnchorPos(new Vector2(0, -1500f), 1f).SetEase(Ease.InBack).SetUpdate(true));
+        sequence.Insert(0.3f, Black.DOFade(0, 1f).SetUpdate(true));
+        sequence.InsertCallback(2f, EventManager.Instance.LoadFinished).SetUpdate(true);
 
     }
     private void LoadEnd()
@@ -67,12 +67,13 @@ public class TwoPlayersDotween : MonoBehaviour
             {EProperties.IsLoad.ToString(), true}
         };
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
-        
         Debug.Log("LoadEnd");
     }
     
     private void OnDisable()
     {
+        EventManager.Instance.OnLoadEnd -= OnLoadEnd;
+        
         // 초기 위치로 리셋하기
         FirstPlayer.anchoredPosition = new Vector2(600, -540);
         FirstPlayer.rotation = Quaternion.Euler(0, 0, 0);
@@ -82,8 +83,6 @@ public class TwoPlayersDotween : MonoBehaviour
         Versus.localScale = new Vector3(0, 0, 0);
         VSParicle.gameObject.SetActive(false);
         DOTween.Kill(this);
-        
-        LoadChecker.OnLoadEnd -= OnLoadEnd;
     }
 
     

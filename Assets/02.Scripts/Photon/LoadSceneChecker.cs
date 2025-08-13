@@ -11,15 +11,18 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     private PhotonView _photonView;
     
     public event Action<int, bool> OnLoading;
-    public event Action OnLoadEnd;
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
     }
-    
+
+    private void Update()
+    {
+        PhotonNetwork.NetworkingClient.Service();
+    }
+
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
-        
         if (changedProps.ContainsKey(EProperties.IsLoad.ToString()) && changedProps[EProperties.IsLoad.ToString()] != null)
         {
             Debug.Log(targetPlayer + "로딩 체크하기");
@@ -59,7 +62,8 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     [PunRPC]
     private void Rpc_LoadEnd()
     {
-        OnLoadEnd?.Invoke();
+        Debug.Log("load");
+        EventManager.Instance.LoadEnd();
     }
 
     private void SetLoadState(bool isLoad)
