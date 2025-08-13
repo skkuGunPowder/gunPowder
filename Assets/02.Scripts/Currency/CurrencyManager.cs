@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public enum ECurrencyType
@@ -14,6 +15,8 @@ public class CurrencyManager : DontDestroySingleton<CurrencyManager>
     public Exp PlayerExp { get; private set; }
 
     private CurrencyRepository _repo;
+
+    public event Action<int, int> OnDataChanged;
 
     protected override void Awake()
     {
@@ -39,26 +42,54 @@ public class CurrencyManager : DontDestroySingleton<CurrencyManager>
         }
     }
 
-    public void AddGold(int amount)
+    public void AddCurrency(ECurrencyType currencyType, int amount)
     {
-        PlayerGold.Add(amount);
-        _repo.SaveCurrencyData(PlayerGold, PlayerExp);
-    }
-
-    public Result SubtractGold(int amount)
-    {
-        if (!PlayerGold.Subtract(amount))
+        if (currencyType == ECurrencyType.Gold)
         {
-            return new Result(false, "보유한 금액이 부족합니다.");
+            PlayerGold.Add(amount);
+        }
+
+        if (currencyType == ECurrencyType.Diamond)
+        {
+            // PlayerDiamond.Add(amount);
+        }
+
+        if (currencyType == ECurrencyType.EXP)
+        {
+            PlayerExp.Add(amount);
         }
 
         _repo.SaveCurrencyData(PlayerGold, PlayerExp);
-        return new Result(true);
+
+        OnDataChanged?.Invoke(PlayerGold.GetAmount(), PlayerGold.GetAmount());
     }
 
-    public void AddExp(int value)
+    public Result SubtractCurrency(ECurrencyType currencyType, int amount)
     {
-        PlayerExp.Add(value);
+        if (currencyType == ECurrencyType.Gold)
+        {
+            if (!PlayerGold.Subtract(amount))
+            {
+                return new Result(false, "보유한 금액이 부족합니다.");
+            }
+        }
+
+        if (currencyType == ECurrencyType.Diamond)
+        {
+            // if (!PlayerDiamond.Subtract(amount))
+            // {
+            //     return new Result(false, "보유한 금액이 부족합니다.");
+            // }
+        }
+
+        if (currencyType == ECurrencyType.EXP)
+        {
+            throw new Exception("EXP는 감소할 수 없습니다!");
+        }
+
         _repo.SaveCurrencyData(PlayerGold, PlayerExp);
+        OnDataChanged?.Invoke(PlayerGold.GetAmount(), PlayerGold.GetAmount());
+
+        return new Result(true);
     }
 }

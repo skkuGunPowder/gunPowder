@@ -7,6 +7,8 @@ public class Shop : DontDestroySingleton<Shop>
 {
     private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
 
+    private ShopItem _selectedItem;
+
     private ShopRepository _repo;
 
     public event Action<Dictionary<EItemType, List<ShopItem>>, EItemType> OnShopItemChanged;
@@ -27,34 +29,36 @@ public class Shop : DontDestroySingleton<Shop>
         OnShopItemChanged?.Invoke(_shopItemDict, EItemType.Event);
     }
 
-    public async void BuyItem(ShopItem selectedItem, int amount)
+    public async void BuyItem(ShopItem selectedItem, ECurrencyType currencyType)
     {
-        if (selectedItem.GoldPrice > 0)
+        int price = 0;
+
+        if (currencyType == ECurrencyType.Diamond)
         {
-            Result goldResult = CurrencyManager.Instance.SubtractGold(selectedItem.GoldPrice);
-            if (!goldResult.IsSuccess)
-            {
-                Debug.LogError(goldResult.Message);
-                return;
-            }
+            price = selectedItem.DiamondPrice;
+        }
+        else
+        {
+            price = selectedItem.GoldPrice;
         }
 
-        if (selectedItem.DiamondPrice > 0)
+        if (price < 0)
         {
-            // TODO
-            // CurrencyManager.Instance.SubtractDiamond(selectedItem.DiamondPrice);
+            throw new Exception("아이템 가격이 유효하지 않습니다!");
         }
 
-        if (selectedItem.CashPrice > 0)
+        Result currencyResult = CurrencyManager.Instance.SubtractCurrency(currencyType, price);
+        if (!currencyResult.IsSuccess)
         {
-            // TODO: 현금 결제 처리
+            Debug.LogError(currencyResult.Message);
+            return;
         }
 
-        Result result = await _repo.BuyItem(selectedItem, amount);
-        if (!result.IsSuccess)
+        Result buyResult = await _repo.BuyItem(selectedItem);
+        if (!buyResult.IsSuccess)
         {
-            Debug.LogError(result.Message);
-            CurrencyManager.Instance.AddGold(selectedItem.GoldPrice);
+            Debug.LogError(buyResult.Message);
+            CurrencyManager.Instance.AddCurrency(currencyType, price);
             return;
         }
 
