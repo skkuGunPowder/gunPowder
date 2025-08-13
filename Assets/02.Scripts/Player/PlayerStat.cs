@@ -49,8 +49,12 @@ public class PlayerStat : MonoBehaviour
     public float NormalRecoilTime { get => _normalRecoilTime; set => _normalRecoilTime = value; }
     [SerializeField] private float _normalRecoilSpeed;
     public float NormalRecoilSpeed { get => _normalRecoilSpeed; set => _normalRecoilSpeed = value; }
-    [SerializeField] private float _confuseTime = 10f;
+    [SerializeField] private float _confuseTime = 5f;
     public float ConfuseTime { get => _confuseTime; set => _confuseTime = value; }
+    private float _originalMoveSpeed;
+    private float _originalRunSpeed;
+    private float _originalJumpForce;
+
 
 
 
@@ -66,6 +70,8 @@ public class PlayerStat : MonoBehaviour
     public bool IsImmune { get => _isImmune; set => _isImmune = value; }
     [SerializeField] private bool _isDownJump = false;
     public bool IsDownJump { get => _isDownJump; set => _isDownJump = value; }
+    [SerializeField] private bool _isWet = false;
+    public bool IsWet { get => _isWet; set => _isWet = value; }
 
     [SerializeField] private float _myMoveSpeed;
     public float MyMoveSpeed { get => _myMoveSpeed; set => _myMoveSpeed = value; }
@@ -144,7 +150,7 @@ public class PlayerStat : MonoBehaviour
     public int UltimateTriggerThreshold { get => _ultimateTriggerThreshold; set => _ultimateTriggerThreshold = value; }
 
 
-    void OnEnable()
+    void Start()
     {
         
         _photonView = GetComponent<PhotonView>();
@@ -183,6 +189,10 @@ public class PlayerStat : MonoBehaviour
             _dieExplosionForce = _playerStatSO.DieExplosionForce;
             _invincibleTime = _playerStatSO.InvincibleTime;
             _damagedTime = _playerStatSO.DamagedTime;
+
+            _originalMoveSpeed = _moveSpeed;
+            _originalRunSpeed = _runSpeed;
+            _originalJumpForce = _jumpForce;
 
             // 나중에는 방 설정에 따라 달라질 수 있음.
             _currentPlayerGunPowderCount = RoomStatManager.Instance.PlayerGunpowder;
@@ -377,5 +387,51 @@ public class PlayerStat : MonoBehaviour
     public void SetConfuseTime(float time)
     {
         _confuseTime = time;
+    }
+
+    private void SetMoveSpeed(float speed)
+    {
+        _moveSpeed = speed;
+    }
+
+    private void SetRunSpeed(float speed)
+    {
+        _runSpeed = speed;
+    }
+
+    private void SetJumpForce(float force)
+    {
+        _jumpForce = force;
+    }
+
+    private void ResetMoveSpeed()
+    {
+        _moveSpeed = _originalMoveSpeed;
+    }
+
+    private void ResetRunSpeed()
+    {
+        _runSpeed = _originalRunSpeed;
+    }
+
+    private void ResetJumpForce()
+    {
+        _jumpForce = _originalJumpForce;
+    }
+
+    public void SetWetState()
+    {
+        SetMoveSpeed(_originalMoveSpeed * 0.5f);
+        SetRunSpeed(_originalRunSpeed * 0.5f);
+        SetJumpForce(_originalJumpForce * 0.5f);
+        _isWet = true;
+    }
+
+    public void ResetWetState()
+    {
+        ResetMoveSpeed();
+        ResetRunSpeed();
+        ResetJumpForce();
+        _isWet = false;
     }
 }
