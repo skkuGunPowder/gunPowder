@@ -40,7 +40,7 @@ public class GhostTrail : MonoBehaviour
     [SerializeField] private bool turnOffSequentially = true;
 
     [Tooltip("꺼짐 시퀀스 동안 각 고스트를 비활성화할 때의 지연(초).")]
-    [SerializeField] private float turnOffDelayPerGhostSeconds = 0.1f;
+    [SerializeField] private float turnOffDelayPerGhostSeconds = 1f;
 
     private readonly List<Transform> _ghostTransforms = new List<Transform>();
     private readonly List<SpriteRenderer[]> _ghostSpriteRendererGroups = new List<SpriteRenderer[]>();

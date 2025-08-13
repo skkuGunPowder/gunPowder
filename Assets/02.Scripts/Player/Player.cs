@@ -110,6 +110,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private Ultimate _ultimate;
     public Ultimate Ultimate => _ultimate;
     private bool _ultimateEffectOn = false;
+	private Coroutine _ultimateEffectOffRoutine;
 
     private PlayerMaterial _playerMaterial;
     private PlayerFSM _playerFSM;
@@ -347,8 +348,75 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void UltimateEffect(bool isOn)
     {
-        UltimateEffectPrefab.SetActive(isOn);
+		if (UltimateEffectPrefab == null)
+		{
+			return;
+		}
+
+		if (isOn)
+		{
+			if (_ultimateEffectOffRoutine != null)
+			{
+				StopCoroutine(_ultimateEffectOffRoutine);
+				_ultimateEffectOffRoutine = null;
+			}
+			UltimateEffectPrefab.SetActive(true);
+			PlayParticleGroup(UltimateEffectPrefab);
+		}
+		else
+		{
+			if (_ultimateEffectOffRoutine != null)
+			{
+				StopCoroutine(_ultimateEffectOffRoutine);
+			}
+			_ultimateEffectOffRoutine = StartCoroutine(StopParticleGroupThenDisable(UltimateEffectPrefab));
+		}
     }
+
+	private void PlayParticleGroup(GameObject root)
+	{
+		var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
+		for (int i = 0; i < particleSystems.Length; i++)
+		{
+			ParticleSystem ps = particleSystems[i];
+			if (ps == null) { continue; }
+			var emission = ps.emission;
+			emission.enabled = true;
+			ps.Play(true);
+		}
+	}
+
+	private IEnumerator StopParticleGroupThenDisable(GameObject root)
+	{
+		var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
+		for (int i = 0; i < particleSystems.Length; i++)
+		{
+			ParticleSystem ps = particleSystems[i];
+			if (ps == null) { continue; }
+			var emission = ps.emission;
+			emission.enabled = false;
+			ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+		}
+
+		bool anyAlive = true;
+		while (anyAlive)
+		{
+			anyAlive = false;
+			for (int i = 0; i < particleSystems.Length; i++)
+			{
+				ParticleSystem ps = particleSystems[i];
+				if (ps != null && ps.IsAlive(true))
+				{
+					anyAlive = true;
+					break;
+				}
+			}
+			yield return null;
+		}
+
+		root.SetActive(false);
+		_ultimateEffectOffRoutine = null;
+	}
 
     // GhostTrail Toggle -------------------------------------------------------
     public void RPC_SetGhostTrail(bool isOn)
