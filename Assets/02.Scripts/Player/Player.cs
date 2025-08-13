@@ -93,6 +93,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject DieExplosionPrefab;
     public GameObject HitEffectPrefab;
     public GameObject UltimateEffectPrefab;
+    public GameObject ExplosionEffectPrefab;
 
 
     private const int RANDOM_SEED = 123456;
@@ -512,7 +513,19 @@ public class Player : MonoBehaviourPun, IDamagable
             _gunPowderDecreaseWithoutAttackTimer = 0f;
             //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
             _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr);
+
+            RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, 10, 30f, 1.0f, true);
+            if(PhotonView.IsMine && ExplosionEffectPrefab != null)
+            {
+                PhotonView.RPC(nameof(PlayExplosionEffect), RpcTarget.All);
+            }
         }
+    }
+
+    [PunRPC]
+    private void PlayExplosionEffect()
+    {
+        VFXPool.Instance.Play(ExplosionEffectPrefab.name, transform.position);
     }
 
     /// <summary>
@@ -579,7 +592,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
-    // [PunRPC]
+    [PunRPC]
     public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
