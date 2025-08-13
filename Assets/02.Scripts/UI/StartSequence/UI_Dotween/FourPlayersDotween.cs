@@ -36,13 +36,13 @@ public class FourPlayersDotween : MonoBehaviour
     public RectTransform Versus;
     private void OnEnable()
     {
-        LoadChecker.OnLoadEnd += OnLoadEnd;
+        EventManager.Instance.OnLoadEnd += OnLoadEnd;
         Play();
     }
     
     private void Play()
     {
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
         
         sequence.Append(Pivot.DOAnchorPos(EndPosition, 1f).SetEase(Ease.OutCirc));
         sequence.Join(DOTween.To(() => Layout.spacing, x => Layout.spacing = x, MiddleSpacing, 1f)
@@ -53,7 +53,7 @@ public class FourPlayersDotween : MonoBehaviour
 
     private void SpacingDown()
     {
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.Append(DOTween.To(() => Layout.spacing, x => Layout.spacing = x, EndSpacing, 0.4f).SetEase(Ease.InCirc));
         sequence.InsertCallback(VersusTime,VersusAct);
         sequence.AppendCallback(LightningOn);
@@ -68,9 +68,9 @@ public class FourPlayersDotween : MonoBehaviour
     // 모든 사람들의 로드가 끝난 후 적용되는 Dotween
     private void OnLoadEnd()
     {
-        DOTween.Kill(this);
+        DOTween.KillAll();
         
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(500, -1500f), 1f).SetEase(Ease.InBack));
         sequence.Join(FirstPlayer.DORotate(new Vector3(0,0,5f),0.5f).SetEase(Ease.InBack));
         sequence.Insert(0.2f , SecondPlayer.DOAnchorPos(new Vector2(960, -1500f), 1f).SetEase(Ease.InBack));   
@@ -150,7 +150,7 @@ public class FourPlayersDotween : MonoBehaviour
         ThirdPlayer.rotation = Quaternion.Euler(0, 0, 0);
         FourthPlayer.rotation = Quaternion.Euler(0, 0, 0);
         Layout.enabled = true;
-        LoadChecker.OnLoadEnd -= OnLoadEnd;
+        EventManager.Instance.OnLoadEnd -= OnLoadEnd;
         DOTween.Kill(this);
         
     }

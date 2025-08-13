@@ -159,6 +159,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1068425991267199376, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
+      propertyPath: GameStartTextSpeed
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 1165136414186184644, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -501,6 +505,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6e602cf5ac011554db3a2895bb70c207, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &63908208 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1068425991267199376, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
+  m_PrefabInstance: {fileID: 63908206}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29df4e7274cfb94f867ed86d15d1e8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &71665068
@@ -7597,6 +7612,10 @@ PrefabInstance:
       propertyPath: GameOverProduction
       value: 
       objectReference: {fileID: 63908207}
+    - target: {fileID: 2982785862916926680, guid: 7e2b38f2dab26e34c822b7fae0f90bd7, type: 3}
+      propertyPath: GameStartProduction
+      value: 
+      objectReference: {fileID: 63908208}
     - target: {fileID: 2982785862916926680, guid: 7e2b38f2dab26e34c822b7fae0f90bd7, type: 3}
       propertyPath: 'FallDeadPathList.Array.data[0]'
       value: 

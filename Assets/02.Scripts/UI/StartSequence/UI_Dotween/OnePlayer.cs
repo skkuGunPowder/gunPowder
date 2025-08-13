@@ -12,7 +12,6 @@ public class OnePlayer : MonoBehaviour
             {EProperties.IsLoad.ToString(), true}
         };
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
-        
         EventManager.Instance.LoadFinished();
     }
     

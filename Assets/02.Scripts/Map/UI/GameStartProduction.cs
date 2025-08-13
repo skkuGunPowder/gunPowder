@@ -6,6 +6,10 @@ public class GameStartProduction : MonoBehaviour
 {
     public RectTransform Timer;
     public RectTransform Profile;
+    [Header("게임 시작 텍스트")]
+    public GameObject GameStartCountText;
+    public GameObject GameStartText;
+    
     [Header("게임 시작 Dotween")]
     public float DotweenDuration;
     public Vector2 TimerEndPosition;
@@ -13,11 +17,16 @@ public class GameStartProduction : MonoBehaviour
     public Vector2 ProfileEndPosition;
     public Ease ProfileEase;
     
+    public float GameStartTextInterval;
+    public float GameStartTextSpeed;
+    public Vector3 GameStartTextScale;
+    public Ease GameStartTextEase;
     
     [Header("원래 위치 조정")] 
     public Vector2 TimerOriginPosition;
     public Vector2 ProfileOriginPosition;
-
+    public Vector3 GameStartTextScaleOrigin;
+    
     private void Awake()
     {
         EventManager.Instance.OnLoadFinished += Play;
@@ -27,11 +36,29 @@ public class GameStartProduction : MonoBehaviour
     public void Play()
     {
         Debug.Log("production");
-        Timer.DOAnchorPos(TimerEndPosition, DotweenDuration).SetEase(TimerEase);
-        Profile.DOAnchorPos(ProfileEndPosition, DotweenDuration).SetEase(ProfileEase);
-        
+        Timer.DOAnchorPos(TimerEndPosition, DotweenDuration).SetEase(TimerEase).SetUpdate(true);
+        Profile.DOAnchorPos(ProfileEndPosition, DotweenDuration).SetEase(ProfileEase).SetUpdate(true);
     }
 
+    public void GameStart()
+    {
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
+        sequence.Append(GameStartCountText.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
+            .SetEase(GameStartTextEase));
+        sequence.AppendInterval(GameStartTextInterval);
+        sequence.Append(GameStartText.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
+            .SetEase(GameStartTextEase));
+        sequence.Join(GameStartCountText.transform.DOScale(GameStartTextScaleOrigin,GameStartTextSpeed / 2)
+            .SetEase(GameStartTextEase));
+        sequence.AppendInterval(GameStartTextInterval);
+        sequence.Append(GameStartText.transform.DOScale(GameStartTextScaleOrigin, GameStartTextSpeed)
+            .SetEase(GameStartTextEase));
+        sequence.OnComplete(() =>
+        {
+            Debug.Log("Change");
+            GameManager.Instance.GameStateChange(EGameState.Playing);
+        });
+    }
     private void OnDisable()
     {
         Timer.anchoredPosition = TimerOriginPosition;

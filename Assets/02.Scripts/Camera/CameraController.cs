@@ -12,14 +12,15 @@ public class CameraController : MonoBehaviour
     
     private List<Player> _currentTargetList = new List<Player>();
     private int _currentTargetIndex = 0;
+    
     private void Awake()
     {
         Init();
-        
     }
-
+    
     private void Start()
     {
+        
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting)
         {
             return;
@@ -50,7 +51,7 @@ public class CameraController : MonoBehaviour
     {
         if (_target != null)
         {
-            _target.OnHit -= HitShake;
+            _target.OnHit -= HitShake; 
             _target.OnAttack += GunShotShake;
         }
         
