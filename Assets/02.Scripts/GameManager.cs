@@ -38,7 +38,7 @@ public class GameManager : PhotonSingleton<GameManager>
          {
              return;
          }
-
+         
          TimeScaleSetting();
          EventManager.Instance.OnLoadFinished += Init;
      }
@@ -143,6 +143,7 @@ public class GameManager : PhotonSingleton<GameManager>
 
     public void Init()
     {
+        Debug.Log("gamemanagerInit");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;

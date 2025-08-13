@@ -134,7 +134,7 @@ public class ThreePlayersDotween : MonoBehaviour
     private void VersusAct()
     {
         Versus.gameObject.SetActive(true);
-        Versus.DOScale(new Vector3(1, 1, 1), 0.15f).SetEase(Ease.OutCubic);
+        Versus.DOScale(new Vector3(1, 1, 1), 0.15f).SetEase(Ease.OutCubic).SetUpdate(true);
     }
     
     private void OnDisable()

@@ -31,6 +31,7 @@ public class CameraController : MonoBehaviour
 
     private void Init()
     {
+        
         if (_mainCamera == null)
         {
             _mainCamera = Camera.main;

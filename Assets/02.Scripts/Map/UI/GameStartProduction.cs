@@ -7,8 +7,10 @@ public class GameStartProduction : MonoBehaviour
     public RectTransform Timer;
     public RectTransform Profile;
     [Header("게임 시작 텍스트")]
-    public GameObject GameStartCountText;
+    public GameObject GameStartCountText1;
     public GameObject GameStartText;
+    public GameObject GameStartCountText2;
+    public GameObject GameStartCountText3;
     
     [Header("게임 시작 Dotween")]
     public float DotweenDuration;
@@ -43,12 +45,22 @@ public class GameStartProduction : MonoBehaviour
     public void GameStart()
     {
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
-        sequence.Append(GameStartCountText.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
+        sequence.Append(GameStartCountText3.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
+            .SetEase(GameStartTextEase));
+        sequence.AppendInterval(GameStartTextInterval);
+        sequence.Append(GameStartCountText2.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
+            .SetEase(GameStartTextEase));
+        sequence.Join(GameStartCountText3.transform.DOScale(GameStartTextScaleOrigin,GameStartTextSpeed / 2)
+            .SetEase(GameStartTextEase));
+        sequence.AppendInterval(GameStartTextInterval);
+        sequence.Append(GameStartCountText1.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
+            .SetEase(GameStartTextEase));
+        sequence.Join(GameStartCountText2.transform.DOScale(GameStartTextScaleOrigin,GameStartTextSpeed / 2)
             .SetEase(GameStartTextEase));
         sequence.AppendInterval(GameStartTextInterval);
         sequence.Append(GameStartText.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
             .SetEase(GameStartTextEase));
-        sequence.Join(GameStartCountText.transform.DOScale(GameStartTextScaleOrigin,GameStartTextSpeed / 2)
+        sequence.Join(GameStartCountText1.transform.DOScale(GameStartTextScaleOrigin,GameStartTextSpeed / 2)
             .SetEase(GameStartTextEase));
         sequence.AppendInterval(GameStartTextInterval);
         sequence.Append(GameStartText.transform.DOScale(GameStartTextScaleOrigin, GameStartTextSpeed)

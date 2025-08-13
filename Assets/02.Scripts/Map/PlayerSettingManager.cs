@@ -20,8 +20,12 @@ public class PlayerSettingManager : MonoBehaviour
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
-        Init();
         // EventManager.Instance.OnLoadEnd += Init;
+    }
+
+    private void Start()
+    {
+        Init();
     }
 
     public void Init()

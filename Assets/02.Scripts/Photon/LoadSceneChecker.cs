@@ -62,6 +62,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     [PunRPC]
     private void Rpc_LoadEnd()
     {
+        Debug.Log("load");
         EventManager.Instance.LoadEnd();
     }
 
