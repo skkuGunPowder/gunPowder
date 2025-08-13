@@ -1893,6 +1893,7 @@ MonoBehaviour:
   DieExplosionPrefab: {fileID: 913711826124557560, guid: 804d65cb3af63d94f8021d7f15b82be5, type: 3}
   HitEffectPrefab: {fileID: 8841075394196172437}
   UltimateEffectPrefab: {fileID: 0}
+  JumpDashEffectPrefab: {fileID: 0}
   _ultimateChanceTimer: 0
 --- !u!114 &4024883436230281669
 MonoBehaviour:
@@ -1932,6 +1933,7 @@ MonoBehaviour:
   _recoilSpeed: 0
   _normalRecoilTime: 0
   _normalRecoilSpeed: 0
+  _confuseTime: 10
   _isRunning: 0
   _isJumping: 0
   _isFallingDead: 0
@@ -2559,7 +2561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fb6d31ca841b9a4ba8ddab861f35eb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _photonView: {fileID: 2161372930500741118}
+  _photonView: {fileID: 0}
 --- !u!1 &7107957649425927777
 GameObject:
   m_ObjectHideFlags: 0
