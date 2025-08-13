@@ -72,9 +72,17 @@ public class UI_RoomProfile : MonoBehaviour
             }
             
             PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
-            EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
             
-            UI_ProfileSlotList[i].TeamSet(team);
+            if (player.CustomProperties.ContainsKey(EProperties.Team.ToString()) == false)
+            {
+                EInGameTeam team = EInGameTeam.Red;
+                UI_ProfileSlotList[i].TeamSet(team);
+            }
+            else
+            {
+                EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+                UI_ProfileSlotList[i].TeamSet(team);
+            }
         }
     }
     private void OnDisable()
