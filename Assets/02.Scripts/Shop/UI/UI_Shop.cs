@@ -1,18 +1,29 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class UI_Shop : MonoBehaviour
+
+public class UI_Shop : Singleton<UI_Shop>
 {
     public UI_MainEventPage MainEventPage;
     public UI_ShoppingPage ShoppingPage;
 
-    private EItemType _currentCategory;
+    public Image SubCategoryTab;
+    public Image MainCategoryTab;
 
-    private void Awake()
+    public List<Sprite> SubTabImageList;
+    public List<Sprite> MainTabImageList;
+
+    public List<UI_ShopMainCategorySlot> MainCategorySlotList;
+    public List<UI_ShopSubCategorySlot> SubCategorySlotList;
+
+    private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
+
+
+    protected override void Awake()
     {
         Shop.Instance.OnShopItemChanged += Refresh;
-
-        ShowMainPage();
+        SelectMainCategory(EShopMainCategory.Event);
     }
 
     public void ShowMainPage()
@@ -27,17 +38,54 @@ public class UI_Shop : MonoBehaviour
         ShoppingPage.gameObject.SetActive(true);
     }
 
-    public void Refresh(Dictionary<EItemType, List<ShopItem>> shopItemDcit)
+    public void SelectMainCategory(EShopMainCategory selectedMainCategory)
     {
-        if (MainEventPage.isActiveAndEnabled)
+        MainCategoryTab.sprite = MainTabImageList[(int)selectedMainCategory];
+        SubCategoryTab.sprite = SubTabImageList[(int)selectedMainCategory];
+
+        if (selectedMainCategory == EShopMainCategory.Event)
         {
-            MainEventPage.Refresh();
-            return;
+            ShowMainPage();
+        }
+        else
+        {
+            ShowShoppingPage();
         }
 
-        if (ShoppingPage.isActiveAndEnabled)
+        List<EItemType> subCategoryList = null;
+
+        foreach (var mainCategorySlot in MainCategorySlotList)
         {
-            ShoppingPage.Refresh(shopItemDcit[_currentCategory]);
+            if (mainCategorySlot.MainCategory == selectedMainCategory)
+            {
+                subCategoryList = mainCategorySlot.SubCategoryList;
+            }
         }
+
+        for (int i = 0; i < SubCategorySlotList.Count; i++)
+            {
+                if (subCategoryList.Count > i)
+                {
+                    SubCategorySlotList[i].gameObject.SetActive(true);
+                    SubCategorySlotList[i].Refresh(subCategoryList[i]);
+                    continue;
+                }
+                SubCategorySlotList[i].gameObject.SetActive(false);
+            }
+
+        SelectSubCategory(subCategoryList[0]);
+    }
+
+    public void SelectSubCategory(EItemType itemType)
+    {
+        Refresh(_shopItemDict, itemType);
+    }
+
+    public void Refresh(Dictionary<EItemType, List<ShopItem>> shopItemDcit, EItemType currentCategory)
+    {
+        _shopItemDict = shopItemDcit;
+
+        MainEventPage.Refresh();
+        ShoppingPage.Refresh(shopItemDcit[currentCategory]);
     }
 }

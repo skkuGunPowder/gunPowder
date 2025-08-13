@@ -9,7 +9,7 @@ public class Shop : DontDestroySingleton<Shop>
 
     private ShopRepository _repo;
 
-    public event Action<Dictionary<EItemType, List<ShopItem>>> OnShopItemChanged;
+    public event Action<Dictionary<EItemType, List<ShopItem>>, EItemType> OnShopItemChanged;
 
 
     protected override void Awake()
@@ -22,8 +22,9 @@ public class Shop : DontDestroySingleton<Shop>
 
     private void LoadShopItemData(Dictionary<EItemType, List<ShopItem>> shopItemDict)
     {
+        Debug.LogWarning("상점 아이템 세팅");
         _shopItemDict = shopItemDict;
-        OnShopItemChanged?.Invoke(_shopItemDict);
+        OnShopItemChanged?.Invoke(_shopItemDict, EItemType.Event);
     }
 
     public async void BuyItem(ShopItem selectedItem, int amount)
@@ -58,6 +59,6 @@ public class Shop : DontDestroySingleton<Shop>
         }
 
         ItemStorage.Instance.AddItem(selectedItem.ID);
-        OnShopItemChanged?.Invoke(_shopItemDict);
+        OnShopItemChanged?.Invoke(_shopItemDict, selectedItem.ItemInfo.ItemType);
     }
 }

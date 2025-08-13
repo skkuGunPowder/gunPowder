@@ -1,10 +1,10 @@
 using System;
-using UnityEngine;
 using LitJson;
 
 
 public enum EShopMainCategory
 {
+    Event,
     Bomb,
     Skin,
     Effect,

@@ -41,14 +41,14 @@ public class ShopRepository
             {
                 if (!result.IsSuccess())
                 {
-                    Debug.LogError($"아이템 데이터 불러오기 실패: {result.GetMessage()}");
+                    Debug.LogError($"상점 아이템 데이터 불러오기 실패: {result.GetMessage()}");
                     return;
                 }
 
                 var itemResult = Backend.Chart.GetChartContents(result.FlattenRows()[0]["selectedChartFileId"].ToString());
                 if (!itemResult.IsSuccess())
                 {
-                    Debug.LogError($"아이템 데이터 불러오기 실패: {itemResult.GetMessage()}");
+                    Debug.LogError($"상점 아이템 데이터 불러오기 실패: {itemResult.GetMessage()}");
                     return;
                 }
 
@@ -57,6 +57,8 @@ public class ShopRepository
                     ShopItem item = new ShopItem(iteminfo);
                     shopItemDict[item.ItemInfo.ItemType].Add(item);
                 }
+
+                Debug.LogWarning($"상점 아이템 데이터 불러오기 성공: {itemResult.GetMessage()}");
                 OnLoadComplete?.Invoke(shopItemDict);
             });
         }
