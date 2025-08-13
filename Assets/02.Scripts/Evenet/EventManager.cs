@@ -89,4 +89,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnTargetChanged?.Invoke();
     }
+    
+    public event Action<int,EInGameTeam> OnPlayerColorChanged;
+    public void PlayerColorChanged(int playerNumber, EInGameTeam color)
+    {
+        OnPlayerColorChanged?.Invoke(playerNumber, color);
+    }
 }
