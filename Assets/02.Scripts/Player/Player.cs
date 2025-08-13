@@ -113,6 +113,8 @@ public class Player : MonoBehaviourPun, IDamagable
     private bool _ultimateEffectOn = false;
 
     private PlayerMaterial _playerMaterial;
+    private PlayerFSM _playerFSM;
+    public PlayerFSM PlayerFSM => _playerFSM;
 
 
     
@@ -125,6 +127,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _rigidbody2D = GetComponent<Rigidbody2D>();
         PhotonView = GetComponent<PhotonView>();
         _playerMaterial = GetComponent<PlayerMaterial>();
+        _playerFSM = GetComponent<PlayerFSM>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         LoadItems();
@@ -262,21 +265,27 @@ public class Player : MonoBehaviourPun, IDamagable
     private void HandleGunPowderEmpty()
     {
         // PlayerFSM을 통해 SyncStateChange 호출
-        PlayerFSM playerFSM = GetComponent<PlayerFSM>();
-        if (playerFSM != null)
+        if (_playerFSM != null)
         {
             // 네트워크 동기화된 상태 변경
-            playerFSM.SyncStateChange<PlayerDieState>();
+            _playerFSM.SyncStateChange<PlayerDieState>();
         }
         else
         {
             // PlayerFSM이 없는 경우 직접 변경
-            GetComponent<PlayerFSM>().ChangeState<PlayerDieState>();
+            _playerFSM.ChangeState<PlayerDieState>();
         }
     }
 
     private void Update()
     {
+        // 테스트
+        if(InputHandler.GetKeyDown(KeyCode.Q))
+        {
+            Confuse();
+        }
+
+        // ------------------------------------------------------------
         if (!PhotonView.IsMine)
         {
             return;
@@ -907,5 +916,10 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.MySpriteREndererList[0].enabled = true;
         _playerStat.MySpriteREndererList[2].enabled = true;
         _playerStat.MySpriteREndererList[3].enabled = true;
+    }
+
+    public void Confuse()
+    {
+        _playerFSM.ChangeState<PlayerConfuseState>();
     }
 }

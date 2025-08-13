@@ -23,12 +23,15 @@ public class PlayerConfuseState : PlayerBaseState
         _owner.PlayerStat.IsRunning = true;
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.RunSpeed;
         _direction = _owner.PlayerStat.FacingDirection >= 0 ? 1f : -1f;
-        _owner.RPC_SetAnimatorTrigger("Run");
+
+        _owner.ResetAnimatorTrigger("Idle");
+        _owner.RPC_SetAnimatorTrigger("Confuse");
     }
 
     public override void OnExit()
     {
         base.OnExit();
+        _owner.RPC_ResetAnimatorTrigger("Confuse");
     }
 
     public override void MineUpdate()
