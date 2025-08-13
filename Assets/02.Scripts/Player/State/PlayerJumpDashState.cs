@@ -45,7 +45,6 @@ public class PlayerJumpDashState : PlayerBaseState
         _airborneTimer = 0f;
 
         _owner.RPC_SetAnimatorTrigger("JumpDash");
-        _owner.RPC_JumpDashEffect(true);
         _owner.RPC_SetGhostTrail(true);
     }
 
