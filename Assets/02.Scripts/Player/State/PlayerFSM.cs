@@ -33,6 +33,16 @@ public class PlayerFSM : MonoFSM<Player>
     /// </summary>
     public void SyncStateChange<T>() where T : PlayerBaseState
     {
+        if(Owner == null)
+        {
+            return;
+        }
+
+        if(Owner.PhotonView == null)
+        {
+            return;
+        }
+
         if (Owner.PhotonView.IsMine)
         {
             // 모든 클라이언트에서 상태 변경 (자신 포함)

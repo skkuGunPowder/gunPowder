@@ -113,6 +113,8 @@ public class Player : MonoBehaviourPun, IDamagable
     private bool _ultimateEffectOn = false;
 
     private PlayerMaterial _playerMaterial;
+    private PlayerFSM _playerFSM;
+    public PlayerFSM PlayerFSM => _playerFSM;
 
 
     
@@ -125,6 +127,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _rigidbody2D = GetComponent<Rigidbody2D>();
         PhotonView = GetComponent<PhotonView>();
         _playerMaterial = GetComponent<PlayerMaterial>();
+        _playerFSM = GetComponent<PlayerFSM>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         LoadItems();
@@ -236,10 +239,12 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    private void OnDisable()
+    void OnEnable()
     {
-        // 이벤트 핸들러 해제 (중복 방지)
-        _playerStat.OnGunPowderEmpty -= HandleGunPowderEmpty;
+        if(_playerFSM != null)
+        {
+            _playerFSM.SyncStateChange<PlayerIdleState>();
+        }
     }
 
     public void ResurrectPlayer()
@@ -262,21 +267,31 @@ public class Player : MonoBehaviourPun, IDamagable
     private void HandleGunPowderEmpty()
     {
         // PlayerFSM을 통해 SyncStateChange 호출
-        PlayerFSM playerFSM = GetComponent<PlayerFSM>();
-        if (playerFSM != null)
+        if (_playerFSM != null)
         {
             // 네트워크 동기화된 상태 변경
-            playerFSM.SyncStateChange<PlayerDieState>();
+            _playerFSM.SyncStateChange<PlayerDieState>();
         }
         else
         {
             // PlayerFSM이 없는 경우 직접 변경
-            GetComponent<PlayerFSM>().ChangeState<PlayerDieState>();
+            _playerFSM.ChangeState<PlayerDieState>();
         }
     }
 
     private void Update()
     {
+        // 테스트
+        if(InputHandler.GetKeyDown(KeyCode.Q))
+        {
+            SetPlayerWet();
+        }
+        else if(InputHandler.GetKeyDown(KeyCode.W))
+        {
+            ResetPlayerWet();
+        }
+
+        // ------------------------------------------------------------
         if (!PhotonView.IsMine)
         {
             return;
@@ -367,7 +382,15 @@ public class Player : MonoBehaviourPun, IDamagable
         GhostTrail trail = GetComponent<GhostTrail>();
         if (trail != null)
         {
-            trail.enabled = isOn;
+            if (isOn)
+            {
+                trail.enabled = true;
+            }
+            else
+            {
+                // sequentially turn off, then disable component
+                trail.TurnOffSequentiallyThenDisable();
+            }
         }
     }
 
@@ -760,6 +783,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerObserveState":
                     playerFSM.ChangeState<PlayerObserveState>();
                     break;
+                case "PlayerConfuseState":
+                    playerFSM.ChangeState<PlayerConfuseState>();
+                    break;
                 default:
                     break;
             }
@@ -904,5 +930,20 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.MySpriteREndererList[0].enabled = true;
         _playerStat.MySpriteREndererList[2].enabled = true;
         _playerStat.MySpriteREndererList[3].enabled = true;
+    }
+
+    public void Confuse()
+    {
+        _playerFSM.ChangeState<PlayerConfuseState>();
+    }
+
+    public void SetPlayerWet()
+    {
+        _playerStat.SetWetState();
+    }
+
+    public void ResetPlayerWet()
+    {
+        _playerStat.ResetWetState();
     }
 }

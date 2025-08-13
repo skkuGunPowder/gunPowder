@@ -35,9 +35,13 @@ public class PlayerIdleState : PlayerBaseState
         _owner.PlayerStat.IsDownJump = false;
         _owner.PlayerStat.ResetJumpDashCount();
 
-        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-        velocity.x = 0f;
-        _owner.Rigidbody2D.linearVelocity = velocity;
+        // 플레이어가 젖으면 미끄러진다.
+        if(!_owner.PlayerStat.IsWet)
+        {
+            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+            velocity.x = 0f;
+            _owner.Rigidbody2D.linearVelocity = velocity;
+        }
 
         // 착지 애니메이션 처리
         if (_isFromJumpState)
