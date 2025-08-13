@@ -124,6 +124,7 @@ public class PlayerBaseState : MonoState
             }
             else
             {
+                // 코요테 타임: 걷기 상태에서 잠깐 떠 있어도 점프 허용
                 _playerFSM.ChangeState<PlayerJumpState>();
             }
             

@@ -74,23 +74,36 @@ public class PlayerWalkState : PlayerBaseState
 
         // 코요테 타임 및 바닥 체크
         bool isGrounded = IsGrounded2D();
-        
+
         if (isGrounded)
         {
+            // 바닥에 있는 동안 타이머 초기화
             _coyoteTimer = 0f;
+            _wasGroundedLastFrame = true;
         }
         else
         {
-            _coyoteTimer += Time.deltaTime;
-        }
+            // 바닥을 벗어난 첫 프레임이면 타이머 초기화만 하고 유지
+            if (_wasGroundedLastFrame)
+            {
+                _coyoteTimer = 0f;
+            }
+            else
+            {
+                _coyoteTimer += Time.deltaTime;
+            }
 
-        // 바닥에서 떨어진 순간(이전 프레임엔 있었고, 이번 프레임엔 없음)
-        if (!isGrounded)
-        {
-            _owner.PlayerStat.IsFallingFromLedge = true;
-            _owner.SetAnimatorTrigger("Fall");
-            _playerFSM.ChangeState<PlayerFallState>();
-            return false;
+            // 코요테 타임이 끝났을 때만 낙하 상태로 전환
+            if (_coyoteTimer >= COYOTE_TIME)
+            {
+                _owner.PlayerStat.IsFallingFromLedge = true;
+                _owner.SetAnimatorTrigger("Fall");
+                _playerFSM.ChangeState<PlayerFallState>();
+                _wasGroundedLastFrame = false;
+                return false;
+            }
+
+            _wasGroundedLastFrame = false;
         }
 
         if (InputHandler.GetKey(KeyCode.RightArrow))
