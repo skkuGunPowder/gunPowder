@@ -12,7 +12,8 @@ public class UltimateProductionSlot : MonoBehaviour
     public RectTransform UltimateEffectUp;
     public RectTransform UltimateEffectDown;
     public float UltimateEffectSpeed = 1f;
-    public Ease UltimateEffectEase = Ease.Linear;
+    public Ease UltimateEffectInEase = Ease.Linear;
+    public Ease UltimateEffectOutEase = Ease.Linear;
     public Vector2 UltimateEndPosition;
     public Vector2 UltimateEndPosition2;
     
@@ -26,13 +27,16 @@ public class UltimateProductionSlot : MonoBehaviour
 
     private void Play(string bomb)
     {
+        UltimateEffectUp.gameObject.SetActive(true);
+        UltimateEffectDown.gameObject.SetActive(true);
+        
         Sequence sequence = DOTween.Sequence();
-        sequence.Append(UltimateEffectUp.DOAnchorPos(UltimateEndPosition, UltimateEffectSpeed).SetEase(UltimateEffectEase));
-        sequence.Join(UltimateEffectDown.DOAnchorPos(UltimateEndPosition2, UltimateEffectSpeed).SetEase(UltimateEffectEase));
+        sequence.Append(UltimateEffectUp.DOAnchorPos(UltimateEndPosition, UltimateEffectSpeed).SetEase(UltimateEffectInEase));
+        sequence.Join(UltimateEffectDown.DOAnchorPos(UltimateEndPosition2, UltimateEffectSpeed).SetEase(UltimateEffectInEase));
         sequence.AppendCallback(()=>BombEffect(bomb));
         sequence.AppendInterval(UltimateTime);
-        sequence.Append(UltimateEffectUp.DOAnchorPos(UltimateOriginPosition, UltimateEffectSpeed).SetEase(UltimateEffectEase));
-        sequence.Join(UltimateEffectDown.DOAnchorPos(UltimateEndPosition2, UltimateEffectSpeed).SetEase(UltimateEffectEase));
+        sequence.Append(UltimateEffectUp.DOAnchorPos(UltimateOriginPosition, UltimateEffectSpeed).SetEase(UltimateEffectOutEase));
+        sequence.Join(UltimateEffectDown.DOAnchorPos(UltimateOriginPosition2, UltimateEffectSpeed).SetEase(UltimateEffectOutEase));
         sequence.OnComplete(() =>
         {
             UltimateEffectUp.gameObject.SetActive(false);
@@ -45,14 +49,17 @@ public class UltimateProductionSlot : MonoBehaviour
         switch (bomb)
         {
             case "BO0005": 
+                UltimateEffectList[2].SetActive(true);
                 break;
             case "BO0007":
                 UltimateEffectList[0].SetActive(true);
                 UltimateEffectList[1].SetActive(true);
                 break;
             case "BO00011":
+                UltimateEffectList[3].SetActive(true);
                 break;
             default:
+                UltimateEffectList[2].SetActive(true);
                 break;
         }
     }

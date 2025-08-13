@@ -32,7 +32,7 @@ public class UltimateManager : Singleton<UltimateManager>
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             GetUltimate("BO0005", _player).ExcuteUltimate();
-               
+            EventManager.Instance.Ultimate("BO0005");
         }
 
         if (Input.GetKeyDown(KeyCode.R))
@@ -44,7 +44,7 @@ public class UltimateManager : Singleton<UltimateManager>
         if (Input.GetKeyDown(KeyCode.T))
         {
             GetUltimate("BO0011", _player).ExcuteUltimate();
-            
+            EventManager.Instance.Ultimate("BO0011");
         }
     }
 
