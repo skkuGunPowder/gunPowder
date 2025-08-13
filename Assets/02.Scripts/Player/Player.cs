@@ -482,6 +482,9 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.HasUsedUltimateThisLife = true;
             _playerStat.HasUltimateChance = false;
             _ultimateChanceTimer = 0f;
+            RPC_UltimateEffect(false);
+            RPC_SetMaterial((byte)EPlayerMaterial.Default);
+            _ultimateEffectOn = false;
         }
     }
 
@@ -725,10 +728,6 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void ResetAnimatorTrigger(string triggerName)
     {
-        if(!PhotonNetwork.IsMasterClient)
-        {
-            return;
-        }
         foreach (Animator animator in _myAnimatorList)
         {
             animator.ResetTrigger(triggerName);

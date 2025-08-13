@@ -14,7 +14,7 @@ public class PlayerWalkState : PlayerBaseState
 
     // 코요테 타임 관련
     private float _coyoteTimer = 0f;
-    private const float COYOTE_TIME = 0.15f;
+    private const float COYOTE_TIME = 0.1f;
     private bool _wasGroundedLastFrame = true;
     
     // 방향 변경 감지용
@@ -40,6 +40,7 @@ public class PlayerWalkState : PlayerBaseState
         _owner.PlayerStat.IsJumping = false;
 
         // 애니메이션 재생
+        _owner.RPC_ResetAnimatorTrigger("Idle");
         _owner.RPC_SetAnimatorTrigger("Walk");
     }
     
@@ -97,7 +98,7 @@ public class PlayerWalkState : PlayerBaseState
             if (_coyoteTimer >= COYOTE_TIME)
             {
                 _owner.PlayerStat.IsFallingFromLedge = true;
-                _owner.SetAnimatorTrigger("Fall");
+                _owner.RPC_SetAnimatorTrigger("Fall");
                 _playerFSM.ChangeState<PlayerFallState>();
                 _wasGroundedLastFrame = false;
                 return false;
