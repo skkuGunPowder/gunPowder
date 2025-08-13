@@ -1,5 +1,13 @@
 using UnityEngine;
 
+public enum ECurrencyType
+{
+    Gold,
+    Diamond,
+    EXP
+}
+
+
 public class CurrencyManager : DontDestroySingleton<CurrencyManager>
 {
     public Gold PlayerGold { get; private set; }

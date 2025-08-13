@@ -11,6 +11,7 @@ public class Shop : DontDestroySingleton<Shop>
 
     public event Action<Dictionary<EItemType, List<ShopItem>>> OnShopItemChanged;
 
+
     protected override void Awake()
     {
         base.Awake();
@@ -27,7 +28,6 @@ public class Shop : DontDestroySingleton<Shop>
 
     public async void BuyItem(ShopItem selectedItem, int amount)
     {
-
         if (selectedItem.GoldPrice > 0)
         {
             Result goldResult = CurrencyManager.Instance.SubtractGold(selectedItem.GoldPrice);

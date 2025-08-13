@@ -6,6 +6,8 @@ public class UI_Shop : MonoBehaviour
     public UI_MainEventPage MainEventPage;
     public UI_ShoppingPage ShoppingPage;
 
+    private EItemType _currentCategory;
+
     private void Awake()
     {
         Shop.Instance.OnShopItemChanged += Refresh;
@@ -27,6 +29,15 @@ public class UI_Shop : MonoBehaviour
 
     public void Refresh(Dictionary<EItemType, List<ShopItem>> shopItemDcit)
     {
+        if (MainEventPage.isActiveAndEnabled)
+        {
+            MainEventPage.Refresh();
+            return;
+        }
 
+        if (ShoppingPage.isActiveAndEnabled)
+        {
+            ShoppingPage.Refresh(shopItemDcit[_currentCategory]);
+        }
     }
 }

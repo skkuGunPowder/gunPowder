@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using LitJson;
 
 
@@ -40,10 +41,10 @@ public class ShopItem
 
         _id = (string)json["GoodsID"];
         _mainCategory = (EShopMainCategory)Enum.Parse(typeof(EShopMainCategory), (string)json["Category"]);
-        _goldPrice = (int)json["GoldPowerPrice"];
-        _diamondPrice = (int)json["DiamonPowerPrice"];
-        _cashPrice = (int)json["CashPrice"];
-        _maxAmount = (int)json["MaxpurchaseLimit"];
+        _goldPrice = int.Parse(json["GoldPowderPrice"].ToString());
+        _diamondPrice = int.Parse(json["DiamondPowderPrice"].ToString());
+        _cashPrice = int.Parse(json["CashPrice"].ToString());
+        _maxAmount = int.Parse(json["MaxPurchaseLimit"].ToString());
         _itemInfo = ItemDatabase.Instance.GetItem(_id);
     }
 
