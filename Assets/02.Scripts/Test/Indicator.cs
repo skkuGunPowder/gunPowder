@@ -7,7 +7,7 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class Indicator : MonoBehaviour
 {
     [SerializeField] private PhotonView _photonView;
-
+    
     private void Start()
     {
         if (GameManager.Instance == null)
