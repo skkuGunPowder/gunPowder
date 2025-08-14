@@ -8,6 +8,7 @@ public class UI_ShoppingPage : MonoBehaviour
     [SerializeField] private UI_ShopItemSlot _shopSlotPrefab;
     [SerializeField] private Transform _gridTransform;
 
+
     private void Awake()
     {
         _shopSlotList = new List<UI_ShopItemSlot>();

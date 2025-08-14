@@ -23,9 +23,7 @@ public class UI_Shop : Singleton<UI_Shop>
     public List<UI_ShopSubCategorySlot> SubCategorySlotList;
 
     private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
-
-    private ShopItem _selectedItem;
-
+    
 
     protected override void Awake()
     {

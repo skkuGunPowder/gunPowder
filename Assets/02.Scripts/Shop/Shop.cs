@@ -65,4 +65,20 @@ public class Shop : DontDestroySingleton<Shop>
         ItemStorage.Instance.AddItem(selectedItem.ID);
         OnShopItemChanged?.Invoke(_shopItemDict, selectedItem.ItemInfo.ItemType);
     }
+
+    public void SelectItem(ShopItem item)
+    {
+        _selectedItem = item;
+    }
+
+    public ShopItem GetSelectedItem()
+    {
+        if (_selectedItem == null)
+        {
+            Debug.LogWarning("선택된 아이템이 없습니다.");
+            return null;    
+        }
+
+        return _selectedItem;
+    }
 }
