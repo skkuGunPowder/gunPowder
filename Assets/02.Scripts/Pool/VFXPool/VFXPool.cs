@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VFXPool : Singleton<VFXPool>
+public class VFXPool : DontDestroySingleton<VFXPool>
 {
     [SerializeField] private List<VFX> _particlePrefabList;
     [SerializeField] private int initialSize = 30;
