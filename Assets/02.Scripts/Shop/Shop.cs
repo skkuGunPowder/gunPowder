@@ -29,7 +29,7 @@ public class Shop : DontDestroySingleton<Shop>
         OnShopItemChanged?.Invoke(_shopItemDict, EItemType.Event);
     }
 
-    public async void BuyItem(ShopItem selectedItem, ECurrencyType currencyType)
+    public void BuyItem(ShopItem selectedItem, ECurrencyType currencyType)
     {
         int price = 0;
 
@@ -54,7 +54,7 @@ public class Shop : DontDestroySingleton<Shop>
             return;
         }
 
-        Result buyResult = await _repo.BuyItem(selectedItem);
+        Result buyResult = _repo.BuyItem(selectedItem).Result;
         if (!buyResult.IsSuccess)
         {
             Debug.LogError(buyResult.Message);
@@ -69,6 +69,7 @@ public class Shop : DontDestroySingleton<Shop>
     public void SelectItem(ShopItem item)
     {
         _selectedItem = item;
+        OnShopItemChanged?.Invoke(_shopItemDict, item.ItemInfo.ItemType);
     }
 
     public ShopItem GetSelectedItem()

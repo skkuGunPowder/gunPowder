@@ -32,6 +32,22 @@ public class UI_ShopItemSlot : MonoBehaviour, ISelectable
         GoldText.text = $"{item.GoldPrice}";
         DiamondText.text = $"{item.DiamondPrice}";
         IconImage.sprite = item.ItemInfo.Image;
+
+        ShopItem selectedItem = Shop.Instance.GetSelectedItem();
+        if (selectedItem == null)
+        {
+            Deselect();
+            return;
+        }
+
+        if (selectedItem.ID == item.ID)
+        {
+            Select();
+        }
+        else
+        {
+            Deselect();
+        }
     }
 
     public void Select()
