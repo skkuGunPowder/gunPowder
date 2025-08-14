@@ -160,6 +160,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
             if (PhotonNetwork.IsMasterClient)
             {
                 PlayerPlacement(PhotonNetwork.LocalPlayer);
+                EventManager.Instance.RoomDataChanged();
             }
 
             return;

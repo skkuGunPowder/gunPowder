@@ -58,12 +58,12 @@ public class UI_ProductionSlot : MonoBehaviour
 
     public void ShineOn()
     {
-        Shine.DOAnchorPos(ShineEndPosition, 1f);
+        Shine.DOAnchorPos(ShineEndPosition, 1f).SetUpdate(true);
     }
 
     public void FlashOn()
     {
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.Append(Glow.DOFade(0.4f, 0.2f));
         sequence.InsertCallback(0.1f, BombOn);
         sequence.Append(Glow.DOFade(0, 0.2f));
@@ -76,7 +76,7 @@ public class UI_ProductionSlot : MonoBehaviour
     }
     public void Shake()
     {
-        gameObject.transform.DOShakePosition(0.5f, 10f, 20, 90, false, true);
+        gameObject.transform.DOShakePosition(0.5f, 10f, 20, 90, false, true).SetUpdate(true);
     }
     
     private void OnDisable()

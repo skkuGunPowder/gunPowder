@@ -163,6 +163,7 @@ GameObject:
   - component: {fileID: 3864677492031836698}
   - component: {fileID: 4352986384241159320}
   - component: {fileID: 1005685616841845659}
+  - component: {fileID: 1940498782353545866}
   m_Layer: 5
   m_Name: Crown
   m_TagString: Untagged
@@ -186,8 +187,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 12, y: 52}
-  m_SizeDelta: {x: 70, y: 70}
+  m_AnchoredPosition: {x: 3, y: 50}
+  m_SizeDelta: {x: 85, y: 80}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &4352986384241159320
 CanvasRenderer:
@@ -217,7 +218,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f6ddea5f7ae89482ab2c56f6f10150af, type: 3}
+  m_Sprite: {fileID: 1047700358, guid: 67c314cc3726b234cad80bb857882200, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -227,6 +228,28 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!95 &1940498782353545866
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 727689889250540347}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: eb324b5d017ce7c44bb01a0921520cee, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1894581458615643793
 GameObject:
   m_ObjectHideFlags: 0
@@ -610,8 +633,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: TakeMeHome
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 715855d65a80d4bd1afb15a96bcf5a78, type: 2}
-  m_sharedMaterial: {fileID: 8923021707789016035, guid: 715855d65a80d4bd1afb15a96bcf5a78, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: df5c7ca2e1a866b4992d97c206c60c61, type: 2}
+  m_sharedMaterial: {fileID: 6845085771162304754, guid: df5c7ca2e1a866b4992d97c206c60c61, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -641,7 +664,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535

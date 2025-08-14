@@ -95,4 +95,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnPlayerColorChanged?.Invoke(playerNumber, color);
     }
+
+    public event Action OnLoadEnd;
+    public void LoadEnd()
+    {
+        OnLoadEnd?.Invoke();
+    }
 }

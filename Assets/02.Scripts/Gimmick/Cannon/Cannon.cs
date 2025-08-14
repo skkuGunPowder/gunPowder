@@ -51,7 +51,7 @@ public class Cannon : MonoBehaviour
         .SetLoops(2, LoopType.Yoyo);
         yield return new WaitForSeconds(0.3f);
 
-        _barrel.transform.DORotate(new Vector3(0, 0, _fireDegree), 0.5f).SetEase(Ease.InOutSine);
+        _barrel.transform.DORotate(new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, _fireDegree), 0.5f).SetEase(Ease.InOutSine);
         yield return new WaitForSeconds(0.5f);
 
         yield return new WaitForSeconds(0.3f);
