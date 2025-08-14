@@ -27,7 +27,7 @@ public class GunPowderBezierCurve : MonoBehaviour
     private float _gunPowderSpeed = 5f;
 
     private bool _bezierFinished = false;
-    private float _followSpeed = 5f;
+    private float _followSpeed = 10f;
 
     //private const int RANDOM_SEED = 1234567890;
 

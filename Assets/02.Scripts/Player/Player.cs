@@ -299,6 +299,13 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         _attackTimer += Time.deltaTime;
 
+        
+        // 대기방에서 작동 안하게 하기 위해 추가
+        if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
+        {
+            return;
+        }
+
         _gunPowderDecreaseTimer += Time.deltaTime;
 
         DecreaseGunPowderPeriodically();
