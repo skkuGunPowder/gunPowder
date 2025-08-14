@@ -51,6 +51,8 @@ public class PlayerStat : MonoBehaviour
     public float NormalRecoilSpeed { get => _normalRecoilSpeed; set => _normalRecoilSpeed = value; }
     [SerializeField] private float _confuseTime = 5f;
     public float ConfuseTime { get => _confuseTime; set => _confuseTime = value; }
+    [SerializeField] private float _hitStopGunPowderCount = 50;
+    public float HitStopGunPowderCount { get => _hitStopGunPowderCount; set => _hitStopGunPowderCount = value; }
     private float _originalMoveSpeed;
     private float _originalRunSpeed;
     private float _originalJumpForce;

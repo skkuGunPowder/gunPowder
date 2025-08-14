@@ -44,20 +44,31 @@ public class PlayerBaseState : MonoState
 
     protected virtual void HandleHit()
     {
-        // 이미 히트스탑 상태라면 추가 히트 처리
-        if (_playerFSM.IsCurrentState<PlayerHitStopState>())
+        // 피가 50이하라면 히트스탑 상태로
+        // 아니라면 Damage 상태로
+        if(_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.PlayerStat.HitStopGunPowderCount)
         {
-            PlayerHitStopState currentHitStopState = _playerFSM.GetCurrentState<PlayerHitStopState>();
-            if (currentHitStopState != null)
+            // 이미 히트스탑 상태라면 추가 히트 처리
+            if (_playerFSM.IsCurrentState<PlayerHitStopState>())
             {
-                currentHitStopState.OnAdditionalHit();
+                PlayerHitStopState currentHitStopState = _playerFSM.GetCurrentState<PlayerHitStopState>();
+                if (currentHitStopState != null)
+                {
+                    currentHitStopState.OnAdditionalHit();
+                }
+            }
+            else
+            {
+                // 새로운 히트스탑 상태로 전환
+                SyncStateChange<PlayerHitStopState>();
             }
         }
         else
         {
-            // 새로운 히트스탑 상태로 전환
-            SyncStateChange<PlayerHitStopState>();
+            SyncStateChange<PlayerDamagedState>();
         }
+
+        
     }
 
     public virtual void MineUpdate()
@@ -113,6 +124,7 @@ public class PlayerBaseState : MonoState
             }
             else
             {
+                // 코요테 타임: 걷기 상태에서 잠깐 떠 있어도 점프 허용
                 _playerFSM.ChangeState<PlayerJumpState>();
             }
             

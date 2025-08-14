@@ -991,6 +991,7 @@ MonoBehaviour:
   - {fileID: 7133949878334549731}
   - {fileID: 2297686660635884882}
   - {fileID: 6433354483379324661}
+  _myDiePartList: []
   PhotonView: {fileID: 0}
   _bombSpawnPointList:
   - {fileID: 6130512474795203499}
@@ -1006,10 +1007,16 @@ MonoBehaviour:
   _attackTimer: 0
   _gunPowderDecreaseTimer: 0
   _gunPowderDecreaseWithoutAttackTimer: 0
+  _storedVelocity: {x: 0, y: 0}
+  _hasStoredVelocity: 0
   _gunPowderSpreadAngle: 90
   _groundRay2D: {fileID: 0}
+  HeadBombPrefab: {fileID: 0}
   GunPowderPrefab: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
   DieExplosionPrefab: {fileID: 0}
+  HitEffectPrefab: {fileID: 0}
+  UltimateEffectPrefab: {fileID: 0}
+  _ultimateChanceTimer: 0
 --- !u!114 &4024883436230281669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1048,10 +1055,14 @@ MonoBehaviour:
   _recoilSpeed: 0
   _normalRecoilTime: 0
   _normalRecoilSpeed: 0
+  _confuseTime: 5
+  _hitStopGunPowderCount: 50
   _isRunning: 0
   _isJumping: 0
   _isFallingDead: 0
   _isImmune: 0
+  _isDownJump: 0
+  _isWet: 0
   _myMoveSpeed: 0
   _jumpCount: 0
   _facingDirection: 1
@@ -1078,6 +1089,10 @@ MonoBehaviour:
   _totalDamage: 0
   _totalKillCount: 0
   IsFallingFromLedge: 0
+  _hasUltimateChance: 0
+  _hasUsedUltimateThisLife: 0
+  _ultimateChanceDuration: 5
+  _ultimateTriggerThreshold: 30
 --- !u!70 &975501548764073768
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1131,7 +1146,7 @@ Rigidbody2D:
   m_LinearDamping: 1
   m_AngularDamping: 0.05
   m_GravityScale: 4
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: c54d3d19ef47a4d488e4eb9705c22881, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

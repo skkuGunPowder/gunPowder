@@ -93,6 +93,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject DieExplosionPrefab;
     public GameObject HitEffectPrefab;
     public GameObject UltimateEffectPrefab;
+    public GameObject ExplosionEffectPrefab;
 
 
     private const int RANDOM_SEED = 123456;
@@ -110,6 +111,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private Ultimate _ultimate;
     public Ultimate Ultimate => _ultimate;
     private bool _ultimateEffectOn = false;
+	private Coroutine _ultimateEffectOffRoutine;
 
     private PlayerMaterial _playerMaterial;
     private PlayerFSM _playerFSM;
@@ -347,8 +349,75 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void UltimateEffect(bool isOn)
     {
-        UltimateEffectPrefab.SetActive(isOn);
+		if (UltimateEffectPrefab == null)
+		{
+			return;
+		}
+
+		if (isOn)
+		{
+			if (_ultimateEffectOffRoutine != null)
+			{
+				StopCoroutine(_ultimateEffectOffRoutine);
+				_ultimateEffectOffRoutine = null;
+			}
+			UltimateEffectPrefab.SetActive(true);
+			PlayParticleGroup(UltimateEffectPrefab);
+		}
+		else
+		{
+			if (_ultimateEffectOffRoutine != null)
+			{
+				StopCoroutine(_ultimateEffectOffRoutine);
+			}
+			_ultimateEffectOffRoutine = StartCoroutine(StopParticleGroupThenDisable(UltimateEffectPrefab));
+		}
     }
+
+	private void PlayParticleGroup(GameObject root)
+	{
+		var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
+		for (int i = 0; i < particleSystems.Length; i++)
+		{
+			ParticleSystem ps = particleSystems[i];
+			if (ps == null) { continue; }
+			var emission = ps.emission;
+			emission.enabled = true;
+			ps.Play(true);
+		}
+	}
+
+	private IEnumerator StopParticleGroupThenDisable(GameObject root)
+	{
+		var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
+		for (int i = 0; i < particleSystems.Length; i++)
+		{
+			ParticleSystem ps = particleSystems[i];
+			if (ps == null) { continue; }
+			var emission = ps.emission;
+			emission.enabled = false;
+			ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+		}
+
+		bool anyAlive = true;
+		while (anyAlive)
+		{
+			anyAlive = false;
+			for (int i = 0; i < particleSystems.Length; i++)
+			{
+				ParticleSystem ps = particleSystems[i];
+				if (ps != null && ps.IsAlive(true))
+				{
+					anyAlive = true;
+					break;
+				}
+			}
+			yield return null;
+		}
+
+		root.SetActive(false);
+		_ultimateEffectOffRoutine = null;
+	}
 
     // GhostTrail Toggle -------------------------------------------------------
     public void RPC_SetGhostTrail(bool isOn)
@@ -414,6 +483,9 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.HasUsedUltimateThisLife = true;
             _playerStat.HasUltimateChance = false;
             _ultimateChanceTimer = 0f;
+            RPC_UltimateEffect(false);
+            RPC_SetMaterial((byte)EPlayerMaterial.Default);
+            _ultimateEffectOn = false;
         }
     }
 
@@ -441,7 +513,19 @@ public class Player : MonoBehaviourPun, IDamagable
             _gunPowderDecreaseWithoutAttackTimer = 0f;
             //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
             _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr);
+
+            RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, 10, 30f, 1.0f, true);
+            if(PhotonView.IsMine && ExplosionEffectPrefab != null)
+            {
+                PhotonView.RPC(nameof(PlayExplosionEffect), RpcTarget.All);
+            }
         }
+    }
+
+    [PunRPC]
+    private void PlayExplosionEffect()
+    {
+        VFXPool.Instance.Play(ExplosionEffectPrefab.name, transform.position);
     }
 
     /// <summary>
@@ -508,7 +592,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// <summary>
     /// 피격시 건파우더 흩뿌리기
     /// </summary>
-    // [PunRPC]
+    [PunRPC]
     public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
@@ -657,10 +741,6 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void ResetAnimatorTrigger(string triggerName)
     {
-        if(!PhotonNetwork.IsMasterClient)
-        {
-            return;
-        }
         foreach (Animator animator in _myAnimatorList)
         {
             animator.ResetTrigger(triggerName);
