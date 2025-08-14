@@ -19,7 +19,7 @@ public class PlayerJumpDashState : PlayerBaseState
     private bool _isLanding = false;
     private bool _landingConfirmed = false;
 
-    private float _jumpDashEffectOffTime = 0.4f;
+    private float _jumpDashEffectOffTime = 0.3f;
 
     public override void OnEnter()
     {

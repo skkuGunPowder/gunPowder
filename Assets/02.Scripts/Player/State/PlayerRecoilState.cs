@@ -41,7 +41,7 @@ public class PlayerRecoilState : PlayerBaseState
             {
                 if (IsGrounded2D())
                 {
-                    _playerFSM.ChangeState<PlayerIdleState>();  
+                    _playerFSM.SyncStateChange<PlayerIdleState>();  
                 }
                 else
                 {
