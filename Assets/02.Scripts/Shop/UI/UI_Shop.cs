@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
@@ -30,8 +31,8 @@ public class UI_Shop : Singleton<UI_Shop>
     {
         CurrencyManager.Instance.OnDataChanged += RefreshPlayerCurrency;
         Shop.Instance.OnShopItemChanged += Refresh;
-        SelectMainCategory(EShopMainCategory.Event);
 
+        SelectMainCategory(EShopMainCategory.Event);
         RefreshPlayerCurrency(CurrencyManager.Instance.PlayerGold.GetAmount(), CurrencyManager.Instance.PlayerGold.GetAmount());
     }
 
@@ -72,15 +73,15 @@ public class UI_Shop : Singleton<UI_Shop>
         }
 
         for (int i = 0; i < SubCategorySlotList.Count; i++)
+        {
+            if (subCategoryList.Count > i)
             {
-                if (subCategoryList.Count > i)
-                {
-                    SubCategorySlotList[i].gameObject.SetActive(true);
-                    SubCategorySlotList[i].Refresh(subCategoryList[i]);
-                    continue;
-                }
-                SubCategorySlotList[i].gameObject.SetActive(false);
+                SubCategorySlotList[i].gameObject.SetActive(true);
+                SubCategorySlotList[i].Refresh(subCategoryList[i]);
+                continue;
             }
+            SubCategorySlotList[i].gameObject.SetActive(false);
+        }
 
         SelectSubCategory(subCategoryList[0]);
     }
@@ -100,7 +101,19 @@ public class UI_Shop : Singleton<UI_Shop>
     {
         _shopItemDict = shopItemDcit;
 
-        MainEventPage.Refresh();
+        if (currentCategory == EItemType.Event)
+        {
+            MainEventPage.Refresh();
+            return;
+        }
+
         ShoppingPage.Refresh(shopItemDcit[currentCategory]);
+    }
+
+    public void ExitShop()
+    {
+        CurrencyManager.Instance.OnDataChanged -= RefreshPlayerCurrency;
+        Shop.Instance.OnShopItemChanged -= Refresh;
+        SceneManager.LoadScene("Lobby");
     }
 }
