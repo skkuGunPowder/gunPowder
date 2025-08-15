@@ -175,6 +175,10 @@ public class AccountRepository
         }
         catch (Exception e)
         {
+            Debug.LogError($"예외 발생 - 타입: {e.GetType().Name}");
+            Debug.LogError($"예외 메시지: {e.Message}");
+            Debug.LogError($"스택 트레이스: {e.StackTrace}");
+
             Debug.LogError("예외 발생: " + e.Message);
             return null;
         }
