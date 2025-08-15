@@ -14,13 +14,11 @@ public class PlayerSettingManager : MonoBehaviour
     private PhotonView _photonView;
     
     public PlayerSpawner Spawner;
-    public LoadSceneChecker LoadChecker;
     
     // 현재 룸 프로퍼티 가져오기 => 플레이어 세팅해주기
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
-        // EventManager.Instance.OnLoadEnd += Init;
     }
 
     private void Start()
@@ -98,11 +96,8 @@ public class PlayerSettingManager : MonoBehaviour
         }
 
         GameManager.Instance.TimeScaleSetting();
+        DamageChecker.Instance.SetPlayerView();
     }
-
-    // private void OnDisable()
-    // {
-    //     EventManager.Instance.OnLoadEnd -= Init;
-    // }
+    
     
 }

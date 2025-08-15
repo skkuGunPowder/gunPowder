@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.UI;
+
 public class UltimateProductionSlot : MonoBehaviour
 {
     
@@ -11,6 +13,8 @@ public class UltimateProductionSlot : MonoBehaviour
     [Header("궁극기 애니메이션 오브젝트 관련")]
     public RectTransform UltimateEffectUp;
     public RectTransform UltimateEffectDown;
+    public Image UpBackGround;
+    public Image DownBackGround;
     public float UltimateEffectSpeed = 1f;
     public Ease UltimateEffectInEase = Ease.Linear;
     public Ease UltimateEffectOutEase = Ease.Linear;
@@ -20,6 +24,10 @@ public class UltimateProductionSlot : MonoBehaviour
     [Header("위치 초기화")]
     public Vector2 UltimateOriginPosition;
     public Vector2 UltimateOriginPosition2;
+    
+    [Header("컬러")]
+    public Color32 MyTeam;
+    public Color32 OtherTeam;
     private void Awake()
     {
         EventManager.Instance.OnUltimate += Play;
@@ -44,6 +52,10 @@ public class UltimateProductionSlot : MonoBehaviour
         });
     }
 
+    private void TeamCheck()
+    {
+        
+    }
     private void BombEffect(string bomb)
     {
         switch (bomb)
@@ -63,8 +75,10 @@ public class UltimateProductionSlot : MonoBehaviour
                 break;
         }
     }
+    
     private void OnDisable()
     {
+        EventManager.Instance.OnUltimate -= Play;
         DOTween.Kill(this);
         UltimateEffectUp.anchoredPosition = UltimateOriginPosition;
         UltimateEffectDown.anchoredPosition = UltimateOriginPosition2;
