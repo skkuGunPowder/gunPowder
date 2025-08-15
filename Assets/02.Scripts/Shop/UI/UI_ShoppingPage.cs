@@ -57,7 +57,7 @@ public class UI_ShoppingPage : MonoBehaviour
         if (_selectedItem.GoldPrice > -1)
             {
                 BuyGoldButton.gameObject.SetActive(true);
-                BuyGoldButtonText.text = _selectedItem.GoldPrice.ToString("N1");
+                BuyGoldButtonText.text = _selectedItem.GoldPrice.ToString("N0");
             }
             else
             {
@@ -67,7 +67,7 @@ public class UI_ShoppingPage : MonoBehaviour
         if (_selectedItem.DiamondPrice > -1)
         {
             BuyDiamondButton.gameObject.SetActive(true);
-            BuyDiamondButtonText.text = _selectedItem.DiamondPrice.ToString("N1");
+            BuyDiamondButtonText.text = _selectedItem.DiamondPrice.ToString("N0");
         }
         else
         {

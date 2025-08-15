@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 public class Shop : DontDestroySingleton<Shop>
@@ -29,7 +30,7 @@ public class Shop : DontDestroySingleton<Shop>
         OnShopItemChanged?.Invoke(_shopItemDict, EItemType.Event);
     }
 
-    public void BuyItem(ECurrencyType currencyType)
+    public async Task BuyItem(ECurrencyType currencyType)
     {
         int price = 0;
 
@@ -54,7 +55,7 @@ public class Shop : DontDestroySingleton<Shop>
             return;
         }
 
-        Result buyResult = _repo.BuyItem(_selectedItem).Result;
+        Result buyResult = await _repo.BuyItem(_selectedItem);
         if (!buyResult.IsSuccess)
         {
             Debug.LogError(buyResult.Message);
@@ -77,9 +78,14 @@ public class Shop : DontDestroySingleton<Shop>
         if (_selectedItem == null)
         {
             Debug.LogWarning("선택된 아이템이 없습니다.");
-            return null;    
+            return null;
         }
 
         return _selectedItem;
+    }
+
+    public Dictionary<EItemType, List<ShopItem>> GetShopItemDict()
+    {
+        return _shopItemDict;
     }
 }

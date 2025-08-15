@@ -30,8 +30,9 @@ public class UI_Shop : Singleton<UI_Shop>
         CurrencyManager.Instance.OnDataChanged += RefreshPlayerCurrency;
         Shop.Instance.OnShopItemChanged += Refresh;
 
+        _shopItemDict = Shop.Instance.GetShopItemDict();
         SelectMainCategory(EShopMainCategory.Event);
-        RefreshPlayerCurrency(CurrencyManager.Instance.PlayerGold.GetAmount(), CurrencyManager.Instance.PlayerGold.GetAmount());
+        RefreshPlayerCurrency(CurrencyManager.Instance.PlayerDiamond.GetAmount(), CurrencyManager.Instance.PlayerGold.GetAmount());
     }
 
     public void ShowMainPage()
@@ -89,10 +90,10 @@ public class UI_Shop : Singleton<UI_Shop>
         Refresh(_shopItemDict, itemType);
     }
 
-    public void RefreshPlayerCurrency(int goldAmount, int diamondAmount)
+    public void RefreshPlayerCurrency(int diamondAmount, int goldAmount)
     {
-        PlayerGoldText.text = $"{goldAmount}";
         PlayerDiamondText.text = $"{diamondAmount}";
+        PlayerGoldText.text = $"{goldAmount}";
     }
 
     public void Refresh(Dictionary<EItemType, List<ShopItem>> shopItemDcit, EItemType currentCategory)
