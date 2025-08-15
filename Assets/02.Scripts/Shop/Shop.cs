@@ -29,17 +29,17 @@ public class Shop : DontDestroySingleton<Shop>
         OnShopItemChanged?.Invoke(_shopItemDict, EItemType.Event);
     }
 
-    public void BuyItem(ShopItem selectedItem, ECurrencyType currencyType)
+    public void BuyItem(ECurrencyType currencyType)
     {
         int price = 0;
 
         if (currencyType == ECurrencyType.Diamond)
         {
-            price = selectedItem.DiamondPrice;
+            price = _selectedItem.DiamondPrice;
         }
         else
         {
-            price = selectedItem.GoldPrice;
+            price = _selectedItem.GoldPrice;
         }
 
         if (price < 0)
@@ -54,7 +54,7 @@ public class Shop : DontDestroySingleton<Shop>
             return;
         }
 
-        Result buyResult = _repo.BuyItem(selectedItem).Result;
+        Result buyResult = _repo.BuyItem(_selectedItem).Result;
         if (!buyResult.IsSuccess)
         {
             Debug.LogError(buyResult.Message);
@@ -62,8 +62,8 @@ public class Shop : DontDestroySingleton<Shop>
             return;
         }
 
-        ItemStorage.Instance.AddItem(selectedItem.ID);
-        OnShopItemChanged?.Invoke(_shopItemDict, selectedItem.ItemInfo.ItemType);
+        ItemStorage.Instance.AddItem(_selectedItem.ID);
+        OnShopItemChanged?.Invoke(_shopItemDict, _selectedItem.ItemInfo.ItemType);
     }
 
     public void SelectItem(ShopItem item)

@@ -3996,6 +3996,10 @@ MonoBehaviour:
   _shopSlotList: []
   _shopSlotPrefab: {fileID: 5708305857085770108, guid: 8e311d1b563c99247a6458cc4fcbdbd9, type: 3}
   _gridTransform: {fileID: 2109776756353499222}
+  BuyGoldButton: {fileID: 629494341601655415}
+  BuyDiamondButton: {fileID: 8040716027330530514}
+  BuyGoldButtonText: {fileID: 5880869405022022674}
+  BuyDiamondButtonText: {fileID: 1268826609962790044}
 --- !u!1 &1169839271865190748
 GameObject:
   m_ObjectHideFlags: 0
@@ -8310,7 +8314,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 925116889023440992}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1160264925482429606}
+        m_TargetAssemblyTypeName: UI_ShoppingPage, Assembly-CSharp
+        m_MethodName: OnClickBuyWithDiamon
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &4755289210030707593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9780,7 +9796,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6632767639086460270}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1160264925482429606}
+        m_TargetAssemblyTypeName: UI_ShoppingPage, Assembly-CSharp
+        m_MethodName: OnClickBuyWithGold
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &5958761760870834360
 CanvasRenderer:
   m_ObjectHideFlags: 0
