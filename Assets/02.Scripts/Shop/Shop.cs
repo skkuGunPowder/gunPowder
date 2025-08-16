@@ -1,15 +1,18 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 public class Shop : DontDestroySingleton<Shop>
 {
     private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
 
+    private ShopItem _selectedItem;
+
     private ShopRepository _repo;
 
-    public event Action<Dictionary<EItemType, List<ShopItem>>> OnShopItemChanged;
+    public event Action<Dictionary<EItemType, List<ShopItem>>, EItemType> OnShopItemChanged;
 
 
     protected override void Awake()
@@ -22,42 +25,67 @@ public class Shop : DontDestroySingleton<Shop>
 
     private void LoadShopItemData(Dictionary<EItemType, List<ShopItem>> shopItemDict)
     {
+        Debug.LogWarning("상점 아이템 세팅");
         _shopItemDict = shopItemDict;
-        OnShopItemChanged?.Invoke(_shopItemDict);
+        OnShopItemChanged?.Invoke(_shopItemDict, EItemType.Event);
     }
 
-    public async void BuyItem(ShopItem selectedItem, int amount)
+    public async Task BuyItem(ECurrencyType currencyType)
     {
-        if (selectedItem.GoldPrice > 0)
+        int price = 0;
+
+        if (currencyType == ECurrencyType.Diamond)
         {
-            Result goldResult = CurrencyManager.Instance.SubtractGold(selectedItem.GoldPrice);
-            if (!goldResult.IsSuccess)
-            {
-                Debug.LogError(goldResult.Message);
-                return;
-            }
+            price = _selectedItem.DiamondPrice;
+        }
+        else
+        {
+            price = _selectedItem.GoldPrice;
         }
 
-        if (selectedItem.DiamondPrice > 0)
+        if (price < 0)
         {
-            // TODO
-            // CurrencyManager.Instance.SubtractDiamond(selectedItem.DiamondPrice);
+            throw new Exception("아이템 가격이 유효하지 않습니다!");
         }
 
-        if (selectedItem.CashPrice > 0)
+        Result currencyResult = CurrencyManager.Instance.SubtractCurrency(currencyType, price);
+        if (!currencyResult.IsSuccess)
         {
-            // TODO: 현금 결제 처리
-        }
-
-        Result result = await _repo.BuyItem(selectedItem, amount);
-        if (!result.IsSuccess)
-        {
-            Debug.LogError(result.Message);
-            CurrencyManager.Instance.AddGold(selectedItem.GoldPrice);
+            Debug.LogError(currencyResult.Message);
             return;
         }
 
-        ItemStorage.Instance.AddItem(selectedItem.ID);
-        OnShopItemChanged?.Invoke(_shopItemDict);
+        Result buyResult = await _repo.BuyItem(_selectedItem);
+        if (!buyResult.IsSuccess)
+        {
+            Debug.LogError(buyResult.Message);
+            CurrencyManager.Instance.AddCurrency(currencyType, price);
+            return;
+        }
+
+        ItemStorage.Instance.AddItem(_selectedItem.ID);
+        OnShopItemChanged?.Invoke(_shopItemDict, _selectedItem.ItemInfo.ItemType);
+    }
+
+    public void SelectItem(ShopItem item)
+    {
+        _selectedItem = item;
+        OnShopItemChanged?.Invoke(_shopItemDict, item.ItemInfo.ItemType);
+    }
+
+    public ShopItem GetSelectedItem()
+    {
+        if (_selectedItem == null)
+        {
+            Debug.LogWarning("선택된 아이템이 없습니다.");
+            return null;
+        }
+
+        return _selectedItem;
+    }
+
+    public Dictionary<EItemType, List<ShopItem>> GetShopItemDict()
+    {
+        return _shopItemDict;
     }
 }

@@ -13,5 +13,7 @@ public enum EItemType
     Player,
     GoldPowder,
     DiamondPowder,
+    Event,
+    EventShop,
     Count
 }
