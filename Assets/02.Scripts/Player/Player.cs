@@ -238,6 +238,12 @@ public class Player : MonoBehaviourPun, IDamagable
             gameObject.tag = "Enemy";   
             //gameObject.layer = LayerMask.NameToLayer("Enemy");
         }
+
+        // 로컬 필드 팀을 항상 네트워크 프로퍼티와 동기화
+        if (PhotonView.Owner != null && PhotonView.Owner.CustomProperties.ContainsKey(EProperties.Team.ToString()))
+        {
+            _playerStat.Team = (EInGameTeam)PhotonView.Owner.CustomProperties[EProperties.Team.ToString()];
+        }
     }
 
     void OnEnable()
@@ -306,9 +312,10 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
 
+        /*
         _gunPowderDecreaseTimer += Time.deltaTime;
 
-        DecreaseGunPowderPeriodically();
+        DecreaseGunPowderPeriodically();*/
 
         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
         DecreaseGunPowderWithoutAttack();
@@ -546,6 +553,11 @@ public class Player : MonoBehaviourPun, IDamagable
         _gunPowderDecreaseWithoutAttackTimer = 0f;
     }
 
+    public void PlayerTeamCheck()
+    {
+        
+    }
+
     public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
         // 피격 VFX 재생
@@ -575,11 +587,32 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
 
+        // 공격자 정보 가져오기
+        PhotonView attackerView = PhotonView.Find(attackerViewId);
+        if(attackerView != null)
+        {
+            PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
+            
+            // 팀 비교는 동기화된 로컬 필드 사용 (시작 시 CustomProperties로부터 동기화됨)
+            EInGameTeam attackerTeam = attackerStat != null ? attackerStat.Team : EInGameTeam.Default;
+            EInGameTeam victimTeam = _playerStat.Team;
+
+            // 팀 체크: 같은 팀이면서 자기 자신이 아닌 경우 데미지 무시
+            if(attackerTeam == victimTeam && attackerActorNumber != PhotonView.OwnerActorNr)
+            {
+                // 같은 팀이므로 데미지 적용하지 않음 (VFX, 사운드 등은 그대로 재생)
+                return;
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[RPC_TakeDamage] Could not find attacker view with ID: {attackerViewId}");
+        }
+
         // 체력 감소
         bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber);
 
         // 날 때린 사람 딜량 증가
-        PhotonView attackerView = PhotonView.Find(attackerViewId);
         if(attackerView != null)
         {
             attackerView.GetComponent<PlayerStat>().IncreaseTotalDamage(damage);
