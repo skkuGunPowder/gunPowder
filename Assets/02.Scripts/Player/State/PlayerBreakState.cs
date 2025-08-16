@@ -67,7 +67,7 @@ public class PlayerBreakState : PlayerBaseState
                 }
                 else
                 {
-                    _owner.SetAnimatorTrigger("Fall");
+                    _owner.RPC_SetAnimatorTrigger("Fall");
                     _playerFSM.ChangeState<PlayerFallState>();
                 }
             }

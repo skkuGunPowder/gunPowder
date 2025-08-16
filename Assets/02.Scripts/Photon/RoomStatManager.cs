@@ -9,6 +9,7 @@ public class RoomStatManager : Singleton<RoomStatManager>
     public int PlayerGunpowder;
     public int PlayerDecreaseTime;
     public EInGameTeam PlayerTeam;
+    
     protected override void Awake()
     {
         base.Awake();

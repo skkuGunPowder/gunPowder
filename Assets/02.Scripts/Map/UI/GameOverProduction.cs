@@ -74,7 +74,6 @@ public class GameOverProduction : MonoBehaviour
         Sequence sequence = DOTween.Sequence();
         sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
         sequence.JoinCallback(TimerOff);
-        sequence.AppendCallback(GameManager.Instance.GameResultCheck);
         sequence.AppendInterval(GameSetWaitTime);
         sequence.Append(_camera.DOOrthoSize(CameraZoomOutAmount, CameraZoomOutTime).SetEase(CameraZoomOutEase));
         sequence.JoinCallback(CameraOn);

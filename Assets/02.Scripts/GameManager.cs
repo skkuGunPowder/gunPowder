@@ -21,6 +21,8 @@ public class GameManager : PhotonSingleton<GameManager>
     
     [Header("게임 종료시 연출")]
     public GameOverProduction GameOverProduction;
+    [Header("게임 시작시 연출")]
+    public GameStartProduction GameStartProduction;
     [Header("플레이어 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
@@ -31,28 +33,26 @@ public class GameManager : PhotonSingleton<GameManager>
          base.Awake();
 
          _photonView = GetComponent<PhotonView>();
-         
+
          if (_currentGameState == EGameState.Waiting)
          {
              return;
          }
+         
+         TimeScaleSetting();
          EventManager.Instance.OnLoadFinished += Init;
      }
-    
     // 게임 시작
     private void Update()
     {
-        if (_currentGameState != EGameState.Playing)
+        if (_currentGameState == EGameState.Playing || _currentGameState == EGameState.Result)
         {
-            return;
+            GameTimer();
         }
-        
-        GameTimer(); 
     }
 
     private void GameTimer()
     {
-
         _timer -= Time.deltaTime;
 
         if (PhotonNetwork.IsMasterClient == false)
@@ -78,6 +78,9 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
+     
+        Debug.Log($"{targetPlayer}의 데드가 변경 {changedProps[EProperties.IsDead.ToString()]} ");
+        
         // 현재 살아있는 사람들 체크
         EventManager.Instance.TargetChanged();
         // 게임오버 체크
@@ -101,13 +104,12 @@ public class GameManager : PhotonSingleton<GameManager>
         { 
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
         }
-
-        
     }
     
     [PunRPC]
     private void RPC_GameOver()
     {
+        GameStateChange(EGameState.Result);
         GameOverProduction.gameObject.SetActive(true);
         GameOverProduction.Play();
     }
@@ -140,18 +142,19 @@ public class GameManager : PhotonSingleton<GameManager>
         return true;
     }
 
-    private void Init()
+    public void Init()
     {
+        Debug.Log("gamemanagerInit");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
 
-        _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All, (int)EGameState.Playing);
+        _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All);
     }
 
     [PunRPC]
-    public void RPC_RequestGameStart(int state)
+    public void RPC_RequestGameStart()
     {
         EventManager.Instance.ProfileInit();
 
@@ -162,9 +165,8 @@ public class GameManager : PhotonSingleton<GameManager>
         _timer = _initTime;
         
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
-        GameStateChange((EGameState)state);
         
-        EventManager.Instance.OnLoadFinished -= Init;
+        GameStartProduction.GameStart();
     }
     
     // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
@@ -177,7 +179,7 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
 
-        int playTime = (int)Mathf.Abs(_timer - _initTime);
+        int playTime = (int)Mathf.Abs(_timer - _initTime) ;
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         PlayerStat stat = playerObject.GetComponent<PlayerStat>();
         Hashtable properties = new Hashtable()
@@ -185,20 +187,39 @@ public class GameManager : PhotonSingleton<GameManager>
             {EProperties.IsDead.ToString(), true},
             {EProperties.Kill.ToString(), stat.TotalKillCount},
             {EProperties.Damage.ToString(), stat.TotalDamage}
-
         };
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            properties.Add(EProperties.SurvivorTime.ToString(), playTime);
+        }
         
         player.SetCustomProperties(properties);
+        
+        GameStateChange(EGameState.GameOver);
     }
     
     public void GameStateChange(EGameState state)
     {
         _currentGameState = state;
+        TimeScaleSetting();
     }
-
-    private void OnDisable()
+    
+    public void TimeScaleSetting()
     {
-        Debug.Log("disable");
+        if (_currentGameState == EGameState.Ready)
+        {
+            Time.timeScale = 0;
+        }
+        else
+        {
+            Time.timeScale = 1;
+        }
+    }
+    
+    private void OnDisable()
+    { 
+        EventManager.Instance.OnLoadFinished -= Init;
     }
 }
 

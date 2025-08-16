@@ -8,7 +8,7 @@ public class PlayerRunState : PlayerBaseState
 
     // 코요테 타임 관련
     private float _coyoteTimer = 0f;
-    private const float COYOTE_TIME = 0.15f;
+    private const float COYOTE_TIME = 0.1f;
     private bool _wasGroundedLastFrame = true;
 
     public override void OnEnter()
@@ -53,19 +53,29 @@ public class PlayerRunState : PlayerBaseState
         if (isGrounded)
         {
             _coyoteTimer = 0f;
+            _wasGroundedLastFrame = true;
         }
         else
         {
-            _coyoteTimer += Time.deltaTime;
-        }
+            if (_wasGroundedLastFrame)
+            {
+                _coyoteTimer = 0f;
+            }
+            else
+            {
+                _coyoteTimer += Time.deltaTime;
+            }
 
-        // 바닥에서 떨어진 순간(이전 프레임엔 있었고, 이번 프레임엔 없음)
-        if (!isGrounded)
-        {
-            _owner.PlayerStat.IsFallingFromLedge = true;
-            _owner.SetAnimatorTrigger("Fall");
-            _playerFSM.ChangeState<PlayerFallState>();
-            return false;
+            if (_coyoteTimer >= COYOTE_TIME)
+            {
+                _owner.PlayerStat.IsFallingFromLedge = true;
+                _owner.RPC_SetAnimatorTrigger("Fall");
+                _playerFSM.ChangeState<PlayerFallState>();
+                _wasGroundedLastFrame = false;
+                return false;
+            }
+
+            _wasGroundedLastFrame = false;
         }
 
         Vector2 velocity = _owner.Rigidbody2D.linearVelocity;

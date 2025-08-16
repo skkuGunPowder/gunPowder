@@ -19,7 +19,11 @@ public class PlayerSettingManager : MonoBehaviour
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
-        EventManager.Instance.OnLoadFinished += Init;
+    }
+
+    private void Start()
+    {
+        Init();
     }
 
     public void Init()
@@ -82,22 +86,18 @@ public class PlayerSettingManager : MonoBehaviour
     
     private void SpawnPlayer()
     {
-        Debug.Log($"지금 소환하는 사람 넘버 : {PhotonNetwork.LocalPlayer.ActorNumber}");
-
         for (int i = 0; i < _playerList.Count; i++)
         {
-            Debug.Log($"spawnplayer 리스트 갯수 :" + _playerList[i]);
             if (_playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
             {
-                Debug.Log($"{_playerList[i]}는 현재 넘버랑 다릅니다.");
-                Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} ");
                 continue;
             }
-            Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} 가 소환한당");    
             Spawner.GeneratePlayers(i);
         }
-        
-        EventManager.Instance.OnLoadFinished -= Init;
+
+        GameManager.Instance.TimeScaleSetting();
+        DamageChecker.Instance.SetPlayerView();
     }
+    
     
 }

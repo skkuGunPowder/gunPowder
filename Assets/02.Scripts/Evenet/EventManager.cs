@@ -95,4 +95,15 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnPlayerColorChanged?.Invoke(playerNumber, color);
     }
+
+    public event Action OnLoadEnd;
+    public void LoadEnd()
+    {
+        OnLoadEnd?.Invoke();
+    }
+    public event Action<string> OnUltimate;
+    public void Ultimate(string bombName)
+    {
+        OnUltimate?.Invoke(bombName);
+    }
 }

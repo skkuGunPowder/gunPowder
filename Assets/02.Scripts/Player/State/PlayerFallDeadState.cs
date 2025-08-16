@@ -30,6 +30,8 @@ public class PlayerFallDeadState : PlayerBaseState
     {
         base.OnEnter();
 
+        _owner.HitEffectPrefab.SetActive(true);
+
         // 안전성 체크
         if (GameManager.Instance == null)
         {
@@ -109,6 +111,8 @@ public class PlayerFallDeadState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
+
+        _owner.HitEffectPrefab.SetActive(false);
 
         // DOTween 중단
         if (_moveTween != null && _moveTween.IsActive())
