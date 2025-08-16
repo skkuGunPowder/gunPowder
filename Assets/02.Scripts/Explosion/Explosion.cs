@@ -43,7 +43,8 @@ public class Explosion : MonoBehaviour
                 {
                     continue;
                 }
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
+                int damage = DamagePerDistance(otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
+                damagableObject.TakeDamage(damage, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());
@@ -68,5 +69,28 @@ public class Explosion : MonoBehaviour
         direction.y += 0.3f;
 
         rb.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
+    }
+    
+    /// <summary>
+    /// 거리별 데미지 계산
+    /// </summary>
+    /// <param name="rb"></param>
+    /// <param name="explosionPosition"></param>
+    /// <param name="explosionRadius"></param>
+    /// <param name="damage"></param>
+    /// <returns></returns>
+    private int DamagePerDistance(Rigidbody2D rb, Vector2 explosionPosition, float explosionRadius, int damage)
+    {
+        Vector2 direction = rb.position - explosionPosition;
+        float distance = direction.magnitude;
+
+        if (distance > explosionRadius)
+        {
+            return 0;
+        }
+
+        float damagePerDistance = damage * (1 - (distance / explosionRadius));
+        Debug.Log($"damagePerDistance: {Mathf.CeilToInt(damagePerDistance)}");
+        return Mathf.CeilToInt(damagePerDistance);
     }
 }
