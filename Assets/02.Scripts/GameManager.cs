@@ -45,12 +45,10 @@ public class GameManager : PhotonSingleton<GameManager>
     // 게임 시작
     private void Update()
     {
-        if (_currentGameState != EGameState.Playing)
+        if (_currentGameState == EGameState.Playing || _currentGameState == EGameState.Result)
         {
-            return;
+            GameTimer();
         }
-        
-        GameTimer(); 
     }
 
     private void GameTimer()
@@ -80,6 +78,9 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
+     
+        Debug.Log($"{targetPlayer}의 데드가 변경 {changedProps[EProperties.IsDead.ToString()]} ");
+        
         // 현재 살아있는 사람들 체크
         EventManager.Instance.TargetChanged();
         // 게임오버 체크
@@ -108,7 +109,7 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     private void RPC_GameOver()
     {
-        GameStateChange(EGameState.GameOver);
+        GameStateChange(EGameState.Result);
         GameOverProduction.gameObject.SetActive(true);
         GameOverProduction.Play();
     }
@@ -155,7 +156,6 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     public void RPC_RequestGameStart()
     {
-        Debug.Log("rpcrpcrpcrpcrpcrpc");
         EventManager.Instance.ProfileInit();
 
         int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
@@ -179,18 +179,24 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
 
-        int playTime = (int)Mathf.Abs(_timer - _initTime);
+        int playTime = (int)Mathf.Abs(_timer - _initTime) ;
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         PlayerStat stat = playerObject.GetComponent<PlayerStat>();
         Hashtable properties = new Hashtable()
         {
             {EProperties.IsDead.ToString(), true},
             {EProperties.Kill.ToString(), stat.TotalKillCount},
-            {EProperties.Damage.ToString(), stat.TotalDamage},
-            {EProperties.PlayTime.ToString(), playTime}
+            {EProperties.Damage.ToString(), stat.TotalDamage}
         };
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            properties.Add(EProperties.SurvivorTime.ToString(), playTime);
+        }
         
         player.SetCustomProperties(properties);
+        
+        GameStateChange(EGameState.GameOver);
     }
     
     public void GameStateChange(EGameState state)
@@ -198,7 +204,7 @@ public class GameManager : PhotonSingleton<GameManager>
         _currentGameState = state;
         TimeScaleSetting();
     }
-
+    
     public void TimeScaleSetting()
     {
         if (_currentGameState == EGameState.Ready)

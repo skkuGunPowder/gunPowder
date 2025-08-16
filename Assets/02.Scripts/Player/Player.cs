@@ -493,6 +493,9 @@ public class Player : MonoBehaviourPun, IDamagable
             RPC_UltimateEffect(false);
             RPC_SetMaterial((byte)EPlayerMaterial.Default);
             _ultimateEffectOn = false;
+            
+            // 궁극기 연출
+            EventManager.Instance.Ultimate(_ultimate.GetBombID());
         }
     }
 

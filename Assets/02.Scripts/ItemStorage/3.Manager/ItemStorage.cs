@@ -91,7 +91,10 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         }
 
         // 스타터 아이템 장착(미사일)
-        EquipItem(_storedItemDict[EItemType.Bomb][0]);
+        if (_equippedItemDict[EItemType.Bomb] == null)
+        {
+            EquipItem(_storedItemDict[EItemType.Bomb][0]);
+        }
 
         SetPlayerCustomProperties();
     }

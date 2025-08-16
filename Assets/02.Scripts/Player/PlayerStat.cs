@@ -266,6 +266,11 @@ public class PlayerStat : MonoBehaviour
     [PunRPC]
     public void RPC_RequestIncreaseGunPowder(int amount, PhotonMessageInfo info)
     {
+        if (GameManager.Instance.CurrentGameState != EGameState.Playing)
+        {
+            return;
+        } 
+        
         // 소유자만 처리 (마스터가 보내더라도 최종 처리는 로컬 소유자 권한)
         if (!_photonView.IsMine)
         {
@@ -278,7 +283,7 @@ public class PlayerStat : MonoBehaviour
     
     public bool DecreaseGunPowderCount(int amount, int attacker)
     {
-        if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
+        if (GameManager.Instance.CurrentGameState != EGameState.Playing)
         {
             return false;
         } 
