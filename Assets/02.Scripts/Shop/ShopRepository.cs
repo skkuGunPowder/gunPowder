@@ -76,17 +76,25 @@ public class ShopRepository
             int purchaseAmount = 0;
 
             DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
-            if (snapshot.Exists)
+            if (snapshot.Exists && snapshot.ContainsField(item.ID))
             {
                 purchaseAmount = snapshot.GetValue<int>(item.ID);
+                Debug.LogWarning($"디버깅 :: {purchaseAmount}");
             }
 
             if (purchaseAmount + 1 > item.MaxAmount)
             {
+                Debug.LogWarning($"{item.ItemInfo.Name} 구매 가능한 개수 초과");
                 return new Result(false, $"{item.ItemInfo.Name} 구매 가능한 개수 초과");
             }
+            
+            var updates = new Dictionary<string, object>
+            {
+                { $"{item.ID}", purchaseAmount + 1 }
+            };
 
-            await docRef.SetAsync(new { purchaseAmount = purchaseAmount + 1 });
+            await docRef.SetAsync(updates, SetOptions.MergeAll);
+            Debug.LogWarning($"{item.ItemInfo.Name} 구매 성공");
             return new Result(true, $"{item.ItemInfo.Name} 구매 성공");
         }
         catch (FirebaseException e)

@@ -54,7 +54,7 @@ public class CurrencyManager : DontDestroySingleton<CurrencyManager>
 
         if (currencyType == ECurrencyType.Diamond)
         {
-            // PlayerDiamond.Add(amount);
+            PlayerDiamond.Add(amount);
         }
 
         if (currencyType == ECurrencyType.EXP)
@@ -63,8 +63,7 @@ public class CurrencyManager : DontDestroySingleton<CurrencyManager>
         }
 
         _repo.SaveCurrencyData(PlayerDiamond, PlayerGold, PlayerExp);
-
-        OnDataChanged?.Invoke(PlayerGold.GetAmount(), PlayerGold.GetAmount());
+        OnDataChanged?.Invoke(PlayerDiamond.GetAmount(), PlayerGold.GetAmount());
     }
 
     public Result SubtractCurrency(ECurrencyType currencyType, int amount)
