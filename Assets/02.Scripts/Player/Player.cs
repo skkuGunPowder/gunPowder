@@ -545,6 +545,43 @@ public class Player : MonoBehaviourPun, IDamagable
         VFXPool.Instance.Play(ExplosionEffectPrefab.name, transform.position);
     }
 
+    // HitEffect 네트워크 동기화 메서드들 추가
+    public void RPC_SetHitEffect(bool isActive)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(SetHitEffect), RpcTarget.All, isActive);
+    }
+
+    [PunRPC]
+    public void SetHitEffect(bool isActive)
+    {
+        if (HitEffectPrefab != null)
+        {
+            HitEffectPrefab.SetActive(isActive);
+        }
+    }
+
+    public void RPC_PlayFallDeadVFX()
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(PlayFallDeadVFX), RpcTarget.All);
+    }
+
+    [PunRPC]
+    public void PlayFallDeadVFX()
+    {
+        if (ExplosionEffectPrefab != null)
+        {
+            VFXPool.Instance.Play(ExplosionEffectPrefab.name, transform.position);
+        }
+    }
+
     /// <summary>
     /// 공격을 하면 타이머 초기화
     /// </summary>
@@ -622,8 +659,10 @@ public class Player : MonoBehaviourPun, IDamagable
             attackerView.GetComponent<PlayerStat>().IncreaseTotalKillCount();
         }
         
+        // 건파우더 감소 개수 = 데미지 절반
+        int gunPowderCount = Mathf.CeilToInt(damage * 0.5f);
         // Gunpowder 낙출
-        ReleaseGunPowder(attackerBomb, attackerViewId, damage, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+        ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
 
         // 피격 횟수 증가
         _playerStat.IncreseDamagedCount();
