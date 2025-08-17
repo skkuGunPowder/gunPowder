@@ -97,7 +97,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
     private const int RANDOM_SEED = 123456;
-    private const string BASIC_BOMB_ID =  "BO0001";
+    private const string BASIC_BOMB_ID = "BO0001";
     public BombStat BasicBombStat;
     public BombStat SpecialBombStat;
 
@@ -111,14 +111,16 @@ public class Player : MonoBehaviourPun, IDamagable
     private Ultimate _ultimate;
     public Ultimate Ultimate => _ultimate;
     private bool _ultimateEffectOn = false;
-	private Coroutine _ultimateEffectOffRoutine;
+    private Coroutine _ultimateEffectOffRoutine;
 
     private PlayerMaterial _playerMaterial;
     private PlayerFSM _playerFSM;
     public PlayerFSM PlayerFSM => _playerFSM;
+    private DamagePopup _damagePopup;
+    public DamagePopup DamagePopup => _damagePopup;
 
 
-    
+
     [SerializeField] private float _ultimateChanceTimer = 0f; // 내부 타이머(갱신/소모 로직은 별도 구현 예정)
     public float UltimateChanceTimer { get => _ultimateChanceTimer; set => _ultimateChanceTimer = value; }
 
@@ -129,7 +131,8 @@ public class Player : MonoBehaviourPun, IDamagable
         PhotonView = GetComponent<PhotonView>();
         _playerMaterial = GetComponent<PlayerMaterial>();
         _playerFSM = GetComponent<PlayerFSM>();
-
+        _damagePopup = GetComponent<DamagePopup>();
+        
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         LoadItems();
 
@@ -137,7 +140,7 @@ public class Player : MonoBehaviourPun, IDamagable
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
         _normalBomb = basicBomb.GetComponent<Bomb>();
         BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
-        
+
         UI_PingBase.Instance.SetPing(this.transform);
 
         UnityEngine.Random.InitState(RANDOM_SEED);
@@ -187,11 +190,11 @@ public class Player : MonoBehaviourPun, IDamagable
                 }
             }
         }
-        
+
         // 특수폭탄 정보 받아오기
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
-        if(UltimateManager.Instance != null)
+        if (UltimateManager.Instance != null)
         {
             _ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
         }
@@ -214,7 +217,7 @@ public class Player : MonoBehaviourPun, IDamagable
             _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
             _rigidbody2D.interpolation = RigidbodyInterpolation2D.None; // 보간 비활성화
         }
-        
+
         _rigidbody2D.linearVelocity = Vector2.zero;
         _rigidbody2D.angularVelocity = 0f;
 
@@ -227,15 +230,15 @@ public class Player : MonoBehaviourPun, IDamagable
         _gunPowderDecreaseWithoutAttackTimer = 0f;
         _ultimateChanceTimer = 0f;
 
-        if(PhotonView.IsMine)
+        if (PhotonView.IsMine)
         {
             gameObject.tag = "Player";
             //gameObject.layer = LayerMask.NameToLayer("Player");
-            
+
         }
         else
-        {   
-            gameObject.tag = "Enemy";   
+        {
+            gameObject.tag = "Enemy";
             //gameObject.layer = LayerMask.NameToLayer("Enemy");
         }
 
@@ -248,7 +251,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     void OnEnable()
     {
-        if(_playerFSM != null)
+        if (_playerFSM != null)
         {
             _playerFSM.SyncStateChange<PlayerIdleState>();
         }
@@ -289,11 +292,11 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Update()
     {
         // 테스트
-        if(InputHandler.GetKeyDown(KeyCode.Q))
+        if (InputHandler.GetKeyDown(KeyCode.Q))
         {
             SetPlayerWet();
         }
-        else if(InputHandler.GetKeyDown(KeyCode.W))
+        else if (InputHandler.GetKeyDown(KeyCode.W))
         {
             ResetPlayerWet();
         }
@@ -305,7 +308,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         _attackTimer += Time.deltaTime;
 
-        
+
         // 대기방에서 작동 안하게 하기 위해 추가
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
         {
@@ -350,10 +353,10 @@ public class Player : MonoBehaviourPun, IDamagable
             }
         }
     }
-    
+
     public void RPC_UltimateEffect(bool isOn)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -363,80 +366,80 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void UltimateEffect(bool isOn)
     {
-		if (UltimateEffectPrefab == null)
-		{
-			return;
-		}
+        if (UltimateEffectPrefab == null)
+        {
+            return;
+        }
 
-		if (isOn)
-		{
-			if (_ultimateEffectOffRoutine != null)
-			{
-				StopCoroutine(_ultimateEffectOffRoutine);
-				_ultimateEffectOffRoutine = null;
-			}
-			UltimateEffectPrefab.SetActive(true);
-			PlayParticleGroup(UltimateEffectPrefab);
-		}
-		else
-		{
-			if (_ultimateEffectOffRoutine != null)
-			{
-				StopCoroutine(_ultimateEffectOffRoutine);
-			}
-			_ultimateEffectOffRoutine = StartCoroutine(StopParticleGroupThenDisable(UltimateEffectPrefab));
-		}
+        if (isOn)
+        {
+            if (_ultimateEffectOffRoutine != null)
+            {
+                StopCoroutine(_ultimateEffectOffRoutine);
+                _ultimateEffectOffRoutine = null;
+            }
+            UltimateEffectPrefab.SetActive(true);
+            PlayParticleGroup(UltimateEffectPrefab);
+        }
+        else
+        {
+            if (_ultimateEffectOffRoutine != null)
+            {
+                StopCoroutine(_ultimateEffectOffRoutine);
+            }
+            _ultimateEffectOffRoutine = StartCoroutine(StopParticleGroupThenDisable(UltimateEffectPrefab));
+        }
     }
 
-	private void PlayParticleGroup(GameObject root)
-	{
-		var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
-		for (int i = 0; i < particleSystems.Length; i++)
-		{
-			ParticleSystem ps = particleSystems[i];
-			if (ps == null) { continue; }
-			var emission = ps.emission;
-			emission.enabled = true;
-			ps.Play(true);
-		}
-	}
+    private void PlayParticleGroup(GameObject root)
+    {
+        var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < particleSystems.Length; i++)
+        {
+            ParticleSystem ps = particleSystems[i];
+            if (ps == null) { continue; }
+            var emission = ps.emission;
+            emission.enabled = true;
+            ps.Play(true);
+        }
+    }
 
-	private IEnumerator StopParticleGroupThenDisable(GameObject root)
-	{
-		var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
-		for (int i = 0; i < particleSystems.Length; i++)
-		{
-			ParticleSystem ps = particleSystems[i];
-			if (ps == null) { continue; }
-			var emission = ps.emission;
-			emission.enabled = false;
-			ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-		}
+    private IEnumerator StopParticleGroupThenDisable(GameObject root)
+    {
+        var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < particleSystems.Length; i++)
+        {
+            ParticleSystem ps = particleSystems[i];
+            if (ps == null) { continue; }
+            var emission = ps.emission;
+            emission.enabled = false;
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
 
-		bool anyAlive = true;
-		while (anyAlive)
-		{
-			anyAlive = false;
-			for (int i = 0; i < particleSystems.Length; i++)
-			{
-				ParticleSystem ps = particleSystems[i];
-				if (ps != null && ps.IsAlive(true))
-				{
-					anyAlive = true;
-					break;
-				}
-			}
-			yield return null;
-		}
+        bool anyAlive = true;
+        while (anyAlive)
+        {
+            anyAlive = false;
+            for (int i = 0; i < particleSystems.Length; i++)
+            {
+                ParticleSystem ps = particleSystems[i];
+                if (ps != null && ps.IsAlive(true))
+                {
+                    anyAlive = true;
+                    break;
+                }
+            }
+            yield return null;
+        }
 
-		root.SetActive(false);
-		_ultimateEffectOffRoutine = null;
-	}
+        root.SetActive(false);
+        _ultimateEffectOffRoutine = null;
+    }
 
     // GhostTrail Toggle -------------------------------------------------------
     public void RPC_SetGhostTrail(bool isOn)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -477,7 +480,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void RPC_SetMaterial(byte id)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -486,9 +489,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void ExecuteUltimate()
     {
-        if(_playerStat.HasUltimateChance && !_playerStat.HasUsedUltimateThisLife)
+        if (_playerStat.HasUltimateChance && !_playerStat.HasUsedUltimateThisLife)
         {
-            if(_ultimate == null)
+            if (_ultimate == null)
             {
                 Debug.LogError("궁극기 스크립트가 없습니다.");
                 return;
@@ -500,7 +503,7 @@ public class Player : MonoBehaviourPun, IDamagable
             RPC_UltimateEffect(false);
             RPC_SetMaterial((byte)EPlayerMaterial.Default);
             _ultimateEffectOn = false;
-            
+
             // 궁극기 연출
             EventManager.Instance.Ultimate(_ultimate.GetBombID());
         }
@@ -532,7 +535,7 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr);
 
             RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, 10, 30f, 1.0f, true);
-            if(PhotonView.IsMine && ExplosionEffectPrefab != null)
+            if (PhotonView.IsMine && ExplosionEffectPrefab != null)
             {
                 PhotonView.RPC(nameof(PlayExplosionEffect), RpcTarget.All);
             }
@@ -548,7 +551,7 @@ public class Player : MonoBehaviourPun, IDamagable
     // HitEffect 네트워크 동기화 메서드들 추가
     public void RPC_SetHitEffect(bool isActive)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -566,7 +569,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void RPC_PlayFallDeadVFX()
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -592,10 +595,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void PlayerTeamCheck()
     {
-        
+
     }
 
-    public void TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
+    public void TakeDamage(int damage, int maxDamage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
         // 피격 VFX 재생
         if (tag == "Player")
@@ -613,29 +616,29 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(int damage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut,PhotonMessageInfo info)
+    public void RPC_TakeDamage(int damage, int maxDamage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, PhotonMessageInfo info)
     {
-        if(_playerStat.IsImmune)
+        if (_playerStat.IsImmune)
         {
             return;
         }
 
         // 공격자 정보 가져오기
         PhotonView attackerView = PhotonView.Find(attackerViewId);
-        if(attackerView != null)
+        if (attackerView != null)
         {
             PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
-            
+
             // 팀 비교는 동기화된 로컬 필드 사용 (시작 시 CustomProperties로부터 동기화됨)
             EInGameTeam attackerTeam = attackerStat != null ? attackerStat.Team : EInGameTeam.Default;
             EInGameTeam victimTeam = _playerStat.Team;
 
             // 팀 체크: 같은 팀이면서 자기 자신이 아닌 경우 데미지 무시
-            if(attackerTeam == victimTeam && attackerActorNumber != PhotonView.OwnerActorNr)
+            if (attackerTeam == victimTeam && attackerActorNumber != PhotonView.OwnerActorNr)
             {
                 // 같은 팀이므로 데미지 적용하지 않음 (VFX, 사운드 등은 그대로 재생)
                 return;
@@ -650,15 +653,15 @@ public class Player : MonoBehaviourPun, IDamagable
         bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber);
 
         // 날 때린 사람 딜량 증가
-        if(attackerView != null)
+        if (attackerView != null)
         {
             attackerView.GetComponent<PlayerStat>().IncreaseTotalDamage(damage);
         }
-        if(isDead)
+        if (isDead)
         {
             attackerView.GetComponent<PlayerStat>().IncreaseTotalKillCount();
         }
-        
+
         // 건파우더 감소 개수 = 데미지 절반
         int gunPowderCount = Mathf.CeilToInt(damage * 0.5f);
         // Gunpowder 낙출
@@ -669,6 +672,22 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 피격 이벤트 발생
         OnHit?.Invoke();
+
+        // 데미지 팝업: 중복 호출 방지
+        // 오직 RPC_TakeDamage를 원래 보낸 클라이언트(피격자 Owner)에서만 팝업 RPC를 전송한다
+        if (info.Sender != null && info.Sender.IsLocal)
+        {
+            // 맞은 사람(Owner)에게는 -damage 표시
+            if (PhotonView.Owner != null)
+            {
+                PhotonView.RPC(nameof(ShowDamagePopup), PhotonView.Owner, -damage, maxDamage);
+            }
+            // 때린 사람(Attacker Owner)에게는 +damage 표시 (피해자와 동일 Owner면 중복 방지)
+            if (attackerView != null && attackerView.Owner != null && attackerView.Owner != PhotonView.Owner)
+            {
+                PhotonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
+            }
+        }
     }
 
     /// <summary>
@@ -678,7 +697,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public void ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
-        if(!PhotonNetwork.IsMasterClient)
+        if (!PhotonNetwork.IsMasterClient)
         {
             return;
         }
@@ -700,7 +719,7 @@ public class Player : MonoBehaviourPun, IDamagable
             spawnPos.z = 0f;
 
             // 랜덤 시드 추가 (시간 + 인덱슬 고유값 생성)
-            int randomSeed =UnityEngine.Random.Range(0, 9999);
+            int randomSeed = UnityEngine.Random.Range(0, 9999);
 
 
             object[] instData = new object[] { attackerViewId, isFallingOut, randomSeed, PhotonView.ViewID };
@@ -711,7 +730,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public void RPC_ReleaseGunPowder(Vector3 explosionOrigin, int attackerViewId, int count = 3, float spreadAngle = 30f,
      float distance = 1.0f, bool isFallingOut = true)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -801,7 +820,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_SetAnimatorTrigger(string triggerName)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -812,7 +831,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_SetAnimatorBool(string boolName, bool value)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -832,7 +851,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_ResetAnimatorTrigger(string triggerName)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -869,14 +888,14 @@ public class Player : MonoBehaviourPun, IDamagable
         PlayerFSM fsmForGuard = GetComponent<PlayerFSM>();
         if (fsmForGuard != null)
         {
-            if (fsmForGuard.IsCurrentState<PlayerDieState>() 
+            if (fsmForGuard.IsCurrentState<PlayerDieState>()
             && stateName != nameof(PlayerIdleState)
             && stateName != nameof(PlayerObserveState))
             {
                 return;
             }
         }
-        
+
         // PlayerFSM 컴포넌트를 찾아서 상태 변경
         PlayerFSM playerFSM = GetComponent<PlayerFSM>();
         if (playerFSM != null)
@@ -947,7 +966,7 @@ public class Player : MonoBehaviourPun, IDamagable
         OnAttack?.Invoke();
     }
 
-    
+
     public bool CanNormalBomb()
     {
         return AttackTimer - _lastNormalBombTime >= BasicBombStat.CoolTime;
@@ -1014,7 +1033,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         gameObject.layer = LayerMask.NameToLayer("DownJump");
         // 하위 오브젝트 들도 모드 변경
-        foreach(Transform child in transform)
+        foreach (Transform child in transform)
         {
             child.gameObject.layer = LayerMask.NameToLayer("DownJump");
         }
@@ -1026,12 +1045,12 @@ public class Player : MonoBehaviourPun, IDamagable
         yield return new WaitForSeconds(0.5f);
         gameObject.layer = LayerMask.NameToLayer("Player");
         _playerStat.IsDownJump = false;
-        foreach(Transform child in transform)
+        foreach (Transform child in transform)
         {
             child.gameObject.layer = LayerMask.NameToLayer("Player");
         }
     }
-    
+
     public void Observe()
     {
         // 관전 상태가 되서 상호작용도 안하고 모습도 안보이게 해야함
@@ -1042,7 +1061,7 @@ public class Player : MonoBehaviourPun, IDamagable
             spriteRenderer.enabled = false;
         }*/
 
-        foreach(Transform child in transform)
+        foreach (Transform child in transform)
         {
             child.gameObject.SetActive(false);
         }
@@ -1052,7 +1071,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void RPC_HeadSpriteOnOff()
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -1063,7 +1082,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void HeadSpriteOnOff()
     {
         StartCoroutine(HeadSpriteOnOffCoroutine());
-    }       
+    }
 
     private IEnumerator HeadSpriteOnOffCoroutine()
     {
@@ -1072,7 +1091,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.MySpriteREndererList[3].enabled = false;
 
         yield return new WaitForSeconds(BasicBombStat.CoolTime);
-        
+
         _playerStat.MySpriteREndererList[0].enabled = true;
         _playerStat.MySpriteREndererList[2].enabled = true;
         _playerStat.MySpriteREndererList[3].enabled = true;
@@ -1091,5 +1110,19 @@ public class Player : MonoBehaviourPun, IDamagable
     public void ResetPlayerWet()
     {
         _playerStat.ResetWetState();
+    }
+
+    [PunRPC]
+    public void ShowDamagePopup(int value, int maxDamage)
+    {
+        if (_damagePopup == null)
+        {
+            _damagePopup = GetComponent<DamagePopup>();
+        }
+        if (_damagePopup == null)
+        {
+            return;
+        }
+        _damagePopup.SpawnPopup(value, maxDamage);
     }
 }

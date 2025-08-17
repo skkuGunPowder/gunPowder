@@ -95,13 +95,13 @@ public class PlayerDamagedState : PlayerBaseState
     {
         // 최소 피격 시간 보장
         _timer += Time.deltaTime;
-        
+
         // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
         if (_timer < _owner.PlayerStat.DamagedTime)
         {
             return;
         }
-        
+
         // 최소 시간이 지난 후에 바닥에 닿으면 Idle 상태로 변환
         if (IsGrounded2D())
         {

@@ -203,7 +203,7 @@ public class PlayerFallDeadState : PlayerBaseState
                     {
                         // IsImmune을 네트워크로 동기화
                         _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
-                        _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr, true);
+                        _owner.TakeDamage(15, 15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr, true);
                     }
                 }
             }

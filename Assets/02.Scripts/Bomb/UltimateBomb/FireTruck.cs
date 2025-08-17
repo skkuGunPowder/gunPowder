@@ -128,7 +128,7 @@ public class FireTruck : MonoBehaviour
 
             foreach (var target in targetsInRange)
             {
-                target.TakeDamage(_damageAmount, transform.position, _owner.PhotonView.ViewID, _owner.PhotonView.OwnerActorNr);
+                target.TakeDamage(_damageAmount, _damageAmount, transform.position, _owner.PhotonView.ViewID, _owner.PhotonView.OwnerActorNr);
             }
             yield return new WaitForSeconds(_damageInterval);
         }
