@@ -15,6 +15,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public Image BombImage;
     
     public ProfileSkin PlayerProfileSkin;
+    public UI_Emotion Emotion;
     
     public List<GameObject> LifeList;
     public List<Color32> GunPowderColorCodeList;
@@ -91,5 +92,10 @@ public class UI_InGameProfileSlot : MonoBehaviour
        public void SetTop(bool isTop)
     {
         FirstPlace.SetActive(isTop);
+    }
+
+    public void PlayEmotion(string emotionName)
+    {
+        Emotion.Play(emotionName);
     }
 }

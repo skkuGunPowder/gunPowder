@@ -16,7 +16,7 @@ public class UI_ProfileSlot : MonoBehaviour
     public Image ProfileOutline;
     
     public ProfileSkin PlayerProfileSkin;
-    
+    public UI_Emotion Emotion;    
     public Sprite EmptyImage;
     public List<Color32> TeamColorCodeList;
     
@@ -90,7 +90,11 @@ public class UI_ProfileSlot : MonoBehaviour
         ProfileOutline.color = TeamColorSet(team);
         PlayerProfileSkin.TeamChanged(team);
     }
-    
+
+    public void Play(string emotion)
+    {
+        Emotion.Play(emotion);
+    }
     private Color32 TeamColorSet(EInGameTeam team)
     {
         switch (team)
@@ -109,4 +113,5 @@ public class UI_ProfileSlot : MonoBehaviour
                 return TeamColorCodeList[0];
         }
     }
+    
 }
