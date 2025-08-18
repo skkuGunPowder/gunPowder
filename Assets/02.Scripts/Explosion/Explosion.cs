@@ -24,8 +24,6 @@ public class Explosion : MonoBehaviour
     {
         VFXPool.Instance.Play(VFXPrefab.name, transform.position);
 
-        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
-
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         var processedRBs = new System.Collections.Generic.HashSet<Rigidbody2D>();
         var processedRoots = new System.Collections.Generic.HashSet<Transform>();

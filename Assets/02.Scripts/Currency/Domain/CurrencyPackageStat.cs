@@ -3,6 +3,8 @@ using System;
 
 public class CurrencyPackageStat : IStat
 {
+    public readonly ECurrencyType CurrencyType;
+
     public readonly int Amount;
 
     public CurrencyPackageStat(JsonData json)

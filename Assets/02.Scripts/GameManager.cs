@@ -27,21 +27,26 @@ public class GameManager : PhotonSingleton<GameManager>
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
+
+
+    private float _airDropTimer;
+    [SerializeField] private GameObject _airDropJetPrefab;
+
     
     protected override void Awake()
-     {
-         base.Awake();
+    {
+        base.Awake();
 
-         _photonView = GetComponent<PhotonView>();
+        _photonView = GetComponent<PhotonView>();
 
-         if (_currentGameState == EGameState.Waiting)
-         {
-             return;
-         }
-         
-         TimeScaleSetting();
-         EventManager.Instance.OnLoadFinished += Init;
-     }
+        if (_currentGameState == EGameState.Waiting)
+        {
+            return;
+        }
+
+        TimeScaleSetting();
+        EventManager.Instance.OnLoadFinished += Init;
+    }
     // 게임 시작
     private void Update()
     {
@@ -49,21 +54,36 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             GameTimer();
         }
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            PhotonNetwork.Instantiate(_airDropJetPrefab.name, transform.position, Quaternion.identity);
+        }
     }
 
     private void GameTimer()
     {
         _timer -= Time.deltaTime;
+        _airDropTimer += Time.deltaTime;
 
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
 
-        if (_timer <= 0)
+        if (_airDropTimer > 30f)
         {
-            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+            _airDropTimer = 0f;
+            if (UnityEngine.Random.Range(0f, 1.0f) <= 0.1f)
+            {
+                PhotonNetwork.Instantiate(_airDropJetPrefab.name, transform.position, Quaternion.identity);
+            }
         }
+
+        if (_timer <= 0)
+            {
+                _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+            }
     }
     // 게임 종료
     // 프로퍼티가 바뀌었을 때 호출되는 함수

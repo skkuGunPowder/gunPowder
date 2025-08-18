@@ -41,14 +41,14 @@ public class ShopRepository
             {
                 if (!result.IsSuccess())
                 {
-                    Debug.LogError($"아이템 데이터 불러오기 실패: {result.GetMessage()}");
+                    Debug.LogError($"상점 아이템 데이터 불러오기 실패: {result.GetMessage()}");
                     return;
                 }
 
                 var itemResult = Backend.Chart.GetChartContents(result.FlattenRows()[0]["selectedChartFileId"].ToString());
                 if (!itemResult.IsSuccess())
                 {
-                    Debug.LogError($"아이템 데이터 불러오기 실패: {itemResult.GetMessage()}");
+                    Debug.LogError($"상점 아이템 데이터 불러오기 실패: {itemResult.GetMessage()}");
                     return;
                 }
 
@@ -57,6 +57,8 @@ public class ShopRepository
                     ShopItem item = new ShopItem(iteminfo);
                     shopItemDict[item.ItemInfo.ItemType].Add(item);
                 }
+
+                Debug.LogWarning($"상점 아이템 데이터 불러오기 성공: {itemResult.GetMessage()}");
                 OnLoadComplete?.Invoke(shopItemDict);
             });
         }
@@ -66,7 +68,7 @@ public class ShopRepository
         }
     }
 
-    public async Task<Result> BuyItem(ShopItem item, int amount)
+    public async Task<Result> BuyItem(ShopItem item)
     {
         DocumentReference docRef = FirebaseManager.Instance.DB.Collection("Shop").Document(_userID);
         try
@@ -74,18 +76,25 @@ public class ShopRepository
             int purchaseAmount = 0;
 
             DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
-            if (snapshot.Exists)
+            if (snapshot.Exists && snapshot.ContainsField(item.ID))
             {
                 purchaseAmount = snapshot.GetValue<int>(item.ID);
             }
 
-            if (purchaseAmount + amount > item.MaxAmount)
+            if (purchaseAmount + 1 > item.MaxAmount)
             {
+                Debug.LogWarning($"{item.ItemInfo.Name} 구매 가능한 개수 초과");
                 return new Result(false, $"{item.ItemInfo.Name} 구매 가능한 개수 초과");
             }
+            
+            var updates = new Dictionary<string, object>
+            {
+                { $"{item.ID}", purchaseAmount + 1 }
+            };
 
-            await docRef.SetAsync(new { purchaseAmount = purchaseAmount + amount });
-            return new Result(true, $"{item.ItemInfo.Name} x{amount} 구매 성공");
+            await docRef.SetAsync(updates, SetOptions.MergeAll);
+            Debug.LogWarning($"{item.ItemInfo.Name} 구매 성공");
+            return new Result(true, $"{item.ItemInfo.Name} 구매 성공");
         }
         catch (FirebaseException e)
         {

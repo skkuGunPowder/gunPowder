@@ -19,12 +19,12 @@ public class CurrencyRepository
         _userID = user.UserId;
     }
 
-    public async void SaveCurrencyData(Gold playerGold, Exp playerExp)
+    public async void SaveCurrencyData(Diamond playerDiamond, Gold playerGold, Exp playerExp)
     {
         DocumentReference docRef = FirebaseManager.Instance.DB.Collection("Currency").Document(_userID);
         try
         {
-            await docRef.SetAsync(new CurrencySaveData(playerGold.GetAmount(), playerExp.GetValue()));
+            await docRef.SetAsync(new CurrencySaveData(playerDiamond.GetAmount(), playerGold.GetAmount(), playerExp.GetValue()));
         }
         catch (FirebaseException e)
         {
@@ -59,13 +59,15 @@ public class CurrencyRepository
 [FirestoreData]
 public class CurrencySaveData
 {
+    [FirestoreProperty] public int PlayerDiamondAmount { get; private set; }
     [FirestoreProperty] public int PlayerGoldAmount { get; private set; }
     [FirestoreProperty] public int PlayerExpAmount { get; private set; }
 
     public CurrencySaveData() { }
 
-    public CurrencySaveData(int playerGold, int playerExp)
+    public CurrencySaveData(int PlayerDiamond, int playerGold, int playerExp)
     {
+        PlayerDiamondAmount = PlayerDiamond;
         PlayerGoldAmount = playerGold;
         PlayerExpAmount = playerExp;
     }

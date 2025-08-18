@@ -5,7 +5,14 @@ public class BomberJet : Jet
 {
     [SerializeField] private Transform _dropTransfrom;
 
+    private PhotonView _photonView;
+
     private Player _player;
+
+    private void Awake()
+    {
+        _photonView = GetComponent<PhotonView>();
+    }
 
     public void SetPlayer(Player player)
     {
@@ -14,9 +21,12 @@ public class BomberJet : Jet
 
     protected override void DropItem()
     {
-        GameObject dropItem = PhotonNetwork.Instantiate(_dropItemList[0].name, _dropTransfrom.position, Quaternion.identity);
-        UltimateMissileBomb missile = dropItem.GetComponent<UltimateMissileBomb>();
-        missile.PhotonView.RPC(nameof(missile.SetOwner), RpcTarget.All, _player.PhotonView.ViewID);
-        missile.PhotonView.RPC(nameof(missile.ThrowBomb), RpcTarget.All, _dropTransfrom.right, _dropTransfrom.up, _dropTransfrom.forward);
+        if (_photonView.IsMine)
+        {
+            GameObject dropItem = PhotonNetwork.Instantiate(_dropItemList[0].name, _dropTransfrom.position, Quaternion.identity);
+            UltimateMissileBomb missile = dropItem.GetComponent<UltimateMissileBomb>();
+            missile.PhotonView.RPC(nameof(missile.SetOwner), RpcTarget.All, _player.PhotonView.ViewID);
+            missile.PhotonView.RPC(nameof(missile.ThrowBomb), RpcTarget.All, _dropTransfrom.right, _dropTransfrom.up, _dropTransfrom.forward);
+        }
     }
 }

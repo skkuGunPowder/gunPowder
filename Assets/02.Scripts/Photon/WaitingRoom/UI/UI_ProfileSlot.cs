@@ -15,6 +15,8 @@ public class UI_ProfileSlot : MonoBehaviour
     public Image BombImage;
     public Image ProfileOutline;
     
+    public ProfileSkin PlayerProfileSkin;
+    
     public Sprite EmptyImage;
     public List<Color32> TeamColorCodeList;
     
@@ -28,8 +30,11 @@ public class UI_ProfileSlot : MonoBehaviour
         }
         
         NicknameTextUGUI.text = player.NickName;
-        Debug.Log(player.NickName);
+        // skincheck
+        PlayerProfileSkin.gameObject.SetActive(true);
+        PlayerProfileSkin.Init(player);
         
+        // bomb
         ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
         BombImage.sprite = item.Image;
         
@@ -76,6 +81,7 @@ public class UI_ProfileSlot : MonoBehaviour
         NicknameTextUGUI.gameObject.SetActive(false);
         Master.SetActive(false);
         ProfileOutline.color = TeamColorSet(EInGameTeam.Default);
+        PlayerProfileSkin.gameObject.SetActive(false);
         BombImage.sprite = EmptyImage;
     }
 

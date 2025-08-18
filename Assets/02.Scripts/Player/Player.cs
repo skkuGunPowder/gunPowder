@@ -510,10 +510,16 @@ public class Player : MonoBehaviourPun, IDamagable
             _ultimateEffectOn = false;
 
             // 궁극기 연출
-            EventManager.Instance.Ultimate(_ultimate.GetBombID());
+            PhotonView.RPC(nameof(Rpc_UltimateProduction), RpcTarget.All, _ultimate.GetBombID());
         }
     }
 
+    [PunRPC]
+    public void Rpc_UltimateProduction(string bomb ,PhotonMessageInfo info)
+    {
+        PhotonPlayer player = info.Sender;
+        EventManager.Instance.Ultimate(bomb, player);
+    }
     /// <summary>
     /// 주기적으로 건파우더 감소
     /// </summary>

@@ -25,6 +25,7 @@ public class CrossExplosion : Explosion
             waterMissile.Init(_cameraController, attackerPhotonView, _distance, _stat);
             waterMissile.Launch(_directions[i]);
         }
+        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
 
         base.Explode(isFallingOut, attackerPhotonView);
     }

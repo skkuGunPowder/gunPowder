@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class UltimateProductionSlot : MonoBehaviour
 {
+    public List<UltimateEffectBase> EffectList;
     
     public List<GameObject> UltimateEffectList;
     [Header("궁극기 연출 시간")]
@@ -28,58 +29,74 @@ public class UltimateProductionSlot : MonoBehaviour
     [Header("컬러")]
     public Color32 MyTeam;
     public Color32 OtherTeam;
-    private void Awake()
+    
+    public void Play(string bomb, bool isMyTeam)
     {
-        EventManager.Instance.OnUltimate += Play;
-    }
-
-    private void Play(string bomb)
-    {
+        
         UltimateEffectUp.gameObject.SetActive(true);
         UltimateEffectDown.gameObject.SetActive(true);
+        
+        BackGroundColorChange(isMyTeam);
         
         Sequence sequence = DOTween.Sequence();
         sequence.Append(UltimateEffectUp.DOAnchorPos(UltimateEndPosition, UltimateEffectSpeed).SetEase(UltimateEffectInEase));
         sequence.Join(UltimateEffectDown.DOAnchorPos(UltimateEndPosition2, UltimateEffectSpeed).SetEase(UltimateEffectInEase));
-        sequence.AppendCallback(()=>BombEffect(bomb));
+        sequence.JoinCallback(()=>BombEffectOn(bomb));
         sequence.AppendInterval(UltimateTime);
         sequence.Append(UltimateEffectUp.DOAnchorPos(UltimateOriginPosition, UltimateEffectSpeed).SetEase(UltimateEffectOutEase));
         sequence.Join(UltimateEffectDown.DOAnchorPos(UltimateOriginPosition2, UltimateEffectSpeed).SetEase(UltimateEffectOutEase));
         sequence.OnComplete(() =>
         {
+            BombEffectOff(bomb);
+            
             UltimateEffectUp.gameObject.SetActive(false);
             UltimateEffectDown.gameObject.SetActive(false);
+            
+            this.gameObject.SetActive(false);
         });
     }
 
-    private void TeamCheck()
+    private void BackGroundColorChange(bool isMyTeam)
     {
-        
-    }
-    private void BombEffect(string bomb)
-    {
-        switch (bomb)
+        if (isMyTeam)
         {
-            case "BO0005": 
-                UltimateEffectList[2].SetActive(true);
-                break;
-            case "BO0007":
-                UltimateEffectList[0].SetActive(true);
-                UltimateEffectList[1].SetActive(true);
-                break;
-            case "BO00011":
-                UltimateEffectList[3].SetActive(true);
-                break;
-            default:
-                UltimateEffectList[2].SetActive(true);
-                break;
+            UpBackGround.color = MyTeam;
+            DownBackGround.color = MyTeam;
+        }
+        else
+        {
+            UpBackGround.color = OtherTeam;
+            DownBackGround.color = OtherTeam;
         }
     }
-    
+    private void BombEffectOn(string bomb)
+    {
+        Debug.Log($"{bomb}");
+        foreach (UltimateEffectBase effect in EffectList)
+        {
+            if (effect.BombName == bomb)
+            {
+                effect.Play();
+                break;
+            }
+        }
+    }
+    private void BombEffectOff(string bomb)
+    {
+        Debug.Log($"{bomb}");
+        foreach (UltimateEffectBase effect in EffectList)
+        {
+            if (effect.BombName == bomb)
+            {
+                effect.Stop();
+                break;
+            }
+        }
+    }
     private void OnDisable()
     {
-        EventManager.Instance.OnUltimate -= Play;
         DOTween.Kill(this);
+        
         UltimateEffectUp.anchoredPosition = UltimateOriginPosition;
         UltimateEffectDown.anchoredPosition = UltimateOriginPosition2;
     }
