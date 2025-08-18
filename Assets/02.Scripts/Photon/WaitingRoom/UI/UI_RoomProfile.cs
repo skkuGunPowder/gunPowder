@@ -11,7 +11,7 @@ public class UI_RoomProfile : MonoBehaviour
     private void Awake()
     {
         Debug.Log("roomprofile awake");
-        EventManager.Instance.OnPlayEmotion -= PlayEmotion;
+        EventManager.Instance.OnPlayEmotion += PlayEmotion;
         EventManager.Instance.OnRoomDataChanged += Refresh;
         EventManager.Instance.OnReadyChanged += ReadyCheck;
         EventManager.Instance.OnTeamChanged += TeamChange;

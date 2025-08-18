@@ -8,6 +8,7 @@ public enum EPopupType
     UI_FriendsListPopup,
     UI_PasswordPopup,
     UI_PasswordWrongPopup,
+    UI_EmotionPopup,
     
     Count
 }

@@ -6607,6 +6607,7 @@ GameObject:
   - component: {fileID: 1954018482}
   - component: {fileID: 1954018486}
   - component: {fileID: 1954018487}
+  - component: {fileID: 1954018488}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6686,6 +6687,19 @@ MonoBehaviour:
   FallDeadPathList: []
   ResurrectPoint: {fileID: 0}
   _airDropJetPrefab: {fileID: 0}
+--- !u!114 &1954018488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954018479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef498c06a5ff07d43b07e6121e5331b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MyPhotonView: {fileID: 1954018482}
 --- !u!1 &1957683532
 GameObject:
   m_ObjectHideFlags: 0

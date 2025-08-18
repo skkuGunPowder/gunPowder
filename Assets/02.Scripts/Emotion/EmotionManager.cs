@@ -5,26 +5,34 @@ using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 public class EmotionManager : MonoBehaviour
 { 
-    private PhotonView _photonView;
-    public List<int> MyEmotionList;
+    public PhotonView MyPhotonView;
+    private List<int> _myEmotionList;
 
     private Dictionary<KeyCode, int> _emotionKeyDictionary;
     private void Awake()
     {
-        MyEmotionList = new List<int>();   
-        _photonView = GetComponent<PhotonView>();
+        _myEmotionList = new List<int>();   
+        MyPhotonView = GetComponent<PhotonView>();
     }
 
     private void Start()
     {
-        int[] emotions = (int[])PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Emotion.ToString()];
-        MyEmotionList = new List<int>(emotions);
+        if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.Emotion.ToString()) == false)
+        {
+            DefaultEmotion();
+        }
+        else
+        {
+            int[] emotions = (int[])PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Emotion.ToString()];
+            _myEmotionList = new List<int>(emotions);
+        }
         
         _emotionKeyDictionary = new Dictionary<KeyCode, int>();
-        for (int i = 0; i < MyEmotionList.Count; i++)
+       
+        for (int i = 0; i < _myEmotionList.Count; i++)
         {
             KeyCode key = KeyCode.Alpha0 + i;  
-            _emotionKeyDictionary.Add(key, MyEmotionList[i]); 
+            _emotionKeyDictionary.Add(key, _myEmotionList[i]); 
         }
     }
 
@@ -41,12 +49,12 @@ public class EmotionManager : MonoBehaviour
 
     private void Request_PlayEmotion(int emotionId)
     {
-        if (_photonView.IsMine == false)
+        if (MyPhotonView.IsMine == false)
         {
             return;
         }
         
-        _photonView.RPC(nameof(RPC_PlayEmotion), RpcTarget.All, emotionId);
+        MyPhotonView.RPC(nameof(RPC_PlayEmotion), RpcTarget.All, emotionId);
     }
     
     [PunRPC]
@@ -56,5 +64,13 @@ public class EmotionManager : MonoBehaviour
         PhotonPlayer player = info.Sender;
         
         EventManager.Instance.PlayEmotion(emotionName, player.ActorNumber);
+    }
+    
+    private void DefaultEmotion()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            _myEmotionList.Add(i);
+        }
     }
 }

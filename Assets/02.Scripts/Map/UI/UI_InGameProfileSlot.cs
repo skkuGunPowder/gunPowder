@@ -15,7 +15,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public Image BombImage;
     
     public ProfileSkin PlayerProfileSkin;
-    public UI_Emotion Emotion;
+    public UI_EmotionSlot Emotion;
     
     public List<GameObject> LifeList;
     public List<Color32> GunPowderColorCodeList;

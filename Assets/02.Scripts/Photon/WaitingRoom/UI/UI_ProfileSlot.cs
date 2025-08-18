@@ -16,7 +16,7 @@ public class UI_ProfileSlot : MonoBehaviour
     public Image ProfileOutline;
     
     public ProfileSkin PlayerProfileSkin;
-    public UI_Emotion Emotion;    
+    public UI_EmotionSlot Emotion;    
     public Sprite EmptyImage;
     public List<Color32> TeamColorCodeList;
     
