@@ -123,6 +123,9 @@ public class Player : MonoBehaviourPun, IDamagable
     private DamagePopup _damagePopup;
     public DamagePopup DamagePopup => _damagePopup;
 
+    private IAirDropItem _airDropItem;
+    public IAirDropItem AirDropItem => _airDropItem;
+
 
 
     [SerializeField] private float _ultimateChanceTimer = 0f; // 내부 타이머(갱신/소모 로직은 별도 구현 예정)
@@ -684,7 +687,7 @@ public class Player : MonoBehaviourPun, IDamagable
             VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
         }
         SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
-        SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 4, 0f, false, SoundType.SFX, true, 1f, 50f);
+        SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 3, 0f, false, SoundType.SFX, true, 1f, 50f);
 
         if (!PhotonView.IsMine)
         {
@@ -1095,6 +1098,17 @@ public class Player : MonoBehaviourPun, IDamagable
         _hasStoredVelocity = false;
         _storedVelocity = Vector2.zero;
     }
+
+    public void SetAirDropItem(IAirDropItem airDropItem)
+    {
+        _airDropItem = airDropItem;
+    }
+
+    public void RemoveAirDropItem()
+    {
+        _airDropItem = null;
+    }
+
 
     [PunRPC]
     public void RPC_SetIsImmune(bool isImmune)

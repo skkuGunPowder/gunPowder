@@ -338,6 +338,13 @@ public class PlayerBaseState : MonoState
         if(!_owner.PhotonView.IsMine)
             return;
 
+        if (_owner.AirDropItem != null)
+        {
+            _owner.AirDropItem.Use();
+            _owner.RemoveAirDropItem();
+            return;
+        }
+
         // 공격 이벤트 발생
         _owner.InvokeAttack();
         SoundManager.Instance.PlayLocalRandomSound("PlayerShot", transform, 1, 2);

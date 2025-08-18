@@ -27,7 +27,8 @@ public class AirDropItemSpeed : AirDropItemBase, IAirDropItem
     }
 
     public override void Use()
-    {       
+    {
+        Debug.LogWarning("스피드 아이템 사용");
         _isBuffOn = true;
         _originalMoveSpeed = _owner.PlayerStat.MoveSpeed;
         _originalRunSpeed = _owner.PlayerStat.RunSpeed;
@@ -38,6 +39,7 @@ public class AirDropItemSpeed : AirDropItemBase, IAirDropItem
 
     private void EndBuff()
     {
+        Debug.LogWarning("스피드 아이템 버프 종료");
         _owner.PlayerStat.MoveSpeed = _originalMoveSpeed;
         _owner.PlayerStat.RunSpeed = _originalRunSpeed;
         _isBuffOn = false;
