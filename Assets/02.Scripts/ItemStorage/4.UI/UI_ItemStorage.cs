@@ -86,6 +86,11 @@ public class UI_ItemStorage : MonoBehaviour
 
     public void Confirm()
     {
+        if (_selectedSlot == null)
+        {
+            return;
+        }
+        
         InventoryItem selectedITem = _selectedSlot.Item;
         if (selectedITem.IsEquipped)
         {
