@@ -9,6 +9,10 @@ public class PlayerSFXAnimationEvent : MonoBehaviour
     public const string GUNPOWDER_HEAL_SFX_NAME_2 = "GunPowderHeal_2";
     public const string GUNPOWDER_HEAL_SFX_NAME_3 = "GunPowderHeal_3";
     public const string GUNPOWDER_HEAL_SFX_NAME_4 = "GunPowderHeal_4";
+    
+    public const string PLAYER_ULTIMATE_USE_SFX_NAME = "PlayerUlt_1";
+
+    public const string PLAYER_CRIT_DAMAGE_VOICE_SFX_NAME = "PlayerCritDamageVoice";
 
     [SerializeField]
     private float _gunpowderHealWindow = 0.25f;
@@ -48,6 +52,16 @@ public class PlayerSFXAnimationEvent : MonoBehaviour
             _ => GUNPOWDER_HEAL_SFX_NAME_4,
         };
         SoundManager.Instance.PlayLocalSound(sfx, transform);
-        Debug.Log(sfx);
+    }
+
+    public void PlayerUltimateUseSFX()
+    {
+        SoundManager.Instance.PlayLocalSound(PLAYER_ULTIMATE_USE_SFX_NAME, transform);
+    }
+
+    public void PlayerCritDamageVoiceRandomSFX()
+    {
+        SoundManager.Instance.PlayLocalRandomSound(PLAYER_CRIT_DAMAGE_VOICE_SFX_NAME, transform, 1, 2, 0f, false, SoundType.SFX, true, 1f, 50f);
+        Debug.Log("PlayerCritDamageVoiceRandomSFX");
     }
 }
