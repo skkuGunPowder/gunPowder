@@ -12,13 +12,17 @@ public class UI_GameResultSlot : MonoBehaviour
     public TextMeshProUGUI KillTextMeshProUGUI;
     public TextMeshProUGUI SurvivorTimeTextMeshProUGUI;
     
+    public ProfileSkin ProfileSkin;
     public void Refresh(PhotonPlayer player,int damage, int rank, int surviveTime, int kill, EInGameTeam team)
     {
         PlayerName.text = player.NickName;
         PlayerRank.text = $"#{rank.ToString()}";
         DamageTextMeshProUGUI.text = damage.ToString();
         KillTextMeshProUGUI.text = kill.ToString();
-        SurvivorTimeTextMeshProUGUI.text = TimeSpan.FromSeconds(surviveTime).ToString(@"mm\:ss");;
+        SurvivorTimeTextMeshProUGUI.text = TimeSpan.FromSeconds(surviveTime).ToString(@"mm\:ss");
+        
+        ProfileSkin.Init(player);
+        ProfileSkin.TeamChanged(team);
         
         Color color = new Color();
         switch (team)

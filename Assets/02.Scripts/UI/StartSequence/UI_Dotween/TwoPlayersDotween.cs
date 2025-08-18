@@ -29,18 +29,18 @@ public class TwoPlayersDotween : MonoBehaviour
     private void Play()
     {
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
-        sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(530, -540), 0.7f).SetEase(Ease.OutCubic).SetUpdate(true));
-        sequence.Join(SecondPlayer.DOAnchorPos(new Vector2(1380, -540), 0.7f).SetEase(Ease.OutCubic).SetUpdate(true));
-        sequence.Insert(0.15f,Versus.DOScale(new Vector3(1.5f, 1.5f, 1.5f), 0.2f).SetEase(Ease.OutCirc).SetUpdate(true));
-        sequence.Insert(0.7f,Versus.DOScale(new Vector3(1, 1, 1), 0.15f).SetEase(Ease.InCirc).SetUpdate(true));
-        sequence.Insert(0.75f, FirstPlayer.DOAnchorPos(new Vector2(600, -540), 0.1f).SetEase(Ease.InCirc).SetUpdate(true));
-        sequence.Insert(0.75f, SecondPlayer.DOAnchorPos(new Vector2(1310, -540), 0.1f).SetEase(Ease.InCirc).SetUpdate(true));
-        sequence.InsertCallback(0.9f, ShakeOn).SetUpdate(true);
-        sequence.InsertCallback(0.9f, LightningOn).SetUpdate(true);
-        sequence.InsertCallback(0.9f, FlashOn).SetUpdate(true);
-        sequence.InsertCallback(1f, ShineOn).SetUpdate(true);
-        sequence.Insert(1.2f,FirstPlayer.DOAnchorPos(new Vector2(610, -540), 10f).SetUpdate(true));
-        sequence.Insert(1.2f, SecondPlayer.DOAnchorPos(new Vector2(1300, -540), 10f).SetUpdate(true));
+        sequence.Append(FirstPlayer.DOAnchorPos(new Vector2(530, -540), 0.7f).SetEase(Ease.OutCubic));
+        sequence.Join(SecondPlayer.DOAnchorPos(new Vector2(1380, -540), 0.7f).SetEase(Ease.OutCubic));
+        sequence.Insert(0.15f,Versus.DOScale(new Vector3(1.5f, 1.5f, 1.5f), 0.2f).SetEase(Ease.OutCirc));
+        sequence.Insert(0.7f,Versus.DOScale(new Vector3(1, 1, 1), 0.15f).SetEase(Ease.InCirc));
+        sequence.Insert(0.75f, FirstPlayer.DOAnchorPos(new Vector2(600, -540), 0.1f).SetEase(Ease.InCirc));
+        sequence.Insert(0.75f, SecondPlayer.DOAnchorPos(new Vector2(1310, -540), 0.1f).SetEase(Ease.InCirc));
+        sequence.InsertCallback(0.9f, ShakeOn);
+        sequence.InsertCallback(0.9f, LightningOn);
+        sequence.InsertCallback(0.9f, FlashOn);
+        sequence.InsertCallback(1f, ShineOn);
+        sequence.Insert(1.2f,FirstPlayer.DOAnchorPos(new Vector2(610, -540), 10f));
+        sequence.Insert(1.2f, SecondPlayer.DOAnchorPos(new Vector2(1300, -540), 10f));
         sequence.InsertCallback(2f,LoadEnd);
 
     }
