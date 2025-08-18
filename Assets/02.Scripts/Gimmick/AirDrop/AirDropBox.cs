@@ -53,14 +53,14 @@ public class AirDropBox : MonoBehaviour
         {
             return;
         }
+        Player player = other.gameObject.GetComponent<Player>();
 
         Debug.LogWarning("박스 루팅");
 
         IAirDropItem item = DropItemList[Random.Range(0, DropItemList.Count)];
-        item.SetOwner(other.gameObject.GetComponent<Player>());
-
-        // TODO
-        // 플레이어 장비에 장착
+        
+        item.SetOwner(player);
+        player.SetAirDropItem(item);
 
         Destroy(gameObject);
     }
