@@ -56,7 +56,7 @@ public class WaterMissile : MonoBehaviour
 
             if (other.TryGetComponent(out IDamagable damagableObject))
             {
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, _attackerPhotonView.ViewID, _attackerPhotonView.OwnerActorNr);
+                damagableObject.TakeDamage(_stat.AttackPower, _stat.AttackPower, transform.position, _attackerPhotonView.ViewID, _attackerPhotonView.OwnerActorNr);
                 if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);

@@ -4201,6 +4201,7 @@ GameObject:
   - component: {fileID: 8601069381001659360}
   - component: {fileID: 1281740879948105312}
   - component: {fileID: 4070434810841397881}
+  - component: {fileID: -5802715714338378822}
   m_Layer: 7
   m_Name: PlayerTest
   m_TagString: Player
@@ -4350,6 +4351,7 @@ MonoBehaviour:
   HitEffectPrefab: {fileID: 8841075394196172437}
   UltimateEffectPrefab: {fileID: 1121568680264472322}
   ExplosionEffectPrefab: {fileID: 5682021106543877335, guid: e5f8e5526c3be7542b66d48b3c0ed76b, type: 3}
+  FallDeadVFXPrefab: {fileID: 3011233550371498735, guid: 794e3e0914193c6458c4b710a6e3a79c, type: 3}
   _ultimateChanceTimer: 0
 --- !u!114 &4024883436230281669
 MonoBehaviour:
@@ -4602,6 +4604,20 @@ MonoBehaviour:
   - {fileID: 1982941608137655350}
   - {fileID: 4084399715226113753}
   - {fileID: 2300375831329208030}
+--- !u!114 &-5802715714338378822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 503320abec9679e47a84cd7eaa54735f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  popupPrefab: {fileID: 1259023133563206875, guid: 80f54251898c8304eb11db9b9f157797, type: 3}
+  target: {fileID: 8041830550723475563}
 --- !u!1 &6883906685738839930
 GameObject:
   m_ObjectHideFlags: 0
