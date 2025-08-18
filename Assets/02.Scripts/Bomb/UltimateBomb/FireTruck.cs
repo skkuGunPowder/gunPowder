@@ -10,6 +10,8 @@ public class FireTruck : MonoBehaviour
     [SerializeField] private Collider2D _damageCollider;
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private ParticleSystem _vfx;
+    public AudioClip FireAudio;
+
 
 
     [Header("Settings")]
@@ -95,9 +97,10 @@ public class FireTruck : MonoBehaviour
         Destroy(_vfx.gameObject);
         _damageCollider.enabled = false;
         _animator.SetBool("IsAttack", false);
+        SoundManager.Instance.StopLoopSound(FireAudio.name);
 
         Sequence seq = DOTween.Sequence();
-        seq.Append(DOVirtual.DelayedCall(0.5f, () => _spriteRenderer.DOFade(0f, _fadeTime)));
+        seq.Append(DOVirtual.DelayedCall(0.1f, () => _spriteRenderer.DOFade(0f, _fadeTime)));
         seq.Join(transform.DOMove(transform.position + new Vector3(_startOffsetDistance, 0, 0), _fadeTime).SetEase(Ease.OutQuad)).OnComplete(() =>
         {
             Destroy(gameObject);
@@ -116,6 +119,7 @@ public class FireTruck : MonoBehaviour
         _vfx.Play();
         _damageCollider.enabled = true;
         _animator.SetBool("IsAttack", true);
+        SoundManager.Instance.PlayLocalSound(FireAudio.name, transform, 0, true);
         damageCoroutine = StartCoroutine(DamageOverTime());
         DOVirtual.DelayedCall(_duration, StopFireTruck);
     }
