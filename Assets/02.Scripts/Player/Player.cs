@@ -5,6 +5,7 @@ using RaycastPro.RaySensors2D;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
 using System.Collections;
+using DG.Tweening;
 
 
 
@@ -69,6 +70,9 @@ public class Player : MonoBehaviourPun, IDamagable
     public float GunPowderDecreaseWithoutAttackTimer => _gunPowderDecreaseWithoutAttackTimer;
     [SerializeField]
     private float _colorUpdateWithoutAttackTimer = 0f;
+    private Tween _preExplosionPulseTween;
+    private Vector3 _defaultLocalScale;
+    private Dictionary<SpriteRenderer, Color> _pulseOriginalColorMap;
 
     [Header("HitStop")]
     [SerializeField]
@@ -247,6 +251,8 @@ public class Player : MonoBehaviourPun, IDamagable
             //gameObject.layer = LayerMask.NameToLayer("Enemy");
         }
 
+        _defaultLocalScale = transform.localScale;
+
         // 로컬 필드 팀을 항상 네트워크 프로퍼티와 동기화
         if (PhotonView.Owner != null && PhotonView.Owner.CustomProperties.ContainsKey(EProperties.Team.ToString()))
         {
@@ -297,15 +303,6 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Update()
     {
         // 테스트
-        if (InputHandler.GetKeyDown(KeyCode.Q))
-        {
-            SetPlayerWet();
-        }
-        else if (InputHandler.GetKeyDown(KeyCode.W))
-        {
-            ResetPlayerWet();
-        }
-
         // ------------------------------------------------------------
         if (!PhotonView.IsMine)
         {
@@ -327,6 +324,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
         DecreaseGunPowderWithoutAttack();
+
+        // 폭탄 경고 펄스 체크는 매 프레임 수행 (시각적 반응성 확보)
+        //CheckAndPlayPreExplosionPulse();
 
         UltimateChanceTimerUpdate();
     }
@@ -543,6 +543,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
             _colorUpdateWithoutAttackTimer = 0f;
+            StopPreExplosionPulse(true);
             //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
 
             // 낙사 상태면 건파우더 감소 안함
@@ -559,40 +560,154 @@ public class Player : MonoBehaviourPun, IDamagable
                 PhotonView.RPC(nameof(PlayExplosionEffect), RpcTarget.All);
             }
 
-            foreach (var renderer in _playerStat.MySpriteREndererList)
-            {
-                if (renderer == null) { continue; }
-                renderer.color = Color.white;
-            }
+            SetSpriteRendererWhite();
 
             _playerFSM.SyncStateChange<PlayerDamagedState>();
         }
         else
         {
-            // 0.5초 간격으로만 색 업데이트
-            _colorUpdateWithoutAttackTimer += Time.deltaTime;
-            if (_colorUpdateWithoutAttackTimer < 0.5f)
+            bool flowControl = SetRedColorWithoutAttack();
+            if (!flowControl)
             {
                 return;
             }
-            _colorUpdateWithoutAttackTimer = 0f;
+        }
+    }
 
-            // PenaltyTime까지 1초단위로 색이 점점 빨개진다.
-            float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
+    private void SetSpriteRendererWhite()
+    {
+        foreach (var renderer in _playerStat.MySpriteREndererList)
+        {
+            if (renderer == null) { continue; }
+            renderer.color = Color.white;
+        }
+    }
+
+
+    private bool SetRedColorWithoutAttack()
+    {
+        // 0.5초 간격으로만 색 업데이트
+        _colorUpdateWithoutAttackTimer += Time.deltaTime;
+        if (_colorUpdateWithoutAttackTimer < 0.5f)
+        {
+            return false;
+        }
+        _colorUpdateWithoutAttackTimer = 0f;
+
+        // 색 변화는 ratio 0.4부터 적용
+        float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
+        if (ratio < 0.4f)
+        {
             foreach (var renderer in _playerStat.MySpriteREndererList)
             {
                 if (renderer == null) { continue; }
-
-                // HSV로 변환해서 S(채도)를 0~100%로 조절 (내부적으로 0~1 매핑)
-                // 점점 '빨개지게' 하기 위해 Hue를 0(red)로 고정하고 채도만 시간 비율에 따라 증가
-                Color current = renderer.color;
-                Color.RGBToHSV(current, out float h, out float s, out float v);
-                h = 0f; // red
-                s = Mathf.Clamp01(ratio); // 0~1 (0~100%)
-                Color newColor = Color.HSVToRGB(h, s, v);
-                newColor.a = current.a; // 기존 알파 유지
-                renderer.color = newColor;
+                renderer.color = Color.white;
             }
+            return true;
+        }
+
+        // 비율에 따라 펄스 시작/정지 (경고 단계)
+        if (ratio >= 0.8f) { PlayPreExplosionPulse(); } else { StopPreExplosionPulse(false); }
+
+        // ratio 0.4~1 -> S: 0~0.8로 맵핑 (H=0 고정, V는 유지)
+        float t = Mathf.Clamp01((ratio - 0.4f) / 0.6f);
+        float targetS = Mathf.Lerp(0f, 0.6f, t);
+        foreach (var renderer in _playerStat.MySpriteREndererList)
+        {
+            if (renderer == null) { continue; }
+            Color current = renderer.color;
+            Color.RGBToHSV(current, out float _, out float _, out float v);
+            Color newColor = Color.HSVToRGB(0f, targetS, v);
+            newColor.a = current.a;
+            renderer.color = newColor;
+        }
+
+        return true;
+    }
+
+    private void CheckAndPlayPreExplosionPulse()
+    {
+        float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
+        if (ratio >= 0.8f)
+        {
+            PlayPreExplosionPulse();
+        }
+        else
+        {
+            StopPreExplosionPulse(false);
+        }
+    }
+
+    private void PlayPreExplosionPulse()
+    {
+        if (_preExplosionPulseTween != null && _preExplosionPulseTween.IsActive())
+        {
+            return;
+        }
+        // 원본 색상 저장
+        if (_pulseOriginalColorMap == null) _pulseOriginalColorMap = new Dictionary<SpriteRenderer, Color>();
+        _pulseOriginalColorMap.Clear();
+        foreach (var renderer in _playerStat.MySpriteREndererList)
+        {
+            if (renderer == null) { continue; }
+            _pulseOriginalColorMap[renderer] = renderer.color;
+        }
+
+        float targetScaleMultiplier = 1.2f;
+        float halfDuration = 0.2f; // 커졌다/작아졌다 왕복 0.4초
+        transform.localScale = _defaultLocalScale;
+
+        Sequence seq = DOTween.Sequence();
+        // 커질 때 빨강으로
+        seq.AppendCallback(() =>
+        {
+            foreach (var renderer in _playerStat.MySpriteREndererList)
+            {
+                if (renderer == null) { continue; }
+                Color baseCol = renderer.color;
+                Color.RGBToHSV(baseCol, out float _, out float _, out float v);
+                Color redCol = Color.HSVToRGB(0f, 0.6f, v);
+                redCol.a = baseCol.a;
+                renderer.color = redCol;
+            }
+        });
+        seq.Append(transform.DOScale(_defaultLocalScale * targetScaleMultiplier, halfDuration).SetEase(Ease.InOutSine));
+        // 작아질 때 원래 색으로 복구
+        seq.AppendCallback(() =>
+        {
+            if (_pulseOriginalColorMap != null)
+            {
+                foreach (var kv in _pulseOriginalColorMap)
+                {
+                    if (kv.Key == null) { continue; }
+                    kv.Key.color = kv.Value;
+                }
+            }
+        });
+        seq.Append(transform.DOScale(_defaultLocalScale, halfDuration).SetEase(Ease.InOutSine));
+        seq.SetLoops(-1, LoopType.Restart);
+        _preExplosionPulseTween = seq;
+    }
+
+    private void StopPreExplosionPulse(bool resetScale)
+    {
+        if (_preExplosionPulseTween != null)
+        {
+            _preExplosionPulseTween.Kill(false);
+            _preExplosionPulseTween = null;
+        }
+        // 색상 복구
+        if (_pulseOriginalColorMap != null)
+        {
+            foreach (var kv in _pulseOriginalColorMap)
+            {
+                if (kv.Key == null) { continue; }
+                kv.Key.color = kv.Value;
+            }
+        }
+        if (resetScale)
+        {
+            transform.localScale = _defaultLocalScale;
         }
     }
 
@@ -665,6 +780,8 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _gunPowderDecreaseWithoutAttackTimer = 0f;
         _colorUpdateWithoutAttackTimer = 0f;
+        StopPreExplosionPulse(true);
+        SetSpriteRendererWhite();
     }
 
     public void PlayerTeamCheck()
