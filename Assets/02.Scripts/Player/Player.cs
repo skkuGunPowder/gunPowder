@@ -687,7 +687,7 @@ public class Player : MonoBehaviourPun, IDamagable
             VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
         }
         SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
-        SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 4, 0f, false, SoundType.SFX, true, 1f, 50f);
+        SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 3, 0f, false, SoundType.SFX, true, 1f, 50f);
 
         if (!PhotonView.IsMine)
         {
