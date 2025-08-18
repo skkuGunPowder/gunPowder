@@ -88,12 +88,14 @@ public class Player : MonoBehaviourPun, IDamagable
     private BoxRay2D _groundRay2D;
     public BoxRay2D GroundRay2D => _groundRay2D;
 
+    [Header("Prefabs")]
     public GameObject HeadBombPrefab;
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
     public GameObject HitEffectPrefab;
     public GameObject UltimateEffectPrefab;
     public GameObject ExplosionEffectPrefab;
+    public GameObject FallDeadVFXPrefab;
 
 
     private const int RANDOM_SEED = 123456;
@@ -532,6 +534,13 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
             //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
+
+            // 낙사 상태면 건파우더 감소 안함
+            if (_playerStat.IsFallingDead)
+            {
+                return;
+            }
+
             _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr);
 
             RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, 10, 30f, 1.0f, true);
@@ -539,6 +548,7 @@ public class Player : MonoBehaviourPun, IDamagable
             {
                 PhotonView.RPC(nameof(PlayExplosionEffect), RpcTarget.All);
             }
+            _playerFSM.SyncStateChange<PlayerDamagedState>();
         }
     }
 
@@ -579,11 +589,30 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void PlayFallDeadVFX()
     {
+        if (FallDeadVFXPrefab != null)
+        {
+            VFXPool.Instance.Play(FallDeadVFXPrefab.name, transform.position);
+        }
+    }
+
+    public void RPC_PlayFallDeadExplosionVFX()
+    {
+        if (!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(PlayFallDeadExplosionVFX), RpcTarget.All);
+    }
+
+    [PunRPC]
+    public void PlayFallDeadExplosionVFX()
+    {
         if (ExplosionEffectPrefab != null)
         {
             VFXPool.Instance.Play(ExplosionEffectPrefab.name, transform.position);
         }
     }
+
 
     /// <summary>
     /// 공격을 하면 타이머 초기화

@@ -13,7 +13,7 @@ public class PlayerFallDeadState : PlayerBaseState
     private float _curveHeight = 1f;
 
     private bool _isGoaled = false;
-    private float _totalDuration = 2.0f; // 전체 이동 시간
+    private float _totalDuration = 3.0f; // 전체 이동 시간
     private float _toStartDuration = 0.6f; // 시작점까지 선행 이동 시간
     private float _waitDuration = 2.0f; // 대기 시간
     private float _wailTime = 0f;
@@ -37,12 +37,12 @@ public class PlayerFallDeadState : PlayerBaseState
         if (_owner.PhotonView.IsMine)
         {
             _owner.RPC_SetHitEffect(true);
+            _owner.RPC_PlayFallDeadVFX();
         }
 
         // 안전성 체크
         if (GameManager.Instance == null)
         {
-            Debug.LogError("GameManager.Instance is null in PlayerFallDeadState");
             return;
         }
 
@@ -218,7 +218,7 @@ public class PlayerFallDeadState : PlayerBaseState
                 // VFX 효과 네트워크 동기화
                 if (_owner.PhotonView.IsMine)
                 {
-                    _owner.RPC_PlayFallDeadVFX();
+                    _owner.RPC_PlayFallDeadExplosionVFX();
                 }
             }
         }
