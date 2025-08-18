@@ -70,6 +70,8 @@ public class Player : MonoBehaviourPun, IDamagable
     public float GunPowderDecreaseWithoutAttackTimer => _gunPowderDecreaseWithoutAttackTimer;
     [SerializeField]
     private float _colorUpdateWithoutAttackTimer = 0f;
+    // legacy: moved to PlayerSFXAnimationEvent
+
     private Tween _preExplosionPulseTween;
     private Vector3 _defaultLocalScale;
     private Dictionary<SpriteRenderer, Color> _pulseOriginalColorMap;
@@ -129,6 +131,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private IAirDropItem _airDropItem;
     public IAirDropItem AirDropItem => _airDropItem;
+    private PlayerSFXAnimationEvent _playerSFXAnimationEvent;
+
 
 
 
@@ -143,7 +147,8 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerMaterial = GetComponent<PlayerMaterial>();
         _playerFSM = GetComponent<PlayerFSM>();
         _damagePopup = GetComponent<DamagePopup>();
-        
+        _playerSFXAnimationEvent = GetComponent<PlayerSFXAnimationEvent>();
+
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         LoadItems();
 
@@ -280,6 +285,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _lastNormalBombTime = 0f;
         _lastSpecialBombTime = 0f;
         _ultimateChanceTimer = 0f;
+        // legacy SFX state removed (moved to PlayerSFXAnimationEvent)
 
         // 저장된 속도 상태 초기화
         ClearStoredVelocity();
@@ -327,6 +333,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
         DecreaseGunPowderWithoutAttack();
+        // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
 
         // 폭탄 경고 펄스 체크는 매 프레임 수행 (시각적 반응성 확보)
         //CheckAndPlayPreExplosionPulse();
@@ -536,6 +543,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
         }
     }
+
+    
 
     /// <summary>
     /// 공격을 일정시간 하지 않으면 건파우더 감소

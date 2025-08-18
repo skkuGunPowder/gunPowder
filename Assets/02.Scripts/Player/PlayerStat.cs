@@ -136,6 +136,7 @@ public class PlayerStat : MonoBehaviour
     
     
     public bool IsFallingFromLedge = false;
+    public PlayerSFXAnimationEvent PlayerSFXAnimationEvent;
 
     [Header("Ultimate")]
     // 궁극기 사용 기회 관련 상태값
@@ -279,6 +280,12 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerGunPowderCount += amount;
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife, 0);
+
+        // Gunpowder Heal 사운드 스택 반영 (로컬 소유자 전용)
+        if(PlayerSFXAnimationEvent != null)
+        {
+            PlayerSFXAnimationEvent.OnGunpowderAbsorbed();
+        }
     }
     
     public bool DecreaseGunPowderCount(int amount, int attacker)

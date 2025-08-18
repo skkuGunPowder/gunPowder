@@ -86,6 +86,12 @@ public class GunPowderBezierCurve : MonoBehaviour
         // GunPowder에서 타겟과 isFallingOut을 받아옴
         GunPowder gunPowder = GetComponent<GunPowder>();
         _target = gunPowder.Target;
+        // 타겟과 SourceViewId가 같다면 파괴
+        if (gunPowder.SourceViewId == gunPowder.Target.GetComponent<PhotonView>().ViewID)
+        {
+            InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+            return;
+        }
         _isFallingOut = gunPowder.IsFallingOut;
 
         _speed = _gunPowderSpeed;
