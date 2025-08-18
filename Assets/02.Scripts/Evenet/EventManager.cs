@@ -101,9 +101,9 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnLoadEnd?.Invoke();
     }
-    public event Action<string> OnUltimate;
-    public void Ultimate(string bombName)
+    public event Action<string, PhotonPlayer> OnUltimate;
+    public void Ultimate(string bombName, PhotonPlayer player)
     {
-        OnUltimate?.Invoke(bombName);
+        OnUltimate?.Invoke(bombName, player);
     }
 }

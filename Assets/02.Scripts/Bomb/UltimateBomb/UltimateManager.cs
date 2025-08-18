@@ -32,19 +32,19 @@ public class UltimateManager : Singleton<UltimateManager>
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             GetUltimate("BO0005", _player).ExcuteUltimate();
-            EventManager.Instance.Ultimate("BO0005");
+            // EventManager.Instance.Ultimate("BO0005");
         }
 
         if (Input.GetKeyDown(KeyCode.R))
         {
             GetUltimate("BO0007", _player).ExcuteUltimate();
-            EventManager.Instance.Ultimate("BO0007");
+            // EventManager.Instance.Ultimate("BO0007");
         }
 
         if (Input.GetKeyDown(KeyCode.T))
         {
             GetUltimate("BO0011", _player).ExcuteUltimate();
-            EventManager.Instance.Ultimate("BO0011");
+            // EventManager.Instance.Ultimate("BO0011");
         }
     }
 
