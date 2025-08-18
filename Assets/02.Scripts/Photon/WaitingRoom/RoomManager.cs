@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
@@ -85,7 +86,30 @@ public class RoomManager : PhotonSingleton<RoomManager>
         
         if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()] == null)
         {
-            ready.Add(EProperties.Team.ToString(), (int)EInGameTeam.Red);
+            PhotonPlayer[] players = PhotonNetwork.PlayerList;
+            HashSet<EInGameTeam> usedTeams = new HashSet<EInGameTeam>();
+
+            foreach (PhotonPlayer player in players)
+            {
+                if (player.CustomProperties.TryGetValue(EProperties.Team.ToString(), out object teamObj))
+                {
+                    EInGameTeam team = (EInGameTeam)teamObj;
+                    usedTeams.Add(team);
+                }
+            }
+
+            // 가능한 팀 중에서 사용되지 않은 팀 찾기
+            EInGameTeam myTeam = EInGameTeam.Red; // 기본값
+            foreach (EInGameTeam team in Enum.GetValues(typeof(EInGameTeam)))
+            {
+                if (!usedTeams.Contains(team))
+                {
+                    myTeam = team;
+                    break;
+                }
+            }
+            
+            ready.Add(EProperties.Team.ToString(), (int)myTeam);
         }
         else
         {
@@ -193,11 +217,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 SelectedTeam = (EInGameTeam)changedProps[$"{EProperties.Team}"];
             }
             EventManager.Instance.TeamChanged();
-            EventManager.Instance.PlayerColorChanged(targetPlayer.ActorNumber, (EInGameTeam)changedProps[$"{EProperties.Team}"]);;;
+            EventManager.Instance.PlayerColorChanged(targetPlayer.ActorNumber, (EInGameTeam)changedProps[$"{EProperties.Team}"]);
         }
         if (changedProps.ContainsKey($"{EItemType.Bomb}"))
         {
             Debug.Log(targetPlayer.CustomProperties[(EItemType.Bomb.ToString())].ToString());
+            EventManager.Instance.RoomDataChanged();
             
             if (targetPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {
