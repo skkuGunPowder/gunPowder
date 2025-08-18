@@ -396,32 +396,32 @@ public class PlayerStat : MonoBehaviour
         _confuseTime = time;
     }
 
-    private void SetMoveSpeed(float speed)
+    public void SetMoveSpeed(float speed)
     {
         _moveSpeed = speed;
     }
 
-    private void SetRunSpeed(float speed)
+    public void SetRunSpeed(float speed)
     {
         _runSpeed = speed;
     }
 
-    private void SetJumpForce(float force)
+    public void SetJumpForce(float force)
     {
         _jumpForce = force;
     }
 
-    private void ResetMoveSpeed()
+    public void ResetMoveSpeed()
     {
         _moveSpeed = _originalMoveSpeed;
     }
 
-    private void ResetRunSpeed()
+    public void ResetRunSpeed()
     {
         _runSpeed = _originalRunSpeed;
     }
 
-    private void ResetJumpForce()
+    public void ResetJumpForce()
     {
         _jumpForce = _originalJumpForce;
     }

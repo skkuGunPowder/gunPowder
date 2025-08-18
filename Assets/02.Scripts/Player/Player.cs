@@ -67,6 +67,8 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField]
     private float _gunPowderDecreaseWithoutAttackTimer;
     public float GunPowderDecreaseWithoutAttackTimer => _gunPowderDecreaseWithoutAttackTimer;
+    [SerializeField]
+    private float _colorUpdateWithoutAttackTimer = 0f;
 
     [Header("HitStop")]
     [SerializeField]
@@ -230,6 +232,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _attackTimer = 0f;
         _gunPowderDecreaseTimer = 0f;
         _gunPowderDecreaseWithoutAttackTimer = 0f;
+        _colorUpdateWithoutAttackTimer = 0f;
         _ultimateChanceTimer = 0f;
 
         if (PhotonView.IsMine)
@@ -533,6 +536,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_gunPowderDecreaseWithoutAttackTimer >= PlayerStat.AttackPenaltyTime)
         {
             _gunPowderDecreaseWithoutAttackTimer = 0f;
+            _colorUpdateWithoutAttackTimer = 0f;
             //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
 
             // 낙사 상태면 건파우더 감소 안함
@@ -548,7 +552,41 @@ public class Player : MonoBehaviourPun, IDamagable
             {
                 PhotonView.RPC(nameof(PlayExplosionEffect), RpcTarget.All);
             }
+
+            foreach (var renderer in _playerStat.MySpriteREndererList)
+            {
+                if (renderer == null) { continue; }
+                renderer.color = Color.white;
+            }
+
             _playerFSM.SyncStateChange<PlayerDamagedState>();
+        }
+        else
+        {
+            // 0.5초 간격으로만 색 업데이트
+            _colorUpdateWithoutAttackTimer += Time.deltaTime;
+            if (_colorUpdateWithoutAttackTimer < 0.5f)
+            {
+                return;
+            }
+            _colorUpdateWithoutAttackTimer = 0f;
+
+            // PenaltyTime까지 1초단위로 색이 점점 빨개진다.
+            float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
+            foreach (var renderer in _playerStat.MySpriteREndererList)
+            {
+                if (renderer == null) { continue; }
+
+                // HSV로 변환해서 S(채도)를 0~100%로 조절 (내부적으로 0~1 매핑)
+                // 점점 '빨개지게' 하기 위해 Hue를 0(red)로 고정하고 채도만 시간 비율에 따라 증가
+                Color current = renderer.color;
+                Color.RGBToHSV(current, out float h, out float s, out float v);
+                h = 0f; // red
+                s = Mathf.Clamp01(ratio); // 0~1 (0~100%)
+                Color newColor = Color.HSVToRGB(h, s, v);
+                newColor.a = current.a; // 기존 알파 유지
+                renderer.color = newColor;
+            }
         }
     }
 
@@ -620,6 +658,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public void ResetGunPowderDecreaseWithoutAttackTimer()
     {
         _gunPowderDecreaseWithoutAttackTimer = 0f;
+        _colorUpdateWithoutAttackTimer = 0f;
     }
 
     public void PlayerTeamCheck()
