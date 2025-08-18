@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Photon.Pun;
+using RaycastPro.RaySensors;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
@@ -37,12 +38,20 @@ public class GameResultManager : Singleton<GameResultManager>
         int maxSurviveTime = Mathf.Max(ResultDataList.Max(s =>s.SurviveTime),1);
 
         foreach (var data in ResultDataList)
-        {   
+        {
             data.CalculateDamageRate(maxDamage);
             data.CalculateKillRate(maxKill);
             data.CalculateSurviveTimeRate(maxSurviveTime);
+
+            if (data.Player.IsLocal)
+            {
+                int totalGold = (int)(data.Kill * 50 + data.Damage * 0.1 + data.SurviveTimeRate * 500);
+                int totlaEXP = (int)(data.Kill * 100 + data.Damage * 1 + data.SurviveTimeRate * 1000);
+                CurrencyManager.Instance.AddCurrency(ECurrencyType.Gold, totalGold);
+                CurrencyManager.Instance.AddCurrency(ECurrencyType.EXP, totlaEXP);
+            }
         }
-        
+
         Arrange();
         GeneratePlayer();
     }
