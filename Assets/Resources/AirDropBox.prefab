@@ -136,9 +136,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1619dd53274b4bd42ab746e5fa5e44f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LandingVFX: {fileID: 193167803160336113, guid: e5f8e5526c3be7542b66d48b3c0ed76b, type: 3}
+  LandingVFXPrefab: {fileID: 193167803160336113, guid: e5f8e5526c3be7542b66d48b3c0ed76b, type: 3}
+  DropWarningVFXPrefab: {fileID: 1356245557022683223, guid: 31f2f97ce559f7242b9e4703fd3a83b8, type: 3}
   DropItemList:
   - {fileID: 6235155123209765561, guid: 3e09d901c0c7f624faff840e3dc38e46, type: 3}
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &4719528911893390549
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -243,10 +247,10 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 2240
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 16311
+    m_Bits: 14135
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
