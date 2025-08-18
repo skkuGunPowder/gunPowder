@@ -79,7 +79,6 @@ public class ShopRepository
             if (snapshot.Exists && snapshot.ContainsField(item.ID))
             {
                 purchaseAmount = snapshot.GetValue<int>(item.ID);
-                Debug.LogWarning($"디버깅 :: {purchaseAmount}");
             }
 
             if (purchaseAmount + 1 > item.MaxAmount)

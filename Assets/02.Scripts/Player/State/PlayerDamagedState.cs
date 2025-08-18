@@ -46,7 +46,7 @@ public class PlayerDamagedState : PlayerBaseState
 
         // 히트 이펙트 활성화 및 방향 설정
         _owner.HitEffectPrefab.SetActive(true);
-        SetHitEffectDirection();
+        //SetHitEffectDirection();
     }
 
     public override void OnExit()
@@ -95,13 +95,13 @@ public class PlayerDamagedState : PlayerBaseState
     {
         // 최소 피격 시간 보장
         _timer += Time.deltaTime;
-        
+
         // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
         if (_timer < _owner.PlayerStat.DamagedTime)
         {
             return;
         }
-        
+
         // 최소 시간이 지난 후에 바닥에 닿으면 Idle 상태로 변환
         if (IsGrounded2D())
         {
@@ -173,8 +173,6 @@ public class PlayerDamagedState : PlayerBaseState
             // 추가 힘 적용
             _owner.Rigidbody2D.AddForce(additionalForce, ForceMode2D.Impulse);
             _owner.Rigidbody2D.AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
-            
-            Debug.Log($"Health Ratio: {currentHealthRatio:F2}, Additional Force: {additionalForceMagnitude:F2}, Total Force: {additionalForce}");
         }
     }
     
@@ -198,8 +196,6 @@ public class PlayerDamagedState : PlayerBaseState
             
             // 히트 이펙트의 회전 설정
             _owner.HitEffectPrefab.transform.rotation = Quaternion.Euler(0, 0, angle);
-            
-            Debug.Log($"Hit Effect Direction: {oppositeDirection}, Angle: {angle}");
         }
         else
         {

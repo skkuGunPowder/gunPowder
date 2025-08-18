@@ -7,6 +7,8 @@ public class Explosion : MonoBehaviour
 
     protected ExplosionStat _stat;
     protected CameraController _cameraController;
+    [SerializeField]
+    private bool _debugDamageLog = false;
 
     protected virtual void Awake()
     {
@@ -22,9 +24,9 @@ public class Explosion : MonoBehaviour
     {
         VFXPool.Instance.Play(VFXPrefab.name, transform.position);
 
-        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
-
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
+        var processedRBs = new System.Collections.Generic.HashSet<Rigidbody2D>();
+        var processedRoots = new System.Collections.Generic.HashSet<Transform>();
         foreach (Collider2D other in colliders)
         {
             if (other.gameObject.tag == "Immune")
@@ -36,14 +38,29 @@ public class Explosion : MonoBehaviour
             {
                 if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
+                    // 중복 처리 방지: 같은 Rigidbody2D에 대해 한 번만 처리
+                    if (!processedRBs.Add(otherRigidBody))
+                    {
+                        continue;
+                    }
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
+                }
+                else
+                {
+                    // Rigidbody가 없는 대상은 루트 기준으로 한 번만 처리
+                    Transform root = other.transform.root;
+                    if (!processedRoots.Add(root))
+                    {
+                        continue;
+                    }
                 }
 
                 if (attackerPhotonView.IsMine && !_stat.IsSelfDamage)
                 {
                     continue;
                 }
-                damagableObject.TakeDamage(_stat.AttackPower, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
+                int damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
+                damagableObject.TakeDamage(damage, _stat.AttackPower, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());
@@ -68,5 +85,59 @@ public class Explosion : MonoBehaviour
         direction.y += 0.3f;
 
         rb.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
+    }
+    
+    // 거리별 데미지 계산: 폭발 중심에서 콜라이더 표면까지의 최단거리 사용
+    private int DamagePerDistance(Collider2D hitCollider, Rigidbody2D rb, Vector2 explosionPosition, float explosionRadius, int maxDamage)
+    {
+        if (hitCollider == null)
+        {
+            return 0;
+        }
+
+        Transform root = rb != null ? rb.transform : hitCollider.transform;
+        float distance = Mathf.Min(GetClosestDistanceToRoot(root, explosionPosition), explosionRadius);
+
+        if (distance >= explosionRadius)
+        {
+            return 0;
+        }
+
+        float t = 1f - (distance / explosionRadius);
+        float damagePerDistance = maxDamage * t;
+
+        if (_debugDamageLog)
+        {
+            Debug.Log($"damagePerDistance: {damagePerDistance}, distance: {distance}, explosionRadius: {explosionRadius}, damage: {Mathf.CeilToInt(Mathf.Max(0f, damagePerDistance))}");
+        }
+
+        return Mathf.CeilToInt(Mathf.Max(0f, damagePerDistance));
+    }
+
+    // 루트 트랜스폼 하위의 모든 Collider2D 중 폭발 원점까지의 최단거리
+    private static float GetClosestDistanceToRoot(Transform root, Vector2 origin)
+    {
+        float minDistance = float.PositiveInfinity;
+        var colliders = root.GetComponentsInChildren<Collider2D>();
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            var col = colliders[i];
+            if (col == null || !col.enabled) continue;
+
+            if (col.OverlapPoint(origin))
+            {
+                return 0f;
+            }
+
+            Vector2 closest = col.ClosestPoint(origin);
+            float d = Vector2.Distance(origin, closest);
+            if (d < minDistance) minDistance = d;
+        }
+
+        if (float.IsPositiveInfinity(minDistance))
+        {
+            return Vector2.Distance(origin, (Vector2)root.position);
+        }
+        return minDistance;
     }
 }

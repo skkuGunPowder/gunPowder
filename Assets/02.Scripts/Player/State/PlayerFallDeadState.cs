@@ -13,10 +13,13 @@ public class PlayerFallDeadState : PlayerBaseState
     private float _curveHeight = 1f;
 
     private bool _isGoaled = false;
-    private float _totalDuration = 2.0f; // 전체 이동 시간
+    private float _totalDuration = 3.0f; // 전체 이동 시간
+    private float _toStartDuration = 0.6f; // 시작점까지 선행 이동 시간
     private float _waitDuration = 2.0f; // 대기 시간
     private float _wailTime = 0f;
     private bool _hasTriggeredDeathEvents = false; // 사망 이벤트가 한 번만 발생하도록 하는 플래그
+    private float _effectTimer = 0f;
+    private float _effectDuration = 0.5f;
 
     private const float MAX_FALL_SPEED = -20f;
 
@@ -30,12 +33,16 @@ public class PlayerFallDeadState : PlayerBaseState
     {
         base.OnEnter();
 
-        _owner.HitEffectPrefab.SetActive(true);
+        // HitEffectPrefab 네트워크 동기화
+        if (_owner.PhotonView.IsMine)
+        {
+            _owner.RPC_SetHitEffect(true);
+            _owner.RPC_PlayFallDeadVFX();
+        }
 
         // 안전성 체크
         if (GameManager.Instance == null)
         {
-            Debug.LogError("GameManager.Instance is null in PlayerFallDeadState");
             return;
         }
 
@@ -64,7 +71,6 @@ public class PlayerFallDeadState : PlayerBaseState
             _isLeft = false;
             _startPoint = GameManager.Instance.FallDeadStartPointList[1].position;
         }
-        transform.position = _startPoint;
 
         // 중단점 설정
         _middlePoint = GameManager.Instance.FallDeadPathList[_isLeft ? 0 : 1].position;
@@ -74,23 +80,25 @@ public class PlayerFallDeadState : PlayerBaseState
         // 경로 설정 (좌우 반전 적용)
         Vector3[] path = new Vector3[] { _startPoint, _middlePoint, _endPoint };
 
-        // DOTween 곡선 이동 - Tween 저장
-        _moveTween = _owner.transform.DOPath(path, _totalDuration, PathType.CatmullRom)
-            .SetEase(Ease.InOutSine)
-            .OnComplete(() =>
+        // DOTween 시퀀스 이동 (시작점까지 이동 후 경로 이동)
+        Sequence seq = DOTween.Sequence();
+        seq.Append(_owner.transform.DOMove(_startPoint, _toStartDuration).SetEase(Ease.InOutSine));
+        seq.Append(_owner.transform.DOPath(path, _totalDuration, PathType.CatmullRom).SetEase(Ease.InOutSine));
+        seq.OnComplete(() =>
+        {
+            _isGoaled = true;
+            _owner.transform.position = _endPoint;
+
+            // DOTween 완료 후 Rigidbody2D 속도 초기화
+            if (_owner.Rigidbody2D != null)
             {
-                _isGoaled = true;
-                _owner.transform.position = _endPoint;
-                
-                // DOTween 완료 후 Rigidbody2D 속도 초기화
-                if (_owner.Rigidbody2D != null)
-                {
-                    Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-                    velocity.x = 0f;
-                    velocity.y = 0f;
-                    _owner.Rigidbody2D.linearVelocity = velocity;
-                }
-            });
+                Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+                velocity.x = 0f;
+                velocity.y = 0f;
+                _owner.Rigidbody2D.linearVelocity = velocity;
+            }
+        });
+        _moveTween = seq;
 
         // 모습 보이게
         List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
@@ -112,7 +120,11 @@ public class PlayerFallDeadState : PlayerBaseState
     {
         base.OnExit();
 
-        _owner.HitEffectPrefab.SetActive(false);
+        // HitEffectPrefab 네트워크 동기화
+        if (_owner.PhotonView.IsMine)
+        {
+            _owner.RPC_SetHitEffect(false);
+        }
 
         // DOTween 중단
         if (_moveTween != null && _moveTween.IsActive())
@@ -134,7 +146,7 @@ public class PlayerFallDeadState : PlayerBaseState
         {
             _owner.gameObject.tag = "Enemy";
         }
-        
+
         // 상태 전환 시 Rigidbody2D 속도 초기화
         if (_owner.Rigidbody2D != null)
         {
@@ -156,10 +168,10 @@ public class PlayerFallDeadState : PlayerBaseState
         if (_isGoaled)
         {
             transform.position = _endPoint;
-            
+
             // _isGoaled 상태에서도 속도 제한 적용
             LimitYVelocity();
-            
+
             // 2초 대기 후 한 번만 사망 이벤트 발생
             if (!_hasTriggeredDeathEvents)
             {
@@ -167,7 +179,7 @@ public class PlayerFallDeadState : PlayerBaseState
                 if (_wailTime >= _waitDuration)
                 {
                     _hasTriggeredDeathEvents = true; // 플래그 설정으로 중복 실행 방지
-                    
+
                     Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생 - IsMine: {_owner.PhotonView.IsMine}, IsMasterClient: {PhotonNetwork.IsMasterClient}");
 
                     // 안전성 체크
@@ -187,29 +199,44 @@ public class PlayerFallDeadState : PlayerBaseState
                     // 15의 데미지를 받는다.
                     _owner.PlayerStat.IsImmune = false;
                     Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} - Calling TakeDamage, IsMine: {_owner.PhotonView.IsMine}");
-                    if(_owner.PhotonView.IsMine)
+                    if (_owner.PhotonView.IsMine)
                     {
                         // IsImmune을 네트워크로 동기화
                         _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
-                        _owner.TakeDamage(15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr ,true);
+                        _owner.TakeDamage(15, 15, _owner.transform.position, _owner.GetComponent<PhotonView>().ViewID, _owner.GetComponent<PhotonView>().OwnerActorNr, true);
                     }
                 }
             }
         }
+        else
+        {
+            // 날아가면서 효과 재생
+            _effectTimer += Time.deltaTime;
+            if(_effectTimer >= _effectDuration)
+            {
+                _effectTimer = 0f;
+                // VFX 효과 네트워크 동기화
+                if (_owner.PhotonView.IsMine)
+                {
+                    _owner.RPC_PlayFallDeadExplosionVFX();
+                }
+            }
+        }
     }
-    
+
     private void LimitYVelocity()
     {
         if (_owner.Rigidbody2D == null) return;
-        
+
         Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-        
+
         // 낙하 속도 제한 (음수)
         if (velocity.y < MAX_FALL_SPEED)
         {
             velocity.y = MAX_FALL_SPEED;
         }
-        
+
         _owner.Rigidbody2D.linearVelocity = velocity;
     }
+    
 }

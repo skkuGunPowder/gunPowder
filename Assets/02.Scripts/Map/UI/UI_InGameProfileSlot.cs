@@ -13,15 +13,18 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public Image ProfileImage;
     public Image BombImage;
     
+    public ProfileSkin PlayerProfileSkin;
+    
     public List<GameObject> LifeList;
     public List<Color32> GunPowderColorCodeList;
     public List<Color32> TeamColorCodeList;
 
-    public void Init(string playerName, Sprite bombImage, EInGameTeam taem)
+    public void Init(string playerName, Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
     {
         NicknameTextUGUI.text = playerName;
         BombImage.sprite = bombImage;
         ProfileImage.color = TeamColorSet(taem);
+        PlayerProfileSkin.Init(player);
     }
     public void Refresh(int gunpowder, int life)
     {

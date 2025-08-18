@@ -27,7 +27,7 @@ public class UI_InGameProfile : MonoBehaviour
                 Sprite bomb = item.Image;
                 string playerName = _playerActorNumberList[i].NickName;
                 EInGameTeam team = (EInGameTeam)_playerActorNumberList[i].CustomProperties[EProperties.Team.ToString()];
-                UI_InGameProfileSlotList[i].Init(playerName,bomb, team);
+                UI_InGameProfileSlotList[i].Init(playerName,bomb, team, _playerActorNumberList[i]);
                 UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
             }
             else

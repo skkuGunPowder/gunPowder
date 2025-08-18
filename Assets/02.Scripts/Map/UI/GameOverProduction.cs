@@ -95,8 +95,6 @@ public class GameOverProduction : MonoBehaviour
             if (!PhotonNetwork.IsMessageQueueRunning)
                 return; // 또는 로딩 상태 체크
 
-            PhotonNetwork.IsMessageQueueRunning = false;
-
             PhotonNetwork.LoadLevel(ESceneList.ResultScene.ToString());
         });
 
