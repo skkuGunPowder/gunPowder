@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class MissileExplosion : Explosion
@@ -9,5 +10,11 @@ public class MissileExplosion : Explosion
     {
         base.Awake();
         SetStat(ID);
+    }
+
+    public override void Explode(bool isFallingOut, PhotonView attackerPhotonView)
+    {
+        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
+        base.Explode(isFallingOut, attackerPhotonView);
     }
 }

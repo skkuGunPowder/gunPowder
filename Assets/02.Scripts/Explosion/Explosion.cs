@@ -22,8 +22,6 @@ public class Explosion : MonoBehaviour
     {
         VFXPool.Instance.Play(VFXPrefab.name, transform.position);
 
-        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
-
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         foreach (Collider2D other in colliders)
         {
