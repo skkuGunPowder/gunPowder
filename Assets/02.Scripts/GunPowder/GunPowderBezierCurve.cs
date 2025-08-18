@@ -51,6 +51,21 @@ public class GunPowderBezierCurve : MonoBehaviour
         if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
         gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = false;
 
+        // Resume particle systems that may have been stopped during release phase
+        var release = GetComponent<GunPowderRelease>();
+        if (release != null)
+        {
+            release.ResumeParticles();
+        }
+        else
+        {
+            var particleSystems = GetComponentsInChildren<ParticleSystem>(true);
+            foreach (var ps in particleSystems)
+            {
+                if (ps != null) ps.Play(true);
+            }
+        }
+
         // Player 레이어를 ExcludeLayers에서 제거
         int playerLayer = LayerMask.NameToLayer("Player");
         //int enemyLayer = LayerMask.NameToLayer("Enemy");
