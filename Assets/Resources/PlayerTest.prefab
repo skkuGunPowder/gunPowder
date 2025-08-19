@@ -2874,6 +2874,7 @@ GameObject:
   - component: {fileID: 4841738079202767485}
   - component: {fileID: 8193787781233298885}
   - component: {fileID: 1220994178685783666}
+  - component: {fileID: 8620183200267240798}
   m_Layer: 7
   m_Name: Idle_Body_0
   m_TagString: Untagged
@@ -2998,6 +2999,19 @@ MonoBehaviour:
   JumpDashParticle: {fileID: 4657792770069071823, guid: 70f685afc0d635f4f99b3aa8b4a9c7e8, type: 3}
   BreakParticle: {fileID: 4657792770069071823, guid: 39312a263f777024dbe3dd07ab9641a7, type: 3}
   LandParticle: {fileID: 4657792770069071823, guid: 4b133ee6d076e874596775d9b3ea2c81, type: 3}
+--- !u!114 &8620183200267240798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4890471182584963523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a43962eb8d9b8b14a8e6af3e81dea753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _gunpowderHealWindow: 0.25
 --- !u!1 &5086045690288416287
 GameObject:
   m_ObjectHideFlags: 0
@@ -4427,6 +4441,7 @@ MonoBehaviour:
   _totalDamage: 0
   _totalKillCount: 0
   IsFallingFromLedge: 0
+  PlayerSFXAnimationEvent: {fileID: 8620183200267240798}
   _hasUltimateChance: 0
   _hasUsedUltimateThisLife: 0
   _ultimateChanceDuration: 5
