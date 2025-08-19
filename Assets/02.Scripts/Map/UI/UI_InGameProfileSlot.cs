@@ -7,6 +7,7 @@ using DG.Tweening;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UI_InGameProfileSlot : MonoBehaviour
 {
+    private RectTransform _gunpowderTextOriginalRectTransform;
     public TextMeshProUGUI NicknameTextUGUI;
     public TextMeshProUGUI GunpowderTextUGUI;
     public GameObject FirstPlace;
@@ -25,12 +26,15 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public float Strength = 20f;
     public float Duration = 1f;
     public Ease EaseType;
+    public float ScaleStrength = 1.2f;
     public void Init(string playerName, Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
     {
         NicknameTextUGUI.text = playerName;
         BombImage.sprite = bombImage;
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
+        
+        _gunpowderTextOriginalRectTransform = GunpowderTextUGUI.rectTransform;
     }
     public void Refresh(int gunpowder, int life)
     {
@@ -86,8 +90,14 @@ public class UI_InGameProfileSlot : MonoBehaviour
 
     private void Shake()
     {
-        Debug.Log("Shake");
-        GunpowderTextUGUI.rectTransform.DOShakeAnchorPos(Duration, Strength).SetEase(EaseType);
+        GunpowderTextUGUI.rectTransform.DOScale(ScaleStrength, Duration).SetEase(Ease.OutCubic).OnComplete(() =>
+        {
+            GunpowderTextUGUI.rectTransform.DOScale(1f, Duration).SetEase(Ease.InCubic);
+        });
+        GunpowderTextUGUI.rectTransform.DOShakeAnchorPos(Duration, Strength).SetEase(EaseType).OnComplete(() =>
+        {
+            GunpowderTextUGUI.rectTransform.anchoredPosition = _gunpowderTextOriginalRectTransform.anchoredPosition;
+        });
     }
        public void SetTop(bool isTop)
     {

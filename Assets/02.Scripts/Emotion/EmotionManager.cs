@@ -14,14 +14,23 @@ public class EmotionManager : MonoBehaviour
     private void Awake()
     {
         _myEmotionList = new List<int>();
-        EventManager.Instance.OnPlayerFind += PlayerFind;
+        EventManager.Instance.OnPlayerFind += Request_PlayerFind;
     }
 
-    private void PlayerFind()
+    private void Request_PlayerFind()
+    {
+        MyPhotonView.RPC(nameof(RPC_PlayerFind), RpcTarget.All);
+    }
+    
+    [PunRPC]
+    private void RPC_PlayerFind()
     {
         PlayerEmotion[] playerEmotionArray = FindObjectsByType<PlayerEmotion>(FindObjectsSortMode.None);
         _playerEmotionList = new List<PlayerEmotion>(playerEmotionArray);
+        
+        Debug.Log($"Find Player {_playerEmotionList.Count} Find : {_playerEmotionList[0].GetPlayerNumber()}");
     }
+    
     private void Start()
     {
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.Emotion.ToString()) == false)
@@ -57,11 +66,14 @@ public class EmotionManager : MonoBehaviour
     private void Request_PlayEmotion(int emotionId)
     {
         MyPhotonView.RPC(nameof(RPC_PlayEmotion), RpcTarget.All, emotionId);
+        
     }
     
     [PunRPC]
     private void RPC_PlayEmotion(int emotionId, PhotonMessageInfo info)
     {
+        Debug.Log($"Play Emotion {info.Sender.NickName} {emotionId}");
+        
         string emotionName = Enum.GetName(typeof(EEmotion), emotionId);
         PhotonPlayer player = info.Sender;
 
@@ -69,7 +81,15 @@ public class EmotionManager : MonoBehaviour
         {
             if (emotion.GetPlayerNumber() == player.ActorNumber)
             {
+                if (emotion.IsLive == false)
+                {
+                    Debug.Log($"Dead Emotion {emotionName} {player.NickName}");
+                    EventManager.Instance.PlayEmotion(emotionName, player.ActorNumber);
+                    break;   
+                }
+                
                 emotion.Play(emotionName);
+                
                 break;
             }
         }
@@ -85,6 +105,6 @@ public class EmotionManager : MonoBehaviour
 
     private void OnDisable()
     {
-        EventManager.Instance.OnPlayerFind -= PlayerFind;
+        EventManager.Instance.OnPlayerFind -= Request_PlayerFind;
     }
 }

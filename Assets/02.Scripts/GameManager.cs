@@ -81,9 +81,9 @@ public class GameManager : PhotonSingleton<GameManager>
         }
 
         if (_timer <= 0)
-            {
-                _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-            }
+        {
+            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+        }
     }
     // 게임 종료
     // 프로퍼티가 바뀌었을 때 호출되는 함수
