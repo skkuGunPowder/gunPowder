@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.Audio;
 
-[RequireComponent(typeof(AudioSource))]
 public class Sound : MonoBehaviour
 {
     [SerializeField] private AudioClip _clip;
@@ -49,5 +48,10 @@ public class Sound : MonoBehaviour
     public void Stop()
     {
         _audioSource.Stop();
+    }
+
+    public AudioSource GetAudioSource()
+    {
+        return _audioSource;
     }
 }
