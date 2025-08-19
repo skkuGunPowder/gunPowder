@@ -7,10 +7,11 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class UI_RoomProfile : MonoBehaviour
 {
     public List<UI_ProfileSlot> UI_ProfileSlotList = new List<UI_ProfileSlot>();
-
+    
     private void Awake()
     {
         Debug.Log("roomprofile awake");
+        EventManager.Instance.OnPlayEmotion += PlayEmotion;
         EventManager.Instance.OnRoomDataChanged += Refresh;
         EventManager.Instance.OnReadyChanged += ReadyCheck;
         EventManager.Instance.OnTeamChanged += TeamChange;
@@ -85,8 +86,28 @@ public class UI_RoomProfile : MonoBehaviour
             }
         }
     }
+
+    private void PlayEmotion( string emotion,int playerNumber)
+    {
+        List<int> playerList = RoomManager.Instance.PlayerSlotList;
+        for (int i = 0; i < playerList.Count; i++)
+        {
+            
+            if (playerList[i] == 0)
+            {
+                continue;
+            }
+
+            if (playerList[i] == playerNumber)
+            {
+                UI_ProfileSlotList[i].Play(emotion);
+                break;
+            }
+        }
+    }
     private void OnDisable()
     {
+        EventManager.Instance.OnPlayEmotion -= PlayEmotion;
         EventManager.Instance.OnRoomDataChanged -= Refresh;
         EventManager.Instance.OnReadyChanged -= ReadyCheck;
         EventManager.Instance.OnTeamChanged -= TeamChange;

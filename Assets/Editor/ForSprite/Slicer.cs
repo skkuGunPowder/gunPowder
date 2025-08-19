@@ -6,7 +6,7 @@ public class SpriteAutoSlicer
     [MenuItem("Tools/Slice All Sprites In Folder")]
     static void SliceAll()
     {
-        string folderPath = "Assets/05.Images/Test"; // 변경
+        string folderPath = "Assets/05.Images/Emotion"; // 변경
         string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { folderPath });
 
         foreach (string guid in guids)
@@ -18,8 +18,8 @@ public class SpriteAutoSlicer
                 ti.spriteImportMode = SpriteImportMode.Multiple;
                 ti.isReadable = true;
 
-                int cellSizeX = 64; // 셀 크기
-                int cellSizeY = 64;
+                int cellSizeX = 32; // 셀 크기
+                int cellSizeY = 32;
 
                 int textureWidth = 0;
                 int textureHeight = 0;

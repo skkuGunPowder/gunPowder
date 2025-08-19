@@ -6,7 +6,7 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class ProfileSkin : MonoBehaviour
 {
     public List<ProfileSkinSlot> SkinSlotList;
-    
+    public List<ProfileTeamSlot> TeamSlotList;
     // 스킨 전체 바꾸기 : 첫 입장
     public void Init(PhotonPlayer player) 
     {
@@ -17,6 +17,13 @@ public class ProfileSkin : MonoBehaviour
         }
     }
 
+    public void TeamChanged(EInGameTeam team)
+    {
+        foreach (ProfileTeamSlot slot in TeamSlotList)
+        {
+            slot.Refresh((int)team);
+        }
+    }
     // 부위 스킨 바꾸기
     public void Refresh(EItemType itemType, PhotonPlayer player)
     {

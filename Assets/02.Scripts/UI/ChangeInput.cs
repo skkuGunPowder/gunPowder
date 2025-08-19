@@ -21,6 +21,17 @@ public class ChangeInput : MonoBehaviour
         if (navigationOrder == null || navigationOrder.Count == 0)
             return;
 
+        // 현재 EventSystem의 선택과 동기화: 마우스 클릭 등으로 선택이 바뀌면 currentIndex도 갱신
+        var selectedGO = EventSystem.current.currentSelectedGameObject;
+        if (selectedGO != null)
+        {
+            int syncedIndex = navigationOrder.FindIndex(s => s != null && s.gameObject == selectedGO);
+            if (syncedIndex >= 0)
+            {
+                currentIndex = syncedIndex;
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             bool isShift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);

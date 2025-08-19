@@ -106,4 +106,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnUltimate?.Invoke(bombName, player);
     }
+    
+    public event Action<string, int> OnPlayEmotion;
+    public void PlayEmotion(string emotionName, int playerNumber)
+    {
+        OnPlayEmotion?.Invoke(emotionName,playerNumber);
+    }
 }

@@ -131,6 +131,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private IAirDropItem _airDropItem;
     public IAirDropItem AirDropItem => _airDropItem;
+
+    [SerializeField]
     private PlayerSFXAnimationEvent _playerSFXAnimationEvent;
 
 
@@ -147,7 +149,6 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerMaterial = GetComponent<PlayerMaterial>();
         _playerFSM = GetComponent<PlayerFSM>();
         _damagePopup = GetComponent<DamagePopup>();
-        _playerSFXAnimationEvent = GetComponent<PlayerSFXAnimationEvent>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         LoadItems();
@@ -519,6 +520,9 @@ public class Player : MonoBehaviourPun, IDamagable
             RPC_SetMaterial((byte)EPlayerMaterial.Default);
             _ultimateEffectOn = false;
 
+            // SFX
+            _playerSFXAnimationEvent.PlayerUltimateUseSFX();
+
             // 궁극기 연출
             PhotonView.RPC(nameof(Rpc_UltimateProduction), RpcTarget.All, _ultimate.GetBombID());
         }
@@ -812,8 +816,19 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
         }
-        SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
-        SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 3, 0f, false, SoundType.SFX, true, 1f, 50f);
+
+        // SFX
+
+        // 맥스 데미지를 받았을때 다른 사운드 재생
+        if( damage == maxDamage)
+        {
+            _playerSFXAnimationEvent.PlayerCritDamageVoiceRandomSFX();
+        }
+        else
+        {
+            SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
+            SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 3, 0f, false, SoundType.SFX, true, 1f, 50f);
+        }
 
         if (!PhotonView.IsMine)
         {
