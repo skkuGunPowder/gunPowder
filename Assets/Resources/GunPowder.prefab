@@ -93,12 +93,12 @@ GameObject:
   - component: {fileID: 5893106614059971835}
   - component: {fileID: 592022657066048674}
   - component: {fileID: 3739907028313335914}
-  - component: {fileID: 1969233818461129981}
   - component: {fileID: 6239051951383542333}
   - component: {fileID: 4440970214917004790}
   - component: {fileID: 1498590149035729745}
   - component: {fileID: 7911003164450423038}
   - component: {fileID: 509355492618332428}
+  - component: {fileID: 3645746150428092262}
   m_Layer: 8
   m_Name: GunPowder
   m_TagString: Untagged
@@ -140,6 +140,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _mySprite: {fileID: -1626869394, guid: 251513fc291127f43b4095721f63a139, type: 3}
   _enemySprite: {fileID: -394664343, guid: 251513fc291127f43b4095721f63a139, type: 3}
+  MyTrailPreset: {fileID: 11400000, guid: 7fc61c747358b3849834bf7ba66926af, type: 2}
+  EnemyTrailPreset: {fileID: 11400000, guid: 92b352261953ee54caa80b379727003d, type: 2}
 --- !u!114 &592022657066048674
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,175 +184,6 @@ MonoBehaviour:
   GroundCheckDistance: 0
   GroundCheckOffset: 0.1
   YForceOffset: 2
---- !u!114 &1969233818461129981
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2640530332653095854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47f233e4c5d6f4aa6a1618016c2233f3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  profile: {fileID: 0}
-  profileSync: 0
-  target: {fileID: 2296979838211452121}
-  _active: 1
-  ignoreVisibility: 0
-  executeInEditMode: 0
-  ignoreFrames: 0
-  duration: 0.5
-  continuous: 0
-  smooth: 1
-  checkWorldPosition: 0
-  minDistance: 0.1
-  worldPositionRelativeOption: 0
-  worldPositionRelativeTransform: {fileID: 0}
-  checkScreenPosition: 1
-  minPixelDistance: 10
-  stepsBufferSize: 1023
-  maxStepsPerFrame: 12
-  checkTime: 0
-  timeInterval: 1
-  checkCollisions: 0
-  orientToSurface: 1
-  ground: 0
-  surfaceOffset: 0.05
-  collisionLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  mask: {fileID: 0}
-  renderOrder: 1
-  clearStencil: 1
-  cullMode: 2
-  subMeshMask: -1
-  colorOverTime:
-    serializedVersion: 2
-    key0: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 1}
-    key1: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 0.7764706}
-    key2: {r: 1, g: 1, b: 1, a: 0.32941177}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 45296
-    ctime2: 65535
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 45104
-    atime2: 65535
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_ColorSpace: 0
-    m_NumColorKeys: 3
-    m_NumAlphaKeys: 3
-  colorRamp: 0
-  colorRampTexture: {fileID: 0}
-  colorRampStart: {fileID: 0}
-  colorRampEnd: {fileID: 0}
-  fadeOut: 1
-  colorSequence: 0
-  color: {r: 1, g: 1, b: 1, a: 1}
-  colorCycleDuration: 3
-  colorCycleLoop: 1
-  pingPongSpeed: 1
-  colorStartPalette:
-    serializedVersion: 2
-    key0: {r: 1, g: 0, b: 0, a: 1}
-    key1: {r: 0, g: 1, b: 0, a: 1}
-    key2: {r: 0, g: 0, b: 1, a: 0}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 32768
-    ctime2: 65535
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_ColorSpace: -1
-    m_NumColorKeys: 3
-    m_NumAlphaKeys: 2
-  cam: {fileID: 0}
-  effect: 0
-  customMaterial: {fileID: 0}
-  texture: {fileID: 0}
-  scale: {x: 1, y: 1, z: 1}
-  scaleStartRandomMin: {x: 1, y: 1, z: 1}
-  scaleStartRandomMax: {x: 1, y: 1, z: 1}
-  scaleOverTime:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  ignoreTransformScale: 0
-  scaleUniform: 0
-  parent: {fileID: 0}
-  localPositionRandomMin: {x: 0, y: 0, z: 0}
-  localPositionRandomMax: {x: 0, y: 0, z: 0}
-  laserBandWidth: 0.1
-  laserIntensity: 20
-  laserFlash: 0.2
-  trailTint: {r: 0, g: 0, b: 0.1, a: 1}
-  cameraDistanceFade: 0
-  cameraDistanceFadeNear: 0
-  cameraDistanceFadeFar: 1000
-  animationStates: 
-  animator: {fileID: 0}
-  lookTarget: {fileID: 0}
-  lookToCamera: 1
-  textureCutOff: 0.25
-  outlineMethod: 0
-  rimPower: 2
-  normalThreshold: 0.3
-  useLastAnimationState: 0
-  maxBatches: 50
-  meshPoolSize: 256
-  interpolate: 0
 --- !u!61 &6239051951383542333
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -389,7 +222,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.44444445, y: 0.44444445}
+    oldSize: {x: 0.8888889, y: 0.8888889}
     newSize: {x: 0.64, y: 0.64}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -564,6 +397,38 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &3645746150428092262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2640530332653095854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8edf2d55ca588547881b7472e926510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TrailName: 
+  m_CurrentTrailPreset: {fileID: 11400000, guid: 7fc61c747358b3849834bf7ba66926af, type: 2}
+  m_TrailParent: {fileID: 0}
+  m_SpriteToDuplicate: {fileID: 0}
+  m_Layer: 0
+  m_ZMoveStep: 0.0001
+  m_ZMoveMax: 10
+  m_HideTrailOnDisabled: 1
+  m_TrailActivationCondition: 0
+  m_TrailDeactivationCondition: 0
+  m_StartIfUnderVelocity: 0
+  m_VelocityStartIsLocalSpace: 0
+  m_VelocityNeededToStart: 0
+  m_StopIfOverVelocity: 0
+  m_VelocityStopIsLocalSpace: 0
+  m_VelocityNeededToStop: 0
+  m_TrailActivationDuration: 0
+  m_SortingLayerID: 0
+  m_OrderInSortingLayer: 0
+  m_DisabledElementsInTrail: []
 --- !u!1 &4261709803794338834
 GameObject:
   m_ObjectHideFlags: 0
@@ -10444,7 +10309,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2248433744428339230, guid: bd285da2363c27b4dbdc763e41fa883f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2478447730118650045, guid: bd285da2363c27b4dbdc763e41fa883f, type: 3}
       propertyPath: m_LocalScale.x
