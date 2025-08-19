@@ -12,7 +12,6 @@ public class EmotionManager : MonoBehaviour
     private void Awake()
     {
         _myEmotionList = new List<int>();   
-        MyPhotonView = GetComponent<PhotonView>();
     }
 
     private void Start()
@@ -49,11 +48,6 @@ public class EmotionManager : MonoBehaviour
 
     private void Request_PlayEmotion(int emotionId)
     {
-        if (MyPhotonView.IsMine == false)
-        {
-            return;
-        }
-        
         MyPhotonView.RPC(nameof(RPC_PlayEmotion), RpcTarget.All, emotionId);
     }
     
