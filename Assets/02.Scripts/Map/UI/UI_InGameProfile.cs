@@ -66,16 +66,16 @@ public class UI_InGameProfile : MonoBehaviour
 
     }
 
-    public void PlayEmotion(string emotionName, int playerNumber)
-    {
-        for (int i = 0; i < _playerActorNumberList.Count; i++)
-        {
-            if (_playerActorNumberList[i].ActorNumber == playerNumber)
-            {
-                UI_InGameProfileSlotList[i].PlayEmotion(emotionName);
-            }
-        }
-    }
+    // public void PlayEmotion(string emotionName, int playerNumber)
+    // {
+    //     for (int i = 0; i < _playerActorNumberList.Count; i++)
+    //     {
+    //         if (_playerActorNumberList[i].ActorNumber == playerNumber)
+    //         {
+    //             UI_InGameProfileSlotList[i].PlayEmotion(emotionName);
+    //         }
+    //     }
+    // }
     private void OnDisable()
     {
         Debug.Log("온 디스에이블 ");
@@ -86,7 +86,7 @@ public class UI_InGameProfile : MonoBehaviour
     {
         if (EventManager.Instance != null)
         {
-            EventManager.Instance.OnPlayEmotion += PlayEmotion;
+            // EventManager.Instance.OnPlayEmotion += PlayEmotion;
             EventManager.Instance.OnDataChanged += Refresh;
             EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
             EventManager.Instance.OnProfileInit += Init;   
@@ -99,7 +99,7 @@ public class UI_InGameProfile : MonoBehaviour
         {
             EventManager.Instance.OnDataChanged -= Refresh;
             EventManager.Instance.OnTopPlayerChanged -= SetTopPlayer;
-            EventManager.Instance.OnPlayEmotion -= PlayEmotion;
+            // EventManager.Instance.OnPlayEmotion -= PlayEmotion;
         }
     }
 }

@@ -6,14 +6,22 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class EmotionManager : MonoBehaviour
 { 
     public PhotonView MyPhotonView;
+    
     private List<int> _myEmotionList;
-
     private Dictionary<KeyCode, int> _emotionKeyDictionary;
+    
+    private List<PlayerEmotion> _playerEmotionList = new List<PlayerEmotion>();
     private void Awake()
     {
-        _myEmotionList = new List<int>();   
+        _myEmotionList = new List<int>();
+        EventManager.Instance.OnPlayerFind += PlayerFind;
     }
 
+    private void PlayerFind()
+    {
+        PlayerEmotion[] playerEmotionArray = FindObjectsByType<PlayerEmotion>(FindObjectsSortMode.None);
+        _playerEmotionList = new List<PlayerEmotion>(playerEmotionArray);
+    }
     private void Start()
     {
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.Emotion.ToString()) == false)
@@ -56,8 +64,15 @@ public class EmotionManager : MonoBehaviour
     {
         string emotionName = Enum.GetName(typeof(EEmotion), emotionId);
         PhotonPlayer player = info.Sender;
-        
-        EventManager.Instance.PlayEmotion(emotionName, player.ActorNumber);
+
+        foreach (var emotion in _playerEmotionList)
+        {
+            if (emotion.GetPlayerNumber() == player.ActorNumber)
+            {
+                emotion.Play(emotionName);
+                break;
+            }
+        }
     }
     
     private void DefaultEmotion()
@@ -66,5 +81,10 @@ public class EmotionManager : MonoBehaviour
         {
             _myEmotionList.Add(i);
         }
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Instance.OnPlayerFind -= PlayerFind;
     }
 }

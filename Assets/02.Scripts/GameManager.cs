@@ -185,7 +185,7 @@ public class GameManager : PhotonSingleton<GameManager>
         _timer = _initTime;
         
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
-        
+        EventManager.Instance.PlayerFind();
         GameStartProduction.GameStart();
     }
     

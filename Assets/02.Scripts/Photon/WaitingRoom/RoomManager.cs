@@ -73,6 +73,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private void GeneratePlayer()
     {
         Spawner.GeneratePlayers(0);
+        EventManager.Instance.PlayerFind();
     }
     // 플레이어가 레디를 했는지 체크했는지 알아보는 커스텀 프로퍼티
     private void SetProperties()
@@ -235,6 +236,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // => 다른 플레이어들에게 플레이어 리스트를 전달하고 각자 로컬에서 알아서 UI 리프레시하는 방식
     public override void OnPlayerEnteredRoom(PhotonPlayer newPlayer)
     {
+        EventManager.Instance.PlayerFind();
+        
         if (PhotonNetwork.IsMasterClient)
         {
             PlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고

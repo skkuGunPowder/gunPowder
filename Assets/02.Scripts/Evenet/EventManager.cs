@@ -112,4 +112,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnPlayEmotion?.Invoke(emotionName,playerNumber);
     }
+
+    public event Action OnPlayerFind;
+    public void PlayerFind()
+    {
+        OnPlayerFind?.Invoke();
+    }
 }
