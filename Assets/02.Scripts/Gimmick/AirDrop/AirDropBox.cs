@@ -57,7 +57,7 @@ public class AirDropBox : MonoBehaviour
 
         Debug.LogWarning("박스 루팅");
 
-        IAirDropItem item = DropItemList[Random.Range(0, DropItemList.Count)];
+        AirDropItemBase item = DropItemList[Random.Range(0, DropItemList.Count)];
         
         item.SetOwner(player);
         player.SetAirDropItem(item);

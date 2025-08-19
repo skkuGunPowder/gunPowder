@@ -64,7 +64,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
         return null;
     }
 
-    public void PlayGlobalSound(string clipName, SoundType type = SoundType.SFX, float delay = 0f, bool isLoop = false)
+    public Sound PlayGlobalSound(string clipName, SoundType type = SoundType.SFX, float delay = 0f, bool isLoop = false)
     {
         GameObject soundObject = new GameObject($"Sound_{clipName}");
         Sound sound = soundObject.AddComponent<Sound>();
@@ -76,15 +76,17 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
         sound.InitGlobalClip(GetClip(clipName));
         sound.Play(_audioMixer.FindMatchingGroups(type.ToString())[0], delay, isLoop);
+
+        return sound;
     }
 
-    public void PlayGlobalRandomSound(string clipName, int min, int max, SoundType type = SoundType.SFX, float delay = 0f, bool isLoop = false)
+    public Sound PlayGlobalRandomSound(string clipName, int min, int max, SoundType type = SoundType.SFX, float delay = 0f, bool isLoop = false)
     {
         string randomClipName = $"{clipName}_{Random.Range(min, max + 1)}";
-        PlayGlobalSound(randomClipName, type, delay, isLoop);
+        return PlayGlobalSound(randomClipName, type, delay, isLoop);
     }
 
-    public void PlayLocalSound(string clipName, Transform audioTarget, float delay = 0f, bool isLoop = false, SoundType type = SoundType.SFX, bool attachToTarget = true, float minDistance = 0.0f, float maxDistance = 50.0f)
+    public Sound PlayLocalSound(string clipName, Transform audioTarget, float delay = 0f, bool isLoop = false, SoundType type = SoundType.SFX, bool attachToTarget = true, float minDistance = 0.0f, float maxDistance = 50.0f)
     {
         GameObject soundObject = new GameObject($"Sound_{clipName}");
         soundObject.transform.localPosition = audioTarget.transform.position;
@@ -103,12 +105,14 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
         sound.InitLocalClip(GetClip(clipName), minDistance, maxDistance);
         sound.Play(_audioMixer.FindMatchingGroups(type.ToString())[0], delay, isLoop);
+
+        return sound;
     }
 
-    public void PlayLocalRandomSound(string clipName, Transform audioTarget, int min, int max, float delay = 0f, bool isLoop = false, SoundType type = SoundType.SFX, bool attachToTarget = true, float minDistance = 0.0f, float maxDistance = 50.0f)
+    public Sound PlayLocalRandomSound(string clipName, Transform audioTarget, int min, int max, float delay = 0f, bool isLoop = false, SoundType type = SoundType.SFX, bool attachToTarget = true, float minDistance = 0.0f, float maxDistance = 50.0f)
     {
         string randomClipName = $"{clipName}_{Random.Range(min, max + 1)}";
-        PlayLocalSound(randomClipName, audioTarget, delay, isLoop, type, attachToTarget, minDistance, maxDistance);
+        return PlayLocalSound(randomClipName, audioTarget, delay, isLoop, type, attachToTarget, minDistance, maxDistance);
     }
 
     public void StopLoopSound(string clipName)

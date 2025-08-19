@@ -28,6 +28,8 @@ public class UltimateBounceBomb : Bomb
             Vector2 randomNormal = (collision.contacts[0].normal + new Vector2(Random.Range(-0.2f, 0.2f), Random.Range(-0.2f, 0.2f))).normalized;
             Vector2 reflectDir = Vector2.Reflect(_rigidBody.linearVelocity.normalized, randomNormal);
             _rigidBody.linearVelocity = reflectDir * _stat.Speed;
+
+            SoundManager.Instance.PlayLocalSound("BounceBombUlt_3", transform);
         }
 
         if (collision.gameObject.GetComponent<IDamagable>() != null)
@@ -61,6 +63,8 @@ public class UltimateBounceBomb : Bomb
             return;
         }
 
+        SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
+
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;
@@ -72,6 +76,8 @@ public class UltimateBounceBomb : Bomb
     {
         _fireDirection = fireRightDirection;
         _rigidBody.linearVelocity = _fireDirection * _stat.Speed;
+        SoundManager.Instance.PlayLocalSound("BounceBombUlt_1", transform);
+        SoundManager.Instance.PlayLocalSound("BounceBombUlt_2", transform, 0, true);
     }
 
     [PunRPC]
