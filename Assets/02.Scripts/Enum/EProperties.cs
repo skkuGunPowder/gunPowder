@@ -16,6 +16,7 @@ public enum EProperties
     Damage,
     Team,
     NickName,
+    Emotion,
     
     Count
 }

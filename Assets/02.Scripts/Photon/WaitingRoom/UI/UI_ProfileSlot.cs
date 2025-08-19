@@ -16,7 +16,7 @@ public class UI_ProfileSlot : MonoBehaviour
     public Image ProfileOutline;
     
     public ProfileSkin PlayerProfileSkin;
-    
+    public UI_EmotionSlot Emotion;    
     public Sprite EmptyImage;
     public List<Color32> TeamColorCodeList;
     
@@ -40,13 +40,13 @@ public class UI_ProfileSlot : MonoBehaviour
         
         if(player.CustomProperties[EProperties.Team.ToString()] == null)
         {
-            ProfileOutline.color = TeamColorSet(EInGameTeam.Red);    
+            TeamSet(EInGameTeam.Red);
         }
         else
         {
             int teamNumber = (int)player.CustomProperties[EProperties.Team.ToString()];
             EInGameTeam team = (EInGameTeam)teamNumber;
-            ProfileOutline.color = TeamColorSet(team);
+            TeamSet(team);
         }
     }
 
@@ -88,8 +88,13 @@ public class UI_ProfileSlot : MonoBehaviour
     public void TeamSet(EInGameTeam team)
     {
         ProfileOutline.color = TeamColorSet(team);
+        PlayerProfileSkin.TeamChanged(team);
     }
-    
+
+    public void Play(string emotion)
+    {
+        Emotion.Play(emotion);
+    }
     private Color32 TeamColorSet(EInGameTeam team)
     {
         switch (team)
@@ -108,4 +113,5 @@ public class UI_ProfileSlot : MonoBehaviour
                 return TeamColorCodeList[0];
         }
     }
+    
 }

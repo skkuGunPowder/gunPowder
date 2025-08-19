@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UI_InGameProfileSlot : MonoBehaviour
 {
@@ -14,11 +15,16 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public Image BombImage;
     
     public ProfileSkin PlayerProfileSkin;
+    public UI_EmotionSlot Emotion;
     
     public List<GameObject> LifeList;
     public List<Color32> GunPowderColorCodeList;
     public List<Color32> TeamColorCodeList;
 
+    [Header("Shaker")]
+    public float Strength = 20f;
+    public float Duration = 1f;
+    public Ease EaseType;
     public void Init(string playerName, Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
     {
         NicknameTextUGUI.text = playerName;
@@ -41,6 +47,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
             GunpowderTextUGUI.color = GunPowderColorCodeList[2];
         }
 
+        Shake();
         GunpowderTextUGUI.text = gunpowder.ToString();
         LifeRefresh(life);
     }
@@ -76,8 +83,19 @@ public class UI_InGameProfileSlot : MonoBehaviour
                 return TeamColorCodeList[0];
         }
     }
-    public void SetTop(bool isTop)
+
+    private void Shake()
+    {
+        Debug.Log("Shake");
+        GunpowderTextUGUI.rectTransform.DOShakeAnchorPos(Duration, Strength).SetEase(EaseType);
+    }
+       public void SetTop(bool isTop)
     {
         FirstPlace.SetActive(isTop);
+    }
+
+    public void PlayEmotion(string emotionName)
+    {
+        Emotion.Play(emotionName);
     }
 }
