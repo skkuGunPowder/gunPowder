@@ -71,6 +71,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField]
     private float _colorUpdateWithoutAttackTimer = 0f;
     // legacy: moved to PlayerSFXAnimationEvent
+    private float _warningSfxTimer = 0f;
 
     private Tween _preExplosionPulseTween;
     private Vector3 _defaultLocalScale;
@@ -134,6 +135,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     [SerializeField]
     private PlayerSFXAnimationEvent _playerSFXAnimationEvent;
+    public PlayerSFXAnimationEvent PlayerSFXAnimationEvent => _playerSFXAnimationEvent;
 
 
 
@@ -335,6 +337,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
         DecreaseGunPowderWithoutAttack();
         // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
+        UpdateWarningSfx();
 
         // 폭탄 경고 펄스 체크는 매 프레임 수행 (시각적 반응성 확보)
         //CheckAndPlayPreExplosionPulse();
@@ -560,6 +563,7 @@ public class Player : MonoBehaviourPun, IDamagable
             _gunPowderDecreaseWithoutAttackTimer = 0f;
             _colorUpdateWithoutAttackTimer = 0f;
             StopPreExplosionPulse(true);
+            _warningSfxTimer = 0f;
             //PhotonView.RPC(nameof(DecreaseGunPowder), RpcTarget.All, PlayerStat.AttackPenaltyAmount);
 
             // 낙사 상태면 건파우더 감소 안함
@@ -623,7 +627,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         // 비율에 따라 펄스 시작/정지 (경고 단계)
-        if (ratio >= 0.8f) { PlayPreExplosionPulse(); } else { StopPreExplosionPulse(false); }
+        if (ratio >= 0.7f) { PlayPreExplosionPulse(); } else { StopPreExplosionPulse(false); }
 
         // ratio 0.4~1 -> S: 0~0.8로 맵핑 (H=0 고정, V는 유지)
         float t = Mathf.Clamp01((ratio - 0.4f) / 0.6f);
@@ -644,13 +648,42 @@ public class Player : MonoBehaviourPun, IDamagable
     private void CheckAndPlayPreExplosionPulse()
     {
         float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
-        if (ratio >= 0.8f)
+        if (ratio >= 0.7f)
         {
             PlayPreExplosionPulse();
         }
         else
         {
             StopPreExplosionPulse(false);
+        }
+    }
+
+    // 경고음: ratio가 0.7 이상일 때 점점 빠른 간격으로 재생
+    private void UpdateWarningSfx()
+    {
+        if (_playerSFXAnimationEvent == null)
+        {
+            return;
+        }
+        float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
+        if (ratio < 0.7f)
+        {
+            _warningSfxTimer = 0f;
+            return;
+        }
+
+        // 0.7 → 1.0 사이에서 재생 간격을 선형으로 0.9s → 0.2s로 축소
+        float t = Mathf.InverseLerp(0.7f, 1f, Mathf.Clamp01(ratio));
+        float interval = Mathf.Lerp(0.7f, 0.1f, t);
+        _warningSfxTimer += Time.deltaTime;
+        if (_warningSfxTimer >= interval)
+        {
+            _warningSfxTimer = 0f;
+            // 로컬 소유자만 재생
+            if (PhotonView.IsMine)
+            {
+                _playerSFXAnimationEvent.PlayerWithoutAttackSFX();
+            }
         }
     }
 
@@ -767,6 +800,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if (FallDeadVFXPrefab != null)
         {
             VFXPool.Instance.Play(FallDeadVFXPrefab.name, transform.position);
+            _playerSFXAnimationEvent.PlayerFallDeadExplosionSFX();
         }
     }
 
@@ -798,6 +832,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _colorUpdateWithoutAttackTimer = 0f;
         StopPreExplosionPulse(true);
         SetSpriteRendererWhite();
+        _warningSfxTimer = 0f;
     }
 
     public void PlayerTeamCheck()

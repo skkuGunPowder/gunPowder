@@ -14,6 +14,9 @@ public class PlayerSFXAnimationEvent : MonoBehaviour
 
     public const string PLAYER_CRIT_DAMAGE_VOICE_SFX_NAME = "PlayerCritDamageVoice";
 
+    public const string PLAYER_FALLDEAD_EXPLOSION_SFX_NAME = "FallDeadExplosion_1";
+    public const string PLAYER_WITHOUT_ATTACK_SFX_NAME = "WithoutAttack_1";
+
     [SerializeField]
     private float _gunpowderHealWindow = 0.25f;
     private float _lastGunpowderHealTime = -999f;
@@ -62,6 +65,15 @@ public class PlayerSFXAnimationEvent : MonoBehaviour
     public void PlayerCritDamageVoiceRandomSFX()
     {
         SoundManager.Instance.PlayLocalRandomSound(PLAYER_CRIT_DAMAGE_VOICE_SFX_NAME, transform, 1, 2, 0f, false, SoundType.SFX, true, 1f, 50f);
-        Debug.Log("PlayerCritDamageVoiceRandomSFX");
+    }
+
+    public void PlayerFallDeadExplosionSFX()
+    {
+        SoundManager.Instance.PlayLocalSound(PLAYER_FALLDEAD_EXPLOSION_SFX_NAME, transform);
+    }
+
+    public void PlayerWithoutAttackSFX()
+    {
+        SoundManager.Instance.PlayLocalSound(PLAYER_WITHOUT_ATTACK_SFX_NAME, transform);
     }
 }
