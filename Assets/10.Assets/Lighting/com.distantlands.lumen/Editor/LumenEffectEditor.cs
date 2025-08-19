@@ -40,7 +40,7 @@ namespace DistantLands.Lumen.EditorScripts
             root.viewDataKey = "LumenInspectorRoot";
 
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(
-                "Packages/com.distantlands.lumen/Editor/USS/Lumen.uss"
+                "Assets/10.Assets/Lighting/com.distantlands.lumen/Editor/USS/Lumen.uss"
             ));
 
             VisualElement effectLayerSettings = new VisualElement();
