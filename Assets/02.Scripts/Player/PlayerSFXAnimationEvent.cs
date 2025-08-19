@@ -4,6 +4,7 @@ public class PlayerSFXAnimationEvent : MonoBehaviour
 {
     public const string MOVE_SFX_NAME_1 = "Footstep_1";
     public const string MOVE_SFX_NAME_2 = "Footstep_2";
+    public const string RUN_SFX_NAME =  "FootstepRun_1";
 
     public const string GUNPOWDER_HEAL_SFX_NAME_1 = "GunPowderHeal_1";
     public const string GUNPOWDER_HEAL_SFX_NAME_2 = "GunPowderHeal_2";
@@ -30,6 +31,11 @@ public class PlayerSFXAnimationEvent : MonoBehaviour
     public void MoveSFX2()
     {
         SoundManager.Instance.PlayLocalSound(MOVE_SFX_NAME_2, transform);
+    }
+
+    public void RunSFX()
+    {
+        SoundManager.Instance.PlayLocalSound(RUN_SFX_NAME, transform);
     }
 
     // 플레이어가 건파우더를 흡수했을 때 호출

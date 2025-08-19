@@ -861,6 +861,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if( damage == maxDamage)
         {
             _playerSFXAnimationEvent.PlayerCritDamageVoiceRandomSFX();
+            SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
         }
         else
         {
