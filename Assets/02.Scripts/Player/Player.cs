@@ -674,9 +674,10 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
 
-        // 0.7 → 1.0 사이에서 재생 간격을 선형으로 0.9s → 0.2s로 축소
+        // 0.7 → 1.0 사이에서 재생 간격을 선형으로 0.7s → 0.1s로 축소, 피치 1.0 → 1.5로 상승
         float t = Mathf.InverseLerp(0.7f, 1f, Mathf.Clamp01(ratio));
         float interval = Mathf.Lerp(0.7f, 0.1f, t);
+        float pitch = Mathf.Lerp(1.0f, 1.9f, t);
         _warningSfxTimer += Time.deltaTime;
         if (_warningSfxTimer >= interval)
         {
@@ -684,7 +685,7 @@ public class Player : MonoBehaviourPun, IDamagable
             // 로컬 소유자만 재생
             if (PhotonView.IsMine)
             {
-                _playerSFXAnimationEvent.PlayerWithoutAttackSFX();
+                _playerSFXAnimationEvent.PlayerWithoutAttackSFX(pitch);
             }
         }
     }

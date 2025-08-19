@@ -74,6 +74,17 @@ public class PlayerSFXAnimationEvent : MonoBehaviour
 
     public void PlayerWithoutAttackSFX()
     {
-        SoundManager.Instance.PlayLocalSound(PLAYER_WITHOUT_ATTACK_SFX_NAME, transform);
+        PlayerWithoutAttackSFX(1f);
+    }
+
+    public void PlayerWithoutAttackSFX(float pitch)
+    {
+        Sound sound = SoundManager.Instance.PlayLocalSound(PLAYER_WITHOUT_ATTACK_SFX_NAME, transform);
+        if (sound == null) return;
+        AudioSource audioSource = sound.GetAudioSource();
+        if (audioSource != null)
+        {
+            audioSource.pitch = pitch;
+        }
     }
 }
