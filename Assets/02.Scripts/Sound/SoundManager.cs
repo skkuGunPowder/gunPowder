@@ -18,7 +18,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
     [SerializeField] private AudioClip[] _preloadedClips;
 
     private Dictionary<string, AudioClip> _clipDict;
-    private List<Sound> _soundList;
+    [SerializeField] private List<Sound> _soundList;
 
     protected override void Awake()
     {
@@ -86,7 +86,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
     public void PlayLocalSound(string clipName, Transform audioTarget, float delay = 0f, bool isLoop = false, SoundType type = SoundType.SFX, bool attachToTarget = true, float minDistance = 0.0f, float maxDistance = 50.0f)
     {
-        GameObject soundObject = new GameObject("TemporarySoundPlayer 3D");
+        GameObject soundObject = new GameObject($"Sound_{clipName}");
         soundObject.transform.localPosition = audioTarget.transform.position;
 
         if (attachToTarget)
