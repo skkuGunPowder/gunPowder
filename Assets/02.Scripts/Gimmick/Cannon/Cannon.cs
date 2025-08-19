@@ -1,10 +1,14 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Cannon : MonoBehaviour
 {
     [SerializeField] private GameObject _barrel;
+
+    [SerializeField] private AudioClip _loadAudio;
+    [SerializeField] private AudioClip _fireAudio;
 
     [SerializeField] private float _fireForce = 100f;
     [SerializeField] private float _fireDegree = 20f;
@@ -37,6 +41,7 @@ public class Cannon : MonoBehaviour
         }
 
         _isLoaded = true;
+        SoundManager.Instance.PlayLocalSound(_loadAudio.name, transform);
 
         target.linearVelocity = Vector2.zero;
         target.bodyType = RigidbodyType2D.Kinematic;
@@ -63,6 +68,8 @@ public class Cannon : MonoBehaviour
         target.bodyType = RigidbodyType2D.Dynamic;
         Vector2 fireDir = _barrel.transform.right.normalized;
         target.AddForce(fireDir * _fireForce, ForceMode2D.Impulse);
+
+        SoundManager.Instance.PlayLocalSound(_fireAudio.name, transform);
 
         yield return null;
 

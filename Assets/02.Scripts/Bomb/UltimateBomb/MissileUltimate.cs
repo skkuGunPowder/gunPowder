@@ -8,6 +8,7 @@ public class MissileUltimate : Ultimate
     [SerializeField] private GameObject BomberJetPrefab;
     [SerializeField] private GameObject BackgroundJet;
     [SerializeField] private GameObject ForegroundJet;
+    [SerializeField] private AudioClip ForegroundJetSound;
 
     [SerializeField] private float _backgroundDuration = 2f;
     [SerializeField] private float _foregroundDuration = 1f;
@@ -26,6 +27,8 @@ public class MissileUltimate : Ultimate
 
     public override void ExcuteUltimate()
     {
+        SoundManager.Instance.PlayGlobalSound(ForegroundJetSound.name);
+
         GameObject backgroundJet = PhotonNetwork.Instantiate(BackgroundJet.name, _startTransform.position, Quaternion.identity);
 
         Sequence seq = DOTween.Sequence();

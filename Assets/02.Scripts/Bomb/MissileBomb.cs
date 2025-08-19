@@ -7,6 +7,8 @@ public class MissileBomb : Bomb
     public const string ID = "BO0005";
     protected const float PREDELAY = 0.3f;
 
+    public AudioClip MisiileTrailSound;
+
 
 
     protected override void Init()
@@ -61,6 +63,7 @@ public class MissileBomb : Bomb
 
     protected IEnumerator AccelerateForward(Vector3 direction, float accelTime, float maxSpeed)
     {
+        SoundManager.Instance.PlayLocalSound(MisiileTrailSound.name, transform);
         float timer = 0f;
         while (timer < accelTime)
         {
