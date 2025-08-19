@@ -22,6 +22,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         {
             Destroy(this.gameObject);
         }
+
+        ClientManager.PlayBGM("Lobby");
     }
     
     // 방에 보내기

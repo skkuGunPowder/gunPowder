@@ -23,7 +23,7 @@ public class UI_Shop : Singleton<UI_Shop>
     public List<UI_ShopSubCategorySlot> SubCategorySlotList;
 
     private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
-    
+
 
     protected override void Awake()
     {
@@ -33,6 +33,7 @@ public class UI_Shop : Singleton<UI_Shop>
         _shopItemDict = Shop.Instance.GetShopItemDict();
         SelectMainCategory(EShopMainCategory.Event);
         RefreshPlayerCurrency(CurrencyManager.Instance.PlayerDiamond.GetAmount(), CurrencyManager.Instance.PlayerGold.GetAmount());
+        ClientManager.PlayBGM("Shop");
     }
 
     public void ShowMainPage()
@@ -114,5 +115,6 @@ public class UI_Shop : Singleton<UI_Shop>
         CurrencyManager.Instance.OnDataChanged -= RefreshPlayerCurrency;
         Shop.Instance.OnShopItemChanged -= Refresh;
         SceneManager.LoadScene("Lobby");
+        ClientManager.PlayBGM("Lobby");
     }
 }

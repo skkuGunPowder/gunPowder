@@ -20,6 +20,8 @@ public class SoundManager : DontDestroySingleton<SoundManager>
     private Dictionary<string, AudioClip> _clipDict;
     [SerializeField] private List<Sound> _soundList;
 
+    private Sound _currentBGM;
+
     protected override void Awake()
     {
         base.Awake();
@@ -69,12 +71,24 @@ public class SoundManager : DontDestroySingleton<SoundManager>
         GameObject soundObject = new GameObject($"Sound_{clipName}");
         Sound sound = soundObject.AddComponent<Sound>();
 
+        if (type == SoundType.BGM && _currentBGM != null)
+        {
+            StopLoopSound(_currentBGM.name);
+        }
+
         if (isLoop)
         {
             _soundList.Add(sound);
         }
 
-        sound.InitGlobalClip(GetClip(clipName));
+        if (type == SoundType.BGM)
+        {
+            sound.InitGlobalClip(GetClip(clipName), false);
+        }
+        else
+        {
+            sound.InitGlobalClip(GetClip(clipName));
+        }
         sound.Play(_audioMixer.FindMatchingGroups(type.ToString())[0], delay, isLoop);
 
         return sound;
