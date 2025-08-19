@@ -15,18 +15,25 @@ public class Sound : MonoBehaviour
         _audioSource.loop = false;
     }
 
-    public void InitGlobalClip(AudioClip clip)
+    public void InitGlobalClip(AudioClip clip, bool randomPitch=true)
     {
         _clip = clip;
         _audioSource.clip = _clip;
-        _audioSource.pitch *= 1 + Random.Range(-RANDOMPERCENT / 100, RANDOMPERCENT / 100);
+
+        if (randomPitch)
+        {
+            _audioSource.pitch *= 1 + Random.Range(-RANDOMPERCENT / 100, RANDOMPERCENT / 100);
+        }
     }
 
-    public void InitLocalClip(AudioClip clip, float minDistance = 1f, float maxDistance = 50f)
+    public void InitLocalClip(AudioClip clip, float minDistance = 1f, float maxDistance = 50f, bool randomPitch=true)
     {
         _clip = clip;
         _audioSource.clip = _clip;
-        _audioSource.pitch *= 1 + Random.Range(-RANDOMPERCENT / 100, RANDOMPERCENT / 100);
+        if (randomPitch)
+        {
+            _audioSource.pitch *= 1 + Random.Range(-RANDOMPERCENT / 100, RANDOMPERCENT / 100);
+        }
         _audioSource.spatialBlend = 1f;
         _audioSource.rolloffMode = AudioRolloffMode.Linear;
         _audioSource.minDistance = minDistance;

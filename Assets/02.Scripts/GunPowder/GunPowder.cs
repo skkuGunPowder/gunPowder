@@ -1,5 +1,6 @@
 using Photon.Pun;
 using UnityEngine;
+using SpriteTrail;
 
 public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
 {
@@ -20,6 +21,10 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     private SpriteRenderer _spriteRenderer;
     public Sprite _mySprite;
     public Sprite _enemySprite;
+    
+    private SpriteTrail.SpriteTrail _spriteTrail;
+    public TrailPreset MyTrailPreset;
+    public TrailPreset EnemyTrailPreset;
 
 
     private void Awake()
@@ -27,6 +32,7 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
         _photonView = GetComponent<PhotonView>();
         _collider = GetComponent<BoxCollider2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _spriteTrail = GetComponent<SpriteTrail.SpriteTrail>();
         _collider.enabled = false;
     }
 
@@ -106,10 +112,12 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
             if (_sourceViewId == localPlayer.PhotonView.ViewID)
             {
                 _spriteRenderer.sprite = _mySprite;
+                _spriteTrail.SetTrailPreset(MyTrailPreset);
             }
             else
             {
                 _spriteRenderer.sprite = _enemySprite;
+                _spriteTrail.SetTrailPreset(EnemyTrailPreset);
             }
         }
         else
