@@ -129,8 +129,10 @@ public class Player : MonoBehaviourPun, IDamagable
     private DamagePopup _damagePopup;
     public DamagePopup DamagePopup => _damagePopup;
 
-    private IAirDropItem _airDropItem;
-    public IAirDropItem AirDropItem => _airDropItem;
+    private AirDropItemBase _airDropItem;
+    public AirDropItemBase AirDropItem => _airDropItem;
+    private float _buffDuration;
+
 
     [SerializeField]
     private PlayerSFXAnimationEvent _playerSFXAnimationEvent;
@@ -1240,16 +1242,32 @@ public class Player : MonoBehaviourPun, IDamagable
         _storedVelocity = Vector2.zero;
     }
 
-    public void SetAirDropItem(IAirDropItem airDropItem)
+    public void SetDuration(float duration)
+    {
+        _buffDuration = duration;
+    }
+
+    public void SetAirDropItem(AirDropItemBase airDropItem)
     {
         _airDropItem = airDropItem;
     }
 
     public void RemoveAirDropItem()
     {
+        if (_airDropItem.gameObject.TryGetComponent(out IBuff buff))
+        {
+            StartCoroutine(BuffCoroutine(buff, _buffDuration));
+            return;
+        }
         _airDropItem = null;
     }
 
+    IEnumerator BuffCoroutine(IBuff buff, float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        buff.EndBuff();
+        _airDropItem = null;
+    }
 
     [PunRPC]
     public void RPC_SetIsImmune(bool isImmune)

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class AirDropItemSpeed : AirDropItemBase, IAirDropItem
+public class AirDropItemSpeed : AirDropItemBase, IAirDropItem, IBuff
 {
     private float _duration = 10f;
     private float _increaseAmount = 4f;
@@ -9,27 +9,20 @@ public class AirDropItemSpeed : AirDropItemBase, IAirDropItem
     private float _originalRunSpeed;
     
 
-    private float _timer = 0f;
-    private bool _isBuffOn = true;
-
-    private void Update()
-    {
-        if (!_isBuffOn)
-        {
-            return;
-        }
-
-        _timer += Time.deltaTime;
-        if (_timer > _duration)
-        {
-            EndBuff();
-        }
-    }
-
     public override void Use()
     {
         Debug.LogWarning("스피드 아이템 사용");
-        _isBuffOn = true;
+        SetDuration();
+        StartBuff();
+    }
+
+    public void SetDuration()
+    {
+        _owner.SetDuration(_duration);
+    }
+
+    public void StartBuff()
+    {
         _originalMoveSpeed = _owner.PlayerStat.MoveSpeed;
         _originalRunSpeed = _owner.PlayerStat.RunSpeed;
 
@@ -37,11 +30,10 @@ public class AirDropItemSpeed : AirDropItemBase, IAirDropItem
         _owner.PlayerStat.RunSpeed += _increaseAmount;
     }
 
-    private void EndBuff()
+    public void EndBuff()
     {
         Debug.LogWarning("스피드 아이템 버프 종료");
         _owner.PlayerStat.MoveSpeed = _originalMoveSpeed;
         _owner.PlayerStat.RunSpeed = _originalRunSpeed;
-        _isBuffOn = false;
     }
 }

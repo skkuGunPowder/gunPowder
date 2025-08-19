@@ -96,8 +96,8 @@ public class BounceBomb : Bomb
         .SetEase(Ease.OutQuad)
         .OnComplete(() =>
         {
-            transform.DOScale(_originalScale, _wobbleDuration / 2f)
-                .SetEase(Ease.InQuad);
+            transform.DOScale(_originalScale, _wobbleDuration / 2f).SetEase(Ease.InQuad);
+            SoundManager.Instance.PlayLocalSound("BounceBomb_1", transform);
         });
 
         if (collision.gameObject == _ownerPhotonview.gameObject)
