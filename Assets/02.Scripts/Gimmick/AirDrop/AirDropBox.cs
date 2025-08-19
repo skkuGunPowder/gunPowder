@@ -11,9 +11,11 @@ public class AirDropBox : MonoBehaviour
     private bool _isInAir = true;
 
     private GameObject _dropWarningVFX;
+    private Animator _animator;
 
     private void Awake()
     {
+        _animator = GetComponent<Animator>();
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 40f, layerMask);
         if (hit.collider == null)
         {
@@ -29,22 +31,25 @@ public class AirDropBox : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if (_dropWarningVFX != null)
+        {
+            Destroy(_dropWarningVFX);
+        }
+
         if (other.gameObject.CompareTag("TileMap") || other.gameObject.CompareTag("OneWayPlatform"))
         {
+
             if (!_isInAir)
             {
                 return;
             }
-            _isInAir = false;
 
-            Destroy(_dropWarningVFX);
+            _isInAir = false;
+            _animator.SetBool("IsInAir", _isInAir);
 
             ParticleSystem landingVFX = Instantiate(LandingVFXPrefab, other.contacts[0].point, Quaternion.identity);
             VFXPool.Instance.Get(LandingVFXPrefab.name);
-            if (!_isInAir)
-        {
-            return;
-        }
+
             landingVFX.Play();
             return;
         }
