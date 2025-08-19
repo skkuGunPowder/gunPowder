@@ -32,10 +32,13 @@ public class GameManager : PhotonSingleton<GameManager>
     private float _airDropTimer;
     [SerializeField] private GameObject _airDropJetPrefab;
 
-    
+
     protected override void Awake()
     {
         base.Awake();
+
+        Debug.LogWarning($"현재 씬 이름 {SceneManager.GetActiveScene().name}");
+        ClientManager.PlayBGM(SceneManager.GetActiveScene().name);
 
         _photonView = GetComponent<PhotonView>();
 
