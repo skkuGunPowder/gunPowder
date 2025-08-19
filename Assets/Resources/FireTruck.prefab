@@ -171233,6 +171233,7 @@ MonoBehaviour:
   _damageCollider: {fileID: 1326639051808669926}
   _spriteRenderer: {fileID: 4583926722328788571}
   _vfx: {fileID: 1010777127860726751}
+  FireAudio: {fileID: 8300000, guid: d52eeb1e0cad97b4b9a1aecc565a0ad9, type: 3}
   _fadeTime: 0.5
   _duration: 5
   _damageInterval: 0.3
@@ -171353,6 +171354,7 @@ GameObject:
   - component: {fileID: 8641447075787539588}
   - component: {fileID: 4583926722328788571}
   - component: {fileID: 3002752634115981013}
+  - component: {fileID: 6561197264005552554}
   m_Layer: 0
   m_Name: FiretruckSprite_0
   m_TagString: Untagged
@@ -171452,3 +171454,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6561197264005552554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4109809091537441128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1e369f71d61a6e40b5de8800bc23fea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StartAudio: {fileID: 8300000, guid: 907f3a7befe980d4aac072b88fc0d0a0, type: 3}
+  DeployAudio: {fileID: 8300000, guid: 63904ec271f36794f86d646d00742601, type: 3}
+  EndAudio: {fileID: 8300000, guid: 979405fdeb6790c4dbdd2d2497a74eed, type: 3}
