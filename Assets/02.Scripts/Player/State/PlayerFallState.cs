@@ -163,12 +163,14 @@ public class PlayerFallState : PlayerBaseState
         // 좌우 이동 - 러닝 상태에 따른 처리
         if (_owner.PlayerStat.IsRunning)
         {
-            if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1 || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
+            if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1 
+            || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
             {
                 _keyReleaseTimer = 0;
                 _xVelocity = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.RunSpeed;
             }
-            else if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
+            else if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 
+            || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
             {
                 _owner.PlayerStat.IsRunning = false;
                 _owner.RPC_SetFacingDirection(-_owner.PlayerStat.FacingDirection);
@@ -258,6 +260,7 @@ public class PlayerFallState : PlayerBaseState
         {
             if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
+                _owner.RPC_SetFacingDirection(-1);
                 _playerFSM.ChangeState<PlayerJumpDashState>();
                 return false;
             }
@@ -267,6 +270,7 @@ public class PlayerFallState : PlayerBaseState
         {
             if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
+                _owner.RPC_SetFacingDirection(1);
                 _playerFSM.ChangeState<PlayerJumpDashState>();
                 return false;
             }
