@@ -46,7 +46,7 @@ namespace DistantLands.Lumen.EditorScripts
             effectPlayer = target as LumenEffectPlayer;
 
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(
-                "Packages/com.distantlands.lumen/Editor/USS/Lumen.uss"
+                "Assets/10.Assets/Lighting/com.distantlands.lumen/Editor/USS/Lumen.uss"
             ));
 
             VisualElement banner = new VisualElement();
