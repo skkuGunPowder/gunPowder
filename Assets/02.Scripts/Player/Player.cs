@@ -1312,7 +1312,6 @@ public class Player : MonoBehaviourPun, IDamagable
     public void RPC_SetIsImmune(bool isImmune)
     {
         _playerStat.IsImmune = isImmune;
-        Debug.Log($"[RPC_SetIsImmune] Player {PhotonView.Owner.ActorNumber} - IsImmune set to: {isImmune}");
     }
 
     public void SetDownJump()

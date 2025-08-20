@@ -180,8 +180,6 @@ public class PlayerFallDeadState : PlayerBaseState
                 {
                     _hasTriggeredDeathEvents = true; // 플래그 설정으로 중복 실행 방지
 
-                    Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} 사망 폭발 발생 - IsMine: {_owner.PhotonView.IsMine}, IsMasterClient: {PhotonNetwork.IsMasterClient}");
-
                     // 안전성 체크
                     if (ExplosionPool.Instance == null || _owner.DieExplosionPrefab == null)
                     {
@@ -198,7 +196,6 @@ public class PlayerFallDeadState : PlayerBaseState
 
                     // 15의 데미지를 받는다.
                     _owner.PlayerStat.IsImmune = false;
-                    Debug.Log($"[PlayerFallDeadState] Player {_owner.PhotonView.Owner.ActorNumber} - Calling TakeDamage, IsMine: {_owner.PhotonView.IsMine}");
                     if (_owner.PhotonView.IsMine)
                     {
                         // IsImmune을 네트워크로 동기화
