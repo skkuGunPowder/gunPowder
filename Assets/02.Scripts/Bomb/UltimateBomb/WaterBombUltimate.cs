@@ -3,14 +3,16 @@ using UnityEngine;
 
 public class WaterBombUltimate : Ultimate
 {
+    private const string ID = "BO0008";
+    
     [SerializeField] private GameObject FireTruckPrefab;
     private GameObject _fireTruckObj;
 
     public override void Init()
     {
-        base.Init();
-
         _ownerBombID = "BO0007";
+
+        _bombStat = ItemDatabase.Instance.GetStat<BombStat>(ID);
     }
 
     public override void ExcuteUltimate()

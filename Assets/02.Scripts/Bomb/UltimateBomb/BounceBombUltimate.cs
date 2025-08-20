@@ -4,16 +4,18 @@ using DG.Tweening;
 
 public class BounceBombUltimate : Ultimate
 {
+    private const string ID = "BO0012";
+
     [SerializeField] GameObject UltimateBouncePrefab;
 
     private Vector3 _fireDirection;
 
     public override void Init()
     {
-        base.Init();
-
         _ownerBombID = "BO0011";
         _fireDirection = transform.right;
+
+        _bombStat = ItemDatabase.Instance.GetStat<BombStat>(ID);
     }
 
     public override void ExcuteUltimate()

@@ -5,6 +5,8 @@ using System.Collections;
 
 public class MissileUltimate : Ultimate
 {
+    private const string ID = "BO0006";
+
     [SerializeField] private GameObject BomberJetPrefab;
     [SerializeField] private GameObject BackgroundJet;
     [SerializeField] private GameObject ForegroundJet;
@@ -18,11 +20,11 @@ public class MissileUltimate : Ultimate
 
     public override void Init()
     {
-        base.Init();
-
         _ownerBombID = "BO0005";
         _startTransform = GameObject.FindWithTag("StartTransform").transform;
         _endTransform = GameObject.FindWithTag("EndTransform").transform;
+
+        _bombStat = ItemDatabase.Instance.GetStat<BombStat>(ID);
     }
 
     public override void ExcuteUltimate()
