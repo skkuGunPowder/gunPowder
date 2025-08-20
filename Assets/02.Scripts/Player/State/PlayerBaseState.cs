@@ -338,8 +338,9 @@ public class PlayerBaseState : MonoState
         if(!_owner.PhotonView.IsMine)
             return;
 
-        if (_owner.AirDropItem != null)
+        if (_owner.AirDropItem != null && _owner.AirDropItemLootVFX.IsSelected)
         {
+            _owner.AirDropItemLootVFX.UseItem();
             _owner.AirDropItem.Use();
             _owner.RemoveAirDropItem();
             return;

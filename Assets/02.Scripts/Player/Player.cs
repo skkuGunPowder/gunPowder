@@ -130,6 +130,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private DamagePopup _damagePopup;
     public DamagePopup DamagePopup => _damagePopup;
 
+    public AirDropItemLootVFX AirDropItemLootVFX;
     private AirDropItemBase _airDropItem;
     public AirDropItemBase AirDropItem => _airDropItem;
     private float _buffDuration;
@@ -1286,6 +1287,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void SetAirDropItem(AirDropItemBase airDropItem)
     {
+        AirDropItemLootVFX.StartRoulette(airDropItem);
         _airDropItem = airDropItem;
     }
 
