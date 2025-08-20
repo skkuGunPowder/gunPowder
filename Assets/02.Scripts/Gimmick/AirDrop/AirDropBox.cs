@@ -32,14 +32,13 @@ public class AirDropBox : MonoBehaviour
     {
         if (_dropWarningVFX != null)
         {
-            Destroy(_dropWarningVFX);
+            PhotonNetwork.Destroy(_dropWarningVFX);
         }
 
         Debug.LogWarning($"{other.gameObject.layer} || {LayerMask.NameToLayer("Platform")}");
 
         if (other.gameObject.layer == 6)
         {
-
             if (!_isInAir)
             {
                 return;
@@ -67,6 +66,6 @@ public class AirDropBox : MonoBehaviour
             player.SetAirDropItem(item);
         }
 
-        Destroy(gameObject);
+        PhotonNetwork.Destroy(gameObject);
     }
 }
