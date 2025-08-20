@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Com.LuisPedroFonseca.ProCamera2D;
+using Photon.Pun;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -10,6 +11,7 @@ public class CameraController : MonoBehaviour
 
     private Player _target;
     
+    private bool _isObserving = false; // 후에 수정해야함
     private List<Player> _currentTargetList = new List<Player>();
     private int _currentTargetIndex = 0;
     
@@ -20,7 +22,6 @@ public class CameraController : MonoBehaviour
     
     private void Start()
     {
-        
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting)
         {
             return;
@@ -102,20 +103,50 @@ public class CameraController : MonoBehaviour
 
     private void TargetListUp()
     {
-        PlayerFSM[] playerStates = FindObjectsByType<PlayerFSM>(FindObjectsSortMode.None);
+        Debug.Log("Target List Up");
+        
+        Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();
-        foreach (var fsm in playerStates)
+        
+        Debug.Log("players.Length : " + players.Length);
+        
+        foreach (var player in players)
         {
-            if (fsm.IsCurrentState<PlayerObserveState>())
+            if (player.gameObject.activeSelf == false)
             {
+                if (player.GetComponent<PhotonView>().Owner.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    _isObserving = true;
+                    Debug.Log($"isObserving : {_isObserving}");
+
+                };
                 continue;
             }
             
-            Player player = fsm.GetComponent<Player>();
             _currentTargetList.Add(player);
+            
         }
         
         Debug.Log($"타겟으로 정할 수 있는 플레이어 수 {_currentTargetList.Count}");
+    }
+
+    private void Update()
+    {
+        if (_isObserving == false)
+        {
+            return;
+        }
+        
+        if (InputHandler.GetKeyDown(KeyCode.LeftArrow))
+        {
+            SelectTarget(-1);
+        }
+
+        if (InputHandler.GetKeyDown(KeyCode.RightArrow))
+        {
+            SelectTarget(1);
+        }
+
     }
 
     public void SelectTarget(int index)

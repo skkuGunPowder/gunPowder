@@ -32,7 +32,6 @@ public class UI_RoomProfile : MonoBehaviour
             
             PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
             UI_ProfileSlotList[i].Refresh(player);
-            
         }
     }
     

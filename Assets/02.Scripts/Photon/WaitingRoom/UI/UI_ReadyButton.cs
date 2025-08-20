@@ -1,4 +1,5 @@
 
+using System;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using TMPro;
@@ -9,13 +10,32 @@ public class UI_ReadyButton : MonoBehaviour
     private bool _isReady = false;
 
     public TextMeshProUGUI ReadyTextUGUI;
-    
+
+    public string Ready = "준비 완료";
+    public string NotReady = "준비";
+
+    public string Master = "시작";
+
+    private void OnEnable()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            ReadyTextUGUI.text = Master;
+            
+        }
+        else
+        {
+            ReadyTextUGUI.text = NotReady;
+        }
+    }
+
     // 레디 버튼을 눌렀을 때, 커스텀 프로퍼티를 바꾼다.
     public void OnClickReady()
     {
         //만약 내가 방장이라면 레디 자체를 안눌리게 한다.
         if (PhotonNetwork.IsMasterClient)
         {
+            
             if (RoomManager.Instance.IsPlayerReady() == false)
             {
                 return;
@@ -28,7 +48,7 @@ public class UI_ReadyButton : MonoBehaviour
         Hashtable ready = new Hashtable { {$"{EProperties.IsReady}" , _isReady} };
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
 
-        ReadyTextUGUI.text =  _isReady ? "Ready" : "Not Ready";
+        ReadyTextUGUI.text =  _isReady ? Ready : NotReady;
         
         if (PhotonNetwork.IsMasterClient == false)
         {

@@ -14,9 +14,9 @@ public class RoomStatManager : Singleton<RoomStatManager>
     {
         base.Awake();
         
-        PlayerLife = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"].ToString());
-        PlayerGunpowder = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"].ToString()); 
-        PlayerDecreaseTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"].ToString());
+        PlayerLife = (int)(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Life}"]);
+        PlayerGunpowder = (int)(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.Gunpowder}"]); 
+        PlayerDecreaseTime = (int)(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.DeclinePowder}"]);
         int team = Convert.ToInt32(PhotonNetwork.LocalPlayer.CustomProperties[$"{EProperties.Team}"]);
         
         PlayerTeam = (EInGameTeam)team;
