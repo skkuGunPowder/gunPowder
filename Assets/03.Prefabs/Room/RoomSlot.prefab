@@ -1593,6 +1593,7 @@ GameObject:
   - component: {fileID: 3352169020554402498}
   - component: {fileID: 5202548125311640797}
   - component: {fileID: 3228255004895358787}
+  - component: {fileID: 597972902991675151}
   m_Layer: 5
   m_Name: RoomSlot
   m_TagString: Untagged
@@ -1735,6 +1736,22 @@ MonoBehaviour:
   MapIcon: {fileID: 1230983732009186685}
   LockIcon: {fileID: 7782383715376183955}
   PasswordPopup: {fileID: 0}
+--- !u!114 &597972902991675151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5389428800368992798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scaleMultiplier: 1.03
+  duration: 0.15
+  easing: 3
+  useUnscaledTime: 1
 --- !u!1 &5640472164010422486
 GameObject:
   m_ObjectHideFlags: 0
