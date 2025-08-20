@@ -236,6 +236,7 @@ public class PlayerBaseState : MonoState
             return;
         }
         
+        _owner.PlayerStat.DecreaseGunPowderCount(_owner.SpecialBombStat.Cost, _owner.PhotonView.Owner.ActorNumber);
         // 4. RPC 호출 (SetOwner 먼저, 그 다음 폭탄 동작)
         bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, ownerPhotonView.ViewID);
         bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);

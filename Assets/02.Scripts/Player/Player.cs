@@ -523,6 +523,8 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.HasUltimateChance = false;
             _ultimateChanceTimer = 0f;
             RPC_UltimateEffect(false);
+            int ultimateCost = _ultimate.GetCost();
+            _playerStat.DecreaseGunPowderCount(ultimateCost, photonView.OwnerActorNr);
             RPC_SetMaterial((byte)EPlayerMaterial.Default);
             _ultimateEffectOn = false;
 
