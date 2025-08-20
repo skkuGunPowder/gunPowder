@@ -99,7 +99,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
     {
-
+        EventManager.Instance.PlayerFind();
+        
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;

@@ -3,10 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class ClientManager : DontDestroySingleton<ClientManager>
 {
-    protected override void Awake()
+    private void Start()
     {
-        base.Awake();
-
         PlayBGM("Photon");
     }
     

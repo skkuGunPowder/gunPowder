@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -84,6 +85,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
         if (type == SoundType.BGM)
         {
             sound.InitGlobalClip(GetClip(clipName), false);
+            _currentBGM = sound;
         }
         else
         {
@@ -96,7 +98,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
     public Sound PlayGlobalRandomSound(string clipName, int min, int max, SoundType type = SoundType.SFX, float delay = 0f, bool isLoop = false)
     {
-        string randomClipName = $"{clipName}_{Random.Range(min, max + 1)}";
+        string randomClipName = $"{clipName}_{UnityEngine.Random.Range(min, max + 1)}";
         return PlayGlobalSound(randomClipName, type, delay, isLoop);
     }
 
@@ -125,13 +127,13 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
     public Sound PlayLocalRandomSound(string clipName, Transform audioTarget, int min, int max, float delay = 0f, bool isLoop = false, SoundType type = SoundType.SFX, bool attachToTarget = true, float minDistance = 0.0f, float maxDistance = 50.0f)
     {
-        string randomClipName = $"{clipName}_{Random.Range(min, max + 1)}";
+        string randomClipName = $"{clipName}_{UnityEngine.Random.Range(min, max + 1)}";
         return PlayLocalSound(randomClipName, audioTarget, delay, isLoop, type, attachToTarget, minDistance, maxDistance);
     }
 
     public void StopLoopSound(string clipName)
     {
-        Sound sound = _soundList.Find(s => s.name == $"Sound_{clipName}");
+         Sound sound = _soundList.Find(s => s != null && s.name == $"Sound_{clipName}");
 
         if (sound != null)
         {
