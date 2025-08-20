@@ -22,7 +22,6 @@ public class AirDropBox : MonoBehaviour
             return;
         }
 
-        Debug.LogWarning($"Hitpoint [{hit.point}]");
         Debug.DrawLine(transform.position, hit.point, Color.red, 10f);
 
         _dropWarningVFX = PhotonNetwork.Instantiate(DropWarningVFXPrefab.name, hit.point, Quaternion.identity);
@@ -36,7 +35,9 @@ public class AirDropBox : MonoBehaviour
             Destroy(_dropWarningVFX);
         }
 
-        if (other.gameObject.CompareTag("TileMap") || other.gameObject.CompareTag("OneWayPlatform"))
+        Debug.LogWarning($"{other.gameObject.layer} || {LayerMask.NameToLayer("Platform")}");
+
+        if (other.gameObject.layer == 6)
         {
 
             if (!_isInAir)
@@ -47,9 +48,7 @@ public class AirDropBox : MonoBehaviour
             _isInAir = false;
             _animator.SetBool("IsInAir", _isInAir);
 
-            ParticleSystem landingVFX = Instantiate(LandingVFXPrefab, other.contacts[0].point, Quaternion.identity);
-            VFXPool.Instance.Get(LandingVFXPrefab.name);
-
+            VFX landingVFX = VFXPool.Instance.Get(LandingVFXPrefab.name);
             landingVFX.Play();
             return;
         }
@@ -60,12 +59,13 @@ public class AirDropBox : MonoBehaviour
         }
         Player player = other.gameObject.GetComponent<Player>();
 
-        Debug.LogWarning("박스 루팅");
-
-        AirDropItemBase item = DropItemList[Random.Range(0, DropItemList.Count)];
-        
-        item.SetOwner(player);
-        player.SetAirDropItem(item);
+        if (player.AirDropItem == null)
+        {
+            Debug.LogWarning("박스 루팅");
+            AirDropItemBase item = DropItemList[Random.Range(0, DropItemList.Count)];
+            item.SetOwner(player);
+            player.SetAirDropItem(item);
+        }
 
         Destroy(gameObject);
     }

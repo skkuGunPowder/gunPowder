@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -96,7 +97,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
     public Sound PlayGlobalRandomSound(string clipName, int min, int max, SoundType type = SoundType.SFX, float delay = 0f, bool isLoop = false)
     {
-        string randomClipName = $"{clipName}_{Random.Range(min, max + 1)}";
+        string randomClipName = $"{clipName}_{UnityEngine.Random.Range(min, max + 1)}";
         return PlayGlobalSound(randomClipName, type, delay, isLoop);
     }
 
@@ -125,7 +126,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
     public Sound PlayLocalRandomSound(string clipName, Transform audioTarget, int min, int max, float delay = 0f, bool isLoop = false, SoundType type = SoundType.SFX, bool attachToTarget = true, float minDistance = 0.0f, float maxDistance = 50.0f)
     {
-        string randomClipName = $"{clipName}_{Random.Range(min, max + 1)}";
+        string randomClipName = $"{clipName}_{UnityEngine.Random.Range(min, max + 1)}";
         return PlayLocalSound(randomClipName, audioTarget, delay, isLoop, type, attachToTarget, minDistance, maxDistance);
     }
 
