@@ -5,8 +5,6 @@ using Photon.Realtime;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
-using System.Linq;
-using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(PhotonView))]
 public class RoomManager : PhotonSingleton<RoomManager>
@@ -23,7 +21,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private bool _initialized = false;  // Init 한번만 부르게 하기
 
     private PhotonView _photonView;
-
     protected override void Awake()
     {
         base.Awake();
@@ -314,6 +311,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             SelectedMap = (ESceneList)propertiesThatChanged[$"{EProperties.MapSelected}"];
             EventManager.Instance.MapChanged();
+        }
+
+        if (propertiesThatChanged.ContainsKey(EProperties.Life.ToString()) &&
+            propertiesThatChanged[EProperties.Life.ToString()] != null)
+        {
+            EventManager.Instance.RoomDataChanged();
         }
     }
 

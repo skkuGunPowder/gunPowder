@@ -9,7 +9,7 @@ public class UI_GameResult : MonoBehaviour
     public GameObject Header;
     // public  List<GameResultData> dataList = new List<GameResultData>();
     public float Timer = 0.4f;
-    public float LoadTime = 1.5f;
+    public float LoadTime = 4f;
 
     private void Awake()
     {

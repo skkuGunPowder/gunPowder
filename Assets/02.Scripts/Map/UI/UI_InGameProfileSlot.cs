@@ -7,7 +7,7 @@ using DG.Tweening;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UI_InGameProfileSlot : MonoBehaviour
 {
-    private RectTransform _gunpowderTextOriginalRectTransform;
+    [SerializeField] private Vector2 _gunpowderTextOriginalRectTransform;
     public TextMeshProUGUI NicknameTextUGUI;
     public TextMeshProUGUI GunpowderTextUGUI;
     public GameObject FirstPlace;
@@ -25,6 +25,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     [Header("Shaker")]
     public float Strength = 20f;
     public float Duration = 1f;
+    public int Vibrato = 10;
     public Ease EaseType;
     public float ScaleStrength = 1.2f;
     public void Init(string playerName, Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
@@ -34,7 +35,6 @@ public class UI_InGameProfileSlot : MonoBehaviour
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
         
-        _gunpowderTextOriginalRectTransform = GunpowderTextUGUI.rectTransform;
     }
     public void Refresh(int gunpowder, int life)
     {
@@ -90,13 +90,15 @@ public class UI_InGameProfileSlot : MonoBehaviour
 
     private void Shake()
     {
+        DOTween.Kill(this);
+        
         GunpowderTextUGUI.rectTransform.DOScale(ScaleStrength, Duration).SetEase(Ease.OutCubic).OnComplete(() =>
         {
             GunpowderTextUGUI.rectTransform.DOScale(1f, Duration).SetEase(Ease.InCubic);
         });
-        GunpowderTextUGUI.rectTransform.DOShakeAnchorPos(Duration, Strength).SetEase(EaseType).OnComplete(() =>
+        GunpowderTextUGUI.rectTransform.DOShakeAnchorPos(Duration, Strength, Vibrato).SetEase(EaseType).OnComplete(() =>
         {
-            GunpowderTextUGUI.rectTransform.anchoredPosition = _gunpowderTextOriginalRectTransform.anchoredPosition;
+            GunpowderTextUGUI.rectTransform.DOAnchorPos(_gunpowderTextOriginalRectTransform, Duration).SetEase(EaseType);
         });
     }
        public void SetTop(bool isTop)

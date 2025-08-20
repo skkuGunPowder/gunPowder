@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +11,9 @@ public class UI_ProfileSlot : MonoBehaviour
     public GameObject Ready;
     public GameObject NotReady;
     public GameObject Master;
-    
+
+    public GameObject Lives;
+    public List<GameObject> LifeList = new List<GameObject>();
     public Image ProfileImage;
     public Image BombImage;
     public Image ProfileOutline;
@@ -19,6 +22,8 @@ public class UI_ProfileSlot : MonoBehaviour
     public UI_EmotionSlot Emotion;    
     public Sprite EmptyImage;
     public List<Color32> TeamColorCodeList;
+    
+    
     
     // 후에 프로필 이미지 추가하기
     public void Refresh(PhotonPlayer player = null)
@@ -33,6 +38,9 @@ public class UI_ProfileSlot : MonoBehaviour
         // skincheck
         PlayerProfileSkin.gameObject.SetActive(true);
         PlayerProfileSkin.Init(player);
+        
+        // life
+        LifeSet();
         
         // bomb
         ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
@@ -50,6 +58,24 @@ public class UI_ProfileSlot : MonoBehaviour
         }
     }
 
+    private void LifeSet()
+    {
+        Lives.SetActive(true);
+
+        int life = (int)PhotonNetwork.CurrentRoom.CustomProperties[EProperties.Life.ToString()];
+
+        for (int i = 0; i < LifeList.Count; i++)
+        {
+            if (i < life)
+            {
+                LifeList[i].SetActive(true);
+            }
+            else
+            {
+                LifeList[i].SetActive(false);
+            }
+        }
+    }
     public void ReadyCheck(bool isReady)
     {
         
@@ -77,6 +103,7 @@ public class UI_ProfileSlot : MonoBehaviour
     public void NoPlayer()
     {
         NotReady.SetActive(false);
+        Lives.SetActive(false);
         Ready.SetActive(false);
         NicknameTextUGUI.gameObject.SetActive(false);
         Master.SetActive(false);

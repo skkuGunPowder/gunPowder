@@ -42,10 +42,10 @@ public class UI_RoomSetting : MonoBehaviour
         
         Hashtable roomProperties = new Hashtable
         {
-            {$"{EProperties.PlayTime}", Playtime.Value.text},
-            {$"{EProperties.Life}", Life.Value.text},
-            {$"{EProperties.Gunpowder}", Powder.Value.text},
-            {$"{EProperties.DeclinePowder}", Decline.Value.text},
+            {$"{EProperties.PlayTime}", Playtime.CurrentValue()},
+            {$"{EProperties.Life}",  Life.CurrentValue()},
+            {$"{EProperties.Gunpowder}",  Powder.CurrentValue()},
+            {$"{EProperties.DeclinePowder}",  Decline.CurrentValue()},
         };
         
         currentRoom.SetCustomProperties(roomProperties);
