@@ -85,6 +85,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
         if (type == SoundType.BGM)
         {
             sound.InitGlobalClip(GetClip(clipName), false);
+            _currentBGM = sound;
         }
         else
         {
@@ -132,7 +133,7 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
     public void StopLoopSound(string clipName)
     {
-        Sound sound = _soundList.Find(s => s.name == $"Sound_{clipName}");
+         Sound sound = _soundList.Find(s => s != null && s.name == $"Sound_{clipName}");
 
         if (sound != null)
         {
