@@ -121,6 +121,12 @@ public class CameraController : MonoBehaviour
     public void SelectTarget(int index)
     {
         _currentTargetIndex += index;
+        
+        if (_currentTargetList.Count == 0)
+        {
+            return;
+        }
+        
         if (_currentTargetIndex < 0)
         {
             _currentTargetIndex = _currentTargetList.Count - 1;

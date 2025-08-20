@@ -6,14 +6,35 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class EmotionManager : MonoBehaviour
 { 
     public PhotonView MyPhotonView;
+    
     private List<int> _myEmotionList;
-
     private Dictionary<KeyCode, int> _emotionKeyDictionary;
+    
+    private List<PlayerEmotion> _playerEmotionList = new List<PlayerEmotion>();
+    public float EmotionCoolTime = 3f;
+    private float _timer;
+
+    private bool _canEmotion = true;
     private void Awake()
     {
-        _myEmotionList = new List<int>();   
+        _myEmotionList = new List<int>();
+        EventManager.Instance.OnPlayerFind += Request_PlayerFind;
     }
 
+    private void Request_PlayerFind()
+    {
+        MyPhotonView.RPC(nameof(RPC_PlayerFind), RpcTarget.All);
+    }
+    
+    [PunRPC]
+    private void RPC_PlayerFind()
+    {
+        PlayerEmotion[] playerEmotionArray = FindObjectsByType<PlayerEmotion>(FindObjectsSortMode.None);
+        _playerEmotionList = new List<PlayerEmotion>(playerEmotionArray);
+        
+        Debug.Log($"Find Player {_playerEmotionList.Count} Find : {_playerEmotionList[0].GetPlayerNumber()}");
+    }
+    
     private void Start()
     {
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.Emotion.ToString()) == false)
@@ -35,13 +56,36 @@ public class EmotionManager : MonoBehaviour
         }
     }
 
+    private void CoolDown()
+    {
+        if (_canEmotion)
+        {
+            return;   
+        }
+        
+        _timer -= Time.deltaTime;
+
+        if (_timer <= 0)
+        {
+            _canEmotion = true;
+            _timer = EmotionCoolTime;
+        }
+        
+    }
     private void Update()
     {
+        if(_canEmotion == false)
+        {
+            CoolDown();
+            return;
+        }
+        
         foreach (var kvp in _emotionKeyDictionary)
         {
             if (InputHandler.GetKeyDown(kvp.Key))
             {
                 Request_PlayEmotion(kvp.Value);
+                _canEmotion = false;
             }
         }
     }
@@ -49,15 +93,33 @@ public class EmotionManager : MonoBehaviour
     private void Request_PlayEmotion(int emotionId)
     {
         MyPhotonView.RPC(nameof(RPC_PlayEmotion), RpcTarget.All, emotionId);
+        
     }
     
     [PunRPC]
     private void RPC_PlayEmotion(int emotionId, PhotonMessageInfo info)
     {
+        Debug.Log($"Play Emotion {info.Sender.NickName} {emotionId}");
+        
         string emotionName = Enum.GetName(typeof(EEmotion), emotionId);
         PhotonPlayer player = info.Sender;
-        
-        EventManager.Instance.PlayEmotion(emotionName, player.ActorNumber);
+
+        foreach (var emotion in _playerEmotionList)
+        {
+            if (emotion.GetPlayerNumber() == player.ActorNumber)
+            {
+                if (emotion.IsLive == false)
+                {
+                    Debug.Log($"Dead Emotion {emotionName} {player.NickName}");
+                    EventManager.Instance.PlayEmotion(emotionName, player.ActorNumber);
+                    break;   
+                }
+                
+                emotion.Play(emotionName);
+                
+                break;
+            }
+        }
     }
     
     private void DefaultEmotion()
@@ -66,5 +128,10 @@ public class EmotionManager : MonoBehaviour
         {
             _myEmotionList.Add(i);
         }
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Instance.OnPlayerFind -= Request_PlayerFind;
     }
 }

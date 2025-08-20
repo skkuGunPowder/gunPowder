@@ -68,7 +68,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _initialized = true;
         GeneratePlayer();
         SetCurrentMap();
-        
     }
     private void GeneratePlayer()
     {
@@ -193,14 +192,35 @@ public class RoomManager : PhotonSingleton<RoomManager>
 
         int[] players = _room.CustomProperties[EProperties.PlayerList.ToString()] as int[];
         _playerSlotList = new List<int>(players);
-        _room.IsVisible = true;
 
+        PlayerListCheck();
+        
+        _room.IsVisible = true;
         
         EventManager.Instance.RoomDataChanged();
-        // if (PhotonNetwork.IsMasterClient)
-        // {
-        //     _photonView.RPC(nameof(Rpc_OnEnterUpdateSlots),RpcTarget.All, _playerSlotList.ToArray());
-        // }
+    }
+    
+    // 현재 받은 플레이어 리스트와 지금 있는 사람들의 리스트를 비교해서 플레이어 리스트 정리
+    private void PlayerListCheck()
+    {
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
+        
+        foreach (PhotonPlayer player in players)
+        {
+            if (_playerSlotList.Contains(player.ActorNumber))
+            {
+                return;
+            }
+
+            for (int i = 0; i < _playerSlotList.Count; i++)
+            {
+                if (_playerSlotList[i] == player.ActorNumber)
+                {
+                    _playerSlotList[i] = 0;
+                    break;   
+                }
+            }
+        }
     }
     // 커스텀 프로퍼티가 바뀌면 적용되는 이벤트 함수 => 레디를 했는가? 정보창 레디 변경 how? 커스텀 프로퍼티를 이용해서
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer, Hashtable changedProps)
@@ -235,6 +255,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // => 다른 플레이어들에게 플레이어 리스트를 전달하고 각자 로컬에서 알아서 UI 리프레시하는 방식
     public override void OnPlayerEnteredRoom(PhotonPlayer newPlayer)
     {
+        
         if (PhotonNetwork.IsMasterClient)
         {
             PlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
@@ -257,7 +278,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 _playerSlotList[i] = 0;
                 break;
             }
-            ;
         }
         _photonView.RPC(nameof(Rpc_OnLeftUpdateSlots), RpcTarget.All, _playerSlotList.ToArray());
         
