@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 public class Shop : DontDestroySingleton<Shop>
 {
+    public Player_Preview Player_Preview;
     private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
 
     private ShopItem _selectedItem;
@@ -70,6 +71,7 @@ public class Shop : DontDestroySingleton<Shop>
     public void SelectItem(ShopItem item)
     {
         _selectedItem = item;
+        Player_Preview.EquipItem(item);
         OnShopItemChanged?.Invoke(_shopItemDict, item.ItemInfo.ItemType);
     }
 
