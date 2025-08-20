@@ -337,8 +337,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
         DecreaseGunPowderPeriodically();*/
 
-        _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
-        DecreaseGunPowderWithoutAttack();
+        // _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
+        // DecreaseGunPowderWithoutAttack();
         // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
         UpdateWarningSfx();
 
@@ -1287,7 +1287,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void SetAirDropItem(AirDropItemBase airDropItem)
     {
-        AirDropItemLootVFX.StartRoulette(airDropItem);
+        if (PhotonView.IsMine)
+        {
+            AirDropItemLootVFX.StartRoulette(airDropItem);
+        }
         _airDropItem = airDropItem;
     }
 
