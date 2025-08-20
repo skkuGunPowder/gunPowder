@@ -337,8 +337,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
         DecreaseGunPowderPeriodically();*/
 
-        // _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
-        // DecreaseGunPowderWithoutAttack();
+        _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
+        DecreaseGunPowderWithoutAttack();
         // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
         UpdateWarningSfx();
 

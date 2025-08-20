@@ -35,7 +35,7 @@ public class UI_GameResult : MonoBehaviour
             {
                 GameResultData data = dataList[i];
                 UI_GameResultSlotList[i].gameObject.SetActive(true);
-                UI_GameResultSlotList[i].Refresh(data.Player,data.Damage, data.Rank, data.SurviveTime, data.Kill,data.Team);
+                UI_GameResultSlotList[i].Refresh(data.Player,data.Damage, data.Rank, data.SurviveTime, data.Kill,data.Team, data.Gold, data.EXP);
             }
             else
             {
