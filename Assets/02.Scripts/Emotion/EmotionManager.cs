@@ -11,6 +11,10 @@ public class EmotionManager : MonoBehaviour
     private Dictionary<KeyCode, int> _emotionKeyDictionary;
     
     private List<PlayerEmotion> _playerEmotionList = new List<PlayerEmotion>();
+    public float EmotionCoolTime = 3f;
+    private float _timer;
+
+    private bool _canEmotion = true;
     private void Awake()
     {
         _myEmotionList = new List<int>();
@@ -52,13 +56,36 @@ public class EmotionManager : MonoBehaviour
         }
     }
 
+    private void CoolDown()
+    {
+        if (_canEmotion)
+        {
+            return;   
+        }
+        
+        _timer -= Time.deltaTime;
+
+        if (_timer <= 0)
+        {
+            _canEmotion = true;
+            _timer = EmotionCoolTime;
+        }
+        
+    }
     private void Update()
     {
+        if(_canEmotion == false)
+        {
+            CoolDown();
+            return;
+        }
+        
         foreach (var kvp in _emotionKeyDictionary)
         {
             if (InputHandler.GetKeyDown(kvp.Key))
             {
                 Request_PlayEmotion(kvp.Value);
+                _canEmotion = false;
             }
         }
     }

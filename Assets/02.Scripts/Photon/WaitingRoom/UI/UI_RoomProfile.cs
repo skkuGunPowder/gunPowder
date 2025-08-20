@@ -48,6 +48,11 @@ public class UI_RoomProfile : MonoBehaviour
             }
             
             PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
+
+            if (player == null)
+            {
+                return;
+            }
             
             if (player.IsMasterClient)
             {
