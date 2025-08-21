@@ -28,7 +28,7 @@ public class UI_Ping : MonoBehaviour
 
     private void Update()
     {
-        if (_playerTransform == null || _renderTexCamera == null)
+        if (_playerTransform == null || _renderTexCamera == null || !_playerTransform.gameObject.activeSelf)
         {
             Content.SetActive(false);
             return;
