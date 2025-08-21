@@ -27,8 +27,6 @@ public class UI_TeamSelcetButton : MonoBehaviour
             {EProperties.Team.ToString(), (int)MyTeam}
         };
         PhotonNetwork.LocalPlayer.SetCustomProperties(team);
-        
-        Debug.Log(PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()]);
     }
     
 }

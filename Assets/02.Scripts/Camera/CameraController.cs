@@ -103,12 +103,8 @@ public class CameraController : MonoBehaviour
 
     private void TargetListUp()
     {
-        Debug.Log("Target List Up");
-        
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();
-        
-        Debug.Log("players.Length : " + players.Length);
         
         foreach (var player in players)
         {
@@ -117,8 +113,6 @@ public class CameraController : MonoBehaviour
                 if (player.GetComponent<PhotonView>().Owner.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
                     _isObserving = true;
-                    Debug.Log($"isObserving : {_isObserving}");
-
                 };
                 continue;
             }
@@ -126,8 +120,6 @@ public class CameraController : MonoBehaviour
             _currentTargetList.Add(player);
             
         }
-        
-        Debug.Log($"타겟으로 정할 수 있는 플레이어 수 {_currentTargetList.Count}");
     }
 
     private void Update()

@@ -71,7 +71,6 @@ public class UltimateProductionSlot : MonoBehaviour
     }
     private void BombEffectOn(string bomb)
     {
-        Debug.Log($"{bomb}");
         foreach (UltimateEffectBase effect in EffectList)
         {
             if (effect.BombName == bomb)
@@ -83,7 +82,6 @@ public class UltimateProductionSlot : MonoBehaviour
     }
     private void BombEffectOff(string bomb)
     {
-        Debug.Log($"{bomb}");
         foreach (UltimateEffectBase effect in EffectList)
         {
             if (effect.BombName == bomb)

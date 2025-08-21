@@ -47,7 +47,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         // 게임 버전 설정
         PhotonNetwork.GameVersion = _gameVersion;
         PhotonNetwork.NickName = AccountManager.Instance.CurrencAccount.Nickname;
-        Debug.Log( PhotonNetwork.NickName);
         PhotonNetwork.ConnectUsingSettings();
     }
 
@@ -79,7 +78,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.Log("OnJoinRandomFailed");
+        Debug.LogWarning("OnJoinRandomFailed");
     }
 
     public override void OnCreatedRoom()
@@ -94,7 +93,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         {
             pool.ResourceCache.TryAdd(kvp.Value.Prefab.name, kvp.Value.Prefab);
         }
-        Debug.Log("포톤 풀 등록 완료");
     }
 
     public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
@@ -105,7 +103,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         {
             return;
         }
-        Debug.Log($"{otherPlayer.ActorNumber} 플레이어 나감요");
         EventManager.Instance.PlayerLeftRoom(otherPlayer);
     }
 }

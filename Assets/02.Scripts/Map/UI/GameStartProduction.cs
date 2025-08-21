@@ -32,12 +32,10 @@ public class GameStartProduction : MonoBehaviour
     private void Awake()
     {
         EventManager.Instance.OnLoadFinished += Play;
-        Debug.Log("gamestart");
     }
 
     public void Play()
     {
-        Debug.Log("production");
         Timer.DOAnchorPos(TimerEndPosition, DotweenDuration).SetEase(TimerEase).SetUpdate(true);
         Profile.DOAnchorPos(ProfileEndPosition, DotweenDuration).SetEase(ProfileEase).SetUpdate(true);
     }
@@ -67,7 +65,6 @@ public class GameStartProduction : MonoBehaviour
             .SetEase(GameStartTextEase));
         sequence.OnComplete(() =>
         {
-            Debug.Log("Change");
             GameManager.Instance.GameStateChange(EGameState.Playing);
         });
     }

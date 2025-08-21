@@ -23,12 +23,6 @@ public class BackendChart : Singleton<BackendChart>
                 Debug.LogError($"[BackendChart] 차트 조회 실패 : {bro.ErrorCode} | {bro.Message}");
                 return;
             }
-
-            Debug.Log($"[BackendChart] 차트 조회 성공 : {bro}");
-            foreach (LitJson.JsonData item in bro.FlattenRows())
-            {
-                Debug.Log($"Chart Item: {item["MYID"]}");
-            }
         });
     }
 }

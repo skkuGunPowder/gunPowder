@@ -36,13 +36,11 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
         {
             _googleAuthSettings = googleAuthManager.GoogleAuthSettings;
             GoogleAuth = new GoogleAuth(_googleAuthSettings);
-            Debug.Log("GoogleAuthManager의 설정을 사용하여 GoogleAuth 초기화");
         }
         else
         {
             // GoogleAuthManager가 없으면 기본 설정 사용
             GoogleAuth = new GoogleAuth();
-            Debug.LogWarning("GoogleAuthManager를 찾을 수 없어 기본 설정을 사용합니다.");
         }
     }
 
@@ -68,7 +66,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
         if (success)
         {
             OnLoginResult?.Invoke($"구글 로그인 성공 : {userInfo.name}");
-            Debug.Log($"구글 로그인 성공: {userInfo.name} ({userInfo.email})");
 
             // Firebase Auth에 구글 계정으로 로그인
             await SignInToFirebaseWithGoogle(userInfo);
@@ -93,8 +90,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             {
                 if (tokenSuccess)
                 {
-                    Debug.Log("구글 ID Token 획득 성공");
-
                     // 2. Firebase Auth에 구글 계정으로 로그인
                     await SignInToFirebaseWithGoogleToken(userInfo, tokenResponse.IdToken);
                 }
@@ -126,10 +121,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             var result = await FirebaseManager.Instance.Auth.SignInWithCredentialAsync(credential);
             FirebaseUser user = result;
 
-            Debug.Log($"Firebase Auth 로그인 성공: {user.DisplayName} ({user.UserId})");
-
-
-
             // Firestore에서 사용자 정보 가져오기
             var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
 
@@ -154,8 +145,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             var backEndResult = Backend.BMember.AuthorizeFederation(idToken, FederationType.Google);
             if (backEndResult.IsSuccess())
             {
-                Debug.Log($"Message : {backEndResult.GetMessage()}");
-                Debug.Log($"Code : {backEndResult.GetCode()}");
                 ItemDatabase.Instance.Init();
             }
             else
@@ -213,8 +202,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             };
             await user.UpdateUserProfileAsync(profile);
 
-            Debug.Log($"새 Firebase 계정 생성 성공: {user.UserId}");
-
             // Firestore에 사용자 정보 저장
             await SaveUserInfoToFirestore(user, userInfo);
 
@@ -257,7 +244,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
                     { "authProvider", "Google" }
                 };
                 await userDoc.UpdateAsync(updateData);
-                Debug.Log("기존 사용자 정보 업데이트 완료");
             }
             else
             {
@@ -273,7 +259,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
                     lastLogin = DateTime.UtcNow,
                     authProvider = "Google"
                 });
-                Debug.Log("새 사용자 정보 저장 완료 (닉네임 없음)");
             }
         }
         catch (Exception e)
@@ -317,8 +302,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
                 {
                     AccountManager.Instance.SetCurrentAccount(accountDTO);
                 }
-
-                Debug.Log($"AccountManager 설정 완료: 닉네임='{nickname}'");
             }
         }
         catch (Exception e)
@@ -342,7 +325,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             OnLoginResult?.Invoke($"Access token: {tokenResponse.AccessToken}");
 
             var jwt = new JWT(tokenResponse.IdToken);
-            Debug.Log($"JSON Web Token (JWT) Payload: {jwt.Payload}");
             jwt.ValidateSignature(GoogleAuth.ClientId, OnValidateSignature);
         }
         else

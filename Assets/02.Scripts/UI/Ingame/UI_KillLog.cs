@@ -30,7 +30,6 @@ public class UI_KillLog : MonoBehaviour
 
     public void Refresh(int kill, int death)
     {
-        Debug.Log($"{kill}이 {death}를 죽였습니다.");
         foreach (UI_KillLogSlot slot in KillLogSlotList)
         {
             if (slot.gameObject.activeInHierarchy)

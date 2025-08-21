@@ -19,7 +19,6 @@ public class GameResultManager : Singleton<GameResultManager>
     {
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
  
-        Debug.Log($"결과 : 플레이어 리스트 {playerList.Count}");
         foreach (PhotonPlayer player in playerList)
         {
             int damage = Convert.ToInt32(player.CustomProperties[EProperties.Damage.ToString()]);
@@ -28,7 +27,6 @@ public class GameResultManager : Singleton<GameResultManager>
             int team = Convert.ToInt32(player.CustomProperties[EProperties.Team.ToString()]);
             
             GameResultData data = new GameResultData(player, damage, kill, survieTime, (EInGameTeam)team);
-            Debug.Log(player.ActorNumber +"의 살아남은 시간 : "+ survieTime);
 
             ResultDataList.Add(data);
         }
@@ -65,9 +63,7 @@ public class GameResultManager : Singleton<GameResultManager>
             .Where(g => g.Count > 0) // 빈 그룹 제거
             .OrderByDescending(teamGroup => teamGroup[0].SurviveTime) // 각 팀 대표의 생존시간 기준
             .ToList();
-        Debug.Log($"그룹화 결과 : 그룹화 1 {groupedTeams.Count}");
-        Debug.Log($"결과 : 정렬 전 데이터 리스트 {ResultDataList.Count}");
-        
+
         ResultDataList.Clear();
 
         int currentRank = 1;

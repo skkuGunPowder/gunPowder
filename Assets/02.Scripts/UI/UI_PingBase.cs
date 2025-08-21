@@ -20,7 +20,6 @@ public class UI_PingBase : MonoBehaviour
             Destroy(gameObject);
         }
 
-        Debug.Log("PingBASE Awake");
         foreach (var ping in PingList)
         {
             ping.Content.SetActive(false);
@@ -36,8 +35,6 @@ public class UI_PingBase : MonoBehaviour
             {
                 ping.SetPlayerTransform(playerTransform);
                 ping.SetRenderTexCamera(RenderTexCameraList[index]);
-                
-                Debug.Log("SetPlayerTransform");
                 return;
             }
             ++index;

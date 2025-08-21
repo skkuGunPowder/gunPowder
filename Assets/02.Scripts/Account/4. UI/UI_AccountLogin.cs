@@ -97,7 +97,6 @@ public class UI_GoogleLogin : MonoBehaviour
         {
             ResultText.text = message;
         }
-        Debug.Log($"Google Login Result: {message}");
     }
 
     /// <summary>
@@ -143,7 +142,7 @@ public class UI_GoogleLogin : MonoBehaviour
                 // 닉네임이 설정되어 있지 않으면 닉네임 설정 UI 호출
                 if (string.IsNullOrEmpty(nickname))
                 {
-                    Debug.Log("닉네임이 설정되지 않음. 닉네임 설정 UI 호출");
+                    Debug.LogWarning("닉네임이 설정되지 않음. 닉네임 설정 UI 호출");
                     ShowNicknameSetupUI(user, userInfo, discriminator);
                     return;
                 }
@@ -154,7 +153,7 @@ public class UI_GoogleLogin : MonoBehaviour
             else
             {
                 // 새 사용자의 경우 닉네임 설정 UI 호출
-                Debug.Log("새 사용자. 닉네임 설정 UI 호출");
+                Debug.LogWarning("새 사용자. 닉네임 설정 UI 호출");
                 ShowNicknameSetupUI(user, userInfo, "");
             }
         }
@@ -242,8 +241,6 @@ public class UI_GoogleLogin : MonoBehaviour
                 lastLogin = DateTime.UtcNow,
                 authProvider = "Google"
             });
-
-            Debug.Log($"닉네임 설정 완료: {nickname}#{_pendingDiscriminator}");
             
             if (NicknameResultText != null)
             {

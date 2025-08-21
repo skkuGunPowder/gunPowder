@@ -31,8 +31,6 @@ public class EmotionManager : MonoBehaviour
     {
         PlayerEmotion[] playerEmotionArray = FindObjectsByType<PlayerEmotion>(FindObjectsSortMode.None);
         _playerEmotionList = new List<PlayerEmotion>(playerEmotionArray);
-        
-        Debug.Log($"Find Player {_playerEmotionList.Count} Find : {_playerEmotionList[0].GetPlayerNumber()}");
     }
     
     private void Start()
@@ -98,9 +96,7 @@ public class EmotionManager : MonoBehaviour
     
     [PunRPC]
     private void RPC_PlayEmotion(int emotionId, PhotonMessageInfo info)
-    {
-        Debug.Log($"Play Emotion {info.Sender.NickName} {emotionId}");
-        
+    {       
         string emotionName = Enum.GetName(typeof(EEmotion), emotionId);
         PhotonPlayer player = info.Sender;
 
@@ -110,7 +106,6 @@ public class EmotionManager : MonoBehaviour
             {
                 if (emotion.IsLive == false)
                 {
-                    Debug.Log($"Dead Emotion {emotionName} {player.NickName}");
                     EventManager.Instance.PlayEmotion(emotionName, player.ActorNumber);
                     break;   
                 }

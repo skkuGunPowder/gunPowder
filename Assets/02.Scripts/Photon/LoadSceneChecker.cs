@@ -25,7 +25,6 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     {
         if (changedProps.ContainsKey(EProperties.IsLoad.ToString()) && changedProps[EProperties.IsLoad.ToString()] != null)
         {
-            Debug.Log(targetPlayer + "로딩 체크하기");
             OnLoading?.Invoke(targetPlayer.ActorNumber, (bool)changedProps[EProperties.IsLoad.ToString()]);
             
             if (PhotonNetwork.IsMasterClient == false)
@@ -47,22 +46,17 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         foreach (PhotonPlayer p in playerList)
         {
             bool isLoaded = p.CustomProperties.ContainsKey(EProperties.IsLoad.ToString()) && (bool)p.CustomProperties[EProperties.IsLoad.ToString()];
-            Debug.Log($"Player {p.NickName}{p.ActorNumber} - SceneLoaded: {isLoaded}");
             if (isLoaded == false)
             {
-                Debug.Log($"Player {p.NickName}{p.ActorNumber} - SceneLoaded: {isLoaded}");
                 return false ;
             }
         }
-       
-        Debug.Log("로드 완료");
         return true;
     }
 
     [PunRPC]
     private void Rpc_LoadEnd()
     {
-        Debug.Log("load");
         EventManager.Instance.LoadEnd();
     }
 
@@ -74,7 +68,6 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         };
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(load);
-        Debug.Log(PhotonNetwork.LocalPlayer.NickName + $"{PhotonNetwork.LocalPlayer.CustomProperties[EProperties.IsLoad.ToString()]}");
     }
 
 }

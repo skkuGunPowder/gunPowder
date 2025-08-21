@@ -45,7 +45,7 @@ public class PlayerCountChecker : MonoBehaviour
         }
         else
         {
-            Debug.Log("아직 셋업이 되지 않았거나 셋업 중 오류가 발생했습니다.");
+            Debug.LogError("아직 셋업이 되지 않았거나 셋업 중 오류가 발생했습니다.");
         }
     }
 

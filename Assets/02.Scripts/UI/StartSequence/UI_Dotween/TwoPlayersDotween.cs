@@ -47,7 +47,6 @@ public class TwoPlayersDotween : MonoBehaviour
 
     private void OnLoadEnd()
     {
-        Debug.Log("killllllllllllllllllllllllllll");
         DOTween.KillAll();
         
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
@@ -67,7 +66,6 @@ public class TwoPlayersDotween : MonoBehaviour
             {EProperties.IsLoad.ToString(), true}
         };
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
-        Debug.Log("LoadEnd");
     }
     
     private void OnDisable()
