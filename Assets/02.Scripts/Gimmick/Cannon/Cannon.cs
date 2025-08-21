@@ -23,6 +23,11 @@ public class Cannon : MonoBehaviour
             return;
         }
 
+        if (!collision.CompareTag("Bomb") && !collision.CompareTag("Player") && !collision.CompareTag("Enemy"))
+        {
+            return;
+        }
+
         _firedProjectile = collision.attachedRigidbody;
 
         StartCoroutine(FireRoutine(_firedProjectile));
@@ -45,15 +50,13 @@ public class Cannon : MonoBehaviour
 
         target.linearVelocity = Vector2.zero;
         target.bodyType = RigidbodyType2D.Kinematic;
-        target.transform.DOMove(_barrel.transform.position, 0.3f).SetEase(Ease.InQuad)
-        .OnComplete(() =>
+        target.transform.DOMove(_barrel.transform.position, 0.3f).SetEase(Ease.InQuad).OnComplete(() =>
         {
             target.gameObject.SetActive(false);  
         });
 
 
-        transform.DOScale(Vector3.one * 1.2f, 0.15f)
-        .SetLoops(2, LoopType.Yoyo);
+        transform.DOScale(Vector3.one * 1.2f, 0.15f).SetLoops(2, LoopType.Yoyo);
         yield return new WaitForSeconds(0.3f);
 
         _barrel.transform.DORotate(new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, _fireDegree), 0.5f).SetEase(Ease.InOutSine);
@@ -61,11 +64,14 @@ public class Cannon : MonoBehaviour
 
         yield return new WaitForSeconds(0.3f);
 
-        transform.DOScale(Vector3.one * 1.2f, 0.15f)
-        .SetLoops(2, LoopType.Yoyo);
+        transform.DOScale(Vector3.one * 1.2f, 0.15f).SetLoops(2, LoopType.Yoyo);
 
         target.gameObject.SetActive(true);
-        target.bodyType = RigidbodyType2D.Dynamic;
+
+        if (!target.CompareTag("Enemy"))
+        {
+            target.bodyType = RigidbodyType2D.Dynamic;
+        }
         Vector2 fireDir = _barrel.transform.right.normalized;
         target.AddForce(fireDir * _fireForce, ForceMode2D.Impulse);
 
@@ -73,7 +79,7 @@ public class Cannon : MonoBehaviour
 
         yield return null;
 
-        if (target.gameObject.tag == "Player")
+        if (target.CompareTag("Player"))
         {
             InputHandler.BlockInput = false;
         }
