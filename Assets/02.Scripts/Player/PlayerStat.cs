@@ -164,8 +164,6 @@ public class PlayerStat : MonoBehaviour
         }
         InitializeStats(); 
         SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime, RoomStatManager.Instance.PlayerTeam);
-        
-        Debug.Log($"{Team.ToString()}");
     }
 
     public void InitializeStats()
@@ -362,7 +360,6 @@ public class PlayerStat : MonoBehaviour
     public void IncreaseTotalKillCount()
     {
         _totalKillCount++;
-        Debug.Log(_totalKillCount);
     }
 
     public void ResetTotalKillCount()
@@ -376,8 +373,6 @@ public class PlayerStat : MonoBehaviour
         {
             return;
         }
-
-        Debug.Log("플레이어 부활");
         
         // 건파우더 초기화
         _currentPlayerGunPowderCount = _initGunpowderCount;
@@ -394,8 +389,6 @@ public class PlayerStat : MonoBehaviour
         
         // 네트워크 동기화
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife, 0);
-        
-        Debug.Log($"[PlayerStat] ResurrectPlayerStat - Life: {_currentPlayerLife}, GunPowder: {_currentPlayerGunPowderCount}");
     }
 
     public void SetConfuseTime(float time)

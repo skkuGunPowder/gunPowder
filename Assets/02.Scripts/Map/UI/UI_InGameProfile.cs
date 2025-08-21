@@ -10,7 +10,6 @@ public class UI_InGameProfile : MonoBehaviour
     
     private void OnEnable()
     {
-        Debug.Log("인게임 프로필 온인에이블");
         SubscribeEvents();
     }
 
@@ -78,7 +77,6 @@ public class UI_InGameProfile : MonoBehaviour
     }
     private void OnDisable()
     {
-        Debug.Log("온 디스에이블 ");
         UnsubscribeEvents();
     }
 

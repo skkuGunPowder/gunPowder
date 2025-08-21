@@ -36,7 +36,6 @@ public class UI_RoomSearchPopup : UI_Popup
     // 방이 보일 수 있을만큼만 보여준다 (최대 8개) => refresh할 것들 : 현재 있는 방의 개수, 방 페이지,
     public void Refresh()
     { 
-        Debug.Log("Refresh");
         List<RoomInfo> roomInfoList = LobbyManager.Instance.RoomInfoList;
 
         // 방이 0개인 경우
@@ -92,7 +91,6 @@ public class UI_RoomSearchPopup : UI_Popup
         
         string map = ((ESceneList)info.CustomProperties[$"{EProperties.MapSelected}"]).ToString();
         
-        Debug.Log(map);
         if (MapDataDictionary.TryGetValue(map, out var mapData))
         { 
             return mapData.MapIcon;

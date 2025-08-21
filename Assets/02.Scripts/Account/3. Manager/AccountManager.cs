@@ -51,7 +51,6 @@ public class AccountManager : DontDestroySingleton<AccountManager>
 
         if(await _accountRepository.TryAddAccount(account))
         {
-            Debug.Log("회원가입에 성공하였습니다.");
             return new Result(true, "회원가입에 성공하였습니다.");
         }
         else
@@ -77,7 +76,7 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         ));
         if (accountDTO == null)
         {
-            Debug.Log("로그인 실패");
+            Debug.LogError("로그인 실패");
             return new Result(false, "로그인에 실패하였습니다");
         }
 
@@ -96,17 +95,6 @@ public class AccountManager : DontDestroySingleton<AccountManager>
             accountDTO.Email_Verified,
             accountDTO.Account_Flags
         );
-        Debug.Log("로그인 성공");
-        Debug.Log($"[Account Info] Account_ID: {_myAccount.Account_ID}\n" +
-                  $"Login_ID: {_myAccount.Login_ID}\n" +
-                  $"Password_Hash: {_myAccount.Password_Hash}\n" +
-                  $"SALT: {_myAccount.SALT}\n" +
-                  $"Auth_Provider: {_myAccount.Auth_Provider}\n" +
-                  $"Nickname: {_myAccount.Nickname}\n" +
-                  $"Discriminator: {_myAccount.Discriminator}\n" +
-                  $"User_Name: {_myAccount.User_Name}\n" +
-                  $"Email_Verified: {_myAccount.Email_Verified}\n" +
-                  $"Account_Flags: {_myAccount.Account_Flags}");
         return new Result(true, "로그인 성공!");
     }
 
@@ -224,16 +212,6 @@ public class AccountManager : DontDestroySingleton<AccountManager>
                 accountDTO.Email_Verified,
                 accountDTO.Account_Flags
             );
-
-            Debug.Log("구글 로그인 계정 정보 설정 완료");
-            Debug.Log($"[Google Account Info] Account_ID: {_myAccount.Account_ID}\n" +
-                      $"Login_ID: {_myAccount.Login_ID}\n" +
-                      $"Auth_Provider: {_myAccount.Auth_Provider}\n" +
-                      $"Nickname: {_myAccount.Nickname}\n" +
-                      $"Discriminator: {_myAccount.Discriminator}\n" +
-                      $"User_Name: {_myAccount.User_Name}\n" +
-                      $"Email_Verified: {_myAccount.Email_Verified}\n" +
-                      $"Account_Flags: {_myAccount.Account_Flags}");
 
             return new Result(true, "구글 로그인 성공!");
         }

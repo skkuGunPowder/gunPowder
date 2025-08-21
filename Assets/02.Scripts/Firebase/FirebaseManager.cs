@@ -48,10 +48,7 @@ public class FirebaseManager : MonoBehaviour
 
             DB = FirebaseFirestore.DefaultInstance;
             DB.Settings.PersistenceEnabled = false;
-            Debug.Log("Firebase 연결 성공");
-
             Auth = FirebaseAuth.DefaultInstance;
-            Debug.Log("Firebase Auth 연결 성공");
         }
         else
         {

@@ -96,8 +96,6 @@ public class FourPlayersDotween : MonoBehaviour
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
         Layout.enabled = false;
-        
-        Debug.Log("LoadEnd");
     }
 
     

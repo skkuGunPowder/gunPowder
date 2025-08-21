@@ -8,7 +8,6 @@ public class UI_SelectTeam : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("SelectTeam Awake");
         EventManager.Instance.OnTeamChanged += TeamSelected;
     }
     

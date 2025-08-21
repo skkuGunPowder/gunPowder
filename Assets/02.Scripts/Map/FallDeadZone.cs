@@ -6,7 +6,6 @@ public class FallDeadZone : MonoBehaviour
     {
         if(collision.CompareTag("Player") || collision.CompareTag("Enemy") || collision.CompareTag("Immune"))
         {
-            Debug.Log($"{collision.gameObject.tag} 낙사 판정 구간 진입");
             if (collision.TryGetComponent<PlayerStat>(out PlayerStat playerStat))
             {
                 if (playerStat.IsFallingDead)

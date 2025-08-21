@@ -20,7 +20,6 @@ public class GoogleAuthManager : MonoBehaviour
         envPath = Path.Combine(buildDirectory, ".env");
         #endif
         
-        Debug.Log($"Loading .env from: {envPath}");
         EnvLoader.LoadEnv(envPath);
         
         string clientId = EnvLoader.Get("WINDOW_CLIENT_ID");
@@ -28,24 +27,15 @@ public class GoogleAuthManager : MonoBehaviour
         string customUriScheme = EnvLoader.Get("GENERIC_CUSTOM_URI_SCHEME");
         string genericClientId = EnvLoader.Get("GENERIC_CLIENT_ID");
 
-        Debug.Log($"Loaded values:");
-        Debug.Log($"  WINDOW_CLIENT_ID: {clientId}");
-        Debug.Log($"  WINDOW_CLIENT_SECRET: {clientSecret}");
-        Debug.Log($"  GENERIC_CUSTOM_URI_SCHEME: {customUriScheme}");
-        Debug.Log($"  GENERIC_CLIENT_ID: {genericClientId}");
-
         #if UNITY_EDITOR
         // 에디터에서는 Desktop 설정 사용
         GoogleAuthSettings.SetDesktopCredentials(clientId, clientSecret);
-        Debug.Log($"Editor: Desktop credentials set - ClientId: {clientId}");
         #elif UNITY_STANDALONE_WIN
         // Windows 빌드에서는 Windows 설정 사용
         GoogleAuthSettings.SetWindowsCredentials(clientId, clientSecret);
-        Debug.Log($"Windows: Windows credentials set - ClientId: {clientId}, CustomUriScheme: {customUriScheme}");
         #else
         // 기타 플랫폼에서는 Generic 설정 사용
         GoogleAuthSettings.SetGenericCredentials(genericClientId, customUriScheme);
-        Debug.Log($"Other: Generic credentials set - ClientId: {genericClientId}, CustomUriScheme: {customUriScheme}");
         #endif
     }
 }

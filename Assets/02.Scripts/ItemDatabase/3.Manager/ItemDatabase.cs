@@ -22,8 +22,7 @@ public class ItemDatabase
     {
         _items = itemDict;
         _stats = statDict;
-        Debug.Log("아이템 데이터 초기화 완료");
-
+        
         if (_items == null)
         {
             throw new System.Exception("아이템 데이터를 불러오는데 실패하였습니다.");

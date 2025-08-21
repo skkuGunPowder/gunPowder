@@ -28,8 +28,6 @@ public static class EnvLoader
             var value = parts[1].Trim();
             envValues[key] = value;
         }
-
-        Debug.Log(".env 파일 로드 완료");
     }
 
     public static string Get(string key, string defaultValue = "")

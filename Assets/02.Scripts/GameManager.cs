@@ -101,8 +101,6 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
-     
-        Debug.Log($"{targetPlayer}의 데드가 변경 {changedProps[EProperties.IsDead.ToString()]} ");
         
         // 현재 살아있는 사람들 체크
         EventManager.Instance.TargetChanged();
@@ -141,7 +139,6 @@ public class GameManager : PhotonSingleton<GameManager>
     private bool PlayerDeadCheck()
     {
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
-        Debug.Log(playerList.Count);
         
         int dead = 1;
         
@@ -167,7 +164,6 @@ public class GameManager : PhotonSingleton<GameManager>
 
     public void Init()
     {
-        Debug.Log("gamemanagerInit");
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;

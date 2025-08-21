@@ -24,7 +24,7 @@ public class AccountRepository
 
             if (snapshot.Count > 0)
             {
-                Debug.Log($"이메일이 이미 존재합니다: {email}");
+                Debug.LogError($"이메일이 이미 존재합니다: {email}");
                 return true;
             }
 
@@ -35,13 +35,13 @@ public class AccountRepository
                 var methods = await FirebaseManager.Instance.Auth.FetchProvidersForEmailAsync(email);
                 if (methods.Count() > 0)
                 {
-                    Debug.Log($"Firebase Auth에서 이메일이 이미 존재합니다: {email}");
+                    Debug.LogError($"Firebase Auth에서 이메일이 이미 존재합니다: {email}");
                     return true;
                 }
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"Firebase Auth 이메일 체크 중 오류: {e.Message}");
+                Debug.LogError($"Firebase Auth 이메일 체크 중 오류: {e.Message}");
                 // Firestore에서 이미 확인했으므로 계속 진행
             }
 
@@ -76,7 +76,6 @@ public class AccountRepository
             // 4. Firestore에 사용자 정보 저장
             await SaveUserInfoToFirestore(user, account, discriminator);
 
-            Debug.LogFormat("회원가입 성공: {0} ({1}) #{2}", user.DisplayName, user.UserId, discriminator);
             return true;
         }
         catch (System.Exception e)
@@ -133,7 +132,6 @@ public class AccountRepository
 
             // 세션 아이디생성;
             string sessionID = Guid.NewGuid().ToString();
-            Debug.LogWarning($"SessionID :: {sessionID}");
 
             // Firestore에서 사용자 정보 가져오기
             var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
@@ -214,7 +212,6 @@ public class AccountRepository
 
             // 4. 인증 메일 발송
             await user.SendEmailVerificationAsync();
-            Debug.Log("인증 메일 발송 완료");
             return true;
         }
         catch (Exception e)
@@ -241,7 +238,6 @@ public class AccountRepository
         try
         {
             await user.UpdatePasswordAsync(newPassword);
-            Debug.Log("비밀번호 업데이트 성공");
             return true;
         }
         catch (Exception e)
@@ -274,7 +270,6 @@ public class AccountRepository
             };
             await userDoc.UpdateAsync(updateData);
 
-            Debug.Log($"닉네임 업데이트 성공: {nickname}#{discriminator}");
             return true;
         }
         catch (Exception e)

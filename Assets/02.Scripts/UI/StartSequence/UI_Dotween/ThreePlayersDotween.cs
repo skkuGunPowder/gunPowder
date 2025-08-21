@@ -97,8 +97,6 @@ public class ThreePlayersDotween : MonoBehaviour
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
         Layout.enabled = false;
-        
-        Debug.Log("LoadEnd");
     }
 
     

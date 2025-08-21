@@ -28,7 +28,6 @@ public class PlayerSettingManager : MonoBehaviour
 
     public void Init()
     {
-        Debug.Log("플레이어 세팅매니저 이벤트");
         // 캐릭터 순번 세팅
         SpawnSetting();
     }
@@ -38,11 +37,7 @@ public class PlayerSettingManager : MonoBehaviour
     {
         _playerList.Clear();
         _playerList = new List<int>(playerList);
-        Debug.Log("RPC로 보내준 리스트의 카운트 :" + _playerList.Count);
-        for (int i = 0; i < _playerList.Count; i++)
-        {
-            Debug.Log($"소환해야하는 플레이어 리스트 {_playerList[i]}");
-        }
+
         SpawnPlayer();
     }
     
@@ -63,7 +58,6 @@ public class PlayerSettingManager : MonoBehaviour
             
             foreach (int actorNumber in currentPlayerList)
             {
-                Debug.Log("스폰 세팅 actorNumber " + actorNumber);
                 if (actorNumber == 0)
                 {
                     continue;

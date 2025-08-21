@@ -14,7 +14,6 @@ public class BackendLogin
         {
             if (bro.IsSuccess())
             {
-                Debug.Log($"[BackendLogin] 회원가입 성공 : {bro}");
                 isSuccess = true;
                 message = "회원가입에 성공하였습니다.";
             }
@@ -22,7 +21,7 @@ public class BackendLogin
             {
                 isSuccess = false;
                 
-                Debug.Log($"[BackendLogin] 회원가입 실패 : {bro.ErrorCode} | {bro.Message}");
+                Debug.LogError($"[BackendLogin] 회원가입 실패 : {bro.ErrorCode} | {bro.Message}");
                 
                 if (bro.GetStatusCode() == "400")
                 {
@@ -63,12 +62,11 @@ public class BackendLogin
                 Debug.LogError(e.Message);
             }
 
-            Debug.Log($"[BackendLogin] 로그인 성공 : {bro}");
             return new Result(true, "로그인에 성공하였습니다.");
         }
         else
         {
-            Debug.Log($"[BackendLogin] 로그인 실패 : {bro.ErrorCode} | {bro.Message}");
+            Debug.LogError($"[BackendLogin] 로그인 실패 : {bro.ErrorCode} | {bro.Message}");
             return new Result(false, "로그인에 실패하였습니다.");
         }
     }
@@ -79,7 +77,6 @@ public class BackendLogin
 
         if (bro.IsSuccess())
         {
-            Debug.Log($"[BackendLogin] 닉네임 변경 성공 : {bro}");
             return new Result(true, "닉네임 변경에 성공하였습니다.");
         }
         else

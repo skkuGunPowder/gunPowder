@@ -79,7 +79,6 @@ public class ItemDatabaseRepo
                     }
                 }
             }
-            Debug.Log("아이템 데이터 불러오기 성공");
             _isItemLoadDone = true;
             CheckComplete(itemDataDict, statDataDict);
         });
@@ -112,7 +111,6 @@ public class ItemDatabaseRepo
                     statDataDict.Add((string)explosioninfo["ItemID"], explosionStat);
                 }
             }
-            Debug.Log("폭발 데이터 불러오기 성공");
             _isExplosionLoadDone = true;
             CheckComplete(itemDataDict, statDataDict);
         });  
