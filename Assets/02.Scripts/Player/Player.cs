@@ -346,9 +346,6 @@ public class Player : MonoBehaviourPun, IDamagable
         // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
         UpdateWarningSfx();
 
-        // 폭탄 경고 펄스 체크는 매 프레임 수행 (시각적 반응성 확보)
-        CheckAndPlayPreExplosionPulse();
-
         UltimateChanceTimerUpdate();
     }
 
