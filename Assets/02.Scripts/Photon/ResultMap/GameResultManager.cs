@@ -14,7 +14,6 @@ public class GameResultManager : Singleton<GameResultManager>
     private float _EndTime = 10f;
     
     public PlayerSpawner Spawner;
-    
     private void Start()
     {
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
@@ -47,6 +46,9 @@ public class GameResultManager : Singleton<GameResultManager>
                 int totlaEXP = (int)(data.Kill * 100 + data.Damage * 1 + data.SurviveTimeRate * 1000);
                 CurrencyManager.Instance.AddCurrency(ECurrencyType.Gold, totalGold);
                 CurrencyManager.Instance.AddCurrency(ECurrencyType.EXP, totlaEXP);
+                
+                data.Gold = totalGold;
+                data.EXP = totlaEXP;
             }
         }
 
@@ -119,7 +121,7 @@ public class GameResultManager : Singleton<GameResultManager>
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
-                
+            
         }
     }
 }
