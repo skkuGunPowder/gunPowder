@@ -103,9 +103,7 @@ public class UI_GoogleLogin : MonoBehaviour
     /// 로그인 성공 처리
     /// </summary>
     private async void OnLoginSuccess(FirebaseUser user, UserInfo userInfo)
-    {
-        Debug.Log($"Google Login Success: {user.DisplayName}");
-        
+    {       
         // 닉네임 확인 및 설정
         await CheckAndSetupNickname(user, userInfo);
     }
