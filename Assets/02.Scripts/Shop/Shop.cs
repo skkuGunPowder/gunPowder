@@ -26,7 +26,6 @@ public class Shop : DontDestroySingleton<Shop>
 
     private void LoadShopItemData(Dictionary<EItemType, List<ShopItem>> shopItemDict)
     {
-        Debug.LogWarning("상점 아이템 세팅");
         _shopItemDict = shopItemDict;
         OnShopItemChanged?.Invoke(_shopItemDict, EItemType.Event);
     }

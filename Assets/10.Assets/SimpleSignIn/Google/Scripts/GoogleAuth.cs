@@ -14,7 +14,7 @@ namespace Assets.SimpleSignIn.Google.Scripts
         public SavedAuth SavedAuth { get; private set; }
         public TokenResponse TokenResponse { get; private set; }
         public string ClientId => _settings.ClientId;
-        public bool DebugLog = true;
+        public bool DebugLog = false;
 
         /// <summary>
         /// OpenID configuration: https://accounts.google.com/.well-known/openid-configuration

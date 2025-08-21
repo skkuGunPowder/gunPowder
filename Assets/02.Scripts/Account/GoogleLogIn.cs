@@ -126,7 +126,6 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
 
             // 세션 아이디생성;
             string sessionID = Guid.NewGuid().ToString();
-            Debug.LogWarning($"SessionID :: {sessionID}");
 
             // 세션정보 저장
             await userDoc.SetAsync(new { activeSession = sessionID }, SetOptions.MergeAll);
