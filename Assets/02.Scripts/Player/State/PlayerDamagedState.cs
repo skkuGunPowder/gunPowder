@@ -18,7 +18,7 @@ public class PlayerDamagedState : PlayerBaseState
 
         _timer = 0f;
         // 애니메이션 재생
-        _owner.RPC_SetAnimatorTrigger("Hit");
+        _owner.RPC_SetAnimatorTrigger("HitLoop");
         
          // 무적
         _owner.gameObject.tag = "Immune";
@@ -53,7 +53,8 @@ public class PlayerDamagedState : PlayerBaseState
     {
         base.OnExit();
         
-        _owner.RPC_ResetAnimatorTrigger("Hit");
+        _owner.RPC_SetAnimatorTrigger("Hit");
+        _owner.RPC_ResetAnimatorTrigger("HitLoop");
         _owner.RPC_ResetAnimatorTrigger("Walk");
         _owner.RPC_ResetAnimatorTrigger("Run");
         _owner.RPC_ResetAnimatorTrigger("Idle");
