@@ -81,7 +81,7 @@ public class ShopRepository
                 purchaseAmount = snapshot.GetValue<int>(item.ID);
             }
 
-            if (purchaseAmount + 1 > item.MaxAmount)
+            if (purchaseAmount + 1 > item.MaxAmount && item.MaxAmount != -1)
             {
                 Debug.LogWarning($"{item.ItemInfo.Name} 구매 가능한 개수 초과");
                 return new Result(false, $"{item.ItemInfo.Name} 구매 가능한 개수 초과");

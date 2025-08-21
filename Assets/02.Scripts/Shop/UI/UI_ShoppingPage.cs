@@ -51,6 +51,8 @@ public class UI_ShoppingPage : MonoBehaviour
 
         if (_selectedItem == null)
         {
+            BuyGoldButton.gameObject.SetActive(false);
+            BuyDiamondButton.gameObject.SetActive(false);
             return;
         }
 

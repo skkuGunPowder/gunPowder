@@ -70,8 +70,13 @@ public class Shop : DontDestroySingleton<Shop>
 
     public void SelectItem(ShopItem item)
     {
+        if (item != null)
+        {
+            Player_Preview.EquipItem(item);
+        }
+
         _selectedItem = item;
-        Player_Preview.EquipItem(item);
+
         OnShopItemChanged?.Invoke(_shopItemDict, item.ItemInfo.ItemType);
     }
 
