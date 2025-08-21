@@ -76,8 +76,6 @@ public class SceneViewCapture : MonoBehaviour
         File.WriteAllBytes(filePath, pngData);
 
         AssetDatabase.Refresh();
-
-        Debug.Log("Screenshot written to file " + filePath);
     }
 }
 #endif

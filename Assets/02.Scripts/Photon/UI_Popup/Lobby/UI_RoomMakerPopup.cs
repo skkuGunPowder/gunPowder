@@ -32,8 +32,6 @@ public class UI_RoomMakerPopup : UI_Popup
         string roomName = RoomName.text;
         int maxPlayers = int.Parse(MaxPlayers.options[MaxPlayers.value].text);
         
-        Debug.Log(maxPlayers);
-        
         if (IsLocked.isOn == false)
         {
             RoomPassword.text = "";

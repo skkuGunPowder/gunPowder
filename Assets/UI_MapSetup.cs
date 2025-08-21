@@ -16,7 +16,5 @@ public class UI_MapSetup : MonoBehaviour
         };
         
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
-        
-        Debug.Log("Selected Map: " + RoomManager.Instance.SelectedMap);
     }
 }

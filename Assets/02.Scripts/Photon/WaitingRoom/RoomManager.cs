@@ -110,7 +110,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
         else
         {
             SelectedTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
-            Debug.Log($"{SelectedTeam.ToString()}");
         }
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
@@ -238,7 +237,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
         }
         if (changedProps.ContainsKey($"{EItemType.Bomb}"))
         {
-            Debug.Log(targetPlayer.CustomProperties[(EItemType.Bomb.ToString())].ToString());
             EventManager.Instance.RoomDataChanged();
             
             if (targetPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)

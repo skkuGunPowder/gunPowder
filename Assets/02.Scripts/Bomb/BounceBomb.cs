@@ -40,7 +40,6 @@ public class BounceBomb : Bomb
         {
             if (!_isGrounded && !_isCharging)
             {
-                Debug.Log($"AddForece!!");
                 StartCoroutine(DelayCoroutine(_delayTime));
             }
             return;

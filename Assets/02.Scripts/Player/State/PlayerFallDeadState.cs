@@ -33,6 +33,8 @@ public class PlayerFallDeadState : PlayerBaseState
     {
         base.OnEnter();
 
+        _owner.RPC_SetAnimatorTrigger("HitLoop");
+
         // HitEffectPrefab 네트워크 동기화
         if (_owner.PhotonView.IsMine)
         {
@@ -119,6 +121,8 @@ public class PlayerFallDeadState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
+
+        _owner.RPC_ResetAnimatorTrigger("HitLoop");
 
         // HitEffectPrefab 네트워크 동기화
         if (_owner.PhotonView.IsMine)

@@ -258,6 +258,8 @@ public class PlayerFallState : PlayerBaseState
         // 방향키 더블 클릭 체크 (점프 대쉬)
         if (InputHandler.GetKeyDown(KeyCode.LeftArrow))
         {
+            // record airborne left tap time to allow post-landing double-tap dash
+            _owner.LastDashTapTimeLeft = Time.time;
             if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
                 _owner.RPC_SetFacingDirection(-1);
@@ -268,6 +270,8 @@ public class PlayerFallState : PlayerBaseState
         }
         if (InputHandler.GetKeyDown(KeyCode.RightArrow))
         {
+            // record airborne right tap time to allow post-landing double-tap dash
+            _owner.LastDashTapTimeRight = Time.time;
             if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
             {
                 _owner.RPC_SetFacingDirection(1);

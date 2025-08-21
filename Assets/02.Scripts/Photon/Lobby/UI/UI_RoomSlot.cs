@@ -41,7 +41,6 @@ public class UI_RoomSlot : MonoBehaviour
     
     public void LockedCheck()
     {
-        Debug.Log($"{_roomInfo}");
         if((bool)_roomInfo.CustomProperties[$"{EProperties.IsLocked}"])
         {
             PopupManager.Instance.Open(EPopupType.UI_PasswordPopup);

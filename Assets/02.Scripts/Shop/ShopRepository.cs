@@ -58,7 +58,6 @@ public class ShopRepository
                     shopItemDict[item.ItemInfo.ItemType].Add(item);
                 }
 
-                Debug.LogWarning($"상점 아이템 데이터 불러오기 성공: {itemResult.GetMessage()}");
                 OnLoadComplete?.Invoke(shopItemDict);
             });
         }
@@ -81,7 +80,7 @@ public class ShopRepository
                 purchaseAmount = snapshot.GetValue<int>(item.ID);
             }
 
-            if (purchaseAmount + 1 > item.MaxAmount)
+            if (purchaseAmount + 1 > item.MaxAmount && item.MaxAmount != -1)
             {
                 Debug.LogWarning($"{item.ItemInfo.Name} 구매 가능한 개수 초과");
                 return new Result(false, $"{item.ItemInfo.Name} 구매 가능한 개수 초과");
@@ -93,7 +92,6 @@ public class ShopRepository
             };
 
             await docRef.SetAsync(updates, SetOptions.MergeAll);
-            Debug.LogWarning($"{item.ItemInfo.Name} 구매 성공");
             return new Result(true, $"{item.ItemInfo.Name} 구매 성공");
         }
         catch (FirebaseException e)

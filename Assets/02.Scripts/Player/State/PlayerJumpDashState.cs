@@ -147,7 +147,6 @@ public class PlayerJumpDashState : PlayerBaseState
             if (_landingCheckTimer >= LANDING_CHECK_DELAY && isGroundedNow)
             {
                 _landingConfirmed = true;
-                Debug.Log("[PlayerJumpDashState] Landing confirmed, transitioning to IdleState");
             }
         }
         

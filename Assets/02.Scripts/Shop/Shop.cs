@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 public class Shop : DontDestroySingleton<Shop>
 {
+    public Player_Preview Player_Preview;
     private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
 
     private ShopItem _selectedItem;
@@ -25,7 +26,6 @@ public class Shop : DontDestroySingleton<Shop>
 
     private void LoadShopItemData(Dictionary<EItemType, List<ShopItem>> shopItemDict)
     {
-        Debug.LogWarning("상점 아이템 세팅");
         _shopItemDict = shopItemDict;
         OnShopItemChanged?.Invoke(_shopItemDict, EItemType.Event);
     }
@@ -69,7 +69,13 @@ public class Shop : DontDestroySingleton<Shop>
 
     public void SelectItem(ShopItem item)
     {
+        if (item != null)
+        {
+            Player_Preview.EquipItem(item);
+        }
+
         _selectedItem = item;
+
         OnShopItemChanged?.Invoke(_shopItemDict, item.ItemInfo.ItemType);
     }
 

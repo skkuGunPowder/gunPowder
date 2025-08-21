@@ -143,6 +143,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
 
+    // Airborne dash double-tap support: remember first tap time per direction
+    public float LastDashTapTimeLeft = -999f;
+    public float LastDashTapTimeRight = -999f;
+
     [SerializeField] private float _ultimateChanceTimer = 0f; // 내부 타이머(갱신/소모 로직은 별도 구현 예정)
     public float UltimateChanceTimer { get => _ultimateChanceTimer; set => _ultimateChanceTimer = value; }
 
@@ -337,13 +341,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
         DecreaseGunPowderPeriodically();*/
 
-        _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
-        DecreaseGunPowderWithoutAttack();
+         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
+         DecreaseGunPowderWithoutAttack();
         // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
         UpdateWarningSfx();
-
-        // 폭탄 경고 펄스 체크는 매 프레임 수행 (시각적 반응성 확보)
-        //CheckAndPlayPreExplosionPulse();
 
         UltimateChanceTimerUpdate();
     }

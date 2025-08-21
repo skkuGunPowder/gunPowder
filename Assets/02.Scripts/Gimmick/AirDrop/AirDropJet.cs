@@ -11,6 +11,7 @@ public class AirDropJet : Jet
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
+        SoundManager.Instance.PlayGlobalSound("Plane_1");
     }
 
     protected override void DropItem()

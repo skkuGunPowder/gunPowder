@@ -67,8 +67,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     // 룸 추가, 삭제
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        Debug.Log(roomList.Count);
-        Debug.Log(_roomInfoList.Count);
         if (PhotonNetwork.InLobby == false)
         {
             return;

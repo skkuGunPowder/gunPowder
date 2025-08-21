@@ -35,8 +35,6 @@ public class AirDropBox : MonoBehaviour
             PhotonNetwork.Destroy(_dropWarningVFX);
         }
 
-        Debug.LogWarning($"{other.gameObject.layer} || {LayerMask.NameToLayer("Platform")}");
-
         if (other.gameObject.layer == 6)
         {
             if (!_isInAir)
@@ -48,6 +46,7 @@ public class AirDropBox : MonoBehaviour
             _animator.SetBool("IsInAir", _isInAir);
 
             VFX landingVFX = VFXPool.Instance.Get(LandingVFXPrefab.name);
+            landingVFX.transform.position = transform.position;
             landingVFX.Play();
             return;
         }
@@ -60,7 +59,6 @@ public class AirDropBox : MonoBehaviour
 
         if (player.AirDropItem == null)
         {
-            Debug.LogWarning("박스 루팅");
             AirDropItemBase item = DropItemList[Random.Range(0, DropItemList.Count)];
             item.SetOwner(player);
             player.SetAirDropItem(item);
