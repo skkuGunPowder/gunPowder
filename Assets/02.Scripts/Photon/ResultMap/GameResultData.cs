@@ -15,6 +15,9 @@ public class GameResultData
     public float SurviveTimeRate;
     public float DamageRate;
     public float KillRate;
+
+    public int Gold;
+    public int EXP;
     public GameResultData(PhotonPlayer player, int damage, int kill, int surviveTime, EInGameTeam team)
     {
         Player = player;
@@ -24,6 +27,7 @@ public class GameResultData
         Team = team;
     }
 
+    
     public void CalculateSurviveTimeRate(int max)
     {
         SurviveTimeRate = (float)SurviveTime / max; 
