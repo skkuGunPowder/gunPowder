@@ -42,6 +42,23 @@ public class PlayerWalkState : PlayerBaseState
         // 애니메이션 재생
         _owner.RPC_ResetAnimatorTrigger("Idle");
         _owner.RPC_SetAnimatorTrigger("Walk");
+
+        // Seed double-tap timing if a tap occurred just before landing (airborne)
+        // so that the next keydown within DoubleTapTime triggers dash immediately.
+        if (_owner.PlayerStat.FacingDirection == 1)
+        {
+            if (_owner.LastDashTapTimeRight > 0f)
+            {
+                _lastKeyPressTime = _owner.LastDashTapTimeRight;
+            }
+        }
+        else if (_owner.PlayerStat.FacingDirection == -1)
+        {
+            if (_owner.LastDashTapTimeLeft > 0f)
+            {
+                _lastKeyPressTime = _owner.LastDashTapTimeLeft;
+            }
+        }
     }
     
     public override void OnExit()
@@ -123,9 +140,12 @@ public class PlayerWalkState : PlayerBaseState
                 float currentTime = Time.time;
 
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
-                if (_owner.PlayerStat.FacingDirection == 1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStat.DoubleTapTime)
+                float rightSeed = Mathf.Max(_lastKeyPressTime, _owner.LastDashTapTimeRight);
+                if (_owner.PlayerStat.FacingDirection == 1 && (currentTime - rightSeed) <= _owner.PlayerStat.DoubleTapTime)
                 {
                     _playerFSM.ChangeState<PlayerDashState>();
+                    // clear seed to avoid stale reuse
+                    _owner.LastDashTapTimeRight = -999f;
                     return false;
                 }
 
@@ -148,9 +168,12 @@ public class PlayerWalkState : PlayerBaseState
                 float currentTime = Time.time;
 
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
-                if (_owner.PlayerStat.FacingDirection == -1 && (currentTime - _lastKeyPressTime) <= _owner.PlayerStat.DoubleTapTime)
+                float leftSeed = Mathf.Max(_lastKeyPressTime, _owner.LastDashTapTimeLeft);
+                if (_owner.PlayerStat.FacingDirection == -1 && (currentTime - leftSeed) <= _owner.PlayerStat.DoubleTapTime)
                 {
                     _playerFSM.ChangeState<PlayerDashState>();
+                    // clear seed to avoid stale reuse
+                    _owner.LastDashTapTimeLeft = -999f;
                     return false;
                 }
 
