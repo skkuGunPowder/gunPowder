@@ -16,6 +16,9 @@ public class UI_ScaleTween : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 	private bool isPointerOver;
 	private bool isPointerDown;
 
+	private const string UI_POINTER_ENTER_SFX = "UI_Pointer_Enter2";
+	private const string UI_CLICK_SFX = "UI_Click";
+
 	private void Awake()
 	{
 		rectTransform = GetComponent<RectTransform>();
@@ -28,6 +31,10 @@ public class UI_ScaleTween : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 		if (!isPointerDown)
 		{
 			PlayScaleTween(originalScale * scaleMultiplier);
+
+			// SFX
+			SoundManager.Instance.PlayLocalSound(UI_POINTER_ENTER_SFX, transform, 1f, false, SoundType.SFX, true, 0.5f, 0.5f);
+
 		}
 	}
 
@@ -41,6 +48,9 @@ public class UI_ScaleTween : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 	{
 		isPointerDown = true;
 		PlayScaleTween(originalScale);
+
+		// SFX
+		SoundManager.Instance.PlayLocalSound(UI_CLICK_SFX, transform, 1f, false, SoundType.SFX, true, 0.5f, 0.5f);
 	}
 
 	public void OnPointerUp(PointerEventData eventData)
