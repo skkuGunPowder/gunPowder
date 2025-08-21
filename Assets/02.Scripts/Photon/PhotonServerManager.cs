@@ -53,19 +53,17 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     // 포톤 마스터 서버에 접속하면 호출되는 함수
     public override void OnConnected()
     {
-        Debug.Log("OnConnected");
+
     }
 
     //마스터 서버에 접속
     public override void OnConnectedToMaster()
     {
-        Debug.Log("OnConnectedToMaster");
         PhotonNetwork.JoinLobby(TypedLobby.Default);
     }
 
     public override void OnJoinedLobby()
     {
-        Debug.Log("OnJoinedLobby");
         Hashtable propertiesToRemove = new Hashtable
         {
             { EProperties.Team.ToString(), null }

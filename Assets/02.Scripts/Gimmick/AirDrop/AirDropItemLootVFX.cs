@@ -8,6 +8,8 @@ public class AirDropItemLootVFX : MonoBehaviour
 {
     public List<Sprite> ItemSpriteList;
     public ParticleSystem _rewardParticle;
+    public AudioClip LootSound;
+    public AudioClip LootEndSound;
 
     public GameObject Icon;
     private SpriteRenderer _spriteRenderer;
@@ -55,6 +57,7 @@ public class AirDropItemLootVFX : MonoBehaviour
     {
         float totalTime = 0f;
         float interval = 0.15f;
+        float pitch = 1f;
 
         while (totalTime < 1.2f)
         {
@@ -67,11 +70,20 @@ public class AirDropItemLootVFX : MonoBehaviour
 
             _spriteRenderer.sprite = ItemSpriteList[newIndex];
 
+            pitch += 0.2f;
+            Sound sound = SoundManager.Instance.PlayGlobalSound(LootSound.name);
+            AudioSource audioSource = sound.GetAudioSource();
+            if (audioSource != null)
+            {
+                audioSource.pitch = pitch;
+            }
+
             yield return new WaitForSeconds(interval);
             totalTime += interval;
             interval *= 1.2f;
         }
         _spriteRenderer.sprite = item.Icon;
+        SoundManager.Instance.PlayGlobalSound(LootEndSound.name);
 
         _rewardParticle.Play();
         IsSelected = true;
