@@ -57,11 +57,6 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             GameTimer();
         }
-
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            PhotonNetwork.Instantiate(_airDropJetPrefab.name, transform.position, Quaternion.identity);
-        }
     }
 
     private void GameTimer()

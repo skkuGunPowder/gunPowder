@@ -5,15 +5,6 @@ public class BackendChart : Singleton<BackendChart>
 {
     private const string BombChartID = "197295";
 
-    private void Update()
-    {
-        if (InputHandler.GetKeyDown(KeyCode.P))
-        {
-            GetChart(BombChartID);
-        }
-    }
-
-
     public void GetChart(string chartID)
     {
         Backend.Chart.GetChartContents(chartID, bro =>

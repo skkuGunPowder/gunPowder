@@ -18,12 +18,6 @@ public class PlayerObserveState : PlayerBaseState
 
     public override void MineUpdate()
     {
-        if(InputHandler.GetKeyDown(KeyCode.Q))
-        {
-            if (_owner.PhotonView.IsMine)
-            {
-                PhotonNetwork.Destroy(_owner.gameObject);
-            }
-        }
+
     }
 }
