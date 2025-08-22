@@ -8485,6 +8485,7 @@ GameObject:
   - component: {fileID: 8217583324417686993}
   - component: {fileID: 8557763973400492626}
   - component: {fileID: 7484190734654835104}
+  - component: {fileID: 8557763973400492627}
   m_Layer: 5
   m_Name: PasswordInputField
   m_TagString: Untagged
@@ -9480,6 +9481,7 @@ GameObject:
   - component: {fileID: 5708769466002812443}
   - component: {fileID: 7866857538088425824}
   - component: {fileID: 5261328314341783386}
+  - component: {fileID: 7866857538088425825}
   m_Layer: 5
   m_Name: EmailInputField
   m_TagString: Untagged
@@ -9538,6 +9540,35 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7866857538088425825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7846751108001151573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 15
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 8692864853153894859}
+          m_TargetAssemblyTypeName: UI_LoginScene, Assembly-CSharp
+          m_MethodName: Login
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!222 &8008652636786344109
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -9824,6 +9855,35 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8557763973400492627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3746704006113741185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 15
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 8692864853153894859}
+          m_TargetAssemblyTypeName: UI_LoginScene, Assembly-CSharp
+          m_MethodName: Login
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!114 &8662332265207812894
 MonoBehaviour:
   m_ObjectHideFlags: 0
