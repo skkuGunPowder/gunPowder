@@ -17,13 +17,13 @@ public class Player_Preview : MonoBehaviour
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            HandleSpecialBomb();
-        }
-    }
+    // private void Update()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.X))
+    //     {
+    //         HandleSpecialBomb();
+    //     }
+    // }
 
     private void HandleSpecialBomb()
     {

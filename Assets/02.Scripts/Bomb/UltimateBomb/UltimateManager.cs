@@ -27,27 +27,6 @@ public class UltimateManager : Singleton<UltimateManager>
         _player = player;
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            GetUltimate("BO0005", _player).ExcuteUltimate();
-            // EventManager.Instance.Ultimate("BO0005");
-        }
-
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            GetUltimate("BO0007", _player).ExcuteUltimate();
-            // EventManager.Instance.Ultimate("BO0007");
-        }
-
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            GetUltimate("BO0011", _player).ExcuteUltimate();
-            // EventManager.Instance.Ultimate("BO0011");
-        }
-    }
-
     public Ultimate GetUltimate(string bombID, Player player)
     {
         if (_ultimateDict.TryGetValue(bombID, out Ultimate ultimate))
