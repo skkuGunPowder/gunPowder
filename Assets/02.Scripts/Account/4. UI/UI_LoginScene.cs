@@ -244,14 +244,4 @@ public class UI_LoginScene : MonoBehaviour
             PhotonServerManager.Instance.Connect();
         }
     }
-
-    public void INPUTFIELD_OnEndEdit()
-    {
-        Debug.Log("INPUTFIELD_OnEndEdit");
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-        {
-            Debug.Log("INPUTFIELD_OnEndEdit_Return");
-            Login();
-        }
-    }
 }
