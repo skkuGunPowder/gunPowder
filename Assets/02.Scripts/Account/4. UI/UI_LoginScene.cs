@@ -32,6 +32,8 @@ public class UI_LoginScene : MonoBehaviour
     [Header("닉네임")]
     public UI_InputFields NicknameInputFields;
 
+    private bool _isLoginCoolingDown;
+
     private void Start()
     {
         OnClickGoToLoginButton();
@@ -129,6 +131,17 @@ public class UI_LoginScene : MonoBehaviour
     // 로그인
     public async void Login()
     {
+        if (_isLoginCoolingDown)
+        {
+            return;
+        }
+        _isLoginCoolingDown = true;
+        if (LoginInputFields != null && LoginInputFields.ConfirmButton != null)
+        {
+            LoginInputFields.ConfirmButton.interactable = false;
+        }
+        Invoke(nameof(ResetLoginCooldown), 1f);
+
         string email = LoginInputFields.IDInputField.text;
         string password = LoginInputFields.PasswordInputField.text;
 
@@ -158,6 +171,15 @@ public class UI_LoginScene : MonoBehaviour
             {
                 PhotonServerManager.Instance.Connect();
             }
+        }
+    }
+
+    private void ResetLoginCooldown()
+    {
+        _isLoginCoolingDown = false;
+        if (LoginInputFields != null && LoginInputFields.ConfirmButton != null)
+        {
+            LoginInputFields.ConfirmButton.interactable = true;
         }
     }
 
@@ -220,6 +242,16 @@ public class UI_LoginScene : MonoBehaviour
         {
             NicknamePanel.SetActive(false);
             PhotonServerManager.Instance.Connect();
+        }
+    }
+
+    public void INPUTFIELD_OnEndEdit()
+    {
+        Debug.Log("INPUTFIELD_OnEndEdit");
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            Debug.Log("INPUTFIELD_OnEndEdit_Return");
+            Login();
         }
     }
 }
