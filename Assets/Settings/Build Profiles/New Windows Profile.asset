@@ -33,7 +33,11 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/01.Scenes/Map3.unity
   - m_enabled: 1
-    m_path: Assets/01.Scenes/Map4.unity
+    m_path: Assets/01.Scenes/ResultScene.unity
+  - m_enabled: 1
+    m_path: Assets/01.Scenes/SShopUIDev.unity
+  - m_enabled: 1
+    m_path: Assets/01.Scenes/StartSequence.unity
   m_ScriptingDefines:
   - MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED
   m_PlayerSettingsYaml:
@@ -49,8 +53,8 @@ MonoBehaviour:
     - line: '|   targetDevice: 2'
     - line: '|   useOnDemandResources: 0'
     - line: '|   accelerometerFrequency: 60'
-    - line: '|   companyName: DefaultCompany'
-    - line: '|   productName: My projectasgsadg'
+    - line: '|   companyName: TNTGames'
+    - line: '|   productName: GunPowder'
     - line: '|   defaultCursor: {instanceID: 0}'
     - line: '|   cursorHotspot: {x: 0, y: 0}'
     - line: '|   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b:
@@ -60,7 +64,7 @@ MonoBehaviour:
     - line: '|   m_SplashScreenOverlayOpacity: 1'
     - line: '|   m_SplashScreenAnimation: 1'
     - line: '|   m_SplashScreenLogoStyle: 1'
-    - line: '|   m_SplashScreenDrawMode: 0'
+    - line: '|   m_SplashScreenDrawMode: 1'
     - line: '|   m_SplashScreenBackgroundAnimationZoom: 1'
     - line: '|   m_SplashScreenLogoAnimationZoom: 1'
     - line: '|   m_SplashScreenBackgroundLandscapeAspect: 1'
@@ -77,11 +81,18 @@ MonoBehaviour:
     - line: '|     y: 0'
     - line: '|     width: 1'
     - line: '|     height: 1'
-    - line: '|   m_SplashScreenLogos: []'
-    - line: '|   m_VirtualRealitySplashScreen: {instanceID: 0}'
+    - line: '|   m_SplashScreenLogos:'
+    - line: '|   - logo: {fileID: 10404, guid: 0000000000000000f000000000000000,
+        type: 0}'
+    - line: '|     duration: 2'
+    - line: '|   - logo: {fileID: -1202315660, guid: 7ff7e8fb62754ae419ae1b435571b1a9,
+        type: 3}'
+    - line: '|     duration: 2'
+    - line: '|   m_VirtualRealitySplashScreen: {fileID: 2800000, guid: 7ff7e8fb62754ae419ae1b435571b1a9,
+        type: 3}'
     - line: '|   m_HolographicTrackingLossScreen: {instanceID: 0}'
-    - line: '|   defaultScreenWidth: 960'
-    - line: '|   defaultScreenHeight: 540'
+    - line: '|   defaultScreenWidth: 1920'
+    - line: '|   defaultScreenHeight: 1080'
     - line: '|   defaultScreenWidthWeb: 960'
     - line: '|   defaultScreenHeightWeb: 600'
     - line: '|   m_StereoRenderingPath: 0'
@@ -118,7 +129,7 @@ MonoBehaviour:
     - line: '|   androidAutoRotationBehavior: 1'
     - line: '|   androidPredictiveBackSupport: 1'
     - line: '|   androidApplicationEntry: 2'
-    - line: '|   defaultIsNativeResolution: 1'
+    - line: '|   defaultIsNativeResolution: 0'
     - line: '|   macRetinaSupport: 1'
     - line: '|   runInBackground: 0'
     - line: '|   muteOtherAudioSources: 0'
@@ -130,9 +141,9 @@ MonoBehaviour:
     - line: '|   usePlayerLog: 1'
     - line: '|   dedicatedServerOptimizations: 1'
     - line: '|   bakeCollisionMeshes: 0'
-    - line: '|   forceSingleInstance: 0'
+    - line: '|   forceSingleInstance: 1'
     - line: '|   useFlipModelSwapchain: 1'
-    - line: '|   resizableWindow: 1'
+    - line: '|   resizableWindow: 0'
     - line: '|   useMacAppStoreValidation: 0'
     - line: '|   macAppStoreCategory: public.app-category.games'
     - line: '|   gpuSkinning: 1'
@@ -144,7 +155,7 @@ MonoBehaviour:
     - line: '|   xboxEnableFitness: 0'
     - line: '|   visibleInBackground: 1'
     - line: '|   allowFullscreenSwitch: 1'
-    - line: '|   fullscreenMode: 3'
+    - line: '|   fullscreenMode: 1'
     - line: '|   xboxSpeechDB: 0'
     - line: '|   xboxEnableHeadOrientation: 0'
     - line: '|   xboxEnableGuest: 0'
@@ -328,7 +339,15 @@ MonoBehaviour:
     - line: '|   AndroidAppBundleSizeToValidate: 150'
     - line: '|   AndroidReportGooglePlayAppDependencies: 1'
     - line: '|   androidSymbolsSizeThreshold: 800'
-    - line: '|   m_BuildTargetIcons: []'
+    - line: '|   m_BuildTargetIcons:'
+    - line: '|   - m_BuildTarget: '
+    - line: '|     m_Icons:'
+    - line: '|     - serializedVersion: 2'
+    - line: '|       m_Icon: {fileID: 2800000, guid: ab50753ca90ede043b4ee56f1f25a883,
+        type: 3}'
+    - line: '|       m_Width: 128'
+    - line: '|       m_Height: 128'
+    - line: '|       m_Kind: 0'
     - line: '|   m_BuildTargetPlatformIcons:'
     - line: '|   - m_BuildTarget: iPhone'
     - line: '|     m_Icons:'
