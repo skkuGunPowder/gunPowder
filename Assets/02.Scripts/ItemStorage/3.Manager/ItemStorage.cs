@@ -39,21 +39,6 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         Init();
     }
 
-#if UNITY_EDITOR
-
-    public string AddItemID;
-    private void Update()
-    {
-        // 아이템 추가 테스트
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            InventoryItem testItem = new InventoryItem(ItemDatabase.Instance.GetItem(AddItemID));
-
-            AddItem(testItem);
-        }
-    }
-#endif
-
     private async void Init()
     {
         _storedItemDict = await _repo.LoadItemStorage();

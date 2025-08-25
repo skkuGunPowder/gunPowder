@@ -129,7 +129,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             return;
         }
-
+        
         if (IsPlayerReady() == false)
         {
             return;
@@ -149,6 +149,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // 사람들이 모두 눌렀는가?
     public bool IsPlayerReady()
     {
+        if (PhotonNetwork.CurrentRoom.PlayerCount < 2)
+        {
+            return false;
+        }
+
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
 
         foreach (PhotonPlayer player in players)
