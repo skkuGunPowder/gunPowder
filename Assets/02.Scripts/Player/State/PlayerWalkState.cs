@@ -131,6 +131,8 @@ public class PlayerWalkState : PlayerBaseState
             {
                 _owner.RPC_SetFacingDirection(1);
                 _lastFacingDirection = 1;
+                // 방향이 바뀌면 현재 시간으로 설정하여 다음 키 입력에서 더블탭 감지 가능하도록 함
+                _lastKeyPressTime = Time.time;
             }
 
             // 키 입력 감지
@@ -154,11 +156,13 @@ public class PlayerWalkState : PlayerBaseState
         }
         else if (InputHandler.GetKey(KeyCode.LeftArrow))
         {
-            // 방향이 바뀔 때만 RPC 호출
+            // 방향이 바뀐 때만 RPC 호출
             if (_lastFacingDirection != -1)
             {
                 _owner.RPC_SetFacingDirection(-1);
                 _lastFacingDirection = -1;
+                // 방향이 바뀌면 현재 시간으로 설정하여 다음 키 입력에서 더블탭 감지 가능하도록 함
+                _lastKeyPressTime = Time.time;
             }
 
             // 키 입력 감지
