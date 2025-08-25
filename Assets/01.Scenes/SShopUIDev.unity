@@ -3453,13 +3453,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Preview
       objectReference: {fileID: 0}
+    - target: {fileID: 757209700615351395, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1153641052990148891, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
+      propertyPath: m_ColliderPaths.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2961388067912955365, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -337
+      value: 19
       objectReference: {fileID: 0}
     - target: {fileID: 2961388067912955365, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 328
       objectReference: {fileID: 0}
     - target: {fileID: 2961388067912955365, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3493,12 +3501,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6204638484788434921, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
+      propertyPath: Camera
+      value: 
+      objectReference: {fileID: 849902091001886992}
     - target: {fileID: 8087846218659539691, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
       propertyPath: sceneViewId
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 3164304533345897285, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -3514,6 +3525,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03fbdf9dba8275e4688952d9c2cbee3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!20 &849902091001886992 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 1517884051120722507, guid: ad1dc70c83b82864f9923b5dfab7cb52, type: 3}
+  m_PrefabInstance: {fileID: 849902091001886990}
+  m_PrefabAsset: {fileID: 0}
 --- !u!222 &867510927041771456
 CanvasRenderer:
   m_ObjectHideFlags: 0
