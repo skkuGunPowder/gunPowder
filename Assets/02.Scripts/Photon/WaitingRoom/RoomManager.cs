@@ -151,6 +151,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         if (PhotonNetwork.CurrentRoom.PlayerCount < 2)
         {
+            UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+            popup.Init("다른 플레이어가 없습니다.", false);
             return false;
         }
 
@@ -165,6 +167,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
 
             if (player.CustomProperties.ContainsKey($"{EProperties.IsReady}") == false || (bool)player.CustomProperties[$"{EProperties.IsReady}"] == false)
             {
+                UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+                popup.Init("모든 플레이어가 준비되지 않았습니다.", false);
                 return false;
             }
         }
