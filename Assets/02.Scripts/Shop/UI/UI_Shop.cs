@@ -27,6 +27,8 @@ public class UI_Shop : Singleton<UI_Shop>
 
     protected override void Awake()
     {
+        base.Awake();
+        
         CurrencyManager.Instance.OnDataChanged += RefreshPlayerCurrency;
         Shop.Instance.OnShopItemChanged += Refresh;
 

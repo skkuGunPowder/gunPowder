@@ -17,8 +17,10 @@ public class PopupManager : MonoBehaviour
         }
         else
         {
+            Instance.PopupList = PopupList;
             Destroy(this.gameObject);
         }
+        DontDestroyOnLoad(gameObject);
     }
 
     private void Update()
@@ -46,12 +48,12 @@ public class PopupManager : MonoBehaviour
         }
     }
 
-    public void Open(EPopupType popupType, Action closeCallback = null)
+    public UI_Popup Open(EPopupType popupType, Action closeCallback = null)
     {
-        PopupOpen(popupType.ToString(), closeCallback);
+        return PopupOpen(popupType.ToString(), closeCallback);
     }
 
-    private void PopupOpen(string popupName, Action closeCallback)
+    private UI_Popup PopupOpen(string popupName, Action closeCallback)
     {
         foreach (UI_Popup popup in PopupList)
         {
@@ -59,9 +61,10 @@ public class PopupManager : MonoBehaviour
             {
                 popup.Open(closeCallback);
                 _popupStack.Push(popup);
-                break;
+                return popup;
             }
         }
+        return null;
     }
 
     public void Close(EPopupType popupType)
