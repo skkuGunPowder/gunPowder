@@ -910,6 +910,11 @@ public class Player : MonoBehaviourPun, IDamagable
             Debug.LogWarning($"[RPC_TakeDamage] Could not find attacker view with ID: {attackerViewId}");
         }
 
+        // 플레이어가 맞은 횟수에 비례해서 데미지 증가
+        int increaseDamagePerDamagedCount = _playerStat.CurrentPlayerDamagedCount / 15;
+        damage += increaseDamagePerDamagedCount;
+        maxDamage += increaseDamagePerDamagedCount;
+
         // 체력 감소
         bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber);
 
