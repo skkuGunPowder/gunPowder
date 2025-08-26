@@ -20,7 +20,7 @@ public class ClientManager : DontDestroySingleton<ClientManager>
 
     public static void GotoShop()
     {
-        SceneManager.LoadScene("SShopUIDev");
+        SceneManager.LoadScene("Shop");
     }
 
     public static void PlayBGM(string sceneName)

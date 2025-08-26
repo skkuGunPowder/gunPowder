@@ -124,9 +124,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4921952472871281314}
-        m_TargetAssemblyTypeName: PopupSlot, Assembly-CSharp
-        m_MethodName: Close
+      - m_Target: {fileID: 6944180818386553725}
+        m_TargetAssemblyTypeName: UI_MessagePopup, Assembly-CSharp
+        m_MethodName: OnClickCancle
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -654,9 +654,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: UI_PasswordPopup, Assembly-CSharp
-        m_MethodName: PasswordCheck
+      - m_Target: {fileID: 6944180818386553725}
+        m_TargetAssemblyTypeName: UI_MessagePopup, Assembly-CSharp
+        m_MethodName: OnClickOK
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1048,7 +1048,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8db85499a788c444893714371e16291e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Popup: 6
+  Popup: 9
 --- !u!1 &9126441248304484495
 GameObject:
   m_ObjectHideFlags: 0

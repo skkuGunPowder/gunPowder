@@ -2,10 +2,13 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 
 
-public class Shop : DontDestroySingleton<Shop>
+public class Shop : MonoBehaviour
 {
+    public static Shop Instance;
+
     public Player_Preview Player_Preview;
     private Dictionary<EItemType, List<ShopItem>> _shopItemDict;
 
@@ -16,9 +19,18 @@ public class Shop : DontDestroySingleton<Shop>
     public event Action<Dictionary<EItemType, List<ShopItem>>, EItemType> OnShopItemChanged;
 
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Instance.Player_Preview = Player_Preview;
+            Destroy(gameObject);
+        }
+        DontDestroyOnLoad(gameObject);
 
         _repo = new ShopRepository();
         _repo.OnLoadComplete += LoadShopItemData;
@@ -52,14 +64,20 @@ public class Shop : DontDestroySingleton<Shop>
         if (!currencyResult.IsSuccess)
         {
             Debug.LogError(currencyResult.Message);
+            UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+            popup.Init(currencyResult.Message, false);
             return;
         }
 
         Result buyResult = await _repo.BuyItem(_selectedItem);
         if (!buyResult.IsSuccess)
         {
-            Debug.LogError(buyResult.Message);
             CurrencyManager.Instance.AddCurrency(currencyType, price);
+
+            Debug.LogError(buyResult.Message);
+            UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+            popup.Init(buyResult.Message, false);
+
             return;
         }
 
