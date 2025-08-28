@@ -3,285 +3,183 @@ using Photon.Pun;
 using RobustFSM.Base;
 using UnityEngine;
 
+/// <summary>
+/// 플레이어 낙하 상태 클래스
+/// 
+/// 역할:
+/// - 플레이어가 공중에서 떨어지는 동안의 처리
+/// - 공중에서의 좌우 이동 및 러닝 상태 관리
+/// - 착지 감지 및 점프 전환 처리
+/// - 공중 공격 (폭탄 설치/투척) 처리
+/// - 공중 대시 (폭탄 대시, 점프 대시) 처리
+/// 
+/// 동작 방식:
+/// 1. 낙하 중 좌우 이동 처리 (러닝/일반 이동)
+/// 2. Y축 속도 제한으로 최대 낙하 속도 제어
+/// 3. 착지 감지 및 상태 전환
+/// 4. 상승 시 점프 상태로 전환
+/// 5. 공중 공격 및 대시 입력 처리
+/// </summary>
 public class PlayerFallState : PlayerBaseState
 {
-    private float _xVelocity = 0f;
-    private float _timer = 0f;
+    // 물리 관련 상수
+    private const float MAX_FALL_SPEED = -20f;                  // 최대 낙하 속도 (음수)
+    private const float JUMP_DETECTION_THRESHOLD = 5f;          // 점프 상태 전환 Y 속도 임계값
+    private const float VELOCITY_LERP_SPEED = 3f;               // 속도 보간 속도 (높을수록 반응 빠름)
     
-    // Y축 속도 제한
-    private const float MAX_FALL_SPEED = -20f; // 최대 낙하 속도
-
-    // 키 릴리즈 타이머 추가
-    private float _keyReleaseTimer = 0f;
-    private float _keyReleaseThreshold = 0.3f;
-    private float _lastLeftTapTime = 0f;
-    private float _lastRightTapTime = 0f;
-
-    private float _originalGravity;
+    // 공중 제어 관련 상수
+    private const float AIR_CONTROL_MULTIPLIER = 1.5f;          // 공중 이동 속도 배율 (지상 대비)
+    private const float AIR_RUNNING_MULTIPLIER = 1.5f;          // 공중 러닝 속도 배율 (지상 러닝 대비)
     
-    // 방향 변경 감지용
-    private int _lastFacingDirection = 0;
+    // 타이머 관련 상수
+    private const float KEY_RELEASE_THRESHOLD = 0.3f;           // 키 릴리즈 임계값 (초)
+    private const float EXPLOSION_OVERRIDE_DURATION = 0.3f;     // 폭발 후 X축 속도 덮어쓰기 차단 시간 (초)
+    private const float LANDING_CONFIRM_TIME = 0.1f;            // 착지 확인 시간 (초)
+    
+    // 방향 상수
+    private const int DIRECTION_LEFT = -1;                      // 왼쪽 방향
+    private const int DIRECTION_RIGHT = 1;                      // 오른쪽 방향
+    private const int DIRECTION_NONE = 0;                       // 방향 없음
+    
+    // 이동 관련 변수들
+    private float _horizontalVelocity = 0f;                     // 수평 이동 속도
+    private float _fallTimer = 0f;                              // 낙하 시간 타이머
+    private float _originalGravityScale;                        // 원본 중력 스케일
+    
+    // 입력 관련 변수들
+    private float _keyReleaseTimer = 0f;                        // 키 릴리즈 타이머
+    private float _lastLeftTapTime = 0f;                        // 마지막 왼쪽 키 탭 시간
+    private float _lastRightTapTime = 0f;                       // 마지막 오른쪽 키 탭 시간
+    private int _lastFacingDirection = DIRECTION_NONE;          // 마지막 바라본 방향
+    
+    // 폭발 효과 관련 변수들
+    private float _explosionOverrideTimer = 0f;                 // 폭발 후 X축 속도 덮어쓰기 차단 타이머
+    
+    // 착지 감지 관련 변수들
+    private bool _wasGroundedLastFrame = false;                 // 이전 프레임에 착지했는지 여부
+    private float _landingTimer = 0f;                           // 착지 확인 타이머
 
-    private float _explosionOverrideTimer = 0f;
-    private const float EXPLOSION_OVERRIDE_DURATION = 0.3f; // n초 동안 velocity.x 덮어쓰기 차단
-
-    // 착지 감지 간소화
-    private bool _wasGroundedLastFrame = false;
-    private float _landingTimer = 0f;
-    private const float LANDING_CONFIRM_TIME = 0.1f; // 착지 확인 시간
-
+    /// <summary>
+    /// 낙하 상태 진입 시 초기화
+    /// </summary>
     public override void OnEnter()
     {
         base.OnEnter();
 
-        _owner.RPC_SetAnimatorBool("LandBool", false);
-        _owner.RPC_SetAnimatorTrigger("Fall");
+        // 애니메이션 설정
+        SetupFallAnimation();
 
-        // 점프 상태에서 떨어지면 점프 횟수 증가하지 않음
-        if(!_playerFSM.IsPreviousState<PlayerJumpState>()
-        && !_playerFSM.IsPreviousState<PlayerJumpDashState>()
-        && !_playerFSM.IsPreviousState<PlayerRecoilState>()
-        && !_playerFSM.IsPreviousState<PlayerNormalRecoilState>()
-        )
-        {
-            _owner.PlayerStat.IncrementJumpCount();
-        }
+        // 점프 카운트 관리
+        HandleJumpCountIncrement();
 
         _owner.PlayerStat.IsJumping = true;
         
-        // 현재 상태가 땅에 닿아있는지 확인
-        _groundRay2D.Cast();
-        bool isCurrentlyGrounded = _groundRay2D.Performed;
-        _wasGroundedLastFrame = isCurrentlyGrounded;
-        _landingTimer = 0f;
+        // 착지 감지 초기화
+        InitializeLandingDetection();
 
-        _timer = 0f;
-        _keyReleaseTimer = 0f;
-        _originalGravity = _owner.Rigidbody2D.gravityScale;
-        
-        //SoundManager.Instance.PlayLocalSound("PlayerFall_1", transform);
+        // 타이머 및 설정 초기화
+        InitializeFallState();
     }
 
+    /// <summary>
+    /// 낙하 상태 종료 시 정리 작업
+    /// </summary>
     public override void OnExit()
     {
         _owner.RPC_ResetAnimatorTrigger("Fall");
-        _owner.Rigidbody2D.gravityScale = _originalGravity;
+        
+        _owner.Rigidbody2D.gravityScale = _originalGravityScale;
         _owner.PlayerStat.IsJumping = false;
 
         base.OnExit();
     }
 
     /// <summary>
-    /// 실제 행동 로직
+    /// 낙하 상태의 메인 업데이트 로직
     /// </summary>
     public override void MineUpdate()
     {
-        _timer += Time.deltaTime;
-        if (_explosionOverrideTimer > 0f)
-        {
-            _explosionOverrideTimer -= Time.deltaTime;
-        }
+        // 타이머 업데이트
+        UpdateTimers();
 
         // Y축 속도 제한 적용
         LimitYVelocity();
 
-        // Y속도가 양수가 되면 점프 상태로 전환
-        if (_owner.Rigidbody2D.linearVelocity.y > 5f)
-        {
-            _playerFSM.ChangeState<PlayerJumpState>();
-            return;
-        }
-
-        // 착지 감지 (간단하게)
-        if (HandleLandingDetection())
-        {
-            // 이전 상태가 없는 경우 (초기 상태)
-            PlayerIdleState.SetLandingFromJump(); // 착지 플래그 설정
-            _playerFSM.ChangeState<PlayerIdleState>();
-            return;
-        }
-
-        bool flowControl = FallMove();
-        if (!flowControl)
+        // 상승 시 점프 상태로 전환
+        if (CheckForJumpTransition())
         {
             return;
         }
 
-        FallAttack();
+        // 착지 감지 및 상태 전환
+        if (CheckForLandingTransition())
+        {
+            return;
+        }
+
+        // 이동 처리
+        if (!HandleFallMovement())
+        {
+            return;
+        }
+
+        // 공격 처리
+        HandleFallAttack();
     }
 
     /// <summary>
-    /// 간단한 착지 감지 로직
+    /// 착지 감지 로직
     /// </summary>
-    private bool HandleLandingDetection()
+    private bool DetectLanding()
     {
         _groundRay2D.Cast();
         bool isGroundedNow = _groundRay2D.Performed;
 
-        if(_owner.PlayerStat.IsDownJump)
+        // 원웨이 플랫폼에서 아래 점프 중인 경우 착지 무시
+        if (IsIgnoringOneWayPlatform(isGroundedNow))
         {
-            RaycastHit2D hit = _groundRay2D.Hit;
-            if(hit.collider != null)
-            {
-                if(hit.collider.CompareTag("OneWayPlatform"))
-                {
-                    return false;
-                }
-            }
+            return false;
         }
         
-        // 착지 감지: 이전에 공중이었다가 지금 땅에 닿음
-        if (!_wasGroundedLastFrame && isGroundedNow)
+        // 착지 순간 감지 및 애니메이션 트리거
+        if (IsLandingMoment(isGroundedNow))
         {
-            // 착지 애니메이션 트리거
-            _owner.RPC_SetAnimatorBool("LandBool", true);
-            _landingTimer = 0f;
+            TriggerLandingAnimation();
         }
         
-        // 착지 확인: 일정 시간 동안 땅에 닿아있으면 착지 완료
-        if (isGroundedNow)
-        {
-            _landingTimer += Time.deltaTime;
-            if (_landingTimer >= LANDING_CONFIRM_TIME)
-            {
-                return true; // 착지 완료
-            }
-        }
-        else
-        {
-            _landingTimer = 0f; // 공중에 있으면 타이머 리셋
-        }
+        // 착지 확인 (일정 시간 동안 지속적으로 땅에 닿아있어야 함)
+        bool isLandingConfirmed = ConfirmLanding(isGroundedNow);
         
         _wasGroundedLastFrame = isGroundedNow;
-        return false;
+        return isLandingConfirmed;
     }
 
-    private bool FallMove()
+    /// <summary>
+    /// 낙하 중 이동 처리 (러닝 상태에 따른 분기)
+    /// </summary>
+    private bool ProcessFallMovement()
     {
-        // y축은 중력에만 맡김 (직접 제어하지 않음)
-
-        // 좌우 이동 - 러닝 상태에 따른 처리
+        // 러닝 상태에 따른 이동 처리
         if (_owner.PlayerStat.IsRunning)
         {
-            if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == 1 
-            || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == -1)
-            {
-                _keyReleaseTimer = 0;
-                _xVelocity = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.RunSpeed;
-            }
-            else if (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == -1 
-            || InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == 1)
-            {
-                _owner.PlayerStat.IsRunning = false;
-                _owner.RPC_SetFacingDirection(-_owner.PlayerStat.FacingDirection);
-                _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
-                _keyReleaseTimer = 0;
-            }
-            else
-            {
-                _keyReleaseTimer += Time.deltaTime;
-                if (_keyReleaseTimer >= _keyReleaseThreshold)
-                {
-                    _owner.PlayerStat.IsRunning = false;
-                    _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
-                }
-                else
-                {
-                    _xVelocity = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.RunSpeed;
-                }
-            }
+            HandleRunningMovement();
         }
         else
         {
-            if (InputHandler.GetKey(KeyCode.RightArrow))
-            {
-                if (_owner.PlayerStat.FacingDirection == -1)
-                {
-                    _owner.PlayerStat.IsRunning = false;
-                    _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
-                }
-                _xVelocity = 1;
-                // 방향이 바뀔 때만 RPC 호출
-                if (_lastFacingDirection != 1)
-                {
-                    _owner.RPC_SetFacingDirection(1);
-                    _lastFacingDirection = 1;
-                }
-            }
-            else if (InputHandler.GetKey(KeyCode.LeftArrow))
-            {
-                if (_owner.PlayerStat.FacingDirection == 1)
-                {
-                    _owner.PlayerStat.IsRunning = false;
-                    _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
-                }
-                _xVelocity = -1;
-                // 방향이 바뀔 때만 RPC 호출
-                if (_lastFacingDirection != -1)
-                {
-                    _owner.RPC_SetFacingDirection(-1);
-                    _lastFacingDirection = -1;
-                }
-            }
-            else
-            {
-                _xVelocity = 0;
-            }
-            _xVelocity *= _owner.PlayerStat.MyMoveSpeed;
+            HandleNormalMovement();
         }
 
-        // Rigidbody2D 기반 이동 적용
-        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        // 물리 기반 이동 적용
+        ApplyHorizontalMovement();
 
-        if (_explosionOverrideTimer <= 0f)
+        // 폭탄 대시 처리
+        if (TryBombDash())
         {
-            velocity.x = Mathf.Lerp(velocity.x, _xVelocity, 1 * Time.deltaTime);
-            // y축은 건드리지 않음 (중력에 맡김)
-            _owner.Rigidbody2D.linearVelocity = velocity;
+            return true;
         }
 
-        // 폭탄 대쉬
-        if (InputHandler.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
-        {
-            _owner.PlayerStat.IncrementJumpCount();
-
-            Vector3 position = _owner.GetExplosionSpawnPoint().position;
-            GameObject prefab = PhotonNetwork.Instantiate("BasicBomb", position, Quaternion.identity);
-            if(prefab.TryGetComponent(out Bomb bomb))
-            {
-                bomb.PhotonView.RPC(nameof(bomb.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
-                bomb.PhotonView.RPC(nameof(bomb.Explode), RpcTarget.All);
-                _explosionOverrideTimer = EXPLOSION_OVERRIDE_DURATION;
-            }
-        }
-
-        // 방향키 더블 클릭 체크 (점프 대쉬)
-        if (InputHandler.GetKeyDown(KeyCode.LeftArrow))
-        {
-            // record airborne left tap time to allow post-landing double-tap dash
-            _owner.LastDashTapTimeLeft = Time.time;
-            if (Time.time - _lastLeftTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
-            {
-                _owner.RPC_SetFacingDirection(-1);
-                _playerFSM.ChangeState<PlayerJumpDashState>();
-                return false;
-            }
-            _lastLeftTapTime = Time.time;
-        }
-        if (InputHandler.GetKeyDown(KeyCode.RightArrow))
-        {
-            // record airborne right tap time to allow post-landing double-tap dash
-            _owner.LastDashTapTimeRight = Time.time;
-            if (Time.time - _lastRightTapTime <= _owner.PlayerStat.DoubleTapTime && _owner.PlayerStat.CanJumpDash())
-            {
-                _owner.RPC_SetFacingDirection(1);
-                _playerFSM.ChangeState<PlayerJumpDashState>();
-                return false;
-            }
-            _lastRightTapTime = Time.time;
-        }
-
-        return true;
+        // 점프 대시 처리
+        return !TryJumpDash();
     }
     
     /// <summary>
@@ -300,47 +198,468 @@ public class PlayerFallState : PlayerBaseState
         _owner.Rigidbody2D.linearVelocity = velocity;
     }
 
-    private void FallAttack()
+    /// <summary>
+    /// 낙하 중 공격 처리
+    /// </summary>
+    private void ProcessFallAttack()
     {
+        // 일반 폭탄 공격
         if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
         {
-            if(_owner.PlayerStat.IsRunning)
-            {
-                ThrowStraightNormalBomb();
-                _playerFSM.ChangeState<PlayerRecoilState>();
-            }
-            else
-            {
-                if(HasDirectionalInput())
-                {
-                    ThrowNormalBomb();
-                }
-                else
-                {
-                    PlaceNormalBomb();
-                }
-                _playerFSM.ChangeState<PlayerNormalRecoilState>();
-            }
+            HandleNormalBombAttack();
         }
+        
+        // 특수 폭탄 공격
         if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
         {
-            if(_owner.PlayerStat.IsRunning)
+            HandleSpecialBombAttack();
+        }
+    }
+
+    // ====== 새로 추가된 헬퍼 메서드들 ======
+
+    /// <summary>
+    /// 낙하 애니메이션 설정
+    /// </summary>
+    private void SetupFallAnimation()
+    {
+        _owner.RPC_SetAnimatorBool("LandBool", false);
+        _owner.RPC_SetAnimatorTrigger("Fall");
+    }
+
+    /// <summary>
+    /// 점프 카운트 증가 처리 (특정 상태에서만)
+    /// </summary>
+    private void HandleJumpCountIncrement()
+    {
+        // 점프 관련 상태에서 떨어지면 점프 횟수 증가하지 않음
+        if (!IsFromJumpRelatedState())
+        {
+            _owner.PlayerStat.IncrementJumpCount();
+        }
+    }
+
+    /// <summary>
+    /// 착지 감지 초기화
+    /// </summary>
+    private void InitializeLandingDetection()
+    {
+        _groundRay2D.Cast();
+        bool isCurrentlyGrounded = _groundRay2D.Performed;
+        _wasGroundedLastFrame = isCurrentlyGrounded;
+        _landingTimer = 0f;
+    }
+
+    /// <summary>
+    /// 낙하 상태 초기화
+    /// </summary>
+    private void InitializeFallState()
+    {
+        _fallTimer = 0f;
+        _keyReleaseTimer = 0f;
+        _originalGravityScale = _owner.Rigidbody2D.gravityScale;
+        _lastFacingDirection = DIRECTION_NONE;
+    }
+
+    /// <summary>
+    /// 타이머 업데이트
+    /// </summary>
+    private void UpdateTimers()
+    {
+        _fallTimer += Time.deltaTime;
+        
+        if (_explosionOverrideTimer > 0f)
+        {
+            _explosionOverrideTimer -= Time.deltaTime;
+        }
+    }
+
+    /// <summary>
+    /// 점프 상태로 전환 확인
+    /// </summary>
+    private bool CheckForJumpTransition()
+    {
+        if (_owner.Rigidbody2D.linearVelocity.y > JUMP_DETECTION_THRESHOLD)
+        {
+            _playerFSM.ChangeState<PlayerJumpState>();
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 착지 상태로 전환 확인
+    /// </summary>
+    private bool CheckForLandingTransition()
+    {
+        if (DetectLanding())
+        {
+            PlayerIdleState.SetLandingFromJump();
+            _playerFSM.ChangeState<PlayerIdleState>();
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 낙하 중 이동 처리
+    /// </summary>
+    private bool HandleFallMovement()
+    {
+        return ProcessFallMovement();
+    }
+
+    /// <summary>
+    /// 낙하 중 공격 처리
+    /// </summary>
+    private void HandleFallAttack()
+    {
+        ProcessFallAttack();
+    }
+
+    /// <summary>
+    /// 점프 관련 상태에서 온 것인지 확인
+    /// </summary>
+    private bool IsFromJumpRelatedState()
+    {
+        return _playerFSM.IsPreviousState<PlayerJumpState>() ||
+               _playerFSM.IsPreviousState<PlayerJumpDashState>() ||
+               _playerFSM.IsPreviousState<PlayerRecoilState>() ||
+               _playerFSM.IsPreviousState<PlayerNormalRecoilState>();
+    }
+
+    /// <summary>
+    /// 원웨이 플랫폼 무시 확인
+    /// </summary>
+    private bool IsIgnoringOneWayPlatform(bool isGroundedNow)
+    {
+        if (!_owner.PlayerStat.IsDownJump || !isGroundedNow)
+        {
+            return false;
+        }
+
+        RaycastHit2D hit = _groundRay2D.Hit;
+        return hit.collider != null && hit.collider.CompareTag("OneWayPlatform");
+    }
+
+    /// <summary>
+    /// 착지 순간인지 확인
+    /// </summary>
+    private bool IsLandingMoment(bool isGroundedNow)
+    {
+        return !_wasGroundedLastFrame && isGroundedNow;
+    }
+
+    /// <summary>
+    /// 착지 애니메이션 트리거
+    /// </summary>
+    private void TriggerLandingAnimation()
+    {
+        _owner.RPC_SetAnimatorBool("LandBool", true);
+        _landingTimer = 0f;
+    }
+
+    /// <summary>
+    /// 착지 확인 (일정 시간 동안 지속적으로 땅에 닿아있어야 함)
+    /// </summary>
+    private bool ConfirmLanding(bool isGroundedNow)
+    {
+        if (isGroundedNow)
+        {
+            _landingTimer += Time.deltaTime;
+            return _landingTimer >= LANDING_CONFIRM_TIME;
+        }
+        else
+        {
+            _landingTimer = 0f;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 러닝 상태에서의 이동 처리
+    /// </summary>
+    private void HandleRunningMovement()
+    {
+        bool isMovingInSameDirection = IsMovingInSameDirection();
+        bool isMovingInOppositeDirection = IsMovingInOppositeDirection();
+
+        if (isMovingInSameDirection)
+        {
+            // 같은 방향으로 이동 중 (공중에서는 러닝 속도에 배율 적용)
+            _keyReleaseTimer = 0;
+            _horizontalVelocity = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.RunSpeed * AIR_RUNNING_MULTIPLIER;
+        }
+        else if (isMovingInOppositeDirection)
+        {
+            // 반대 방향 키 입력 시 러닝 해제 및 방향 전환
+            StopRunningAndChangeDirection();
+        }
+        else
+        {
+            // 키 입력 없음
+            HandleRunningKeyRelease();
+        }
+    }
+
+    /// <summary>
+    /// 일반 이동 상태에서의 이동 처리
+    /// </summary>
+    private void HandleNormalMovement()
+    {
+        if (InputHandler.GetKey(KeyCode.RightArrow))
+        {
+            HandleRightMovement();
+        }
+        else if (InputHandler.GetKey(KeyCode.LeftArrow))
+        {
+            HandleLeftMovement();
+        }
+        else
+        {
+            _horizontalVelocity = 0;
+        }
+        
+        // 공중에서는 이동 속도에 배율 적용
+        _horizontalVelocity *= _owner.PlayerStat.MyMoveSpeed * AIR_CONTROL_MULTIPLIER;
+    }
+
+    /// <summary>
+    /// 수평 이동 적용
+    /// </summary>
+    private void ApplyHorizontalMovement()
+    {
+        if (_explosionOverrideTimer <= 0f)
+        {
+            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+            velocity.x = Mathf.Lerp(velocity.x, _horizontalVelocity, VELOCITY_LERP_SPEED * Time.deltaTime);
+            _owner.Rigidbody2D.linearVelocity = velocity;
+        }
+    }
+
+    /// <summary>
+    /// 폭탄 대시 시도
+    /// </summary>
+    private bool TryBombDash()
+    {
+        if (InputHandler.GetKeyDown(KeyCode.Space) && _owner.PlayerStat.CanJump())
+        {
+            ExecuteBombDash();
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 점프 대시 시도
+    /// </summary>
+    private bool TryJumpDash()
+    {
+        return TryLeftJumpDash() || TryRightJumpDash();
+    }
+
+    /// <summary>
+    /// 일반 폭탄 공격 처리
+    /// </summary>
+    private void HandleNormalBombAttack()
+    {
+        if (_owner.PlayerStat.IsRunning)
+        {
+            ThrowStraightNormalBomb();
+            _playerFSM.ChangeState<PlayerRecoilState>();
+        }
+        else
+        {
+            if (HasDirectionalInput())
             {
-                ThrowStraightSpecialBomb();
-                _playerFSM.ChangeState<PlayerRecoilState>();
+                ThrowNormalBomb();
             }
             else
             {
-                if(HasDirectionalInput())
-                {
-                    ThrowSpecialBomb();
-                }
-                else
-                {
-                    PlaceSpecialBomb();
-                }
-                _playerFSM.ChangeState<PlayerNormalRecoilState>();
+                PlaceNormalBomb();
             }
+            _playerFSM.ChangeState<PlayerNormalRecoilState>();
         }
+    }
+
+    /// <summary>
+    /// 특수 폭탄 공격 처리
+    /// </summary>
+    private void HandleSpecialBombAttack()
+    {
+        if (_owner.PlayerStat.IsRunning)
+        {
+            ThrowStraightSpecialBomb();
+            _playerFSM.ChangeState<PlayerRecoilState>();
+        }
+        else
+        {
+            if (HasDirectionalInput())
+            {
+                ThrowSpecialBomb();
+            }
+            else
+            {
+                PlaceSpecialBomb();
+            }
+            _playerFSM.ChangeState<PlayerNormalRecoilState>();
+        }
+    }
+
+    /// <summary>
+    /// 같은 방향으로 이동 중인지 확인
+    /// </summary>
+    private bool IsMovingInSameDirection()
+    {
+        return (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == DIRECTION_RIGHT) ||
+               (InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == DIRECTION_LEFT);
+    }
+
+    /// <summary>
+    /// 반대 방향으로 이동 중인지 확인
+    /// </summary>
+    private bool IsMovingInOppositeDirection()
+    {
+        return (InputHandler.GetKey(KeyCode.RightArrow) && _owner.PlayerStat.FacingDirection == DIRECTION_LEFT) ||
+               (InputHandler.GetKey(KeyCode.LeftArrow) && _owner.PlayerStat.FacingDirection == DIRECTION_RIGHT);
+    }
+
+    /// <summary>
+    /// 러닝 중단 및 방향 전환
+    /// </summary>
+    private void StopRunningAndChangeDirection()
+    {
+        _owner.PlayerStat.IsRunning = false;
+        _owner.RPC_SetFacingDirection(-_owner.PlayerStat.FacingDirection);
+        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+        _keyReleaseTimer = 0;
+    }
+
+    /// <summary>
+    /// 러닝 중 키 릴리즈 처리
+    /// </summary>
+    private void HandleRunningKeyRelease()
+    {
+        _keyReleaseTimer += Time.deltaTime;
+        
+        if (_keyReleaseTimer >= KEY_RELEASE_THRESHOLD)
+        {
+            _owner.PlayerStat.IsRunning = false;
+            _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+        }
+        else
+        {
+            _horizontalVelocity = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.RunSpeed * AIR_RUNNING_MULTIPLIER;
+        }
+    }
+
+    /// <summary>
+    /// 오른쪽 이동 처리
+    /// </summary>
+    private void HandleRightMovement()
+    {
+        if (_owner.PlayerStat.FacingDirection == DIRECTION_LEFT)
+        {
+            _owner.PlayerStat.IsRunning = false;
+            _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+        }
+        
+        _horizontalVelocity = 1;
+        UpdateFacingDirection(DIRECTION_RIGHT);
+    }
+
+    /// <summary>
+    /// 왼쪽 이동 처리
+    /// </summary>
+    private void HandleLeftMovement()
+    {
+        if (_owner.PlayerStat.FacingDirection == DIRECTION_RIGHT)
+        {
+            _owner.PlayerStat.IsRunning = false;
+            _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+        }
+        
+        _horizontalVelocity = -1;
+        UpdateFacingDirection(DIRECTION_LEFT);
+    }
+
+    /// <summary>
+    /// 바라보는 방향 업데이트 (방향이 바뀔 때만 RPC 호출)
+    /// </summary>
+    private void UpdateFacingDirection(int newDirection)
+    {
+        if (_lastFacingDirection != newDirection)
+        {
+            _owner.RPC_SetFacingDirection(newDirection);
+            _lastFacingDirection = newDirection;
+        }
+    }
+
+    /// <summary>
+    /// 폭탄 대시 실행
+    /// </summary>
+    private void ExecuteBombDash()
+    {
+        _owner.PlayerStat.IncrementJumpCount();
+
+        Vector3 position = _owner.GetExplosionSpawnPoint().position;
+        GameObject prefab = PhotonNetwork.Instantiate("BasicBomb", position, Quaternion.identity);
+        
+        if (prefab.TryGetComponent(out Bomb bomb))
+        {
+            bomb.PhotonView.RPC(nameof(bomb.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
+            bomb.PhotonView.RPC(nameof(bomb.Explode), RpcTarget.All);
+            _explosionOverrideTimer = EXPLOSION_OVERRIDE_DURATION;
+        }
+    }
+
+    /// <summary>
+    /// 왼쪽 점프 대시 시도
+    /// </summary>
+    private bool TryLeftJumpDash()
+    {
+        if (InputHandler.GetKeyDown(KeyCode.LeftArrow))
+        {
+            _owner.LastDashTapTimeLeft = Time.time;
+            
+            if (IsDoubleTap(_lastLeftTapTime) && _owner.PlayerStat.CanJumpDash())
+            {
+                _owner.RPC_SetFacingDirection(DIRECTION_LEFT);
+                _playerFSM.ChangeState<PlayerJumpDashState>();
+                return true;
+            }
+            
+            _lastLeftTapTime = Time.time;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 오른쪽 점프 대시 시도
+    /// </summary>
+    private bool TryRightJumpDash()
+    {
+        if (InputHandler.GetKeyDown(KeyCode.RightArrow))
+        {
+            _owner.LastDashTapTimeRight = Time.time;
+            
+            if (IsDoubleTap(_lastRightTapTime) && _owner.PlayerStat.CanJumpDash())
+            {
+                _owner.RPC_SetFacingDirection(DIRECTION_RIGHT);
+                _playerFSM.ChangeState<PlayerJumpDashState>();
+                return true;
+            }
+            
+            _lastRightTapTime = Time.time;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 더블 탭 확인
+    /// </summary>
+    private bool IsDoubleTap(float lastTapTime)
+    {
+        return Time.time - lastTapTime <= _owner.PlayerStat.DoubleTapTime;
     }
 }

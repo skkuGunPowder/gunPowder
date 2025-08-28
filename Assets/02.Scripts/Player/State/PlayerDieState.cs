@@ -4,159 +4,108 @@ using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
 
+/// <summary>
+/// 플레이어 사망 상태 클래스
+/// 
+/// 역할:
+/// - 플레이어 사망 시 처리 (시각적 효과, 사운드, 폭발)
+/// - 생명 수에 따른 부활 또는 완전 사망 처리
+/// - 사망 시 신체 부위별 물리 효과 적용
+/// 
+/// 동작 방식:
+/// 1. 사망 시 무적 상태 전환 및 시각적 숨김
+/// 2. 신체 부위별 물리 효과 적용 (흩어지는 효과)
+/// 3. 사망 폭발 효과 및 사운드 재생
+/// 4. 생명 수 확인 후 부활 또는 관전 상태로 전환
+/// 5. 부활 시 일정 시간 무적 상태 유지
+/// </summary>
 public class PlayerDieState : PlayerBaseState
 {
-    private float _timer = 0f;
-    private bool _hasStartedResurrection = false; // 부활 시작 플래그
-    private bool _hasRequestedDestroy = false; // 파괴 요청 플래그
+    // 시간 관련 상수
+    private const float RESURRECTION_DELAY_TIME = 3f;      // 부활 대기 시간 (초)
+    private const float IMMUNE_DURATION_AFTER_RESURRECTION = 3f; // 부활 후 무적 시간 (초)
+    
+    // 사망 효과 관련 상수
+    private const float DIE_EFFECT_FORCE = 30f;            // 사망 시 신체 부위에 가해지는 힘
+    
+    // 방향 벡터 상수들
+    private static readonly Vector2 HEAD_DIRECTION = new Vector2(0, 1).normalized;       // 머리 부위 방향 (위)
+    private static readonly Vector2 BODY_DIRECTION = new Vector2(0, -1).normalized;     // 몸통 부위 방향 (아래)
+    private static readonly Vector2 LEFT_ARM_DIRECTION = new Vector2(-1, 1).normalized; // 왼팔 방향 (왼쪽 위)
+    private static readonly Vector2 LEFT_LEG_DIRECTION = new Vector2(-1, -1).normalized;// 왼다리 방향 (왼쪽 아래)
+    private static readonly Vector2 RIGHT_ARM_DIRECTION = new Vector2(1, 1).normalized; // 오른팔 방향 (오른쪽 위)
+    private static readonly Vector2 RIGHT_LEG_DIRECTION = new Vector2(1, -1).normalized;// 오른다리 방향 (오른쪽 아래)
+    
+    // 상태 변수들
+    private float _dieTimer = 0f;                          // 사망 후 경과 시간 타이머
+    private bool _hasStartedResurrection = false;          // 부활 시작 플래그
+    private bool _hasRequestedDestroy = false;             // 파괴 요청 플래그
 
-    private float power = 30f;
-
+    /// <summary>
+    /// 사망 상태 진입 시 초기화
+    /// </summary>
     public override void OnEnter()
     {
-        // base.OnEnter()를 먼저 호출하여 _owner 초기화
         base.OnEnter();
         
-        // null 체크
-        if (_owner == null)
+        // 안전성 검사
+        if (!ValidateOwnerAndComponents())
         {
             return;
         }
 
-        if (_owner.PhotonView == null)
-        {
-            Debug.LogError("[PlayerDieState] PhotonView is null in OnEnter");
-            return;
-        }
+        // 상태 초기화
+        InitializeDeathState();
 
-        // 무적
-        _owner.gameObject.tag = "Immune";
-        _owner.PlayerStat.IsImmune = true;
+        // 무적 상태 설정
+        SetImmuneState();
 
-        // 히트 이벤트로 인한 상태 전환 방지
+        // 히트 이벤트 해제 (사망 중 추가 피격 방지)
         _owner.OnHit -= HandleHit;
 
-        // 사망 효과
-        DieEffect();
-
-
-
-        // 타이머 및 플래그 초기화
-        _timer = 0f;
-        _hasStartedResurrection = false;
-        _hasRequestedDestroy = false;
-
-        // 플레이어가 사망할 떄, 사망 폭발이 발생
-        Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
-        dieExplosion.transform.position = _owner.transform.position;
-        dieExplosion.Explode(true, _owner.PhotonView);
-
-        // 모습 안보이게
-        List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
-        if (playerSpriteRendererList != null)
-        {
-            foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
-            {
-                if (spriteRenderer != null)
-                {
-                    spriteRenderer.enabled = false;
-                }
-            }
-        }
-
-        // 플레이어 사망 사운드 재생
-        SoundManager.Instance.PlayLocalRandomSound("PlayerDeath", transform, 1, 2);
+        // 사망 효과들 실행
+        ExecuteDeathEffects();
     }
 
-    /*
-    private IEnumerator DieEffectCoroutine()
-    {
-        _owner.DieEffectPrefab.SetActive(true);
-        yield return new WaitForSeconds(2f);
-        _owner.DieEffectPrefab.SetActive(false);
-    }*/
-
+    /// <summary>
+    /// 사망 상태 종료 시 정리 작업
+    /// </summary>
     public override void OnExit()
     {
-        // null 체크
-        if (_owner == null || _owner.PhotonView == null)
+        // 안전성 검사
+        if (!ValidateOwnerAndComponents())
         {
             return;
         }
         
         base.OnExit();
 
-        // 태그 설정 (무적은 ImmuneCoroutine에서 관리)
-        if(_owner.PhotonView.IsMine)
-        {
-            _owner.gameObject.tag = "Player";
-        }
-        else
-        {
-            _owner.gameObject.tag = "Enemy";
-        }
+        // 태그 복원 (무적 상태는 ImmuneCoroutine에서 별도 관리)
+        RestorePlayerTag();
 
-        // 모습 보이게
-        List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
-        if (playerSpriteRendererList != null)
-        {
-            foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
-            {
-                if (spriteRenderer != null)
-                {
-                    spriteRenderer.enabled = true;
-                }
-            }
-        }
+        // 플레이어 모습 다시 보이게 설정
+        SetSpriteRenderersVisibility(true);
     }
 
+    /// <summary>
+    /// 사망 상태의 메인 업데이트 로직
+    /// </summary>
     public override void MineUpdate()
     {   
-        // null 체크
-        if (_owner == null || _owner.PhotonView == null)
+        // 안전성 검사
+        if (!ValidateOwnerAndComponents())
         {
             return;
         }
 
-        
-        if(_owner.PlayerStat.CurrentPlayerLife <= 0)
+        // 생명 수에 따른 처리 분기
+        if (HasNoMoreLives())
         {
-            // 진짜 죽음
-            // 파괴 요청
-            if (_hasRequestedDestroy)
-            {
-                return;
-            }
-            _hasRequestedDestroy = true;
-
-            // 플레이어가 자신의 GameObject를 제거하거나, MasterClient에게 요청
-            if (_owner.PhotonView.IsMine)
-            {
-                SyncStateChange<PlayerObserveState>();
-                PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
-                {
-                    {EProperties.IsDead.ToString(), true},
-                    {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
-                    {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
-                });
-            }
+            HandlePermanentDeath();
         }
         else
         {
-            // 부활 지점에서 몇초 후 부활
-            _timer += Time.deltaTime;
-            
-            if(_timer < 3f)
-            {
-                return;
-            }
-
-            // 부활 로직은 한 번만 실행
-            if (!_hasStartedResurrection)
-            {
-                _hasStartedResurrection = true;
-                StartResurrection();
-            }
+            HandleResurrectionProcess();
         }
     }
 
@@ -165,99 +114,264 @@ public class PlayerDieState : PlayerBaseState
     /// </summary>
     private void StartResurrection()
     {
-        // null 체크
-        if (_owner == null || _owner.PhotonView == null)
+        // 안전성 검사
+        if (!ValidateOwnerAndComponents())
         {
             return;
         }
 
-
         // 부활 위치로 이동
-        DOTween.Kill(_owner.transform);
-        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
+        MoveToResurrectionPoint();
 
-        // 모습 보이게
-        List<SpriteRenderer> playerSpriteRendererList = _owner.PlayerStat.MySpriteREndererList;
-        if (playerSpriteRendererList != null)
-        {
-            foreach(SpriteRenderer spriteRenderer in playerSpriteRendererList)
-            {
-                if (spriteRenderer != null)
-                {
-                    spriteRenderer.enabled = true;
-                }
-            }
-        }
+        // 플레이어 모습 다시 보이게 설정
+        SetSpriteRenderersVisibility(true);
         
-        // 플레이어 부활
+        // 플레이어 상태 부활
         _owner.ResurrectPlayer();
         
-        // 무적 코루틴 시작
-        StartCoroutine(ImmuneCoroutine());
+        // 부활 후 무적 시간 시작
+        StartCoroutine(PostResurrectionImmuneCoroutine());
         
-        // 상태 전환 - 네트워크 동기화 사용 (모든 경우에 일관성 있게)
+        // Idle 상태로 전환
         SyncStateChange<PlayerIdleState>();
     }
 
     /// <summary>
-    /// 3초 동안 무적
+    /// 부활 후 무적 시간 관리
     /// </summary>
-    /// <returns></returns>
-    private IEnumerator ImmuneCoroutine()
+    private IEnumerator PostResurrectionImmuneCoroutine()
     {
-        // null 체크
-        if (_owner == null || _owner.PhotonView == null)
+        // 안전성 검사
+        if (!ValidateOwnerAndComponents())
         {
             yield break;
         }
 
-        // 이미 무적 상태이므로 추가 설정 불필요
-        yield return new WaitForSeconds(3f);
+        // 부활 후 무적 시간 대기
+        yield return new WaitForSeconds(IMMUNE_DURATION_AFTER_RESURRECTION);
         
+        // 무적 상태 해제
         _owner.PlayerStat.IsImmune = false;
     }
 
-    private void DieEffect()
+    /// <summary>
+    /// 신체 부위별 사망 효과 적용 (각 부위를 다른 방향으로 흩어뜨림)
+    /// </summary>
+    private void ApplyBodyPartsDeathEffect()
     {
-        foreach(GameObject diePart in _owner.HeadPartList)
-        {
-            AddForceToDiePart(diePart, new Vector2(0, 1).normalized, power);
-        }
-
-        foreach(GameObject diePart in _owner.BodyPartList)
-        {
-            AddForceToDiePart(diePart, new Vector2(0, -1).normalized, power);
-        }
-
-        foreach(GameObject diePart in _owner.LeftArmPartList)
-        {
-            AddForceToDiePart(diePart, new Vector2(-1, 1).normalized, power);
-        }
-
-        foreach(GameObject diePart in _owner.LeftLegPartList)
-        {
-            AddForceToDiePart(diePart, new Vector2(-1, -1).normalized, power);
-        }
-
-        foreach(GameObject diePart in _owner.RightArmPartList)
-        {
-            AddForceToDiePart(diePart, new Vector2(1, 1).normalized, power);
-        }
-
-        foreach(GameObject diePart in _owner.RightLegPartList)
-        {
-            AddForceToDiePart(diePart, new Vector2(1, -1).normalized, power);
-        }
-        
+        // 각 신체 부위별로 지정된 방향으로 힘 적용
+        ApplyForceToBodyParts(_owner.HeadPartList, HEAD_DIRECTION);
+        ApplyForceToBodyParts(_owner.BodyPartList, BODY_DIRECTION);
+        ApplyForceToBodyParts(_owner.LeftArmPartList, LEFT_ARM_DIRECTION);
+        ApplyForceToBodyParts(_owner.LeftLegPartList, LEFT_LEG_DIRECTION);
+        ApplyForceToBodyParts(_owner.RightArmPartList, RIGHT_ARM_DIRECTION);
+        ApplyForceToBodyParts(_owner.RightLegPartList, RIGHT_LEG_DIRECTION);
     }
 
-    private void AddForceToDiePart(GameObject diePart, Vector2 direction, float power)
+    /// <summary>
+    /// 특정 신체 부위 리스트에 힘 적용
+    /// </summary>
+    private void ApplyForceToBodyParts(List<GameObject> bodyParts, Vector2 direction)
     {
-        Rigidbody2D rigidbody2D = diePart.GetComponent<Rigidbody2D>();
-        if(rigidbody2D != null)
+        if (bodyParts == null) return;
+
+        foreach (GameObject bodyPart in bodyParts)
         {
-            diePart.SetActive(true);
-            rigidbody2D.AddForce(direction * power, ForceMode2D.Impulse);
+            ApplyForceToSingleBodyPart(bodyPart, direction);
         }
+    }
+
+    /// <summary>
+    /// 개별 신체 부위에 힘 적용
+    /// </summary>
+    private void ApplyForceToSingleBodyPart(GameObject bodyPart, Vector2 direction)
+    {
+        if (bodyPart == null) return;
+
+        Rigidbody2D rigidbody2D = bodyPart.GetComponent<Rigidbody2D>();
+        if (rigidbody2D != null)
+        {
+            bodyPart.SetActive(true);
+            rigidbody2D.AddForce(direction * DIE_EFFECT_FORCE, ForceMode2D.Impulse);
+        }
+    }
+
+    // ====== 새로 추가된 헬퍼 메서드들 ======
+
+    /// <summary>
+    /// Owner와 핵심 컴포넌트들의 유효성 검사
+    /// </summary>
+    private bool ValidateOwnerAndComponents()
+    {
+        if (_owner == null)
+        {
+            Debug.LogWarning("[PlayerDieState] Owner is null");
+            return false;
+        }
+
+        if (_owner.PhotonView == null)
+        {
+            Debug.LogError("[PlayerDieState] PhotonView is null");
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 사망 상태 초기화
+    /// </summary>
+    private void InitializeDeathState()
+    {
+        _dieTimer = 0f;
+        _hasStartedResurrection = false;
+        _hasRequestedDestroy = false;
+    }
+
+    /// <summary>
+    /// 무적 상태 설정
+    /// </summary>
+    private void SetImmuneState()
+    {
+        _owner.gameObject.tag = "Immune";
+        _owner.PlayerStat.IsImmune = true;
+    }
+
+    /// <summary>
+    /// 모든 사망 효과 실행
+    /// </summary>
+    private void ExecuteDeathEffects()
+    {
+        // 신체 부위 흩어지는 효과
+        ApplyBodyPartsDeathEffect();
+
+        // 사망 폭발 효과
+        CreateDeathExplosion();
+
+        // 플레이어 모습 숨기기
+        SetSpriteRenderersVisibility(false);
+
+        // 사망 사운드 재생
+        PlayDeathSound();
+    }
+
+    /// <summary>
+    /// 사망 폭발 효과 생성
+    /// </summary>
+    private void CreateDeathExplosion()
+    {
+        Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
+        dieExplosion.transform.position = _owner.transform.position;
+        dieExplosion.Explode(true, _owner.PhotonView);
+    }
+
+    /// <summary>
+    /// 스프라이트 렌더러들의 가시성 설정
+    /// </summary>
+    private void SetSpriteRenderersVisibility(bool isVisible)
+    {
+        List<SpriteRenderer> spriteRenderers = _owner.PlayerStat.MySpriteREndererList;
+        if (spriteRenderers == null) return;
+
+        foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+        {
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.enabled = isVisible;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 사망 사운드 재생
+    /// </summary>
+    private void PlayDeathSound()
+    {
+        SoundManager.Instance.PlayLocalRandomSound("PlayerDeath", transform, 1, 2);
+    }
+
+    /// <summary>
+    /// 플레이어 태그 복원
+    /// </summary>
+    private void RestorePlayerTag()
+    {
+        _owner.gameObject.tag = _owner.PhotonView.IsMine ? "Player" : "Enemy";
+    }
+
+    /// <summary>
+    /// 생명 수가 남아있는지 확인
+    /// </summary>
+    private bool HasNoMoreLives()
+    {
+        return _owner.PlayerStat.CurrentPlayerLife <= 0;
+    }
+
+    /// <summary>
+    /// 영구 사망 처리
+    /// </summary>
+    private void HandlePermanentDeath()
+    {
+        // 중복 처리 방지
+        if (_hasRequestedDestroy) return;
+        
+        _hasRequestedDestroy = true;
+
+        // 본인의 클라이언트에서만 관전 상태로 전환 및 통계 업데이트
+        if (_owner.PhotonView.IsMine)
+        {
+            TransitionToObserveState();
+            UpdatePlayerStatistics();
+        }
+    }
+
+    /// <summary>
+    /// 부활 프로세스 처리
+    /// </summary>
+    private void HandleResurrectionProcess()
+    {
+        _dieTimer += Time.deltaTime;
+        
+        // 부활 대기 시간이 지나지 않았으면 대기
+        if (_dieTimer < RESURRECTION_DELAY_TIME)
+        {
+            return;
+        }
+
+        // 부활 로직은 한 번만 실행
+        if (!_hasStartedResurrection)
+        {
+            _hasStartedResurrection = true;
+            StartResurrection();
+        }
+    }
+
+    /// <summary>
+    /// 관전 상태로 전환
+    /// </summary>
+    private void TransitionToObserveState()
+    {
+        SyncStateChange<PlayerObserveState>();
+    }
+
+    /// <summary>
+    /// 플레이어 통계 업데이트
+    /// </summary>
+    private void UpdatePlayerStatistics()
+    {
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+        {
+            {EProperties.IsDead.ToString(), true},
+            {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
+            {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
+        });
+    }
+
+    /// <summary>
+    /// 부활 위치로 이동
+    /// </summary>
+    private void MoveToResurrectionPoint()
+    {
+        DOTween.Kill(_owner.transform);
+        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
     }
 }
