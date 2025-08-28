@@ -6,8 +6,9 @@ public class PlayerWalkState : PlayerBaseState
     private float _timer = 0f;
     
 
-    // 더블탭 감지용 변수들
-    private float _lastKeyPressTime = 0f;
+    // 더블탭 감지용 변수들 (방향별로 독립적으로 관리)
+    private float _lastRightKeyDownTime = -999f;
+    private float _lastLeftKeyDownTime = -999f;
     private bool _isKeyPressed = false;
     private float _keyReleaseTimer = 0f;
     private const float KEY_RELEASE_THRESHOLD = 0.1f; // 키를 떼고 이 시간 이내에 다시 누르면 더블탭으로 인식
@@ -25,7 +26,8 @@ public class PlayerWalkState : PlayerBaseState
         base.OnEnter();
 
         // 더블탭 변수 초기화
-        _lastKeyPressTime = 0f;
+        _lastRightKeyDownTime = -999f;
+        _lastLeftKeyDownTime = -999f;
         _isKeyPressed = false;
         _keyReleaseTimer = 0f;
         _lastFacingDirection = _owner.PlayerStat.FacingDirection;
@@ -43,21 +45,14 @@ public class PlayerWalkState : PlayerBaseState
         _owner.RPC_ResetAnimatorTrigger("Idle");
         _owner.RPC_SetAnimatorTrigger("Walk");
 
-        // Seed double-tap timing if a tap occurred just before landing (airborne)
-        // so that the next keydown within DoubleTapTime triggers dash immediately.
-        if (_owner.PlayerStat.FacingDirection == 1)
+        // Seed: 착지 직전/상태 전환 직전 입력을 이어받아 같은 방향 더블탭만 유효하도록 저장
+        if (_owner.LastDashTapTimeRight > 0f)
         {
-            if (_owner.LastDashTapTimeRight > 0f)
-            {
-                _lastKeyPressTime = _owner.LastDashTapTimeRight;
-            }
+            _lastRightKeyDownTime = _owner.LastDashTapTimeRight;
         }
-        else if (_owner.PlayerStat.FacingDirection == -1)
+        if (_owner.LastDashTapTimeLeft > 0f)
         {
-            if (_owner.LastDashTapTimeLeft > 0f)
-            {
-                _lastKeyPressTime = _owner.LastDashTapTimeLeft;
-            }
+            _lastLeftKeyDownTime = _owner.LastDashTapTimeLeft;
         }
     }
     
@@ -124,6 +119,19 @@ public class PlayerWalkState : PlayerBaseState
             _wasGroundedLastFrame = false;
         }
 
+        // 반대 방향 새 입력 발생 시, 기존 홀드 입력을 무시하고 새 입력을 탭으로 인식
+        if (InputHandler.GetKeyDown(KeyCode.RightArrow))
+        {
+            _isKeyPressed = false;
+            _lastLeftKeyDownTime = -999f;
+        }
+        else if (InputHandler.GetKeyDown(KeyCode.LeftArrow))
+        {
+            _isKeyPressed = false;
+            _lastRightKeyDownTime = -999f;
+        }
+
+        // 우선순위: 우측 키가 우선
         if (InputHandler.GetKey(KeyCode.RightArrow))
         {
             // 방향이 바뀔 때만 RPC 호출
@@ -131,8 +139,8 @@ public class PlayerWalkState : PlayerBaseState
             {
                 _owner.RPC_SetFacingDirection(1);
                 _lastFacingDirection = 1;
-                // 방향이 바뀌면 현재 시간으로 설정하여 다음 키 입력에서 더블탭 감지 가능하도록 함
-                _lastKeyPressTime = Time.time;
+                // 방향이 바뀔 때 이전 방향(왼쪽)의 타이머를 초기화하여 잘못된 더블탭 방지
+                _lastLeftKeyDownTime = -999f;
             }
 
             // 키 입력 감지
@@ -142,7 +150,7 @@ public class PlayerWalkState : PlayerBaseState
                 float currentTime = Time.time;
 
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
-                float rightSeed = Mathf.Max(_lastKeyPressTime, _owner.LastDashTapTimeRight);
+                float rightSeed = Mathf.Max(_lastRightKeyDownTime, _owner.LastDashTapTimeRight);
                 if (_owner.PlayerStat.FacingDirection == 1 && (currentTime - rightSeed) <= _owner.PlayerStat.DoubleTapTime)
                 {
                     _playerFSM.ChangeState<PlayerDashState>();
@@ -151,9 +159,10 @@ public class PlayerWalkState : PlayerBaseState
                     return false;
                 }
 
-                _lastKeyPressTime = currentTime;
+                _lastRightKeyDownTime = currentTime;
             }
         }
+        // 좌측 키는 우측 키가 눌려있지 않을 때만 처리
         else if (InputHandler.GetKey(KeyCode.LeftArrow))
         {
             // 방향이 바뀐 때만 RPC 호출
@@ -161,8 +170,8 @@ public class PlayerWalkState : PlayerBaseState
             {
                 _owner.RPC_SetFacingDirection(-1);
                 _lastFacingDirection = -1;
-                // 방향이 바뀌면 현재 시간으로 설정하여 다음 키 입력에서 더블탭 감지 가능하도록 함
-                _lastKeyPressTime = Time.time;
+                // 방향이 바뀔 때 이전 방향(오른쪽)의 타이머를 초기화하여 잘못된 더블탭 방지
+                _lastRightKeyDownTime = -999f;
             }
 
             // 키 입력 감지
@@ -172,7 +181,7 @@ public class PlayerWalkState : PlayerBaseState
                 float currentTime = Time.time;
 
                 // 더블탭 체크 (같은 방향이고, 시간 간격이 짧을 때)
-                float leftSeed = Mathf.Max(_lastKeyPressTime, _owner.LastDashTapTimeLeft);
+                float leftSeed = Mathf.Max(_lastLeftKeyDownTime, _owner.LastDashTapTimeLeft);
                 if (_owner.PlayerStat.FacingDirection == -1 && (currentTime - leftSeed) <= _owner.PlayerStat.DoubleTapTime)
                 {
                     _playerFSM.ChangeState<PlayerDashState>();
@@ -181,7 +190,7 @@ public class PlayerWalkState : PlayerBaseState
                     return false;
                 }
 
-                _lastKeyPressTime = currentTime;
+                _lastLeftKeyDownTime = currentTime;
             }
         }
         else
