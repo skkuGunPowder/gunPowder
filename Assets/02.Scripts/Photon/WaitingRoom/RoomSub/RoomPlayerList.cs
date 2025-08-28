@@ -11,7 +11,6 @@ public class RoomPlayerList
     public RoomPlayerList(int[] playerSlotList)
     {
         _playerSlotList = new List<int>(playerSlotList);
-        
     }
 
     public void GetPlayerList(int[] playerSlotList)

@@ -40,11 +40,12 @@ public class UI_ReadyButton : MonoBehaviour
         //만약 내가 방장이라면 레디 자체를 안눌리게 한다.
         if (PhotonNetwork.IsMasterClient)
         {
-            if (RoomManager.Instance.ReadyCheck.IsPlayerReady())
+            if (RoomManager.Instance.ReadyCheck.IsPlayerReady() == false)
             {
                 return;
             }
             
+            Debug.Log("game start");
             RoomManager.Instance.GameStart();
         }
         

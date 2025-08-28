@@ -19,12 +19,6 @@ public class GameManager : PhotonSingleton<GameManager>
     public float Timer => _timer;
     private float _initTime = 0;
     
-    [Header("게임 종료시 연출")]
-    public GameOverProduction GameOverProduction;
-    [Header("게임 시작시 연출")]
-    public GameStartProduction GameStartProduction;
-   
-    
     [Header("플레이어 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
@@ -34,15 +28,17 @@ public class GameManager : PhotonSingleton<GameManager>
     private float _airDropTimer;
     [SerializeField] private GameObject _airDropJetPrefab;
 
+    public event Action OnGameStart;
+    public event Action OnGameOver;
 
     protected override void Awake()
     {
+        Debug.Log("GameManager Awake");
         base.Awake();
-
-        Debug.LogWarning($"현재 씬 이름 {SceneManager.GetActiveScene().name}");
-        ClientManager.PlayBGM(SceneManager.GetActiveScene().name);
-
         _photonView = GetComponent<PhotonView>();
+
+        // Debug.LogWarning($"현재 씬 이름 {SceneManager.GetActiveScene().name}");
+        // ClientManager.PlayBGM(SceneManager.GetActiveScene().name);
 
         if (_currentGameState == EGameState.Waiting)
         {
@@ -129,8 +125,7 @@ public class GameManager : PhotonSingleton<GameManager>
     private void RPC_GameOver()
     {
         GameStateChange(EGameState.Result);
-        GameOverProduction.gameObject.SetActive(true);
-        GameOverProduction.Play();
+        OnGameOver?.Invoke();
     }
     
     // 캐릭터들 사망 체크하기 = 방장만
@@ -183,7 +178,7 @@ public class GameManager : PhotonSingleton<GameManager>
         
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
         EventManager.Instance.PlayerFind();
-        GameStartProduction.GameStart();
+        OnGameStart?.Invoke();
     }
     
     // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
@@ -237,6 +232,11 @@ public class GameManager : PhotonSingleton<GameManager>
     private void OnDisable()
     { 
         EventManager.Instance.OnLoadFinished -= Init;
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("GameManager OnDestroy");
     }
 }
 

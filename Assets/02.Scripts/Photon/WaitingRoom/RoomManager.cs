@@ -12,10 +12,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private Room _room;
     private PhotonView _photonView;
     public int MaxPlayerCount = 4;
-    public PlayerSpawner Spawner;
     
-    public RoomReadyCheck ReadyCheck;
-    public RoomPlayerList PlayerList;
+    // 스폰, 레디, 초기화, 플레이어 리스트 분리
+    public RoomInitializer Initializer; // 초기화
+    public RoomReadyCheck ReadyCheck;   // 준비
+    public RoomPlayerList PlayerList;  // 현재 플레이어리스트 관리
+    public PlayerSpawner Spawner;
     
     public EMap SelectedMap;      // 맵 선택하기
     public EInGameTeam SelectedTeam;
@@ -29,6 +31,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _photonView = GetComponent<PhotonView>();
         _room = PhotonNetwork.CurrentRoom;
         ReadyCheck = new RoomReadyCheck();
+        Initializer = new RoomInitializer();
         EventManager.Instance.OnPlayerChanged += PlayerLeft;
     }
     // 방 세팅 시작 => Init
@@ -61,69 +64,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // 방에 들어왔을 때 첫 세팅 하기
     private void Init()
     {
-        SetProperties();
-        SetRoom();
-
         _initialized = true;
-        GeneratePlayer();
-        SetCurrentMap();
+        Initializer.Init(this);
+        SetRoom();
     }
-    
-    private void GeneratePlayer()
-    {
-        Spawner.GeneratePlayers(0);
-    }
-    // 플레이어가 레디를 했는지 체크했는지 알아보는 커스텀 프로퍼티
-    private void SetProperties()
-    {
-        Hashtable ready = new Hashtable
-        {
-            { EProperties.IsReady.ToString(), false },
-            { EProperties.IsDead.ToString(), false },
-            { EProperties.IsLoad.ToString(), false}
-        };
-        
-        if (PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()] == null)
-        {
-            PhotonPlayer[] players = PhotonNetwork.PlayerList;
-            HashSet<EInGameTeam> usedTeams = new HashSet<EInGameTeam>();
-            
-            foreach (PhotonPlayer player in players)
-            {
-                if (player.CustomProperties.TryGetValue(EProperties.Team.ToString(), out object teamObj))
-                {
-                    EInGameTeam team = (EInGameTeam)teamObj;
-                    usedTeams.Add(team);
-                }
-            }
 
-            // 가능한 팀 중에서 사용되지 않은 팀 찾기
-            EInGameTeam myTeam = EInGameTeam.Red; // 기본값
-            foreach (EInGameTeam team in Enum.GetValues(typeof(EInGameTeam)))
-            {
-                if (!usedTeams.Contains(team))
-                {
-                    myTeam = team;
-                    break;
-                }
-            }
-            
-            ready.Add(EProperties.Team.ToString(), (int)myTeam);
-        }
-        else
-        {
-            SelectedTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
-        }
-        
-        PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
-    }
-    // 현재 방의 맵이 무엇인가?
-    private void SetCurrentMap()
-    {
-        SelectedMap = (EMap)_room.CustomProperties[ERoomProperties.MapSelected.ToString()];
-        EventManager.Instance.MapChanged();
-    }
-    
     // 준비가 다 되었다면 마스터가 정한 맵으로 이동시킴
     // 확인이 필요한 것 : 1. 방장인가?
     //                  2. 모두 준비가 되었는 가? 
@@ -138,9 +83,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             {EProperties.PlayerList.ToString(), PlayerList.PlayerSlotList.ToArray()}
         };
+        Debug.Log($"{PlayerList.PlayerSlotList.ToArray()}");
         _room.SetCustomProperties(playerList);
 
         _room.IsVisible = false;
+        
+        Debug.Log($"Game Start Scene : {SelectedMap.ToString()}");
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
     }
     
@@ -251,6 +199,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
     {
         EventManager.Instance.MasterChanged();
+        
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;

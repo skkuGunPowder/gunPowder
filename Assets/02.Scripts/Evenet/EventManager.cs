@@ -73,6 +73,7 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
 
     public void LoadFinished()
     {
+        Debug.Log("load finished");
         OnLoadFinished?.Invoke();   
     }
     

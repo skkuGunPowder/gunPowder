@@ -16,10 +16,10 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         _photonView = GetComponent<PhotonView>();
     }
 
-    // private void Update()
-    // {
-    //     PhotonNetwork.NetworkingClient.Service();
-    // }
+    private void Update()
+    {
+        PhotonNetwork.NetworkingClient.Service();
+    }
 
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {

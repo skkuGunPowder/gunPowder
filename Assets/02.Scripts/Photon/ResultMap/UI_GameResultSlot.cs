@@ -31,7 +31,12 @@ public class UI_GameResultSlot : MonoBehaviour
         GoldTextMeshProUGUI.text = gold.ToString();
         EXPTextMeshProUGUI.text = exp.ToString();
         
-        Color color = new Color();
+        ColorSet(team);
+    }
+    
+    private void ColorSet(EInGameTeam team)
+    {
+        Color32 color = new Color();
         switch (team)
         {
             case EInGameTeam.Blue :
@@ -52,5 +57,5 @@ public class UI_GameResultSlot : MonoBehaviour
         }
         
         TeamColor.color = color;
-    }
+    }    
 }
