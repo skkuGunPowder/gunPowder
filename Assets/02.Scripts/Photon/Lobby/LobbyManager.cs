@@ -5,24 +5,15 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
 
-public class LobbyManager : MonoBehaviourPunCallbacks
+public class LobbyManager : PhotonSingleton<LobbyManager>
 {
-    public static LobbyManager Instance;
     private List<RoomInfo> _roomInfoList = new List<RoomInfo>();
     public List<RoomInfo> RoomInfoList => _roomInfoList;
     
     public event Action OnDataChanged;
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(this.gameObject);
-        }
-
+        base.Awake();
         ClientManager.PlayBGM("Lobby");
     }
     
@@ -32,37 +23,42 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         // 룸 프로퍼티에 들어가야할 것들 : 시간, 목숨, 시작 건파우더, 시간 당 감소
         Hashtable roomProperties = new Hashtable
         {
-            {$"{EProperties.MapSelected}", ESceneList.Map1},
-            {$"{EProperties.PlayTime}", playTime},
-            {$"{EProperties.Life}", life},
-            {$"{EProperties.Gunpowder}", gunpowder},
-            {$"{EProperties.DeclinePowder}", decline},
-            {$"{EProperties.IsLocked}",isLocked },
-            {$"{EProperties.Password}", password}
+            {ERoomProperties.MapSelected.ToString(), (int)EMap.Map1},
+            {ERoomProperties.PlayTime.ToString(), playTime},
+            {ERoomProperties.Life.ToString(), life},
+            {ERoomProperties.Gunpowder.ToString(), gunpowder},
+            {ERoomProperties.DeclinePowder.ToString(), decline},
+            {ERoomProperties.IsLocked.ToString(),isLocked },
+            {ERoomProperties.Password.ToString(), password}
         };
         
         RoomOptions roomOptions = new RoomOptions();
-        
+        // 룸 세팅
         roomOptions.MaxPlayers = maxPlayers;
         roomOptions.IsVisible = true;
         roomOptions.IsOpen = true;
-        roomOptions.CustomRoomPropertiesForLobby = new string[]
-        {
-            $"{EProperties.MapSelected}",
-            $"{EProperties.IsLocked}",
-            $"{EProperties.PlayTime}",
-            $"{EProperties.Life}",
-            $"{EProperties.Gunpowder}",
-            $"{EProperties.DeclinePowder}",
-            $"{EProperties.Password}"
-        };
+        roomOptions.CustomRoomPropertiesForLobby = SetRoomPropertiesForLobby();
         roomOptions.CustomRoomProperties = roomProperties; 
         roomOptions.EmptyRoomTtl = 0;
         
+        //방 만들기
         PhotonNetwork.CreateRoom(roomName, roomOptions, TypedLobby.Default);
     }
-    // 모든 룸 정보들을 가지고 있어야함 => 방 refresh담당
     
+    private string[] SetRoomPropertiesForLobby()
+    {
+        Array enumValues = Enum.GetValues(typeof(ERoomProperties));
+        int count = enumValues.Length -1;
+        
+        string[] roomProperties = new string[count];
+        
+        for (int i = 0; i < count; i++)
+        {
+            roomProperties[i] = enumValues.GetValue(i).ToString();
+        }
+        
+        return roomProperties;
+    }
     // 계정 정보들 가져오기?
     // 룸 추가, 삭제
     public override void OnRoomListUpdate(List<RoomInfo> roomList)

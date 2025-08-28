@@ -27,9 +27,7 @@ public class UltimateProductionSlot : MonoBehaviour
     public Vector2 UltimateOriginPosition2;
     
     [Header("컬러")]
-    public Color32 MyTeam;
-    public Color32 OtherTeam;
-    
+    public ColorPalette ColorPalette;
     public void Play(string bomb, bool isMyTeam)
     {
         
@@ -60,13 +58,13 @@ public class UltimateProductionSlot : MonoBehaviour
     {
         if (isMyTeam)
         {
-            UpBackGround.color = MyTeam;
-            DownBackGround.color = MyTeam;
+            UpBackGround.color = ColorPalette.ColorDictionary[EColorType.UltimatePlayer];
+            DownBackGround.color = ColorPalette.ColorDictionary[EColorType.UltimatePlayer];
         }
         else
         {
-            UpBackGround.color = OtherTeam;
-            DownBackGround.color = OtherTeam;
+            UpBackGround.color = ColorPalette.ColorDictionary[EColorType.UltimateEnemy];
+            DownBackGround.color = ColorPalette.ColorDictionary[EColorType.UltimateEnemy];
         }
     }
     private void BombEffectOn(string bomb)

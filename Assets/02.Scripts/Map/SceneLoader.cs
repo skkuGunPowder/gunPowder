@@ -3,8 +3,10 @@ using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour
 {
+    public ESceneList AdditiveScene;
+    
     private void Awake()
     {
-        SceneManager.LoadScene(ESceneList.StartSequence.ToString(), LoadSceneMode.Additive);
+        SceneManager.LoadScene(AdditiveScene.ToString(), LoadSceneMode.Additive);
     }
 }

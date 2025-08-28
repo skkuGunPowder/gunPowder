@@ -15,8 +15,7 @@ public class UI_KillLogSlot : MonoBehaviour
     [Header("색상")] 
     [Tooltip("킬한 사람의 배경화면")]public Image KillBackground;
     [Tooltip("데스한 사람의 배경화면")]public Image DeathBackground;
-    [Tooltip("적군일 경우 들어갈 색상")] public Color32 EnemyColor;
-    [Tooltip("아군일 경우 들어갈 색상")] public Color32 PlayerColor;
+    public ColorPalette ColorPalette;
     
     [Header("시간")] 
     [Tooltip("킬로그 등장 퇴장에 관련된 시간")] public float MoveSpeed;
@@ -66,21 +65,21 @@ public class UI_KillLogSlot : MonoBehaviour
     {
         if (killTeam)
         {
-            KillBackground.color = PlayerColor;
+            KillBackground.color = ColorPalette.ColorDictionary[EColorType.KillLogMyTeam];
         }
         else
         {
-            KillBackground.color = EnemyColor;
+            KillBackground.color = ColorPalette.ColorDictionary[EColorType.KillLogEnemy];
         }
 
         if (deathTeam)
         {
-            DeathBackground.color = PlayerColor;
+            DeathBackground.color = ColorPalette.ColorDictionary[EColorType.KillLogMyTeam];
         }
         else
         {
             
-            DeathBackground.color = EnemyColor;
+            DeathBackground.color = ColorPalette.ColorDictionary[EColorType.KillLogEnemy];
         }
     }
 

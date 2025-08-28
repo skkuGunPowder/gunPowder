@@ -16,10 +16,10 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         _photonView = GetComponent<PhotonView>();
     }
 
-    private void Update()
-    {
-        PhotonNetwork.NetworkingClient.Service();
-    }
+    // private void Update()
+    // {
+    //     PhotonNetwork.NetworkingClient.Service();
+    // }
 
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
@@ -46,6 +46,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         foreach (PhotonPlayer p in playerList)
         {
             bool isLoaded = p.CustomProperties.ContainsKey(EProperties.IsLoad.ToString()) && (bool)p.CustomProperties[EProperties.IsLoad.ToString()];
+           
             if (isLoaded == false)
             {
                 return false ;
@@ -58,16 +59,6 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     private void Rpc_LoadEnd()
     {
         EventManager.Instance.LoadEnd();
-    }
-
-    private void SetLoadState(bool isLoad)
-    {
-        Hashtable load = new Hashtable()
-        {
-            { EProperties.IsLoad.ToString(), isLoad }
-        };
-
-        PhotonNetwork.LocalPlayer.SetCustomProperties(load);
     }
 
 }

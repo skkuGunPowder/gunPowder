@@ -10,16 +10,14 @@ public class UI_RoomProfile : MonoBehaviour
     
     private void Awake()
     {
-        // EventManager.Instance.OnPlayEmotion += PlayEmotion;
         EventManager.Instance.OnRoomDataChanged += Refresh;
         EventManager.Instance.OnReadyChanged += ReadyCheck;
         EventManager.Instance.OnTeamChanged += TeamChange;
         
     }
-    
     public void Refresh()
     {
-        List<int> playerSlotList = RoomManager.Instance.PlayerSlotList;
+        List<int> playerSlotList = RoomManager.Instance.PlayerList.PlayerSlotList;
         
         for (int i = 0; i < playerSlotList.Count; i++)
         {
@@ -36,17 +34,17 @@ public class UI_RoomProfile : MonoBehaviour
     
     public void ReadyCheck()
     {
-        List<int> playerSlotList = RoomManager.Instance.PlayerSlotList;
+        List<int> playerSlotList = RoomManager.Instance.PlayerList.PlayerSlotList;
 
         for (int i = 0; i < playerSlotList.Count; i++)
         {
+            // 건너뛰기
             if (playerSlotList[i] == 0)
             {
                 continue;
             }
             
             PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
-
             if (player == null)
             {
                 return;
@@ -58,14 +56,14 @@ public class UI_RoomProfile : MonoBehaviour
             }
             else
             {
-                UI_ProfileSlotList[i].ReadyCheck((bool)player.CustomProperties[$"{EProperties.IsReady}"]);
+                UI_ProfileSlotList[i].ReadyCheck((bool)player.CustomProperties[EProperties.IsReady.ToString()]);
             }
         }
     }
 
     public void TeamChange()
     {
-        List<int> playerSlotList = RoomManager.Instance.PlayerSlotList;
+        List<int> playerSlotList = RoomManager.Instance.PlayerList.PlayerSlotList;
         
         for (int i = 0; i < playerSlotList.Count; i++)
         {
@@ -88,28 +86,9 @@ public class UI_RoomProfile : MonoBehaviour
             }
         }
     }
-
-    // private void PlayEmotion( string emotion,int playerNumber)
-    // {
-    //     List<int> playerList = RoomManager.Instance.PlayerSlotList;
-    //     for (int i = 0; i < playerList.Count; i++)
-    //     {
-    //         
-    //         if (playerList[i] == 0)
-    //         {
-    //             continue;
-    //         }
-    //
-    //         if (playerList[i] == playerNumber)
-    //         {
-    //             UI_ProfileSlotList[i].Play(emotion);
-    //             break;
-    //         }
-    //     }
-    // }
+    
     private void OnDisable()
     {
-        // EventManager.Instance.OnPlayEmotion -= PlayEmotion;
         EventManager.Instance.OnRoomDataChanged -= Refresh;
         EventManager.Instance.OnReadyChanged -= ReadyCheck;
         EventManager.Instance.OnTeamChanged -= TeamChange;

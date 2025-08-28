@@ -14,6 +14,10 @@ public class UI_GameResultSlot : MonoBehaviour
     public TextMeshProUGUI GoldTextMeshProUGUI;
     public TextMeshProUGUI EXPTextMeshProUGUI;
     public ProfileSkin ProfileSkin;
+    
+    [Header("팀별 색상")] 
+    public ColorPalette ColorPalette;
+    
     public void Refresh(PhotonPlayer player,int damage, int rank, int surviveTime, int kill, EInGameTeam team, int gold, int exp)
     {
         PlayerName.text = player.NickName;
@@ -30,15 +34,20 @@ public class UI_GameResultSlot : MonoBehaviour
         Color color = new Color();
         switch (team)
         {
-            case EInGameTeam.Blue : color = new Color32(0, 112, 192,255);
+            case EInGameTeam.Blue :
+                color = ColorPalette.ColorDictionary[EColorType.Blue];
                 break;
-            case EInGameTeam.Red : color = new Color32(255, 71, 91,255);
+            case EInGameTeam.Red : 
+                color = ColorPalette.ColorDictionary[EColorType.Red];
                 break;
-            case EInGameTeam.Green : color = new Color32(93,182, 1,255);
+            case EInGameTeam.Green : 
+                color = ColorPalette.ColorDictionary[EColorType.Green];
                 break;
-            case EInGameTeam.Yellow : color = new Color32(255, 228,42,255);
+            case EInGameTeam.Yellow :
+                color = ColorPalette.ColorDictionary[EColorType.Yellow];
                 break;
-            default: color = new Color(1, 1, 1);
+            default: 
+                color = ColorPalette.ColorDictionary[EColorType.White];
                 break;
         }
         

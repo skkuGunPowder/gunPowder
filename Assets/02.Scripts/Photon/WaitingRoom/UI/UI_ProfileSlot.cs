@@ -14,16 +14,12 @@ public class UI_ProfileSlot : MonoBehaviour
 
     public GameObject Lives;
     public List<GameObject> LifeList = new List<GameObject>();
-    public Image ProfileImage;
     public Image BombImage;
     public Image ProfileOutline;
     
     public ProfileSkin PlayerProfileSkin;
-    public UI_EmotionSlot Emotion;    
     public Sprite EmptyImage;
-    public List<Color32> TeamColorCodeList;
-    
-    
+    public ColorPalette ColorPalette;
     
     // 후에 프로필 이미지 추가하기
     public void Refresh(PhotonPlayer player = null)
@@ -34,6 +30,7 @@ public class UI_ProfileSlot : MonoBehaviour
             return;
         }
         
+        NicknameTextUGUI.gameObject.SetActive(true);   
         NicknameTextUGUI.text = player.NickName;
         // skincheck
         PlayerProfileSkin.gameObject.SetActive(true);
@@ -62,7 +59,7 @@ public class UI_ProfileSlot : MonoBehaviour
     {
         Lives.SetActive(true);
 
-        int life = (int)PhotonNetwork.CurrentRoom.CustomProperties[EProperties.Life.ToString()];
+        int life = (int)PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.Life.ToString()];
 
         for (int i = 0; i < LifeList.Count; i++)
         {
@@ -78,8 +75,6 @@ public class UI_ProfileSlot : MonoBehaviour
     }
     public void ReadyCheck(bool isReady)
     {
-        
-        NicknameTextUGUI.gameObject.SetActive(true);
         Master.gameObject.SetActive(false);
         
         if (isReady)
@@ -118,26 +113,22 @@ public class UI_ProfileSlot : MonoBehaviour
         PlayerProfileSkin.TeamChanged(team);
     }
 
-    public void Play(string emotion)
-    {
-        Emotion.Play(emotion);
-    }
     private Color32 TeamColorSet(EInGameTeam team)
     {
         switch (team)
         {
             case EInGameTeam.Red:
-                return TeamColorCodeList[0];
+                return ColorPalette.ColorDictionary[EColorType.Red];
             case EInGameTeam.Blue:
-                return TeamColorCodeList[1];
+                return ColorPalette.ColorDictionary[EColorType.Blue];
             case EInGameTeam.Green:
-                return TeamColorCodeList[2];
+                return ColorPalette.ColorDictionary[EColorType.Green];
             case EInGameTeam.Yellow:
-                return TeamColorCodeList[3];
+                return ColorPalette.ColorDictionary[EColorType.Yellow];
             case EInGameTeam.Default:
-                return TeamColorCodeList[4];
+                return ColorPalette.ColorDictionary[EColorType.White];
             default:
-                return TeamColorCodeList[0];
+                return ColorPalette.ColorDictionary[EColorType.Red];
         }
     }
     

@@ -51,7 +51,7 @@ public class UI_RoomStartOption : MonoBehaviour
     // 맵 설정 하기
     public void MapChange()
     {
-        ESceneList map = RoomManager.Instance.SelectedMap;
+        EMap map = RoomManager.Instance.SelectedMap;
         
         string name = MapDataDictionary[map.ToString()].MapName;
         Sprite mapSprite = MapDataDictionary[map.ToString()].MapSprite;

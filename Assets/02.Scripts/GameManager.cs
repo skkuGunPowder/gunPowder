@@ -23,6 +23,8 @@ public class GameManager : PhotonSingleton<GameManager>
     public GameOverProduction GameOverProduction;
     [Header("게임 시작시 연출")]
     public GameStartProduction GameStartProduction;
+   
+    
     [Header("플레이어 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
@@ -72,6 +74,7 @@ public class GameManager : PhotonSingleton<GameManager>
         if (_airDropTimer > 30f)
         {
             _airDropTimer = 0f;
+            
             if (UnityEngine.Random.Range(0f, 1.0f) <= 0.1f)
             {
                 PhotonNetwork.Instantiate(_airDropJetPrefab.name, transform.position, Quaternion.identity);
@@ -172,7 +175,7 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         EventManager.Instance.ProfileInit();
 
-        int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[$"{EProperties.PlayTime}"].ToString()) * 60;
+        int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
         
         _initTime = playtime;
 
