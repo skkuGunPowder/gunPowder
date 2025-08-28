@@ -15,10 +15,10 @@ public class Player : MonoBehaviourPun, IDamagable
     private List<Animator> _myAnimatorList;
     public List<Animator> MyAnimatorList => _myAnimatorList;
 
-    [Header("DieParts")]
+    [Header("죽음 파츠")]
     [SerializeField]
-    private List<GameObject> _myDiePartList;
-    public List<GameObject> MyDiePartList => _myDiePartList;
+    private List<GameObject> _diePartList;
+    public List<GameObject> DiePartList => _diePartList;
     private List<GameObject> _headPartList;
     public List<GameObject> HeadPartList => _headPartList;
     private List<GameObject> _bodyPartList;
@@ -42,9 +42,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public Dictionary<EItemType, ItemDTO> EquipedItemDict;
 
-    [Header("Bomb")]
-    // 폭탄 스폰 위치 리스트
-    // 0 45 90 135 180 225 270 315
+    [Header("폭탄 설정")]
+    // 폭탄 스폰 위치 리스트 (각도: 0,45,90,135,180,225,270,315)
     [SerializeField]
     private List<Transform> _bombSpawnPointList;
     [SerializeField]
@@ -58,7 +57,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private Bomb _headBomb;
     public Bomb HeadBomb => _headBomb;
 
-    [Header("Timer")]
+    [Header("타이머")]
     [SerializeField]
     private float _attackTimer = 0f;
     public float AttackTimer => _attackTimer;
@@ -77,7 +76,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private Vector3 _defaultLocalScale;
     private Dictionary<SpriteRenderer, Color> _pulseOriginalColorMap;
 
-    [Header("HitStop")]
+    [Header("히트스탑")]
     [SerializeField]
     private Vector2 _storedVelocity = Vector2.zero;
     public Vector2 StoredVelocity => _storedVelocity;
@@ -85,7 +84,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private bool _hasStoredVelocity = false;
     public bool HasStoredVelocity => _hasStoredVelocity;
 
-    [Header("GunPowder")]
+    [Header("건파우더 설정")]
     [SerializeField]
     private float _gunPowderSpreadAngle = 90f;
     private float _gunPowderSpreadDistance = 1.0f;
@@ -97,7 +96,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private BoxRay2D _groundRay2D;
     public BoxRay2D GroundRay2D => _groundRay2D;
 
-    [Header("Prefabs")]
+    [Header("프리팹 참조")]
     public GameObject HeadBombPrefab;
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
@@ -109,12 +108,27 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private const int RANDOM_SEED = 123456;
     private const string BASIC_BOMB_ID = "BO0001";
+    
+    // 공격 없을 때 관련 상수
+    private const float COLOR_UPDATE_TICK_SECONDS = 0.5f;
+    private const float REDNESS_START_RATIO = 0.4f;
+    private const float WARNING_RATIO_THRESHOLD = 0.7f;
+    private const float MAX_RED_SATURATION = 0.6f;
+    private const float PULSE_SCALE_MULTIPLIER = 1.2f;
+    private const float PULSE_HALF_DURATION = 0.2f;
+    private const float WARNING_INTERVAL_MAX = 0.7f;
+    private const float WARNING_INTERVAL_MIN = 0.1f;
+    private const float WARNING_PITCH_MIN = 1.0f;
+    private const float WARNING_PITCH_MAX = 1.9f;
+    private const int NO_ATTACK_RELEASE_COUNT = 10;
+    private const float NO_ATTACK_RELEASE_SPREAD_ANGLE = 30f;
+    private const float NO_ATTACK_RELEASE_DISTANCE = 1.0f;
     public BombStat BasicBombStat;
     public BombStat SpecialBombStat;
 
     // 쿨타임 체크용 변수
-    private float _lastNormalBombTime = 0f;
-    private float _lastSpecialBombTime = 0f;
+    private float _lastNormalBombTime = -999f;
+    private float _lastSpecialBombTime = -999f;
 
     public float LastNormalBombTime => _lastNormalBombTime;
     public float LastSpecialBombTime => _lastSpecialBombTime;
@@ -143,7 +157,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
 
-    // Airborne dash double-tap support: remember first tap time per direction
+    // 대시 탭 타임
     public float LastDashTapTimeLeft = -999f;
     public float LastDashTapTimeRight = -999f;
 
@@ -176,27 +190,77 @@ public class Player : MonoBehaviourPun, IDamagable
         InitializeBodyParts();
     }
 
+    private void OnDestroy()
+    {
+        // 이벤트 구독 해제
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnPlayerItemChanged -= LoadItems;
+        }
+        if (_playerStat != null)
+        {
+            _playerStat.OnGunPowderEmpty -= HandleGunPowderEmpty;
+            _playerStat.OnGunpowderIncreased -= HandleGunpowderIncreased;
+        }
+    }
+
+    /// <summary>
+    /// 플레이어의 신체 부위별 GameObject를 초기화하고 분류하는 메서드
+    /// PlayerStat의 SpriteRenderer 리스트를 순회하며 BodyPartMarker 컴포넌트를 기반으로
+    /// 나중에 추가될 부분도 BodyPartMarker 컴포넌트를 추가해줘야 함
+    /// </summary>
     private void InitializeBodyParts()
     {
-        _headPartList = new List<GameObject>();
-        _bodyPartList = new List<GameObject>();
-        _leftArmPartList = new List<GameObject>();
-        _leftLegPartList = new List<GameObject>();
-        _rightArmPartList = new List<GameObject>();
-        _rightLegPartList = new List<GameObject>();
+        // 각 신체 부위별 GameObject 리스트를 초기화
+        _headPartList = new List<GameObject>();        // 머리 부위 리스트
+        _bodyPartList = new List<GameObject>();        // 몸통 부위 리스트
+        _leftArmPartList = new List<GameObject>();     // 왼팔 부위 리스트
+        _leftLegPartList = new List<GameObject>();     // 왼다리 부위 리스트
+        _rightArmPartList = new List<GameObject>();    // 오른팔 부위 리스트
+        _rightLegPartList = new List<GameObject>();    // 오른다리 부위 리스트
 
-        _headPartList.Add(_myDiePartList[0]);
-        _headPartList.Add(_myDiePartList[2]);
-        _headPartList.Add(_myDiePartList[3]);
+        foreach (var part in _diePartList)
+        {
+            if (part == null) { continue; }  // null 체크
 
-        _bodyPartList.Add(_myDiePartList[1]);
+            // 해당 SpriteRenderer가 속한 GameObject에서 BodyPartMarker 컴포넌트 검색
+            BodyPartMarker markerComp = part.GetComponent<BodyPartMarker>();
+            if (markerComp == null) { continue; }  // BodyPartMarker가 없으면 스킵
 
-        _leftArmPartList.Add(_myDiePartList[4]);
-        _leftLegPartList.Add(_myDiePartList[5]);
+            // 마커에서 정의된 신체 부위 타입 가져오기
+            BodyPartType partType = markerComp.PartType;
 
-        _rightArmPartList.Add(_myDiePartList[6]);
-        _rightLegPartList.Add(_myDiePartList[7]);
+            // 신체 부위 타입에 따라 해당하는 리스트에 GameObject 추가
+            switch (partType)
+            {
+                case BodyPartType.Head:     // 머리 부위
+                    _headPartList.Add(part);
+                    break;
+                case BodyPartType.Body:     // 몸통 부위
+                    _bodyPartList.Add(part);
+                    break;
+                case BodyPartType.LeftArm:  // 왼팔 부위
+                    _leftArmPartList.Add(part);
+                    break;
+                case BodyPartType.LeftLeg:  // 왼다리 부위
+                    _leftLegPartList.Add(part);
+                    break;
+                case BodyPartType.RightArm: // 오른팔 부위
+                    _rightArmPartList.Add(part);
+                    break;
+                case BodyPartType.RightLeg: // 오른다리 부위
+                    _rightLegPartList.Add(part);
+                    break;
+            }
+        }
+
+        // 모든 신체 부위 리스트가 비어있는 경우 경고 메시지 출력
+        if ((_headPartList.Count + _bodyPartList.Count + _leftArmPartList.Count + _leftLegPartList.Count + _rightArmPartList.Count + _rightLegPartList.Count) == 0)
+        {
+            Debug.LogWarning("BodyPartMarker를 찾지 못했습니다. PlayerSprites 루트에 마커를 추가해주세요.");
+        }
     }
+        
 
     private void LoadItems()
     {
@@ -230,6 +294,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         // 1. 이벤트 핸들러 등록
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
+        _playerStat.OnGunpowderIncreased += HandleGunpowderIncreased;
 
         // 2. Rigidbody2D 최적화된 초기화
         if (photonView.IsMine)
@@ -292,16 +357,30 @@ public class Player : MonoBehaviourPun, IDamagable
         _attackTimer = 0f;
         _gunPowderDecreaseTimer = 0f;
         _gunPowderDecreaseWithoutAttackTimer = 0f;
+        _colorUpdateWithoutAttackTimer = 0f;
         _lastNormalBombTime = 0f;
         _lastSpecialBombTime = 0f;
         _ultimateChanceTimer = 0f;
+        _warningSfxTimer = 0f;
         // legacy SFX state removed (moved to PlayerSFXAnimationEvent)
 
         // 저장된 속도 상태 초기화
         ClearStoredVelocity();
 
+        // 색상 및 펄스 효과 초기화
+        StopPreExplosionPulse(true);
+        SetSpriteRendererWhite();
+
         // 플레이어 스탯 초기화 (건파우더 초기화)
         _playerStat.ResurrectPlayerStat();
+    }
+
+    private void HandleGunpowderIncreased(int amount)
+    {
+        if (_playerSFXAnimationEvent != null)
+        {
+            _playerSFXAnimationEvent.OnGunpowderAbsorbed();
+        }
     }
 
     private void HandleGunPowderEmpty()
@@ -311,11 +390,14 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             // 네트워크 동기화된 상태 변경
             _playerFSM.SyncStateChange<PlayerDieState>();
+            return;
         }
-        else
+
+        // PlayerFSM이 없는 경우 방어적으로 컴포넌트 조회 후 변경
+        var fsm = GetComponent<PlayerFSM>();
+        if (fsm != null)
         {
-            // PlayerFSM이 없는 경우 직접 변경
-            _playerFSM.ChangeState<PlayerDieState>();
+            fsm.ChangeState<PlayerDieState>();
         }
     }
 
@@ -336,19 +418,25 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
 
+        // 주기적으로 건파우더 감소
         /*
         _gunPowderDecreaseTimer += Time.deltaTime;
 
         DecreaseGunPowderPeriodically();*/
 
-         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
+        // 공격 없을 때 건파우더 감소
+        _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
          DecreaseGunPowderWithoutAttack();
+
         // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
         UpdateWarningSfx();
 
         UltimateChanceTimerUpdate();
     }
 
+    /// <summary>
+    /// 궁극기 사용 가능 상태 타이머 업데이트
+    /// </summary>
     private void UltimateChanceTimerUpdate()
     {
         // 궁극기 사용가능 상태
@@ -459,7 +547,10 @@ public class Player : MonoBehaviourPun, IDamagable
         _ultimateEffectOffRoutine = null;
     }
 
-    // GhostTrail Toggle -------------------------------------------------------
+    /// <summary>
+    /// 대쉬시 잔상 토글
+    /// </summary>
+    /// <param name="isOn"></param>
     public void RPC_SetGhostTrail(bool isOn)
     {
         if (!PhotonView.IsMine)
@@ -516,7 +607,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             if (_ultimate == null)
             {
-                Debug.LogError("궁극기 스크립트가 없습니다.");
+                Debug.LogError("궁극기 스크립트를 찾을 수 없습니다.");
                 return;
             }
             _ultimate.ExcuteUltimate();
@@ -580,7 +671,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
             _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr);
 
-            RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, 10, 30f, 1.0f, true);
+            RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, NO_ATTACK_RELEASE_COUNT, NO_ATTACK_RELEASE_SPREAD_ANGLE, NO_ATTACK_RELEASE_DISTANCE, true);
             if (PhotonView.IsMine && ExplosionEffectPrefab != null)
             {
                 PhotonView.RPC(nameof(PlayExplosionEffect), RpcTarget.All);
@@ -614,7 +705,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         // 0.5초 간격으로만 색 업데이트
         _colorUpdateWithoutAttackTimer += Time.deltaTime;
-        if (_colorUpdateWithoutAttackTimer < 0.5f)
+        if (_colorUpdateWithoutAttackTimer < COLOR_UPDATE_TICK_SECONDS)
         {
             return false;
         }
@@ -622,7 +713,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 색 변화는 ratio 0.4부터 적용
         float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
-        if (ratio < 0.4f)
+        if (ratio < REDNESS_START_RATIO)
         {
             foreach (var renderer in _playerStat.MySpriteREndererList)
             {
@@ -633,11 +724,11 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         // 비율에 따라 펄스 시작/정지 (경고 단계)
-        if (ratio >= 0.7f) { PlayPreExplosionPulse(); } else { StopPreExplosionPulse(false); }
+        if (ratio >= WARNING_RATIO_THRESHOLD) { PlayPreExplosionPulse(); } else { StopPreExplosionPulse(false); }
 
         // ratio 0.4~1 -> S: 0~0.8로 맵핑 (H=0 고정, V는 유지)
-        float t = Mathf.Clamp01((ratio - 0.4f) / 0.6f);
-        float targetS = Mathf.Lerp(0f, 0.6f, t);
+        float t = Mathf.Clamp01((ratio - REDNESS_START_RATIO) / (1f - REDNESS_START_RATIO));
+        float targetS = Mathf.Lerp(0f, MAX_RED_SATURATION, t);
         foreach (var renderer in _playerStat.MySpriteREndererList)
         {
             if (renderer == null) { continue; }
@@ -654,7 +745,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void CheckAndPlayPreExplosionPulse()
     {
         float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
-        if (ratio >= 0.7f)
+        if (ratio >= WARNING_RATIO_THRESHOLD)
         {
             PlayPreExplosionPulse();
         }
@@ -672,16 +763,16 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
         float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
-        if (ratio < 0.7f)
+        if (ratio < WARNING_RATIO_THRESHOLD)
         {
             _warningSfxTimer = 0f;
             return;
         }
 
-        // 0.7 → 1.0 사이에서 재생 간격을 선형으로 0.7s → 0.1s로 축소, 피치 1.0 → 1.5로 상승
-        float t = Mathf.InverseLerp(0.7f, 1f, Mathf.Clamp01(ratio));
-        float interval = Mathf.Lerp(0.7f, 0.1f, t);
-        float pitch = Mathf.Lerp(1.0f, 1.9f, t);
+        // WARNING_RATIO_THRESHOLD → 1.0 사이에서 재생 간격을 선형으로 WARNING_INTERVAL_MAX → WARNING_INTERVAL_MIN로 축소, 피치 WARNING_PITCH_MIN → WARNING_PITCH_MAX로 상승
+        float t = Mathf.InverseLerp(WARNING_RATIO_THRESHOLD, 1f, Mathf.Clamp01(ratio));
+        float interval = Mathf.Lerp(WARNING_INTERVAL_MAX, WARNING_INTERVAL_MIN, t);
+        float pitch = Mathf.Lerp(WARNING_PITCH_MIN, WARNING_PITCH_MAX, t);
         _warningSfxTimer += Time.deltaTime;
         if (_warningSfxTimer >= interval)
         {
@@ -709,8 +800,8 @@ public class Player : MonoBehaviourPun, IDamagable
             _pulseOriginalColorMap[renderer] = renderer.color;
         }
 
-        float targetScaleMultiplier = 1.2f;
-        float halfDuration = 0.2f; // 커졌다/작아졌다 왕복 0.4초
+        float targetScaleMultiplier = PULSE_SCALE_MULTIPLIER;
+        float halfDuration = PULSE_HALF_DURATION; // 커졌다/작아졌다 왕복 0.4초
         transform.localScale = _defaultLocalScale;
 
         Sequence seq = DOTween.Sequence();
@@ -722,7 +813,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 if (renderer == null) { continue; }
                 Color baseCol = renderer.color;
                 Color.RGBToHSV(baseCol, out float _, out float _, out float v);
-                Color redCol = Color.HSVToRGB(0f, 0.6f, v);
+                Color redCol = Color.HSVToRGB(0f, MAX_RED_SATURATION, v);
                 redCol.a = baseCol.a;
                 renderer.color = redCol;
             }
@@ -907,8 +998,12 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         else
         {
-            Debug.LogWarning($"[RPC_TakeDamage] Could not find attacker view with ID: {attackerViewId}");
+            Debug.LogWarning($"[RPC_TakeDamage] 공격자 뷰를 찾을 수 없습니다. ID: {attackerViewId}");
         }
+
+        
+        // 피격 횟수 증가
+        _playerStat.IncreseDamagedCount();
 
         // 플레이어가 맞은 횟수에 비례해서 데미지 증가
         int increaseDamagePerDamagedCount = _playerStat.CurrentPlayerDamagedCount / 15;
@@ -932,9 +1027,6 @@ public class Player : MonoBehaviourPun, IDamagable
         int gunPowderCount = Mathf.CeilToInt(damage * 0.5f);
         // Gunpowder 낙출
         ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
-
-        // 피격 횟수 증가
-        _playerStat.IncreseDamagedCount();
 
         // 피격 이벤트 발생
         OnHit?.Invoke();
@@ -1223,7 +1315,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         else
         {
-            Debug.LogError("PlayerFSM component not found!");
+            Debug.LogError("PlayerFSM 컴포넌트를 찾을 수 없습니다!");
         }
     }
 
@@ -1304,6 +1396,12 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void RemoveAirDropItem()
     {
+        if (_airDropItem == null || _airDropItem.gameObject == null)
+        {
+            _airDropItem = null;
+            return;
+        }
+
         if (_airDropItem.gameObject.TryGetComponent(out IBuff buff))
         {
             StartCoroutine(BuffCoroutine(buff, _buffDuration));
@@ -1345,24 +1443,6 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             child.gameObject.layer = LayerMask.NameToLayer("Player");
         }
-    }
-
-    public void Observe()
-    {
-        // 관전 상태가 되서 상호작용도 안하고 모습도 안보이게 해야함
-
-        /*
-        foreach(SpriteRenderer spriteRenderer in _playerStat.MySpriteREndererList)
-        {
-            spriteRenderer.enabled = false;
-        }*/
-
-        foreach (Transform child in transform)
-        {
-            child.gameObject.SetActive(false);
-        }
-
-        _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
     }
 
     public void RPC_HeadSpriteOnOff()
