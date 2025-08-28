@@ -13,8 +13,8 @@ public class BuffStat
             throw new System.Exception("Json 데이터가 비어있습니다.");
         }
 
-        Duration = (float)json["Duration"];
-        Value = (int)json["Value"];
+        Duration = float.Parse(json["Duration"].ToString());
+        Value = int.Parse(json["Value"].ToString());
     }
 
     public BuffStat(float duration, int value)

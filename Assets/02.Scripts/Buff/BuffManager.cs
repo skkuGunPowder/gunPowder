@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class BuffManager : DontDestroySingleton<BuffManager>
 {
-    public List<Buff> BuffList { get; private set; }
+    [SerializeField] private List<Buff> _buffList;
 
     private Dictionary<string, Buff> _buffPrefabDict;
 
@@ -22,8 +22,9 @@ public class BuffManager : DontDestroySingleton<BuffManager>
     {
         _buffPrefabDict = new Dictionary<string, Buff>();
 
-        foreach (Buff buff in BuffList)
+        foreach (Buff buff in _buffList)
         {
+            buff.Init();
             if (_buffPrefabDict.ContainsKey(buff.ID))
             {
                 continue;

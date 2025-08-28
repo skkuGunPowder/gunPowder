@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class BoosterBuff : Buff, IBuff
 {
-    private void Awake()
+    public override void Init()
     {
+        base.Init();
         ID = "BF0002";
     }
 

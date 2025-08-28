@@ -10,6 +10,13 @@ public abstract class Buff : MonoBehaviour, IBuff
     protected float _timer;
     protected bool _isActive = false;
 
+    public virtual void Init()
+    {
+        _owner = null;
+        _timer = 0f;
+        _isActive = false;
+    }
+
     public void SetStat(BuffStat stat)
     {
         if (stat == null)
@@ -18,10 +25,6 @@ public abstract class Buff : MonoBehaviour, IBuff
         }
 
         Stat = stat;
-
-        _owner = null;
-        _timer = 0f;
-        _isActive = false;
     }
 
     public void SetOwner(Player player)

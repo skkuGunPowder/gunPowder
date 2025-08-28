@@ -42,7 +42,7 @@ public class BuffRepository
                 foreach (JsonData buffInfo in chartContents.FlattenRows())
                 {
                     BuffStat buffStat = new BuffStat(buffInfo);
-                    statDict.Add((string)buffInfo["ID"], buffStat);
+                    statDict.Add((string)buffInfo["BuffID"], buffStat);
                 }
             }
             OnStatLoaded?.Invoke(statDict);

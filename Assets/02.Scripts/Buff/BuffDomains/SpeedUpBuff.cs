@@ -3,8 +3,9 @@ using UnityEngine;
 
 public class SpeedUpBuff : Buff, IBuff
 {
-    private void Awake()
+    public override void Init()
     {
+        base.Init();
         ID = "BF0001";
     }
 
