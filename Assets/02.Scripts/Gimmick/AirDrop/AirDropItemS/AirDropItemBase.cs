@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class AirDropItemBase : MonoBehaviour, IAirDropItem
+public abstract class AirDropItemBase : MonoBehaviour, IAirDropItem
 {
     protected Player _owner;
     public Sprite Icon;
@@ -12,6 +12,10 @@ public class AirDropItemBase : MonoBehaviour, IAirDropItem
 
     public virtual void Use()
     {
-
+        if (_owner == null)
+        {
+            Debug.LogError("아이템 사용자가 없습니다.");
+            return;
+        }
     }
 }
