@@ -147,7 +147,6 @@ public class Player : MonoBehaviourPun, IDamagable
     public AirDropItemLootVFX AirDropItemLootVFX;
     private AirDropItemBase _airDropItem;
     public AirDropItemBase AirDropItem => _airDropItem;
-    private float _buffDuration;
 
 
     [SerializeField]
@@ -1380,11 +1379,6 @@ public class Player : MonoBehaviourPun, IDamagable
         _storedVelocity = Vector2.zero;
     }
 
-    public void SetDuration(float duration)
-    {
-        _buffDuration = duration;
-    }
-
     public void SetAirDropItem(AirDropItemBase airDropItem)
     {
         if (PhotonView.IsMine)
@@ -1396,24 +1390,6 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void RemoveAirDropItem()
     {
-        if (_airDropItem == null || _airDropItem.gameObject == null)
-        {
-            _airDropItem = null;
-            return;
-        }
-
-        if (_airDropItem.gameObject.TryGetComponent(out IBuff buff))
-        {
-            StartCoroutine(BuffCoroutine(buff, _buffDuration));
-            return;
-        }
-        _airDropItem = null;
-    }
-
-    IEnumerator BuffCoroutine(IBuff buff, float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        buff.EndBuff();
         _airDropItem = null;
     }
 
