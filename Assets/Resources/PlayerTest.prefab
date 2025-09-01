@@ -580,6 +580,7 @@ GameObject:
   - component: {fileID: 1087562559329936879}
   - component: {fileID: 4617499864973392788}
   - component: {fileID: 6378997302330593908}
+  - component: {fileID: 1762138744022126421}
   m_Layer: 0
   m_Name: Idle_Accesorie_0
   m_TagString: Untagged
@@ -732,6 +733,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d5786aef4a085409ce61b2c6660e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1762138744022126421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 954121986114294003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cda11d6acf68a43aaae95be12d2b7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PartType: 0
 --- !u!1 &1002491522865304213
 GameObject:
   m_ObjectHideFlags: 0
@@ -1668,7 +1682,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 58481213
-  m_SortingLayer: 4
+  m_SortingLayer: -1
   m_SortingOrder: 90
   m_Sprite: {fileID: 2099056433, guid: 08f918d888102be409acfa087ff3a1e7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -2513,6 +2527,7 @@ GameObject:
   - component: {fileID: 4661534443730403908}
   - component: {fileID: 8784175348608128963}
   - component: {fileID: 3641328825980168657}
+  - component: {fileID: 8141108032047014194}
   m_Layer: 0
   m_Name: Idle_Eye_0
   m_TagString: Untagged
@@ -2665,6 +2680,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d5786aef4a085409ce61b2c6660e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8141108032047014194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4373107127214203765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cda11d6acf68a43aaae95be12d2b7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PartType: 0
 --- !u!1 &4665024384969968099
 GameObject:
   m_ObjectHideFlags: 0
@@ -2827,7 +2855,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 58481213
-  m_SortingLayer: 4
+  m_SortingLayer: -1
   m_SortingOrder: 70
   m_Sprite: {fileID: 2062307282, guid: 0c867f92fb9d15a41a9d6bb6c9136d3a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -2939,7 +2967,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 58481213
-  m_SortingLayer: 4
+  m_SortingLayer: -1
   m_SortingOrder: 85
   m_Sprite: {fileID: 1529430837, guid: e438253bdcff64142878903dfb179087, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -3676,7 +3704,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 58481213
-  m_SortingLayer: 4
+  m_SortingLayer: -1
   m_SortingOrder: 75
   m_Sprite: {fileID: -968536049, guid: d9369cd6822b19d478ad3d50606bd090, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -4105,7 +4133,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 58481213
-  m_SortingLayer: 4
+  m_SortingLayer: -1
   m_SortingOrder: 65
   m_Sprite: {fileID: -677207455, guid: cbdaedf9b57712a4ab1df44772b51f9f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -4326,7 +4354,7 @@ MonoBehaviour:
   - {fileID: 2297686660635884882}
   - {fileID: 6433354483379324661}
   - {fileID: 3088665711032286281}
-  _myDiePartList:
+  _diePartList:
   - {fileID: 954121986114294003}
   - {fileID: 7541523809711689117}
   - {fileID: 4373107127214203765}
@@ -4401,13 +4429,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerStatSO: {fileID: 11400000, guid: 24c91fb983f6a934f8d9ad203ab6b394, type: 2}
   _moveSpeed: 0
-  _jumpForce: 0
-  _dashTime: 0
-  _doubleTapTime: 0
-  _dashSpeed: 0
-  _breakTime: 0
   _runSpeed: 0
+  _jumpForce: 0
   _maxJumpCount: 0
+  _dashTime: 0
+  _dashSpeed: 0
+  _doubleTapTime: 0
+  _breakTime: 0
   _jumpDashCount: 0
   _recoilTime: 0
   _recoilSpeed: 0
@@ -4415,6 +4443,8 @@ MonoBehaviour:
   _normalRecoilSpeed: 0
   _confuseTime: 5
   _hitStopGunPowderCount: 50
+  _damagedTime: 0
+  _invincibleTime: 0
   _isRunning: 0
   _isJumping: 0
   _isFallingDead: 0
@@ -4424,17 +4454,23 @@ MonoBehaviour:
   _myMoveSpeed: 0
   _jumpCount: 0
   _facingDirection: 1
+  IsFallingFromLedge: 0
+  _currentPlayerGunPowderCount: 0
+  _currentPlayerLife: 0
+  _initGunpowderCount: 0
   _gunPowderDecreaseTime: 0
+  _currentPlayerDamagedCount: 0
   _attackPenaltyTime: 0
   _attackPenaltyAmount: 0
-  _initGunpowderCount: 0
   _dieExplosionDamage: 0
   _dieExplosionRadius: 0
   _dieExplosionForce: 0
-  _invincibleTime: 0
-  _currentPlayerGunPowderCount: 0
-  _currentPlayerLife: 0
-  _currentPlayerDamagedCount: 0
+  _totalDamage: 0
+  _totalKillCount: 0
+  _hasUltimateChance: 0
+  _hasUsedUltimateThisLife: 0
+  _ultimateChanceDuration: 10
+  _ultimateTriggerThreshold: 30
   _mySpriteRendererList:
   - {fileID: 5606816833796974662}
   - {fileID: 4841738079202767485}
@@ -4444,15 +4480,7 @@ MonoBehaviour:
   - {fileID: 1204886375384353146}
   - {fileID: 4296287364748657003}
   - {fileID: 1012296347412030769}
-  _damagedTime: 0
-  _totalDamage: 0
-  _totalKillCount: 0
-  IsFallingFromLedge: 0
   PlayerSFXAnimationEvent: {fileID: 8620183200267240798}
-  _hasUltimateChance: 0
-  _hasUsedUltimateThisLife: 0
-  _ultimateChanceDuration: 5
-  _ultimateTriggerThreshold: 30
 --- !u!70 &975501548764073768
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -4667,6 +4695,7 @@ GameObject:
   - component: {fileID: 7533238779106575502}
   - component: {fileID: 3389664738812076217}
   - component: {fileID: 8414401783142527431}
+  - component: {fileID: 8591873230270198803}
   m_Layer: 0
   m_Name: Idle_Head_0
   m_TagString: Untagged
@@ -4819,6 +4848,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d5786aef4a085409ce61b2c6660e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8591873230270198803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6883906685738839930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cda11d6acf68a43aaae95be12d2b7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PartType: 0
 --- !u!1 &6903566443520954797
 GameObject:
   m_ObjectHideFlags: 0
@@ -4832,6 +4874,7 @@ GameObject:
   - component: {fileID: 3057759173797354246}
   - component: {fileID: 2010708866241806464}
   - component: {fileID: 5203778187850537220}
+  - component: {fileID: 1729068375236905056}
   m_Layer: 0
   m_Name: Idle_RightLeg_0
   m_TagString: Untagged
@@ -4984,6 +5027,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d5786aef4a085409ce61b2c6660e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1729068375236905056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6903566443520954797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cda11d6acf68a43aaae95be12d2b7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PartType: 5
 --- !u!1 &7015136536288500257
 GameObject:
   m_ObjectHideFlags: 0
@@ -5091,7 +5147,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 58481213
-  m_SortingLayer: 4
+  m_SortingLayer: -1
   m_SortingOrder: 55
   m_Sprite: {fileID: -1587779952, guid: eef3ed23bc80df545b5931ef248be8b1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -5384,6 +5440,7 @@ GameObject:
   - component: {fileID: 3212994450401046128}
   - component: {fileID: 867005688959434019}
   - component: {fileID: 4926878628855229901}
+  - component: {fileID: 6678976606721741448}
   m_Layer: 0
   m_Name: Idle_Body_0
   m_TagString: Untagged
@@ -5536,6 +5593,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d5786aef4a085409ce61b2c6660e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6678976606721741448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7541523809711689117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cda11d6acf68a43aaae95be12d2b7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PartType: 1
 --- !u!1 &7616411801881973863
 GameObject:
   m_ObjectHideFlags: 0
@@ -5612,7 +5682,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 58481213
-  m_SortingLayer: 4
+  m_SortingLayer: -1
   m_SortingOrder: 80
   m_Sprite: {fileID: -1760590962, guid: a0d9c8946584e1b4cb99a49dcbab83b7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -5946,6 +6016,7 @@ GameObject:
   - component: {fileID: 8387459447935356807}
   - component: {fileID: 3236739514236847841}
   - component: {fileID: 6317246374938823582}
+  - component: {fileID: 5590737198990558509}
   m_Layer: 0
   m_Name: Idle_LeftArm_0
   m_TagString: Untagged
@@ -6098,6 +6169,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d5786aef4a085409ce61b2c6660e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5590737198990558509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7764269824478446261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cda11d6acf68a43aaae95be12d2b7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PartType: 2
 --- !u!1 &7945225421532970804
 GameObject:
   m_ObjectHideFlags: 0
@@ -6174,7 +6258,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 58481213
-  m_SortingLayer: 4
+  m_SortingLayer: -1
   m_SortingOrder: 60
   m_Sprite: {fileID: -921130177, guid: d107f56a339fd654da16836a158b9c54, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -6524,6 +6608,7 @@ GameObject:
   - component: {fileID: 7700660213105038594}
   - component: {fileID: 7765794740556713852}
   - component: {fileID: 1328878915984105278}
+  - component: {fileID: 1111482035253471144}
   m_Layer: 0
   m_Name: Idle_RightArm_0
   m_TagString: Untagged
@@ -6676,6 +6761,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d5786aef4a085409ce61b2c6660e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1111482035253471144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8723950012076221833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cda11d6acf68a43aaae95be12d2b7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PartType: 4
 --- !u!1 &8789152129179738349
 GameObject:
   m_ObjectHideFlags: 0
@@ -6689,6 +6787,7 @@ GameObject:
   - component: {fileID: 5877239824231097587}
   - component: {fileID: 860082648392942384}
   - component: {fileID: 4893862617223265836}
+  - component: {fileID: 2194544158449576057}
   m_Layer: 0
   m_Name: Idle_LeftLeg_0
   m_TagString: Untagged
@@ -6841,6 +6940,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d5786aef4a085409ce61b2c6660e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2194544158449576057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8789152129179738349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cda11d6acf68a43aaae95be12d2b7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PartType: 3
 --- !u!1 &8930653728303460364
 GameObject:
   m_ObjectHideFlags: 0
