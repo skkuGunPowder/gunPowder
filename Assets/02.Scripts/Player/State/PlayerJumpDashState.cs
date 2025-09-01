@@ -24,37 +24,13 @@ public class PlayerJumpDashState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        // 플레이어 상태
-        _owner.PlayerStat.IsRunning = true;
-        _owner.PlayerStat.IsJumping = true;
-        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
-        _owner.PlayerStat.IncrementJumpDashCount();
-        _originalGravityScale = _owner.Rigidbody2D.gravityScale;
-        _owner.Rigidbody2D.gravityScale = 0f;
-        
-        _yVelocity = 0f;
-        _xVelocity = 0f;
-        _dashTimer = 0f;
-
-        // 착지 감지 변수 초기화
-        _isLanding = false;
-        _landingConfirmed = false;
-        _landingCheckTimer = 0f;
-        _groundRay2D.Cast();
-        _wasGroundedLastFrame = _groundRay2D.Performed;
-        _airborneTimer = 0f;
-
-        _owner.RPC_SetAnimatorTrigger("JumpDash");
-        _owner.RPC_SetGhostTrail(true);
+        InitializeJumpDashOnEnter();
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        _owner.Rigidbody2D.gravityScale = _originalGravityScale;
-        _owner.RPC_ResetAnimatorTrigger("JumpDash");
-        StartCoroutine(JumpDashEffectOffCoroutine());
-       
+        CleanupOnExit();
     }
 
     private IEnumerator JumpDashEffectOffCoroutine()
@@ -101,11 +77,7 @@ public class PlayerJumpDashState : PlayerBaseState
         else
         {
             // 대쉬 이동후 낙하
-            _dashTimer += Time.deltaTime;
-            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-            velocity.x = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed;
-            velocity.y = 0;
-            _owner.Rigidbody2D.linearVelocity = velocity;
+            UpdateDashMovement();
         }
     }
 
@@ -151,5 +123,91 @@ public class PlayerJumpDashState : PlayerBaseState
         }
         
         _wasGroundedLastFrame = isGroundedNow;
+    }
+
+    /// <summary>
+    /// 점프 대시 상태 진입 시 초기화 처리
+    /// </summary>
+    private void InitializeJumpDashOnEnter()
+    {
+        SetupPlayerStatsForJumpDash();
+        InitializePhysicsForJumpDash();
+        ResetDashRuntimeValues();
+        InitializeLandingDetection();
+        TriggerEnterEffects();
+    }
+
+    /// <summary>
+    /// 점프 대시에 맞게 플레이어 스탯 설정
+    /// </summary>
+    private void SetupPlayerStatsForJumpDash()
+    {
+        _owner.PlayerStat.IsRunning = true;
+        _owner.PlayerStat.IsJumping = true;
+        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.DashSpeed;
+        _owner.PlayerStat.IncrementJumpDashCount();
+    }
+
+    /// <summary>
+    /// 점프 대시 물리 초기화
+    /// </summary>
+    private void InitializePhysicsForJumpDash()
+    {
+        _originalGravityScale = _owner.Rigidbody2D.gravityScale;
+        _owner.Rigidbody2D.gravityScale = 0f;
+    }
+
+    /// <summary>
+    /// 런타임 값 초기화(속도/타이머)
+    /// </summary>
+    private void ResetDashRuntimeValues()
+    {
+        _yVelocity = 0f;
+        _xVelocity = 0f;
+        _dashTimer = 0f;
+    }
+
+    /// <summary>
+    /// 착지 감지 변수 초기화
+    /// </summary>
+    private void InitializeLandingDetection()
+    {
+        _isLanding = false;
+        _landingConfirmed = false;
+        _landingCheckTimer = 0f;
+        _groundRay2D.Cast();
+        _wasGroundedLastFrame = _groundRay2D.Performed;
+        _airborneTimer = 0f;
+    }
+
+    /// <summary>
+    /// 진입 이펙트/애니메이션 트리거
+    /// </summary>
+    private void TriggerEnterEffects()
+    {
+        _owner.RPC_SetAnimatorTrigger("JumpDash");
+        _owner.RPC_SetGhostTrail(true);
+    }
+
+    /// <summary>
+    /// 점프 대시 이동 업데이트 처리
+    /// </summary>
+    private void UpdateDashMovement()
+    {
+        _dashTimer += Time.deltaTime;
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        velocity.x = _owner.PlayerStat.FacingDirection * _owner.PlayerStat.MyMoveSpeed;
+        velocity.y = 0;
+        _owner.Rigidbody2D.linearVelocity = velocity;
+    }
+
+    /// <summary>
+    /// 상태 종료 시 정리 작업
+    /// </summary>
+    private void CleanupOnExit()
+    {
+        _owner.Rigidbody2D.gravityScale = _originalGravityScale;
+        _owner.RPC_ResetAnimatorTrigger("JumpDash");
+        StartCoroutine(JumpDashEffectOffCoroutine());
     }
 }

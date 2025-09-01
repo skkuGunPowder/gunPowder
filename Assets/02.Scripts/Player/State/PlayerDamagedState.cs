@@ -1,58 +1,215 @@
 using Photon.Pun;
-using RobustFSM.Base;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
 
+/// <summary>
+/// 플레이어 피격 상태 클래스
+/// 
+/// 역할:
+/// - 플레이어가 피격당했을 때의 상태 처리
+/// - 피격 시 무적 시간, 넉백 효과, 체력 비례 추가 힘 적용
+/// - 피격 애니메이션 및 이펙트 관리
+/// 
+/// 동작 방식:
+/// 1. 피격 시 무적 상태로 전환 및 태그 변경
+/// 2. 체력 비율에 따른 넉백 효과 적용
+/// 3. 히트 이펙트 활성화 및 방향 설정
+/// 4. 최소 피격 시간 후 바닥 착지 시 Idle 상태로 전환
+/// </summary>
 public class PlayerDamagedState : PlayerBaseState
 {
-    private float _timer = 0f;
-    private float _originalDrag;
-    private Tween _dragTween;
-    private float _startLinearDamping = 0.01f;
-    private float _targetLinearDamping = 2.5f;
+    // 넉백 효과 관련 상수
+    private const float MIN_LINEAR_DAMPING = 0.01f;        // 최소 선형 감쇠값
+    private const float MAX_LINEAR_DAMPING = 2.5f;         // 최대 선형 감쇠값
+    private const float HEALTH_RATIO_THRESHOLD = 0.5f;     // 체력 비율 임계값 (50%)
+    private const float DAMPING_LERP_START = 0.5f;         // 감쇠 보간 시작값
+    
+    // 추가 힘 관련 상수
+    private const float MAX_ADDITIONAL_FORCE = 10f;        // 최대 추가 힘
+    private const float UPWARD_FORCE = 10f;                // 위쪽 힘
+    private const float MIN_VELOCITY_THRESHOLD = 0.1f;     // 최소 속도 임계값
+    
+    // 히트 이펙트 관련 상수
+    private const float HIT_EFFECT_DURATION = 0.5f;        // 히트 이펙트 지속 시간
+    private const float DEFAULT_HIT_EFFECT_ANGLE = 90f;    // 기본 히트 이펙트 각도
+    
+    // 상태 변수들
+    private float _damagedTimer = 0f;           // 피격 지속 시간 타이머
+    private float _originalLinearDamping;       // 원본 선형 감쇠값
+    private Tween _knockbackTween;              // 넉백 효과 트윈
 
+    /// <summary>
+    /// 피격 상태 진입 시 초기화
+    /// </summary>
     public override void OnEnter()
     {
         base.OnEnter();
 
-        _timer = 0f;
-        // 애니메이션 재생
+        _damagedTimer = 0f;
         _owner.RPC_SetAnimatorTrigger("HitLoop");
         
-         // 무적
-        _owner.gameObject.tag = "Immune";
-        _owner.PlayerStat.IsImmune = true;
+        // 무적 상태 설정
+        SetImmuneState(true);
         
-        // IsImmune을 네트워크로 동기화
-        if (_owner.PhotonView.IsMine)
-        {
-            _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, true);
-        }
+        // 저장된 속도 복원 (히트스탑에서 온 경우)
+        RestoreStoredVelocityIfExists();
         
-        // 히트스탑에서 저장된 속도가 있다면 복원
-        if (_owner.HasStoredVelocity)
-        {
-            _owner.RestoreVelocity();
-        }
+        // 체력 비례 추가 힘 적용
+        ApplyHealthBasedForce();
         
-        // 맞은 횟수에 따른 추가 힘 적용
-        ApplyDamageBasedForce();
-        
-        // Knockback 효과 적용
-        // 플레이어의 건파우더가 50퍼 이하라면 (현재 피가 최대 피보다 클 수 있으므로 안전하게 처리)
-        float currentHealthRatio = Mathf.Clamp01((float)_owner.PlayerStat.CurrentPlayerGunPowderCount / _owner.PlayerStat.InitGunpowderCount);
+        // 체력 비율에 따른 넉백 효과 적용
+        float currentHealthRatio = CalculateCurrentHealthRatio();
         ApplyKnockbackEffect(currentHealthRatio);
 
-        // 히트 이펙트 활성화 및 방향 설정
-        _owner.HitEffectPrefab.SetActive(true);
-        //SetHitEffectDirection();
+        // 히트 이펙트 활성화
+        ActivateHitEffect();
     }
 
+    /// <summary>
+    /// 피격 상태 종료 시 정리 작업
+    /// </summary>
     public override void OnExit()
     {
         base.OnExit();
         
+        // 애니메이션 정리 및 전환
+        ResetAnimationsAndTriggerHit();
+        
+        // 히트 이펙트 비활성화 (코루틴으로 지연 처리)
+        _owner.StartCoroutine(DeactivateHitEffectWithDelay());
+
+        // 무적 상태 해제
+        SetImmuneState(false);
+        
+        // 저장된 속도 상태 초기화
+        _owner.ClearStoredVelocity();
+        
+        // 넉백 효과 정리
+        CleanupKnockbackEffect();
+    }
+
+    /// <summary>
+    /// 피격 상태의 메인 업데이트 로직
+    /// </summary>
+    public override void MineUpdate()
+    {
+        _damagedTimer += Time.deltaTime;
+
+        // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
+        if (!IsMinimumDamagedTimeElapsed())
+        {
+            return;
+        }
+
+        // 최소 시간이 지난 후 바닥 착지 시 Idle 상태로 전환
+        if (IsGrounded2D())
+        {
+            SyncStateChange<PlayerIdleState>();
+        }
+    }
+    
+    /// <summary>
+    /// 체력 비율에 따른 넉백 효과 적용
+    /// </summary>
+    private void ApplyKnockbackEffect(float currentHealthRatio)
+    {
+        _originalLinearDamping = _owner.Rigidbody2D.linearDamping;
+
+        float startDamping = CalculateStartDamping(currentHealthRatio);
+        _owner.Rigidbody2D.linearDamping = startDamping;
+        
+        // 시간에 따라 감쇠값을 증가시켜 점진적으로 감속
+        ApplyDampingTween();
+    }
+    
+    /// <summary>
+    /// 넉백 효과 정리
+    /// </summary>
+    private void CleanupKnockbackEffect()
+    {
+        // 트윈 정리
+        _knockbackTween?.Kill();
+        
+        // 원본 선형 감쇠값으로 복원
+        _owner.Rigidbody2D.linearDamping = _originalLinearDamping;
+    }
+    
+    /// <summary>
+    /// 체력 비율에 따라 추가 힘을 적용 (체력이 낮을수록 더 강한 힘)
+    /// </summary>
+    private void ApplyHealthBasedForce()
+    {
+        if (_owner.Rigidbody2D == null) return;
+        
+        float currentHealthRatio = CalculateCurrentHealthRatio();
+        float additionalForceMagnitude = (1.0f - currentHealthRatio) * MAX_ADDITIONAL_FORCE;
+        
+        // 현재 속도 방향으로 추가 힘 적용
+        ApplyForceBasedOnVelocity(additionalForceMagnitude);
+    }
+
+    // ====== 새로 추가된 헬퍼 메서드들 ======
+
+    /// <summary>
+    /// 무적 상태 설정
+    /// </summary>
+    private void SetImmuneState(bool isImmune)
+    {
+        // 태그 설정
+        if (isImmune)
+        {
+            _owner.gameObject.tag = "Immune";
+        }
+        else
+        {
+            _owner.gameObject.tag = _owner.PhotonView.IsMine ? "Player" : "Enemy";
+        }
+        
+        // 무적 상태 설정
+        _owner.PlayerStat.IsImmune = isImmune;
+        
+        // 네트워크 동기화
+        if (_owner.PhotonView.IsMine)
+        {
+            _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, isImmune);
+        }
+    }
+
+    /// <summary>
+    /// 저장된 속도가 있다면 복원
+    /// </summary>
+    private void RestoreStoredVelocityIfExists()
+    {
+        if (_owner.HasStoredVelocity)
+        {
+            _owner.RestoreVelocity();
+        }
+    }
+
+    /// <summary>
+    /// 현재 체력 비율 계산 (0~1 범위)
+    /// </summary>
+    private float CalculateCurrentHealthRatio()
+    {
+        return Mathf.Clamp01((float)_owner.PlayerStat.CurrentPlayerGunPowderCount / _owner.PlayerStat.InitGunpowderCount);
+    }
+
+    /// <summary>
+    /// 히트 이펙트 활성화
+    /// </summary>
+    private void ActivateHitEffect()
+    {
+        _owner.HitEffectPrefab.SetActive(true);
+        // 필요 시 방향 설정
+        // SetHitEffectDirection();
+    }
+
+    /// <summary>
+    /// 애니메이션 리셋 및 히트 트리거 실행
+    /// </summary>
+    private void ResetAnimationsAndTriggerHit()
+    {
         _owner.RPC_SetAnimatorTrigger("Hit");
         _owner.RPC_ResetAnimatorTrigger("HitLoop");
         _owner.RPC_ResetAnimatorTrigger("Walk");
@@ -60,148 +217,70 @@ public class PlayerDamagedState : PlayerBaseState
         _owner.RPC_ResetAnimatorTrigger("Idle");
         _owner.RPC_ResetAnimatorTrigger("Dash");
         _owner.RPC_ResetAnimatorTrigger("Fall");
-        _owner.StartCoroutine(HitEffectSetDeActiveCoroutine());
-
-        // 무적 해제
-        if(_owner.PhotonView.IsMine)
-        {
-            _owner.gameObject.tag = "Player";
-        }
-        else
-        {
-            _owner.gameObject.tag = "Enemy";
-        }
-        _owner.PlayerStat.IsImmune = false;
-        
-        // IsImmune을 네트워크로 동기화
-        if (_owner.PhotonView.IsMine)
-        {
-            _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
-        }
-        
-        // 저장된 속도 상태 초기화
-        _owner.ClearStoredVelocity();
-        
-        // Knockback 효과 정리
-        CleanupKnockbackEffect();
     }
 
-    private IEnumerator HitEffectSetDeActiveCoroutine()
+    /// <summary>
+    /// 지연 후 히트 이펙트 비활성화
+    /// </summary>
+    private IEnumerator DeactivateHitEffectWithDelay()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(HIT_EFFECT_DURATION);
         _owner.HitEffectPrefab.SetActive(false);
     }
 
-    public override void MineUpdate()
+    /// <summary>
+    /// 최소 피격 시간이 경과했는지 확인
+    /// </summary>
+    private bool IsMinimumDamagedTimeElapsed()
     {
-        // 최소 피격 시간 보장
-        _timer += Time.deltaTime;
-
-        // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
-        if (_timer < _owner.PlayerStat.DamagedTime)
-        {
-            return;
-        }
-
-        // 최소 시간이 지난 후에 바닥에 닿으면 Idle 상태로 변환
-        if (IsGrounded2D())
-        {
-            SyncStateChange<PlayerIdleState>();
-            return;
-        }
+        return _damagedTimer >= _owner.PlayerStat.DamagedTime;
     }
-    
-    private void ApplyKnockbackEffect(float currentHealthRatio)
-    {
-        // 원래 drag 값 저장
-        _originalDrag = _owner.Rigidbody2D.linearDamping;
 
-        // 피의 비율에 따라 시작값 계산
-        // 50%: 0.5, 0%: 0.01
-        float startDamping;
-        if (currentHealthRatio >= 0.5f)
+    /// <summary>
+    /// 체력 비율에 따른 시작 감쇠값 계산
+    /// </summary>
+    private float CalculateStartDamping(float currentHealthRatio)
+    {
+        if (currentHealthRatio >= HEALTH_RATIO_THRESHOLD)
         {
-            startDamping = _originalDrag;
+            return _originalLinearDamping;
         }
         else
         {
-            // 50%에서 0%까지 시작값이 0.5에서 0.01로 내려감
-            float ratio = (0.5f - currentHealthRatio) / 0.5f; // 0~1 범위로 변환
-            startDamping = Mathf.Lerp(0.5f, 0.01f, ratio);
+            // 50%에서 0%까지 시작값이 0.5에서 0.01로 변화
+            float ratio = (HEALTH_RATIO_THRESHOLD - currentHealthRatio) / HEALTH_RATIO_THRESHOLD;
+            return Mathf.Lerp(DAMPING_LERP_START, MIN_LINEAR_DAMPING, ratio);
         }
+    }
 
-        _owner.Rigidbody2D.linearDamping = startDamping;
-        
-        // 시간이 지나면서 마찰을 점점 증가시켜 감속
-        _dragTween?.Kill();
-        _dragTween = DOTween.To(() => _owner.Rigidbody2D.linearDamping, x => 
-        {
-            _owner.Rigidbody2D.linearDamping = x;
-        }, _targetLinearDamping, _owner.PlayerStat.DamagedTime)
-        .SetEase(Ease.InOutBack);  
-    }
-    
-    private void CleanupKnockbackEffect()
-    {
-        // Tween 정리
-        _dragTween?.Kill();
-        
-        // 원래 drag 값으로 복원
-        _owner.Rigidbody2D.linearDamping = _originalDrag;
-    }
-    
     /// <summary>
-    /// 피 비율에 따라 추가 힘을 적용
+    /// 감쇠값 트윈 적용
     /// </summary>
-    private void ApplyDamageBasedForce()
+    private void ApplyDampingTween()
     {
-        if (_owner.Rigidbody2D == null) return;
-        
-        // 현재 피 비율 계산 (0~1 범위, 최대 1.0으로 제한)
-        float currentHealthRatio = Mathf.Clamp01((float)_owner.PlayerStat.CurrentPlayerGunPowderCount / _owner.PlayerStat.InitGunpowderCount);
-        
-        // 피 비율에 따른 추가 힘 계산
-        // 피 100%일 때 추가 힘 0, 피 0%일 때 추가 힘 10
-        float additionalForceMagnitude = (1.0f - currentHealthRatio) * 10.0f;
-        
-        // 현재 속도 방향으로 추가 힘 적용
+        _knockbackTween?.Kill();
+        _knockbackTween = DOTween.To(() => _owner.Rigidbody2D.linearDamping, 
+            x => _owner.Rigidbody2D.linearDamping = x, 
+            MAX_LINEAR_DAMPING, 
+            _owner.PlayerStat.DamagedTime)
+            .SetEase(Ease.InOutBack);
+    }
+
+    /// <summary>
+    /// 속도에 기반한 힘 적용
+    /// </summary>
+    private void ApplyForceBasedOnVelocity(float forceMagnitude)
+    {
         Vector2 currentVelocity = _owner.Rigidbody2D.linearVelocity;
-        if (currentVelocity.magnitude > 0.1f) // 속도가 있을 때만 적용
+        
+        if (currentVelocity.magnitude > MIN_VELOCITY_THRESHOLD)
         {
             Vector2 velocityDirection = currentVelocity.normalized;
-            Vector2 additionalForce = velocityDirection * additionalForceMagnitude;
+            Vector2 additionalForce = velocityDirection * forceMagnitude;
             
-            // 추가 힘 적용
+            // 수평 및 수직 힘 적용
             _owner.Rigidbody2D.AddForce(additionalForce, ForceMode2D.Impulse);
-            _owner.Rigidbody2D.AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
-        }
-    }
-    
-    /// <summary>
-    /// 히트 이펙트의 방향을 플레이어 속도의 반대 방향으로 설정
-    /// </summary>
-    private void SetHitEffectDirection()
-    {
-        if (_owner.HitEffectPrefab == null || _owner.Rigidbody2D == null) return;
-        
-        Vector2 currentVelocity = _owner.Rigidbody2D.linearVelocity;
-        
-        // 속도가 있을 때만 방향 설정
-        if (currentVelocity.magnitude > 0.1f)
-        {
-            // 속도의 반대 방향 계산
-            Vector2 oppositeDirection = -currentVelocity.normalized;
-            
-            // Y축을 기준으로 회전 (파티클이 위쪽을 향하도록)
-            float angle = Mathf.Atan2(oppositeDirection.y, oppositeDirection.x) * Mathf.Rad2Deg;
-            
-            // 히트 이펙트의 회전 설정
-            _owner.HitEffectPrefab.transform.rotation = Quaternion.Euler(0, 0, angle);
-        }
-        else
-        {
-            // 속도가 없으면 기본 방향 (위쪽)으로 설정
-            _owner.HitEffectPrefab.transform.rotation = Quaternion.Euler(0, 0, 90f);
+            _owner.Rigidbody2D.AddForce(Vector2.up * UPWARD_FORCE, ForceMode2D.Impulse);
         }
     }
 }

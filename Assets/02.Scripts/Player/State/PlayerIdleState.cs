@@ -1,13 +1,28 @@
 using RobustFSM.Base;
 using UnityEngine;
 
+/// <summary>
+/// 플레이어 대기(Idle) 상태 클래스
+/// 
+/// 역할:
+/// - 서 있는 동안의 기본 상태 유지
+/// - 방향 입력 시 걷기 상태 전환
+/// - 대기 중 일반/특수 폭탄 공격 처리
+/// - 점프 착지 직후의 애니메이션 전환 처리
+/// 
+/// 동작 방식:
+/// 1) 상태 진입 시 플레이어 기본 스탯 초기화 및 마찰 적용(젖지 않았을 때만)
+/// 2) 점프 상태에서 넘어온 경우 착지 애니메이션 완료까지 대기 후 Idle 트리거
+/// 3) 방향 입력 감지 시 Walk 상태로 전환
+/// 4) 공격 입력(Z/X)에 따른 폭탄 배치/투척 처리
+/// </summary>
 public class PlayerIdleState : PlayerBaseState
 {
     private bool _firstEnter = false;
     
     // 방향 변경 감지용
     private int _lastFacingDirection = 0;
-
+    
     private const float MAX_FALL_SPEED = -20f; // 최대 낙하 속도
     private const float MAX_JUMP_SPEED = 30f;  // 최대 점프 속도
 
@@ -23,40 +38,8 @@ public class PlayerIdleState : PlayerBaseState
     {
         base.OnEnter();
         
-        // 착지 플래그 확인 (더 안전한 방법)
-        _isFromJumpState = _landingFromJump;
-        _landingFromJump = false; // 플래그 리셋
-
-        // 플레이어 상태
-        _owner.PlayerStat.IsRunning = false;
-        _owner.PlayerStat.IsJumping = false;
-        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;  // 기본 이동속도
-        _owner.PlayerStat.JumpCount = 0;
-        _owner.PlayerStat.IsDownJump = false;
-        _owner.PlayerStat.ResetJumpDashCount();
-
-        // 플레이어가 젖으면 미끄러진다.
-        if(!_owner.PlayerStat.IsWet)
-        {
-            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
-            velocity.x = 0f;
-            _owner.Rigidbody2D.linearVelocity = velocity;
-        }
-
-        // 착지 애니메이션 처리
-        if (_isFromJumpState)
-        {
-            _landingAnimationTimer = 0f;
-            // 착지 애니메이션은 이미 JumpState에서 트리거됨
-        }
-        else
-        {
-            // 애니메이션 재생
-            if(_firstEnter)
-            {
-                _owner.RPC_SetAnimatorTrigger("Idle");
-            }
-        }
+        // 진입 초기화 (플래그/스탯/마찰/애니메이션)
+        InitializeOnEnter();
         _firstEnter = true;
     }
 
@@ -82,11 +65,10 @@ public class PlayerIdleState : PlayerBaseState
     {
         base.MineUpdate();
         
-        // 착지 애니메이션 처리
+        // 애니메이션/입력 처리
         HandleLandingAnimation();
-        
-        IdleMove();
-        IdleAttack();
+        HandleIdleMovement();
+        HandleIdleAttack();
     }
 
     /// <summary>
@@ -116,6 +98,22 @@ public class PlayerIdleState : PlayerBaseState
     {
         IdleNormalAttack();
         IdleSpecialAttack();
+    }
+
+    /// <summary>
+    /// Idle 공격 처리 래퍼 -> 내부 처리 위임
+    /// </summary>
+    private void HandleIdleAttack()
+    {
+        ProcessIdleAttack();
+    }
+
+    /// <summary>
+    /// Idle 공격 처리 본체
+    /// </summary>
+    private void ProcessIdleAttack()
+    {
+        IdleAttack();
     }
 
     private void IdleNormalAttack()
@@ -196,6 +194,79 @@ public class PlayerIdleState : PlayerBaseState
         {
             _owner.RPC_SetFacingDirection(InputHandler.GetKey(KeyCode.LeftArrow) ? -1 : 1);
             _playerFSM.ChangeState<PlayerWalkState>();
+        }
+    }
+
+    /// <summary>
+    /// Idle 이동 처리 래퍼
+    /// </summary>
+    private void HandleIdleMovement()
+    {
+        IdleMove();
+    }
+
+    /// <summary>
+    /// Idle 상태 진입 시 초기화 처리
+    /// </summary>
+    private void InitializeOnEnter()
+    {
+        InitializeLandingFlag();
+        ResetPlayerStateForIdle();
+        ApplyGroundFrictionIfNotWet();
+        SetupEnterAnimation();
+    }
+
+    /// <summary>
+    /// 점프 착지 플래그 처리
+    /// </summary>
+    private void InitializeLandingFlag()
+    {
+        _isFromJumpState = _landingFromJump;
+        _landingFromJump = false;
+    }
+
+    /// <summary>
+    /// Idle에 맞게 플레이어 스탯 리셋
+    /// </summary>
+    private void ResetPlayerStateForIdle()
+    {
+        _owner.PlayerStat.IsRunning = false;
+        _owner.PlayerStat.IsJumping = false;
+        _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+        _owner.PlayerStat.JumpCount = 0;
+        _owner.PlayerStat.IsDownJump = false;
+        _owner.PlayerStat.ResetJumpDashCount();
+    }
+
+    /// <summary>
+    /// 젖지 않았을 때만 수평 속도 0으로 고정(지면 마찰)
+    /// </summary>
+    private void ApplyGroundFrictionIfNotWet()
+    {
+        if(!_owner.PlayerStat.IsWet)
+        {
+            Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+            velocity.x = 0f;
+            _owner.Rigidbody2D.linearVelocity = velocity;
+        }
+    }
+
+    /// <summary>
+    /// 상태 진입 시 애니메이션 세팅
+    /// </summary>
+    private void SetupEnterAnimation()
+    {
+        if (_isFromJumpState)
+        {
+            _landingAnimationTimer = 0f;
+            // 착지 애니메이션은 이미 JumpState에서 트리거됨
+        }
+        else
+        {
+            if(_firstEnter)
+            {
+                _owner.RPC_SetAnimatorTrigger("Idle");
+            }
         }
     }
 }
