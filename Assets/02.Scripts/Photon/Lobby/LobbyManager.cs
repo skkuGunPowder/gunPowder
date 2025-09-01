@@ -10,6 +10,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
     private List<RoomInfo> _roomInfoList = new List<RoomInfo>();
     public List<RoomInfo> RoomInfoList => _roomInfoList;
     
+    [Header("처음 맵 설정")] public EMap InitialMap = EMap.Map1;
     public event Action OnDataChanged;
     protected override void Awake()
     {
@@ -23,7 +24,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         // 룸 프로퍼티에 들어가야할 것들 : 시간, 목숨, 시작 건파우더, 시간 당 감소
         Hashtable roomProperties = new Hashtable
         {
-            {ERoomProperties.MapSelected.ToString(), (int)EMap.Map1},
+            {ERoomProperties.MapSelected.ToString(), (int)InitialMap},
             {ERoomProperties.PlayTime.ToString(), playTime},
             {ERoomProperties.Life.ToString(), life},
             {ERoomProperties.Gunpowder.ToString(), gunpowder},
@@ -67,7 +68,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         {
             return;
         }
-
+        
         foreach (RoomInfo roomInfo in roomList)
         {
             if (roomInfo.RemovedFromList)

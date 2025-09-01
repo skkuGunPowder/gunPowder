@@ -38,7 +38,7 @@ public class UI_RoomSearchPopup : UI_Popup
     public void Refresh()
     { 
         List<RoomInfo> roomInfoList = LobbyManager.Instance.RoomInfoList;
-
+        
         // 방이 0개인 경우
         if (roomInfoList == null || roomInfoList.Count == 0)
         {
@@ -77,6 +77,7 @@ public class UI_RoomSearchPopup : UI_Popup
             {
                 RoomInfo room = roomInfoList[startIndex + i];
                 Sprite mapIcon = StringToSprite(room);
+                RoomSlotList[i].gameObject.SetActive(true);
                 RoomSlotList[i].Refresh(mapIcon, room);
             }
             else
