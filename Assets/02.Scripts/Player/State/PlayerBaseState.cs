@@ -292,7 +292,7 @@ public class PlayerBaseState : MonoState
         }
     }
 
-    // [리팩토링] 일반 폭탄 처리 메서드
+    //일반 폭탄 처리 메서드
     protected virtual void HandleNormalBomb(BombActionType action, EBombSpawnPoint? spawnPoint = null)
     {
         if(!_owner.PhotonView.IsMine)
@@ -332,7 +332,7 @@ public class PlayerBaseState : MonoState
         return Mathf.Abs(h) > 0.01f || Mathf.Abs(v) > 0.01f;
     }
 
-    // [리팩토링] 특수 폭탄 처리 메서드
+    //특수 폭탄 처리 메서드
     protected virtual void HandleSpecialBomb(BombActionType action, EBombSpawnPoint? spawnPoint = null)
     {
         if(!_owner.PhotonView.IsMine)

@@ -980,7 +980,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 공격자 정보 가져오기
         PhotonView attackerView = PhotonView.Find(attackerViewId);
-        if (attackerView != null)
+        if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
         {
             PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
 
@@ -1013,13 +1013,17 @@ public class Player : MonoBehaviourPun, IDamagable
         bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber);
 
         // 날 때린 사람 딜량 증가
-        if (attackerView != null)
+        if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
         {
-            attackerView.GetComponent<PlayerStat>().IncreaseTotalDamage(damage);
-        }
-        if (isDead)
-        {
-            attackerView.GetComponent<PlayerStat>().IncreaseTotalKillCount();
+            PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
+            if (attackerStat != null)
+            {
+                attackerStat.IncreaseTotalDamage(damage);
+                if (isDead)
+                {
+                    attackerStat.IncreaseTotalKillCount();
+                }
+            }
         }
 
         // 건파우더 감소 개수 = 데미지 절반
@@ -1040,7 +1044,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 PhotonView.RPC(nameof(ShowDamagePopup), PhotonView.Owner, -damage, maxDamage);
             }
             // 때린 사람(Attacker Owner)에게는 +damage 표시 (피해자와 동일 Owner면 중복 방지)
-            if (attackerView != null && attackerView.Owner != null && attackerView.Owner != PhotonView.Owner)
+            if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy && attackerView.Owner != null && attackerView.Owner != PhotonView.Owner)
             {
                 PhotonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
             }

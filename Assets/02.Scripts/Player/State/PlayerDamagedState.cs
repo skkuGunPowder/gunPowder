@@ -283,22 +283,4 @@ public class PlayerDamagedState : PlayerBaseState
             _owner.Rigidbody2D.AddForce(Vector2.up * UPWARD_FORCE, ForceMode2D.Impulse);
         }
     }
-
-    /// <summary>
-    /// 속도에 따른 히트 이펙트 방향 설정
-    /// </summary>
-    private void SetHitEffectDirectionByVelocity(Vector2 velocity)
-    {
-        Vector2 oppositeDirection = -velocity.normalized;
-        float angle = Mathf.Atan2(oppositeDirection.y, oppositeDirection.x) * Mathf.Rad2Deg;
-        _owner.HitEffectPrefab.transform.rotation = Quaternion.Euler(0, 0, angle);
-    }
-
-    /// <summary>
-    /// 기본 히트 이펙트 방향 설정 (위쪽)
-    /// </summary>
-    private void SetDefaultHitEffectDirection()
-    {
-        _owner.HitEffectPrefab.transform.rotation = Quaternion.Euler(0, 0, DEFAULT_HIT_EFFECT_ANGLE);
-    }
 }

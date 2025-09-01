@@ -158,7 +158,6 @@ public class PlayerHitStopState : PlayerBaseState
         StartScreenShakeEffect();
     }
 
-    // ====== 새로 추가된 헬퍼 메서드들 ======
 
     /// <summary>
     /// Owner와 PlayerStat의 유효성 검사

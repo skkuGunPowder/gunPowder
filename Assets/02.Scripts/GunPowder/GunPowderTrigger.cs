@@ -20,15 +20,15 @@ public class GunPowderTrigger : MonoBehaviour
             GunPowder gunPowder = gameObject.GetComponentInParent<GunPowder>();
             if (gunPowder != null)
             {
-                if(gunPowder.SourceViewId == collision.GetComponent<PhotonView>().ViewID)
-                {
-                    return;
-                }
-                PhotonView targetView = collision.GetComponent<PhotonView>();
-                if (targetView != null)
-                {
-                    gunPowder.photonView.RPC(nameof(GunPowder.SetTarget), RpcTarget.All, targetView.ViewID);
-                }
+                        PhotonView collisionPhotonView = collision.GetComponent<PhotonView>();
+        if(collisionPhotonView != null && collisionPhotonView.gameObject.activeInHierarchy)
+        {
+            if(gunPowder.SourceViewId == collisionPhotonView.ViewID)
+            {
+                return;
+            }
+            gunPowder.photonView.RPC(nameof(GunPowder.SetTarget), RpcTarget.All, collisionPhotonView.ViewID);
+        }
             }
 
             // 이 콜라이더는 더 이상 감지하지 않게 비활성화

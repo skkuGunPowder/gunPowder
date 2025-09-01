@@ -2,8 +2,22 @@ using RobustFSM.Base;
 using Photon.Pun;
 using UnityEngine;
 
+/// <summary>
+/// 플레이어 상태 머신(FSM) 등록/초기화 클래스
+/// 
+/// 역할:
+/// - 모든 플레이어 상태 등록 및 초기 상태 설정
+/// - 중요한 상태 전환의 네트워크 동기화 제공
+/// 
+/// 동작 방식:
+/// 1. AddStates에서 상태들을 등록하고 초기 상태를 설정
+/// 2. SyncStateChange<T>() 호출 시 본인 클라이언트에서 RPC로 전 클라이언트에 상태 전파
+/// </summary>
 public class PlayerFSM : MonoFSM<Player>
 {
+    /// <summary>
+    /// 플레이어 상태 등록 및 초기 상태 설정
+    /// </summary>
     public override void AddStates()
     {
         // 상태 등록
@@ -33,12 +47,7 @@ public class PlayerFSM : MonoFSM<Player>
     /// </summary>
     public void SyncStateChange<T>() where T : PlayerBaseState
     {
-        if(Owner == null)
-        {
-            return;
-        }
-
-        if(Owner.PhotonView == null)
+        if (Owner == null || Owner.PhotonView == null)
         {
             return;
         }
