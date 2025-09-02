@@ -13,11 +13,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnDataChanged?.Invoke(playerNumber, gunpowder, life);
     }
-    public event Action OnMapChanged;    // UI 변경 => 방장이 맵을 변경했을 때
+    public event Action<EMap> OnMapChanged;    // UI 변경 => 방장이 맵을 변경했을 때
 
-    public void MapChanged()
+    public void MapChanged(EMap currentMap)
     {
-        OnMapChanged?.Invoke();
+        OnMapChanged?.Invoke(currentMap);
     }
     public event Action OnRoomDataChanged;  // UI 변경 => 플레이어들이 자리를 이동할 때
 

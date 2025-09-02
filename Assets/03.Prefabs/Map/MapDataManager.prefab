@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3304875036615823301
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4767274235755336048}
+  - component: {fileID: 1061030821594630940}
+  m_Layer: 0
+  m_Name: MapDataManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4767274235755336048
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3304875036615823301}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.1863124, y: 10.4777775, z: -21.76}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1061030821594630940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3304875036615823301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bca0d6f66131574291dd56f08ebdd16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _mapDataSOList:
+  - {fileID: 11400000, guid: 9cc09f17710216045ba3b4c0e2ce62d0, type: 2}
+  - {fileID: 11400000, guid: 0d1827e23360495419df2a069f47a11d, type: 2}
+  - {fileID: 11400000, guid: e7c87cc41afbc184299492da0f110c06, type: 2}
+  - {fileID: 11400000, guid: 4903d64c319468e4398c10efa1e99563, type: 2}
+  _mapThemeDataSOList:
+  - {fileID: 11400000, guid: bafe8b2c28562124e80834f551258ee6, type: 2}
+  - {fileID: 11400000, guid: f35f64d725dfebb48ac505ef16fc1116, type: 2}
+  - {fileID: 11400000, guid: 879229b1bda83c8428cf6ed836a503c4, type: 2}
+  - {fileID: 11400000, guid: c7cd93af2221edc42841d44c9147db04, type: 2}
+  CurrentMap: 0

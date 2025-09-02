@@ -185,7 +185,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         if (propertiesThatChanged.ContainsKey(ERoomProperties.MapSelected.ToString()) && propertiesThatChanged[ERoomProperties.MapSelected.ToString()] != null)
         {
             SelectedMap = (EMap)propertiesThatChanged[ERoomProperties.MapSelected.ToString()];
-            EventManager.Instance.MapChanged();
+            EventManager.Instance.MapChanged(SelectedMap);
         }
 
         if (propertiesThatChanged.ContainsKey(ERoomProperties.Life.ToString()) &&

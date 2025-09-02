@@ -9,9 +9,6 @@ public class UI_RoomSearchPopup : UI_Popup
     public List<UI_RoomSlot> RoomSlotList;
     [Header("방 페이지 수")]
     public TextMeshProUGUI RoomPageTextUGUI;
-    [Header("맵 관련")]
-    public List<MapDataSO> MapDataList;
-    private Dictionary<EMap, MapDataSO> _mapDataDictionary;
     
     private int _currentPage = 1;
     private int _maxPage = 1;
@@ -19,13 +16,6 @@ public class UI_RoomSearchPopup : UI_Popup
     private void Awake()
     {
         LobbyManager.Instance.OnDataChanged += Refresh;
-        
-        _mapDataDictionary = new Dictionary<EMap, MapDataSO>();
-        
-        foreach (MapDataSO dataSo in MapDataList)
-        {
-            _mapDataDictionary.Add(dataSo.MapSceneList, dataSo);
-        }
     }
     
     private void OnEnable()
@@ -92,12 +82,14 @@ public class UI_RoomSearchPopup : UI_Popup
     {
         EMap map = (EMap)info.CustomProperties[ERoomProperties.MapSelected.ToString()];
         
-        if (_mapDataDictionary.TryGetValue(map, out var mapData))
-        { 
-            return mapData.MapSprite;
+        MapThemeData theme = MapDataManager.Instance.GetThemeData(map);
+        
+        if (theme == null)
+        {
+            return null;
         }
         
-        return null;
+        return theme.MapIcon;
     }
 
     private void PageSetting()
