@@ -113,6 +113,7 @@ public class UI_RoomSearchPopup : UI_Popup
 
     private void OnDisable()
     {
+        LobbyManager.Instance.OnDataChanged -= Refresh;
         _currentPage = 1;
     }
 }

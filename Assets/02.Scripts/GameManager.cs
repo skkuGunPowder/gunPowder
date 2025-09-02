@@ -14,11 +14,6 @@ public class GameManager : PhotonSingleton<GameManager>
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
     
-    [Header("게임 지속시간")]
-    [SerializeField]private float _timer;
-    public float Timer => _timer;
-    private float _initTime = 0;
-    
     [Header("플레이어 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
@@ -28,17 +23,17 @@ public class GameManager : PhotonSingleton<GameManager>
     private float _airDropTimer;
     [SerializeField] private GameObject _airDropJetPrefab;
 
+    public event Action<PhotonPlayer> OnTimeCheck;
     public event Action OnGameStart;
     public event Action OnGameOver;
 
     protected override void Awake()
     {
-        Debug.Log("GameManager Awake");
         base.Awake();
         _photonView = GetComponent<PhotonView>();
 
-        // Debug.LogWarning($"현재 씬 이름 {SceneManager.GetActiveScene().name}");
-        // ClientManager.PlayBGM(SceneManager.GetActiveScene().name);
+        Debug.LogWarning($"현재 씬 이름 {SceneManager.GetActiveScene().name}");
+        ClientManager.PlayBGM(SceneManager.GetActiveScene().name);
 
         if (_currentGameState == EGameState.Waiting)
         {
@@ -48,42 +43,32 @@ public class GameManager : PhotonSingleton<GameManager>
         TimeScaleSetting();
         EventManager.Instance.OnLoadFinished += Init;
     }
-    // 게임 시작
-    private void Update()
+    
+    private void Init()
     {
-        if (_currentGameState == EGameState.Playing || _currentGameState == EGameState.Result)
-        {
-            GameTimer();
-        }
-    }
-
-    private void GameTimer()
-    {
-        _timer -= Time.deltaTime;
-        _airDropTimer += Time.deltaTime;
-
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
 
-        if (_airDropTimer > 30f)
-        {
-            _airDropTimer = 0f;
-            
-            if (UnityEngine.Random.Range(0f, 1.0f) <= 0.1f)
-            {
-                PhotonNetwork.Instantiate(_airDropJetPrefab.name, transform.position, Quaternion.identity);
-            }
-        }
-
-        if (_timer <= 0)
-        {
-            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-        }
+        _photonView.RPC(nameof(RPC_GameStart), RpcTarget.All);
     }
+    
     // 게임 종료
+    public void RequestGameOver()
+    {
+        _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+    }
+    
+    [PunRPC]
+    private void RPC_GameOver()
+    {
+        GameStateChange(EGameState.Result);
+        OnGameOver?.Invoke();
+    }
+    
     // 프로퍼티가 바뀌었을 때 호출되는 함수
+    // 플레이어가 죽을 때마다 죽은 플레이어들 체크하기
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
         if (_currentGameState == EGameState.Waiting || _currentGameState == EGameState.GameOver)
@@ -96,7 +81,7 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
         
-        // 현재 살아있는 사람들 체크
+        // 현재 살아있는 사람들 체크, 관전
         EventManager.Instance.TargetChanged();
         // 게임오버 체크
         if (PhotonNetwork.IsMasterClient == false)
@@ -106,26 +91,13 @@ public class GameManager : PhotonSingleton<GameManager>
         
         if ((bool)changedProps[EProperties.IsDead.ToString()])
         {
-            int playtime = (int)Mathf.Abs(_timer - _initTime);
-            Hashtable hash = new Hashtable() 
-            {
-                {EProperties.SurvivorTime.ToString(), playtime} 
-            };
-            
-            targetPlayer.SetCustomProperties(hash);
+            OnTimeCheck?.Invoke(targetPlayer);
         }   
         
         if (PlayerDeadCheck())
         { 
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
         }
-    }
-    
-    [PunRPC]
-    private void RPC_GameOver()
-    {
-        GameStateChange(EGameState.Result);
-        OnGameOver?.Invoke();
     }
     
     // 캐릭터들 사망 체크하기 = 방장만
@@ -144,7 +116,6 @@ public class GameManager : PhotonSingleton<GameManager>
             }
             
             dead++;
-            
         }
         
         if (dead < playerList.Count)
@@ -155,27 +126,10 @@ public class GameManager : PhotonSingleton<GameManager>
         return true;
     }
 
-    public void Init()
-    {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-
-        _photonView.RPC(nameof(RPC_RequestGameStart), RpcTarget.All);
-    }
-
     [PunRPC]
-    public void RPC_RequestGameStart()
+    public void RPC_GameStart()
     {
         EventManager.Instance.ProfileInit();
-
-        int playtime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
-        
-        _initTime = playtime;
-
-        _timer = _initTime;
-        
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
         EventManager.Instance.PlayerFind();
         OnGameStart?.Invoke();
@@ -185,13 +139,11 @@ public class GameManager : PhotonSingleton<GameManager>
     public void GameResultCheck()
     {
         PhotonPlayer player = PhotonNetwork.LocalPlayer;
-
         if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
         {
             return;
         }
-
-        int playTime = (int)Mathf.Abs(_timer - _initTime) ;
+        
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         PlayerStat stat = playerObject.GetComponent<PlayerStat>();
         Hashtable properties = new Hashtable()
@@ -203,12 +155,10 @@ public class GameManager : PhotonSingleton<GameManager>
 
         if (PhotonNetwork.IsMasterClient)
         {
-            properties.Add(EProperties.SurvivorTime.ToString(), playTime);
+            OnTimeCheck?.Invoke(player);
         }
         
         player.SetCustomProperties(properties);
-        
-        GameStateChange(EGameState.GameOver);
     }
     
     public void GameStateChange(EGameState state)
