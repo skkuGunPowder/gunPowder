@@ -19,15 +19,19 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public UI_EmotionSlot Emotion;
     
     public List<GameObject> LifeList;
-    public List<Color32> GunPowderColorCodeList;
-    public List<Color32> TeamColorCodeList;
-
+    public ColorPalette ColorPalette;
+   
+    [Header("Color")] 
+    public int GunpowderMiddle = 50;
+    public int GunpowderLow = 20;
+    
     [Header("Shaker")]
     public float Strength = 20f;
     public float Duration = 1f;
     public int Vibrato = 10;
     public Ease EaseType;
     public float ScaleStrength = 1.2f;
+   
     public void Init(string playerName, Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
     {
         NicknameTextUGUI.text = playerName;
@@ -38,17 +42,17 @@ public class UI_InGameProfileSlot : MonoBehaviour
     }
     public void Refresh(int gunpowder, int life)
     {
-        if (gunpowder > 50)
+        if (gunpowder > GunpowderMiddle)
         {
-            GunpowderTextUGUI.color = GunPowderColorCodeList[0];
+            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
         }
-        else if (gunpowder > 20)
+        else if (gunpowder > GunpowderLow)
         {
-            GunpowderTextUGUI.color = GunPowderColorCodeList[1];
+            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthMiddle];
         }
         else
         {
-            GunpowderTextUGUI.color = GunPowderColorCodeList[2];
+            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthLow];
         }
 
         Shake();
@@ -76,15 +80,15 @@ public class UI_InGameProfileSlot : MonoBehaviour
         switch (team)
         {
             case EInGameTeam.Red:
-                return TeamColorCodeList[0];
+                return ColorPalette.ColorDictionary[EColorType.Red];
             case EInGameTeam.Blue:
-                return TeamColorCodeList[1];
+                return ColorPalette.ColorDictionary[EColorType.Blue];
             case EInGameTeam.Green:
-                return TeamColorCodeList[2];
+                return ColorPalette.ColorDictionary[EColorType.Green];
             case EInGameTeam.Yellow:
-                return TeamColorCodeList[3];
+                return ColorPalette.ColorDictionary[EColorType.Yellow];
             default:
-                return TeamColorCodeList[0];
+                return ColorPalette.ColorDictionary[EColorType.Red];
         }
     }
 

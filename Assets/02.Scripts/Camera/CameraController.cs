@@ -10,8 +10,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private ProCamera2D _proCamera;
 
     private Player _target;
-    
-    private bool _isObserving = false; // 후에 수정해야함
+
+    private bool _isObserving = false;
     private List<Player> _currentTargetList = new List<Player>();
     private int _currentTargetIndex = 0;
     
@@ -110,6 +110,7 @@ public class CameraController : MonoBehaviour
         {
             if (player.gameObject.activeSelf == false)
             {
+                // activefalse가 자기 자신이면 오저버모드
                 if (player.GetComponent<PhotonView>().Owner.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
                     _isObserving = true;
@@ -129,12 +130,12 @@ public class CameraController : MonoBehaviour
             return;
         }
         
-        if (InputHandler.GetKeyDown(KeyCode.LeftArrow))
+        if (InputHandler.GetKeyDown(KeyCode.LeftArrow) || InputHandler.GetKeyDown(KeyCode.DownArrow))
         {
             SelectTarget(-1);
         }
 
-        if (InputHandler.GetKeyDown(KeyCode.RightArrow))
+        if (InputHandler.GetKeyDown(KeyCode.RightArrow)|| InputHandler.GetKeyDown(KeyCode.UpArrow))
         {
             SelectTarget(1);
         }
@@ -143,12 +144,12 @@ public class CameraController : MonoBehaviour
 
     public void SelectTarget(int index)
     {
-        _currentTargetIndex += index;
-        
-        if (_currentTargetList.Count == 0)
+        if (_currentTargetList.Count <= 1)
         {
             return;
         }
+        
+        _currentTargetIndex += index;
         
         if (_currentTargetIndex < 0)
         {
@@ -162,10 +163,6 @@ public class CameraController : MonoBehaviour
         Player player = _currentTargetList[_currentTargetIndex];
         SetTarget(player);
     }
-    // private void TargetChange(Player player)
-    // {
-    //     _target = player;
-    // }
     
     private void OnDisable()
     {

@@ -34,6 +34,10 @@ public class GameStartProduction : MonoBehaviour
         EventManager.Instance.OnLoadFinished += Play;
     }
 
+    private void Start()
+    {
+        GameManager.Instance.OnGameStart += GameStart;    
+    }
     public void Play()
     {
         Timer.DOAnchorPos(TimerEndPosition, DotweenDuration).SetEase(TimerEase).SetUpdate(true);
@@ -66,12 +70,14 @@ public class GameStartProduction : MonoBehaviour
         sequence.OnComplete(() =>
         {
             GameManager.Instance.GameStateChange(EGameState.Playing);
+            GameManager.Instance.OnGameStart -= GameStart;
         });
     }
     private void OnDisable()
     {
         Timer.anchoredPosition = TimerOriginPosition;
         Profile.anchoredPosition = ProfileOriginPosition;
+        
         EventManager.Instance.OnLoadFinished -= Play;
     }
 }

@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class PlayerSpawner : MonoBehaviour
 {
+    public GameObject PlayerPrefab;
     public List<Transform> SpawnPoints = new List<Transform>();
     public List<RankSpawnPoint> RankSpawnPointList = new List<RankSpawnPoint>();
     public void GeneratePlayers(int count)
     {
-        GameObject playerInstance = PhotonNetwork.Instantiate("PlayerTest", SpawnPoints[count].position, Quaternion.identity, 0);
+        GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, SpawnPoints[count].position, Quaternion.identity, 0);
         Player player = playerInstance.GetComponent<Player>();
 
         if (player.PhotonView.IsMine)
@@ -35,7 +36,7 @@ public class PlayerSpawner : MonoBehaviour
                 continue;
             }
             
-            GameObject playerInstance = PhotonNetwork.Instantiate("PlayerTest", rankSpawnPoint.SpawnPointList[spawnCount].position, Quaternion.identity, 0);
+            GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, rankSpawnPoint.SpawnPointList[spawnCount].position, Quaternion.identity, 0);
             Player player = playerInstance.GetComponent<Player>();
             break;
         }

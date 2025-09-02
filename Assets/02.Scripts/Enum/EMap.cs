@@ -1,0 +1,7 @@
+public enum EMap
+{
+    Map1,
+    Map2,
+    Map3,
+    Map4,
+}

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class UI_MapSetup : MonoBehaviour
 {
-    public ESceneList SelectedMap;
+    public EMap SelectedMap;
     
     public void SetupMap()
     {
@@ -12,7 +12,7 @@ public class UI_MapSetup : MonoBehaviour
         
         Hashtable roomProperties = new Hashtable()
         {
-            {"MapSelected", SelectedMap}
+            {ERoomProperties.MapSelected.ToString(), SelectedMap}
         };
         
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);

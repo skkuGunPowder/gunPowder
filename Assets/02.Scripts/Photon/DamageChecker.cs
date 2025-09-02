@@ -130,9 +130,15 @@ public class DamageChecker : Singleton<DamageChecker>
             {
                 topScore = kvp.Value;
                 topActor = kvp.Key;
+                
+            }
+            
+            if (topActor != _currentTopPlayer)
+            {
+                _currentTopPlayer = topActor;
+                _photonView.RPC(nameof(RPC_RequestTopPlayer), RpcTarget.All, topActor);
             }
         }
-        _photonView.RPC(nameof(RPC_RequestTopPlayer), RpcTarget.All, topActor);
     }
     
     [PunRPC]

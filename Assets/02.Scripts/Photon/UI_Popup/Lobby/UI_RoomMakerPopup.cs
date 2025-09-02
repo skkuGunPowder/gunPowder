@@ -41,14 +41,10 @@ public class UI_RoomMakerPopup : UI_Popup
             Gunpowder.CurrentValue(), Decline.CurrentValue(), IsLocked.isOn, RoomPassword.text);
     }
     
-    public void Cancel()
-    {
-        gameObject.SetActive(false);    
-    }
-    
     // UI 초기화하기
     public void OnDisable()
     {
+        IsLocked.isOn = false;
         RoomName.text = "";
         RoomPassword.text = "";
         MaxPlayers.value = 0;
