@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SettingManager : Singleton<SettingManager>
+public class SettingManager : DontDestroySingleton<SettingManager>
 {
     private const string PrefKeyResolutionIndex = "pref_resolution_index";
     private const string PrefKeyFullscreenMode = "pref_fullscreen_mode"; // 0: Windowed, 1: Fullscreen, 2: Borderless
@@ -32,7 +32,10 @@ public class SettingManager : Singleton<SettingManager>
         int savedIndex = GetSavedResolutionIndex();
         EFullscreenMode savedMode = GetSavedFullscreenMode();
         ApplyResolution(savedIndex, savedMode, save: false);
-        
+    }
+
+    private void Start()
+    {
         // Apply saved sound volumes
         float savedBGMVolume = GetSavedBGMVolume();
         float savedSFXVolume = GetSavedSFXVolume();
@@ -110,8 +113,10 @@ public class SettingManager : Singleton<SettingManager>
         // SoundManager를 통해 볼륨 적용
         if (SoundManager.Instance != null)
         {
-            SoundManager.Instance.SetVolume(SoundType.BGM, bgmVolume);
-            SoundManager.Instance.SetVolume(SoundType.SFX, sfxVolume);
+            float bgmDb = Linear01ToDecibel(bgmVolume);
+            float sfxDb = Linear01ToDecibel(sfxVolume);
+            SoundManager.Instance.SetVolume(SoundType.BGM, bgmDb);
+            SoundManager.Instance.SetVolume(SoundType.SFX, sfxDb);
         }
 
         if (save)
@@ -120,5 +125,12 @@ public class SettingManager : Singleton<SettingManager>
             PlayerPrefs.SetFloat(PrefKeySFXVolume, sfxVolume);
             PlayerPrefs.Save();
         }
+    }
+
+    private static float Linear01ToDecibel(float linear)
+    {
+        if (linear <= 0.0001f) return -80f;
+        float db = Mathf.Log10(linear) * 20f;
+        return Mathf.Clamp(db, -80f, 0f);
     }
 }

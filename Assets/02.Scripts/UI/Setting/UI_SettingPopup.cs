@@ -7,14 +7,17 @@ public class UI_SettingPopup : UI_Popup
 {
     [SerializeField] private TMP_Dropdown _resolutionDropdown;
     
-    [Header("Fullscreen Mode Toggles")]
+    [Header("화면 모드 토글")]
     [SerializeField] private Toggle _windowedToggle;
     [SerializeField] private Toggle _fullscreenToggle;
     [SerializeField] private Toggle _borderlessToggle;
 
-    [Header("Sound Volume Sliders")]
+    [Header("사운드 볼륨")]
     [SerializeField] private Slider _bgmVolumeSlider;
     [SerializeField] private Slider _sfxVolumeSlider;
+    [SerializeField] private TextMeshProUGUI _bgmVolumeText;
+    [SerializeField] private TextMeshProUGUI _sfxVolumeText;
+
 
     private readonly string[] presetLabels = new string[]
     {
@@ -82,6 +85,8 @@ public class UI_SettingPopup : UI_Popup
 
         _bgmVolumeSlider.value = savedBGMVolume;
         _sfxVolumeSlider.value = savedSFXVolume;
+        _bgmVolumeText.text = Mathf.Round(savedBGMVolume * 100).ToString() + "%";
+        _sfxVolumeText.text = Mathf.Round(savedSFXVolume * 100).ToString() + "%";
     }
 
     // 인스펙터에서 TMP_Dropdown의 OnValueChanged에 할당할 메서드
@@ -131,5 +136,7 @@ public class UI_SettingPopup : UI_Popup
         float currentSFXVolume = _sfxVolumeSlider.value;
         float currentBGMVolume = _bgmVolumeSlider.value;
         SettingManager.Instance.ApplySoundVolumes(currentBGMVolume, currentSFXVolume, save: true);
+        _bgmVolumeText.text = Mathf.Round(currentBGMVolume * 100).ToString() + "%";
+        _sfxVolumeText.text = Mathf.Round(currentSFXVolume * 100).ToString() + "%";
     }
 }
