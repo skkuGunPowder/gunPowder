@@ -1,210 +1,208 @@
 using System;
 using System.Collections.Generic;
 using Photon.Pun;
-using Photon.Pun.Demo.Cockpit;
 using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
 {
+    // 내부 필드
     private PhotonView _photonView;
-    [Header("Scriptable Object Reference")]
-    [SerializeField] private PlayerStatSO _playerStatSO;
-    public PlayerStatSO PlayerStatSO => _playerStatSO;
-
-    [Header("Movement Stats")]
-    [SerializeField] private float _moveSpeed;
-    public float MoveSpeed { get => _moveSpeed; set => _moveSpeed = value; }
-
-    [SerializeField] private float _jumpForce;
-    public float JumpForce { get => _jumpForce; set => _jumpForce = value; }
-
-    [SerializeField] private float _dashTime;
-    public float DashTime { get => _dashTime; set => _dashTime = value; }
-
-    [SerializeField] private float _doubleTapTime;
-    public float DoubleTapTime { get => _doubleTapTime; set => _doubleTapTime = value; }
-
-    [SerializeField] private float _dashSpeed;
-    public float DashSpeed { get => _dashSpeed; set => _dashSpeed = value; }
-
-    [SerializeField] private float _breakTime;
-    public float BreakTime { get => _breakTime; set => _breakTime = value; }
-
-    [SerializeField] private float _runSpeed;
-    public float RunSpeed { get => _runSpeed; set => _runSpeed = value; }
-
-    [SerializeField] private float _maxJumpCount;
-    public float MaxJumpCount { get => _maxJumpCount; set => _maxJumpCount = value; }
-
-    [SerializeField] private float _jumpDashCount;
-    public float JumpDashCount { get => _jumpDashCount; set => _jumpDashCount = value; }
-
-    [SerializeField] private float _recoilTime;
-    public float RecoilTime { get => _recoilTime; set => _recoilTime = value; }
-
-    [SerializeField] private float _recoilSpeed;
-    public float RecoilSpeed { get => _recoilSpeed; set => _recoilSpeed = value; }
-
-    [SerializeField] private float _normalRecoilTime;
-    public float NormalRecoilTime { get => _normalRecoilTime; set => _normalRecoilTime = value; }
-    [SerializeField] private float _normalRecoilSpeed;
-    public float NormalRecoilSpeed { get => _normalRecoilSpeed; set => _normalRecoilSpeed = value; }
-    [SerializeField] private float _confuseTime = 5f;
-    public float ConfuseTime { get => _confuseTime; set => _confuseTime = value; }
-    [SerializeField] private float _hitStopGunPowderCount = 50;
-    public float HitStopGunPowderCount { get => _hitStopGunPowderCount; set => _hitStopGunPowderCount = value; }
     private float _originalMoveSpeed;
     private float _originalRunSpeed;
     private float _originalJumpForce;
 
+    [Header("스크립터블 오브젝트 참조")]
+    [SerializeField] private PlayerStatSO _playerStatSO;
+    public PlayerStatSO PlayerStatSO => _playerStatSO;
 
-
-
-    [Header("Player State Stats")]
-    [SerializeField] private bool _isRunning = false;
-    public bool IsRunning { get => _isRunning; set => _isRunning = value; }
-
-    [SerializeField] private bool _isJumping = false;
-    public bool IsJumping { get => _isJumping; set => _isJumping = value; }
-    [SerializeField] private bool _isFallingDead = false;
-    public bool IsFallingDead { get => _isFallingDead; set => _isFallingDead = value; }
-    [SerializeField] private bool _isImmune = false;
-    public bool IsImmune { get => _isImmune; set => _isImmune = value; }
-    [SerializeField] private bool _isDownJump = false;
-    public bool IsDownJump { get => _isDownJump; set => _isDownJump = value; }
-    [SerializeField] private bool _isWet = false;
-    public bool IsWet { get => _isWet; set => _isWet = value; }
-
-    [SerializeField] private float _myMoveSpeed;
-    public float MyMoveSpeed { get => _myMoveSpeed; set => _myMoveSpeed = value; }
-
-    [SerializeField] private float _jumpCount = 0;
-    public float JumpCount { get => _jumpCount; set => _jumpCount = value; }
-
-    [SerializeField] private int _facingDirection = 1;
-    public int FacingDirection { get => _facingDirection; set => _facingDirection = value; }
-
-    [Header("Player Attributes")]
-    [SerializeField] private float _gunPowderDecreaseTime;
-    public float GunPowderDecreaseTime { get => _gunPowderDecreaseTime; set => _gunPowderDecreaseTime = value; }
-    [SerializeField] private int _attackPenaltyTime;
-    public int AttackPenaltyTime { get => _attackPenaltyTime; set => _attackPenaltyTime = value; }
-
-    [SerializeField] private int _attackPenaltyAmount;
-    public int AttackPenaltyAmount { get => _attackPenaltyAmount; set => _attackPenaltyAmount = value; }
-    [SerializeField] private int _initGunpowderCount;
-    public int InitGunpowderCount => _initGunpowderCount;
+    [Header("이동 설정")]
+    [SerializeField] private float _moveSpeed;
+    [SerializeField] private float _runSpeed;
+    [SerializeField] private float _jumpForce;
+    [SerializeField] private float _maxJumpCount;
     
+    public float MoveSpeed { get => _moveSpeed; set => _moveSpeed = value; }
+    public float RunSpeed { get => _runSpeed; set => _runSpeed = value; }
+    public float JumpForce { get => _jumpForce; set => _jumpForce = value; }
+    public float MaxJumpCount { get => _maxJumpCount; set => _maxJumpCount = value; }
 
-    [Header("Die")]
-    [SerializeField] private int _dieExplosionDamage;
-    public int DieExplosionDamage { get => _dieExplosionDamage; set => _dieExplosionDamage = value; }
-    [SerializeField] private float _dieExplosionRadius;
-    public float DieExplosionRadius { get => _dieExplosionRadius; set => _dieExplosionRadius = value; }
-    [SerializeField] private float _dieExplosionForce;
-    public float DieExplosionForce { get => _dieExplosionForce; set => _dieExplosionForce = value; }
+    [Header("대시 설정")]
+    [SerializeField] private float _dashTime;
+    [SerializeField] private float _dashSpeed;
+    [SerializeField] private float _doubleTapTime;
+    [SerializeField] private float _breakTime;
+    [SerializeField] private float _jumpDashCount;
+    
+    public float DashTime { get => _dashTime; set => _dashTime = value; }
+    public float DashSpeed { get => _dashSpeed; set => _dashSpeed = value; }
+    public float DoubleTapTime { get => _doubleTapTime; set => _doubleTapTime = value; }
+    public float BreakTime { get => _breakTime; set => _breakTime = value; }
+    public float JumpDashCount { get => _jumpDashCount; set => _jumpDashCount = value; }
+
+    [Header("반동 설정")]
+    [SerializeField] private float _recoilTime;
+    [SerializeField] private float _recoilSpeed;
+    [SerializeField] private float _normalRecoilTime;
+    [SerializeField] private float _normalRecoilSpeed;
+    
+    public float RecoilTime { get => _recoilTime; set => _recoilTime = value; }
+    public float RecoilSpeed { get => _recoilSpeed; set => _recoilSpeed = value; }
+    public float NormalRecoilTime { get => _normalRecoilTime; set => _normalRecoilTime = value; }
+    public float NormalRecoilSpeed { get => _normalRecoilSpeed; set => _normalRecoilSpeed = value; }
+
+    [Header("상태 효과")]
+    [SerializeField] private float _confuseTime = 5f;
+    [SerializeField] private float _hitStopGunPowderCount = 50;
+    [SerializeField] private float _damagedTime;
     [SerializeField] private float _invincibleTime;
+    
+    public float ConfuseTime { get => _confuseTime; set => _confuseTime = value; }
+    public float HitStopGunPowderCount { get => _hitStopGunPowderCount; set => _hitStopGunPowderCount = value; }
+    public float DamagedTime { get => _damagedTime; set => _damagedTime = value; }
     public float InvincibleTime { get => _invincibleTime; set => _invincibleTime = value; }
 
-    [Header("Current Player")]
-    // 현재 플레이어가 가지고 있는 수치
-    [SerializeField] private int _currentPlayerGunPowderCount;
-    public int CurrentPlayerGunPowderCount => _currentPlayerGunPowderCount;    
+    [Header("플레이어 상태")]
+    [SerializeField] private bool _isRunning = false;
+    [SerializeField] private bool _isJumping = false;
+    [SerializeField] private bool _isFallingDead = false;
+    [SerializeField] private bool _isImmune = false;
+    [SerializeField] private bool _isDownJump = false;
+    [SerializeField] private bool _isWet = false;
+    [SerializeField] private float _myMoveSpeed;
+    [SerializeField] private float _jumpCount = 0;
+    [SerializeField] private int _facingDirection = 1;
     
+    public bool IsRunning { get => _isRunning; set => _isRunning = value; }
+    public bool IsJumping { get => _isJumping; set => _isJumping = value; }
+    public bool IsFallingDead { get => _isFallingDead; set => _isFallingDead = value; }
+    public bool IsImmune { get => _isImmune; set => _isImmune = value; }
+    public bool IsDownJump { get => _isDownJump; set => _isDownJump = value; }
+    public bool IsWet { get => _isWet; set => _isWet = value; }
+    public float MyMoveSpeed { get => _myMoveSpeed; set => _myMoveSpeed = value; }
+    public float JumpCount { get => _jumpCount; set => _jumpCount = value; }
+    public int FacingDirection { get => _facingDirection; set => _facingDirection = value; }
+    public bool IsFallingFromLedge = false;
+
+    [Header("플레이어 리소스")]
+    [SerializeField] private int _currentPlayerGunPowderCount;
     [SerializeField] private int _currentPlayerLife;
-    public int CurrentPlayerLife => _currentPlayerLife;
+    [SerializeField] private int _initGunpowderCount;
+    [SerializeField] private float _gunPowderDecreaseTime;
     [SerializeField] private int _currentPlayerDamagedCount;
+    
+    public int CurrentPlayerGunPowderCount => _currentPlayerGunPowderCount;
+    public int CurrentPlayerLife => _currentPlayerLife;
+    public int InitGunpowderCount => _initGunpowderCount;
+    public float GunPowderDecreaseTime { get => _gunPowderDecreaseTime; set => _gunPowderDecreaseTime = value; }
     public int CurrentPlayerDamagedCount => _currentPlayerDamagedCount;
 
-    [SerializeField]
-    private List<SpriteRenderer> _mySpriteRendererList;
-    public List<SpriteRenderer> MySpriteREndererList => _mySpriteRendererList;
+    [Header("공격 설정")]
+    [SerializeField] private int _attackPenaltyTime;
+    [SerializeField] private int _attackPenaltyAmount;
+    
+    public int AttackPenaltyTime { get => _attackPenaltyTime; set => _attackPenaltyTime = value; }
+    public int AttackPenaltyAmount { get => _attackPenaltyAmount; set => _attackPenaltyAmount = value; }
 
-    [Header("Damaged")]
-    [SerializeField] private float _damagedTime;
-    public float DamagedTime { get => _damagedTime; set => _damagedTime = value; }
+    [Header("사망 설정")]
+    [SerializeField] private int _dieExplosionDamage;
+    [SerializeField] private float _dieExplosionRadius;
+    [SerializeField] private float _dieExplosionForce;
+    
+    public int DieExplosionDamage { get => _dieExplosionDamage; set => _dieExplosionDamage = value; }
+    public float DieExplosionRadius { get => _dieExplosionRadius; set => _dieExplosionRadius = value; }
+    public float DieExplosionForce { get => _dieExplosionForce; set => _dieExplosionForce = value; }
 
-    [Header("Damage, Death")]
+    [Header("통계")]
     [SerializeField] private float _totalDamage;
-    public float TotalDamage => _totalDamage;
     [SerializeField] private float _totalKillCount;
+    
+    public float TotalDamage => _totalDamage;
     public float TotalKillCount => _totalKillCount;
-    
-    [Header("Team")]
-    public EInGameTeam Team { get; set; }
-    public event Action OnGunPowderEmpty;
-    
-    
-    public bool IsFallingFromLedge = false;
-    public PlayerSFXAnimationEvent PlayerSFXAnimationEvent;
 
-    [Header("Ultimate")]
-    // 궁극기 사용 기회 관련 상태값
+    [Header("궁극기 시스템")]
     [SerializeField] private bool _hasUltimateChance = false; // 궁극기 사용가능 상태
-    public bool HasUltimateChance { get => _hasUltimateChance; set => _hasUltimateChance = value; }
-
     [SerializeField] private bool _hasUsedUltimateThisLife = false; // 현재 라이프에서 이미 궁극기를 사용했는지
-    public bool HasUsedUltimateThisLife { get => _hasUsedUltimateThisLife; set => _hasUsedUltimateThisLife = value; }
-
-    [SerializeField] private float _ultimateChanceDuration = 5f; // 기회가 지속되는 시간(초)
-    public float UltimateChanceDuration { get => _ultimateChanceDuration; set => _ultimateChanceDuration = value; }
-
+    [SerializeField] private float _ultimateChanceDuration = 10f; // 기회가 지속되는 시간(초)
     [SerializeField] private int _ultimateTriggerThreshold = 30; // 건파우더(체력)가 이 값 이하가 되면 기회 발생 조건 충족
+    
+    public bool HasUltimateChance { get => _hasUltimateChance; set => _hasUltimateChance = value; }
+    public bool HasUsedUltimateThisLife { get => _hasUsedUltimateThisLife; set => _hasUsedUltimateThisLife = value; }
+    public float UltimateChanceDuration { get => _ultimateChanceDuration; set => _ultimateChanceDuration = value; }
     public int UltimateTriggerThreshold { get => _ultimateTriggerThreshold; set => _ultimateTriggerThreshold = value; }
 
+    [Header("팀 & 이벤트")]
+    [SerializeField] private List<SpriteRenderer> _mySpriteRendererList;
+    
+    public EInGameTeam Team { get; set; }
+    public List<SpriteRenderer> MySpriteREndererList => _mySpriteRendererList;
+    public PlayerSFXAnimationEvent PlayerSFXAnimationEvent;
+    public event Action OnGunPowderEmpty;
+    public event Action<int> OnGunpowderIncreased;
 
     void Start()
     {
-        
         _photonView = GetComponent<PhotonView>();
         
         if (_photonView.IsMine == false)
         {
             return;
         }
-        InitializeStats(); 
-        SetPlayer(RoomStatManager.Instance.PlayerGunpowder,RoomStatManager.Instance.PlayerLife,RoomStatManager.Instance.PlayerDecreaseTime, RoomStatManager.Instance.PlayerTeam);
+        
+        //InitializeStats(); 
+        SetPlayer(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife, 
+                 RoomStatManager.Instance.PlayerDecreaseTime, RoomStatManager.Instance.PlayerTeam);
     }
 
+    // 초기화 관련 메서드
     public void InitializeStats()
     {
         if (_playerStatSO != null)
         {
+            // 이동 스탯
             _moveSpeed = _playerStatSO.MoveSpeed;
-            _jumpForce = _playerStatSO.JumpForce;
-            _dashTime = _playerStatSO.DashTime;
-            _doubleTapTime = _playerStatSO.DoubleTapTime;
-            _dashSpeed = _playerStatSO.DashSpeed;
-            _breakTime = _playerStatSO.BreakTime;
             _runSpeed = _playerStatSO.RunSpeed;
+            _jumpForce = _playerStatSO.JumpForce;
             _maxJumpCount = _playerStatSO.MaxJumpCount;
+            
+            // 대시 스탯
+            _dashTime = _playerStatSO.DashTime;
+            _dashSpeed = _playerStatSO.DashSpeed;
+            _doubleTapTime = _playerStatSO.DoubleTapTime;
+            _breakTime = _playerStatSO.BreakTime;
+            
+            // 반동 스탯
             _recoilTime = _playerStatSO.RecoilTime;
             _recoilSpeed = _playerStatSO.RecoilSpeed;
             _normalRecoilTime = _playerStatSO.NormalRecoilTime;
             _normalRecoilSpeed = _playerStatSO.NormalRecoilSpeed;
+            
+            // 공격 스탯
             _attackPenaltyTime = _playerStatSO.AttackPenaltyTime;
             _attackPenaltyAmount = _playerStatSO.AttackPenaltyAmount;
-            // _gunPowderDecreaseTime = _playerStatSO.GunPowderDecreaseTime;
+            
+            // 사망 스탯
             _dieExplosionDamage = _playerStatSO.DieExplosionDamage;
             _dieExplosionRadius = _playerStatSO.DieExplosionRadius;
             _dieExplosionForce = _playerStatSO.DieExplosionForce;
+            
+            // 상태 효과
             _invincibleTime = _playerStatSO.InvincibleTime;
             _damagedTime = _playerStatSO.DamagedTime;
 
+            // 원본 값 저장 (리셋용)
             _originalMoveSpeed = _moveSpeed;
             _originalRunSpeed = _runSpeed;
             _originalJumpForce = _jumpForce;
 
-            // 나중에는 방 설정에 따라 달라질 수 있음.
+            // 방 설정에서 플레이어 리소스 초기화
             _currentPlayerGunPowderCount = RoomStatManager.Instance.PlayerGunpowder;
             _initGunpowderCount = RoomStatManager.Instance.PlayerGunpowder;
             _currentPlayerLife = RoomStatManager.Instance.PlayerLife;
             _gunPowderDecreaseTime = RoomStatManager.Instance.PlayerDecreaseTime;
-
             
             _currentPlayerDamagedCount = 0;
         }
-    } 
+    }
 
     public void SetPlayer(int gunpowder, int life, int decrease, EInGameTeam team)
     {
@@ -221,6 +219,7 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerLife = life;
     }
 
+    // 점프 관리 메서드
     public void ResetJumpCount()
     {
         _jumpCount = 0;
@@ -250,9 +249,11 @@ public class PlayerStat : MonoBehaviour
     {
         _jumpDashCount = 0;
     }
+
+    // 건파우더 관리 메서드
     public void IncreaseGunPowderCount(int amount)
     {
-        if(!_photonView.IsMine)
+        if (!_photonView.IsMine)
         {
             return;
         }
@@ -260,6 +261,7 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerGunPowderCount += amount;
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife, 0);
+        OnGunpowderIncreased?.Invoke(amount);
     }
 
     [PunRPC]
@@ -268,22 +270,17 @@ public class PlayerStat : MonoBehaviour
         if (GameManager.Instance.CurrentGameState != EGameState.Playing)
         {
             return;
-        } 
-        
-        // 소유자만 처리 (마스터가 보내더라도 최종 처리는 로컬 소유자 권한)
+        }
+
         if (!_photonView.IsMine)
         {
             return;
         }
+        
         _currentPlayerGunPowderCount += amount;
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife, 0);
-
-        // Gunpowder Heal 사운드 스택 반영 (로컬 소유자 전용)
-        if(PlayerSFXAnimationEvent != null)
-        {
-            PlayerSFXAnimationEvent.OnGunpowderAbsorbed();
-        }
+        OnGunpowderIncreased?.Invoke(amount);
     }
     
     public bool DecreaseGunPowderCount(int amount, int attacker)
@@ -291,8 +288,9 @@ public class PlayerStat : MonoBehaviour
         if (GameManager.Instance.CurrentGameState != EGameState.Playing)
         {
             return false;
-        } 
-        if(!_photonView.IsMine)
+        }
+        
+        if (!_photonView.IsMine)
         {
             return false;
         }
@@ -305,9 +303,9 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerGunPowderCount -= amount;
         bool isDead = false;
 
-        // 피가 30이하가 되면 궁극기 사용기회 주어짐
-        // 라이프당 1번만 기회가 주어짐
-        if(_currentPlayerGunPowderCount <= _ultimateTriggerThreshold && !_hasUltimateChance && !_hasUsedUltimateThisLife)
+        // 궁극기 기회 발생 조건 확인
+        if (_currentPlayerGunPowderCount <= _ultimateTriggerThreshold && 
+            !_hasUltimateChance && !_hasUsedUltimateThisLife)
         {
             _hasUltimateChance = true;
         }
@@ -320,7 +318,7 @@ public class PlayerStat : MonoBehaviour
             OnGunPowderEmpty?.Invoke();
         }
         
-        if(_currentPlayerLife <= 0)
+        if (_currentPlayerLife <= 0)
         {
             _currentPlayerGunPowderCount = 0;
         }
@@ -334,9 +332,10 @@ public class PlayerStat : MonoBehaviour
     [PunRPC]
     private void RPC_ChangeGunpowder(int gunpowder, int life, int attacker, PhotonMessageInfo info)
     {
-        DamageChecker.Instance.RPC_RequestDamage(gunpowder, life , info.Sender.ActorNumber, attacker);
+        DamageChecker.Instance.RPC_RequestDamage(gunpowder, life, info.Sender.ActorNumber, attacker);
     }
 
+    // 데미지 & 통계 관리 메서드
     public void IncreseDamagedCount()
     {
         _currentPlayerDamagedCount++;
@@ -367,9 +366,10 @@ public class PlayerStat : MonoBehaviour
         _totalKillCount = 0;
     }
 
+    // 플레이어 상태 관리 메서드
     public void ResurrectPlayerStat()
     {
-        if(!_photonView.IsMine)
+        if (!_photonView.IsMine)
         {
             return;
         }
@@ -391,11 +391,29 @@ public class PlayerStat : MonoBehaviour
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife, 0);
     }
 
+    // 상태 효과 관리 메서드
     public void SetConfuseTime(float time)
     {
         _confuseTime = time;
     }
 
+    public void SetWetState()
+    {
+        SetMoveSpeed(_originalMoveSpeed * 0.5f);
+        SetRunSpeed(_originalRunSpeed * 0.5f);
+        SetJumpForce(_originalJumpForce * 0.5f);
+        _isWet = true;
+    }
+
+    public void ResetWetState()
+    {
+        ResetMoveSpeed();
+        ResetRunSpeed();
+        ResetJumpForce();
+        _isWet = false;
+    }
+
+    // 이동 능력치 수정자 메서드
     public void SetMoveSpeed(float speed)
     {
         _moveSpeed = speed;
@@ -424,21 +442,5 @@ public class PlayerStat : MonoBehaviour
     public void ResetJumpForce()
     {
         _jumpForce = _originalJumpForce;
-    }
-
-    public void SetWetState()
-    {
-        SetMoveSpeed(_originalMoveSpeed * 0.5f);
-        SetRunSpeed(_originalRunSpeed * 0.5f);
-        SetJumpForce(_originalJumpForce * 0.5f);
-        _isWet = true;
-    }
-
-    public void ResetWetState()
-    {
-        ResetMoveSpeed();
-        ResetRunSpeed();
-        ResetJumpForce();
-        _isWet = false;
     }
 }

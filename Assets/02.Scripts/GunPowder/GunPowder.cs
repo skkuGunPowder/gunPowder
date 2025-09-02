@@ -2,6 +2,21 @@ using Photon.Pun;
 using UnityEngine;
 using SpriteTrail;
 
+/// <summary>
+/// 건파우더(투사체) 네트워크 오브젝트
+/// 
+/// 역할:
+/// - Photon 인스턴스 데이터 수신 및 초기 설정(타겟/낙출 여부/랜덤 시드/발사자)
+/// - 내/적 소유에 따른 스프라이트/트레일 프리셋 적용
+/// - 낙출 모드(GunPowderRelease) 또는 베지어 추적 모드(GunPowderBezierCurve) 활성화
+/// - 생성 직후 짧은 지연 후 충돌 활성화, 런타임 타겟 RPC 갱신 지원
+/// 
+/// 동작 방식:
+/// 1. Awake에서 필수 컴포넌트 캐싱, Collider 비활성화
+/// 2. Update에서 일정 시간 후 Collider 활성화
+/// 3. OnPhotonInstantiate에서 인스턴스 데이터 파싱 → 모드/타겟/소유 구분 → 컴포넌트 활성화 전환
+/// 4. SetTarget RPC로 타겟 동기화
+/// </summary>
 public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
 {
     private BoxCollider2D _collider;
@@ -27,6 +42,9 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     public TrailPreset EnemyTrailPreset;
 
 
+    /// <summary>
+    /// 필수 컴포넌트 캐싱 및 초기 비활성화 설정
+    /// </summary>
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
@@ -36,6 +54,9 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
         _collider.enabled = false;
     }
 
+    /// <summary>
+    /// 생성 후 일정 시간 경과 시 Collider 활성화
+    /// </summary>
     private void Update()
     {
         _timer += Time.deltaTime;
@@ -46,9 +67,8 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     }
 
     /// <summary>
-    /// 건파우더 생성 어태커 퓨 아이디, 낙출 여부, 랜덤덤
+    /// Photon 인스턴스 데이터 파싱(공격자/낙출 여부/랜덤 시드/발사자) 및 모드 전환
     /// </summary>
-    /// <param name="info"></param>
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
         object[] instData = photonView.InstantiationData;
@@ -65,13 +85,13 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
             if (attackerViewId != 0)
             {
                 PhotonView attackerView = PhotonView.Find(attackerViewId);
-                if (attackerView != null)
+                if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
                 {
                     _target = attackerView.transform;
                 }
             }
 
-            // 스프라이트 설정 - 자신이 생성한 건파우더인지 확인
+            // 스프라이트/트레일 설정 - 자신이 생성한 건파우더인지 확인
             SetSpriteBasedOnOwner();
 
             // 컴포넌트 활성화/비활성화 처리
@@ -98,7 +118,7 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     }
 
     /// <summary>
-    /// 건파우더 생성자에 따라 스프라이트 설정
+    /// 건파우더 생성자에 따라 스프라이트/트레일 프리셋 설정
     /// </summary>
     private void SetSpriteBasedOnOwner()
     {
@@ -144,10 +164,13 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     }
 
     [PunRPC]
+    /// <summary>
+    /// 네트워크 RPC로 타겟 ViewID를 받아 타겟 Transform 설정
+    /// </summary>
     public void SetTarget(int targetViewId)
     {
         PhotonView targetView = PhotonView.Find(targetViewId);
-        if (targetView != null)
+        if (targetView != null && targetView.gameObject != null && targetView.gameObject.activeInHierarchy)
             _target = targetView.transform;
     }
 }

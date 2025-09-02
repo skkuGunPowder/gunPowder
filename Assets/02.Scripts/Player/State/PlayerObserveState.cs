@@ -8,8 +8,7 @@ public class PlayerObserveState : PlayerBaseState
         _playerFSM = SuperMachine as PlayerFSM;
         _owner = _playerFSM.Owner;
         _groundRay2D = _owner.GroundRay2D;
-        _owner.Observe();
-        this.gameObject.SetActive(false);
+        _owner.gameObject.SetActive(false);
     }
 
     public override void OnExit()
