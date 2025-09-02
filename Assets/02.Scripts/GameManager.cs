@@ -14,15 +14,11 @@ public class GameManager : PhotonSingleton<GameManager>
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
     
-    [Header("플레이어 관련")]
+    [Header("플레이어 낙사 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
-
-
-    private float _airDropTimer;
-    [SerializeField] private GameObject _airDropJetPrefab;
-
+    
     public event Action<PhotonPlayer> OnTimeCheck;
     public event Action OnGameStart;
     public event Action OnGameOver;
