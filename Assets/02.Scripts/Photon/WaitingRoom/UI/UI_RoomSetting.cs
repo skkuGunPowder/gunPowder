@@ -18,13 +18,13 @@ public class UI_RoomSetting : MonoBehaviour
     // 처음 설정한 방 세팅 가져오기
     private void OnEnable()
     {
-        PlaytimeInit = Init(EProperties.PlayTime,Playtime);
-        PowderInit = Init(EProperties.Gunpowder,Powder);
-        DeclineInit = Init(EProperties.DeclinePowder,Decline);
-        LifeInit = Init(EProperties.Life, Life);
+        PlaytimeInit = Init(ERoomProperties.PlayTime,Playtime);
+        PowderInit = Init(ERoomProperties.Gunpowder,Powder);
+        DeclineInit = Init(ERoomProperties.DeclinePowder,Decline);
+        LifeInit = Init(ERoomProperties.Life, Life);
     }
     
-    private int Init(EProperties properties, UI_RoomSetupButton button)
+    private int Init(ERoomProperties properties, UI_RoomSetupButton button)
     {
         Room currentRoom = PhotonNetwork.CurrentRoom;
         
@@ -42,10 +42,10 @@ public class UI_RoomSetting : MonoBehaviour
         
         Hashtable roomProperties = new Hashtable
         {
-            {$"{EProperties.PlayTime}", Playtime.CurrentValue()},
-            {$"{EProperties.Life}",  Life.CurrentValue()},
-            {$"{EProperties.Gunpowder}",  Powder.CurrentValue()},
-            {$"{EProperties.DeclinePowder}",  Decline.CurrentValue()},
+            {$"{ERoomProperties.PlayTime}", Playtime.CurrentValue()},
+            {$"{ERoomProperties.Life}",  Life.CurrentValue()},
+            {$"{ERoomProperties.Gunpowder}",  Powder.CurrentValue()},
+            {$"{ERoomProperties.DeclinePowder}",  Decline.CurrentValue()},
         };
         
         currentRoom.SetCustomProperties(roomProperties);

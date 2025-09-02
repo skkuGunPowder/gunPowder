@@ -1,13 +1,6 @@
 public enum EProperties
 {
     IsReady,
-    MapSelected,
-    PlayTime,
-    Life,
-    Gunpowder,
-    DeclinePowder,
-    IsLocked,
-    Password,
     PlayerList,
     IsDead,
     IsLoad,
@@ -15,7 +8,6 @@ public enum EProperties
     Kill,
     Damage,
     Team,
-    NickName,
     Emotion,
     
     Count

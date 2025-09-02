@@ -6,18 +6,18 @@ public class UI_PasswordPopup : UI_Popup
 {
     public TMP_InputField PasswordInputField;
     public RoomInfo _currentRoomInfo;
+    private string _tempPassword;
     
     public void SetRoomInfo(RoomInfo roomInfo)
     {
         _currentRoomInfo = roomInfo;
+        _tempPassword = _currentRoomInfo.CustomProperties[ERoomProperties.Password.ToString()].ToString();
     }
     
     // 비밀번호 확인해서 적용시킴
     public void PasswordCheck()
     {
-        string password = _currentRoomInfo.CustomProperties[$"{EProperties.Password}"].ToString();
-            
-        if (PasswordInputField.text != password)
+        if (PasswordInputField.text != _tempPassword)
         {
             Fail();
             return;

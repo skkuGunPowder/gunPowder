@@ -55,22 +55,34 @@ public class GameOverProduction : MonoBehaviour
     [Tooltip("타이머의 원래 위치")] public Vector2 TimerOriginPosition;
     
     private float CamerZoomAmount = 10;
-    private void OnEnable()
+
+    private void Awake()
     {
         _camera = Camera.main;
-        
-        if (!Test)
-        {
-            return;
-        }
-        
-        Play();
     }
+
+    private void Start()
+    {
+        GameManager.Instance.OnGameOver += Play;
+    }
+    // private void OnEnable()
+    // {
+    //     _camera = Camera.main;
+    //     
+    //     if (!Test)
+    //     {
+    //         return;
+    //     }
+    //     
+    //     Play();
+    // }
 
     public void Play()
     {
         GameOverProductionPanel.gameObject.SetActive(true);
-
+        
+        GameManager.Instance.OnGameOver -= Play;
+        
         Sequence sequence = DOTween.Sequence();
         sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
         sequence.JoinCallback(TimerOff);

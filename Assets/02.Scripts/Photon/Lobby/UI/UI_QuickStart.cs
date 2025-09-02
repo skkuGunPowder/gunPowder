@@ -8,7 +8,7 @@ public class UI_QuickStart : MonoBehaviour
     {
         Hashtable hash = new Hashtable()
         {
-            {EProperties.IsLocked.ToString(), false}   
+            {ERoomProperties.IsLocked.ToString(), false}   
         };
         PhotonNetwork.JoinRandomRoom(hash, 0);
         

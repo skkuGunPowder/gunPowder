@@ -8,8 +8,6 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class PhotonServerManager : MonoBehaviourPunCallbacks
 {
     public static PhotonServerManager Instance;
-
-    public List<RoomInfo> CachedRoomList { get; set; } = new List<RoomInfo>();
     // 게임이 시작 될 때 연결되는 포톤 서버 매니저
 
     [Header("DataFrameRate")]

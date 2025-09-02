@@ -5,12 +5,13 @@ using UnityEngine;
 
 public class UI_RoomSearchPopup : UI_Popup
 {
+    [Header("현재 방")]
     public List<UI_RoomSlot> RoomSlotList;
-    
+    [Header("방 페이지 수")]
     public TextMeshProUGUI RoomPageTextUGUI;
-    
+    [Header("맵 관련")]
     public List<MapDataSO> MapDataList;
-    public Dictionary<string, MapDataSO> MapDataDictionary;
+    private Dictionary<EMap, MapDataSO> _mapDataDictionary;
     
     private int _currentPage = 1;
     private int _maxPage = 1;
@@ -19,11 +20,11 @@ public class UI_RoomSearchPopup : UI_Popup
     {
         LobbyManager.Instance.OnDataChanged += Refresh;
         
-        MapDataDictionary = new Dictionary<string, MapDataSO>();
+        _mapDataDictionary = new Dictionary<EMap, MapDataSO>();
         
         foreach (MapDataSO dataSo in MapDataList)
         {
-            MapDataDictionary.Add(dataSo.MapSceneList.ToString(), dataSo);
+            _mapDataDictionary.Add(dataSo.MapSceneList, dataSo);
         }
     }
     
@@ -37,7 +38,7 @@ public class UI_RoomSearchPopup : UI_Popup
     public void Refresh()
     { 
         List<RoomInfo> roomInfoList = LobbyManager.Instance.RoomInfoList;
-
+        
         // 방이 0개인 경우
         if (roomInfoList == null || roomInfoList.Count == 0)
         {
@@ -52,6 +53,7 @@ public class UI_RoomSearchPopup : UI_Popup
         int roomCount = roomInfoList.Count;
         _maxPage = (int)(roomCount / RoomSlotList.Count + 1);
         
+        // 페이지 저장 인덱스
         int startIndex;
         
         if (_maxPage <= _currentPage)
@@ -76,7 +78,7 @@ public class UI_RoomSearchPopup : UI_Popup
                 RoomInfo room = roomInfoList[startIndex + i];
                 Sprite mapIcon = StringToSprite(room);
                 RoomSlotList[i].gameObject.SetActive(true);
-                RoomSlotList[i].Refresh(room.Name, room.PlayerCount, room.MaxPlayers, mapIcon, room);
+                RoomSlotList[i].Refresh(mapIcon, room);
             }
             else
             {
@@ -88,12 +90,11 @@ public class UI_RoomSearchPopup : UI_Popup
     // 아이콘 가져오기
     private Sprite StringToSprite(RoomInfo info)
     {
+        EMap map = (EMap)info.CustomProperties[ERoomProperties.MapSelected.ToString()];
         
-        string map = ((ESceneList)info.CustomProperties[$"{EProperties.MapSelected}"]).ToString();
-        
-        if (MapDataDictionary.TryGetValue(map, out var mapData))
+        if (_mapDataDictionary.TryGetValue(map, out var mapData))
         { 
-            return mapData.MapIcon;
+            return mapData.MapSprite;
         }
         
         return null;
@@ -112,6 +113,7 @@ public class UI_RoomSearchPopup : UI_Popup
 
     private void OnDisable()
     {
+        LobbyManager.Instance.OnDataChanged -= Refresh;
         _currentPage = 1;
     }
 }
