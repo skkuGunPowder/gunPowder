@@ -53,9 +53,6 @@ public class GameOverProduction : MonoBehaviour
     [Tooltip("GameSet 글자가 떨어지기 시작할 위치")] public Vector2 GameSetStartPosition;
     [Tooltip("Profile슬롯들의 처음 위치 : 초기 53.19")] public Vector2 ProfileSlotStartPosition = new Vector2(0, 53.19f);
     [Tooltip("타이머의 원래 위치")] public Vector2 TimerOriginPosition;
-    
-    private float CamerZoomAmount = 10;
-
     private void Awake()
     {
         _camera = Camera.main;

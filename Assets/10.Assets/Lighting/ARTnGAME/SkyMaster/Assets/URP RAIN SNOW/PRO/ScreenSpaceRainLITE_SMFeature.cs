@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Experimental.Rendering;
@@ -498,6 +499,7 @@ namespace Artngame.SKYMASTER
 
             //v1.5
 #if UNITY_2020_2_OR_NEWER
+            [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled). Use Render Graph API instead.", false)]
             public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
             {
                 // get a copy of the current camera’s RenderTextureDescriptor
@@ -532,6 +534,7 @@ namespace Artngame.SKYMASTER
             // Use <c>ScriptableRenderContext</c> to issue drawing commands or execute command buffers
             // https://docs.unity3d.com/ScriptReference/Rendering.ScriptableRenderContext.html
             // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
+            [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled). Use Render Graph API instead.", false)]
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 CommandBuffer cmd = CommandBufferPool.Get("Outline Pass");

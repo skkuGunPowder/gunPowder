@@ -9,10 +9,6 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class GameResultManager : Singleton<GameResultManager>
 {
     public List<GameResultData> ResultDataList = new List<GameResultData>();
-    
-    private float _timer = 0;
-    private float _EndTime = 10f;
-    
     public PlayerSpawner Spawner;
     private void Start()
     {

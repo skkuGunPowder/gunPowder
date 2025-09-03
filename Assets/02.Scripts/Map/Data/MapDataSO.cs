@@ -4,7 +4,7 @@ using UnityEngine;
 public class MapDataSO : ScriptableObject
 {
     public EMapTheme MapTheme;
-    public EMap MapSceneList;
+    public EMap Map;
     public string MapName;
     public Sprite MapSprite;
 }

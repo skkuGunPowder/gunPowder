@@ -32,6 +32,18 @@ public class MapThemeData
         MapDataList.Add(mapData);
     }
 
+    public bool MapCheck(EMap map)
+    {
+        foreach (MapData data in MapDataList)
+        {
+            if (data.Map == map)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
     public MapData GetMapData(string mapName)
     {
         foreach (var data in MapDataList)
