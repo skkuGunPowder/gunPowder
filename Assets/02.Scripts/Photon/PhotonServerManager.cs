@@ -79,6 +79,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
 
     public override void OnCreatedRoom()
     {
+        PopupManager.Instance.Close(EPopupType.UI_RoomSearchPopup);
         PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
     }
 

@@ -175,7 +175,7 @@ public class GameManager : PhotonSingleton<GameManager>
         }
     }
     
-    private void OnDisable()
+    public override void OnDisable()
     { 
         EventManager.Instance.OnLoadFinished -= Init;
     }

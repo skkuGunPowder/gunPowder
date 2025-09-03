@@ -1,4 +1,6 @@
-﻿namespace Artngame.GLAMOR.Sketch
+﻿using System;
+
+namespace Artngame.GLAMOR.Sketch
 {
     using UnityEngine;
     using UnityEngine.Rendering;
@@ -63,6 +65,7 @@
                 material = new Material(shader);
             }
 
+            [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled). Use Render Graph API instead.", false)]
             public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
             {
                 ResetTarget();

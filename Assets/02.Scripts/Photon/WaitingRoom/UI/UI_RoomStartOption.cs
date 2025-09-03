@@ -10,23 +10,11 @@ public class UI_RoomStartOption : MonoBehaviour
     public Button MapSelectButton;
     public Image MapIcon;
     public TextMeshProUGUI MapNameGUGI;
-
-    public List<MapDataSO> MapDataList;
-    public Dictionary<string, MapDataSO> MapDataDictionary;
-    
     
     private void Awake()
     {
-        MapDataDictionary = new Dictionary<string, MapDataSO>();
-        
-        foreach (MapDataSO dataSo in MapDataList)
-        {
-            MapDataDictionary.Add(dataSo.MapSceneList.ToString(), dataSo);
-        }
-
         EventManager.Instance.OnMapChanged += MapChange;
         EventManager.Instance.OnMasterChanged += ButtonSetup;
-
     }
 
     private void Start()
@@ -49,14 +37,14 @@ public class UI_RoomStartOption : MonoBehaviour
     }
     
     // 맵 설정 하기
-    public void MapChange()
+    public void MapChange(EMap map)
     {
-        EMap map = RoomManager.Instance.SelectedMap;
+        MapData data = MapDataManager.Instance.GetDataLoad(map);
+
+        string mapName = data.MapName;
+        Sprite mapSprite = data.MapSprite;
         
-        string name = MapDataDictionary[map.ToString()].MapName;
-        Sprite mapSprite = MapDataDictionary[map.ToString()].MapSprite;
-        
-        Refresh(name, mapSprite);
+        Refresh(mapName, mapSprite);
     }
 
     private void Refresh(string mapName, Sprite map)
