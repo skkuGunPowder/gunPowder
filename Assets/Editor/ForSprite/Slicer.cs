@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 using UnityEditor;
 
 public class SpriteAutoSlicer
 {
     [MenuItem("Tools/Slice All Sprites In Folder")]
+    [Obsolete("Obsolete")]
     static void SliceAll()
     {
         string folderPath = "Assets/05.Images/Emotion"; // 변경

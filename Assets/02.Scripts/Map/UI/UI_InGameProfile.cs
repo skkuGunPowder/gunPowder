@@ -27,7 +27,7 @@ public class UI_InGameProfile : MonoBehaviour
                 string playerName = _playerActorNumberList[i].NickName;
                 EInGameTeam team = (EInGameTeam)_playerActorNumberList[i].CustomProperties[EProperties.Team.ToString()];
                 UI_InGameProfileSlotList[i].Init(playerName,bomb, team, _playerActorNumberList[i]);
-                UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
+                UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife , 0);
             }
             else
             {
@@ -53,13 +53,13 @@ public class UI_InGameProfile : MonoBehaviour
         }
     }
     
-    private void Refresh(int playerNumber, int gunpowder, int life)
+    private void Refresh(int playerNumber, int gunpowder, int life, int attacker)
     {
         for (int i = 0; i < _playerActorNumberList.Count; i++)
         {
             if (_playerActorNumberList[i].ActorNumber == playerNumber)
             {
-                UI_InGameProfileSlotList[i].Refresh(gunpowder,life);
+                UI_InGameProfileSlotList[i].Refresh(gunpowder,life,attacker);
             }
         }
 
