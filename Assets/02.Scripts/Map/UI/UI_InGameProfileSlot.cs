@@ -19,7 +19,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public UI_EmotionSlot Emotion;
     
     public List<GameObject> LifeList;
-    public ColorPalette ColorPalette;
+    // public ColorPalette ColorPalette;
    
     [Header("Color")] 
     public int GunpowderMiddle = 50;

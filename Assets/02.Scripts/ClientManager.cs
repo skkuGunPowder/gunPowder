@@ -6,6 +6,7 @@ public class ClientManager : DontDestroySingleton<ClientManager>
     private void Start()
     {
         PlayBGM("Photon");
+        ColorPalette.Init();
     }
     
 
