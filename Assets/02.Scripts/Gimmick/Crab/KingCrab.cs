@@ -1,16 +1,53 @@
+using System.Collections;
+using Photon.Pun.UtilityScripts;
 using UnityEngine;
 
-public class KingCrab : MonoBehaviour
+public class KingCrab : Crab
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private Transform _holdPoint;
+    [SerializeField] private float _holdDuration = 5f;
+    [SerializeField] private float _throwForce = 10f;
+
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        
+        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
+        {
+            Debug.LogWarning("Contact KingCrab");
+            if (_isActive)
+            {
+                return;
+            }
+
+            _isActive = true;
+            Player player = collision.gameObject.GetComponent<Player>();
+            StartCoroutine(HoldCoroutine(player));
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private IEnumerator HoldCoroutine(Player player)
     {
+        float randomThrowX = Random.Range(0, 2) == 0 ? -1 : 1;
+        Vector2 throwDirection = new Vector2(randomThrowX, 1).normalized;
+
+        if (player.PhotonView.IsMine)
+        {
+            InputHandler.BlockInput = true;
+        }
+
+        float timer = 0f;
+        while (timer < _holdDuration)
+        {
+            timer += Time.deltaTime;
+            player.transform.position = _holdPoint.position;
+            yield return null;
+        }
+        player.Rigidbody2D.AddForce(throwDirection * _throwForce, ForceMode2D.Impulse);
         
+        if (player.PhotonView.IsMine)
+        {
+            InputHandler.BlockInput = false;
+        }
+
+        StartCoroutine(DeactiveCoroutine());
     }
 }

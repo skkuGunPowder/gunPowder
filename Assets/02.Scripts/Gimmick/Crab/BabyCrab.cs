@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class BabyCrab : Crab
 {
+    [SerializeField] private float _delay = 1.5f;
     [SerializeField] private float _druation = 5f;
 
     private Rigidbody2D _rigidbody;
-    private bool _isActive = false;
 
     private void Awake()
     {
@@ -17,6 +17,7 @@ public class BabyCrab : Crab
     {
         if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
         {
+            Debug.LogWarning("Contact BabyCrab");
             if (_isActive)
             {
                 return;
@@ -50,9 +51,6 @@ public class BabyCrab : Crab
 
         _rigidbody.simulated = true;
         _rigidbody.AddForce(new Vector2(1, 1) * 1f, ForceMode2D.Impulse);
-        _isNeedToMove = true;
-        _isActive = false;
+        StartCoroutine(DeactiveCoroutine());
     }
-
-
 }

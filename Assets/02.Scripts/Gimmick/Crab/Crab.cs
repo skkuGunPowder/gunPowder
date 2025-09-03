@@ -3,6 +3,7 @@ using UnityEngine;
 
 public abstract class Crab : MonoBehaviour
 {
+    [SerializeField] private float _activeDelay = 1.5f;
     [SerializeField] private float _waitingTime = 5f;
     [SerializeField] private float _maxMoveDistance = 10f;
     [SerializeField] private float _minMoveDistance = 3f;
@@ -13,6 +14,7 @@ public abstract class Crab : MonoBehaviour
 
     protected Coroutine _moveCoroutineInstance;
     protected bool _isNeedToMove = true;
+    protected bool _isActive = false;
 
     private float _moveDistance;
     private float _movingDirection; // 1 : 오른쪽, -1 왼쪽
@@ -59,5 +61,12 @@ public abstract class Crab : MonoBehaviour
             movedDistance += step;
             yield return null;
         }
+    }
+
+    protected IEnumerator DeactiveCoroutine()
+    {
+        yield return new WaitForSeconds(_activeDelay);
+        _isNeedToMove = true;
+        _isActive = false;
     }
 }
