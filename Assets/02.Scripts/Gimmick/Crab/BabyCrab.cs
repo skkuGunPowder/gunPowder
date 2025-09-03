@@ -1,4 +1,5 @@
 using System.Collections;
+using Photon.Pun;
 using UnityEngine;
 
 public class BabyCrab : Crab
@@ -7,6 +8,8 @@ public class BabyCrab : Crab
     [SerializeField] private float _druation = 5f;
 
     private Rigidbody2D _rigidbody;
+    private float _changeDirectionTimer = 0f;
+    private float _changeDirectionInterval;
 
     private void Awake()
     {
@@ -39,18 +42,38 @@ public class BabyCrab : Crab
         float timer = 0f;
         _isNeedToMove = false;
         _rigidbody.simulated = false;
+        _changeDirectionInterval = Random.Range(1f, 4f);
 
-        // player.SetHasBabyCrab(true);
+        if (player.PhotonView.IsMine)
+        {
+            InputHandler.BlockInput = true;
+        }
+
         while (timer < _druation)
         {
             timer += Time.deltaTime;
             transform.position = player.transform.position + new Vector3(0.5f, 0.5f, 0);
+
+            _changeDirectionTimer += Time.deltaTime;
+            if (_changeDirectionTimer >= _changeDirectionInterval)
+            {
+                _changeDirectionTimer = 0f;
+                _changeDirectionInterval = Random.Range(1f, 4f);
+                player.PlayerStat.FacingDirection *= -1;
+                player.RPC_SetFacingDirection(player.PlayerStat.FacingDirection==-1 ? -1 : 1);
+            }
+
+            player.PlayerFSM.ChangeState<PlayerRunState>();
             yield return null;
         }
-        // player.SetHasBabyCrab(false);
+
+        if (player.PhotonView.IsMine)
+        {
+            InputHandler.BlockInput = false;
+        }
 
         _rigidbody.simulated = true;
-        _rigidbody.AddForce(new Vector2(1, 1) * 1f, ForceMode2D.Impulse);
+        _rigidbody.AddForce(new Vector2(1, 1).normalized * 1f, ForceMode2D.Impulse);
         StartCoroutine(DeactiveCoroutine());
     }
 }

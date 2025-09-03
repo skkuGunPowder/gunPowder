@@ -1,4 +1,5 @@
 using System.Collections;
+using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using UnityEngine;
 
@@ -32,6 +33,7 @@ public class KingCrab : Crab
         if (player.PhotonView.IsMine)
         {
             InputHandler.BlockInput = true;
+            player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerDamagedState));
         }
 
         float timer = 0f;
@@ -42,7 +44,7 @@ public class KingCrab : Crab
             yield return null;
         }
         player.Rigidbody2D.AddForce(throwDirection * _throwForce, ForceMode2D.Impulse);
-        
+
         if (player.PhotonView.IsMine)
         {
             InputHandler.BlockInput = false;
