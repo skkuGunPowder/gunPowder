@@ -73,7 +73,6 @@ public class UI_KillLog : MonoBehaviour
                 if (playerTeam == _myTeam)
                 {
                     return true;
-                    break;
                 }
             }
         } 

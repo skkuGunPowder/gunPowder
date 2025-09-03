@@ -13,13 +13,14 @@ public class UI_RoomSearchPopup : UI_Popup
     private int _currentPage = 1;
     private int _maxPage = 1;
     
-    private void Awake()
-    {
-        LobbyManager.Instance.OnDataChanged += Refresh;
-    }
+    // private void Awake()
+    // {
+    //     LobbyManager.Instance.OnDataChanged += Refresh;
+    // }
     
     private void OnEnable()
     {
+        LobbyManager.Instance.OnDataChanged += Refresh;
         Refresh();
         PageSetting();
     }

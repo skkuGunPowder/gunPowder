@@ -7,7 +7,6 @@ using PhotonPlayer = Photon.Realtime.Player;
 
 public class LoadSceneChecker : MonoBehaviourPunCallbacks
 {
-    private bool _isLoad = false;
     private PhotonView _photonView;
     
     public event Action<int, bool> OnLoading;

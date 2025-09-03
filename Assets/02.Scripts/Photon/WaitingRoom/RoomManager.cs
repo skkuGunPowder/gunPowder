@@ -5,6 +5,7 @@ using Photon.Realtime;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(PhotonView))]
 public class RoomManager : PhotonSingleton<RoomManager>
@@ -83,12 +84,17 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             {EProperties.PlayerList.ToString(), PlayerList.PlayerSlotList.ToArray()}
         };
-        Debug.Log($"{PlayerList.PlayerSlotList.ToArray()}");
-        _room.SetCustomProperties(playerList);
-
-        _room.IsVisible = false;
         
-        Debug.Log($"Game Start Scene : {SelectedMap.ToString()}");
+        _room.SetCustomProperties(playerList);
+        _room.IsVisible = false;
+
+        if (SelectedMap == EMap.Random)
+        {
+            int max = (int)EMap.Count - 1;
+            int index = Random.Range(1, max);
+            SelectedMap = (EMap)index;
+        }
+        
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
     }
     
@@ -186,6 +192,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             SelectedMap = (EMap)propertiesThatChanged[ERoomProperties.MapSelected.ToString()];
             EventManager.Instance.MapChanged(SelectedMap);
+            MapDataManager.Instance.LoadMapData();
         }
 
         if (propertiesThatChanged.ContainsKey(ERoomProperties.Life.ToString()) &&
