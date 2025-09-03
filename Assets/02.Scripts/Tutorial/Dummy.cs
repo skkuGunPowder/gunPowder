@@ -6,9 +6,7 @@ public class Dummy : MonoBehaviour
     private Animator _animator;
     private Rigidbody2D _rigidbody2D;
 
-    // 폭발 임펄스 감지 파라미터
-    private const float EXPLOSION_IMPULSE_THRESHOLD = 4.5f; // 한 프레임에서 이 이상 속도 변화 시 폭발로 간주
-    private const float EXPLOSION_COOLDOWN = 0.25f;          // 연속 감지 방지 쿨다운 (초)
+    // 폭발 임펄스 감지는 제거됨
 
     // 플레이어와 유사한 감쇠(마찰) 변화 파라미터
     private const float MIN_LINEAR_DAMPING = 0.01f;
@@ -19,9 +17,9 @@ public class Dummy : MonoBehaviour
 
     private float _originalLinearDamping;
     private Tween _dampingTween;
+    private DamagePopup _damagePopup;
 
-    private Vector2 _previousVelocity;
-    private float _lastImpulseTime;
+    
 
     [SerializeField] private GameObject _gunpowderPrefab;
 
@@ -29,16 +27,10 @@ public class Dummy : MonoBehaviour
     {
         _animator = GetComponent<Animator>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
-        _lastImpulseTime = -999f;
+        _damagePopup = GetComponent<DamagePopup>();
     }
 
-    private void OnEnable()
-    {
-        if (_rigidbody2D != null)
-        {
-            _previousVelocity = _rigidbody2D.linearVelocity;
-        }
-    }
+    
 
     void LateUpdate()
     {
@@ -50,26 +42,7 @@ public class Dummy : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
-    {
-        if (_rigidbody2D == null)
-        {
-            return;
-        }
-
-        Vector2 currentVelocity = _rigidbody2D.linearVelocity;
-        Vector2 deltaV = currentVelocity - _previousVelocity;
-
-        // 폭발로 인한 임펄스(Impulse) 추정: 한 물리프레임 내 큰 속도 변화 발생 시 처리
-        if (deltaV.magnitude >= EXPLOSION_IMPULSE_THRESHOLD &&
-            (Time.time - _lastImpulseTime) >= DUMMY_DAMAGED_TIME)
-        {
-            _lastImpulseTime = Time.time;
-            OnExplosionImpact();
-        }
-
-        _previousVelocity = currentVelocity;
-    }
+    
 
     private void ApplyTemporaryDampingEffect()
     {
@@ -109,10 +82,13 @@ public class Dummy : MonoBehaviour
 
     }
 
-    // 외부에서 수동 트리거를 원할 때 호출할 수 있는 공개 메서드
-    public void TriggerExplosionEffect()
+    public void TriggerExplosionEffect(int maxDamage, int damage)
     {
         OnExplosionImpact();
+        if (_damagePopup != null && maxDamage > 0)
+        {
+            _damagePopup.SpawnPopup(damage, maxDamage);
+        }
     }
 
     private void OnDisable()

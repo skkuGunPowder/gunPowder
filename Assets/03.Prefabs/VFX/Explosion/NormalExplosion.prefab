@@ -4866,7 +4866,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1250508717
-  m_SortingLayer: 5
+  m_SortingLayer: 1
   m_SortingOrder: 135
   m_RenderMode: 1
   m_MeshDistribution: 0
@@ -9775,7 +9775,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1250508717
-  m_SortingLayer: 5
+  m_SortingLayer: 1
   m_SortingOrder: 135
   m_RenderMode: 1
   m_MeshDistribution: 0
@@ -9823,6 +9823,7 @@ GameObject:
   - component: {fileID: 7455753746719729415}
   - component: {fileID: 7542398227720193282}
   - component: {fileID: -937879627135250067}
+  - component: {fileID: 7531494245396390024}
   m_Layer: 0
   m_Name: NormalExplosion
   m_TagString: Untagged
@@ -14899,6 +14900,28 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 565d2dc873a436f4d974429be3f7d365, type: 3}
   - {fileID: 8300000, guid: 17c1b2d968e89a246bf5166a8a4aa8b3, type: 3}
   - {fileID: 8300000, guid: 0095bb3a63feea0418b2aa8a74017ef0, type: 3}
+--- !u!114 &7531494245396390024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5682021106543877335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f9c59f1b8a851340bfc65117048d47a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  notifyRadius: 3
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  waitOneFrame: 1
+  maxDamage: 5
+  onlyInTutorial: 1
+  allowedSceneNames:
+  - Tutorial
+  - WaitingRoom
 --- !u!1 &8291380555178529277
 GameObject:
   m_ObjectHideFlags: 0
@@ -19751,7 +19774,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 946952411
-  m_SortingLayer: 3
+  m_SortingLayer: -2
   m_SortingOrder: 40
   m_RenderMode: 0
   m_MeshDistribution: 0
@@ -24646,7 +24669,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1250508717
-  m_SortingLayer: 5
+  m_SortingLayer: 1
   m_SortingOrder: 135
   m_RenderMode: 0
   m_MeshDistribution: 0
