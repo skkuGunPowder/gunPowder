@@ -609,6 +609,13 @@ public class Player : MonoBehaviourPun, IDamagable
                 Debug.LogError("궁극기 스크립트를 찾을 수 없습니다.");
                 return;
             }
+
+            // 피가 부족하면 궁극기 사용 불가
+            if (_playerStat.CurrentPlayerGunPowderCount <= _ultimate.GetCost())
+            {
+                return;
+            }
+
             _ultimate.ExcuteUltimate();
             _playerStat.HasUsedUltimateThisLife = true;
             _playerStat.HasUltimateChance = false;
