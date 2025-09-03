@@ -10,6 +10,7 @@ public enum EPopupType
     UI_PasswordWrongPopup,
     UI_EmotionPopup,
     UI_MessagePopup,
+    UI_SettingPopup,
     
     
     Count
