@@ -1,3 +1,4 @@
+using System;
 using Artngame.SKYMASTER;
 
 using UnityEngine;
@@ -95,14 +96,9 @@ namespace Artngame.SKYMASTER //UnityEngine.Rendering.Universal
                 this.useDepthTexture = connector.useDepthTexture;
             }
 
-            //if still null, disable effect
-            bool connectorFound = true;
-            if (connector == null)
-            {
-                connectorFound = false;
-            }
 
-            if (Camera.main != null && enableShafts && connectorFound)
+
+            if (Camera.main != null)
             {
 
                 //ConfigureInput(ScriptableRenderPassInput.Color);
@@ -156,12 +152,12 @@ namespace Artngame.SKYMASTER //UnityEngine.Rendering.Universal
                 }
                 tmpBuffer2A = renderGraph.ImportTexture(_handleA);//reflectionMapID                            
 
-                if (_handleTAART == null || _handleTAART.rt.width != xres/4 || _handleTAART.rt.height != yres / 4 || _handleTAART.rt.useMipMap == false)
+                if (_handleTAART == null || _handleTAART.rt.width != xres || _handleTAART.rt.height != yres || _handleTAART.rt.useMipMap == false)
                 {
                     //_handleTAART.rt.DiscardContents();
                     //_handleTAART.rt.useMipMap = true;// = 8;
                     //_handleTAART.rt.autoGenerateMips = true;                       
-                    _handleTAART = RTHandles.Alloc(xres / 4, yres / 4, colorFormat: GraphicsFormat.R16G16B16A16_SFloat, dimension: TextureDimension.Tex2D,
+                    _handleTAART = RTHandles.Alloc(xres, yres, colorFormat: GraphicsFormat.R32G32B32A32_SFloat, dimension: TextureDimension.Tex2D,
                         useMipMap: true, autoGenerateMips: true
                         );
                     _handleTAART.rt.wrapMode = TextureWrapMode.Clamp;
@@ -459,15 +455,6 @@ namespace Artngame.SKYMASTER //UnityEngine.Rendering.Universal
                 //       cmd.SetGlobalTexture("_ColorBuffer", lrDepthBuffer);
                 //       cmd.Blit(m_TemporaryColorTexture, source, sheetSHAFTS, (screenBlendMode == BlitSunShaftsSRP.BlitSettings.ShaftsScreenBlendMode.Screen) ? 0 : 4);
 
-                if(screenBlendMode == BlitSunShaftsSRP.BlitSettings.ShaftsScreenBlendMode.Screen)
-                {
-                    sheetSHAFTS.SetFloat("isScreen", 1);
-                }
-                if (screenBlendMode == BlitSunShaftsSRP.BlitSettings.ShaftsScreenBlendMode.Add)
-                {
-                    sheetSHAFTS.SetFloat("isScreen", 0);
-                }
-
                 string passNameAAa = "DO 1aa";
                 using (var builder = renderGraph.AddRasterRenderPass<PassData>(passNameAAa, out var passData))
                 {
@@ -759,6 +746,7 @@ namespace Artngame.SKYMASTER //UnityEngine.Rendering.Universal
         RenderTargetHandle _handle;
 #endif
 
+        [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled). Use Render Graph API instead.", false)]
         public override void OnCameraSetup(CommandBuffer cmd, ref UnityEngine.Rendering.Universal.RenderingData renderingData)
         {
 
@@ -899,6 +887,7 @@ namespace Artngame.SKYMASTER //UnityEngine.Rendering.Universal
         connectSuntoSunShaftsURP connector;
 
         /// <inheritdoc/>
+        [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled). Use Render Graph API instead.", false)]
         public override void Execute(ScriptableRenderContext context, ref UnityEngine.Rendering.Universal.RenderingData renderingData)
         {            
             //grab settings if script on scene camera

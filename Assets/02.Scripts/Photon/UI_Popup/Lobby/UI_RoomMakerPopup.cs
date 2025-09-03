@@ -39,6 +39,7 @@ public class UI_RoomMakerPopup : UI_Popup
         
         LobbyManager.Instance.MakeRoom(roomName, maxPlayers, PlayTime.CurrentValue(), Life.CurrentValue(),
             Gunpowder.CurrentValue(), Decline.CurrentValue(), IsLocked.isOn, RoomPassword.text);
+        Close();
     }
     
     // UI 초기화하기

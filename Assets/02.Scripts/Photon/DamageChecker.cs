@@ -75,7 +75,7 @@ public class DamageChecker : Singleton<DamageChecker>
             return;
         }
         
-        PlayerDataChange(gunpowder, life, player);
+        PlayerDataChange(gunpowder, life, player, attacker);
         
         if (gunpowder <= 0 && attacker != 0)
         {
@@ -90,7 +90,7 @@ public class DamageChecker : Singleton<DamageChecker>
         CalculateScore(gunpowder, life, player);
     }
     
-    private void PlayerDataChange(int gunpowder, int life, int playerNumber)
+    private void PlayerDataChange(int gunpowder, int life, int playerNumber, int attacker)
     {
         foreach (PhotonView view in _playerPhotonViewList)
         {
@@ -103,7 +103,7 @@ public class DamageChecker : Singleton<DamageChecker>
             }
         }
         
-        EventManager.Instance.PlayerDataChange(gunpowder, life, playerNumber);
+        EventManager.Instance.PlayerDataChange(gunpowder, life, playerNumber,attacker);
     }
     
     private void CalculateScore(int gunpowder, int life, int playerNumber)

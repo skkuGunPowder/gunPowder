@@ -489,22 +489,22 @@
 					return color*1;
 				}
 				ENDHLSL
-			}
+		}
 
 
 
-				//PASS 0-8
-			//Tags{ "RenderType" = "Opaque" }
-					Pass{
-						ZTest Always Cull Off ZWrite Off
+			//PASS 0-8
+		//Tags{ "RenderType" = "Opaque" }
+		Pass{
+			ZTest Always Cull Off ZWrite Off
 
-						HLSLPROGRAM
+			HLSLPROGRAM
 
-						#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-						#include "BlitSunShafts.hlsl"//v0.2
-						#pragma vertex Vert
-						#pragma fragment fragScreenA
-			float isScreen=0;
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+			#include "BlitSunShafts.hlsl"//v0.2
+			#pragma vertex Vert
+			#pragma fragment fragScreenA
+
 			half4 fragScreenA(VaryingsB i) : SV_Target{
 
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
@@ -519,15 +519,7 @@
 					half4 colorB = SAMPLE_TEXTURE2D(_ColorBuffer, sampler_ColorBuffer, i.texcoord.xy);//v1.1
 				#endif
 					half4 depthMask = saturate(colorB * _SunColor);
-
-					//ADD
-					if (isScreen == 0) {
-						return 1 * colorA + depthMask;
-					}
-					else {
-						//SCREEN
-						return  1.0f - (1.0f - colorA) * (1.0f - depthMask);//colorA * 5.6;// 1.0f - (1.0f - colorA) * (1.0f - depthMask);
-					}
+					return  1.0f - (1.0f - colorA) * (1.0f - depthMask);//colorA * 5.6;// 1.0f - (1.0f - colorA) * (1.0f - depthMask);
 			}
 
 			ENDHLSL

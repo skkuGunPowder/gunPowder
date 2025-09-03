@@ -64,7 +64,7 @@ public class RoomInitializer
         Room room = PhotonNetwork.CurrentRoom;
      
         roomManager.SelectedMap = (EMap)room.CustomProperties[ERoomProperties.MapSelected.ToString()];
-        EventManager.Instance.MapChanged();
+        EventManager.Instance.MapChanged(roomManager.SelectedMap);
     }
 
     private void GeneratePlayer(RoomManager roomManager)
