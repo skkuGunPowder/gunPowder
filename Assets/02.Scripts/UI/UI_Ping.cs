@@ -1,9 +1,13 @@
+using System;
+using Photon.Pun;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_Ping : MonoBehaviour
 {
     public GameObject Content;
     public GameObject Arm;
+    public Image ArmColor;
 
     [SerializeField] private int _margin = 100;
 
@@ -14,6 +18,7 @@ public class UI_Ping : MonoBehaviour
 
     private Vector3 _playerScreenPoint;
     private Vector3 _pingScreenPoint;
+    private Image _contentImage;
 
     public void Init(Transform playerTransform, int margin)
     {
@@ -24,6 +29,7 @@ public class UI_Ping : MonoBehaviour
     private void Awake()
     {
         _camera = Camera.main;
+        _contentImage = Content.GetComponent<Image>();
     }
 
     private void Update()
@@ -35,7 +41,21 @@ public class UI_Ping : MonoBehaviour
         }
         _renderTexCamera.transform.position = new Vector3(_playerTransform.position.x, _playerTransform.position.y, _renderTexCamera.transform.position.z);
         _playerScreenPoint = _camera.WorldToScreenPoint(_playerTransform.position);
+        Player player = _playerTransform.GetComponent<Player>();
+        Photon.Realtime.Player photonPlayer = PhotonNetwork.PlayerList[player.photonView.OwnerActorNr-1];
 
+        if (photonPlayer.CustomProperties.ContainsKey("Team"))
+        {
+            EColorType teamColor = (EColorType)Enum.Parse(typeof(EColorType), photonPlayer.CustomProperties["Team"].ToString());
+
+            ArmColor.color = ColorPalette.ColorDictionary[teamColor];
+            _contentImage.color = ColorPalette.ColorDictionary[teamColor];
+        }
+        else
+        {
+            ArmColor.color = Color.white;
+            _contentImage.color = Color.white;
+        }
 
         if (CheckPlayerIsInCamera())
         {

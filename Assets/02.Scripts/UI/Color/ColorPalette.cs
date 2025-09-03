@@ -1,18 +1,22 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
-public class ColorPalette : MonoBehaviour
+
+public class ColorPalette
 {
-    public List<ColorDataSO> ColorPaletteList;
+    public static Dictionary<EColorType, Color32> ColorDictionary;
 
-    public Dictionary<EColorType, Color32> ColorDictionary;
-    private void Awake()
+    public static void Init()
     {
         ColorDictionary = new Dictionary<EColorType, Color32>();
-        foreach (var color in ColorPaletteList)
+
+        var locations = Addressables.LoadResourceLocationsAsync("Colors").WaitForCompletion();
+        var entries = Addressables.LoadAssetsAsync<ColorDataSO>(locations, null).WaitForCompletion();
+
+        foreach (var entry in entries)
         {
-            ColorDictionary.Add(color.ColorType, color.Color);
+            ColorDictionary.Add(entry.ColorType, entry.Color);
         }
     }
 }
