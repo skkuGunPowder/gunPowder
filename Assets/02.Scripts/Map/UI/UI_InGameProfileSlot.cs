@@ -40,22 +40,10 @@ public class UI_InGameProfileSlot : MonoBehaviour
         PlayerProfileSkin.Init(player);
         
     }
-    public void Refresh(int gunpowder, int life)
+    public void Refresh(int gunpowder, int life, int attacker)
     {
-        if (gunpowder > GunpowderMiddle)
-        {
-            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
-        }
-        else if (gunpowder > GunpowderLow)
-        {
-            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthMiddle];
-        }
-        else
-        {
-            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthLow];
-        }
-
-        Shake();
+        ColorSet(gunpowder);
+        Shake(attacker);
         GunpowderTextUGUI.text = gunpowder.ToString();
         LifeRefresh(life);
     }
@@ -72,6 +60,22 @@ public class UI_InGameProfileSlot : MonoBehaviour
             {
                 LifeList[i].SetActive(false);
             }
+        }
+    }
+    
+    private void ColorSet(int gunpowder)
+    {
+        if (gunpowder > GunpowderMiddle)
+        {
+            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
+        }
+        else if (gunpowder > GunpowderLow)
+        {
+            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthMiddle];
+        }
+        else
+        {
+            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthLow];
         }
     }
 
@@ -92,8 +96,13 @@ public class UI_InGameProfileSlot : MonoBehaviour
         }
     }
 
-    private void Shake()
+    private void Shake(int attacker)
     {
+        if (attacker == 0)
+        {
+            return;
+        }
+        
         DOTween.Kill(this);
         
         GunpowderTextUGUI.rectTransform.DOScale(ScaleStrength, Duration).SetEase(Ease.OutCubic).OnComplete(() =>
