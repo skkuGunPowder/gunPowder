@@ -74,7 +74,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private Tween _preExplosionPulseTween;
     private Vector3 _defaultLocalScale;
-    private Dictionary<SpriteRenderer, Color> _pulseOriginalColorMap;
+    private Dictionary<SpriteRenderer, Color> _originalColorMap; // 게임 시작 시 저장되는 진짜 원본 색상
 
     [Header("히트스탑")]
     [SerializeField]
@@ -335,6 +335,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
         _defaultLocalScale = transform.localScale;
 
+        // 원본 색상 저장 (게임 시작 시 한 번만)
+        InitializeOriginalColors();
+
         // 로컬 필드 팀을 항상 네트워크 프로퍼티와 동기화
         if (PhotonView.Owner != null && PhotonView.Owner.CustomProperties.ContainsKey(EProperties.Team.ToString()))
         {
@@ -347,6 +350,22 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_playerFSM != null)
         {
             _playerFSM.SyncStateChange<PlayerIdleState>();
+        }
+    }
+
+    /// <summary>
+    /// 게임 시작 시 원본 색상을 저장합니다. (한 번만 실행)
+    /// </summary>
+    private void InitializeOriginalColors()
+    {
+        _originalColorMap = new Dictionary<SpriteRenderer, Color>();
+        
+        foreach (var renderer in _playerStat.MySpriteREndererList)
+        {
+            if (renderer != null)
+            {
+                _originalColorMap[renderer] = renderer.color;
+            }
         }
     }
 
@@ -410,6 +429,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
+        
         _attackTimer += Time.deltaTime;
 
 
@@ -723,11 +743,8 @@ public class Player : MonoBehaviourPun, IDamagable
         float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
         if (ratio < REDNESS_START_RATIO)
         {
-            foreach (var renderer in _playerStat.MySpriteREndererList)
-            {
-                if (renderer == null) { continue; }
-                renderer.color = Color.white;
-            }
+            // 원본 색상으로 복구
+            RestoreOriginalColors();
             return true;
         }
 
@@ -737,14 +754,19 @@ public class Player : MonoBehaviourPun, IDamagable
         // ratio 0.4~1 -> S: 0~0.8로 맵핑 (H=0 고정, V는 유지)
         float t = Mathf.Clamp01((ratio - REDNESS_START_RATIO) / (1f - REDNESS_START_RATIO));
         float targetS = Mathf.Lerp(0f, MAX_RED_SATURATION, t);
-        foreach (var renderer in _playerStat.MySpriteREndererList)
+        
+        // 원본 색상을 기반으로 빨간색 적용
+        if (_originalColorMap != null)
         {
-            if (renderer == null) { continue; }
-            Color current = renderer.color;
-            Color.RGBToHSV(current, out float _, out float _, out float v);
-            Color newColor = Color.HSVToRGB(0f, targetS, v);
-            newColor.a = current.a;
-            renderer.color = newColor;
+            foreach (var kv in _originalColorMap)
+            {
+                if (kv.Key == null) { continue; }
+                Color originalColor = kv.Value;
+                Color.RGBToHSV(originalColor, out float _, out float _, out float v);
+                Color newColor = Color.HSVToRGB(0f, targetS, v);
+                newColor.a = originalColor.a;
+                kv.Key.color = newColor;
+            }
         }
 
         return true;
@@ -799,45 +821,33 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        // 원본 색상 저장
-        if (_pulseOriginalColorMap == null) _pulseOriginalColorMap = new Dictionary<SpriteRenderer, Color>();
-        _pulseOriginalColorMap.Clear();
-        foreach (var renderer in _playerStat.MySpriteREndererList)
-        {
-            if (renderer == null) { continue; }
-            _pulseOriginalColorMap[renderer] = renderer.color;
-        }
 
         float targetScaleMultiplier = PULSE_SCALE_MULTIPLIER;
         float halfDuration = PULSE_HALF_DURATION; // 커졌다/작아졌다 왕복 0.4초
         transform.localScale = _defaultLocalScale;
 
         Sequence seq = DOTween.Sequence();
-        // 커질 때 빨강으로
+        // 커질 때 빨강으로 (원본 색상 기반)
         seq.AppendCallback(() =>
         {
-            foreach (var renderer in _playerStat.MySpriteREndererList)
+            if (_originalColorMap != null)
             {
-                if (renderer == null) { continue; }
-                Color baseCol = renderer.color;
-                Color.RGBToHSV(baseCol, out float _, out float _, out float v);
-                Color redCol = Color.HSVToRGB(0f, MAX_RED_SATURATION, v);
-                redCol.a = baseCol.a;
-                renderer.color = redCol;
+                foreach (var kv in _originalColorMap)
+                {
+                    if (kv.Key == null) { continue; }
+                    Color originalColor = kv.Value;
+                    Color.RGBToHSV(originalColor, out float _, out float _, out float v);
+                    Color redCol = Color.HSVToRGB(0f, MAX_RED_SATURATION, v);
+                    redCol.a = originalColor.a;
+                    kv.Key.color = redCol;
+                }
             }
         });
         seq.Append(transform.DOScale(_defaultLocalScale * targetScaleMultiplier, halfDuration).SetEase(Ease.InOutSine));
-        // 작아질 때 원래 색으로 복구
+        // 작아질 때 원본 색으로 복구
         seq.AppendCallback(() =>
         {
-            if (_pulseOriginalColorMap != null)
-            {
-                foreach (var kv in _pulseOriginalColorMap)
-                {
-                    if (kv.Key == null) { continue; }
-                    kv.Key.color = kv.Value;
-                }
-            }
+            RestoreOriginalColors();
         });
         seq.Append(transform.DOScale(_defaultLocalScale, halfDuration).SetEase(Ease.InOutSine));
         seq.SetLoops(-1, LoopType.Restart);
@@ -852,24 +862,34 @@ public class Player : MonoBehaviourPun, IDamagable
             _preExplosionPulseTween = null;
         }
         
-        // 색상 복구 - 원본 색상 맵이 있으면 복구, 없으면 흰색으로 설정
-        if (_pulseOriginalColorMap != null && _pulseOriginalColorMap.Count > 0)
-        {
-            foreach (var kv in _pulseOriginalColorMap)
-            {
-                if (kv.Key == null) { continue; }
-                kv.Key.color = kv.Value;
-            }
-        }
-        else
-        {
-            // 원본 색상 정보가 없는 경우 흰색으로 강제 설정
-            SetSpriteRendererWhite();
-        }
+        // 원본 색상으로 복구
+        RestoreOriginalColors();
         
         if (resetScale)
         {
             transform.localScale = _defaultLocalScale;
+        }
+    }
+
+    /// <summary>
+    /// 저장된 원본 색상으로 스프라이트를 복구합니다.
+    /// </summary>
+    private void RestoreOriginalColors()
+    {
+        if (_originalColorMap != null && _originalColorMap.Count > 0)
+        {
+            foreach (var kv in _originalColorMap)
+            {
+                if (kv.Key != null)
+                {
+                    kv.Key.color = kv.Value;
+                }
+            }
+        }
+        else
+        {
+            // 원본 색상 정보가 없는 경우 흰색으로 설정
+            SetSpriteRendererWhite();
         }
     }
 
@@ -944,8 +964,8 @@ public class Player : MonoBehaviourPun, IDamagable
         // 펄스 효과 중단 및 스케일 리셋
         StopPreExplosionPulse(true);
         
-        // 스프라이트 색상을 흰색으로 초기화
-        SetSpriteRendererWhite();
+        // 스프라이트 색상을 원본 색상으로 초기화
+        RestoreOriginalColors();
         
         // 타이머들 초기화
         _gunPowderDecreaseWithoutAttackTimer = 0f;
@@ -1050,7 +1070,11 @@ public class Player : MonoBehaviourPun, IDamagable
                 attackerStat.IncreaseTotalDamage(damage);
                 if (isDead)
                 {
-                    attackerStat.IncreaseTotalKillCount();
+                    // 킬 카운트는 공격자 본인의 클라이언트에서만 증가시키도록 RPC 호출
+                    if (attackerView.Owner != null)
+                    {
+                        attackerView.RPC(nameof(PlayerStat.RPC_IncreaseTotalKillCount), attackerView.Owner);
+                    }
                 }
             }
         }

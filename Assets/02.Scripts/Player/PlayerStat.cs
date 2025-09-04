@@ -361,10 +361,21 @@ public class PlayerStat : MonoBehaviour
         _totalKillCount++;
     }
 
+    [PunRPC]
+    public void RPC_IncreaseTotalKillCount()
+    {
+        // 자신의 플레이어에서만 킬 카운트 증가
+        if (_photonView.IsMine)
+        {
+            _totalKillCount++;
+        }
+    }
+
     public void ResetTotalKillCount()
     {
         _totalKillCount = 0;
     }
+
 
     // 플레이어 상태 관리 메서드
     public void ResurrectPlayerStat()
