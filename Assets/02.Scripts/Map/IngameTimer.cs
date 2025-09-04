@@ -66,7 +66,6 @@ public class IngameTimer : MonoBehaviour
         {
             _airDropTimer = 0f;
         
-            Debug.Log("AirDrop");
             if (UnityEngine.Random.Range(0f, 1.0f) <= 0.1f)
             {
                 PhotonNetwork.Instantiate(_airDropJetPrefab.name, transform.position, Quaternion.identity);

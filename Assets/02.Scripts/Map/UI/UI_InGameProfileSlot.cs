@@ -19,7 +19,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public UI_EmotionSlot Emotion;
     
     public List<GameObject> LifeList;
-    public ColorPalette ColorPalette;
+    // public ColorPalette ColorPalette;
    
     [Header("Color")] 
     public int GunpowderMiddle = 50;
@@ -114,7 +114,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
             GunpowderTextUGUI.rectTransform.DOAnchorPos(_gunpowderTextOriginalRectTransform, Duration).SetEase(EaseType);
         });
     }
-       public void SetTop(bool isTop)
+    public void SetTop(bool isTop)
     {
         FirstPlace.SetActive(isTop);
     }

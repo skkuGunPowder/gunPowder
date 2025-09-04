@@ -315,6 +315,7 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerLife -= 1;
             _currentPlayerGunPowderCount = _initGunpowderCount;
             isDead = true;
+            _photonView.RPC(nameof(RPC_Dead), RpcTarget.All, attacker);
             OnGunPowderEmpty?.Invoke();
         }
         
@@ -330,9 +331,15 @@ public class PlayerStat : MonoBehaviour
     }
 
     [PunRPC]
-    private void RPC_ChangeGunpowder(int gunpowder, int life, int attacker, PhotonMessageInfo info)
+    private void RPC_ChangeGunpowder(int gunpowder, int life, int attacker ,PhotonMessageInfo info)
     {
-        DamageChecker.Instance.RPC_RequestDamage(gunpowder, life, info.Sender.ActorNumber, attacker);
+        DamageChecker.Instance.RPC_RequestDamage(gunpowder, life, attacker,info.Sender.ActorNumber);
+    }
+
+    [PunRPC]
+    private void RPC_Dead(int attacker, PhotonMessageInfo info)
+    {
+        DamageChecker.Instance.ActiveKillLog(attacker, info.Sender.ActorNumber);
     }
 
     // 데미지 & 통계 관리 메서드

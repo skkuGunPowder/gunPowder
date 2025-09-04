@@ -45,7 +45,7 @@ public class DamageChecker : Singleton<DamageChecker>
             _playerList.Add(player.ActorNumber);
             _playerScoreDictionary.Add(player.ActorNumber, RoomStatManager.Instance.PlayerLife * RoomStatManager.Instance.PlayerGunpowder);
         }
-        
+
         _currentTopPlayer = PlayerList[0];
     }
 
@@ -62,12 +62,17 @@ public class DamageChecker : Singleton<DamageChecker>
         }
     }
 
-    private void ActiveKillLog(int killer, int death)
+    public void ActiveKillLog(int killer, int death)
     {
+        if (GameManager.Instance.CurrentGameState != EGameState.Playing)
+        {
+            return;
+        }
+        
         EventManager.Instance.OnUpdateLog(killer, death);
     }
     
-    public void RPC_RequestDamage(int gunpowder, int life, int player,int attacker)
+    public void RPC_RequestDamage(int gunpowder, int life, int attacker, int player)
     {
         
         if (GameManager.Instance.CurrentGameState != EGameState.Playing)
@@ -77,16 +82,10 @@ public class DamageChecker : Singleton<DamageChecker>
         
         PlayerDataChange(gunpowder, life, player, attacker);
         
-        if (gunpowder <= 0 && attacker != 0)
-        {
-            ActiveKillLog(attacker ,player);
-        }
-        
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
-        
         CalculateScore(gunpowder, life, player);
     }
     
@@ -130,7 +129,6 @@ public class DamageChecker : Singleton<DamageChecker>
             {
                 topScore = kvp.Value;
                 topActor = kvp.Key;
-                
             }
             
             if (topActor != _currentTopPlayer)
