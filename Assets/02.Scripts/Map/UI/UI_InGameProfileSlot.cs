@@ -114,7 +114,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
             GunpowderTextUGUI.rectTransform.DOAnchorPos(_gunpowderTextOriginalRectTransform, Duration).SetEase(EaseType);
         });
     }
-       public void SetTop(bool isTop)
+    public void SetTop(bool isTop)
     {
         FirstPlace.SetActive(isTop);
     }
