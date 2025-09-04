@@ -8,7 +8,6 @@ public class UI_IngameTimer : MonoBehaviour
     
     public void RefreshTimer(int timer)
     {
-        Debug.Log($"{timer}");
         TimerTextMeshProUGUI.text = TimeSpan.FromSeconds(timer).ToString(@"mm\:ss");
     }
 }
