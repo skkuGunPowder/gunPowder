@@ -367,8 +367,7 @@ public class Player : MonoBehaviourPun, IDamagable
         ClearStoredVelocity();
 
         // 색상 및 펄스 효과 초기화
-        StopPreExplosionPulse(true);
-        SetSpriteRendererWhite();
+        ResetColorAndEffects();
 
         // 플레이어 스탯 초기화 (건파우더 초기화)
         _playerStat.ResurrectPlayerStat();
@@ -384,6 +383,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void HandleGunPowderEmpty()
     {
+        // 죽을 때 색상 및 효과 초기화
+        ResetColorAndEffects();
+        
         // PlayerFSM을 통해 SyncStateChange 호출
         if (_playerFSM != null)
         {
@@ -683,7 +685,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 PhotonView.RPC(nameof(PlayExplosionEffect), RpcTarget.All);
             }
 
-            SetSpriteRendererWhite();
+            ResetColorAndEffects();
 
             _playerFSM.SyncStateChange<PlayerDamagedState>();
         }
@@ -849,8 +851,9 @@ public class Player : MonoBehaviourPun, IDamagable
             _preExplosionPulseTween.Kill(false);
             _preExplosionPulseTween = null;
         }
-        // 색상 복구
-        if (_pulseOriginalColorMap != null)
+        
+        // 색상 복구 - 원본 색상 맵이 있으면 복구, 없으면 흰색으로 설정
+        if (_pulseOriginalColorMap != null && _pulseOriginalColorMap.Count > 0)
         {
             foreach (var kv in _pulseOriginalColorMap)
             {
@@ -858,6 +861,12 @@ public class Player : MonoBehaviourPun, IDamagable
                 kv.Key.color = kv.Value;
             }
         }
+        else
+        {
+            // 원본 색상 정보가 없는 경우 흰색으로 강제 설정
+            SetSpriteRendererWhite();
+        }
+        
         if (resetScale)
         {
             transform.localScale = _defaultLocalScale;
@@ -928,15 +937,28 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
     /// <summary>
+    /// 색상과 시각적 효과를 모두 초기화하는 메서드
+    /// </summary>
+    private void ResetColorAndEffects()
+    {
+        // 펄스 효과 중단 및 스케일 리셋
+        StopPreExplosionPulse(true);
+        
+        // 스프라이트 색상을 흰색으로 초기화
+        SetSpriteRendererWhite();
+        
+        // 타이머들 초기화
+        _gunPowderDecreaseWithoutAttackTimer = 0f;
+        _colorUpdateWithoutAttackTimer = 0f;
+        _warningSfxTimer = 0f;
+    }
+
+    /// <summary>
     /// 공격을 하면 타이머 초기화
     /// </summary>
     public void ResetGunPowderDecreaseWithoutAttackTimer()
     {
-        _gunPowderDecreaseWithoutAttackTimer = 0f;
-        _colorUpdateWithoutAttackTimer = 0f;
-        StopPreExplosionPulse(true);
-        SetSpriteRendererWhite();
-        _warningSfxTimer = 0f;
+        ResetColorAndEffects();
     }
 
     public void PlayerTeamCheck()
