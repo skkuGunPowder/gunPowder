@@ -18,14 +18,12 @@ public class PlayerSettingManager : MonoBehaviour
     // 현재 룸 프로퍼티 가져오기 => 플레이어 세팅해주기
     private void Awake()
     {
-        Debug.Log("playerSettingManager Awake");
         _photonView = GetComponent<PhotonView>();
     }
 
     private void Start()
     {
         Init();
-        Debug.Log("PlayerSettingManager Start");
     }
 
     public void Init()
@@ -94,7 +92,6 @@ public class PlayerSettingManager : MonoBehaviour
 
         GameManager.Instance.TimeScaleSetting();
         DamageChecker.Instance.SetPlayerView();
-        Debug.Log("SpawnPlayer");
     }
     
     

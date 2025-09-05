@@ -33,7 +33,7 @@ public abstract class UltimateEffectBase : MonoBehaviour,IUltimateEffect
 
     public virtual void Play()
     {
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.AppendInterval(Delay);
         sequence.AppendCallback(EffectOn);
         sequence.Join(LineEffectUp.transform.DOLocalMove(EndPositionUp, DurationUp).SetEase(EaseUp));

@@ -36,7 +36,7 @@ public class UltimateProductionSlot : MonoBehaviour
         
         BackGroundColorChange(isMyTeam);
         
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.Append(UltimateEffectUp.DOAnchorPos(UltimateEndPosition, UltimateEffectSpeed).SetEase(UltimateEffectInEase));
         sequence.Join(UltimateEffectDown.DOAnchorPos(UltimateEndPosition2, UltimateEffectSpeed).SetEase(UltimateEffectInEase));
         sequence.JoinCallback(()=>BombEffectOn(bomb));
