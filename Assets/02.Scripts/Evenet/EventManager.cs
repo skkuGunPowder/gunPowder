@@ -125,4 +125,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnBackGroundFade?.Invoke();
     }
+
+    public event Action OnHitScreen;
+    public void HitScreen()
+    {
+        OnHitScreen?.Invoke();
+    }
 }

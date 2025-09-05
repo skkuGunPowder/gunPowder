@@ -32,7 +32,7 @@ public class UltimateEffectLocal : MonoBehaviour
 
     private void PlayEffect(string bomb, PhotonPlayer player)
     {
-        DOTween.KillAll();
+        DOTween.Kill(this);
         StopAllCoroutines();
         foreach (PhotonView view in _playerList)
         {
