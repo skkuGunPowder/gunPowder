@@ -130,6 +130,15 @@ public class PlayerStat : MonoBehaviour
     public float UltimateChanceDuration { get => _ultimateChanceDuration; set => _ultimateChanceDuration = value; }
     public int UltimateTriggerThreshold { get => _ultimateTriggerThreshold; set => _ultimateTriggerThreshold = value; }
 
+    [Header("최근 공격자 추적")]
+    [SerializeField] private int _lastAttackerActorNumber = -1; // 최근에 나를 공격한 사람의 ActorNumber
+    [SerializeField] private float _lastAttackTime = 0f; // 마지막으로 공격받은 시간
+    [SerializeField] private float _attackTrackingDuration = 5f; // 공격자를 추적하는 시간(초)
+    
+    public int LastAttackerActorNumber => _lastAttackerActorNumber;
+    public float LastAttackTime => _lastAttackTime;
+    public float AttackTrackingDuration => _attackTrackingDuration;
+
     [Header("팀 & 이벤트")]
     [SerializeField] private List<SpriteRenderer> _mySpriteRendererList;
     
@@ -152,6 +161,7 @@ public class PlayerStat : MonoBehaviour
         SetPlayer(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife, 
                  RoomStatManager.Instance.PlayerDecreaseTime, RoomStatManager.Instance.PlayerTeam);
     }
+
 
     // 초기화 관련 메서드
     public void InitializeStats()
@@ -303,6 +313,9 @@ public class PlayerStat : MonoBehaviour
         _currentPlayerGunPowderCount -= amount;
         bool isDead = false;
 
+        // 공격자 기록 (자기 자신이 아닌 경우에만)
+        RecordLastAttacker(attacker);
+
         // 궁극기 기회 발생 조건 확인
         if (_currentPlayerGunPowderCount <= _ultimateTriggerThreshold && 
             !_hasUltimateChance && !_hasUsedUltimateThisLife)
@@ -315,8 +328,34 @@ public class PlayerStat : MonoBehaviour
             _currentPlayerLife -= 1;
             _currentPlayerGunPowderCount = _initGunpowderCount;
             isDead = true;
-            _photonView.RPC(nameof(RPC_Dead), RpcTarget.All, attacker);
+            // 최근 공격자를 확인하여 킬로그에 표시할 킬러 결정
+            int killerForLog = GetValidLastAttacker();
+            if (killerForLog == -1)
+            {
+                killerForLog = _photonView.OwnerActorNr; // 자살
+            }
+            
+            _photonView.RPC(nameof(RPC_Dead), RpcTarget.All, attacker, killerForLog);
             OnGunPowderEmpty?.Invoke();
+            
+            // 킬 카운트 증가 로직 - 최근 공격자 기반
+            if (isDead)
+            {
+                int validLastAttacker = GetValidLastAttacker();
+                
+                // 유효한 최근 공격자가 있는 경우에만 킬 카운트 증가
+                if (validLastAttacker != -1)
+                {
+                    PhotonView attackerView = FindAttackerPhotonView(validLastAttacker);
+                    
+                    // 공격자에게 킬 카운트 증가 RPC 전송
+                    if (attackerView != null && attackerView.Owner != null)
+                    {
+                        attackerView.RPC(nameof(RPC_IncreaseTotalKillCount), attackerView.Owner);
+                    }
+                }
+                // 유효한 최근 공격자가 없으면 아무의 킬도 증가하지 않음
+            }
         }
         
         if (_currentPlayerLife <= 0)
@@ -337,9 +376,10 @@ public class PlayerStat : MonoBehaviour
     }
 
     [PunRPC]
-    private void RPC_Dead(int attacker, PhotonMessageInfo info)
+    private void RPC_Dead(int attacker, int killerForLog, PhotonMessageInfo info)
     {
-        DamageChecker.Instance.ActiveKillLog(attacker, info.Sender.ActorNumber);
+        // 죽은 사람의 클라이언트에서 미리 결정된 킬러로 킬로그 표시
+        DamageChecker.Instance.ActiveKillLog(killerForLog, info.Sender.ActorNumber);
     }
 
     // 데미지 & 통계 관리 메서드
@@ -383,6 +423,68 @@ public class PlayerStat : MonoBehaviour
         _totalKillCount = 0;
     }
 
+    /// <summary>
+    /// ActorNumber를 통해 공격자의 PhotonView를 찾는 메서드
+    /// </summary>
+    /// <param name="attackerActorNumber">공격자의 ActorNumber</param>
+    /// <returns>공격자의 PhotonView, 찾지 못하면 null</returns>
+    private PhotonView FindAttackerPhotonView(int attackerActorNumber)
+    {
+        // Enemy 태그를 가진 오브젝트들 중에서 공격자 찾기
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        
+        foreach (GameObject enemy in enemies)
+        {
+            PhotonView enemyPhotonView = enemy.GetComponent<PhotonView>();
+            if (enemyPhotonView != null && enemyPhotonView.Owner != null && 
+                enemyPhotonView.Owner.ActorNumber == attackerActorNumber)
+            {
+                return enemyPhotonView;
+            }
+        }
+        
+        return null;
+    }
+
+    /// <summary>
+    /// 공격받을 때 최근 공격자를 기록하는 메서드
+    /// </summary>
+    /// <param name="attackerActorNumber">공격자의 ActorNumber</param>
+    public void RecordLastAttacker(int attackerActorNumber)
+    {
+        // 자기 자신이 공격자인 경우는 기록하지 않음 (자살, 자해 등)
+        if (attackerActorNumber == _photonView.OwnerActorNr)
+        {
+            return;
+        }
+
+        _lastAttackerActorNumber = attackerActorNumber;
+        _lastAttackTime = Time.time;
+    }
+
+    /// <summary>
+    /// 최근 공격자가 유효한지 확인하는 메서드 (5초 이내)
+    /// </summary>
+    /// <returns>유효한 최근 공격자의 ActorNumber, 없으면 -1</returns>
+    public int GetValidLastAttacker()
+    {
+        // 최근 공격자가 없는 경우
+        if (_lastAttackerActorNumber == -1)
+        {
+            return -1;
+        }
+
+        // 5초가 지난 경우
+        if (Time.time - _lastAttackTime > _attackTrackingDuration)
+        {
+            _lastAttackerActorNumber = -1;
+            return -1;
+        }
+
+        return _lastAttackerActorNumber;
+    }
+
+
 
     // 플레이어 상태 관리 메서드
     public void ResurrectPlayerStat()
@@ -404,6 +506,10 @@ public class PlayerStat : MonoBehaviour
         _isFallingDead = false;
         _hasUsedUltimateThisLife = false;
         _hasUltimateChance = false;
+        
+        // 최근 공격자 정보 초기화
+        _lastAttackerActorNumber = -1;
+        _lastAttackTime = 0f;
         
         // 네트워크 동기화
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount, _currentPlayerLife, 0);

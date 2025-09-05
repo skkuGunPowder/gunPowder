@@ -405,6 +405,14 @@ public class Player : MonoBehaviourPun, IDamagable
         // 죽을 때 색상 및 효과 초기화
         ResetColorAndEffects();
         
+        // 궁극기 효과 초기화
+        RPC_UltimateEffect(false);
+        RPC_SetMaterial((byte)EPlayerMaterial.Default);
+        _ultimateEffectOn = false;
+        
+        // 궁극기 관련 타이머 초기화
+        _ultimateChanceTimer = 0f;
+        
         // PlayerFSM을 통해 SyncStateChange 호출
         if (_playerFSM != null)
         {
@@ -1068,6 +1076,7 @@ public class Player : MonoBehaviourPun, IDamagable
             if (attackerStat != null)
             {
                 attackerStat.IncreaseTotalDamage(damage);
+                /*
                 if (isDead)
                 {
                     // 킬 카운트는 공격자 본인의 클라이언트에서만 증가시키도록 RPC 호출
@@ -1075,7 +1084,7 @@ public class Player : MonoBehaviourPun, IDamagable
                     {
                         attackerView.RPC(nameof(PlayerStat.RPC_IncreaseTotalKillCount), attackerView.Owner);
                     }
-                }
+                }*/
             }
         }
 
