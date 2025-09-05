@@ -632,9 +632,6 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void ExecuteUltimate()
     {
-        
-        PhotonView.RPC(nameof(Rpc_UltimateProduction), RpcTarget.All, _ultimate.GetBombID());
-        
         if (_playerStat.HasUltimateChance && !_playerStat.HasUsedUltimateThisLife)
         {
             if (_ultimate == null)
@@ -663,6 +660,7 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerSFXAnimationEvent.PlayerUltimateUseSFX();
 
             // 궁극기 연출
+            PhotonView.RPC(nameof(Rpc_UltimateProduction), RpcTarget.All, _ultimate.GetBombID());
         }
     }
 

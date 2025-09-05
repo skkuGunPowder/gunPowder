@@ -9,12 +9,12 @@ public class RoomReadyCheck
     {
         Room room = PhotonNetwork.CurrentRoom;
         
-        // if (room.PlayerCount < _minimumPlayerCount)
-        // {
-        //     UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
-        //     popup.Init("다른 플레이어가 없습니다.", false);
-        //     return false;
-        // }
+        if (room.PlayerCount < _minimumPlayerCount)
+        {
+            UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+            popup.Init("다른 플레이어가 없습니다.", false);
+            return false;
+        }
 
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
 
