@@ -26,12 +26,12 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     private float _lifetimeSeconds = 10f;
     private float _lifeTimer = 0f;
     private bool _hasRequestedLifeDestroy = false;
-    
+
     [Header("Lifetime Flicker")]
     [SerializeField]
     private float _flickerStartSeconds = 8f;
     [SerializeField]
-    private float _flickerIntervalSeconds = 0.15f;
+    private float _flickerIntervalSeconds = 0.05f;
     private bool _isFlickering = false;
     private float _nextFlickerTime = 0f;
     private bool _currentVisible = true;
