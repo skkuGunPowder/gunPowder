@@ -22,6 +22,20 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     private BoxCollider2D _collider;
     private float _timer = 0f;
     private float _colliderOnTime = 0.2f;
+    [SerializeField]
+    private float _lifetimeSeconds = 10f;
+    private float _lifeTimer = 0f;
+    private bool _hasRequestedLifeDestroy = false;
+    
+    [Header("Lifetime Flicker")]
+    [SerializeField]
+    private float _flickerStartSeconds = 8f;
+    [SerializeField]
+    private float _flickerIntervalSeconds = 0.15f;
+    private bool _isFlickering = false;
+    private float _nextFlickerTime = 0f;
+    private bool _currentVisible = true;
+
     private Transform _target;
     public Transform Target => _target;
     private bool _isFallingOut;
@@ -63,6 +77,33 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
         if(_timer > _colliderOnTime)
         {
             _collider.enabled = true;
+        }
+
+        // 일정 시간 경과 후 삭제(네트워크 동기화)
+        _lifeTimer += Time.deltaTime;
+
+        // 8초 이후 깜박임 시작
+        if (!_isFlickering && _lifeTimer >= _flickerStartSeconds)
+        {
+            _isFlickering = true;
+            _nextFlickerTime = 0f;
+            _currentVisible = true;
+        }
+        if (_isFlickering && _lifeTimer >= _nextFlickerTime)
+        {
+            _currentVisible = !_currentVisible;
+            if (_spriteRenderer != null) _spriteRenderer.enabled = _currentVisible;
+            if (_spriteTrail != null) _spriteTrail.enabled = _currentVisible;
+            _nextFlickerTime = _lifeTimer + _flickerIntervalSeconds;
+        }
+
+        if (!_hasRequestedLifeDestroy && _lifeTimer >= _lifetimeSeconds)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+            }
+            _hasRequestedLifeDestroy = true;
         }
     }
 
