@@ -8,11 +8,9 @@ using UnityEngine.Tilemaps;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UltimateEffectLocal : MonoBehaviour
 {
-    public List<Tilemap> Grid;
     public List<GameObject> EffectList;
     private SpriteRenderer _ultiBackGround;
     
-    public Color32 GridColor;
     [Header("궁극기에 얼마나 멈출건지")]
     public float UltiTime = 1f;
     public float ColorChangeTime = 0.1f;
@@ -34,7 +32,7 @@ public class UltimateEffectLocal : MonoBehaviour
 
     private void PlayEffect(string bomb, PhotonPlayer player)
     {
-        DOTween.Kill(this);
+        DOTween.KillAll();
         StopAllCoroutines();
         foreach (PhotonView view in _playerList)
         {
@@ -66,10 +64,6 @@ public class UltimateEffectLocal : MonoBehaviour
     private void UltimateOn()
     {
         StartCoroutine(TimeSlow());
-        foreach (Tilemap tile in Grid)
-        {
-            tile.color = GridColor;
-        }
     }
     
     private IEnumerator TimeSlow()
@@ -84,7 +78,9 @@ public class UltimateEffectLocal : MonoBehaviour
         }
         
         GameManager.Instance.GameStateChange(EGameState.Playing);
+        BackGroundOff();
         EventManager.Instance.BackGroundFade();
+        
     }   
     private void PlayerListUp()
     {
@@ -111,7 +107,7 @@ public class UltimateEffectLocal : MonoBehaviour
             yield return null;
         }
         
-        _ultiBackGround.color = Color.black;
+        _ultiBackGround.color = ColorPalette.ColorDictionary[EColorType.UltiBack];
     }
     private void BackGroundOff()
     {
@@ -120,11 +116,6 @@ public class UltimateEffectLocal : MonoBehaviour
             UltimateBackGround.SetActive(false);
             _ultiBackGround.color = Color.white; 
         });
-        
-        foreach (Tilemap tile in Grid)
-        {
-            DOTween.To(() => tile.color, x => tile.color = x, Color.white, FadeTime);
-        }
     }
 
     private void OnDestroy()
