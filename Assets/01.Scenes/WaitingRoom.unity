@@ -1672,6 +1672,37 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &668101122
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 668101123}
+  m_Layer: 0
+  m_Name: UltimateProduction
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &668101123
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 668101122}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &718051321
 GameObject:
   m_ObjectHideFlags: 0
@@ -7390,6 +7421,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _currentGameState: 0
+  UltiTime: 1
   FallDeadStartPointList: []
   FallDeadPathList: []
   ResurrectPoint: {fileID: 0}
@@ -8508,3 +8540,4 @@ SceneRoots:
   - {fileID: 549082057}
   - {fileID: 1697628283}
   - {fileID: 938364084}
+  - {fileID: 668101123}

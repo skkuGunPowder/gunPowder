@@ -8,7 +8,7 @@ public class UltimateEffectWater : UltimateEffectBase
     
     public override void Play()
     {
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.AppendInterval(Delay);
         sequence.AppendCallback(EffectOn);
         

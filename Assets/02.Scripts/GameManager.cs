@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
@@ -13,13 +14,13 @@ public class GameManager : PhotonSingleton<GameManager>
     
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
-    
     [Header("플레이어 낙사 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
     
     public event Action<PhotonPlayer> OnTimeCheck;
+    public event Action OnUltimateEnd;
     public event Action OnGameStart;
     public event Action OnGameOver;
 
@@ -165,7 +166,7 @@ public class GameManager : PhotonSingleton<GameManager>
     
     public void TimeScaleSetting()
     {
-        if (_currentGameState == EGameState.Ready)
+        if (_currentGameState == EGameState.Ready || _currentGameState == EGameState.Ultimate)
         {
             Time.timeScale = 0;
         }
@@ -179,7 +180,7 @@ public class GameManager : PhotonSingleton<GameManager>
     { 
         EventManager.Instance.OnLoadFinished -= Init;
     }
-
+    
     private void OnDestroy()
     {
         Debug.Log("GameManager OnDestroy");
