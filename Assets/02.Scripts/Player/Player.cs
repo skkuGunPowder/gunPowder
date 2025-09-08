@@ -994,7 +994,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     }
 
-    public void TakeDamage(int damage, int maxDamage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
+    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
         // 피격 VFX 재생
         if (tag == "Player")
@@ -1024,11 +1024,11 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(int damage, int maxDamage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, PhotonMessageInfo info)
+    public void RPC_TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, PhotonMessageInfo info)
     {
         if (_playerStat.IsImmune)
         {
@@ -1057,9 +1057,12 @@ public class Player : MonoBehaviourPun, IDamagable
             Debug.LogWarning($"[RPC_TakeDamage] 공격자 뷰를 찾을 수 없습니다. ID: {attackerViewId}");
         }
 
-        
         // 피격 횟수 증가
         _playerStat.IncreseDamagedCount();
+
+        // 건파우더 드랍량 계산 (힐량 계산)
+        float healPercent = HealPercent / 100f;
+        int gunPowderCount = Mathf.CeilToInt(maxDamage * healPercent);
 
         // 플레이어가 맞은 횟수에 비례해서 데미지 증가
         int increaseDamagePerDamagedCount = _playerStat.CurrentPlayerDamagedCount / 15;
@@ -1088,8 +1091,6 @@ public class Player : MonoBehaviourPun, IDamagable
             }
         }
 
-        // 건파우더 감소 개수 = 데미지 절반
-        int gunPowderCount = Mathf.CeilToInt(damage * 0.5f);
         // Gunpowder 낙출
         ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
 
