@@ -30,7 +30,6 @@ public class HitScreen : MonoBehaviour
 
         float currentValue = HitScreenImage.color.a;
         currentValue = Mathf.Min(currentValue + Value, MaxValue);
-        Debug.Log(currentValue);
         Play(currentValue);
     }
 
