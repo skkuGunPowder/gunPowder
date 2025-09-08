@@ -996,7 +996,6 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
-        Debug.Log("TakeDamage");
         EventManager.Instance.HitScreen();
         // 피격 VFX 재생
         if (tag == "Player")
