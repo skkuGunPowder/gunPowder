@@ -259,7 +259,7 @@ public class Player : MonoBehaviourPun, IDamagable
             Debug.LogWarning("BodyPartMarker를 찾지 못했습니다. PlayerSprites 루트에 마커를 추가해주세요.");
         }
     }
-        
+
 
     private void LoadItems()
     {
@@ -278,14 +278,28 @@ public class Player : MonoBehaviourPun, IDamagable
                     EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID));
                 }
             }
+            else
+            {
+                // 해당 슬롯이 해제되었거나 값이 제거된 경우 로컬 딕셔너리에서도 제거
+                if (EquipedItemDict.ContainsKey(itemType))
+                {
+                    EquipedItemDict.Remove(itemType);
+                }
+            }
         }
 
-        // 특수폭탄 정보 받아오기
+        // 특수폭탄 정보 받아오기                
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
         if (UltimateManager.Instance != null)
         {
             _ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
+        }
+        
+                
+        foreach (var item in EquipedItemDict)
+        {
+            Debug.Log($"{item.Key} : {item.Value.ID}");
         }
     }
 
