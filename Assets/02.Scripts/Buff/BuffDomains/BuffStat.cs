@@ -1,30 +1,33 @@
+using System.Collections.Generic;
 using LitJson;
-using UnityEngine;
+using System;
 
 public class BuffStat
 {
     public readonly float Duration;
-    public readonly int Value;
+    public readonly List<int> ValueList;
 
     public BuffStat(JsonData json)
     {
         if (json == null)
         {
-            throw new System.Exception("Json 데이터가 비어있습니다.");
+            throw new Exception("Json 데이터가 비어있습니다.");
         }
 
         Duration = float.Parse(json["Duration"].ToString());
-        Value = int.Parse(json["Value"].ToString());
-    }
 
-    public BuffStat(float duration, int value)
-    {
-        if (duration < -1)
+        ValueList = new List<int>();
+        string[] values = json["Value"].ToString().Split(',');
+        foreach (var val in values)
         {
-            throw new System.Exception("Duration은 -1보다 작을 수 없습니다.");
+            if (int.TryParse(val.Trim(), out int intValue))
+            {
+                ValueList.Add(intValue);
+            }
+            else
+            {
+                throw new Exception($"Value '{val}'를 정수로 변환할 수 없습니다.");
+            }
         }
-
-        Duration = duration;
-        Value = value;
     }
 }
