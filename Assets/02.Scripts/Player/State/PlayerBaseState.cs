@@ -202,7 +202,19 @@ public class PlayerBaseState : MonoState
 
     protected virtual bool CanSpecialBomb()
     {
-        return _owner.CanSpecialBomb();
+        // 쿨타임 체크
+        if (!_owner.CanSpecialBomb())
+        {
+            return false;
+        }
+        
+        // 건파우더가 특수 폭탄 코스트보다 적은지 체크
+        if (_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.SpecialBombStat.Cost)
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     protected virtual void SetLastNormalBombTime()
@@ -245,6 +257,18 @@ public class PlayerBaseState : MonoState
             return;
         }
 
+        // 특수 폭탄일 경우 건파우더 소모
+        if(prefabName != BASIC_BOMB_PREFAB)
+        {
+            // 건파우더가 부족한 경우 폭탄 생성 중단
+            if (_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.SpecialBombStat.Cost)
+            {
+                return;
+            }
+            
+            _owner.PlayerStat.DecreaseGunPowderCount(_owner.SpecialBombStat.Cost, _owner.PhotonView.Owner.ActorNumber);
+        }
+
         // 1. 폭탄 인스턴싱
         GameObject bomb = PhotonNetwork.Instantiate(prefabName, bombSpawnPoint.position,
          Quaternion.Euler(0, _owner.PlayerStat.FacingDirection == 1 ? 0 : 180, 0));
@@ -271,12 +295,6 @@ public class PlayerBaseState : MonoState
             Debug.LogError("[PlayerBaseState] Owner PhotonView를 찾을 수 없습니다.");
             PhotonNetwork.Destroy(bomb); // 실패한 오브젝트 정리
             return;
-        }
-        
-        // 특수 폭탄일 경우 건파우더 소모
-        if(prefabName != BASIC_BOMB_PREFAB)
-        {
-            _owner.PlayerStat.DecreaseGunPowderCount(_owner.SpecialBombStat.Cost, _owner.PhotonView.Owner.ActorNumber);
         }
         
         // 4. RPC 호출 (SetOwner 먼저, 그 다음 폭탄 동작)
@@ -337,6 +355,12 @@ public class PlayerBaseState : MonoState
     {
         if(!_owner.PhotonView.IsMine)
             return;
+
+        // 특수 폭탄 사용 가능 여부 체크
+        if (!CanSpecialBomb())
+        {
+            return;
+        }
 
         // 에어드롭 아이템 사용 체크
         if (TryUseAirDropItem())

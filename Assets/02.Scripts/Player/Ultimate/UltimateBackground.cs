@@ -45,7 +45,7 @@ public class UltimateBackground : MonoBehaviour
     private void MoveWind(RectTransform wind)
     {
         // 왼쪽으로 이동
-        wind.anchoredPosition += Vector2.left * WindSpeed * Time.deltaTime;
+        wind.anchoredPosition += Vector2.left * WindSpeed * Time.unscaledDeltaTime;
 
         // 특정 위치 지나면 다시 오른쪽으로 보냄
         if (wind.anchoredPosition.x <= WindResetPosition.x)

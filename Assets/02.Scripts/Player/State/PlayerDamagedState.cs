@@ -103,9 +103,14 @@ public class PlayerDamagedState : PlayerBaseState
         }
 
         // 최소 시간이 지난 후 바닥 착지 시 Idle 상태로 전환
+        // 공중에 있을 시 Fall 상태로 전환
         if (IsGrounded2D())
         {
             SyncStateChange<PlayerIdleState>();
+        }
+        else
+        {
+            SyncStateChange<PlayerFallState>();
         }
     }
     

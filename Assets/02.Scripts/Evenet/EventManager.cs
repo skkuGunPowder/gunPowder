@@ -119,4 +119,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnPlayerFind?.Invoke();
     }
+    
+    public event Action OnBackGroundFade;
+    public void BackGroundFade()
+    {
+        OnBackGroundFade?.Invoke();
+    }
 }

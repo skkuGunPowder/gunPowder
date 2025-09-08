@@ -11,5 +11,9 @@ public enum EColorType
     KillLogMyTeam,
     KillLogEnemy,
     UltimatePlayer,
-    UltimateEnemy
+    UltimateEnemy,
+    Fade,
+    FadeOut,
+    UltiBack
+    
 }

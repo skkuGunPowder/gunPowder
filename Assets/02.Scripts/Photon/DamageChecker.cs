@@ -45,7 +45,7 @@ public class DamageChecker : Singleton<DamageChecker>
             _playerList.Add(player.ActorNumber);
             _playerScoreDictionary.Add(player.ActorNumber, RoomStatManager.Instance.PlayerLife * RoomStatManager.Instance.PlayerGunpowder);
         }
-        
+
         _currentTopPlayer = PlayerList[0];
     }
 
@@ -86,7 +86,6 @@ public class DamageChecker : Singleton<DamageChecker>
         {
             return;
         }
-        
         CalculateScore(gunpowder, life, player);
     }
     
@@ -130,7 +129,6 @@ public class DamageChecker : Singleton<DamageChecker>
             {
                 topScore = kvp.Value;
                 topActor = kvp.Key;
-                
             }
             
             if (topActor != _currentTopPlayer)

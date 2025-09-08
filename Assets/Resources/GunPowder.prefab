@@ -61,7 +61,7 @@ CircleCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
@@ -134,6 +134,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feca4d3bdb21b4d4a80f905a30c97c7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _lifetimeSeconds: 10
+  _flickerStartSeconds: 8
+  _flickerIntervalSeconds: 0.05
   _mySprite: {fileID: -1626869394, guid: 251513fc291127f43b4095721f63a139, type: 3}
   _enemySprite: {fileID: -394664343, guid: 251513fc291127f43b4095721f63a139, type: 3}
   MyTrailPreset: {fileID: 11400000, guid: 7fc61c747358b3849834bf7ba66926af, type: 2}
@@ -187,7 +190,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2640530332653095854}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -196,7 +199,7 @@ BoxCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 2432
+    m_Bits: 2496
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
@@ -224,7 +227,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1, y: 0.61}
   m_EdgeRadius: 0
 --- !u!50 &4440970214917004790
 Rigidbody2D:

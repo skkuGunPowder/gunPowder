@@ -6,10 +6,15 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class UltimateProductionManager : MonoBehaviour
 {   
     public List<UltimateProductionSlot> UltimateProductionSlotList;
-
+    private EInGameTeam _myTeam;
     private void Awake()
     {
         EventManager.Instance.OnUltimate += Play;
+    }
+
+    private void Start()
+    {
+        _myTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
     }
 
     private void Play(string bomb, PhotonPlayer player)
@@ -25,13 +30,11 @@ public class UltimateProductionManager : MonoBehaviour
             }
         }
     }
-
     private bool TeamCheck(PhotonPlayer player)
     {
-        EInGameTeam myTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
-        EInGameTeam OtherTeam = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+        EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
         
-        if(myTeam == OtherTeam)
+        if(_myTeam == team)
         {
             return true;
         }

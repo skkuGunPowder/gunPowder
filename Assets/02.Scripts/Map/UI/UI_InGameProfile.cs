@@ -40,7 +40,7 @@ public class UI_InGameProfile : MonoBehaviour
     
     private void SetTopPlayer(int playerNumber)
     {
-        for (int i = 0; i < _playerActorNumberList.Count; i++)
+        for(int i = 0; i < _playerActorNumberList.Count; i++)
         {
             if (_playerActorNumberList[i].ActorNumber == playerNumber)
             {
