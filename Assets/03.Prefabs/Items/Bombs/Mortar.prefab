@@ -12,7 +12,9 @@ GameObject:
   - component: {fileID: 8752946201438330862}
   - component: {fileID: 7315292413075179696}
   - component: {fileID: 3567200624534257312}
-  m_Layer: 0
+  - component: {fileID: -5353431045778681506}
+  - component: {fileID: 608996661511347496}
+  m_Layer: 10
   m_Name: Mortar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -51,11 +53,11 @@ MonoBehaviour:
   TrailVFXPosition: {fileID: 0}
   TrailVFXPrefab: {fileID: 0}
   PhotonView: {fileID: 0}
-  _mortarShellPrefab: {fileID: 0}
+  _mortarShellPrefab: {fileID: 2395629562714259156, guid: 7f6e66abd4175b64382206e461f94216, type: 3}
   _mortarFireSound: {fileID: 0}
   _mortarInstallSound: {fileID: 0}
   _muzzle: {fileID: 1492565690392591237}
-  _barrel: {fileID: 0}
+  _barrel: {fileID: 3201471006351985848}
   _mortarDuration: 8
   _minRange: 10
   _maxRange: 50
@@ -85,7 +87,7 @@ MonoBehaviour:
     m_Bits: 64
   triggerInteraction: 0
   resolution: 0.1
-  maxLength: 10
+  maxLength: 40
   maxBounces: 0
   bounceDamping: 0
   gravityMode: 1
@@ -197,6 +199,45 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &-5353431045778681506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952674426262522851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents:
+  - {fileID: 608996661511347496}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &608996661511347496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952674426262522851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!1 &4010998488120070366
 GameObject:
   m_ObjectHideFlags: 0
@@ -206,7 +247,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1492565690392591237}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +279,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3201471006351985848}
   - component: {fileID: 4737600502861166876}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Barrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}

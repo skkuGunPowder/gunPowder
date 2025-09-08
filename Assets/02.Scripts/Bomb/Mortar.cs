@@ -11,114 +11,155 @@ public class Mortar : Bomb
     [Header("References")]
     [SerializeField] private GameObject _mortarShellPrefab;
     [SerializeField] private AudioClip _mortarFireSound;
-    [SerializeField] private AudioClip _mortarInstallSound;
+    [SerializeField] private AudioClip _mortarDeploySound;
     [SerializeField] private Transform _muzzle;
     [SerializeField] private Transform _barrel;
 
-
     [Header("Settings")]
     [SerializeField] private float _mortarDuration = 8f;
-    [SerializeField] private float _minRange = 10f;
-    [SerializeField] private float _maxRange = 50f;
+    [SerializeField] private int _maxAmmo = 8;
+    [SerializeField] private float _minAngle = 45f;
+    [SerializeField] private float _maxAngle = 85f;
     [SerializeField] private float _rangeStep = 5f;
-    [SerializeField] private bool _useHighAngle = true; // true=고각, false=저각
 
-    private PhotonView _photonView;
     private BallisticPathLineRender _pathRenderer;
     private BallisticsData _projectileData;
+    private int _currentAmmo;
+    private float _currentAngle = 60f;
+    private bool _isFacingRight = false;
+    private float _timer;
 
-    [Header("Runtime")]
-    [SerializeField] private float _targetRange;
 
 
     protected override void Init()
     {
         base.Init();
-        // SetStat(ID);
+        SetStat(ID);
 
         _pathRenderer = GetComponent<BallisticPathLineRender>();
 
         _projectileData = new BallisticsData
         {
-            velocity = _muzzle.right * 10f,
+            velocity = _muzzle.right * _stat.Speed,
             radius = 1f
         };
 
         _pathRenderer.projectile = _projectileData;
         _pathRenderer.start = _muzzle.position;
-
-        _pathRenderer.Simulate();
         _pathRenderer.continuousRun = true;
+
+        if (transform.eulerAngles.y != 0f)
+        {
+            _isFacingRight = false;
+        }
+        else
+        {
+            _isFacingRight = true;
+        }
+
+        _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+        _currentAmmo = _maxAmmo;
     }
 
     protected override void Update()
     {
-        if (Input.GetKey(KeyCode.Q))
+        _timer += Time.deltaTime;
+        if (_timer >= _mortarDuration)
         {
-            _targetRange = Mathf.Max(_minRange, _targetRange - _rangeStep * Time.deltaTime);
+            _timer = 0f;
+            RemoveMortar();
         }
 
-        if (Input.GetKey(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            _targetRange = Mathf.Min(_maxRange, _targetRange + _rangeStep * Time.deltaTime);
+            Player owner = _ownerPhotonview.GetComponent<Player>();
+            if (owner.PhotonView.IsMine)
+            {
+                owner.PhotonView.RPC(nameof(owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerJumpState));
+            }
+
+            RemoveMortar();
         }
-        
-        // 거리 → 각도 계산
-        float angle = CalculateLaunchAngle(_targetRange, _projectileData.Speed, Mathf.Abs(Physics.gravity.y), _useHighAngle);
 
-        _barrel.localRotation = Quaternion.Euler(0f, 0f, angle);
-
-        _pathRenderer.start = _muzzle.position;
-        _projectileData.Rotation = _muzzle.rotation;
-        _pathRenderer.projectile = _projectileData;
-
-
-        if (Input.GetKey(KeyCode.X) || Input.GetKey(KeyCode.Z))
+        if (Input.GetKey(KeyCode.LeftArrow))
         {
+            if (_isFacingRight)
+            {
+                _currentAngle = Mathf.Min(_maxAngle, _currentAngle + _rangeStep * Time.deltaTime);
+            }
+            else
+            {
+                _currentAngle = Mathf.Max(_minAngle, _currentAngle - _rangeStep * Time.deltaTime);
+            }
+
+            _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+
+            _projectileData.velocity = _muzzle.right * _stat.Speed;
+            _pathRenderer.projectile = _projectileData;
+            _pathRenderer.start = _muzzle.position;
+        }
+
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            if(_isFacingRight)
+            {
+                _currentAngle = Mathf.Max(_minAngle, _currentAngle - _rangeStep * Time.deltaTime);
+            }
+            else
+            {
+                _currentAngle = Mathf.Min(_maxAngle, _currentAngle + _rangeStep * Time.deltaTime);
+            }
+
+            _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+
+            _projectileData.velocity = _muzzle.right * _stat.Speed;
+            _pathRenderer.projectile = _projectileData;
+            _pathRenderer.start = _muzzle.position;
+        }
+
+        if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Z))
+        {
+            if(_mortarFireSound != null)
+            {
+                SoundManager.Instance.PlayLocalSound(nameof(_mortarFireSound), transform);
+            }
+
             GameObject mortarShellObject = PhotonNetwork.Instantiate(_mortarShellPrefab.name, _muzzle.position, _muzzle.rotation);
             MortarShell mortarShell = mortarShellObject.GetComponent<MortarShell>();
-            if (_photonView.IsMine)
+
+            if (mortarShell.PhotonView.IsMine)
             {
-                _photonView.RPC(nameof(mortarShell.ThrowBomb), RpcTarget.All, _muzzle.right, _muzzle.up, _muzzle.forward);
+                mortarShell.PhotonView.RPC(nameof(mortarShell.ThrowBomb), RpcTarget.All, _muzzle.right, _muzzle.up, _muzzle.forward);
             }
         }
     }
 
-    private float CalculateLaunchAngle(float range, float speed, float gravity, bool highAngle)
+    private void RemoveMortar()
     {
-        float value = (range * gravity) / (speed * speed);
-        if (value > 1f || value < -1f)
+        if (PhotonView.IsMine)
         {
-            return 45f; // 발사 불가능한 경우 기본값 반환
+            InputHandler.BlockInput = false;
+
+            if (PhotonView != null && PhotonView.ViewID != 0)
+            {
+                PhotonNetwork.Destroy(gameObject);
+            }
+            else
+            {
+                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
+                Destroy(gameObject);
+            }
         }
-
-
-        float asin = Mathf.Asin(value);
-        if (float.IsNaN(asin))
-        {
-            return 45f;
-        }
-
-        float angleRad = 0.5f * asin;
-
-        // 두 가지 해 중 선택
-        if (highAngle)
-        {
-            angleRad = 0.5f * (Mathf.PI - Mathf.Asin(value));
-        }
-
-        return angleRad * Mathf.Rad2Deg;
     }
 
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
-        if (_mortarFireSound != null)
+        if (_mortarDeploySound != null)
         {
-            SoundManager.Instance.PlayLocalSound(nameof(_mortarInstallSound), transform);
+            SoundManager.Instance.PlayLocalSound(nameof(_mortarDeploySound), transform);
         }
 
-        // TODO
         if (PhotonView.IsMine)
         {
             InputHandler.BlockInput = true;

@@ -34,11 +34,14 @@ namespace Heathen.UnityPhysics
         // Cached array buffer for LineRenderer.SetPositions
         private Vector3[] positionBuffer = new Vector3[100];
 
-        private void Start()
+        private void Awake()
         {
             lineRenderer = GetComponent<LineRenderer>();
             lineRenderer.useWorldSpace = true;
+        }
 
+        private void Start()
+        {
             if (runOnStart)
                 Simulate();
         }

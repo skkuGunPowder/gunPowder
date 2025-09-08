@@ -3,12 +3,30 @@ using UnityEngine;
 
 public class MortarShell : Bomb
 {
-    private Rigidbody2D _rigidbody;
-
     protected override void Init()
     {
         base.Init();
         SetStat(Mortar.ID);
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if(!PhotonView.IsMine)
+        {
+            return;
+        }
+
+        if (other.gameObject.tag == "Player" || other.gameObject.tag == "Immune")
+        {
+            return;
+        }
+
+        if (CheckPriority(other))
+        {
+            return;
+        }
+        
+        PhotonView.RPC(nameof(Explode), RpcTarget.All);
     }
 
 
