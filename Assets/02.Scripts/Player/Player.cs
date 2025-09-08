@@ -996,6 +996,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
+        Debug.Log("TakeDamage");
+        EventManager.Instance.HitScreen();
         // 피격 VFX 재생
         if (tag == "Player")
         {
@@ -1005,7 +1007,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
         }
-
+        
         // SFX
 
         // 맥스 데미지를 받았을때 다른 사운드 재생
