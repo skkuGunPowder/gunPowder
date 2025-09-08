@@ -432,6 +432,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Update()
     {
         // 테스트
+        
         // ------------------------------------------------------------
         if (!PhotonView.IsMine)
         {
