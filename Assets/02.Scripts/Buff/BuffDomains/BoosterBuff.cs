@@ -13,7 +13,7 @@ public class BoosterBuff : Buff, IBuff
         base.StartBuff();
 
         Debug.LogWarning("부스트 버프 시작");
-        _owner.PlayerStat.MaxJumpCount = 9999;
+        _owner.PlayerStat.MaxJumpCount = Stat.ValueList[0];
     }
 
     public override void EndBuff()
