@@ -9,9 +9,20 @@ public class MortarShell : Bomb
         SetStat(Mortar.ID);
     }
 
+    protected override void Update()
+    {
+        base.Update();
+
+        if (_rigidBody.linearVelocity.magnitude > 0.1f)
+        {
+            float angle = Mathf.Atan2(_rigidBody.linearVelocity.y, _rigidBody.linearVelocity.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if(!PhotonView.IsMine)
+        if (!PhotonView.IsMine)
         {
             return;
         }
@@ -25,7 +36,7 @@ public class MortarShell : Bomb
         {
             return;
         }
-        
+
         PhotonView.RPC(nameof(Explode), RpcTarget.All);
     }
 

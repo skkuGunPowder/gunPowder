@@ -22,6 +22,7 @@ public class Mortar : Bomb
     [SerializeField] private float _maxAngle = 85f;
     [SerializeField] private float _rangeStep = 5f;
 
+    private Animator _animator;
     private BallisticPathLineRender _pathRenderer;
     private BallisticsData _projectileData;
     private int _currentAmmo;
@@ -36,12 +37,18 @@ public class Mortar : Bomb
         base.Init();
         SetStat(ID);
 
+        _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+        _currentAmmo = _maxAmmo;
+
+        _animator = GetComponent<Animator>();
+        _animator.SetFloat("Angle", _currentAngle);
+
         _pathRenderer = GetComponent<BallisticPathLineRender>();
 
         _projectileData = new BallisticsData
         {
             velocity = _muzzle.right * _stat.Speed,
-            radius = 1f
+            radius = 0.5f
         };
 
         _pathRenderer.projectile = _projectileData;
@@ -56,19 +63,16 @@ public class Mortar : Bomb
         {
             _isFacingRight = true;
         }
-
-        _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
-        _currentAmmo = _maxAmmo;
     }
 
     protected override void Update()
     {
         _timer += Time.deltaTime;
-        if (_timer >= _mortarDuration)
-        {
-            _timer = 0f;
-            RemoveMortar();
-        }
+        // if (_timer >= _mortarDuration)
+        // {
+        //     _timer = 0f;
+        //     RemoveMortar();
+        // }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -97,11 +101,12 @@ public class Mortar : Bomb
             _projectileData.velocity = _muzzle.right * _stat.Speed;
             _pathRenderer.projectile = _projectileData;
             _pathRenderer.start = _muzzle.position;
+            _animator.SetFloat("Angle", _currentAngle);
         }
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            if(_isFacingRight)
+            if (_isFacingRight)
             {
                 _currentAngle = Mathf.Max(_minAngle, _currentAngle - _rangeStep * Time.deltaTime);
             }
@@ -115,11 +120,12 @@ public class Mortar : Bomb
             _projectileData.velocity = _muzzle.right * _stat.Speed;
             _pathRenderer.projectile = _projectileData;
             _pathRenderer.start = _muzzle.position;
+            _animator.SetFloat("Angle", _currentAngle);
         }
 
         if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Z))
         {
-            if(_mortarFireSound != null)
+            if (_mortarFireSound != null)
             {
                 SoundManager.Instance.PlayLocalSound(nameof(_mortarFireSound), transform);
             }
@@ -130,6 +136,12 @@ public class Mortar : Bomb
             if (mortarShell.PhotonView.IsMine)
             {
                 mortarShell.PhotonView.RPC(nameof(mortarShell.ThrowBomb), RpcTarget.All, _muzzle.right, _muzzle.up, _muzzle.forward);
+            }
+
+            _currentAmmo--;
+            if(_currentAmmo <= 0)
+            {
+                RemoveMortar();
             }
         }
     }
