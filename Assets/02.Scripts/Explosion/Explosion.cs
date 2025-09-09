@@ -60,7 +60,7 @@ public class Explosion : MonoBehaviour
                     continue;
                 }
                 int damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
-                damagableObject.TakeDamage(damage, _stat.AttackPower, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
+                damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.HealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());

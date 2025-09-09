@@ -42,6 +42,12 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public Dictionary<EItemType, ItemDTO> EquipedItemDict;
 
+    // [스킨] 마지막으로 적용된 스킨 ID를 저장하여 변경 여부를 감지
+    private string _lastHeadSkinId;
+    private string _lastFaceSkinId;
+    private string _lastChestSkinId;
+    private string _lastCapeSkinId;
+
     [Header("폭탄 설정")]
     // 폭탄 스폰 위치 리스트 (각도: 0,45,90,135,180,225,270,315)
     [SerializeField]
@@ -259,7 +265,7 @@ public class Player : MonoBehaviourPun, IDamagable
             Debug.LogWarning("BodyPartMarker를 찾지 못했습니다. PlayerSprites 루트에 마커를 추가해주세요.");
         }
     }
-        
+
 
     private void LoadItems()
     {
@@ -278,15 +284,84 @@ public class Player : MonoBehaviourPun, IDamagable
                     EquipedItemDict.Add((EItemType)i, ItemDatabase.Instance.GetItem((string)itemID));
                 }
             }
+            else
+            {
+                // 해당 슬롯이 해제되었거나 값이 제거된 경우 로컬 딕셔너리에서도 제거
+                if (EquipedItemDict.ContainsKey(itemType))
+                {
+                    EquipedItemDict.Remove(itemType);
+                }
+            }
         }
 
-        // 특수폭탄 정보 받아오기
+        // [스킨] 스킨 변경 감지 및 그룹(Head/Face, Chest/Cape)별 분기 처리
+        ItemDTO headItem = null;
+        ItemDTO faceItem = null;
+        ItemDTO chestItem = null;
+        ItemDTO capeItem = null;
+
+        EquipedItemDict.TryGetValue(EItemType.Head, out headItem);
+        EquipedItemDict.TryGetValue(EItemType.Face, out faceItem);
+        EquipedItemDict.TryGetValue(EItemType.Chest, out chestItem);
+        EquipedItemDict.TryGetValue(EItemType.Cape, out capeItem);
+
+        string currentHeadId = headItem != null ? headItem.ID : null;
+        string currentFaceId = faceItem != null ? faceItem.ID : null;
+        string currentChestId = chestItem != null ? chestItem.ID : null;
+        string currentCapeId = capeItem != null ? capeItem.ID : null;
+
+        bool headFaceChanged = currentHeadId != _lastHeadSkinId || currentFaceId != _lastFaceSkinId;
+        bool chestCapeChanged = currentChestId != _lastChestSkinId || currentCapeId != _lastCapeSkinId;
+
+        if (headFaceChanged)
+        {
+            _lastHeadSkinId = currentHeadId;
+            _lastFaceSkinId = currentFaceId;
+            OnHeadFaceSkinChanged(headItem, faceItem);
+        }
+
+        if (chestCapeChanged)
+        {
+            _lastChestSkinId = currentChestId;
+            _lastCapeSkinId = currentCapeId;
+            OnChestCapeSkinChanged(chestItem, capeItem);
+        }
+
+        // 특수폭탄 정보 받아오기                
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
         if (UltimateManager.Instance != null)
         {
             _ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
         }
+        
+                
+        foreach (var item in EquipedItemDict)
+        {
+            Debug.Log($"{item.Key} : {item.Value.ID}");
+        }
+    }
+
+    // [스킨] 자리표시자: Head/Face 스킨 적용
+    // Head/Face는 머리 스프라이트/애니메이션 교체, 얼굴 액세서리 교체 등
+    private void OnHeadFaceSkinChanged(ItemDTO headItem, ItemDTO faceItem)
+    {
+        Debug.Log("[스킨] Head/Face 스킨 변경됨 → 여기서 머리/얼굴 비주얼을 적용하세요.");
+        // TODO [스킨]: Head/Face 그룹 적용 로직 구현
+        // - 머리 SpriteRenderer 교체 또는 AnimationClip 오버라이드
+        // - 얼굴 액세서리 프리팹/스프라이트 부착 또는 교체
+        // - 필요 시 런타임 머티리얼/셰이더 갱신
+    }
+
+    // [스킨] 자리표시자: Chest/Cape 스킨 적용
+    // Chest/Cape는 상체 스프라이트 교체와 망토 프리팹/리깅 갱신이 필요할 수 있음
+    private void OnChestCapeSkinChanged(ItemDTO chestItem, ItemDTO capeItem)
+    {
+        Debug.Log("[스킨] Chest/Cape 스킨 변경됨 → 여기서 상체/망토 비주얼을 적용하세요.");
+        // TODO [스킨]: Chest/Cape 그룹 적용 로직 구현
+        // - 상체 스프라이트/애니메이션 교체
+        // - 망토 프리팹 생성/교체, 본 또는 제약 설정
+        // - 망토가 천/리짓드 컴포넌트를 사용하면 콜라이더/피직스 갱신
     }
 
     private void Start()
@@ -432,6 +507,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Update()
     {
         // 테스트
+        
         // ------------------------------------------------------------
         if (!PhotonView.IsMine)
         {
@@ -994,8 +1070,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
     }
 
-    public void TakeDamage(int damage, int maxDamage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
+    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
     {
+        EventManager.Instance.HitScreen();
         // 피격 VFX 재생
         if (tag == "Player")
         {
@@ -1005,7 +1082,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
         }
-
+        
         // SFX
 
         // 맥스 데미지를 받았을때 다른 사운드 재생
@@ -1024,11 +1101,11 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(int damage, int maxDamage, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, PhotonMessageInfo info)
+    public void RPC_TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, PhotonMessageInfo info)
     {
         if (_playerStat.IsImmune)
         {
@@ -1057,9 +1134,12 @@ public class Player : MonoBehaviourPun, IDamagable
             Debug.LogWarning($"[RPC_TakeDamage] 공격자 뷰를 찾을 수 없습니다. ID: {attackerViewId}");
         }
 
-        
         // 피격 횟수 증가
         _playerStat.IncreseDamagedCount();
+
+        // 건파우더 드랍량 계산 (힐량 계산)
+        float healPercent = HealPercent / 100f;
+        int gunPowderCount = Mathf.CeilToInt(maxDamage * healPercent);
 
         // 플레이어가 맞은 횟수에 비례해서 데미지 증가
         int increaseDamagePerDamagedCount = _playerStat.CurrentPlayerDamagedCount / 15;
@@ -1088,8 +1168,6 @@ public class Player : MonoBehaviourPun, IDamagable
             }
         }
 
-        // 건파우더 감소 개수 = 데미지 절반
-        int gunPowderCount = Mathf.CeilToInt(damage * 0.5f);
         // Gunpowder 낙출
         ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
 
@@ -1373,6 +1451,9 @@ public class Player : MonoBehaviourPun, IDamagable
                     break;
                 case "PlayerConfuseState":
                     playerFSM.ChangeState<PlayerConfuseState>();
+                    break;
+                case "PlayerLastDieState":
+                    playerFSM.ChangeState<PlayerLastDieState>();
                     break;
                 default:
                     break;

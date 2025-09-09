@@ -312,7 +312,7 @@ public class PlayerStat : MonoBehaviour
         
         _currentPlayerGunPowderCount -= amount;
         bool isDead = false;
-
+        
         // 공격자 기록 (자기 자신이 아닌 경우에만)
         RecordLastAttacker(attacker);
 
