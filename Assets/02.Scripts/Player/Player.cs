@@ -1452,6 +1452,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerConfuseState":
                     playerFSM.ChangeState<PlayerConfuseState>();
                     break;
+                case "PlayerLastDieState":
+                    playerFSM.ChangeState<PlayerLastDieState>();
+                    break;
                 default:
                     break;
             }
