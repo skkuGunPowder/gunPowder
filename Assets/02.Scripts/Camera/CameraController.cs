@@ -16,6 +16,10 @@ public class CameraController : MonoBehaviour
     private bool _isObserving = false;
     private List<Player> _currentTargetList = new List<Player>();
     private int _currentTargetIndex = 0;
+
+    [Header("마지막 킬 관련")] 
+    [Tooltip("시간 고치면 플레이어 라스트 다이 시간도 고쳐야함")] public float TargetZoomDuration = 1.5f;
+    
     
     private void Awake()
     {
@@ -28,14 +32,13 @@ public class CameraController : MonoBehaviour
         {
             return;
         }
-        EventManager.Instance.OnPlayerListUp += TargetListUp;
         EventManager.Instance.OnTargetChanged += TargetListUp;
         EventManager.Instance.OnLastAttack += LastAttack;
     }
 
     private void Init()
     {
-        
+        _currentTargetList = new List<Player>();
         if (_mainCamera == null)
         {
             _mainCamera = Camera.main;
@@ -106,12 +109,11 @@ public class CameraController : MonoBehaviour
 
     private void TargetListUp()
     {
-        if (GameManager.Instance.LastPlayer)
+        if (_currentTargetList.Count == 2)
         {
+            Debug.Log("dont target list up");
             return;
         }
-        
-        Debug.Log("TargetListUp");
         
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();
@@ -136,31 +138,23 @@ public class CameraController : MonoBehaviour
         EventManager.Instance.OnPlayerListUp -= TargetListUp;
     }
 
-    private void LastAttack(PhotonPlayer player)
+    private void LastAttack(int actorNumber)
     {
         Debug.Log("LastAttack");
         
         foreach (Player p in _currentTargetList)
         {
             PhotonPlayer photonPlayer = p.GetComponent<PhotonView>().Owner;
-            if (photonPlayer.ActorNumber == player.ActorNumber)
+            if (photonPlayer.ActorNumber == actorNumber)
             {
                 _proCamera.RemoveAllCameraTargets();
-                _proCamera.AddCameraTarget(p.transform, duration: 1.5f);
+                _proCamera.AddCameraTarget(p.transform, duration:TargetZoomDuration);
                 Debug.Log($"player : {photonPlayer.ActorNumber}");
-                
-                StartCoroutine(TestCoroutine());
                 return;
             }
         }
     }
     
-    private IEnumerator TestCoroutine()
-    {
-        Debug.Log("TestCoroutine");
-        yield return new WaitForSeconds(5);
-        GameManager.Instance.RequestGameOver();
-    }
     private void Update()
     {
         if (_isObserving == false || GameManager.Instance.LastPlayer)

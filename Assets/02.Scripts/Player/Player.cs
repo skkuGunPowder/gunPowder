@@ -491,16 +491,32 @@ public class Player : MonoBehaviourPun, IDamagable
         // PlayerFSM을 통해 SyncStateChange 호출
         if (_playerFSM != null)
         {
-            // 네트워크 동기화된 상태 변경
-            _playerFSM.SyncStateChange<PlayerDieState>();
-            return;
+            if (GameManager.Instance.LastPlayer == false)
+            {
+                // 네트워크 동기화된 상태 변경
+                _playerFSM.SyncStateChange<PlayerDieState>();
+                return;   
+            }
+            else
+            {
+                _playerFSM.SyncStateChange<PlayerLastDieState>();
+                return;
+            }
         }
 
         // PlayerFSM이 없는 경우 방어적으로 컴포넌트 조회 후 변경
         var fsm = GetComponent<PlayerFSM>();
         if (fsm != null)
         {
-            fsm.ChangeState<PlayerDieState>();
+            if (GameManager.Instance.LastPlayer == false)
+            {
+                // 네트워크 동기화된 상태 변경
+                _playerFSM.SyncStateChange<PlayerDieState>();
+            }
+            else
+            {
+                _playerFSM.SyncStateChange<PlayerLastDieState>();
+            }
         }
     }
 

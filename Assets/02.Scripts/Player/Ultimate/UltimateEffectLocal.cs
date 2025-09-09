@@ -88,7 +88,6 @@ public class UltimateEffectLocal : MonoBehaviour
             _playerList.Add(view);
         }
         
-        Debug.Log($"플레이어 리스트 업 : {_playerList.Count}");
         EventManager.Instance.OnPlayerListUp -= PlayerListUp;
     }
 

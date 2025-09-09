@@ -137,10 +137,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
         OnHitScreen?.Invoke();
     }
 
-    public event Action<PhotonPlayer> OnLastAttack;
+    public event Action<int> OnLastAttack;
 
-    public void LastAttack(PhotonPlayer player)
+    public void LastAttack(int actorNumber)
     {
-        OnLastAttack?.Invoke(player);
+        OnLastAttack?.Invoke(actorNumber);
     }
 }
