@@ -42,6 +42,12 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public Dictionary<EItemType, ItemDTO> EquipedItemDict;
 
+    // [스킨] 마지막으로 적용된 스킨 ID를 저장하여 변경 여부를 감지
+    private string _lastHeadSkinId;
+    private string _lastFaceSkinId;
+    private string _lastChestSkinId;
+    private string _lastCapeSkinId;
+
     [Header("폭탄 설정")]
     // 폭탄 스폰 위치 리스트 (각도: 0,45,90,135,180,225,270,315)
     [SerializeField]
@@ -288,6 +294,39 @@ public class Player : MonoBehaviourPun, IDamagable
             }
         }
 
+        // [스킨] 스킨 변경 감지 및 그룹(Head/Face, Chest/Cape)별 분기 처리
+        ItemDTO headItem = null;
+        ItemDTO faceItem = null;
+        ItemDTO chestItem = null;
+        ItemDTO capeItem = null;
+
+        EquipedItemDict.TryGetValue(EItemType.Head, out headItem);
+        EquipedItemDict.TryGetValue(EItemType.Face, out faceItem);
+        EquipedItemDict.TryGetValue(EItemType.Chest, out chestItem);
+        EquipedItemDict.TryGetValue(EItemType.Cape, out capeItem);
+
+        string currentHeadId = headItem != null ? headItem.ID : null;
+        string currentFaceId = faceItem != null ? faceItem.ID : null;
+        string currentChestId = chestItem != null ? chestItem.ID : null;
+        string currentCapeId = capeItem != null ? capeItem.ID : null;
+
+        bool headFaceChanged = currentHeadId != _lastHeadSkinId || currentFaceId != _lastFaceSkinId;
+        bool chestCapeChanged = currentChestId != _lastChestSkinId || currentCapeId != _lastCapeSkinId;
+
+        if (headFaceChanged)
+        {
+            _lastHeadSkinId = currentHeadId;
+            _lastFaceSkinId = currentFaceId;
+            OnHeadFaceSkinChanged(headItem, faceItem);
+        }
+
+        if (chestCapeChanged)
+        {
+            _lastChestSkinId = currentChestId;
+            _lastCapeSkinId = currentCapeId;
+            OnChestCapeSkinChanged(chestItem, capeItem);
+        }
+
         // 특수폭탄 정보 받아오기                
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
@@ -301,6 +340,28 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             Debug.Log($"{item.Key} : {item.Value.ID}");
         }
+    }
+
+    // [스킨] 자리표시자: Head/Face 스킨 적용
+    // Head/Face는 머리 스프라이트/애니메이션 교체, 얼굴 액세서리 교체 등
+    private void OnHeadFaceSkinChanged(ItemDTO headItem, ItemDTO faceItem)
+    {
+        Debug.Log("[스킨] Head/Face 스킨 변경됨 → 여기서 머리/얼굴 비주얼을 적용하세요.");
+        // TODO [스킨]: Head/Face 그룹 적용 로직 구현
+        // - 머리 SpriteRenderer 교체 또는 AnimationClip 오버라이드
+        // - 얼굴 액세서리 프리팹/스프라이트 부착 또는 교체
+        // - 필요 시 런타임 머티리얼/셰이더 갱신
+    }
+
+    // [스킨] 자리표시자: Chest/Cape 스킨 적용
+    // Chest/Cape는 상체 스프라이트 교체와 망토 프리팹/리깅 갱신이 필요할 수 있음
+    private void OnChestCapeSkinChanged(ItemDTO chestItem, ItemDTO capeItem)
+    {
+        Debug.Log("[스킨] Chest/Cape 스킨 변경됨 → 여기서 상체/망토 비주얼을 적용하세요.");
+        // TODO [스킨]: Chest/Cape 그룹 적용 로직 구현
+        // - 상체 스프라이트/애니메이션 교체
+        // - 망토 프리팹 생성/교체, 본 또는 제약 설정
+        // - 망토가 천/리짓드 컴포넌트를 사용하면 콜라이더/피직스 갱신
     }
 
     private void Start()
