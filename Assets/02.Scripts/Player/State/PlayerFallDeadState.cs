@@ -34,6 +34,7 @@ public class PlayerFallDeadState : PlayerBaseState
     
     // 데미지 관련 상수
     private const int FALL_DAMAGE_AMOUNT = 15;               // 낙사 시 받는 데미지
+    private const int FALL_HEAL_PERCENT = 100;               // 낙사 시 받는 힐량
     
     // 배열 인덱스 상수
     private const int LEFT_SIDE_INDEX = 0;                   // 좌측 인덱스
@@ -457,6 +458,7 @@ public class PlayerFallDeadState : PlayerBaseState
             _owner.TakeDamage(
                 FALL_DAMAGE_AMOUNT, 
                 FALL_DAMAGE_AMOUNT, 
+                FALL_HEAL_PERCENT,
                 _owner.transform.position, 
                 _owner.GetComponent<PhotonView>().ViewID, 
                 _owner.GetComponent<PhotonView>().OwnerActorNr, 
