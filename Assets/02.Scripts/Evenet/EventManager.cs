@@ -120,6 +120,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
         OnPlayerFind?.Invoke();
     }
     
+    public event Action OnPlayerListUp;
+    public void PlayerListUp()
+    {
+        OnPlayerListUp?.Invoke();
+    }
     public event Action OnBackGroundFade;
     public void BackGroundFade()
     {
@@ -130,5 +135,12 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     public void HitScreen()
     {
         OnHitScreen?.Invoke();
+    }
+
+    public event Action<PhotonPlayer> OnLastAttack;
+
+    public void LastAttack(PhotonPlayer player)
+    {
+        OnLastAttack?.Invoke(player);
     }
 }

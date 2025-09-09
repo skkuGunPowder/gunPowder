@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Com.LuisPedroFonseca.ProCamera2D;
 using Photon.Pun;
+using PhotonPlayer = Photon.Realtime.Player;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -26,8 +28,9 @@ public class CameraController : MonoBehaviour
         {
             return;
         }
-
+        EventManager.Instance.OnPlayerListUp += TargetListUp;
         EventManager.Instance.OnTargetChanged += TargetListUp;
+        EventManager.Instance.OnLastAttack += LastAttack;
     }
 
     private void Init()
@@ -103,6 +106,13 @@ public class CameraController : MonoBehaviour
 
     private void TargetListUp()
     {
+        if (GameManager.Instance.LastPlayer)
+        {
+            return;
+        }
+        
+        Debug.Log("TargetListUp");
+        
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();
         
@@ -121,11 +131,39 @@ public class CameraController : MonoBehaviour
             _currentTargetList.Add(player);
             
         }
+        
+        Debug.Log($"target list : {_currentTargetList.Count}");
+        EventManager.Instance.OnPlayerListUp -= TargetListUp;
     }
 
+    private void LastAttack(PhotonPlayer player)
+    {
+        Debug.Log("LastAttack");
+        
+        foreach (Player p in _currentTargetList)
+        {
+            PhotonPlayer photonPlayer = p.GetComponent<PhotonView>().Owner;
+            if (photonPlayer.ActorNumber == player.ActorNumber)
+            {
+                _proCamera.RemoveAllCameraTargets();
+                _proCamera.AddCameraTarget(p.transform, duration: 1.5f);
+                Debug.Log($"player : {photonPlayer.ActorNumber}");
+                
+                StartCoroutine(TestCoroutine());
+                return;
+            }
+        }
+    }
+    
+    private IEnumerator TestCoroutine()
+    {
+        Debug.Log("TestCoroutine");
+        yield return new WaitForSeconds(5);
+        GameManager.Instance.RequestGameOver();
+    }
     private void Update()
     {
-        if (_isObserving == false)
+        if (_isObserving == false || GameManager.Instance.LastPlayer)
         {
             return;
         }
@@ -142,7 +180,7 @@ public class CameraController : MonoBehaviour
 
     }
 
-    public void SelectTarget(int index)
+    private void SelectTarget(int index)
     {
         if (_currentTargetList.Count <= 1)
         {
@@ -177,7 +215,7 @@ public class CameraController : MonoBehaviour
         {
             _proCamera.RemoveAllCameraTargets();
         }
-        
+        EventManager.Instance.OnLastAttack -= LastAttack;
         EventManager.Instance.OnTargetChanged -= TargetListUp;
     }
 }

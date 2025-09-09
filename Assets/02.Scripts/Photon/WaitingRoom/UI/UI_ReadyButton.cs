@@ -45,7 +45,6 @@ public class UI_ReadyButton : MonoBehaviour
                 return;
             }
             
-            Debug.Log("game start");
             RoomManager.Instance.GameStart();
         }
         

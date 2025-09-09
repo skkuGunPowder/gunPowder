@@ -14,13 +14,14 @@ public class GameManager : PhotonSingleton<GameManager>
     
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
+    public bool LastPlayer = false;
+    
     [Header("플레이어 낙사 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
     
     public event Action<PhotonPlayer> OnTimeCheck;
-    public event Action OnUltimateEnd;
     public event Action OnGameStart;
     public event Action OnGameOver;
 
@@ -40,6 +41,17 @@ public class GameManager : PhotonSingleton<GameManager>
         TimeScaleSetting();
         EventManager.Instance.OnLoadFinished += Init;
     }
+
+    // 처음부터 두명이서 시작할 경우
+    private void PlayerLastCheck()
+    {
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
+        
+        if (players.Length == 2)
+        {
+            LastPlayer = true; 
+        }
+    }
     
     private void Init()
     {
@@ -54,7 +66,19 @@ public class GameManager : PhotonSingleton<GameManager>
     // 게임 종료
     public void RequestGameOver()
     {
+        Debug.Log("RequestGameOver");
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
         _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_LastAttack(PhotonPlayer targetPlayer)
+    {
+        EventManager.Instance.LastAttack(targetPlayer);
     }
     
     [PunRPC]
@@ -93,7 +117,8 @@ public class GameManager : PhotonSingleton<GameManager>
         
         if (PlayerDeadCheck())
         { 
-            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+            // _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+            _photonView.RPC(nameof(RPC_LastAttack), RpcTarget.All, targetPlayer);
         }
     }
     
@@ -126,12 +151,18 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     public void RPC_GameStart()
     {
+        OnGameStart?.Invoke();
         EventManager.Instance.ProfileInit();
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
-        EventManager.Instance.PlayerFind();
-        OnGameStart?.Invoke();
     }
-    
+
+    public void GameStartSetting()
+    { 
+        EventManager.Instance.TargetChanged();
+        GameStateChange(EGameState.Playing);
+        EventManager.Instance.PlayerListUp();
+        PlayerLastCheck();
+    }
     // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
     public void GameResultCheck()
     {
