@@ -980,6 +980,7 @@ GameObject:
   - component: {fileID: 1074464008448590434}
   - component: {fileID: 4490513316600960149}
   - component: {fileID: 1377660519838230690}
+  - component: {fileID: 3869414470208023910}
   m_Layer: 5
   m_Name: HitScreen
   m_TagString: Untagged
@@ -1044,6 +1045,24 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3869414470208023910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4333919245077393422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a7d3797cc0f75f43a71190c28939463, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HitScreenImage: {fileID: 1377660519838230690}
+  Value: 0.4
+  MaxValue: 1
+  FadeSpeed: 0.5
+  FadeInSpeed: 0.3
+  ScreenColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &4484011372185047889
 GameObject:
   m_ObjectHideFlags: 0
