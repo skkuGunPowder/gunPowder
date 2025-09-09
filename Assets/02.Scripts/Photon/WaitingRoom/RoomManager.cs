@@ -143,10 +143,15 @@ public class RoomManager : PhotonSingleton<RoomManager>
             EventManager.Instance.PlayerColorChanged(targetPlayer.ActorNumber, (EInGameTeam)changedProps[EProperties.Team.ToString()]);
         }
         
-        if (changedProps.ContainsKey(EItemType.Bomb.ToString())) // 특수 폭탄 변경
+        // 아이템(스킨 포함) 변경 콜백: Bomb, Head, Face, Chest, Cape 모두 감지
+        if (changedProps.ContainsKey(EItemType.Bomb.ToString()) ||
+            changedProps.ContainsKey(EItemType.Head.ToString()) ||
+            changedProps.ContainsKey(EItemType.Face.ToString()) ||
+            changedProps.ContainsKey(EItemType.Chest.ToString()) ||
+            changedProps.ContainsKey(EItemType.Cape.ToString()))
         {
             EventManager.Instance.RoomDataChanged();
-            
+
             if (targetPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {
                 EventManager.Instance.PlayerItemChanged();
