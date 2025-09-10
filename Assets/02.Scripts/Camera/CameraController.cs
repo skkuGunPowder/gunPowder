@@ -18,9 +18,9 @@ public class CameraController : MonoBehaviour
     private int _currentTargetIndex = 0;
 
     [Header("마지막 킬 관련")] 
-    [Tooltip("시간 고치면 플레이어 라스트 다이 시간도 고쳐야함")] public float TargetZoomDuration = 1.5f;
-    
-    
+    [Tooltip("시간 고치면 플레이어 라스트 다이 시간도 고쳐야함")]
+    public float TargetZoomDuration = 1.5f;
+    public float TargetZoomAmount = 1.5f;
     private void Awake()
     {
         Init();
@@ -148,8 +148,11 @@ public class CameraController : MonoBehaviour
             if (photonPlayer.ActorNumber == actorNumber)
             {
                 _proCamera.RemoveAllCameraTargets();
-                _proCamera.AddCameraTarget(p.transform, duration:TargetZoomDuration);
+                _proCamera.AddCameraTarget(p.transform);
+                _proCamera.Zoom(-TargetZoomAmount, TargetZoomDuration);
                 EventManager.Instance.GameSet();
+                _currentTargetList.Clear();
+                _currentTargetList.Add(p);
                 Debug.Log($"player : {photonPlayer.ActorNumber}");
                 return;
             }
@@ -158,7 +161,7 @@ public class CameraController : MonoBehaviour
     
     private void Update()
     {
-        if (_isObserving == false || GameManager.Instance.LastPlayer)
+        if (_isObserving == false)
         {
             return;
         }

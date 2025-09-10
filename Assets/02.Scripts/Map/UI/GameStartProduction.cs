@@ -47,6 +47,7 @@ public class GameStartProduction : MonoBehaviour
     public void GameStart()
     {
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
+        InputHandler.BlockInput = true;
         sequence.Append(GameStartCountText3.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
             .SetEase(GameStartTextEase));
         sequence.AppendInterval(GameStartTextInterval);
@@ -70,6 +71,8 @@ public class GameStartProduction : MonoBehaviour
         sequence.OnComplete(() =>
         {
             GameManager.Instance.GameStartSetting();
+            
+            InputHandler.BlockInput = false;
             GameManager.Instance.OnGameStart -= GameStart;
         });
     }

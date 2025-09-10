@@ -150,4 +150,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGameSet?.Invoke();
     }
+    public event Action OnRoomListUpdate;
+
+    public void RoomListUpdate()
+    {
+        OnRoomListUpdate?.Invoke();
+    }
 }
