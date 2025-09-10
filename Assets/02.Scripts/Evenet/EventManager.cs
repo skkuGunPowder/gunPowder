@@ -143,4 +143,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnLastAttack?.Invoke(actorNumber);
     }
+
+    public event Action OnGameSet;
+
+    public void GameSet()
+    {
+        OnGameSet?.Invoke();
+    }
 }

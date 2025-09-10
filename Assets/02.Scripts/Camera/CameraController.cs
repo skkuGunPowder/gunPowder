@@ -149,6 +149,7 @@ public class CameraController : MonoBehaviour
             {
                 _proCamera.RemoveAllCameraTargets();
                 _proCamera.AddCameraTarget(p.transform, duration:TargetZoomDuration);
+                EventManager.Instance.GameSet();
                 Debug.Log($"player : {photonPlayer.ActorNumber}");
                 return;
             }

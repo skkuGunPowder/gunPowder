@@ -172,6 +172,7 @@ public class GameManager : PhotonSingleton<GameManager>
     public void GameStartSetting()
     { 
         EventManager.Instance.PlayerListUp();
+        EventManager.Instance.TargetChanged();
         GameStateChange(EGameState.Playing);
         PlayerLastCheck();
     }

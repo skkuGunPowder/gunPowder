@@ -11,8 +11,9 @@ public class PlayerLastDieState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+        SetImmuneState();
         EventManager.Instance.LastAttack(this._owner.PhotonView.OwnerActorNr);
-        LastDiePlay();
+        EventManager.Instance.OnGameSet += LastDiePlay;
     }
 
     public override void OnExit()
@@ -27,6 +28,7 @@ public class PlayerLastDieState : PlayerBaseState
 
     private void LastDiePlay()
     {
+        EventManager.Instance.OnGameSet -= LastDiePlay;
         Sequence seq = DOTween.Sequence();
         seq.AppendInterval(IntervalTime);
         seq.Append(this.gameObject.transform.DOShakePosition(VibrateDuration, VibratePower));
@@ -37,5 +39,11 @@ public class PlayerLastDieState : PlayerBaseState
     {
         ExecuteDeathEffects();
         GameManager.Instance.RequestGameOver();
+        SyncStateChange<PlayerObserveState>();
+    }
+    private void SetImmuneState()
+    {
+        _owner.gameObject.tag = "Immune";
+        _owner.PlayerStat.IsImmune = true;
     }
 }
