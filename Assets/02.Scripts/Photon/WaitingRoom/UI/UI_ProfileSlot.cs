@@ -54,7 +54,7 @@ public class UI_ProfileSlot : MonoBehaviour
             TeamSet(team);
         }
     }
-
+    
     private void LifeSet()
     {
         Lives.SetActive(true);
@@ -88,7 +88,7 @@ public class UI_ProfileSlot : MonoBehaviour
             NotReady.SetActive(true);
         }
     }
-
+    
     public void MasterCheck(bool isMaster)
     {
         Master.gameObject.SetActive(isMaster);
