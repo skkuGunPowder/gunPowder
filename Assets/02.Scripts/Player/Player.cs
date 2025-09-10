@@ -182,7 +182,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _skinManager = GetComponent<PlayerSkinManager>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
-        LoadItems();
+        
 
         // 기본 폭탄 정보 가져오기
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
@@ -192,8 +192,6 @@ public class Player : MonoBehaviourPun, IDamagable
         UI_PingBase.Instance.SetPing(this.transform);
 
         UnityEngine.Random.InitState(RANDOM_SEED);
-
-        EventManager.Instance.OnPlayerItemChanged += LoadItems;
 
         InitializeBodyParts();
     }
@@ -381,9 +379,12 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Start()
     {
+        LoadItems();
+        
         // 1. 이벤트 핸들러 등록
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
         _playerStat.OnGunpowderIncreased += HandleGunpowderIncreased;
+        EventManager.Instance.OnPlayerItemChanged += LoadItems;
 
         // 2. Rigidbody2D 최적화된 초기화
         if (photonView.IsMine)
@@ -1623,15 +1624,32 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private IEnumerator HeadSpriteOnOffCoroutine()
     {
-        _playerStat.MySpriteREndererList[0].enabled = false;
-        _playerStat.MySpriteREndererList[2].enabled = false;
+        // 스킨 슬롯 부모 아래의 모든 스프라이트 렌더러를 끄고, 쿨타임 후 복구
+        if (_skinManager is IPlayerSkinManager sm)
+        {
+            ToggleAllSpriteRenderers(sm.HeadSlotParent, false);
+            ToggleAllSpriteRenderers(sm.FaceSlotParent, false);
+        }
         _playerStat.MySpriteREndererList[3].enabled = false;
 
         yield return new WaitForSeconds(BasicBombStat.CoolTime);
 
-        _playerStat.MySpriteREndererList[0].enabled = true;
-        _playerStat.MySpriteREndererList[2].enabled = true;
+        if (_skinManager is IPlayerSkinManager sm2)
+        {
+            ToggleAllSpriteRenderers(sm2.HeadSlotParent, true);
+            ToggleAllSpriteRenderers(sm2.FaceSlotParent, true);
+        }
         _playerStat.MySpriteREndererList[3].enabled = true;
+    }
+
+    private void ToggleAllSpriteRenderers(Transform root, bool enabled)
+    {
+        if (root == null) { return; }
+        var srs = root.GetComponentsInChildren<SpriteRenderer>(true);
+        for (int i = 0; i < srs.Length; i++)
+        {
+            if (srs[i] != null) { srs[i].enabled = enabled; }
+        }
     }
 
     public void Confuse()
