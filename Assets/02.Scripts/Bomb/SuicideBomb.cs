@@ -17,7 +17,6 @@ public class SuicideBomb : Bomb
     [SerializeField] private int _totalBeats = 5;
 
     private SpriteRenderer _spriteRenderer;
-    private Transform _playerTransform;
 
 
     protected override void Init()
