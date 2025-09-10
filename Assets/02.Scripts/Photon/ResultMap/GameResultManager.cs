@@ -36,15 +36,16 @@ public class GameResultManager : Singleton<GameResultManager>
             data.CalculateKillRate(maxKill);
             data.CalculateSurviveTimeRate(maxSurviveTime);
 
+            int totalGold = (int)(data.Kill * 50 + data.Damage * 0.1 + data.SurviveTimeRate * 500);
+            int totlaEXP = (int)(data.Kill * 100 + data.Damage * 1 + data.SurviveTimeRate * 1000);
+           
+            data.Gold = totalGold;
+            data.EXP = totlaEXP;
+            
             if (data.Player.IsLocal)
             {
-                int totalGold = (int)(data.Kill * 50 + data.Damage * 0.1 + data.SurviveTimeRate * 500);
-                int totlaEXP = (int)(data.Kill * 100 + data.Damage * 1 + data.SurviveTimeRate * 1000);
                 CurrencyManager.Instance.AddCurrency(ECurrencyType.Gold, totalGold);
                 CurrencyManager.Instance.AddCurrency(ECurrencyType.EXP, totlaEXP);
-                
-                data.Gold = totalGold;
-                data.EXP = totlaEXP;
             }
         }
 

@@ -267,7 +267,12 @@ public class PlayerStat : MonoBehaviour
         {
             return;
         }
-        
+
+        if(_currentPlayerGunPowderCount <= 0)
+        {
+            return;
+        }
+
         _currentPlayerGunPowderCount += amount;
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife, 0);
@@ -283,6 +288,11 @@ public class PlayerStat : MonoBehaviour
         }
 
         if (!_photonView.IsMine)
+        {
+            return;
+        }
+
+        if(_currentPlayerGunPowderCount <= 0)
         {
             return;
         }

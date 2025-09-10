@@ -11,16 +11,18 @@ using UnityEngine.SceneManagement;
 public class GameManager : PhotonSingleton<GameManager> 
 {
     private PhotonView _photonView;
+    private List<PhotonPlayer> _playerList = new List<PhotonPlayer>();
     
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
+    public bool LastPlayer = false;
+    
     [Header("플레이어 낙사 관련")]
     public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
     public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
     public Transform ResurrectPoint;                   // 부활 지점
     
     public event Action<PhotonPlayer> OnTimeCheck;
-    public event Action OnUltimateEnd;
     public event Action OnGameStart;
     public event Action OnGameOver;
 
@@ -39,6 +41,18 @@ public class GameManager : PhotonSingleton<GameManager>
 
         TimeScaleSetting();
         EventManager.Instance.OnLoadFinished += Init;
+    }
+
+    // 처음부터 두명이서 시작할 경우
+    private void PlayerLastCheck()
+    {
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
+        _playerList = new List<PhotonPlayer>(players);
+        
+        if (_playerList.Count == 2)
+        {
+            LastPlayer = true; 
+        }
     }
     
     private void Init()
@@ -91,45 +105,49 @@ public class GameManager : PhotonSingleton<GameManager>
             OnTimeCheck?.Invoke(targetPlayer);
         }   
         
-        if (PlayerDeadCheck())
-        { 
-            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-        }
+        PlayerDeadCheck();
     }
     
     // 캐릭터들 사망 체크하기 = 방장만
-    private bool PlayerDeadCheck()
+    private void PlayerDeadCheck()
     {
-        List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
+        int notDead = 0;
         
-        int dead = 1;
-        
-        foreach (PhotonPlayer p in playerList)
+        foreach (PhotonPlayer p in _playerList)
         {
             bool isDead = p.CustomProperties.ContainsKey(EProperties.IsDead.ToString()) && (bool)p.CustomProperties[EProperties.IsDead.ToString()];
             if (isDead == false)
             {
-                continue;
+                notDead++;
             }
-            
-            dead++;
         }
-        
-        if (dead < playerList.Count)
+
+        // 플레이어가 두명 남았는가?
+        if (LastPlayer == false && notDead == 2)
         {
-            return false;
+            _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.All);
         }
-        
-        return true;
     }
 
     [PunRPC]
     public void RPC_GameStart()
     {
+        OnGameStart?.Invoke();
         EventManager.Instance.ProfileInit();
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
-        EventManager.Instance.PlayerFind();
-        OnGameStart?.Invoke();
+    }
+
+    [PunRPC]
+    private void RPC_LastPlayer()
+    {
+        LastPlayer = true;
+    }
+    public void GameStartSetting()
+    { 
+        EventManager.Instance.PlayerListUp();
+        EventManager.Instance.TargetChanged();
+        GameStateChange(EGameState.Playing);
+        PlayerLastCheck();
     }
     
     // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
@@ -183,7 +201,6 @@ public class GameManager : PhotonSingleton<GameManager>
     
     private void OnDestroy()
     {
-        Debug.Log("GameManager OnDestroy");
     }
 }
 

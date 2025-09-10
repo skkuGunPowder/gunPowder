@@ -21,13 +21,8 @@ public class UltimateEffectLocal : MonoBehaviour
     private void Awake()
     {
         EventManager.Instance.OnUltimate += PlayEffect;
-        EventManager.Instance.OnPlayerFind += PlayerListUp;
+        EventManager.Instance.OnPlayerListUp += PlayerListUp;
         _ultiBackGround = UltimateBackGround.GetComponent<SpriteRenderer>();
-    }
-
-    private void Start()
-    {
-        GameManager.Instance.OnUltimateEnd += BackGroundOff;
     }
 
     private void PlayEffect(string bomb, PhotonPlayer player)
@@ -93,8 +88,7 @@ public class UltimateEffectLocal : MonoBehaviour
             _playerList.Add(view);
         }
         
-        Debug.Log($"플레이어 리스트 업 : {_playerList.Count}");
-        EventManager.Instance.OnPlayerFind -= PlayerListUp;
+        EventManager.Instance.OnPlayerListUp -= PlayerListUp;
     }
 
     private IEnumerator BackGroundColorChange()

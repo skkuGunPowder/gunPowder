@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Photon.Pun;
 using RaycastPro.RaySensors2D;
 using RobustFSM.Base;
@@ -28,11 +29,17 @@ public class PlayerBaseState : MonoState
         Boost
     }
 
-
-
-
-
-
+    // 사망 효과 관련 상수
+    private const float DIE_EFFECT_FORCE = 30f;            // 사망 시 신체 부위에 가해지는 힘
+    
+    // 방향 벡터 상수들
+    private static readonly Vector2 HEAD_DIRECTION = new Vector2(0, 1).normalized;       // 머리 부위 방향 (위)
+    private static readonly Vector2 BODY_DIRECTION = new Vector2(0, -1).normalized;     // 몸통 부위 방향 (아래)
+    private static readonly Vector2 LEFT_ARM_DIRECTION = new Vector2(-1, 1).normalized; // 왼팔 방향 (왼쪽 위)
+    private static readonly Vector2 LEFT_LEG_DIRECTION = new Vector2(-1, -1).normalized;// 왼다리 방향 (왼쪽 아래)
+    private static readonly Vector2 RIGHT_ARM_DIRECTION = new Vector2(1, 1).normalized; // 오른팔 방향 (오른쪽 위)
+    private static readonly Vector2 RIGHT_LEG_DIRECTION = new Vector2(1, -1).normalized;// 오른다리 방향 (오른쪽 아래)
+    
     public override void OnEnter()
     {
         base.OnEnter();
@@ -42,10 +49,12 @@ public class PlayerBaseState : MonoState
 
         
         // 사망상태에서는 히트에 의한 상태 전환을 막기 위해 구독하지 않음
-        if (!_playerFSM.IsCurrentState<PlayerDieState>())
+        if (_playerFSM.IsCurrentState<PlayerDieState>() || _playerFSM.IsCurrentState<PlayerLastDieState>())
         {
-            _owner.OnHit += HandleHit;
+            return;
         }
+        
+        _owner.OnHit += HandleHit;
     }
 
     public override void OnExit()
@@ -565,4 +574,98 @@ public class PlayerBaseState : MonoState
         recoil.y += upPower;
         _owner.Rigidbody2D.AddForce(recoil, ForceMode2D.Impulse);
     }
+    
+    /// <summary>
+    /// 신체 부위별 사망 효과 적용 (각 부위를 다른 방향으로 흩어뜨림)
+    /// </summary>
+    private void ApplyBodyPartsDeathEffect()
+    {
+        // 각 신체 부위별로 지정된 방향으로 힘 적용
+        ApplyForceToBodyParts(_owner.HeadPartList, HEAD_DIRECTION);
+        ApplyForceToBodyParts(_owner.BodyPartList, BODY_DIRECTION);
+        ApplyForceToBodyParts(_owner.LeftArmPartList, LEFT_ARM_DIRECTION);
+        ApplyForceToBodyParts(_owner.LeftLegPartList, LEFT_LEG_DIRECTION);
+        ApplyForceToBodyParts(_owner.RightArmPartList, RIGHT_ARM_DIRECTION);
+        ApplyForceToBodyParts(_owner.RightLegPartList, RIGHT_LEG_DIRECTION);
+    }
+
+    /// <summary>
+    /// 특정 신체 부위 리스트에 힘 적용
+    /// </summary>
+    private void ApplyForceToBodyParts(List<GameObject> bodyParts, Vector2 direction)
+    {
+        if (bodyParts == null) return;
+
+        foreach (GameObject bodyPart in bodyParts)
+        {
+            ApplyForceToSingleBodyPart(bodyPart, direction);
+        }
+    }
+
+    /// <summary>
+    /// 개별 신체 부위에 힘 적용
+    /// </summary>
+    private void ApplyForceToSingleBodyPart(GameObject bodyPart, Vector2 direction)
+    {
+        if (bodyPart == null) return;
+
+        Rigidbody2D rigidbody2D = bodyPart.GetComponent<Rigidbody2D>();
+        if (rigidbody2D != null)
+        {
+            bodyPart.SetActive(true);
+            rigidbody2D.AddForce(direction * DIE_EFFECT_FORCE, ForceMode2D.Impulse);
+        }
+    }
+
+    protected void ExecuteDeathEffects()
+    {
+        // 신체 부위 흩어지는 효과
+        ApplyBodyPartsDeathEffect();
+
+        // 사망 폭발 효과
+        CreateDeathExplosion();
+
+        // 플레이어 모습 숨기기
+        SetSpriteRenderersVisibility(false);
+
+        // 사망 사운드 재생
+        PlayDeathSound();
+        
+    }
+    
+    /// <summary>
+    /// 사망 폭발 효과 생성
+    /// </summary>
+    private void CreateDeathExplosion()
+    {
+        Explosion dieExplosion = ExplosionPool.Instance.Get(_owner.DieExplosionPrefab.name);
+        dieExplosion.transform.position = _owner.transform.position;
+        dieExplosion.Explode(true, _owner.PhotonView);
+    }
+    
+    /// <summary>
+    /// 스프라이트 렌더러들의 가시성 설정
+    /// </summary>
+    protected void SetSpriteRenderersVisibility(bool isVisible)
+    {
+        List<SpriteRenderer> spriteRenderers = _owner.PlayerStat.MySpriteREndererList;
+        if (spriteRenderers == null) return;
+
+        foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+        {
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.enabled = isVisible;
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 사망 사운드 재생
+    /// </summary>
+    private void PlayDeathSound()
+    {
+        SoundManager.Instance.PlayLocalRandomSound("PlayerDeath", transform, 1, 2);
+    }
+
 }
