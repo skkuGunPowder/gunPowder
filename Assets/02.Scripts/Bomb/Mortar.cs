@@ -153,6 +153,7 @@ public class Mortar : Bomb
             if (mortarShell.PhotonView.IsMine)
             {
                 mortarShell.PhotonView.RPC(nameof(mortarShell.ThrowBomb), RpcTarget.All, _muzzle.right, _muzzle.up, _muzzle.forward);
+                mortarShell.PhotonView.RPC(nameof(mortarShell.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
             }
 
             _currentAmmo--;
