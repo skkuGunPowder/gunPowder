@@ -15,15 +15,6 @@ public class SettingManager : DontDestroySingleton<SettingManager>
         new Vector2Int(1920, 1080),
         new Vector2Int(2560, 1440)
     };
-    
-    private void Update()
-    {
-        // p키 누르면 Playerorefs 초기화
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            PlayerPrefs.DeleteAll();
-        }
-    }
 
     protected override void Awake()
     {

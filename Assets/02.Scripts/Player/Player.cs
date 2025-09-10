@@ -7,8 +7,6 @@ using PhotonPlayer = Photon.Realtime.Player;
 using System.Collections;
 using DG.Tweening;
 
-
-
 public class Player : MonoBehaviourPun, IDamagable
 {
     [SerializeField]
@@ -149,6 +147,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public PlayerFSM PlayerFSM => _playerFSM;
     private DamagePopup _damagePopup;
     public DamagePopup DamagePopup => _damagePopup;
+    private IPlayerSkinManager _skinManager;
 
     public AirDropItemLootVFX AirDropItemLootVFX;
     private AirDropItemBase _airDropItem;
@@ -158,6 +157,9 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField]
     private PlayerSFXAnimationEvent _playerSFXAnimationEvent;
     public PlayerSFXAnimationEvent PlayerSFXAnimationEvent => _playerSFXAnimationEvent;
+
+    [Header("스킨")]
+
 
 
 
@@ -177,9 +179,10 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerMaterial = GetComponent<PlayerMaterial>();
         _playerFSM = GetComponent<PlayerFSM>();
         _damagePopup = GetComponent<DamagePopup>();
+        _skinManager = GetComponent<PlayerSkinManager>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
-        LoadItems();
+        
 
         // 기본 폭탄 정보 가져오기
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
@@ -189,8 +192,6 @@ public class Player : MonoBehaviourPun, IDamagable
         UI_PingBase.Instance.SetPing(this.transform);
 
         UnityEngine.Random.InitState(RANDOM_SEED);
-
-        EventManager.Instance.OnPlayerItemChanged += LoadItems;
 
         InitializeBodyParts();
     }
@@ -266,8 +267,8 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-
-    private void LoadItems()
+    [PunRPC]
+    private void RPC_LoadItems()
     {
         PhotonPlayer photonPlayer = PhotonView.Owner;
         for (int i = 0; i < (int)EItemType.None; i++)
@@ -294,7 +295,7 @@ public class Player : MonoBehaviourPun, IDamagable
             }
         }
 
-        // [스킨] 스킨 변경 감지 및 그룹(Head/Face, Chest/Cape)별 분기 처리
+        // [스킨] 단순 존재 여부 기반 적용/해제: 장착되었으면 적용, 없으면 해제
         ItemDTO headItem = null;
         ItemDTO faceItem = null;
         ItemDTO chestItem = null;
@@ -305,27 +306,10 @@ public class Player : MonoBehaviourPun, IDamagable
         EquipedItemDict.TryGetValue(EItemType.Chest, out chestItem);
         EquipedItemDict.TryGetValue(EItemType.Cape, out capeItem);
 
-        string currentHeadId = headItem != null ? headItem.ID : null;
-        string currentFaceId = faceItem != null ? faceItem.ID : null;
-        string currentChestId = chestItem != null ? chestItem.ID : null;
-        string currentCapeId = capeItem != null ? capeItem.ID : null;
-
-        bool headFaceChanged = currentHeadId != _lastHeadSkinId || currentFaceId != _lastFaceSkinId;
-        bool chestCapeChanged = currentChestId != _lastChestSkinId || currentCapeId != _lastCapeSkinId;
-
-        if (headFaceChanged)
-        {
-            _lastHeadSkinId = currentHeadId;
-            _lastFaceSkinId = currentFaceId;
-            OnHeadFaceSkinChanged(headItem, faceItem);
-        }
-
-        if (chestCapeChanged)
-        {
-            _lastChestSkinId = currentChestId;
-            _lastCapeSkinId = currentCapeId;
-            OnChestCapeSkinChanged(chestItem, capeItem);
-        }
+        if (headItem != null) { ApplyHeadSkin(headItem); } else { ClearHeadSkin(); }
+        if (faceItem != null) { ApplyFaceSkin(faceItem); } else { ClearFaceSkin(); }
+        if (chestItem != null) { ApplyChestSkin(chestItem); } else { ClearChestSkin(); }
+        if (capeItem != null) { ApplyCapeSkin(capeItem); } else { ClearCapeSkin(); }
 
         // 특수폭탄 정보 받아오기                
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
@@ -334,41 +318,73 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
         }
-        
-                
+
+
         foreach (var item in EquipedItemDict)
         {
             Debug.Log($"{item.Key} : {item.Value.ID}");
         }
     }
 
-    // [스킨] 자리표시자: Head/Face 스킨 적용
-    // Head/Face는 머리 스프라이트/애니메이션 교체, 얼굴 액세서리 교체 등
-    private void OnHeadFaceSkinChanged(ItemDTO headItem, ItemDTO faceItem)
+    public void LoadItems()
     {
-        Debug.Log("[스킨] Head/Face 스킨 변경됨 → 여기서 머리/얼굴 비주얼을 적용하세요.");
-        // TODO [스킨]: Head/Face 그룹 적용 로직 구현
-        // - 머리 SpriteRenderer 교체 또는 AnimationClip 오버라이드
-        // - 얼굴 액세서리 프리팹/스프라이트 부착 또는 교체
-        // - 필요 시 런타임 머티리얼/셰이더 갱신
+        if (!PhotonView.IsMine)
+        {
+            return;
+        }
+        
+        PhotonView.RPC(nameof(RPC_LoadItems), RpcTarget.All);
     }
 
-    // [스킨] 자리표시자: Chest/Cape 스킨 적용
-    // Chest/Cape는 상체 스프라이트 교체와 망토 프리팹/리깅 갱신이 필요할 수 있음
-    private void OnChestCapeSkinChanged(ItemDTO chestItem, ItemDTO capeItem)
+    /// <summary>
+    /// 스킨 적용/해제 핸들러
+    /// </summary>
+    /// <param name="item"></param>
+    private void ApplyHeadSkin(ItemDTO item)
     {
-        Debug.Log("[스킨] Chest/Cape 스킨 변경됨 → 여기서 상체/망토 비주얼을 적용하세요.");
-        // TODO [스킨]: Chest/Cape 그룹 적용 로직 구현
-        // - 상체 스프라이트/애니메이션 교체
-        // - 망토 프리팹 생성/교체, 본 또는 제약 설정
-        // - 망토가 천/리짓드 컴포넌트를 사용하면 콜라이더/피직스 갱신
+        if (_skinManager != null) { _skinManager.ApplyHead(item); }
     }
+    private void ClearHeadSkin()
+    {
+        if (_skinManager != null) { _skinManager.ClearHead(); }
+    }
+    private void ApplyFaceSkin(ItemDTO item)
+    {
+        if (_skinManager != null) { _skinManager.ApplyFace(item); }
+    }
+    private void ClearFaceSkin()
+    {
+        if (_skinManager != null) { _skinManager.ClearFace(); }
+    }
+    private void ApplyChestSkin(ItemDTO item)
+    {
+        if (_skinManager != null) { _skinManager.ApplyChest(item); }
+    }
+    private void ClearChestSkin()
+    {
+        if (_skinManager != null) { _skinManager.ClearChest(); }
+    }
+    private void ApplyCapeSkin(ItemDTO item)
+    {
+        if (_skinManager != null) { _skinManager.ApplyCape(item); }
+    }
+    private void ClearCapeSkin()
+    {
+        if (_skinManager != null) { _skinManager.ClearCape(); }
+    }
+
+    // Player는 스킨 내부 구현을 가지지 않도록 정리 (외부 매니저로 위임)
+
+    // 내부 구현 제거됨 (스킨 관리는 PlayerSkinManager에서 처리)
 
     private void Start()
     {
+        LoadItems();
+        
         // 1. 이벤트 핸들러 등록
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
         _playerStat.OnGunpowderIncreased += HandleGunpowderIncreased;
+        EventManager.Instance.OnPlayerItemChanged += LoadItems;
 
         // 2. Rigidbody2D 최적화된 초기화
         if (photonView.IsMine)
@@ -441,6 +457,29 @@ public class Player : MonoBehaviourPun, IDamagable
             {
                 _originalColorMap[renderer] = renderer.color;
             }
+        }
+    }
+
+    // 스킨 동적 추가 시 색상 시스템에 편입/해제
+    public void RegisterOriginalColor(SpriteRenderer renderer)
+    {
+        if (renderer == null) { return; }
+        if (_originalColorMap == null)
+        {
+            _originalColorMap = new Dictionary<SpriteRenderer, Color>();
+        }
+        if (!_originalColorMap.ContainsKey(renderer))
+        {
+            _originalColorMap[renderer] = renderer.color;
+        }
+    }
+
+    public void UnregisterOriginalColor(SpriteRenderer renderer)
+    {
+        if (renderer == null || _originalColorMap == null) { return; }
+        if (_originalColorMap.ContainsKey(renderer))
+        {
+            _originalColorMap.Remove(renderer);
         }
     }
 
@@ -1585,15 +1624,32 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private IEnumerator HeadSpriteOnOffCoroutine()
     {
-        _playerStat.MySpriteREndererList[0].enabled = false;
-        _playerStat.MySpriteREndererList[2].enabled = false;
+        // 스킨 슬롯 부모 아래의 모든 스프라이트 렌더러를 끄고, 쿨타임 후 복구
+        if (_skinManager is IPlayerSkinManager sm)
+        {
+            ToggleAllSpriteRenderers(sm.HeadSlotParent, false);
+            ToggleAllSpriteRenderers(sm.FaceSlotParent, false);
+        }
         _playerStat.MySpriteREndererList[3].enabled = false;
 
         yield return new WaitForSeconds(BasicBombStat.CoolTime);
 
-        _playerStat.MySpriteREndererList[0].enabled = true;
-        _playerStat.MySpriteREndererList[2].enabled = true;
+        if (_skinManager is IPlayerSkinManager sm2)
+        {
+            ToggleAllSpriteRenderers(sm2.HeadSlotParent, true);
+            ToggleAllSpriteRenderers(sm2.FaceSlotParent, true);
+        }
         _playerStat.MySpriteREndererList[3].enabled = true;
+    }
+
+    private void ToggleAllSpriteRenderers(Transform root, bool enabled)
+    {
+        if (root == null) { return; }
+        var srs = root.GetComponentsInChildren<SpriteRenderer>(true);
+        for (int i = 0; i < srs.Length; i++)
+        {
+            if (srs[i] != null) { srs[i].enabled = enabled; }
+        }
     }
 
     public void Confuse()
