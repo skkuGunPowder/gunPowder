@@ -69,7 +69,7 @@ public class GameStartProduction : MonoBehaviour
             .SetEase(GameStartTextEase));
         sequence.OnComplete(() =>
         {
-            GameManager.Instance.GameStateChange(EGameState.Playing);
+            GameManager.Instance.GameStartSetting();
             GameManager.Instance.OnGameStart -= GameStart;
         });
     }

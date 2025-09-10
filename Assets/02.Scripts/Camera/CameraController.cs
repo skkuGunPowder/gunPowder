@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Com.LuisPedroFonseca.ProCamera2D;
 using Photon.Pun;
+using PhotonPlayer = Photon.Realtime.Player;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -14,6 +16,10 @@ public class CameraController : MonoBehaviour
     private bool _isObserving = false;
     private List<Player> _currentTargetList = new List<Player>();
     private int _currentTargetIndex = 0;
+
+    [Header("마지막 킬 관련")] 
+    [Tooltip("시간 고치면 플레이어 라스트 다이 시간도 고쳐야함")] public float TargetZoomDuration = 1.5f;
+    
     
     private void Awake()
     {
@@ -26,13 +32,13 @@ public class CameraController : MonoBehaviour
         {
             return;
         }
-
         EventManager.Instance.OnTargetChanged += TargetListUp;
+        EventManager.Instance.OnLastAttack += LastAttack;
     }
 
     private void Init()
     {
-        
+        _currentTargetList = new List<Player>();
         if (_mainCamera == null)
         {
             _mainCamera = Camera.main;
@@ -103,6 +109,12 @@ public class CameraController : MonoBehaviour
 
     private void TargetListUp()
     {
+        if (_currentTargetList.Count == 2)
+        {
+            Debug.Log("dont target list up");
+            return;
+        }
+        
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();
         
@@ -121,11 +133,32 @@ public class CameraController : MonoBehaviour
             _currentTargetList.Add(player);
             
         }
+        
+        Debug.Log($"target list : {_currentTargetList.Count}");
+        EventManager.Instance.OnPlayerListUp -= TargetListUp;
     }
 
+    private void LastAttack(int actorNumber)
+    {
+        Debug.Log("LastAttack");
+        
+        foreach (Player p in _currentTargetList)
+        {
+            PhotonPlayer photonPlayer = p.GetComponent<PhotonView>().Owner;
+            if (photonPlayer.ActorNumber == actorNumber)
+            {
+                _proCamera.RemoveAllCameraTargets();
+                _proCamera.AddCameraTarget(p.transform, duration:TargetZoomDuration);
+                EventManager.Instance.GameSet();
+                Debug.Log($"player : {photonPlayer.ActorNumber}");
+                return;
+            }
+        }
+    }
+    
     private void Update()
     {
-        if (_isObserving == false)
+        if (_isObserving == false || GameManager.Instance.LastPlayer)
         {
             return;
         }
@@ -142,7 +175,7 @@ public class CameraController : MonoBehaviour
 
     }
 
-    public void SelectTarget(int index)
+    private void SelectTarget(int index)
     {
         if (_currentTargetList.Count <= 1)
         {
@@ -177,7 +210,7 @@ public class CameraController : MonoBehaviour
         {
             _proCamera.RemoveAllCameraTargets();
         }
-        
+        EventManager.Instance.OnLastAttack -= LastAttack;
         EventManager.Instance.OnTargetChanged -= TargetListUp;
     }
 }
