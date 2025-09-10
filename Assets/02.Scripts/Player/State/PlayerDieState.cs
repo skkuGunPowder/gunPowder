@@ -53,13 +53,17 @@ public class PlayerDieState : PlayerBaseState
         {
             return;
         }
-
+        
         // 상태 초기화
         InitializeDeathState();
 
         // 무적 상태 설정
         SetImmuneState();
-
+        
+        if (!HasNoMoreLives())
+        {
+            ExecuteDeath();
+        }
         // 히트 이벤트 해제 (사망 중 추가 피격 방지)
         _owner.OnHit -= HandleHit;
         
@@ -83,7 +87,6 @@ public class PlayerDieState : PlayerBaseState
 
         // 플레이어 모습 다시 보이게 설정
         SetSpriteRenderersVisibility(true);
-        _effectInitial = false;
 
     }
 
@@ -242,8 +245,6 @@ public class PlayerDieState : PlayerBaseState
     /// </summary>
     private void ExecuteDeath()
     {
-        _effectInitial = true;
-        
         ExecuteDeathEffects();
         // ApplyBodyPartsDeathEffect();
         // // 사망 폭발 효과
@@ -314,8 +315,17 @@ public class PlayerDieState : PlayerBaseState
     {
         // 중복 처리 방지
         if (_hasRequestedDestroy) return;
+       _hasRequestedDestroy = true;
         
-        _hasRequestedDestroy = true;
+       // 플레이어가 두명 남았으면 LastDie로 넘어감
+        if (GameManager.Instance.LastPlayer)
+        {
+            SyncStateChange<PlayerLastDieState>();
+            UpdatePlayerStatistics();
+            return;
+        }
+        
+        ExecuteDeath();
 
         // 본인의 클라이언트에서만 관전 상태로 전환 및 통계 업데이트
         if (_owner.PhotonView.IsMine)
@@ -331,12 +341,7 @@ public class PlayerDieState : PlayerBaseState
     private void HandleResurrectionProcess()
     {
         _dieTimer += Time.deltaTime;
-
-        if (!_effectInitial)
-        {
-            // 사망 효과들 실행
-            ExecuteDeath();
-        }
+        
         // 부활 대기 시간이 지나지 않았으면 대기
         if (_dieTimer < RESURRECTION_DELAY_TIME)
         {
@@ -356,13 +361,7 @@ public class PlayerDieState : PlayerBaseState
     /// </summary>
     private void TransitionToObserveState()
     {
-        // 플레이어가 두명 남았으면 LastDie로 넘어감
-        if (GameManager.Instance.LastPlayer)
-        {
-            SyncStateChange<PlayerLastDieState>();
-            return;
-        }
-        
+        Debug.Log("Observe");
         SyncStateChange<PlayerObserveState>();
     }
 

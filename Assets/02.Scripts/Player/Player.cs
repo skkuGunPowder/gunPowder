@@ -530,32 +530,17 @@ public class Player : MonoBehaviourPun, IDamagable
         // PlayerFSM을 통해 SyncStateChange 호출
         if (_playerFSM != null)
         {
-            if (GameManager.Instance.LastPlayer == false)
-            {
-                // 네트워크 동기화된 상태 변경
-                _playerFSM.SyncStateChange<PlayerDieState>();
-                return;   
-            }
-            else
-            {
-                _playerFSM.SyncStateChange<PlayerLastDieState>();
-                return;
-            }
+            // 네트워크 동기화된 상태 변경
+            _playerFSM.SyncStateChange<PlayerDieState>();
+            return;   
         }
 
         // PlayerFSM이 없는 경우 방어적으로 컴포넌트 조회 후 변경
         var fsm = GetComponent<PlayerFSM>();
         if (fsm != null)
         {
-            if (GameManager.Instance.LastPlayer == false)
-            {
-                // 네트워크 동기화된 상태 변경
-                _playerFSM.SyncStateChange<PlayerDieState>();
-            }
-            else
-            {
-                _playerFSM.SyncStateChange<PlayerLastDieState>();
-            }
+            // 네트워크 동기화된 상태 변경
+            _playerFSM.SyncStateChange<PlayerDieState>();
         }
     }
 
@@ -644,6 +629,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
         if (isOn)
         {
+            UltimateEffectPrefab.SetActive(true);
             if (_ultimateEffectOffRoutine != null)
             {
                 StopCoroutine(_ultimateEffectOffRoutine);
@@ -1446,7 +1432,8 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             if (fsmForGuard.IsCurrentState<PlayerDieState>()
             && stateName != nameof(PlayerIdleState)
-            && stateName != nameof(PlayerObserveState))
+            && stateName != nameof(PlayerObserveState)
+            && stateName != nameof(PlayerLastDieState))
             {
                 return;
             }

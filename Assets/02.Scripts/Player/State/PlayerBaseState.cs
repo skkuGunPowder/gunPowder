@@ -630,6 +630,7 @@ public class PlayerBaseState : MonoState
 
         // 사망 사운드 재생
         PlayDeathSound();
+        
     }
     
     /// <summary>
