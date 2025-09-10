@@ -70,12 +70,6 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
     }
-
-    // [PunRPC]
-    // private void RPC_LastAttack(PhotonPlayer targetPlayer)
-    // {
-    //     EventManager.Instance.LastAttack(targetPlayer);
-    // }
     
     [PunRPC]
     private void RPC_GameOver()
@@ -111,17 +105,12 @@ public class GameManager : PhotonSingleton<GameManager>
             OnTimeCheck?.Invoke(targetPlayer);
         }   
         
-        if (PlayerDeadCheck())
-        { 
-            // _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-            // _photonView.RPC(nameof(RPC_LastAttack), RpcTarget.All, targetPlayer);
-        }
+        PlayerDeadCheck();
     }
     
     // 캐릭터들 사망 체크하기 = 방장만
-    private bool PlayerDeadCheck()
+    private void PlayerDeadCheck()
     {
-        int dead = 1;
         int notDead = 0;
         
         foreach (PhotonPlayer p in _playerList)
@@ -130,10 +119,7 @@ public class GameManager : PhotonSingleton<GameManager>
             if (isDead == false)
             {
                 notDead++;
-                continue;
             }
-            
-            dead++;
         }
 
         // 플레이어가 두명 남았는가?
@@ -141,13 +127,6 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.All);
         }
-        
-        if (dead < _playerList.Count)
-        {
-            return false;
-        }
-        
-        return true;
     }
 
     [PunRPC]
@@ -170,6 +149,7 @@ public class GameManager : PhotonSingleton<GameManager>
         GameStateChange(EGameState.Playing);
         PlayerLastCheck();
     }
+    
     // 타임 오버가 되었을 때 로컬로 나의 프로퍼티를 보낸다.
     public void GameResultCheck()
     {
@@ -221,7 +201,6 @@ public class GameManager : PhotonSingleton<GameManager>
     
     private void OnDestroy()
     {
-        Debug.Log("GameManager OnDestroy");
     }
 }
 

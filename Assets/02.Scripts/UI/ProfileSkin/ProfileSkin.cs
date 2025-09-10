@@ -8,6 +8,7 @@ public class ProfileSkin : MonoBehaviour
     public List<ProfileSkinSlot> SkinSlotList;
     public List<ProfileTeamSlot> TeamSlotList;
     // 스킨 전체 바꾸기 : 첫 입장
+    
     public void Init(PhotonPlayer player) 
     {
         foreach (ProfileSkinSlot slot in SkinSlotList)

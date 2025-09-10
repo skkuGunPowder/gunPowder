@@ -13,7 +13,6 @@ public class UI_RoomProfile : MonoBehaviour
         EventManager.Instance.OnRoomDataChanged += Refresh;
         EventManager.Instance.OnReadyChanged += ReadyCheck;
         EventManager.Instance.OnTeamChanged += TeamChange;
-        
     }
     public void Refresh()
     {
