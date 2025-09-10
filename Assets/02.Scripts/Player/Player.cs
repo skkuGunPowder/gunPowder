@@ -311,6 +311,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (chestItem != null) { ApplyChestSkin(chestItem); } else { ClearChestSkin(); }
         if (capeItem != null) { ApplyCapeSkin(capeItem); } else { ClearCapeSkin(); }
 
+        SpriteFlipx();
+
         // 특수폭탄 정보 받아오기                
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
@@ -1420,6 +1422,11 @@ public class Player : MonoBehaviourPun, IDamagable
     public void SetFacingDirection(int direction)
     {
         _playerStat.FacingDirection = direction;
+        SpriteFlipx();
+    }
+
+    private void SpriteFlipx()
+    {
         foreach (SpriteRenderer spriteRenderer in _playerStat.MySpriteREndererList)
         {
             if (_playerStat.FacingDirection == 1)

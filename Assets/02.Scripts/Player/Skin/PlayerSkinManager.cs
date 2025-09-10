@@ -176,7 +176,6 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 					addedAnimators++;
 				}
 			}
-			Debug.Log($"[SkinMgr] Animators found={animators.Length}, added={addedAnimators} under {instance.name}");
 		}
 
 		if (_playerStat != null && _playerStat.MySpriteREndererList != null)
@@ -197,9 +196,7 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 					_player?.RegisterOriginalColor(sr);
 				}
 			}
-			Debug.Log($"[SkinMgr] SpriteRenderers found={srs.Length}, added={addedRenderers} under {instance.name}");
 		}
-		Debug.Log("[SkinMgr] AddInstanceComponentsToLists end");
 	}
 
 	// 기준 애니메이터의 현재 상태 시간과만 동기화한다(파라미터 복제 없음)
