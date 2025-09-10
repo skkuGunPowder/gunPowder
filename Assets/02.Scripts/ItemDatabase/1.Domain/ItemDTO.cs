@@ -12,6 +12,7 @@ public class ItemDTO
     public readonly string PrefabAddress;
 
     public readonly Sprite Image;
+    public readonly Sprite SkinImage;
     public readonly GameObject Prefab;
 
 
@@ -25,5 +26,10 @@ public class ItemDTO
         PrefabAddress = item.PrefabAddress;
         Image = item.Image;
         Prefab = item.Prefab;
+        
+        if (item.SkinImage != null)
+        {
+            SkinImage = item.SkinImage;
+        }
     }
 }
