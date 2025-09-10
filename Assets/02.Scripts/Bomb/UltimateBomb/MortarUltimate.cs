@@ -20,8 +20,9 @@ public class MortarUltimate : Ultimate
         if (_owner.PhotonView.IsMine)
         {
             GameObject mortarOBJ = PhotonNetwork.Instantiate(UltimateMortarPrefab.name, _owner.transform.position, Quaternion.identity);
-            Mortar mortar = mortarOBJ.GetComponent<Mortar>();
+            UltimateMortar mortar = mortarOBJ.GetComponent<UltimateMortar>();
             mortar.PhotonView.RPC(nameof(mortar.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
+            mortar.PhotonView.RPC(nameof(mortar.PlaceBomb), RpcTarget.All, Vector3.zero, Vector3.zero, Vector3.zero);
         }
     }
 }

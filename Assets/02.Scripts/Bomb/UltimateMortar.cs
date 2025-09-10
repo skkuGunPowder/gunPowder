@@ -34,8 +34,6 @@ public class UltimateMortar : Bomb
         base.Init();
         SetStat(ID);
 
-        _owner = _ownerPhotonview.GetComponent<Player>();
-
         _muzzle.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
         _currentAmmo = _maxAmmo;
 
@@ -139,6 +137,23 @@ public class UltimateMortar : Bomb
             }
         }
     }
-    
 
+    [PunRPC]
+    public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
+    {
+        if (_ownerPhotonview != null)
+        {
+            _owner = _ownerPhotonview.GetComponent<Player>();
+        }
+
+        if (_deploySound != null)
+        {
+            SoundManager.Instance.PlayLocalSound(nameof(_deploySound), transform);
+        }
+
+        if (PhotonView.IsMine)
+        {
+            InputHandler.BlockInput = true;
+        }
+    }
 }
