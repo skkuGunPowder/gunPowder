@@ -269,11 +269,15 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         Hashtable equipedItems = new Hashtable();
         foreach (var kvp in _equippedItemDict)
         {
-            if (kvp.Value == null)
+            // 장착 해제된 슬롯은 null을 전송해 커스텀 프로퍼티에서 키를 제거한다
+            if (kvp.Value != null)
             {
-                continue;
+                equipedItems[kvp.Key.ToString()] = kvp.Value.ID;
             }
-            equipedItems.Add(kvp.Key.ToString(), kvp.Value.ID);
+            else
+            {
+                equipedItems[kvp.Key.ToString()] = null;
+            }
         }
         PhotonNetwork.LocalPlayer.SetCustomProperties(equipedItems);
     }

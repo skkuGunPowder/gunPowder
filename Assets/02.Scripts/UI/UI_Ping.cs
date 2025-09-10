@@ -19,6 +19,8 @@ public class UI_Ping : MonoBehaviour
     private Vector3 _playerScreenPoint;
     private Vector3 _pingScreenPoint;
     private Image _contentImage;
+    private Player _player;
+    private Photon.Realtime.Player _photonPlayer;
 
     public void Init(Transform playerTransform, int margin)
     {
@@ -34,19 +36,15 @@ public class UI_Ping : MonoBehaviour
 
     private void Update()
     {
-        if (_playerTransform == null || _renderTexCamera == null || !_playerTransform.gameObject.activeSelf)
+        if (_playerTransform == null || _renderTexCamera == null || !_playerTransform.gameObject.activeSelf || _photonPlayer == null)
         {
             Content.SetActive(false);
             return;
         }
-        _renderTexCamera.transform.position = new Vector3(_playerTransform.position.x, _playerTransform.position.y, _renderTexCamera.transform.position.z);
-        _playerScreenPoint = _camera.WorldToScreenPoint(_playerTransform.position);
-        Player player = _playerTransform.GetComponent<Player>();
-        Photon.Realtime.Player photonPlayer = PhotonNetwork.PlayerList[player.photonView.OwnerActorNr-1];
 
-        if (photonPlayer.CustomProperties.ContainsKey("Team"))
+        if (_photonPlayer.CustomProperties.ContainsKey("Team"))
         {
-            EColorType teamColor = (EColorType)Enum.Parse(typeof(EColorType), photonPlayer.CustomProperties["Team"].ToString());
+            EColorType teamColor = (EColorType)Enum.Parse(typeof(EColorType), _photonPlayer.CustomProperties["Team"].ToString());
 
             ArmColor.color = ColorPalette.ColorDictionary[teamColor];
             _contentImage.color = ColorPalette.ColorDictionary[teamColor];
@@ -56,6 +54,10 @@ public class UI_Ping : MonoBehaviour
             ArmColor.color = Color.white;
             _contentImage.color = Color.white;
         }
+
+
+        _renderTexCamera.transform.position = new Vector3(_playerTransform.position.x, _playerTransform.position.y, _renderTexCamera.transform.position.z);
+        _playerScreenPoint = _camera.WorldToScreenPoint(_playerTransform.position);
 
         if (CheckPlayerIsInCamera())
         {
@@ -73,6 +75,8 @@ public class UI_Ping : MonoBehaviour
     public void SetPlayerTransform(Transform playerTransform)
     {
         _playerTransform = playerTransform;
+        _player = _playerTransform.GetComponent<Player>();
+        _photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(_player.PhotonView.OwnerActorNr);
     }
 
     public void SetMargin(int margin)
