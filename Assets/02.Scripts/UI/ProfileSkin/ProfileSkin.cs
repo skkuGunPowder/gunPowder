@@ -48,7 +48,7 @@ public class ProfileSkin : MonoBehaviour
         }
         
         ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[itemType.ToString()].ToString());
-        return item.Image;
+        return item.SkinImage;
         
     }
 }
