@@ -1,7 +1,6 @@
 using Photon.Pun;
 using UnityEngine;
 using Heathen.UnityPhysics;
-using UnityEditor.Search;
 
 
 public class Mortar : Bomb
@@ -17,11 +16,13 @@ public class Mortar : Bomb
 
     [Header("Settings")]
     [SerializeField] private float _mortarDuration = 8f;
-    [SerializeField] private int _maxAmmo = 8;
+    [SerializeField] private int _maxAmmo = 5;
+    [SerializeField] private float _firedelay = 0.5f;
     [SerializeField] private float _minAngle = 45f;
     [SerializeField] private float _maxAngle = 85f;
-    [SerializeField] private float _rangeStep = 5f;
+    [SerializeField] private float _rangeStep = 20f;
 
+    private Player _owner;
     private Animator _animator;
     private BallisticPathLineRender _pathRenderer;
     private BallisticsData _projectileData;
@@ -29,6 +30,7 @@ public class Mortar : Bomb
     private float _currentAngle = 60f;
     private bool _isFacingRight = false;
     private float _timer;
+    private float _delayTimer;
 
 
 
@@ -51,9 +53,18 @@ public class Mortar : Bomb
             radius = 0.5f
         };
 
-        _pathRenderer.projectile = _projectileData;
-        _pathRenderer.start = _muzzle.position;
-        _pathRenderer.continuousRun = true;
+
+        if (PhotonView.IsMine)
+        {
+            _pathRenderer.enabled = true;
+            _pathRenderer.projectile = _projectileData;
+            _pathRenderer.start = _muzzle.position;
+            _pathRenderer.continuousRun = true;
+        }
+        else
+        {
+            _pathRenderer.enabled = false;
+        }
 
         if (transform.eulerAngles.y != 0f)
         {
@@ -68,18 +79,19 @@ public class Mortar : Bomb
     protected override void Update()
     {
         _timer += Time.deltaTime;
-        // if (_timer >= _mortarDuration)
-        // {
-        //     _timer = 0f;
-        //     RemoveMortar();
-        // }
+        if (_timer >= _mortarDuration)
+        {
+            _timer = 0f;
+            RemoveMortar();
+        }
+
+        _delayTimer += Time.deltaTime;
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Player owner = _ownerPhotonview.GetComponent<Player>();
-            if (owner.PhotonView.IsMine)
+            if (_owner.PhotonView.IsMine)
             {
-                owner.PhotonView.RPC(nameof(owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerJumpState));
+                _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerJumpState));
             }
 
             RemoveMortar();
@@ -125,6 +137,12 @@ public class Mortar : Bomb
 
         if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Z))
         {
+            if(_delayTimer < _firedelay)
+            {
+                return;
+            }
+            _delayTimer = 0f;
+
             if (_mortarFireSound != null)
             {
                 SoundManager.Instance.PlayLocalSound(nameof(_mortarFireSound), transform);
@@ -132,7 +150,6 @@ public class Mortar : Bomb
 
             GameObject mortarShellObject = PhotonNetwork.Instantiate(_mortarShellPrefab.name, _muzzle.position, _muzzle.rotation);
             MortarShell mortarShell = mortarShellObject.GetComponent<MortarShell>();
-
             if (mortarShell.PhotonView.IsMine)
             {
                 mortarShell.PhotonView.RPC(nameof(mortarShell.ThrowBomb), RpcTarget.All, _muzzle.right, _muzzle.up, _muzzle.forward);
@@ -167,6 +184,11 @@ public class Mortar : Bomb
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        if (_ownerPhotonview != null)
+        {
+            _owner = _ownerPhotonview.GetComponent<Player>();
+        }
+
         if (_mortarDeploySound != null)
         {
             SoundManager.Instance.PlayLocalSound(nameof(_mortarDeploySound), transform);

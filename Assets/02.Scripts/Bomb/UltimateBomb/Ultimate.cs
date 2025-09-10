@@ -1,21 +1,25 @@
 using UnityEngine;
-public class Ultimate : MonoBehaviour
+public abstract class Ultimate : MonoBehaviour
 {
     protected string _ownerBombID;
     protected Player _owner;
     protected BombStat _bombStat;
+
     private void Awake()
     {
         Init();
     }
+    
     public virtual void Init()
     {
-        
+
     }
+
     public void SetOwner(Player owner)
     {
         _owner = owner;
     }
+
     public string GetBombID()
     {
         if (string.IsNullOrEmpty(_ownerBombID))
@@ -25,9 +29,11 @@ public class Ultimate : MonoBehaviour
         }
         return _ownerBombID;
     }
+
     public virtual void ExcuteUltimate()
     {
     }
+
     public int GetCost()
     {
         return _bombStat.Cost;
