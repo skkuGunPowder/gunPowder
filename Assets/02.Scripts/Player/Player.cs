@@ -523,6 +523,7 @@ public class Player : MonoBehaviourPun, IDamagable
         RPC_UltimateEffect(false);
         RPC_SetMaterial((byte)EPlayerMaterial.Default);
         _ultimateEffectOn = false;
+        _playerStat.HasUltimateChance = false;
         
         // 궁극기 관련 타이머 초기화
         _ultimateChanceTimer = 0f;
@@ -547,12 +548,15 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Update()
     {
         // 테스트
-        
-        // ------------------------------------------------------------
-        if (!PhotonView.IsMine)
+        if (Input.GetKeyDown(KeyCode.K))
         {
-            return;
+            _playerStat.SetPlayerGunPowderCountAndLife(0, 3);
         }
+        // ------------------------------------------------------------
+            if (!PhotonView.IsMine)
+            {
+                return;
+            }
         
         _attackTimer += Time.deltaTime;
 
@@ -593,6 +597,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 {
                     RPC_UltimateEffect(true);
                     RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
+                    Debug.Log($"[UltimateEffect] ON request - player {PhotonView.OwnerActorNr}, timer={_ultimateChanceTimer:0.00}/{_playerStat.UltimateChanceDuration:0.00}");
                 }
                 _ultimateEffectOn = true;
             }
@@ -606,6 +611,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 RPC_UltimateEffect(false);
                 RPC_SetMaterial((byte)EPlayerMaterial.Default);
                 _ultimateEffectOn = false;
+                Debug.Log($"[UltimateEffect] OFF by timeout - player {PhotonView.OwnerActorNr}");
             }
         }
     }
@@ -616,6 +622,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
+        Debug.Log($"[UltimateEffect] RPC_UltimateEffect send {isOn} - owner {PhotonView.OwnerActorNr}");
         PhotonView.RPC(nameof(UltimateEffect), RpcTarget.All, isOn);
     }
 
@@ -626,6 +633,8 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
+
+        Debug.Log($"[UltimateEffect RPC] {(isOn ? "ON" : "OFF")} - view {PhotonView.ViewID}, owner {PhotonView.OwnerActorNr}");
 
         if (isOn)
         {
@@ -767,6 +776,7 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.HasUsedUltimateThisLife = true;
             _playerStat.HasUltimateChance = false;
             _ultimateChanceTimer = 0f;
+            Debug.Log("[UltimateEffect] OFF by ExecuteUltimate");
             RPC_UltimateEffect(false);
             int ultimateCost = _ultimate.GetCost();
             _playerStat.DecreaseGunPowderCount(ultimateCost, photonView.OwnerActorNr);
