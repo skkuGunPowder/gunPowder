@@ -15,6 +15,7 @@ public class Item
     public readonly string PrefabAddress;
 
     public readonly Sprite Image;
+    public readonly Sprite SkinImage;
     public readonly GameObject Prefab;
 
 
@@ -37,8 +38,13 @@ public class Item
         ImageAddress = json["ImageAddress"].ToString();
         PrefabAddress = json["PrefabAddress"].ToString();
 
+        if (json.Keys.Contains("SkinImageAddress"))
+        {
+            SkinImage = Addressables.LoadAssetAsync<Sprite>(json["SkinImageAddress"].ToString()).WaitForCompletion();
+        }
+
         Image = Addressables.LoadAssetAsync<Sprite>(ImageAddress).WaitForCompletion();
-        
+
         if (PrefabAddress == null || string.IsNullOrEmpty(PrefabAddress))
         {
             return;
