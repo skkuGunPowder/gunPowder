@@ -11,7 +11,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
     public List<RoomInfo> RoomInfoList => _roomInfoList;
     
     [Header("처음 맵 설정")] public EMap InitialMap = EMap.Map1;
-    public event Action OnDataChanged;
+    
     protected override void Awake()
     {
         base.Awake();
@@ -89,8 +89,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
             }
 
         }
-        
-        
-        OnDataChanged?.Invoke();
+
+        EventManager.Instance.RoomListUpdate();
     }
 }

@@ -20,7 +20,7 @@ public class UI_RoomSearchPopup : UI_Popup
     
     private void OnEnable()
     {
-        LobbyManager.Instance.OnDataChanged += Refresh;
+        EventManager.Instance.OnRoomListUpdate += Refresh;
         Refresh();
         PageSetting();
     }
@@ -105,8 +105,11 @@ public class UI_RoomSearchPopup : UI_Popup
     }
 
     private void OnDisable()
-    {
-        LobbyManager.Instance.OnDataChanged -= Refresh;
+    { 
         _currentPage = 1;
+    }
+    private void OnDestroy()
+    {
+        EventManager.Instance.OnRoomListUpdate -= Refresh;
     }
 }

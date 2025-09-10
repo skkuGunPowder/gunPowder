@@ -311,6 +311,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (chestItem != null) { ApplyChestSkin(chestItem); } else { ClearChestSkin(); }
         if (capeItem != null) { ApplyCapeSkin(capeItem); } else { ClearCapeSkin(); }
 
+        SpriteFlipx();
+
         // 특수폭탄 정보 받아오기                
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
@@ -523,6 +525,7 @@ public class Player : MonoBehaviourPun, IDamagable
         RPC_UltimateEffect(false);
         RPC_SetMaterial((byte)EPlayerMaterial.Default);
         _ultimateEffectOn = false;
+        _playerStat.HasUltimateChance = false;
         
         // 궁극기 관련 타이머 초기화
         _ultimateChanceTimer = 0f;
@@ -532,26 +535,30 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             // 네트워크 동기화된 상태 변경
             _playerFSM.SyncStateChange<PlayerDieState>();
-            return;
+            return;   
         }
 
         // PlayerFSM이 없는 경우 방어적으로 컴포넌트 조회 후 변경
         var fsm = GetComponent<PlayerFSM>();
         if (fsm != null)
         {
-            fsm.ChangeState<PlayerDieState>();
+            // 네트워크 동기화된 상태 변경
+            _playerFSM.SyncStateChange<PlayerDieState>();
         }
     }
 
     private void Update()
     {
         // 테스트
-        
-        // ------------------------------------------------------------
-        if (!PhotonView.IsMine)
+        if (Input.GetKeyDown(KeyCode.K))
         {
-            return;
+            _playerStat.SetPlayerGunPowderCountAndLife(0, 3);
         }
+        // ------------------------------------------------------------
+            if (!PhotonView.IsMine)
+            {
+                return;
+            }
         
         _attackTimer += Time.deltaTime;
 
@@ -592,6 +599,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 {
                     RPC_UltimateEffect(true);
                     RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
+                    Debug.Log($"[UltimateEffect] ON request - player {PhotonView.OwnerActorNr}, timer={_ultimateChanceTimer:0.00}/{_playerStat.UltimateChanceDuration:0.00}");
                 }
                 _ultimateEffectOn = true;
             }
@@ -605,6 +613,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 RPC_UltimateEffect(false);
                 RPC_SetMaterial((byte)EPlayerMaterial.Default);
                 _ultimateEffectOn = false;
+                Debug.Log($"[UltimateEffect] OFF by timeout - player {PhotonView.OwnerActorNr}");
             }
         }
     }
@@ -615,6 +624,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
+        Debug.Log($"[UltimateEffect] RPC_UltimateEffect send {isOn} - owner {PhotonView.OwnerActorNr}");
         PhotonView.RPC(nameof(UltimateEffect), RpcTarget.All, isOn);
     }
 
@@ -626,8 +636,11 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
 
+        Debug.Log($"[UltimateEffect RPC] {(isOn ? "ON" : "OFF")} - view {PhotonView.ViewID}, owner {PhotonView.OwnerActorNr}");
+
         if (isOn)
         {
+            UltimateEffectPrefab.SetActive(true);
             if (_ultimateEffectOffRoutine != null)
             {
                 StopCoroutine(_ultimateEffectOffRoutine);
@@ -765,6 +778,7 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.HasUsedUltimateThisLife = true;
             _playerStat.HasUltimateChance = false;
             _ultimateChanceTimer = 0f;
+            Debug.Log("[UltimateEffect] OFF by ExecuteUltimate");
             RPC_UltimateEffect(false);
             int ultimateCost = _ultimate.GetCost();
             _playerStat.DecreaseGunPowderCount(ultimateCost, photonView.OwnerActorNr);
@@ -1408,6 +1422,11 @@ public class Player : MonoBehaviourPun, IDamagable
     public void SetFacingDirection(int direction)
     {
         _playerStat.FacingDirection = direction;
+        SpriteFlipx();
+    }
+
+    private void SpriteFlipx()
+    {
         foreach (SpriteRenderer spriteRenderer in _playerStat.MySpriteREndererList)
         {
             if (_playerStat.FacingDirection == 1)
@@ -1430,7 +1449,8 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             if (fsmForGuard.IsCurrentState<PlayerDieState>()
             && stateName != nameof(PlayerIdleState)
-            && stateName != nameof(PlayerObserveState))
+            && stateName != nameof(PlayerObserveState)
+            && stateName != nameof(PlayerLastDieState))
             {
                 return;
             }
