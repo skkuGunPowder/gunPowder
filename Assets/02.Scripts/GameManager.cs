@@ -17,9 +17,7 @@ public class GameManager : PhotonSingleton<GameManager>
     public EGameState CurrentGameState => _currentGameState;
     public bool LastPlayer = false;
     
-    [Header("플레이어 낙사 관련")]
-    public List<Transform> FallDeadStartPointList;     // 좌 : 0, 우 : 1
-    public List<Transform> FallDeadPathList;           // 좌 : 0, 우 : 1
+    [Header("부활 지점")]
     public Transform ResurrectPoint;                   // 부활 지점
     
     public event Action<PhotonPlayer> OnTimeCheck;

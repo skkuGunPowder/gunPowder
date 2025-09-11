@@ -35,13 +35,7 @@ public class PlayerFallDeadState : PlayerBaseState
     // 데미지 관련 상수
     private const int FALL_DAMAGE_AMOUNT = 15;               // 낙사 시 받는 데미지
     private const int FALL_HEAL_PERCENT = 100;               // 낙사 시 받는 힐량
-    
-    // 배열 인덱스 상수
-    private const int LEFT_SIDE_INDEX = 0;                   // 좌측 인덱스
-    private const int RIGHT_SIDE_INDEX = 1;                  // 우측 인덱스
-    
-    // 위치 및 이동 관련 변수들
-    private bool _isFallFromLeftSide = false;                // 좌측에서 떨어졌는지 여부
+
     private Vector3 _fallStartPoint;                         // 낙사 시작점
     private Vector3 _pathMiddlePoint;                        // 이동 경로 중간점
     private Vector3 _resurrectionEndPoint;                   // 부활 지점 (도착점)
@@ -222,19 +216,8 @@ public class PlayerFallDeadState : PlayerBaseState
     /// </summary>
     private void CalculateMovementPath()
     {
-        // 플레이어 위치에 따른 좌우 판정
-        DetermineFallDirection();
-
         // 각 지점 설정
         SetMovementPoints();
-    }
-
-    /// <summary>
-    /// 낙하 방향 결정 (좌측/우측)
-    /// </summary>
-    private void DetermineFallDirection()
-    {
-        _isFallFromLeftSide = transform.position.x <= 0;
     }
 
     /// <summary>
@@ -242,11 +225,11 @@ public class PlayerFallDeadState : PlayerBaseState
     /// </summary>
     private void SetMovementPoints()
     {
-        int sideIndex = _isFallFromLeftSide ? LEFT_SIDE_INDEX : RIGHT_SIDE_INDEX;
+        FallDeadPathData fallDeadPathData = FallDeadPathManager.Instance.GetFallDeadPathData(_owner.transform.position.x);
         
-        _fallStartPoint = GameManager.Instance.FallDeadStartPointList[sideIndex].position;
-        _pathMiddlePoint = GameManager.Instance.FallDeadPathList[sideIndex].position;
-        _resurrectionEndPoint = GameManager.Instance.ResurrectPoint.position;
+        _fallStartPoint = fallDeadPathData.FallDeadStartPoint.position;
+        _pathMiddlePoint = fallDeadPathData.FallDeadPath.position;
+        _resurrectionEndPoint = fallDeadPathData.FallDeadEntPoint.position;
     }
 
     /// <summary>
