@@ -27,10 +27,25 @@ public class FallDeadPathManager : Singleton<FallDeadPathManager>
 
     public FallDeadPathData GetFallDeadPathData(float playerX)
     {
+        // 안전성 체크: 리스트가 비어있거나 null인 경우
+        if (FallDeadPathDataList == null || FallDeadPathDataList.Count == 0)
+        {
+            Debug.LogError("FallDeadPathDataList가 비어있습니다! FallDeadPathManager를 확인해주세요.");
+            return new FallDeadPathData(); // 기본값 반환
+        }
+
+        // 범위에 맞는 데이터 찾기
         foreach (var data in FallDeadPathDataList)
         {
+            // MinX < MaxX 검증
+            if (data.MinX >= data.MaxX)
+            {
+                Debug.LogWarning($"잘못된 범위 설정: MinX({data.MinX}) >= MaxX({data.MaxX}). 이 데이터는 건너뜁니다.");
+                continue;
+            }
+
             if (playerX >= data.MinX && playerX < data.MaxX)
-            {   
+            {
                 return data;
             }
         }
