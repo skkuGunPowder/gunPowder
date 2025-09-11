@@ -36,6 +36,7 @@ public class PlayerCountChecker : MonoBehaviour
             ProfileColorChangeList[i].Refresh(_playerList[i]);
         }
     }
+    
     // 플레이어 수와 컨텐트 셋업의 숫자가 같은지 체크
     public void SetupUIForPlayerCount(int playerCount)
     {
@@ -48,12 +49,14 @@ public class PlayerCountChecker : MonoBehaviour
                 matchingSetup = setup;
                 break;
             }
+        
         }
 
         if (matchingSetup != null && matchingSetup.productionUI != null)
         {
             matchingSetup.productionUI.gameObject.SetActive(true);
         }
+        
         else
         {
             Debug.LogError("아직 셋업이 되지 않았거나 셋업 중 오류가 발생했습니다.");

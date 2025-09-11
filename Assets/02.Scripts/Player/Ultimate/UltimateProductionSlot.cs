@@ -9,6 +9,9 @@ public class UltimateProductionSlot : MonoBehaviour
     public List<UltimateEffectBase> EffectList;
     
     public List<GameObject> UltimateEffectList;
+    [Header("플레이어 이미지")] 
+    public GameObject PlayerImage;
+    
     [Header("궁극기 연출 시간")]
     public float UltimateTime = 1f;
     [Header("궁극기 애니메이션 오브젝트 관련")]
@@ -33,6 +36,7 @@ public class UltimateProductionSlot : MonoBehaviour
         
         UltimateEffectUp.gameObject.SetActive(true);
         UltimateEffectDown.gameObject.SetActive(true);
+        PlayerImage.gameObject.SetActive(true);
         
         BackGroundColorChange(isMyTeam);
         
@@ -49,7 +53,7 @@ public class UltimateProductionSlot : MonoBehaviour
             
             UltimateEffectUp.gameObject.SetActive(false);
             UltimateEffectDown.gameObject.SetActive(false);
-            
+            PlayerImage.gameObject.SetActive(false);
             this.gameObject.SetActive(false);
         });
     }
@@ -89,10 +93,13 @@ public class UltimateProductionSlot : MonoBehaviour
             }
         }
     }
+
+    public void AddPlayer(GameObject player)
+    {
+        PlayerImage = player;
+    }
     private void OnDisable()
     {
-        DOTween.Kill(this);
-        
         UltimateEffectUp.anchoredPosition = UltimateOriginPosition;
         UltimateEffectDown.anchoredPosition = UltimateOriginPosition2;
     }
