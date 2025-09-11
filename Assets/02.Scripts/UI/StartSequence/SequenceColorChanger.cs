@@ -14,8 +14,7 @@ public class SequenceColorChanger : MonoBehaviour
 
         for (int i = 0; i < _playerList.Count; i++)
         {
-            EInGameTeam team = (EInGameTeam)_playerList[i].CustomProperties[EProperties.Team.ToString()];
-            TeamColorSettingList[i].Refresh(team); 
+            TeamColorSettingList[i].Refresh(_playerList[i]); 
         }
     }
 }

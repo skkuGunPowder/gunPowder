@@ -19,13 +19,17 @@ public class CrossExplosion : Explosion
 
     public override void Explode(bool isFallingOut, PhotonView attackerPhotonView)
     {
+        
         for (int i = 0; i < 4; i++)
         {
             WaterMissile waterMissile = Instantiate(WaterMissilePrefab, transform.position, Quaternion.identity);
             waterMissile.Init(_cameraController, attackerPhotonView, _distance, _stat);
             waterMissile.Launch(_directions[i]);
         }
-        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
+        if (_cameraController != null)
+        {
+            _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
+        }
 
         base.Explode(isFallingOut, attackerPhotonView);
     }

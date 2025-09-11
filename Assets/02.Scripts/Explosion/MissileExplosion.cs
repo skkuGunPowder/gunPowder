@@ -14,7 +14,11 @@ public class MissileExplosion : Explosion
 
     public override void Explode(bool isFallingOut, PhotonView attackerPhotonView)
     {
-        _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
+        if (_cameraController != null)
+        {
+            _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
+        }
+        
         base.Explode(isFallingOut, attackerPhotonView);
     }
 }
