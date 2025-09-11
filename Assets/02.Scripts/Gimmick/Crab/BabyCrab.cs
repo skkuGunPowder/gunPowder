@@ -11,8 +11,9 @@ public class BabyCrab : Crab
     private float _changeDirectionTimer = 0f;
     private float _changeDirectionInterval;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
@@ -20,12 +21,14 @@ public class BabyCrab : Crab
     {
         if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
         {
-            Debug.LogWarning("Contact BabyCrab");
             if (_isActive)
             {
                 return;
             }
             
+            _animator.SetBool("IsMoving", false);
+            _animator.SetBool("IsAttack", true);
+
             _isActive = true;
             if (_moveCoroutineInstance != null)
             {
@@ -54,6 +57,9 @@ public class BabyCrab : Crab
             timer += Time.deltaTime;
             transform.position = player.transform.position + new Vector3(0.5f, 0.5f, 0);
 
+            Vector3 dir = (player.transform.position - transform.position).normalized;
+            transform.rotation = Quaternion.FromToRotation(transform.up, dir) * transform.rotation;
+
             _changeDirectionTimer += Time.deltaTime;
             if (_changeDirectionTimer >= _changeDirectionInterval)
             {
@@ -74,6 +80,8 @@ public class BabyCrab : Crab
 
         _rigidbody.simulated = true;
         _rigidbody.AddForce(new Vector2(1, 1).normalized * 1f, ForceMode2D.Impulse);
+
+        transform.rotation = Quaternion.identity;
         StartCoroutine(DeactiveCoroutine());
     }
 }
