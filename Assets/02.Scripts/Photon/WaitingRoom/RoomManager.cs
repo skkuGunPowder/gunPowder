@@ -163,6 +163,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // => 다른 플레이어들에게 플레이어 리스트를 전달하고 각자 로컬에서 알아서 UI 리프레시하는 방식
     public override void OnPlayerEnteredRoom(PhotonPlayer newPlayer)
     {
+        EventManager.Instance.PlayerItemChanged();
+        
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
