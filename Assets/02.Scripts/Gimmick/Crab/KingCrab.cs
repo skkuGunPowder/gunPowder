@@ -1,6 +1,5 @@
 using System.Collections;
 using Photon.Pun;
-using Photon.Pun.UtilityScripts;
 using UnityEngine;
 
 public class KingCrab : Crab
@@ -19,6 +18,9 @@ public class KingCrab : Crab
                 return;
             }
 
+            _animator.SetBool("IsMoving", false);
+            _animator.SetBool("IsAttack", true);
+
             _isActive = true;
             Player player = collision.gameObject.GetComponent<Player>();
             StartCoroutine(HoldCoroutine(player));
@@ -33,7 +35,7 @@ public class KingCrab : Crab
         if (player.PhotonView.IsMine)
         {
             InputHandler.BlockInput = true;
-            player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerDamagedState));
+            player.RPC_SetAnimatorTrigger("HitLoop");
         }
 
         float timer = 0f;
@@ -41,9 +43,12 @@ public class KingCrab : Crab
         {
             timer += Time.deltaTime;
             player.transform.position = _holdPoint.position;
+            player.transform.rotation = _holdPoint.rotation;
             yield return null;
         }
+        player.transform.rotation = Quaternion.identity;
         player.Rigidbody2D.AddForce(throwDirection * _throwForce, ForceMode2D.Impulse);
+        player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerDamagedState));
 
         if (player.PhotonView.IsMine)
         {
