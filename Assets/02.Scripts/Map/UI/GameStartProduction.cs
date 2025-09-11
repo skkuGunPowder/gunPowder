@@ -32,6 +32,7 @@ public class GameStartProduction : MonoBehaviour
     private void Awake()
     {
         EventManager.Instance.OnLoadFinished += Play;
+        InputHandler.BlockInput = true;
     }
 
     private void Start()
@@ -47,7 +48,6 @@ public class GameStartProduction : MonoBehaviour
     public void GameStart()
     {
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
-        InputHandler.BlockInput = true;
         sequence.Append(GameStartCountText3.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
             .SetEase(GameStartTextEase));
         sequence.AppendInterval(GameStartTextInterval);

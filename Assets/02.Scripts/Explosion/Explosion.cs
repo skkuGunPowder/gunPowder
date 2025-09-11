@@ -22,6 +22,7 @@ public class Explosion : MonoBehaviour
 
     public virtual void Explode(bool isFallingOut, PhotonView attackerPhotonView)
     {
+        
         VFXPool.Instance.Play(VFXPrefab.name, transform.position);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);

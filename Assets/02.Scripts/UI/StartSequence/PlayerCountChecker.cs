@@ -7,6 +7,8 @@ public class PlayerCountChecker : MonoBehaviour
 {
     private List<PhotonPlayer> _playerList;
     public List<UI_PlayerCountSetup> StartProductionList;
+    public List<PlayerStartSkin> StartSkinList;
+    public List<ProfileColorChange> ProfileColorChangeList;
     private void Awake()
     {
         _playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
@@ -23,8 +25,17 @@ public class PlayerCountChecker : MonoBehaviour
     private void Start()
     {
         SetupUIForPlayerCount(_playerList.Count);
+        PlayerSetting();
     }
 
+    private void PlayerSetting()
+    {
+        for (int i = 0; i < _playerList.Count; i++)
+        {
+            StartSkinList[i].Refresh(_playerList[i]);
+            ProfileColorChangeList[i].Refresh(_playerList[i]);
+        }
+    }
     // 플레이어 수와 컨텐트 셋업의 숫자가 같은지 체크
     public void SetupUIForPlayerCount(int playerCount)
     {
