@@ -148,6 +148,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 641311591552772888}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3900477227552298913
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7890664176781646330}
+  - component: {fileID: 2188742022538185072}
+  m_Layer: 0
+  m_Name: FallDeadPathManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7890664176781646330
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3900477227552298913}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2598089178144936548}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2188742022538185072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3900477227552298913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abbd4873fac00ab46955d3f584fd00a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FallDeadPathDataList:
+  - MinX: -9999
+    MaxX: 0
+    FallDeadStartPoint: {fileID: 0}
+    FallDeadPath: {fileID: 0}
+    FallDeadEntPoint: {fileID: 0}
+  - MinX: 0
+    MaxX: 9999
+    FallDeadStartPoint: {fileID: 0}
+    FallDeadPath: {fileID: 0}
+    FallDeadEntPoint: {fileID: 0}
 --- !u!1 &3985014541184793251
 GameObject:
   m_ObjectHideFlags: 0
@@ -181,6 +236,7 @@ Transform:
   - {fileID: 641311591552772888}
   - {fileID: 3555998034873936086}
   - {fileID: 1410012175741151227}
+  - {fileID: 7890664176781646330}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4292871377773106343
@@ -279,14 +335,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _currentGameState: 1
-  FallDeadStartPointList:
-  - {fileID: 0}
-  - {fileID: 0}
-  FallDeadPathList:
-  - {fileID: 0}
-  - {fileID: 0}
+  LastPlayer: 0
   ResurrectPoint: {fileID: 0}
-  _airDropJetPrefab: {fileID: 2459243126257665570, guid: 5f349281e5dbe574da51e3db9503b645, type: 3}
 --- !u!114 &3020084340095007817
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,10 +1,9 @@
 public enum EMap
 {
     Random,
-    Map1,
-    Map2,
-    Map3,
-    Map4,
+    Forest1,
+    Dock1,
+    Beach1,
     
     Count
 }
