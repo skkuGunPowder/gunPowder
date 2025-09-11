@@ -22,6 +22,7 @@ public class Explosion : MonoBehaviour
 
     public virtual void Explode(bool isFallingOut, PhotonView attackerPhotonView)
     {
+        
         VFXPool.Instance.Play(VFXPrefab.name, transform.position);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
@@ -88,7 +89,7 @@ public class Explosion : MonoBehaviour
     }
     
     // 거리별 데미지 계산: 폭발 중심에서 콜라이더 표면까지의 최단거리 사용
-    private int DamagePerDistance(Collider2D hitCollider, Rigidbody2D rb, Vector2 explosionPosition, float explosionRadius, int maxDamage)
+    public int DamagePerDistance(Collider2D hitCollider, Rigidbody2D rb, Vector2 explosionPosition, float explosionRadius, int maxDamage)
     {
         if (hitCollider == null)
         {
