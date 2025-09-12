@@ -5655,10 +5655,10 @@ GameObject:
   - component: {fileID: 280944911}
   - component: {fileID: 280944910}
   - component: {fileID: 280944909}
-  - component: {fileID: 280944912}
   - component: {fileID: 280944913}
+  - component: {fileID: 280944914}
   m_Layer: 5
-  m_Name: RoomCreate
+  m_Name: TutorialButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5728,9 +5728,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 280944912}
-        m_TargetAssemblyTypeName: PopupSlot, Assembly-CSharp
-        m_MethodName: Open
+      - m_Target: {fileID: 280944914}
+        m_TargetAssemblyTypeName: SceneChanger, Assembly-CSharp
+        m_MethodName: OnClickSceneChange
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5778,19 +5778,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 280944907}
   m_CullTransparentMesh: 1
---- !u!114 &280944912
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 280944907}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8db85499a788c444893714371e16291e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Popup: 2
 --- !u!114 &280944913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5807,6 +5794,19 @@ MonoBehaviour:
   duration: 0.15
   easing: 3
   useUnscaledTime: 1
+--- !u!114 &280944914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 280944907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdc08e3c2c7729149b0aa2787f479bf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Scene: 4
 --- !u!1 &281879487
 GameObject:
   m_ObjectHideFlags: 0

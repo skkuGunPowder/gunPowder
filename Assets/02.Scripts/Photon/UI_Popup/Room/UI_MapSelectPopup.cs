@@ -15,7 +15,7 @@ public class UI_MapSelectPopup : UI_Popup
     // 현재 맵
     private void Awake()
     {
-        MapDataManager.Instance.OnMapDataLoad += LoadCurrentMap;
+
     }
 
     private void Start()
@@ -26,6 +26,7 @@ public class UI_MapSelectPopup : UI_Popup
     // 팝업 창을 켰을 때, 그 맵의 테마와 그 맵이 선택되어있도록 
     private void OnEnable()
     {
+        MapDataManager.Instance.OnMapDataLoad += LoadCurrentMap;
         Refresh(Theme);
     }
 
@@ -33,13 +34,21 @@ public class UI_MapSelectPopup : UI_Popup
     {
         List<MapThemeData> themeDataList = MapDataManager.Instance.GetThemeDataList();
         
-        for (int i = 0; i < themeDataList.Count; i++)
+        for (int i = 0; i < UI_ThemeButtonList.Count; i++)
         {
+            if (i >= themeDataList.Count)
+            {
+                UI_ThemeButtonList[i].gameObject.SetActive(false);
+                continue;
+            }
+            
             MapThemeData themeData = themeDataList[i];
             if (themeData.MapTheme == EMapTheme.Random)
             {
+                UI_ThemeButtonList[i].gameObject.SetActive(false);
                 continue;
             }
+            
             UI_ThemeButtonList[i].Refresh(themeData.MapTheme,themeData.MapIcon ,themeData.ThemeName);
         }
         
@@ -106,7 +115,7 @@ public class UI_MapSelectPopup : UI_Popup
     {
         Refresh(theme);
     }
-    private void OnDestroy()
+    private void OnDisable()
     {
         MapDataManager.Instance.OnMapDataLoad -= LoadCurrentMap;
     }
