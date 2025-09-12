@@ -23,6 +23,13 @@ public class PlayerSettingManager : MonoBehaviour
 
     private void Start()
     {
+        
+        if (GameManager.Instance.CurrentGameState == EGameState.Tutorial)
+        {
+            Debug.Log("Tutorial");
+            Spawner.GeneratePlayers(0);
+            return;       
+        }
         Init();
     }
 
