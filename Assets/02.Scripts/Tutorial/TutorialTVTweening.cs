@@ -31,7 +31,7 @@ public class TutorialTVTweening : MonoBehaviour
 
     private void OnEnable()
     {
-        PlayTurnOn();
+        PlayTurnOn2();
     }
 
     private void OnDisable()
@@ -57,7 +57,42 @@ public class TutorialTVTweening : MonoBehaviour
             _sequence.Kill();
         }
 
-        // Start as a thin horizontal line, invisible
+        transform.localScale = new Vector3(_originalScale.x, 0.01f, _originalScale.z);
+
+        if (_spriteRenderer != null)
+        {
+            var c = _spriteRenderer.color;
+            c.a = 0f;
+            _spriteRenderer.color = c;
+        }
+
+        float half = Mathf.Max(0.01f, _duration * 0.6f);
+        float rest = Mathf.Max(0.01f, _duration - half);
+
+        _sequence = DOTween.Sequence();
+        if (_ignoreTimeScale)
+        {
+            _sequence.SetUpdate(true);
+        }
+
+        if (_spriteRenderer != null)
+        {
+            _sequence.Insert(0f, _spriteRenderer.DOFade(1f, _fadeDuration).SetEase(Ease.Linear));
+        }
+
+        _sequence.Append(transform.DOScaleY(_overshootScaleY * _originalScale.y, half).SetEase(Ease.OutExpo));
+        _sequence.Append(transform.DOScaleY(_originalScale.y, rest).SetEase(Ease.OutBack));
+
+        _sequence.Play();
+    }
+    
+    public void PlayTurnOn2()
+    {
+        if (_sequence != null && _sequence.IsActive())
+        {
+            _sequence.Kill();
+        }
+
         transform.localScale = new Vector3(_originalScale.x, 0.01f, _originalScale.z);
         
         if (_spriteRenderer != null)
@@ -76,14 +111,9 @@ public class TutorialTVTweening : MonoBehaviour
             _sequence.SetUpdate(true);
         }
 
-        // Fade should start at the very beginning
-        if (_spriteRenderer != null)
-        {
-            _sequence.Insert(0f, _spriteRenderer.DOFade(1f, _fadeDuration).SetEase(Ease.Linear));
-        }
+        _sequence.Append(_spriteRenderer.DOFade(0.2f, _fadeDuration).SetEase(Ease.Linear));
+        _sequence.Append(transform.DOScaleY(_overshootScaleY * _originalScale.y, half).SetEase(Ease.OutExpo)).Join(_spriteRenderer.DOFade(1f, _fadeDuration).SetEase(Ease.Linear));
 
-        // Scale up quickly, slight overshoot, then settle
-        _sequence.Append(transform.DOScaleY(_overshootScaleY * _originalScale.y, half).SetEase(Ease.OutExpo));
         _sequence.Append(transform.DOScaleY(_originalScale.y, rest).SetEase(Ease.OutBack));
 
         _sequence.Play();
