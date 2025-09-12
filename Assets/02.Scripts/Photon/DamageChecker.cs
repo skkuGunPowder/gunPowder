@@ -120,6 +120,7 @@ public class DamageChecker : Singleton<DamageChecker>
 
     private void CheckTopPlayer()
     {
+        Debug.Log("check");
         int topActor = _currentTopPlayer;
         int topScore = _playerScoreDictionary[topActor];
 

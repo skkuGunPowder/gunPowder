@@ -4,6 +4,7 @@ public enum ESceneList
     WaitingRoom,
     ResultScene,
     StartSequence,
+    Tutorial,
     
     Count
     

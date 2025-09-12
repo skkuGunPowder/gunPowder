@@ -7,8 +7,7 @@ public class UltimateProductionManager : MonoBehaviour
 {   
     public Dictionary<int, UltimateProductionSlot> UltimateProductionSlotDic = new Dictionary<int, UltimateProductionSlot>();
     public List<UltimateProductionSlot> UltimateProductionSlotList;
-    public List<ProfileColorChange> ColorChangeList = new List<ProfileColorChange>();
-    public List<PlayerStartSkin> StartSkinList = new List<PlayerStartSkin>();
+    public SkinSettingForUlti SkinSettingForUlti;
     private EInGameTeam _myTeam;
     private void Awake()
     {
@@ -18,6 +17,7 @@ public class UltimateProductionManager : MonoBehaviour
     private void Start()
     {
         _myTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
+        SkinSettingForUlti.Init();
         Init();
     }
 
@@ -26,10 +26,8 @@ public class UltimateProductionManager : MonoBehaviour
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
         for (int i = 0; i < players.Length; i++)
         {
-            StartSkinList[i].Refresh(players[i]);
-            ColorChangeList[i].Refresh(players[i]);
-            UltimateProductionSlotList[i].AddPlayer(StartSkinList[i].gameObject);
-            StartSkinList[i].gameObject.SetActive(false);
+
+            UltimateProductionSlotList[i].AddPlayer(SkinSettingForUlti.StartSkinList[i].gameObject);
             UltimateProductionSlotDic.Add(players[i].ActorNumber, UltimateProductionSlotList[i]);
         }
     }
