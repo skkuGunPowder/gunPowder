@@ -105855,7 +105855,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2217154902772403571, guid: 102a389f2151d2b4c91b1384912885c6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.33446008
+      value: -70.5
       objectReference: {fileID: 0}
     - target: {fileID: 2217154902772403571, guid: 102a389f2151d2b4c91b1384912885c6, type: 3}
       propertyPath: m_LocalPosition.y
@@ -169697,6 +169697,7 @@ GameObject:
   - component: {fileID: 2100798147}
   - component: {fileID: 2100798149}
   - component: {fileID: 2100798148}
+  - component: {fileID: 2100798150}
   m_Layer: 0
   m_Name: Walk
   m_TagString: Untagged
@@ -169796,6 +169797,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &2100798150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100798146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca5de621ab518404595330077025af67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _spriteRenderer: {fileID: 0}
+  _duration: 0.4
+  _overshootScaleY: 1.05
+  _fadeDuration: 0.2
+  _ignoreTimeScale: 1
 --- !u!1001 &2108829452
 PrefabInstance:
   m_ObjectHideFlags: 0
