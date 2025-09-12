@@ -18601,7 +18601,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &102473532
 Transform:
   m_ObjectHideFlags: 0
@@ -18708,6 +18708,7 @@ GameObject:
   - component: {fileID: 130099871}
   - component: {fileID: 130099870}
   - component: {fileID: 130099869}
+  - component: {fileID: 130099874}
   m_Layer: 0
   m_Name: TurnOn Move
   m_TagString: Untagged
@@ -19104,6 +19105,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &130099874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 130099867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 2100798146}
 --- !u!1 &139740327
 GameObject:
   m_ObjectHideFlags: 0
@@ -19118,6 +19133,7 @@ GameObject:
   - component: {fileID: 139740331}
   - component: {fileID: 139740330}
   - component: {fileID: 139740329}
+  - component: {fileID: 139740334}
   m_Layer: 0
   m_Name: TurnOn Drop
   m_TagString: Untagged
@@ -19606,6 +19622,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &139740334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 139740327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 1251980186}
 --- !u!1 &159222018
 GameObject:
   m_ObjectHideFlags: 0
@@ -25279,6 +25309,7 @@ GameObject:
   - component: {fileID: 279746872}
   - component: {fileID: 279746871}
   - component: {fileID: 279746870}
+  - component: {fileID: 279746875}
   m_Layer: 0
   m_Name: TurnOn Run
   m_TagString: Untagged
@@ -25675,6 +25706,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &279746875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 279746868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 2128762085}
 --- !u!1 &280514336
 GameObject:
   m_ObjectHideFlags: 0
@@ -30972,6 +31017,7 @@ GameObject:
   - component: {fileID: 325507241}
   - component: {fileID: 325507240}
   - component: {fileID: 325507239}
+  - component: {fileID: 325507244}
   m_Layer: 0
   m_Name: TurnOn StrongAttack
   m_TagString: Untagged
@@ -31460,6 +31506,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &325507244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 325507237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 2011644575}
 --- !u!1 &339670973
 GameObject:
   m_ObjectHideFlags: 0
@@ -56797,7 +56857,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &628181870
 Transform:
   m_ObjectHideFlags: 0
@@ -92015,6 +92075,7 @@ GameObject:
   - component: {fileID: 1084115843}
   - component: {fileID: 1084115842}
   - component: {fileID: 1084115841}
+  - component: {fileID: 1084115846}
   m_Layer: 0
   m_Name: TurnOn Down
   m_TagString: Untagged
@@ -92427,6 +92488,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1084115846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084115839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 628181869}
 --- !u!1 &1111246027
 GameObject:
   m_ObjectHideFlags: 0
@@ -105551,7 +105626,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1251980187
 Transform:
   m_ObjectHideFlags: 0
@@ -105854,6 +105929,7 @@ GameObject:
   - component: {fileID: 1381789767}
   - component: {fileID: 1381789766}
   - component: {fileID: 1381789765}
+  - component: {fileID: 1381789770}
   m_Layer: 0
   m_Name: TurnOn Jump
   m_TagString: Untagged
@@ -106250,6 +106326,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1381789770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1381789763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 1934426311}
 --- !u!1 &1385465663
 GameObject:
   m_ObjectHideFlags: 0
@@ -126746,6 +126836,7 @@ GameObject:
   - component: {fileID: 1577922506}
   - component: {fileID: 1577922505}
   - component: {fileID: 1577922504}
+  - component: {fileID: 1577922509}
   m_Layer: 0
   m_Name: TurnOn Attack
   m_TagString: Untagged
@@ -127234,6 +127325,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1577922509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1577922502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 1931804837}
 --- !u!1 &1588212600
 GameObject:
   m_ObjectHideFlags: 0
@@ -127283,6 +127388,7 @@ GameObject:
   - component: {fileID: 1588664275}
   - component: {fileID: 1588664274}
   - component: {fileID: 1588664273}
+  - component: {fileID: 1588664278}
   m_Layer: 0
   m_Name: TurnOn Ultimate
   m_TagString: Untagged
@@ -127771,6 +127877,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1588664278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1588664271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 1679822309}
 --- !u!1 &1601492793
 GameObject:
   m_ObjectHideFlags: 0
@@ -147644,7 +147764,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1679822310
 Transform:
   m_ObjectHideFlags: 0
@@ -147751,6 +147871,7 @@ GameObject:
   - component: {fileID: 1696071741}
   - component: {fileID: 1696071740}
   - component: {fileID: 1696071739}
+  - component: {fileID: 1696071744}
   m_Layer: 0
   m_Name: TurnOn DoubleJump
   m_TagString: Untagged
@@ -148239,6 +148360,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1696071744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1696071737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 2122700443}
 --- !u!1 &1740995271
 GameObject:
   m_ObjectHideFlags: 0
@@ -158332,6 +158467,7 @@ GameObject:
   - component: {fileID: 1877277922}
   - component: {fileID: 1877277921}
   - component: {fileID: 1877277920}
+  - component: {fileID: 1877277925}
   m_Layer: 0
   m_Name: TurnOn SpecialAttack
   m_TagString: Untagged
@@ -158820,6 +158956,20 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1877277925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877277918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4150a4344139c29499f10c8cd4ff8394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isOn: 0
+  _tutorialTV: {fileID: 102473531}
 --- !u!1 &1882420081
 GameObject:
   m_ObjectHideFlags: 0
@@ -164164,7 +164314,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1931804838
 Transform:
   m_ObjectHideFlags: 0
@@ -164274,7 +164424,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1934426312
 Transform:
   m_ObjectHideFlags: 0
@@ -164543,7 +164693,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2011644576
 Transform:
   m_ObjectHideFlags: 0
@@ -169553,7 +169703,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2100798147
 Transform:
   m_ObjectHideFlags: 0
@@ -169734,6 +169884,10 @@ PrefabInstance:
       propertyPath: ResurrectPoint
       value: 
       objectReference: {fileID: 1976650262}
+    - target: {fileID: 2982785862916926680, guid: 7e2b38f2dab26e34c822b7fae0f90bd7, type: 3}
+      propertyPath: _currentGameState
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3020084340095007817, guid: 7e2b38f2dab26e34c822b7fae0f90bd7, type: 3}
       propertyPath: sceneViewId
       value: 1
@@ -174681,7 +174835,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2122700444
 Transform:
   m_ObjectHideFlags: 0
@@ -174791,7 +174945,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2128762086
 Transform:
   m_ObjectHideFlags: 0
