@@ -32,6 +32,11 @@ public class MapDataManager : Singleton<MapDataManager>
         
         foreach (MapDataSO dataSO in _mapDataSOList)
         {
+            if (dataSO == null)
+            {
+                continue;
+            }
+            
             MapData data = new MapData(dataSO.Map, dataSO.MapName, dataSO.MapSprite);
             _mapDataList.Add(data);
         }
@@ -43,6 +48,11 @@ public class MapDataManager : Singleton<MapDataManager>
         
         foreach (MapThemeDataSO theme in _mapThemeDataSOList)
         {
+            if (theme == null)
+            {
+                continue;
+            }
+            
             MapThemeData themeData = new MapThemeData(theme.MapTheme, theme.ThemeName, theme.MapIcon);
             
             if (themeData.MapTheme == EMapTheme.All)
@@ -50,8 +60,14 @@ public class MapDataManager : Singleton<MapDataManager>
                 _mapThemeDataDict.Add(themeData.MapTheme, themeData);
                 continue;  
             }
+            
             foreach (MapDataSO dataSO in _mapDataSOList)
             {
+                if (dataSO == null)
+                {
+                    continue;
+                }
+                
                 if (dataSO.MapTheme == themeData.MapTheme || dataSO.MapTheme == EMapTheme.Random)
                 {
                     MapData data = new MapData(dataSO.Map, dataSO.MapName, dataSO.MapSprite);

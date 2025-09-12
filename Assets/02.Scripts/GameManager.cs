@@ -32,7 +32,7 @@ public class GameManager : PhotonSingleton<GameManager>
         Debug.LogWarning($"현재 씬 이름 {SceneManager.GetActiveScene().name}");
         ClientManager.PlayBGM(SceneManager.GetActiveScene().name);
 
-        if (_currentGameState == EGameState.Waiting)
+        if (_currentGameState == EGameState.Waiting || _currentGameState == EGameState.Tutorial)
         {
             return;
         }
