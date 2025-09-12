@@ -188,8 +188,11 @@ public class Player : MonoBehaviourPun, IDamagable
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
         _normalBomb = basicBomb.GetComponent<Bomb>();
         BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
-
-        UI_PingBase.Instance.SetPing(this.transform);
+        
+        if (UI_PingBase.Instance != null)
+        {
+            UI_PingBase.Instance.SetPing(this.transform);
+        }
 
         UnityEngine.Random.InitState(RANDOM_SEED);
 
@@ -564,7 +567,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
         // 대기방에서 작동 안하게 하기 위해 추가
-        if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
+        if (GameManager.Instance.CurrentGameState == EGameState.Waiting 
+            || GameManager.Instance.CurrentGameState == EGameState.GameOver 
+            || GameManager.Instance.CurrentGameState == EGameState.Tutorial)
         {
             return;
         }
