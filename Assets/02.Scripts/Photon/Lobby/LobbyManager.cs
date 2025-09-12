@@ -10,7 +10,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
     private List<RoomInfo> _roomInfoList = new List<RoomInfo>();
     public List<RoomInfo> RoomInfoList => _roomInfoList;
     
-    [Header("처음 맵 설정")] public EMap InitialMap = EMap.Map1;
+    [Header("처음 맵 설정")] public EMap InitialMap = EMap.Forest1;
     
     protected override void Awake()
     {

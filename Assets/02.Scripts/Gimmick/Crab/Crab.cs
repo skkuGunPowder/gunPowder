@@ -13,12 +13,20 @@ public abstract class Crab : MonoBehaviour
     [SerializeField] private Transform _leftGroundChecker;
 
     protected Coroutine _moveCoroutineInstance;
+    protected Animator _animator;
+    protected SpriteRenderer _spriteRenderer;
     protected bool _isNeedToMove = true;
     protected bool _isActive = false;
 
     private float _moveDistance;
     private float _movingDirection; // 1 : 오른쪽, -1 왼쪽
     private float _timer = 0f;
+
+    protected virtual void Awake()
+    {
+        _animator = GetComponent<Animator>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
     private void Update()
     {
@@ -40,11 +48,17 @@ public abstract class Crab : MonoBehaviour
         _moveDistance = Random.Range(_minMoveDistance, _maxMoveDistance);
         _movingDirection = Random.Range(0, 2) == 0 ? -1 : 1;
 
+        if (_movingDirection != 1)
+        {
+            _spriteRenderer.flipX = true;
+        }
+
         _moveCoroutineInstance = StartCoroutine(MoveCoroutine());
     }
 
     private IEnumerator MoveCoroutine()
     {
+        _animator.SetBool("IsMoving", true);
         float movedDistance = 0f;
         while (movedDistance < _moveDistance)
         {
@@ -54,6 +68,7 @@ public abstract class Crab : MonoBehaviour
             if (!isGrounded)
             {
                 _movingDirection *= -1;
+                _spriteRenderer.flipX = !_spriteRenderer.flipX;
             }
 
             float step = Time.deltaTime * _moveSpeed; // 이동 속도 조절
@@ -61,11 +76,16 @@ public abstract class Crab : MonoBehaviour
             movedDistance += step;
             yield return null;
         }
+        _animator.SetBool("IsMoving", false);
     }
 
     protected IEnumerator DeactiveCoroutine()
     {
+        _animator.SetBool("IsAttack", false);
+        _animator.SetBool("IsMoving", false);
+
         yield return new WaitForSeconds(_activeDelay);
+        
         _isNeedToMove = true;
         _isActive = false;
     }
