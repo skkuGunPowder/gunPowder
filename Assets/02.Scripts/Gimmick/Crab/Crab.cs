@@ -52,6 +52,10 @@ public abstract class Crab : MonoBehaviour
         {
             _spriteRenderer.flipX = true;
         }
+        else
+        {
+            _spriteRenderer.flipX = false;
+        }
 
         _moveCoroutineInstance = StartCoroutine(MoveCoroutine());
     }
