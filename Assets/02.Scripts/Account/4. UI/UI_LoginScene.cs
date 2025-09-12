@@ -241,7 +241,7 @@ public class UI_LoginScene : MonoBehaviour
         if (result.IsSuccess)
         {
             NicknamePanel.SetActive(false);
-            PhotonServerManager.Instance.Connect();
+            PhotonServerManager.Instance.Connect(true);
         }
     }
 }

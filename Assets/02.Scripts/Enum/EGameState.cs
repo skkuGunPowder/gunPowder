@@ -5,5 +5,6 @@ public enum EGameState
     Playing,
     Result,
     GameOver,
-    Ultimate
+    Ultimate,
+    Tutorial,
 }

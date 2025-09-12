@@ -16,6 +16,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
 
     [Header("GameVersion")]
     [SerializeField] private string _gameVersion = "1.0.0";
+    
+    private bool _isTutorial = false;
     private void Awake()
     {
         if (Instance == null)
@@ -40,23 +42,56 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     }
 
     // 서버를 연결하겠다.
-    public void Connect()
+    public void Connect(bool first = false)
     {
         // 게임 버전 설정
         PhotonNetwork.GameVersion = _gameVersion;
         PhotonNetwork.NickName = AccountManager.Instance.CurrencAccount.Nickname;
-        PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.ConnectUsingSettings();   
+       
+        if (first)
+        {
+            TutorialMode(true);
+        }
+    }
+
+    public void TutorialMode()
+    {
+        Debug.Log("TutorialMode");
+        _isTutorial = true;
+        Hashtable roomProperties = new Hashtable
+        {
+            {ERoomProperties.PlayTime.ToString(), 100},
+            {ERoomProperties.Life.ToString(), 3},
+            {ERoomProperties.Gunpowder.ToString(), 100},
+            {ERoomProperties.DeclinePowder.ToString(), 1},
+        };
+        RoomOptions roomOptions = new RoomOptions();
+        roomOptions.IsVisible = false;
+        roomOptions.MaxPlayers = 1;
+        roomOptions.CustomRoomProperties = roomProperties; 
+        
+        PhotonNetwork.CreateRoom("tutorial", roomOptions, TypedLobby.Default);
+    }
+
+    public void TutorialMode(bool isTutorial)
+    {
+        _isTutorial = isTutorial;
     }
 
     // 포톤 마스터 서버에 접속하면 호출되는 함수
     public override void OnConnected()
     {
-
     }
 
     //마스터 서버에 접속
     public override void OnConnectedToMaster()
     {
+        if (_isTutorial)
+        {
+            TutorialMode();
+        }
+        
         PhotonNetwork.JoinLobby(TypedLobby.Default);
     }
 
@@ -66,6 +101,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         {
             { EProperties.Team.ToString(), null }
         };
+        
+        _isTutorial = false;         
         PhotonNetwork.LocalPlayer.SetCustomProperties(propertiesToRemove);
 
         PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
@@ -77,10 +114,24 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         Debug.LogWarning("OnJoinRandomFailed");
     }
 
+    public override void OnJoinedRoom()
+    {
+        if (_isTutorial)
+        {
+            Debug.Log("tutoOnJoinedRoom");
+            PhotonNetwork.LoadLevel(ESceneList.Tutorial.ToString());
+        }
+    }
+
     public override void OnCreatedRoom()
     {
-        PopupManager.Instance.Close(EPopupType.UI_RoomSearchPopup);
-        PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
+        Debug.Log("OnCreatedRoom");
+        
+        if (!_isTutorial)
+        {
+            PopupManager.Instance.Close(EPopupType.UI_RoomSearchPopup);
+            PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());   
+        }
     }
 
     public void SetPhotonPrefabPool(Dictionary<string, Item> itemDict)
