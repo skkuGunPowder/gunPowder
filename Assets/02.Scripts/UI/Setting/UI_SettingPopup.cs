@@ -18,7 +18,8 @@ public class UI_SettingPopup : UI_Popup
     [SerializeField] private TextMeshProUGUI _bgmVolumeText;
     [SerializeField] private TextMeshProUGUI _sfxVolumeText;
 
-
+    private int _originalResolutionIndex;
+    private EFullscreenMode _originalFullscreenMode;
     private readonly string[] presetLabels = new string[]
     {
         "1280x720 (HD)",
@@ -28,9 +29,34 @@ public class UI_SettingPopup : UI_Popup
 
     private void OnEnable()
     {
+        // Snapshot current applied state when popup opens (SetActive true)
+        _originalResolutionIndex = SettingManager.Instance.GetCurrentResolutionIndex();
+        _originalFullscreenMode = SettingManager.Instance.GetCurrentFullscreenMode();
+
         InitializeResolutionDropdown();
         InitializeFullscreenToggles();
         InitializeSoundSliders();
+    }
+
+    private void UpdateToggleInteractables(EFullscreenMode activeMode)
+    {
+        if (_windowedToggle == null || _fullscreenToggle == null || _borderlessToggle == null)
+        {
+            return;
+        }
+
+        _windowedToggle.interactable = activeMode != EFullscreenMode.Windowed;
+        _fullscreenToggle.interactable = activeMode != EFullscreenMode.Fullscreen;
+        _borderlessToggle.interactable = activeMode != EFullscreenMode.Borderless;
+    }
+
+    private void UpdateResolutionDropdownInteractable(EFullscreenMode activeMode)
+    {
+        if (_resolutionDropdown == null)
+        {
+            return;
+        }
+        _resolutionDropdown.interactable = (activeMode != EFullscreenMode.Fullscreen);
     }
 
     private void InitializeResolutionDropdown()
@@ -51,9 +77,9 @@ public class UI_SettingPopup : UI_Popup
         }
         _resolutionDropdown.AddOptions(options);
 
-        int savedIndex = SettingManager.Instance.GetSavedResolutionIndex();
-        savedIndex = Mathf.Clamp(savedIndex, 0, presetCount - 1);
-        _resolutionDropdown.value = savedIndex;
+        int currentIndex = SettingManager.Instance.GetCurrentResolutionIndex();
+        currentIndex = Mathf.Clamp(currentIndex, 0, presetCount - 1);
+        _resolutionDropdown.value = currentIndex;
         _resolutionDropdown.RefreshShownValue();
     }
 
@@ -64,12 +90,15 @@ public class UI_SettingPopup : UI_Popup
             return;
         }
 
-        // 현재 저장된 모드에 따라 토글 상태 설정
-        EFullscreenMode savedMode = SettingManager.Instance.GetSavedFullscreenMode();
+        // 현재 적용된 모드에 따라 토글 상태 설정
+        EFullscreenMode currentMode = SettingManager.Instance.GetCurrentFullscreenMode();
         
-        _windowedToggle.isOn = (savedMode == EFullscreenMode.Windowed);
-        _fullscreenToggle.isOn = (savedMode == EFullscreenMode.Fullscreen);
-        _borderlessToggle.isOn = (savedMode == EFullscreenMode.Borderless);
+        _windowedToggle.isOn = (currentMode == EFullscreenMode.Windowed);
+        _fullscreenToggle.isOn = (currentMode == EFullscreenMode.Fullscreen);
+        _borderlessToggle.isOn = (currentMode == EFullscreenMode.Borderless);
+
+        UpdateToggleInteractables(currentMode);
+        UpdateResolutionDropdownInteractable(currentMode);
     }
 
     private void InitializeSoundSliders()
@@ -94,40 +123,53 @@ public class UI_SettingPopup : UI_Popup
     {
         // 선택된 인덱스 받아오기
         int selectedIndex = _resolutionDropdown.value;
-
-        EFullscreenMode currentMode = SettingManager.Instance.GetSavedFullscreenMode();
-        SettingManager.Instance.ApplyResolution(selectedIndex, currentMode, save: true);
+        EFullscreenMode currentMode = SettingManager.Instance.GetCurrentFullscreenMode();
+        SettingManager.Instance.ApplyResolution(selectedIndex, currentMode, save: false);
     }
 
     // 인스펙터에서 Windowed Toggle의 OnValueChanged에 할당할 메서드
     public void OnWindowedToggleChanged()
     {
-        _fullscreenToggle.isOn = false;
-        _borderlessToggle.isOn = false;
-        
+        if (_windowedToggle == null || _windowedToggle.isOn == false)
+        {
+            return;
+        }
+
         int currentResolution = _resolutionDropdown.value;
-        SettingManager.Instance.ApplyResolution(currentResolution, EFullscreenMode.Windowed, save: true);
+        SettingManager.Instance.ApplyResolution(currentResolution, EFullscreenMode.Windowed, save: false);
+
+        UpdateToggleInteractables(EFullscreenMode.Windowed);
+        UpdateResolutionDropdownInteractable(EFullscreenMode.Windowed);
     }
 
     // 인스펙터에서 Fullscreen Toggle의 OnValueChanged에 할당할 메서드
     public void OnFullscreenToggleChanged()
     {
-        _windowedToggle.isOn = false;
-        _borderlessToggle.isOn = false;
-        
+        if (_fullscreenToggle == null || _fullscreenToggle.isOn == false)
+        {
+            return;
+        }
+
         int currentResolution = _resolutionDropdown.value;
-        SettingManager.Instance.ApplyResolution(currentResolution, EFullscreenMode.Fullscreen, save: true);
+        SettingManager.Instance.ApplyResolution(currentResolution, EFullscreenMode.Fullscreen, save: false);
+
+        UpdateToggleInteractables(EFullscreenMode.Fullscreen);
+        UpdateResolutionDropdownInteractable(EFullscreenMode.Fullscreen);
     }
 
     // 인스펙터에서 Borderless Toggle의 OnValueChanged에 할당할 메서드
     public void OnBorderlessToggleChanged()
     {
-        _windowedToggle.isOn = false;
-        _fullscreenToggle.isOn = false;
-        
+        if (_borderlessToggle == null || _borderlessToggle.isOn == false)
+        {
+            return;
+        }
+
         int currentResolution = _resolutionDropdown.value;
-        SettingManager.Instance.ApplyResolution(currentResolution, EFullscreenMode.Borderless, save: true);
-        
+        SettingManager.Instance.ApplyResolution(currentResolution, EFullscreenMode.Borderless, save: false);
+
+        UpdateToggleInteractables(EFullscreenMode.Borderless);
+        UpdateResolutionDropdownInteractable(EFullscreenMode.Borderless);
     }
 
     // 인스펙터에서 Volume Slider의 OnValueChanged에 할당할 메서드
@@ -138,5 +180,37 @@ public class UI_SettingPopup : UI_Popup
         SettingManager.Instance.ApplySoundVolumes(currentBGMVolume, currentSFXVolume, save: true);
         _bgmVolumeText.text = Mathf.Round(currentBGMVolume * 100).ToString() + "%";
         _sfxVolumeText.text = Mathf.Round(currentSFXVolume * 100).ToString() + "%";
+    }
+
+    // 인스펙터에서 확인 버튼에 할당할 메서드
+    public void OnClickConfirm()
+    {
+        // 현재 적용된 상태를 저장
+        SettingManager.Instance.SaveCurrentResolutionAndMode();
+        gameObject.SetActive(false);
+    }
+
+    // 인스펙터에서 취소 버튼에 할당할 메서드
+    public void OnClickCancel()
+    {
+        // 원래 상태로 되돌림 (저장하지 않음)
+        SettingManager.Instance.ApplyResolution(_originalResolutionIndex, _originalFullscreenMode, save: false);
+
+        // UI도 원래 상태를 반영
+        if (_resolutionDropdown != null)
+        {
+            _resolutionDropdown.value = _originalResolutionIndex;
+            _resolutionDropdown.RefreshShownValue();
+        }
+
+        if (_windowedToggle != null && _fullscreenToggle != null && _borderlessToggle != null)
+        {
+            _windowedToggle.isOn = (_originalFullscreenMode == EFullscreenMode.Windowed);
+            _fullscreenToggle.isOn = (_originalFullscreenMode == EFullscreenMode.Fullscreen);
+            _borderlessToggle.isOn = (_originalFullscreenMode == EFullscreenMode.Borderless);
+            UpdateToggleInteractables(_originalFullscreenMode);
+        }
+        UpdateResolutionDropdownInteractable(_originalFullscreenMode);
+        gameObject.SetActive(false);
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class SettingManager : DontDestroySingleton<SettingManager>
 {
@@ -15,6 +16,9 @@ public class SettingManager : DontDestroySingleton<SettingManager>
         new Vector2Int(1920, 1080),
         new Vector2Int(2560, 1440)
     };
+
+    private int _currentResolutionIndex;
+    private EFullscreenMode _currentFullscreenMode;
 
     protected override void Awake()
     {
@@ -72,6 +76,8 @@ public class SettingManager : DontDestroySingleton<SettingManager>
         int clamped = Mathf.Clamp(presetIndex, 0, ResolutionPresets.Length - 1);
         Vector2Int size = ResolutionPresets[clamped];
 
+        // Borderless(진짜 보더리스 창모드)는 원하는 크기 유지
+
         FullScreenMode unityMode;
         switch (fullscreenMode)
         {
@@ -82,14 +88,64 @@ public class SettingManager : DontDestroySingleton<SettingManager>
                 unityMode = FullScreenMode.FullScreenWindow;
                 break;
             case EFullscreenMode.Borderless:
-                unityMode = FullScreenMode.MaximizedWindow;
+                unityMode = FullScreenMode.Windowed; // 먼저 창 모드로 만들고 스타일 제거
                 break;
             default:
                 unityMode = FullScreenMode.FullScreenWindow;
                 break;
         }
 
+#if UNITY_STANDALONE_WIN
+        // 보더리스가 아닌 모드로 전환 시, 기존 보더리스 스타일 복구
+        if (fullscreenMode != EFullscreenMode.Borderless)
+        {
+            WindowsBorderless.RestoreStandardWindow();
+        }
+#endif
+
+        // 모드 전환 시 대기 중인 코루틴 정리
+#if UNITY_STANDALONE_WIN
+        if (fullscreenMode != EFullscreenMode.Borderless && _applyBorderlessCoroutine != null)
+        {
+            StopCoroutine(_applyBorderlessCoroutine);
+            _applyBorderlessCoroutine = null;
+        }
+#endif
+        if (fullscreenMode != EFullscreenMode.Windowed && _applyWindowedCoroutine != null)
+        {
+            StopCoroutine(_applyWindowedCoroutine);
+            _applyWindowedCoroutine = null;
+        }
+
         Screen.SetResolution(size.x, size.y, unityMode);
+
+        // 해상도 적용 직후, Windows라면 보더리스 적용
+        if (fullscreenMode == EFullscreenMode.Borderless)
+        {
+#if UNITY_STANDALONE_WIN
+            // 해상도/모드 전환 직후에는 아직 윈도우 스타일 적용이 완료되지 않았을 수 있으므로 다음 프레임에 적용
+            if (_applyBorderlessCoroutine != null)
+            {
+                StopCoroutine(_applyBorderlessCoroutine);
+                _applyBorderlessCoroutine = null;
+            }
+            _applyBorderlessCoroutine = StartCoroutine(ApplyBorderlessNextFrame(size));
+#endif
+        }
+        else if (fullscreenMode == EFullscreenMode.Windowed)
+        {
+            // 전체화면 → 윈도우 전환 시 선택된 해상도를 다음 프레임에 재적용
+            if (_applyWindowedCoroutine != null)
+            {
+                StopCoroutine(_applyWindowedCoroutine);
+                _applyWindowedCoroutine = null;
+            }
+            _applyWindowedCoroutine = StartCoroutine(ApplyWindowedNextFrame(size));
+        }
+
+        // Track current applied state regardless of save flag
+        _currentResolutionIndex = clamped;
+        _currentFullscreenMode = fullscreenMode;
 
         if (save)
         {
@@ -97,6 +153,34 @@ public class SettingManager : DontDestroySingleton<SettingManager>
             PlayerPrefs.SetInt(PrefKeyFullscreenMode, (int)fullscreenMode);
             PlayerPrefs.Save();
         }
+    }
+
+    private Coroutine _applyWindowedCoroutine;
+
+#if UNITY_STANDALONE_WIN
+    private Coroutine _applyBorderlessCoroutine;
+
+    private IEnumerator ApplyBorderlessNextFrame(Vector2Int size)
+    {
+        yield return null; // 다음 프레임까지 대기
+        yield return new WaitForEndOfFrame();
+
+        int x = (Display.main.systemWidth - size.x) / 2;
+        int y = (Display.main.systemHeight - size.y) / 2;
+        WindowsBorderless.MakeBorderless(x, y, size.x, size.y);
+
+        _applyBorderlessCoroutine = null;
+    }
+#endif
+
+    private IEnumerator ApplyWindowedNextFrame(Vector2Int size)
+    {
+        yield return null; // 다음 프레임까지 대기
+        yield return new WaitForEndOfFrame();
+
+        Screen.SetResolution(size.x, size.y, FullScreenMode.Windowed);
+
+        _applyWindowedCoroutine = null;
     }
 
     public void ApplySoundVolumes(float bgmVolume, float sfxVolume, bool save = true)
@@ -124,4 +208,23 @@ public class SettingManager : DontDestroySingleton<SettingManager>
         float db = Mathf.Log10(linear) * 20f;
         return Mathf.Clamp(db, -80f, 0f);
     }
+
+    public int GetCurrentResolutionIndex()
+    {
+        return _currentResolutionIndex;
+    }
+
+    public EFullscreenMode GetCurrentFullscreenMode()
+    {
+        return _currentFullscreenMode;
+    }
+
+    public void SaveCurrentResolutionAndMode()
+    {
+        int clamped = Mathf.Clamp(_currentResolutionIndex, 0, ResolutionPresets.Length - 1);
+        PlayerPrefs.SetInt(PrefKeyResolutionIndex, clamped);
+        PlayerPrefs.SetInt(PrefKeyFullscreenMode, (int)_currentFullscreenMode);
+        PlayerPrefs.Save();
+    }
 }
+
