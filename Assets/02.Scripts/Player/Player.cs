@@ -112,7 +112,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private const int RANDOM_SEED = 123456;
     private const string BASIC_BOMB_ID = "BO0001";
-    
+
     // 공격 없을 때 관련 상수
     private const float COLOR_UPDATE_TICK_SECONDS = 0.5f;
     private const float REDNESS_START_RATIO = 0.4f;
@@ -182,7 +182,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _skinManager = GetComponent<PlayerSkinManager>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
-        
+
 
         // 기본 폭탄 정보 가져오기
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
@@ -337,7 +337,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        
+
         PhotonView.RPC(nameof(RPC_LoadItems), RpcTarget.All);
     }
 
@@ -385,7 +385,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Start()
     {
         LoadItems();
-        
+
         // 1. 이벤트 핸들러 등록
         _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
         _playerStat.OnGunpowderIncreased += HandleGunpowderIncreased;
@@ -455,7 +455,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void InitializeOriginalColors()
     {
         _originalColorMap = new Dictionary<SpriteRenderer, Color>();
-        
+
         foreach (var renderer in _playerStat.MySpriteREndererList)
         {
             if (renderer != null)
@@ -523,22 +523,22 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         // 죽을 때 색상 및 효과 초기화
         ResetColorAndEffects();
-        
+
         // 궁극기 효과 초기화
         RPC_UltimateEffect(false);
         RPC_SetMaterial((byte)EPlayerMaterial.Default);
         _ultimateEffectOn = false;
         _playerStat.HasUltimateChance = false;
-        
+
         // 궁극기 관련 타이머 초기화
         _ultimateChanceTimer = 0f;
-        
+
         // PlayerFSM을 통해 SyncStateChange 호출
         if (_playerFSM != null)
         {
             // 네트워크 동기화된 상태 변경
             _playerFSM.SyncStateChange<PlayerDieState>();
-            return;   
+            return;
         }
 
         // PlayerFSM이 없는 경우 방어적으로 컴포넌트 조회 후 변경
@@ -555,14 +555,14 @@ public class Player : MonoBehaviourPun, IDamagable
         // 테스트
         if (Input.GetKeyDown(KeyCode.K))
         {
-            _playerStat.SetPlayerGunPowderCountAndLife(0, 3);
+            ForceUltimateChance();
         }
         // ------------------------------------------------------------
-            if (!PhotonView.IsMine)
-            {
-                return;
-            }
-        
+        if (!PhotonView.IsMine)
+        {
+            return;
+        }
+
         _attackTimer += Time.deltaTime;
 
 
@@ -582,7 +582,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 공격 없을 때 건파우더 감소
         _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
-         DecreaseGunPowderWithoutAttack();
+        DecreaseGunPowderWithoutAttack();
 
         // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
         UpdateWarningSfx();
@@ -799,7 +799,7 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
     [PunRPC]
-    public void Rpc_UltimateProduction(string bomb ,PhotonMessageInfo info)
+    public void Rpc_UltimateProduction(string bomb, PhotonMessageInfo info)
     {
         PhotonPlayer player = info.Sender;
         EventManager.Instance.Ultimate(bomb, player);
@@ -818,7 +818,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    
+
 
     /// <summary>
     /// 공격을 일정시간 하지 않으면 건파우더 감소
@@ -896,7 +896,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // ratio 0.4~1 -> S: 0~0.8로 맵핑 (H=0 고정, V는 유지)
         float t = Mathf.Clamp01((ratio - REDNESS_START_RATIO) / (1f - REDNESS_START_RATIO));
         float targetS = Mathf.Lerp(0f, MAX_RED_SATURATION, t);
-        
+
         // 원본 색상을 기반으로 빨간색 적용
         if (_originalColorMap != null)
         {
@@ -1003,10 +1003,10 @@ public class Player : MonoBehaviourPun, IDamagable
             _preExplosionPulseTween.Kill(false);
             _preExplosionPulseTween = null;
         }
-        
+
         // 원본 색상으로 복구
         RestoreOriginalColors();
-        
+
         if (resetScale)
         {
             transform.localScale = _defaultLocalScale;
@@ -1105,10 +1105,10 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         // 펄스 효과 중단 및 스케일 리셋
         StopPreExplosionPulse(true);
-        
+
         // 스프라이트 색상을 원본 색상으로 초기화
         RestoreOriginalColors();
-        
+
         // 타이머들 초기화
         _gunPowderDecreaseWithoutAttackTimer = 0f;
         _colorUpdateWithoutAttackTimer = 0f;
@@ -1140,11 +1140,11 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
         }
-        
+
         // SFX
 
         // 맥스 데미지를 받았을때 다른 사운드 재생
-        if( damage == maxDamage)
+        if (damage == maxDamage)
         {
             _playerSFXAnimationEvent.PlayerCritDamageVoiceRandomSFX();
             SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
@@ -1704,5 +1704,20 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
         _damagePopup.SpawnPopup(value, maxDamage);
+    }
+
+    /// <summary>
+    /// 강제로 궁극기 사용가능상태 만들기
+    /// 이때는 궁극기 사용가능 시간이 무제한이다.
+    /// </summary>
+    public void ForceUltimateChance()
+    {
+        _playerStat.HasUltimateChance = true;
+        _playerStat.HasUsedUltimateThisLife = false;
+        _ultimateChanceTimer = 0f;
+        RPC_UltimateEffect(true);
+        RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
+        _ultimateEffectOn = true;
+        _playerStat.UltimateChanceDuration = 999999999f;
     }
 }
