@@ -11,11 +11,6 @@ public class UI_SelectTeam : MonoBehaviour
         EventManager.Instance.OnTeamChanged += TeamSelected;
     }
     
-    private void Start()
-    {
-        TeamSelected();
-    }
-
     private void TeamSelected()
     {
         EInGameTeam team = RoomManager.Instance.SelectedTeam;

@@ -28,6 +28,7 @@ public class PlayerSettingManager : MonoBehaviour
         {
             Debug.Log("Tutorial");
             Spawner.GeneratePlayers(0);
+            EventManager.Instance.PlayerListUp();
             return;       
         }
         Init();
@@ -55,7 +56,6 @@ public class PlayerSettingManager : MonoBehaviour
         {
             return;
         }
-        Debug.Log("SpawnSetting");
         _playerList.Clear();
         
         if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)

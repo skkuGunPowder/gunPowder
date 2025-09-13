@@ -11,7 +11,6 @@ public class PlayerSpawner : MonoBehaviour
     
     public void GeneratePlayers(int count)
     {
-        Debug.Log("generatePlayers");
         GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, SpawnPoints[count].position, Quaternion.identity, 0);
         Player player = playerInstance.GetComponent<Player>();
 
