@@ -6,10 +6,10 @@ public class PlayerSFXAnimationEvent : MonoBehaviour
     public const string MOVE_SFX_NAME_2 = "Footstep_2";
     public const string RUN_SFX_NAME =  "FootstepRun_1";
 
-    public const string GUNPOWDER_HEAL_SFX_NAME_1 = "GunPowderHeal_1";
-    public const string GUNPOWDER_HEAL_SFX_NAME_2 = "GunPowderHeal_2";
-    public const string GUNPOWDER_HEAL_SFX_NAME_3 = "GunPowderHeal_3";
-    public const string GUNPOWDER_HEAL_SFX_NAME_4 = "GunPowderHeal_4";
+    public const string GUNPOWDER_HEAL_SFX_NAME_1 = "GunPowderHeal2_1";
+    public const string GUNPOWDER_HEAL_SFX_NAME_2 = "GunPowderHeal2_2";
+    public const string GUNPOWDER_HEAL_SFX_NAME_3 = "GunPowderHeal2_3";
+    public const string GUNPOWDER_HEAL_SFX_NAME_4 = "GunPowderHeal2_4";
     
     public const string PLAYER_ULTIMATE_USE_SFX_NAME = "PlayerUlt_1";
 

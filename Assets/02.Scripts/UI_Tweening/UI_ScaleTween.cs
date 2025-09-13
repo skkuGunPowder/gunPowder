@@ -16,8 +16,8 @@ public class UI_ScaleTween : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 	private bool isPointerOver;
 	private bool isPointerDown;
 
-	private const string UI_POINTER_ENTER_SFX = "UI_Pointer_Enter2";
-	private const string UI_CLICK_SFX = "UI_Click";
+	private const string UI_POINTER_ENTER_SFX = "UI_Pointer_Enter3";
+	private const string UI_CLICK_SFX = "UI_Click3";
 
 	private void Awake()
 	{
