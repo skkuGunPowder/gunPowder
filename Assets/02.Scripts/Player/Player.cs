@@ -553,10 +553,6 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Update()
     {
         // 테스트
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            ForceUltimateChance();
-        }
         // ------------------------------------------------------------
         if (!PhotonView.IsMine)
         {
@@ -783,7 +779,6 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.HasUsedUltimateThisLife = true;
             _playerStat.HasUltimateChance = false;
             _ultimateChanceTimer = 0f;
-            Debug.Log("[UltimateEffect] OFF by ExecuteUltimate");
             RPC_UltimateEffect(false);
             int ultimateCost = _ultimate.GetCost();
             _playerStat.DecreaseGunPowderCount(ultimateCost, photonView.OwnerActorNr);
