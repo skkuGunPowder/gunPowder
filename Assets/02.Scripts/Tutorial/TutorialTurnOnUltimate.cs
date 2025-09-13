@@ -6,7 +6,6 @@ public class TutorialTurnOnUltimate : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log(other.TryGetComponent<Player>(out Player a));
             if (other.TryGetComponent<Player>(out Player player))
             {
                 player.ForceUltimateChance();
