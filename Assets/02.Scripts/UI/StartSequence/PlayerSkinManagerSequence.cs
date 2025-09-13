@@ -86,6 +86,10 @@ public class PlayerSkinManagerSequence : MonoBehaviour, IPlayerSkinManager
 		instance.layer = originalObject.layer;
 		SpriteRenderer srcSr = originalObject.GetComponent<SpriteRenderer>();
 		SpriteRenderer dstSr = instance.GetComponent<SpriteRenderer>();
+		
+		Animator animator = instance.GetComponent<Animator>();
+		animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+		
 		if (srcSr != null && dstSr != null)
 		{
 			dstSr.sortingLayerID = srcSr.sortingLayerID;
@@ -107,6 +111,8 @@ public class PlayerSkinManagerSequence : MonoBehaviour, IPlayerSkinManager
 			currentInstance = null;
 		}
 		GameObject instance = Instantiate(prefab, slotParent);
+		Animator animator = instance.GetComponent<Animator>();
+		animator.updateMode = AnimatorUpdateMode.UnscaledTime;
 		instance.transform.localPosition = Vector3.zero;
 		instance.transform.localRotation = Quaternion.identity;
 		instance.transform.localScale = Vector3.one;

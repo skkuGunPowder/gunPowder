@@ -24,11 +24,11 @@ public class UltimateEffectLocal : MonoBehaviour
         EventManager.Instance.OnPlayerListUp += PlayerListUp;
         _ultiBackGround = UltimateBackGround.GetComponent<SpriteRenderer>();
     }
-
     private void PlayEffect(string bomb, PhotonPlayer player)
     {
         DOTween.Kill(this);
         StopAllCoroutines();
+        
         foreach (PhotonView view in _playerList)
         {
             if (view.OwnerActorNr == player.ActorNumber)
@@ -64,6 +64,7 @@ public class UltimateEffectLocal : MonoBehaviour
     private IEnumerator TimeSlow()
     {
         float time = 0;
+        EGameState state = GameManager.Instance.CurrentGameState;
         GameManager.Instance.GameStateChange(EGameState.Ultimate);
         
         while (time < UltiTime)
@@ -71,8 +72,15 @@ public class UltimateEffectLocal : MonoBehaviour
             time += Time.unscaledDeltaTime;
             yield return null;
         }
-        
-        GameManager.Instance.GameStateChange(EGameState.Playing);
+
+        if (state == EGameState.Tutorial)
+        {
+            GameManager.Instance.GameStateChange(EGameState.Tutorial);
+        }
+        else
+        {
+            GameManager.Instance.GameStateChange(EGameState.Playing);
+        }
         BackGroundOff();
         EventManager.Instance.BackGroundFade();
         
