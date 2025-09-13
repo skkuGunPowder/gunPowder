@@ -18,6 +18,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     [SerializeField] private string _gameVersion = "1.0.0";
     
     private bool _isTutorial = false;
+    private bool _isFirst = false;
+    public bool IsFirst => _isFirst;
     private void Awake()
     {
         if (Instance == null)
@@ -30,8 +32,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
             Destroy(this.gameObject);
         }
     }
-
-
+    
     private void Start()
     {
         // 데이터 송수신 빈도
@@ -47,18 +48,18 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         // 게임 버전 설정
         PhotonNetwork.GameVersion = _gameVersion;
         PhotonNetwork.NickName = AccountManager.Instance.CurrencAccount.Nickname;
-        PhotonNetwork.ConnectUsingSettings();   
-       
+        PhotonNetwork.ConnectUsingSettings();
+
         if (first)
-        {
-            TutorialMode(true);
+        { 
+            _isFirst = true;   
         }
     }
 
     public void TutorialMode()
     {
-        Debug.Log("TutorialMode");
         _isTutorial = true;
+        
         Hashtable roomProperties = new Hashtable
         {
             {ERoomProperties.PlayTime.ToString(), 100},
@@ -87,16 +88,13 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     //마스터 서버에 접속
     public override void OnConnectedToMaster()
     {
-        if (_isTutorial)
-        {
-            TutorialMode();
-        }
-        
         PhotonNetwork.JoinLobby(TypedLobby.Default);
     }
 
     public override void OnJoinedLobby()
     {
+
+        PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
         Hashtable propertiesToRemove = new Hashtable
         {
             { EProperties.Team.ToString(), null }
@@ -104,10 +102,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         
         _isTutorial = false;         
         PhotonNetwork.LocalPlayer.SetCustomProperties(propertiesToRemove);
-
-        PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
         
-
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
@@ -118,15 +113,12 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     {
         if (_isTutorial)
         {
-            Debug.Log("tutoOnJoinedRoom");
             PhotonNetwork.LoadLevel(ESceneList.Tutorial.ToString());
         }
     }
 
     public override void OnCreatedRoom()
     {
-        Debug.Log("OnCreatedRoom");
-        
         if (!_isTutorial)
         {
             PopupManager.Instance.Close(EPopupType.UI_RoomSearchPopup);
@@ -152,5 +144,10 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
             return;
         }
         EventManager.Instance.PlayerLeftRoom(otherPlayer);
+    }
+
+    public void SetFirst(bool isFirst)
+    {
+        _isFirst = isFirst;
     }
 }
