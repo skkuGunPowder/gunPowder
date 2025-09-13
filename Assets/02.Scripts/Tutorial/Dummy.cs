@@ -73,9 +73,9 @@ public class Dummy : MonoBehaviour
         ApplyTemporaryDampingEffect();
         // 사운드
         SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
-        SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 3, 0f, false, SoundType.SFX, true, 1f, 50f);
+        //SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 3, 0f, false, SoundType.SFX, true, 1f, 50f);
         // 애니메이션
-        //_animator.SetTrigger("Damaged");
+        _animator.SetTrigger("Damaged");
 
         // 건파우더 낙출
         ReleaseGunPowder();

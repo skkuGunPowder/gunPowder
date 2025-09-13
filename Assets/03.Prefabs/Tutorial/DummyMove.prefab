@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1017598696871944288}
   - component: {fileID: 3413451909096853409}
   - component: {fileID: -7847647898248320884}
+  - component: {fileID: 3693674573288941159}
   m_Layer: 7
   m_Name: DummyMove
   m_TagString: Enemy
@@ -80,7 +81,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 479420017, guid: 4999f997671cd7243b4fd0797a1c739b, type: 3}
+  m_Sprite: {fileID: 1409984836, guid: b1ce10056ba31d344afd9fa0d012bc31, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -152,8 +153,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 2, y: 2.3888888}
+  m_Offset: {x: 0, y: -0.2}
+  m_Size: {x: 1.2, y: 1.7}
   m_Direction: 0
 --- !u!114 &3413451909096853409
 MonoBehaviour:
@@ -182,3 +183,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popupPrefab: {fileID: 1259023133563206875, guid: 80f54251898c8304eb11db9b9f157797, type: 3}
   target: {fileID: 6624714931377840315}
+--- !u!95 &3693674573288941159
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3650402377230982346}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4c439f0dd357256498bba0900b17fe14, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
