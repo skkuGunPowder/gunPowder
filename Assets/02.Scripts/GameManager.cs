@@ -176,6 +176,11 @@ public class GameManager : PhotonSingleton<GameManager>
     
     public void GameStateChange(EGameState state)
     {
+        if (_currentGameState == EGameState.Tutorial)
+        {
+            return;
+        }
+        
         _currentGameState = state;
         TimeScaleSetting();
     }
