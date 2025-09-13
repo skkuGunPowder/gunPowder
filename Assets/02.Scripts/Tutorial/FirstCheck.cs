@@ -9,9 +9,11 @@ public class FirstCheck : MonoBehaviour
     private void Start()
     {
         _isFirst = PhotonServerManager.Instance.IsFirst;
-        
-        PhotonServerManager.Instance.TutorialMode(true);
-            
+
+        if (_isFirst == false)
+        {
+            return;
+        }
         UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
         popup.Init(TutorialMessage,true, PhotonServerManager.Instance.TutorialMode);
         

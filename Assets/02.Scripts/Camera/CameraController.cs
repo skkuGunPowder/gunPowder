@@ -111,7 +111,6 @@ public class CameraController : MonoBehaviour
     {
         if (_currentTargetList.Count == 2)
         {
-            Debug.Log("dont target list up");
             return;
         }
         
@@ -134,7 +133,6 @@ public class CameraController : MonoBehaviour
             
         }
         
-        Debug.Log($"target list : {_currentTargetList.Count}");
         EventManager.Instance.OnPlayerListUp -= TargetListUp;
     }
 

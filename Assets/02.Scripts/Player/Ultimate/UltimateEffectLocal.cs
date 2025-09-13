@@ -24,11 +24,11 @@ public class UltimateEffectLocal : MonoBehaviour
         EventManager.Instance.OnPlayerListUp += PlayerListUp;
         _ultiBackGround = UltimateBackGround.GetComponent<SpriteRenderer>();
     }
-
     private void PlayEffect(string bomb, PhotonPlayer player)
     {
         DOTween.Kill(this);
         StopAllCoroutines();
+        
         foreach (PhotonView view in _playerList)
         {
             if (view.OwnerActorNr == player.ActorNumber)

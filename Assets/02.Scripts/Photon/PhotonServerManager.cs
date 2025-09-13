@@ -49,7 +49,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         PhotonNetwork.GameVersion = _gameVersion;
         PhotonNetwork.NickName = AccountManager.Instance.CurrencAccount.Nickname;
         PhotonNetwork.ConnectUsingSettings();
-
+        
         if (first)
         { 
             _isFirst = true;   
@@ -93,14 +93,14 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-
+        _isTutorial = false;         
+        
         PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
         Hashtable propertiesToRemove = new Hashtable
         {
             { EProperties.Team.ToString(), null }
         };
         
-        _isTutorial = false;         
         PhotonNetwork.LocalPlayer.SetCustomProperties(propertiesToRemove);
         
     }

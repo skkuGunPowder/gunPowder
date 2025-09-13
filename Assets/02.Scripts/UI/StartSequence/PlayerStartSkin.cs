@@ -43,10 +43,6 @@ public class PlayerStartSkin : MonoBehaviour
             }
         }
 
-        foreach (var VARIABLE in EquipedItemDict)
-        {
-            Debug.Log($"{VARIABLE.Key} : {VARIABLE.Value}");
-        }
         // [스킨] 단순 존재 여부 기반 적용/해제: 장착되었으면 적용, 없으면 해제
         ItemDTO headItem = null;
         ItemDTO faceItem = null;

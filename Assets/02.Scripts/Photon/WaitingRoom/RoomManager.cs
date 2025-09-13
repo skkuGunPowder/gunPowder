@@ -68,6 +68,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _initialized = true;
         Initializer.Init(this);
         SetRoom();
+        EventManager.Instance.TeamChanged();
     }
 
     // 준비가 다 되었다면 마스터가 정한 맵으로 이동시킴
