@@ -177,34 +177,35 @@ public class GunPowderBezierCurve : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D collision)
     {
-        if(collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
+        if(collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy")
+          || collision.gameObject.CompareTag("Immune"))
         {
-                    // 자신이 생성한 건파우더인지 확인
-        PhotonView collisionPhotonView = collision.GetComponent<PhotonView>();
-        if(collisionPhotonView != null && collisionPhotonView.gameObject.activeInHierarchy)
-        {
-            if(collisionPhotonView.ViewID == GetComponent<GunPowder>().SourceViewId)
+            // 자신이 생성한 건파우더인지 확인
+            PhotonView collisionPhotonView = collision.GetComponent<PhotonView>();
+            if(collisionPhotonView != null && collisionPhotonView.gameObject.activeInHierarchy)
             {
-                return;
-            }
-        }
-
-                    // 플레이어 컴포넌트 확인
-        Player player = collision.gameObject.GetComponent<Player>();
-        if (player != null && player.PlayerStat != null)
-        {
-            // 건파우더 제거 - 마스터에서만 처리
-            if (!_hasTriggeredDestroy && PhotonNetwork.IsMasterClient)
-            {
-                var targetView = player.GetComponent<PhotonView>();
-                if (targetView != null && targetView.gameObject.activeInHierarchy)
+                if(collisionPhotonView.ViewID == GetComponent<GunPowder>().SourceViewId)
                 {
-                    targetView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGunPowder), targetView.Owner, 1);
-                    InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
-                    _hasTriggeredDestroy = true;
+                    return;
                 }
             }
-        }
+
+                        // 플레이어 컴포넌트 확인
+            Player player = collision.gameObject.GetComponent<Player>();
+            if (player != null && player.PlayerStat != null)
+            {
+                // 건파우더 제거 - 마스터에서만 처리
+                if (!_hasTriggeredDestroy && PhotonNetwork.IsMasterClient)
+                {
+                    var targetView = player.GetComponent<PhotonView>();
+                    if (targetView != null && targetView.gameObject.activeInHierarchy && targetView.Owner != null)
+                    {
+                        targetView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGunPowder), targetView.Owner, 1);
+                        InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+                        _hasTriggeredDestroy = true;
+                    }
+                }
+            }
         }
     }
 
