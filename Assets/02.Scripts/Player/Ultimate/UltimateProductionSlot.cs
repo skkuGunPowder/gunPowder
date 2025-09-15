@@ -51,6 +51,7 @@ public class UltimateProductionSlot : MonoBehaviour
         {
             BombEffectOff(bomb);
             
+            Debug.Log("off");
             UltimateEffectUp.gameObject.SetActive(false);
             UltimateEffectDown.gameObject.SetActive(false);
             PlayerImage.gameObject.SetActive(false);
