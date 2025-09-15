@@ -11,8 +11,6 @@ public class UltimateEffectWater : UltimateEffectBase
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.AppendInterval(Delay);
         sequence.AppendCallback(EffectOn);
-        
-        
     }
 
     public override void Stop()
