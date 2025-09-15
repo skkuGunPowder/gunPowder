@@ -12,7 +12,6 @@ public abstract class Buff : MonoBehaviour, IBuff
 
     public virtual void Init()
     {
-        _owner = null;
         _timer = 0f;
         _isActive = false;
     }
@@ -29,7 +28,7 @@ public abstract class Buff : MonoBehaviour, IBuff
 
     public void SetOwner(Player player)
     {
-        if (player != null)
+        if (player == null)
         {
             throw new Exception("플레이어가 없습니다.");
         }
@@ -45,7 +44,7 @@ public abstract class Buff : MonoBehaviour, IBuff
         }
 
         _timer += Time.deltaTime;
-        if (_timer > Stat. Duration)
+        if (_timer > Stat.Duration)
         {
             EndBuff();
         }

@@ -7,6 +7,11 @@ public abstract class AirDropItemBase : MonoBehaviour, IAirDropItem
 
     public void SetOwner(Player player)
     {
+        if(player == null)
+        {
+            Debug.LogError("[SetOwner] : 아이템 사용자가 없습니다.");
+            return;
+        }
         _owner = player;
     }
 

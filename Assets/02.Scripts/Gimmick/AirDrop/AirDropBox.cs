@@ -64,6 +64,9 @@ public class AirDropBox : MonoBehaviour
             player.SetAirDropItem(item);
         }
 
-        PhotonNetwork.Destroy(gameObject);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 }
