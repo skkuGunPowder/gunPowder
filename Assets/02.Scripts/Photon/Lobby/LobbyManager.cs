@@ -24,6 +24,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         // 룸 프로퍼티에 들어가야할 것들 : 시간, 목숨, 시작 건파우더, 시간 당 감소
         Hashtable roomProperties = new Hashtable
         {
+            {ERoomProperties.RoomName.ToString(), roomName},
             {ERoomProperties.MapSelected.ToString(), (int)InitialMap},
             {ERoomProperties.PlayTime.ToString(), playTime},
             {ERoomProperties.Life.ToString(), life},
@@ -42,8 +43,9 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         roomOptions.CustomRoomProperties = roomProperties; 
         roomOptions.EmptyRoomTtl = 0;
         
+        string room = PhotonNetwork.LocalPlayer.UserId + " " + roomName;
         //방 만들기
-        PhotonNetwork.CreateRoom(roomName, roomOptions, TypedLobby.Default);
+        PhotonNetwork.CreateRoom(room,roomOptions, TypedLobby.Default);
     }
     
     private string[] SetRoomPropertiesForLobby()

@@ -72,7 +72,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         roomOptions.MaxPlayers = 1;
         roomOptions.CustomRoomProperties = roomProperties; 
         
-        PhotonNetwork.CreateRoom("tutorial", roomOptions, TypedLobby.Default);
+        string room = PhotonNetwork.LocalPlayer.UserId + " " + "Tutorial";
+        PhotonNetwork.CreateRoom(room, roomOptions, TypedLobby.Default);
     }
 
     public void TutorialMode(bool isTutorial)

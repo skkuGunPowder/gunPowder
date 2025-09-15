@@ -107,9 +107,6 @@ public class UI_RoomSearchPopup : UI_Popup
     private void OnDisable()
     { 
         _currentPage = 1;
-    }
-    private void OnDestroy()
-    {
         EventManager.Instance.OnRoomListUpdate -= Refresh;
     }
 }

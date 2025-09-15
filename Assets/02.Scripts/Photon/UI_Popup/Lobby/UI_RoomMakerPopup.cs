@@ -30,6 +30,12 @@ public class UI_RoomMakerPopup : UI_Popup
     public void OnclickCreateRoom()
     {
         string roomName = RoomName.text;
+        if (roomName.Length < 3)
+        {
+            UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+            popup.Init("방 이름은 3글자 이상이어야합니다.", false);
+            return;
+        }
         int maxPlayers = int.Parse(MaxPlayers.options[MaxPlayers.value].text);
         
         if (IsLocked.isOn == false)
