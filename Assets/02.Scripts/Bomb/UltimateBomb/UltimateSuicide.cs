@@ -6,7 +6,7 @@ public class UltimateSuicide : Bomb
     private const string ID = "BO0019";
 
     [Header("References")]
-    [SerializeField] private Material _ultimateMaterial;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
 
     [Header("Settings")]
     [SerializeField] private float _duration = 12f;
@@ -25,6 +25,14 @@ public class UltimateSuicide : Bomb
     protected override void Update()
     {
         transform.position = _ownerPhotonview.transform.position;
+        if (_owner.PlayerStat.MySpriteREndererList[0].flipX == true)
+        {
+            _spriteRenderer.flipX = true;
+        }
+        else
+        {
+            _spriteRenderer.flipX = false;
+        }
 
         _jumpTimer += Time.deltaTime;
         if (_jumpTimer >= _jumpResetTime && _owner != null)
