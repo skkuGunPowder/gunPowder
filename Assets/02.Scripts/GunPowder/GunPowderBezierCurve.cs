@@ -47,6 +47,12 @@ public class GunPowderBezierCurve : MonoBehaviour
 
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _collider = GetComponent<BoxCollider2D>();
+        if (_rigidbody2D == null || _collider == null)
+        {
+            Debug.LogError("[GunPowderBezierCurve] Missing required components (Rigidbody2D/BoxCollider2D). Disabling component.");
+            enabled = false;
+            return;
+        }
 
         if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
         gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = false;
@@ -85,6 +91,12 @@ public class GunPowderBezierCurve : MonoBehaviour
 
         // GunPowder에서 타겟과 isFallingOut을 받아옴
         GunPowder gunPowder = GetComponent<GunPowder>();
+        if (gunPowder == null)
+        {
+            Debug.LogError("[GunPowderBezierCurve] Missing GunPowder component on the same GameObject. Disabling.");
+            enabled = false;
+            return;
+        }
         _target = gunPowder.Target;
         // 타겟이 없거나 비활성화되었다면 즉시 제거
         if (_target == null || !_target.gameObject.activeInHierarchy)

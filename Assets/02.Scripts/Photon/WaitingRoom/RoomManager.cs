@@ -102,6 +102,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     //현재 이 방에 있는 플레이어들의 계정 정보
     private void SetRoom()
     {
+        InputHandler.BlockInput = false;
+     
         if (_room.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false)
         {
             int[] playerList = new int[MaxPlayerCount];
