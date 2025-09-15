@@ -65,14 +65,14 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
     {
         if (success)
         {
-            OnLoginResult?.Invoke($"구글 로그인 성공 : {userInfo.name}");
+            OnLoginResult?.Invoke($"로그인 성공 : {userInfo.name}");
 
             // Firebase Auth에 구글 계정으로 로그인
             await SignInToFirebaseWithGoogle(userInfo);
         }
         else
         {
-            OnLoginResult?.Invoke($"구글 로그인 실패: {error}");
+            OnLoginResult?.Invoke($"로그인 실패: {error}");
             OnLoginError?.Invoke(error);
             Debug.LogError($"구글 로그인 실패: {error}");
         }
@@ -104,7 +104,7 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
         catch (Exception e)
         {
             Debug.LogError($"Firebase 구글 로그인 중 오류: {e.Message}");
-            OnLoginResult?.Invoke($"Firebase 로그인 실패: {e.Message}");
+            OnLoginResult?.Invoke($"로그인 실패: {e.Message}");
             OnLoginError?.Invoke(e.Message);
         }
     }
@@ -153,7 +153,7 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             }
 
 
-            OnLoginResult?.Invoke($"Firebase 로그인 성공: {user.DisplayName}");
+            OnLoginResult?.Invoke($"로그인 성공: {user.DisplayName}");
             OnLoginSuccess?.Invoke(user, userInfo);
 
         }
@@ -168,14 +168,14 @@ public class GoogleLogIn : Singleton<GoogleLogIn>
             }
             else
             {
-                OnLoginResult?.Invoke($"Firebase 로그인 실패: {fe.Message}");
+                OnLoginResult?.Invoke($"로그인 실패: {fe.Message}");
                 OnLoginError?.Invoke(fe.Message);
             }
         }
         catch (Exception e)
         {
             Debug.LogError($"Firebase 로그인 중 예외: {e.Message}");
-            OnLoginResult?.Invoke($"Firebase 로그인 실패: {e.Message}");
+            OnLoginResult?.Invoke($"로그인 실패: {e.Message}");
             OnLoginError?.Invoke(e.Message);
         }
     }
