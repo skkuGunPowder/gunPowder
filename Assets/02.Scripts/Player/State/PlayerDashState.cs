@@ -35,6 +35,7 @@ public class PlayerDashState : PlayerBaseState
 
         // 애니메이션 재생
         _owner.RPC_SetAnimatorTrigger("Dash");
+        _owner.RPC_ResetAnimatorTrigger("StrongAttack");
     }
 
     public override void OnExit()

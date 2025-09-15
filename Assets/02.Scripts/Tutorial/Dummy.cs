@@ -1,10 +1,13 @@
 using UnityEngine;
 using DG.Tweening;
+using RaycastPro.RaySensors2D;
 
 public class Dummy : MonoBehaviour
 {
-    private Animator _animator;
+    protected Animator _animator;
     private Rigidbody2D _rigidbody2D;
+    [SerializeField]
+    protected BoxRay2D _groundRay2D;
 
     // 폭발 임펄스 감지는 제거됨
 
@@ -19,7 +22,7 @@ public class Dummy : MonoBehaviour
     private Tween _dampingTween;
     private DamagePopup _damagePopup;
 
-    
+
 
     [SerializeField] private GameObject _gunpowderPrefab;
 
@@ -30,7 +33,7 @@ public class Dummy : MonoBehaviour
         _damagePopup = GetComponent<DamagePopup>();
     }
 
-    
+
 
     void LateUpdate()
     {
@@ -42,9 +45,9 @@ public class Dummy : MonoBehaviour
         }
     }
 
-    
 
-    private void ApplyTemporaryDampingEffect()
+
+    protected virtual void ApplyTemporaryDampingEffect()
     {
         if (_rigidbody2D == null) return;
 
@@ -61,13 +64,14 @@ public class Dummy : MonoBehaviour
             MAX_LINEAR_DAMPING,
             DUMMY_DAMAGED_TIME
         ).SetEase(Ease.InOutBack)
-        .OnComplete(() => {
+        .OnComplete(() =>
+        {
             _rigidbody2D.linearDamping = _originalLinearDamping;
         });
     }
 
     // 폭발을 맞았을 때 실행할 처리 (Explosion 수정 없이 내부 감지로 호출)
-    private void OnExplosionImpact()
+    protected virtual void OnExplosionImpact()
     {
         // 로직 호출 가능 (예: 사운드, 이펙트, 애니메이션 등)\
         ApplyTemporaryDampingEffect();
@@ -103,8 +107,18 @@ public class Dummy : MonoBehaviour
         }
     }
 
-    private void ReleaseGunPowder()
+    protected virtual void ReleaseGunPowder()
     {
         Instantiate(_gunpowderPrefab, transform.position, Quaternion.identity);
+    }
+
+    protected virtual bool IsGrounded2D()
+    {
+        if (_groundRay2D == null)
+        {
+            return false;
+        }
+        _groundRay2D.Cast();
+        return _groundRay2D.Performed;
     }
 }

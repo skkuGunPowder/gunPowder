@@ -11,7 +11,7 @@ public class ExplosionVFXNotifier : MonoBehaviour
 
     [Header("Scene Gate")]
     [SerializeField] private bool onlyInTutorial = true;
-    [SerializeField] private string[] allowedSceneNames = new[] { "Tutorial", "WaitingRoom" };
+    [SerializeField] private string[] allowedSceneNames = new[] { "Tutorial" };
 
     
 
