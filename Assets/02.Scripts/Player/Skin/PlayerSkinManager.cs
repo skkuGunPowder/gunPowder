@@ -194,6 +194,8 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 					}
 					// 색상 시스템 편입
 					_player?.RegisterOriginalColor(sr);
+					// 원본 sortingOrder 저장
+					_player?.RegisterOriginalSortingOrder(sr);
 				}
 			}
 		}
@@ -242,6 +244,8 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 				_playerStat.MySpriteREndererList.Remove(sr);
 				// 색상 시스템 해제
 				_player?.UnregisterOriginalColor(sr);
+				// sortingOrder 시스템 해제
+				_player?.UnregisterOriginalSortingOrder(sr);
 			}
 		}
 	}

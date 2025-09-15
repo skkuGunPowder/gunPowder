@@ -79,6 +79,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private Tween _preExplosionPulseTween;
     private Vector3 _defaultLocalScale;
     private Dictionary<SpriteRenderer, Color> _originalColorMap; // 게임 시작 시 저장되는 진짜 원본 색상
+    private Dictionary<SpriteRenderer, int> _originalSortingOrderMap; // 스프라이트 렌더러의 원본 sortingOrder 저장
 
     [Header("히트스탑")]
     [SerializeField]
@@ -183,6 +184,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _skinManager = GetComponent<PlayerSkinManager>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
+        _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
 
 
         // 기본 폭탄 정보 가져오기
@@ -325,10 +327,26 @@ public class Player : MonoBehaviourPun, IDamagable
             _ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
         }
 
+        SetPlayerOrderInLayer();
+    }
 
-        foreach (var item in EquipedItemDict)
+    private void SetPlayerOrderInLayer()
+    {
+        int playerOrderInLayerPlus = PhotonView.OwnerActorNr;
+        Debug.Log($"playerOrderInLayerPlus: {playerOrderInLayerPlus}");
+        foreach (var item in _playerStat.MySpriteREndererList)
         {
-            Debug.Log($"{item.Key} : {item.Value.ID}");
+            if (item != null)
+            {
+                // 원본 sortingOrder를 저장하고 있지 않다면 현재 값을 원본으로 저장
+                if (!_originalSortingOrderMap.ContainsKey(item))
+                {
+                    _originalSortingOrderMap[item] = item.sortingOrder;
+                }
+                
+                // 원본 값에 플레이어 오프셋을 더해서 설정
+                item.sortingOrder = _originalSortingOrderMap[item] + playerOrderInLayerPlus * 100;
+            }
         }
     }
 
@@ -385,6 +403,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Start()
     {
+        // 기본 스프라이트 렌더러들의 원본 sortingOrder 저장
+        InitializeOriginalSortingOrders();
+        
         LoadItems();
 
         // 1. 이벤트 핸들러 등록
@@ -486,6 +507,43 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_originalColorMap.ContainsKey(renderer))
         {
             _originalColorMap.Remove(renderer);
+        }
+    }
+
+    // 스킨 동적 추가 시 sortingOrder 시스템에 편입/해제
+    public void RegisterOriginalSortingOrder(SpriteRenderer renderer)
+    {
+        if (renderer == null) { return; }
+        if (_originalSortingOrderMap == null)
+        {
+            _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
+        }
+        if (!_originalSortingOrderMap.ContainsKey(renderer))
+        {
+            _originalSortingOrderMap[renderer] = renderer.sortingOrder;
+        }
+    }
+
+    public void UnregisterOriginalSortingOrder(SpriteRenderer renderer)
+    {
+        if (renderer == null || _originalSortingOrderMap == null) { return; }
+        if (_originalSortingOrderMap.ContainsKey(renderer))
+        {
+            _originalSortingOrderMap.Remove(renderer);
+        }
+    }
+
+    // 플레이어 시작 시 기본 스프라이트 렌더러들의 원본 sortingOrder 저장
+    private void InitializeOriginalSortingOrders()
+    {
+        if (_playerStat?.MySpriteREndererList == null) { return; }
+        
+        foreach (var renderer in _playerStat.MySpriteREndererList)
+        {
+            if (renderer != null)
+            {
+                RegisterOriginalSortingOrder(renderer);
+            }
         }
     }
 
