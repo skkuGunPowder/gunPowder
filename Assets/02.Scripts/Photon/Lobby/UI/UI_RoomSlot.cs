@@ -30,7 +30,7 @@ public class UI_RoomSlot : MonoBehaviour
     {
         _roomInfo = roomInfo;
         
-        RoomName.text = roomInfo.Name;
+        RoomName.text = roomInfo.CustomProperties[ERoomProperties.RoomName.ToString()].ToString();
         PlayerCount.text = $"{roomInfo.PlayerCount}/{roomInfo.MaxPlayers}";
         MapIcon.sprite = mapIcon;
         

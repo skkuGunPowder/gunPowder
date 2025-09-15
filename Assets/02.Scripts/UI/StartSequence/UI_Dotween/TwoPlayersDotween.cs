@@ -110,5 +110,6 @@ public class TwoPlayersDotween : MonoBehaviour
     private void LightningOn()
     {
         VSParicle.gameObject.SetActive(true);
+        // SoundManager.Instance.PlayLocalSound("VS_1", transform);
     }
 }
