@@ -10,6 +10,12 @@ public class GunPowderTrigger : MonoBehaviour
     void OnEnable()
     {
         _collider = GetComponent<CircleCollider2D>();
+        if (_collider == null)
+        {
+            Debug.LogError("[GunPowderTrigger] Missing CircleCollider2D on the same GameObject. Disabling component.");
+            enabled = false;
+            return;
+        }
         _collider.enabled = true;
     }
 
@@ -20,25 +26,51 @@ public class GunPowderTrigger : MonoBehaviour
             GunPowder gunPowder = gameObject.GetComponentInParent<GunPowder>();
             if (gunPowder != null)
             {
-                        PhotonView collisionPhotonView = collision.GetComponent<PhotonView>();
-        if(collisionPhotonView != null && collisionPhotonView.gameObject.activeInHierarchy)
-        {
-            if(gunPowder.SourceViewId == collisionPhotonView.ViewID)
-            {
-                return;
-            }
-            gunPowder.photonView.RPC(nameof(GunPowder.SetTarget), RpcTarget.All, collisionPhotonView.ViewID);
-        }
+                PhotonView collisionPhotonView = collision.GetComponent<PhotonView>();
+                if (collisionPhotonView != null && collisionPhotonView.gameObject.activeInHierarchy)
+                {
+                    if (gunPowder.SourceViewId == collisionPhotonView.ViewID)
+                    {
+                        return;
+                    }
+                    if (gunPowder.photonView != null)
+                    {
+                        gunPowder.photonView.RPC(nameof(GunPowder.SetTarget), RpcTarget.All, collisionPhotonView.ViewID);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[GunPowderTrigger] Parent GunPowder has no PhotonView; cannot RPC SetTarget.");
+                    }
+                }
             }
 
             // 이 콜라이더는 더 이상 감지하지 않게 비활성화
-            _collider.enabled = false;
+            if (_collider != null)
+            {
+                _collider.enabled = false;
+            }
 
             // 1. 베지어 곡선 이동 활성화
-            gameObject.GetComponentInParent<GunPowderBezierCurve>().enabled = true;
+            var bezier = gameObject.GetComponentInParent<GunPowderBezierCurve>();
+            if (bezier != null)
+            {
+                bezier.enabled = true;
+            }
+            else
+            {
+                Debug.LogWarning("[GunPowderTrigger] Missing GunPowderBezierCurve on parent when trying to enable.");
+            }
 
             // 2. 상위 콜라이더를 트리거로 전환
-            gameObject.GetComponentInParent<BoxCollider2D>().isTrigger = true;
+            var parentBox = gameObject.GetComponentInParent<BoxCollider2D>();
+            if (parentBox != null)
+            {
+                parentBox.isTrigger = true;
+            }
+            else
+            {
+                Debug.LogWarning("[GunPowderTrigger] Missing BoxCollider2D on parent when trying to set isTrigger=true.");
+            }
 
             // 3. 파티클 재생 (부모의 GunPowderRelease에 요청)
             var release = gameObject.GetComponentInParent<GunPowderRelease>();
