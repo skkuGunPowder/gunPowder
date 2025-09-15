@@ -17,7 +17,12 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         base.Awake();
         ClientManager.PlayBGM("Lobby");
     }
-    
+
+    private void Start()
+    {
+        _roomInfoList = PhotonServerManager.Instance.TempRoomInfoList;
+    }
+
     // 방에 보내기
     public void MakeRoom(string roomName, int maxPlayers, int playTime, int life, int gunpowder, int decline, bool isLocked, string password = null)
     {
@@ -37,8 +42,8 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         RoomOptions roomOptions = new RoomOptions();
         // 룸 세팅
         roomOptions.MaxPlayers = maxPlayers;
-        roomOptions.IsVisible = true;
-        roomOptions.IsOpen = true;
+        roomOptions.IsVisible = false;
+        roomOptions.IsOpen = false;
         roomOptions.CustomRoomPropertiesForLobby = SetRoomPropertiesForLobby();
         roomOptions.CustomRoomProperties = roomProperties; 
         roomOptions.EmptyRoomTtl = 0;
@@ -93,5 +98,10 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         }
 
         EventManager.Instance.RoomListUpdate();
+    }
+
+    private void OnDestroy()
+    {
+        PhotonServerManager.Instance.SaveRoomList(_roomInfoList);
     }
 }

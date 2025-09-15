@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,7 +22,7 @@ public class ClientManager : DontDestroySingleton<ClientManager>
 
     public static void GotoShop()
     {
-        SceneManager.LoadScene("Shop");
+        PhotonNetwork.LoadLevel("Shop");
     }
 
     public static void PlayBGM(string sceneName)
@@ -44,12 +45,20 @@ public class ClientManager : DontDestroySingleton<ClientManager>
                 SoundManager.Instance.PlayGlobalSound("WatingRoom2", SoundType.BGM, 0, true);
                 break;
 
-            case "Map1":
+            case "Forest1":
                 SoundManager.Instance.PlayGlobalSound("Forest1", SoundType.BGM, 0, true);
                 break;
 
-            case "Map2":
+            case "Dock1":
                 SoundManager.Instance.PlayGlobalSound("Dock1", SoundType.BGM, 0, true);
+                break;
+
+            case "Beach1":
+                SoundManager.Instance.PlayGlobalSound("Beach1", SoundType.BGM, 0, true);
+                break;
+            
+            case "Tutorial":
+                SoundManager.Instance.PlayGlobalSound("Tutorial1", SoundType.BGM, 0, true);
                 break;
 
             case "ResultScene":

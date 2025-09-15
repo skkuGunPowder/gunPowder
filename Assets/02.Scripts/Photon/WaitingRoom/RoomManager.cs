@@ -88,7 +88,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         
         _room.SetCustomProperties(playerList);
         _room.IsVisible = false;
-
+        _room.IsOpen = false;
         if (SelectedMap == EMap.Random)
         {
             int max = (int)EMap.Count - 1;
@@ -113,6 +113,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 EventManager.Instance.RoomDataChanged();
             }
 
+            _room.IsVisible = true;
+            _room.IsOpen = true;
             return;
         }
 
@@ -122,7 +124,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         PlayerList.PlayerListCheck();
         
         _room.IsVisible = true;
-        
+        _room.IsOpen = true;
         EventManager.Instance.RoomDataChanged();
     }
     

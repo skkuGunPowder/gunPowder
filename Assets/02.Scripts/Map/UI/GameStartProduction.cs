@@ -29,6 +29,8 @@ public class GameStartProduction : MonoBehaviour
     public Vector2 ProfileOriginPosition;
     public Vector3 GameStartTextScaleOrigin;
     
+    [Header("사운드")]
+    public AudioClip GameStartBell_1;
     private void Awake()
     {
         EventManager.Instance.OnLoadFinished += Play;
@@ -65,6 +67,7 @@ public class GameStartProduction : MonoBehaviour
             .SetEase(GameStartTextEase));
         sequence.Join(GameStartCountText1.transform.DOScale(GameStartTextScaleOrigin,GameStartTextSpeed / 2)
             .SetEase(GameStartTextEase));
+        sequence.JoinCallback(SoundStart);
         sequence.AppendInterval(GameStartTextInterval);
         sequence.Append(GameStartText.transform.DOScale(GameStartTextScaleOrigin, GameStartTextSpeed)
             .SetEase(GameStartTextEase));
@@ -75,6 +78,12 @@ public class GameStartProduction : MonoBehaviour
             InputHandler.BlockInput = false;
             GameManager.Instance.OnGameStart -= GameStart;
         });
+    }
+
+    public void SoundStart()
+    {
+        Debug.Log("Sound Start");
+        SoundManager.Instance.PlayLocalSound(nameof(GameStartBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
     }
     private void OnDisable()
     {

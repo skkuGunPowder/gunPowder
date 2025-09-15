@@ -17,6 +17,9 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     [Header("GameVersion")]
     [SerializeField] private string _gameVersion = "1.0.0";
     
+    
+    public List<RoomInfo> TempRoomInfoList = new List<RoomInfo>();
+    
     private bool _isTutorial = false;
     private bool _isFirst = false;
     public bool IsFirst => _isFirst;
@@ -150,5 +153,9 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     public void SetFirst(bool isFirst)
     {
         _isFirst = isFirst;
+    }
+    public void SaveRoomList(List<RoomInfo> roomList)
+    {
+        TempRoomInfoList = roomList;
     }
 }
