@@ -43,7 +43,10 @@ public class BuffManager : DontDestroySingleton<BuffManager>
     {
         if (_buffPrefabDict.TryGetValue(buffID, out Buff buff))
         {
-            return Instantiate(buff, caller);
+            Buff buffInstance = Instantiate(buff, caller);
+            buffInstance.Init();
+            buffInstance.SetStat(buff.Stat);
+            return buffInstance;
         }
 
         Debug.LogWarning($"[{buff.ID}] 버프가 없습니다.");
