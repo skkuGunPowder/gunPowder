@@ -30,6 +30,7 @@ public class UI_RoomSearchPopup : UI_Popup
     { 
         List<RoomInfo> roomInfoList = LobbyManager.Instance.RoomInfoList;
         
+        Debug.Log(" roomcount"+roomInfoList.Count);;
         // 방이 0개인 경우
         if (roomInfoList == null || roomInfoList.Count == 0)
         {

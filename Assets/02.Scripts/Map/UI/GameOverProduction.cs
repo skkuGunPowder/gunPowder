@@ -53,6 +53,10 @@ public class GameOverProduction : MonoBehaviour
     [Tooltip("GameSet 글자가 떨어지기 시작할 위치")] public Vector2 GameSetStartPosition;
     [Tooltip("Profile슬롯들의 처음 위치 : 초기 53.19")] public Vector2 ProfileSlotStartPosition = new Vector2(0, 53.19f);
     [Tooltip("타이머의 원래 위치")] public Vector2 TimerOriginPosition;
+    
+    [Header("사운드")]
+    public AudioClip GameEndBell_1;
+    public AudioClip GameEndCameraOff_2;
     private void Awake()
     {
         _camera = Camera.main;
@@ -76,6 +80,9 @@ public class GameOverProduction : MonoBehaviour
 
     public void Play()
     {
+        SoundManager.Instance.PlayLocalSound(nameof(GameEndBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
+
+
         GameOverProductionPanel.gameObject.SetActive(true);
         
         GameManager.Instance.OnGameOver -= Play;
@@ -130,6 +137,8 @@ public class GameOverProduction : MonoBehaviour
     private void CameraButtonDown()
     {
         MyAnimator.SetTrigger("Down");
+        SoundManager.Instance.PlayLocalSound(nameof(GameEndCameraOff_2), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
+
     }
     private void OnDisable()
     {

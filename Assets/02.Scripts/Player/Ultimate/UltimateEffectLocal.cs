@@ -18,6 +18,8 @@ public class UltimateEffectLocal : MonoBehaviour
     public GameObject UltimateBackGround;
     
     private List<PhotonView> _playerList = new List<PhotonView>();
+    [Header("사운드")]
+    public AudioClip UltParticle_1;
     private void Awake()
     {
         EventManager.Instance.OnUltimate += PlayEffect;
@@ -58,6 +60,8 @@ public class UltimateEffectLocal : MonoBehaviour
     }
     private void UltimateOn()
     {
+        SoundManager.Instance.PlayLocalSound(nameof(UltParticle_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
+
         StartCoroutine(TimeSlow());
     }
     
