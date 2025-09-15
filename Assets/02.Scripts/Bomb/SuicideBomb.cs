@@ -17,6 +17,7 @@ public class SuicideBomb : Bomb
     [SerializeField] private int _totalBeats = 5;
 
     private SpriteRenderer _spriteRenderer;
+    private Player _owner;
 
 
     protected override void Init()
@@ -32,6 +33,14 @@ public class SuicideBomb : Bomb
         base.Update();
 
         transform.position = _ownerPhotonview.transform.position;
+        if (_owner.PlayerStat.MySpriteREndererList[0].flipX == true)
+        {
+            _spriteRenderer.flipX = true;
+        }
+        else
+        {
+            _spriteRenderer.flipX = false;
+        }
     }
 
     private IEnumerator BombRoutine()
@@ -83,6 +92,7 @@ public class SuicideBomb : Bomb
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        _owner = _ownerPhotonview.GetComponent<Player>();
         StartCoroutine(BombRoutine());
     }
 
