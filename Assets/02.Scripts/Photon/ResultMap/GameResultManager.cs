@@ -118,6 +118,7 @@ public class GameResultManager : Singleton<GameResultManager>
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.DestroyAll();
+            
             PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
         }
     }
