@@ -126,6 +126,7 @@ public class FourPlayersDotween : MonoBehaviour
     private void LightningOn()
     {
         VSParticle.gameObject.SetActive(true);
+        SoundManager.Instance.PlayLocalSound("VS_1", transform);
     }
 
     private void VersusAct()
