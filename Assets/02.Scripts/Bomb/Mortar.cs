@@ -148,14 +148,17 @@ public class Mortar : Bomb
                 SoundManager.Instance.PlayLocalSound(_mortarFireSound.name, transform);
             }
 
-            GameObject mortarShellObject = PhotonNetwork.Instantiate(_mortarShellPrefab.name, _muzzle.position, _muzzle.rotation);
-            MortarShell mortarShell = mortarShellObject.GetComponent<MortarShell>();
-            if (mortarShell.PhotonView.IsMine)
+            if (PhotonView.IsMine)
             {
-                mortarShell.PhotonView.RPC(nameof(mortarShell.ThrowBomb), RpcTarget.All, _muzzle.right, _muzzle.up, _muzzle.forward);
-                mortarShell.PhotonView.RPC(nameof(mortarShell.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
+                GameObject mortarShellObject = PhotonNetwork.Instantiate(_mortarShellPrefab.name, _muzzle.position, _muzzle.rotation);
+                MortarShell mortarShell = mortarShellObject.GetComponent<MortarShell>();
+                if (mortarShell.PhotonView.IsMine)
+                {
+                    mortarShell.PhotonView.RPC(nameof(mortarShell.ThrowBomb), RpcTarget.All, _muzzle.right, _muzzle.up, _muzzle.forward);
+                    mortarShell.PhotonView.RPC(nameof(mortarShell.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
+                }
             }
-
+            
             _currentAmmo--;
             if(_currentAmmo <= 0)
             {
