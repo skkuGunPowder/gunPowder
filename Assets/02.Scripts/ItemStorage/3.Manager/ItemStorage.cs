@@ -30,8 +30,8 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         _repo = new ItemStorageRepo();
 
         // 현재 카테고리 초기화
-        CurrentMainCategory = EMainCategory.Character;
-        CurrentCategory = EItemType.Head;
+        CurrentMainCategory = EMainCategory.Bomb;
+        CurrentCategory = EItemType.Bomb;
 
         // 선택된 아이템 인덱스 초기화
         SelectedItemIndex = -1;

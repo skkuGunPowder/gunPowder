@@ -1,23 +1,21 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_CategorySlot : MonoBehaviour, ISelectable
 {
     public EItemType Category;
-    public GameObject SelectedIcon;
-
-    private void Start()
-    {
-        SelectedIcon.SetActive(false);
-    }
+    public Image BackgroundImage;
+    public Sprite SelectedSprite;
+    public Sprite UnselectedSprite;
 
     public void Select()
     {
-        SelectedIcon.SetActive(true);
+        BackgroundImage.sprite = SelectedSprite;
     }
 
     public void Deselect()
     {
-        SelectedIcon.SetActive(false);
+        BackgroundImage.sprite = UnselectedSprite;
     }
 
     public void OnClick()
