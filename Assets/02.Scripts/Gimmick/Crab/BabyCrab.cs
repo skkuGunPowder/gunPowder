@@ -61,17 +61,6 @@ public class BabyCrab : Crab
 
             Vector3 dir = (player.transform.position - transform.position).normalized;
             transform.rotation = Quaternion.FromToRotation(transform.up, dir) * transform.rotation;
-
-            // _changeDirectionTimer += Time.deltaTime;
-            // if (_changeDirectionTimer >= _changeDirectionInterval)
-            // {
-            //     _changeDirectionTimer = 0f;
-            //     _changeDirectionInterval = Random.Range(1f, 4f);
-            //     player.PlayerStat.FacingDirection *= -1;
-            //     player.RPC_SetFacingDirection(player.PlayerStat.FacingDirection == -1 ? -1 : 1);
-            // }
-
-            // player.PlayerFSM.ChangeState<PlayerRunState>();
             yield return null;
         }
 
@@ -79,7 +68,7 @@ public class BabyCrab : Crab
         {
             InputHandler.BlockInput = false;
         }
-        player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerRunState));
+        player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerIdleState));
 
         _rigidbody.simulated = true;
         _rigidbody.AddForce(new Vector2(1, 1).normalized * 1f, ForceMode2D.Impulse);
