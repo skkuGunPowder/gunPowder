@@ -160,7 +160,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
     [Header("스킨")]
 
-
+    [Header("크랩용")]
+    public Transform CrabHoldPoint;
 
 
 
