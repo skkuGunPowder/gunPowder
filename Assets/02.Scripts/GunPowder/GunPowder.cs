@@ -65,6 +65,12 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
         _collider = GetComponent<BoxCollider2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _spriteTrail = GetComponent<SpriteTrail.SpriteTrail>();
+        if (_collider == null)
+        {
+            Debug.LogError("[GunPowder] Missing BoxCollider2D. Disabling component.");
+            enabled = false;
+            return;
+        }
         _collider.enabled = false;
     }
 
@@ -112,6 +118,12 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     /// </summary>
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
+        if (photonView == null)
+        {
+            Debug.LogError("[GunPowder] PhotonView is missing. Disabling component.");
+            enabled = false;
+            return;
+        }
         object[] instData = photonView.InstantiationData;
         if (instData != null && instData.Length >= 3) // 3개로 변경
         {
@@ -137,7 +149,10 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
 
             // 컴포넌트 활성화/비활성화 처리
             var release = GetComponent<GunPowderRelease>();
-            release.SetRandomSeed(_randomSeed);
+            if (release != null)
+            {
+                release.SetRandomSeed(_randomSeed);
+            }
             var bezier = GetComponent<GunPowderBezierCurve>();
             if (_isFallingOut)
             {

@@ -38,6 +38,12 @@ public class GunPowderRelease : MonoBehaviour
         _groundRay2D = GetComponent<BoxRay2D>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _childParticleSystems = GetComponentsInChildren<ParticleSystem>(true);
+        if (_collider == null || _groundRay2D == null || _rigidbody2D == null)
+        {
+            Debug.LogError("[GunPowderRelease] Missing required components (BoxCollider2D/BoxRay2D/Rigidbody2D). Disabling component.");
+            enabled = false;
+            return;
+        }
         
         // 랜덤 시드가 설정되어 있으면 사용
         if (_randomSeed != 0)
@@ -122,7 +128,15 @@ public class GunPowderRelease : MonoBehaviour
                     {
                         _collider.isTrigger = true; // Collider를 Trigger로 변경
                     }
-                    gameObject.GetComponentInChildren<GunPowderTrigger>().enabled = true;
+                    var trigger = gameObject.GetComponentInChildren<GunPowderTrigger>(true);
+                    if (trigger != null)
+                    {
+                        trigger.enabled = true;
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[GunPowderRelease] Missing GunPowderTrigger in children when trying to enable.");
+                    }
 
                     // 착지 시 파티클 정지 (재생 가능하게 StopEmitting)
                     StopParticles();
