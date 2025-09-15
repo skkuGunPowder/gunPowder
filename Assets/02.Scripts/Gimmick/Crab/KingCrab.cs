@@ -64,6 +64,8 @@ public class KingCrab : Crab
             player.transform.rotation = _holdPoint.rotation;
             yield return null;
         }
+        player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerDamagedState));
+        
         player.transform.rotation = Quaternion.identity;
         player.Rigidbody2D.AddForce(throwDirection * _throwForce, ForceMode2D.Impulse);
 
