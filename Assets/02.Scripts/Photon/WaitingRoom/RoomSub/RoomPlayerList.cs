@@ -15,6 +15,7 @@ public class RoomPlayerList
 
     public void GetPlayerList(int[] playerSlotList)
     {
+        _playerSlotList.Clear();
         _playerSlotList = new List<int>(playerSlotList);
     }
     // 게임 시작했을 때와 게임이 끝나고 돌아온 후 플레이어 리스트를 비교후 리스트 재조정
