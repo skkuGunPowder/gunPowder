@@ -31,6 +31,10 @@ public class ThreePlayersDotween : MonoBehaviour
     public float VersusTime = 1f;
     public GameObject VSParticle;
     public RectTransform Versus;
+    
+    [Header("사운드")]
+    public AudioClip VS_1;
+    
     private void OnEnable()
     {
         EventManager.Instance.OnLoadEnd += OnLoadEnd;
@@ -127,7 +131,7 @@ public class ThreePlayersDotween : MonoBehaviour
     private void LightningOn()
     {
         VSParticle.gameObject.SetActive(true);
-        SoundManager.Instance.PlayLocalSound("VS_1", transform);
+        SoundManager.Instance.PlayLocalSound(nameof(VS_1), transform);
     }
 
     private void VersusAct()
