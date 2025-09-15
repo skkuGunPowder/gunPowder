@@ -18,7 +18,8 @@ public class TwoPlayersDotween : MonoBehaviour
     
     [Header("파티클")] 
     public GameObject VSParicle;
-    
+    [Header("사운드")]
+    public AudioClip VS_1;
     
     private void OnEnable()
     {
@@ -110,6 +111,6 @@ public class TwoPlayersDotween : MonoBehaviour
     private void LightningOn()
     {
         VSParicle.gameObject.SetActive(true);
-        // SoundManager.Instance.PlayLocalSound("VS_1", transform);
+        SoundManager.Instance.PlayLocalSound(nameof(VS_1), transform);
     }
 }

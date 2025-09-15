@@ -68,7 +68,8 @@ public class UI_RoomSlot : MonoBehaviour
 
     public void JoinRoom()
     {
-        PhotonNetwork.JoinRoom(RoomName.text);
+        
+        PhotonNetwork.JoinRoom(_roomInfo.Name);
     }
     
 }
