@@ -56,8 +56,16 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
                 // 스타터 아이템 지급(미사일)
                 if ((EItemType)i == EItemType.Bomb)
                 {
-                    ItemDTO starterItem = ItemDatabase.Instance.GetItem("BO0005");
-                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(starterItem));
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0005")));
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0007")));
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0009")));
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0011")));
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0018")));
+                }
+
+                if ((EItemType)i == EItemType.Face)
+                {
+                    _storedItemDict[EItemType.Face].Add(new InventoryItem(ItemDatabase.Instance.GetItem("SK0001")));
                 }
             }
 

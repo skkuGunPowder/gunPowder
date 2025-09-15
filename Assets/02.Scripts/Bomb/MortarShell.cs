@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class MortarShell : Bomb
 {
+    public AudioClip FallingSound;
+
     protected override void Init()
     {
         base.Init();
@@ -51,6 +53,7 @@ public class MortarShell : Bomb
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _rigidBody.linearVelocity = fireRightDirection * _stat.Speed;
+        SoundManager.Instance.PlayLocalSound(FallingSound.name, transform, 0.2f);
     }
 
     [PunRPC]

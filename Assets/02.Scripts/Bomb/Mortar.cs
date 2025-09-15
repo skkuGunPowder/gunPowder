@@ -145,7 +145,7 @@ public class Mortar : Bomb
 
             if (_mortarFireSound != null)
             {
-                SoundManager.Instance.PlayLocalSound(nameof(_mortarFireSound), transform);
+                SoundManager.Instance.PlayLocalSound(_mortarFireSound.name, transform);
             }
 
             GameObject mortarShellObject = PhotonNetwork.Instantiate(_mortarShellPrefab.name, _muzzle.position, _muzzle.rotation);
@@ -192,7 +192,7 @@ public class Mortar : Bomb
 
         if (_mortarDeploySound != null)
         {
-            SoundManager.Instance.PlayLocalSound(nameof(_mortarDeploySound), transform);
+            SoundManager.Instance.PlayLocalSound(_mortarDeploySound.name, transform);
         }
 
         if (PhotonView.IsMine)
