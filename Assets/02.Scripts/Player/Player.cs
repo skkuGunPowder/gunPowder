@@ -1515,6 +1515,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerLastDieState":
                     playerFSM.ChangeState<PlayerLastDieState>();
                     break;
+                case "PlayerCrabHoldedState":
+                    playerFSM.ChangeState<PlayerCrabHoldedState>();
+                    break;
                 default:
                     break;
             }

@@ -6,7 +6,6 @@ public class TurnOnTutorialTV : MonoBehaviour
     [SerializeField] private GameObject _tutorialTV;
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log($"{other.name} OnTriggerEnter2D");
         if (_isOn)
         {
             return;
@@ -14,7 +13,6 @@ public class TurnOnTutorialTV : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Player");
             _isOn = true;
             _tutorialTV.SetActive(true);
         }

@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 824307070807848193}
   - component: {fileID: 8910590888935667074}
   - component: {fileID: 1017598696871944288}
-  - component: {fileID: 3413451909096853409}
   - component: {fileID: -7847647898248320884}
   - component: {fileID: 3693674573288941159}
+  - component: {fileID: 6903075780632277724}
   m_Layer: 7
   m_Name: DummyMove
   m_TagString: Enemy
@@ -34,7 +34,8 @@ Transform:
   m_LocalPosition: {x: 12.1, y: 0.99, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 3592149627450963343}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!212 &824307070807848193
@@ -156,19 +157,6 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: -0.2}
   m_Size: {x: 1.2, y: 1.7}
   m_Direction: 0
---- !u!114 &3413451909096853409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3650402377230982346}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0700469200457ef41ba0c3bf6abba47f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _gunpowderPrefab: {fileID: 2932390106990567279, guid: 349c23fb140c6354bb38e06f3b013fd8, type: 3}
 --- !u!114 &-7847647898248320884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,3 +193,112 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6903075780632277724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3650402377230982346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc879c141196df428fc4d9cd0e7c531, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _groundRay2D: {fileID: 8177488269067506423}
+  _gunpowderPrefab: {fileID: 2932390106990567279, guid: 349c23fb140c6354bb38e06f3b013fd8, type: 3}
+--- !u!1 &5205216945781089927
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3592149627450963343}
+  - component: {fileID: 8177488269067506423}
+  m_Layer: 7
+  m_Name: BoxRay2D
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3592149627450963343
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5205216945781089927}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.562, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6624714931377840315}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8177488269067506423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5205216945781089927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a535485ea5f07aa48b73d926842d87a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  influence: 1
+  triggerInteraction: 0
+  detectLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  autoUpdate: 1
+  colorProfile: {fileID: 0}
+  gizmosUpdate: 0
+  liner: {fileID: 0}
+  linerClamped: 0
+  linerCutOnHit: 0
+  linerFixCut: 1
+  linerEndPosition: 1
+  linerBasePosition: 0
+  stamp: {fileID: 0}
+  local: 1
+  scalable: 0
+  stampOnHit: 0
+  stampAutoHide: 0
+  stampOffset: 0
+  syncStamp:
+    axis: 0
+    syncAxis: 0
+    flipAxis: 0
+  planarSensitive: 0
+  _planar: {fileID: 0}
+  planers: []
+  anyPlanar: 1
+  onCast:
+    m_PersistentCalls:
+      m_Calls: []
+  onDetect:
+    m_PersistentCalls:
+      m_Calls: []
+  onChange:
+    m_PersistentCalls:
+      m_Calls: []
+  onBeginDetect:
+    m_PersistentCalls:
+      m_Calls: []
+  onEndDetect:
+    m_PersistentCalls:
+      m_Calls: []
+  minDepth: 2
+  maxDepth: -2
+  normalFilter: 0
+  minAngle: 0
+  maxAngle: 90
+  hitBackside: 0
+  direction: {x: 0, y: -1}
+  size: {x: 0.88, y: 0.02}
