@@ -7,6 +7,7 @@ public enum ERoomProperties
     DeclinePowder,
     IsLocked,
     Password,
+    RoomName,
     
     Count
 }
