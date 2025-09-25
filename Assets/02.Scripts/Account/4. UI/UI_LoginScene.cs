@@ -162,6 +162,12 @@ public class UI_LoginScene : MonoBehaviour
         LoginInputFields.ResultText.text = result.Message;
         if (result.IsSuccess)
         {
+            // Save email on successful login
+            if (!string.IsNullOrEmpty(email))
+            {
+                PlayerPrefs.SetString("SavedLoginEmail", email);
+                PlayerPrefs.Save();
+            }
             // 닉네임이 없으면 닉네임 입력 패널 표시
             if (!AccountManager.Instance.HasNickname())
             {
