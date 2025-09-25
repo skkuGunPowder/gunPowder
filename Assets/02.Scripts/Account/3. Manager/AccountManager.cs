@@ -221,4 +221,13 @@ public class AccountManager : DontDestroySingleton<AccountManager>
             return new Result(false, $"구글 계정 정보 설정 실패: {e.Message}");
         }
     }
+
+	/// <summary>
+	/// 로그아웃: 현재 계정과 세션 관련 상태 초기화
+	/// </summary>
+	public void Logout()
+	{
+		_myAccount = null;
+		_sessoinID = null;
+	}
 }
