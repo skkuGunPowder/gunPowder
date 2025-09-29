@@ -12,19 +12,26 @@ public class FirebaseManager : MonoBehaviour
     public FirebaseFirestore DB { get; private set; }
     public FirebaseAuth Auth { get; private set; }
 
+    private bool _initialized;
+    private bool _firestoreConfigured;
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
-        else
+        else if (Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
-        DontDestroyOnLoad(this);
 
-        Init();
+        if (!_initialized)
+        {
+            Init();
+        }
     }
 
     private async void Init()
@@ -41,14 +48,34 @@ public class FirebaseManager : MonoBehaviour
                     StorageBucket = "gunpowder-c52bd.firebasestorage.app",
                 };
 
+            if (App == null)
+            {
                 App = FirebaseApp.Create(options);
+            }
             #else
+            if (App == null)
+            {
                 App = FirebaseApp.DefaultInstance;
+            }
             #endif
 
-            DB = FirebaseFirestore.DefaultInstance;
-            DB.Settings.PersistenceEnabled = false;
-            Auth = FirebaseAuth.DefaultInstance;
+            if (DB == null)
+            {
+                DB = FirebaseFirestore.DefaultInstance;
+            }
+
+            if (!_firestoreConfigured && DB != null)
+            {
+                DB.Settings.PersistenceEnabled = false;
+                _firestoreConfigured = true;
+            }
+
+            if (Auth == null)
+            {
+                Auth = FirebaseAuth.DefaultInstance;
+            }
+
+            _initialized = true;
         }
         else
         {

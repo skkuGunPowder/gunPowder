@@ -12,13 +12,13 @@ public class MissileExplosion : Explosion
         SetStat(ID);
     }
 
-    public override void Explode(bool isFallingOut, PhotonView attackerPhotonView)
+    public override void Explode(bool isFallingOut, PhotonView attackerPhotonView, bool isNormalAttack = false)
     {
         if (_cameraController != null)
         {
             _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
         }
         
-        base.Explode(isFallingOut, attackerPhotonView);
+        base.Explode(isFallingOut, attackerPhotonView, isNormalAttack);
     }
 }

@@ -17,7 +17,7 @@ public class CrossExplosion : Explosion
         SetStat(ID);
     }
 
-    public override void Explode(bool isFallingOut, PhotonView attackerPhotonView)
+    public override void Explode(bool isFallingOut, PhotonView attackerPhotonView, bool isNormalAttack = false)
     {
         
         for (int i = 0; i < 4; i++)
@@ -31,6 +31,6 @@ public class CrossExplosion : Explosion
             _cameraController.ExplosionShake(transform, _stat.ExplosionRadius);
         }
 
-        base.Explode(isFallingOut, attackerPhotonView);
+        base.Explode(isFallingOut, attackerPhotonView, isNormalAttack);
     }
 }

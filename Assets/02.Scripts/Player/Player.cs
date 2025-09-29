@@ -40,12 +40,6 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public Dictionary<EItemType, ItemDTO> EquipedItemDict;
 
-    // [스킨] 마지막으로 적용된 스킨 ID를 저장하여 변경 여부를 감지
-    private string _lastHeadSkinId;
-    private string _lastFaceSkinId;
-    private string _lastChestSkinId;
-    private string _lastCapeSkinId;
-
     [Header("폭탄 설정")]
     // 폭탄 스폰 위치 리스트 (각도: 0,45,90,135,180,225,270,315)
     [SerializeField]
@@ -191,7 +185,7 @@ public class Player : MonoBehaviourPun, IDamagable
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
         _normalBomb = basicBomb.GetComponent<Bomb>();
         BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
-        
+
         if (UI_PingBase.Instance != null)
         {
             UI_PingBase.Instance.SetPing(this.transform);
@@ -343,7 +337,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 {
                     _originalSortingOrderMap[item] = item.sortingOrder;
                 }
-                
+
                 // 원본 값에 플레이어 오프셋을 더해서 설정
                 item.sortingOrder = _originalSortingOrderMap[item] + playerOrderInLayerPlus * 100;
             }
@@ -405,7 +399,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         // 기본 스프라이트 렌더러들의 원본 sortingOrder 저장
         InitializeOriginalSortingOrders();
-        
+
         LoadItems();
 
         // 1. 이벤트 핸들러 등록
@@ -537,7 +531,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void InitializeOriginalSortingOrders()
     {
         if (_playerStat?.MySpriteREndererList == null) { return; }
-        
+
         foreach (var renderer in _playerStat.MySpriteREndererList)
         {
             if (renderer != null)
@@ -622,8 +616,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
         // 대기방에서 작동 안하게 하기 위해 추가
-        if (GameManager.Instance.CurrentGameState == EGameState.Waiting 
-            || GameManager.Instance.CurrentGameState == EGameState.GameOver 
+        if (GameManager.Instance.CurrentGameState == EGameState.Waiting
+            || GameManager.Instance.CurrentGameState == EGameState.GameOver
             || GameManager.Instance.CurrentGameState == EGameState.Tutorial)
         {
             return;
@@ -636,7 +630,10 @@ public class Player : MonoBehaviourPun, IDamagable
         DecreaseGunPowderPeriodically();*/
 
         // 공격 없을 때 건파우더 감소
-        _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
+        if (!_playerStat.IsPausedNoAttack)
+        {
+            _gunPowderDecreaseWithoutAttackTimer += Time.deltaTime;
+        }
         DecreaseGunPowderWithoutAttack();
 
         // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
@@ -1182,7 +1179,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     }
 
-    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
+    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
     {
         EventManager.Instance.HitScreen();
         // 피격 VFX 재생
@@ -1213,16 +1210,18 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, PhotonMessageInfo info)
+    public void RPC_TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack, PhotonMessageInfo info)
     {
         if (_playerStat.IsImmune)
         {
             return;
         }
+
+        Debug.Log($"[RPC_TakeDamage] isNormalAttack: {isNormalAttack}");
 
         // 공격자 정보 가져오기
         PhotonView attackerView = PhotonView.Find(attackerViewId);
@@ -1776,5 +1775,16 @@ public class Player : MonoBehaviourPun, IDamagable
         RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
         _ultimateEffectOn = true;
         _playerStat.UltimateChanceDuration = 999999999f;
+    }
+
+    public void SetPausedNoAttack()
+    {
+        _playerStat.IsPausedNoAttack = true;
+        ResetColorAndEffects();
+    }
+
+    public void ResetPausedNoAttack()
+    {
+        _playerStat.IsPausedNoAttack = false;
     }
 }
