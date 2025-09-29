@@ -99,7 +99,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
         Hashtable propertiesToRemove = new Hashtable
         {
-            { EProperties.Team.ToString(), null }
+            { EProperties.Team.ToString(), null },
+            { EProperties.RoomInitial.ToString(), null}
         };
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(propertiesToRemove);
@@ -154,7 +155,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        Debug.Log($"OnRoomListUpdate{roomList.Count}");
         if (PhotonNetwork.InLobby == false)
         {
             return;
@@ -178,9 +178,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
                     _roomInfoList.Add(roomInfo);
                 }
             }
-
+            
         }
-
         EventManager.Instance.RoomListUpdate();
     }
 

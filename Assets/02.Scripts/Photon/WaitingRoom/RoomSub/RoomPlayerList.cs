@@ -1,18 +1,23 @@
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
+
 public class RoomPlayerList
 { 
     //리스트로 정보칸 들어가게 하기 => 플레이어 칸 정하기
     private List<int> _playerSlotList;
     public List<int> PlayerSlotList => _playerSlotList;
-
+    
+    
     public RoomPlayerList(int[] playerSlotList)
     {
         _playerSlotList = new List<int>(playerSlotList);
     }
 
+    // 플레이어 리스트 재설정
     public void GetPlayerList(int[] playerSlotList)
     {
         _playerSlotList.Clear();
@@ -29,15 +34,8 @@ public class RoomPlayerList
             {
                 return;
             }
-
-            for (int i = 0; i < _playerSlotList.Count; i++)
-            {
-                if (_playerSlotList[i] == player.ActorNumber)
-                {
-                    _playerSlotList[i] = 0;
-                    break;   
-                }
-            }
+            
+            SubPlayerPlacement(player);
         }
     }
     public void AddPlayerPlacement(PhotonPlayer player)
@@ -51,6 +49,8 @@ public class RoomPlayerList
                 break;
             }
         }
+
+        SetPlayerList();
     }
 
     public void SubPlayerPlacement(PhotonPlayer player)
@@ -64,5 +64,18 @@ public class RoomPlayerList
                 break;   
             }
         }
+        SetPlayerList();
     }
+
+    private void SetPlayerList()
+    {
+        Room room = PhotonNetwork.CurrentRoom;
+        Hashtable currentList = new Hashtable()
+        {
+            { EProperties.PlayerList.ToString(), _playerSlotList.ToArray() }
+        };
+
+        room.SetCustomProperties(currentList);
+    }
+    
 }

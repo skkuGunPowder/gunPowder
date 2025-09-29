@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 
@@ -71,5 +72,19 @@ public class RoomInitializer
     {
         roomManager.Spawner.GeneratePlayers(0);
     }
-    
+
+    public void PlayerInitial(int roomInitial)
+    {
+        if(PhotonNetwork.LocalPlayer.CustomProperties[EProperties.RoomInitial.ToString()] != null)
+        {
+            return;
+        }
+        
+        Hashtable notFirst = new Hashtable()
+        {
+            {EProperties.RoomInitial.ToString(), roomInitial}
+        };
+        
+        PhotonNetwork.LocalPlayer.SetCustomProperties(notFirst);
+    }
 }

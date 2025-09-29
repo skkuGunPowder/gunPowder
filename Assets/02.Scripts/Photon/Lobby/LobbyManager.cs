@@ -40,7 +40,9 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         roomOptions.CustomRoomProperties = roomProperties; 
         roomOptions.EmptyRoomTtl = 0;
         
-        string room = PhotonNetwork.LocalPlayer.UserId + " " + roomName;
+        DateTime now = DateTime.Now;
+        
+        string room = PhotonNetwork.LocalPlayer.UserId + $"{now}" + roomName;
         //방 만들기
         PhotonNetwork.CreateRoom(room,roomOptions, TypedLobby.Default);
     }
