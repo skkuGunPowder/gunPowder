@@ -84,8 +84,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             return;
         }
-
-        Initializer.SetPlayerList(PlayerList.PlayerSlotList.ToArray());
         
         _room.IsVisible = false;
         _room.IsOpen = false;
@@ -104,10 +102,10 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private void SetRoom()
     {
         InputHandler.BlockInput = false;
-     
-        if (_room.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false)
+        
+        if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.RoomInitial.ToString()) == false)
         {
-            // 이 방에 처음 들어온 사람들 초기 세팅
+            // 만약 방에 처음 들어왔다면 
             int[] playerList = new int[MaxPlayerCount];
             PlayerList = new RoomPlayerList(playerList);
             
@@ -119,15 +117,16 @@ public class RoomManager : PhotonSingleton<RoomManager>
                 _room.IsVisible = true;
                 _room.IsOpen = true;
             }
+         
+            Initializer.PlayerInitial(1);   
             return;
         }
-
-
+        
+        // 한판 끝나고 돌아왔을 때 플레이어 체크, 원래 있던 플레이어들 refresh
         int[] players = _room.CustomProperties[EProperties.PlayerList.ToString()] as int[];
         PlayerList = new RoomPlayerList(players);
         PlayerList.PlayerListCheck(); // 현재 플레이어와 지금 플레이어의 차이를 체크 
-        Initializer.SetPlayerList();  // 프로퍼티 지우기
-
+        
         if (PhotonNetwork.IsMasterClient)
         {
             _room.IsVisible = true;
