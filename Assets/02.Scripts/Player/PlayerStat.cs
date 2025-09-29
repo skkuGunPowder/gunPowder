@@ -68,6 +68,7 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private bool _isImmune = false;
     [SerializeField] private bool _isDownJump = false;
     [SerializeField] private bool _isWet = false;
+    [SerializeField] private bool _isPausedNoAttack = false;
     [SerializeField] private float _myMoveSpeed;
     [SerializeField] private float _jumpCount = 0;
     [SerializeField] private int _facingDirection = 1;
@@ -81,6 +82,7 @@ public class PlayerStat : MonoBehaviour
     public float MyMoveSpeed { get => _myMoveSpeed; set => _myMoveSpeed = value; }
     public float JumpCount { get => _jumpCount; set => _jumpCount = value; }
     public int FacingDirection { get => _facingDirection; set => _facingDirection = value; }
+    public bool IsPausedNoAttack { get => _isPausedNoAttack; set => _isPausedNoAttack = value; }
     public bool IsFallingFromLedge = false;
 
     [Header("플레이어 리소스")]
