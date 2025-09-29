@@ -71,5 +71,16 @@ public class RoomInitializer
     {
         roomManager.Spawner.GeneratePlayers(0);
     }
-    
+
+    public void SetPlayerList(int[] playerList = null)
+    {
+        Room room = PhotonNetwork.CurrentRoom;
+        
+        Hashtable currentList = new Hashtable()
+        {
+            {EProperties.PlayerList.ToString(), playerList}
+        };
+        
+        room.SetCustomProperties(currentList);
+    }
 }

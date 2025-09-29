@@ -31,10 +31,13 @@ public class RoomManager : PhotonSingleton<RoomManager>
 
         _photonView = GetComponent<PhotonView>();
         _room = PhotonNetwork.CurrentRoom;
+        
         ReadyCheck = new RoomReadyCheck();
         Initializer = new RoomInitializer();
+        
         EventManager.Instance.OnPlayerChanged += PlayerLeft;
     }
+
     // 방 세팅 시작 => Init
     public void Start()
     {
@@ -67,6 +70,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         _initialized = true;
         Initializer.Init(this);
+        
         SetRoom();
         EventManager.Instance.TeamChanged();
     }
@@ -81,14 +85,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
             return;
         }
 
-        Hashtable playerList = new Hashtable()
-        {
-            {EProperties.PlayerList.ToString(), PlayerList.PlayerSlotList.ToArray()}
-        };
+        Initializer.SetPlayerList(PlayerList.PlayerSlotList.ToArray());
         
-        _room.SetCustomProperties(playerList);
         _room.IsVisible = false;
         _room.IsOpen = false;
+        
         if (SelectedMap == EMap.Random)
         {
             int max = (int)EMap.Count - 1;
@@ -106,27 +107,33 @@ public class RoomManager : PhotonSingleton<RoomManager>
      
         if (_room.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false)
         {
+            // 이 방에 처음 들어온 사람들 초기 세팅
             int[] playerList = new int[MaxPlayerCount];
-            PlayerList = new RoomPlayerList(playerList);    
+            PlayerList = new RoomPlayerList(playerList);
             
             if (PhotonNetwork.IsMasterClient)
             {
                 PlayerList.AddPlayerPlacement(PhotonNetwork.LocalPlayer);
                 EventManager.Instance.RoomDataChanged();
+                
+                _room.IsVisible = true;
+                _room.IsOpen = true;
             }
-
-            _room.IsVisible = true;
-            _room.IsOpen = true;
             return;
         }
 
 
         int[] players = _room.CustomProperties[EProperties.PlayerList.ToString()] as int[];
-        PlayerList = new RoomPlayerList(players); 
-        PlayerList.PlayerListCheck();
+        PlayerList = new RoomPlayerList(players);
+        PlayerList.PlayerListCheck(); // 현재 플레이어와 지금 플레이어의 차이를 체크 
+        Initializer.SetPlayerList();  // 프로퍼티 지우기
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            _room.IsVisible = true;
+            _room.IsOpen = true;
+        }
         
-        _room.IsVisible = true;
-        _room.IsOpen = true;
         EventManager.Instance.RoomDataChanged();
     }
     
@@ -223,10 +230,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             return;
         }
+        
         Hashtable table = new Hashtable()
         {
             {EProperties.IsReady.ToString(), false}
         };
+        
         newMasterClient.SetCustomProperties(table);
     }
   
