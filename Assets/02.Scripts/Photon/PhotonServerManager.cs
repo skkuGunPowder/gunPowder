@@ -155,7 +155,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        Debug.Log($"OnRoomListUpdate{roomList.Count}");
         if (PhotonNetwork.InLobby == false)
         {
             return;
@@ -165,7 +164,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         {
             if (roomInfo.RemovedFromList)
             {
-                Debug.Log("remove");
                 _roomInfoList.RemoveAll(x => x.Name == roomInfo.Name);
             }
             else
@@ -173,21 +171,14 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
                 int index = _roomInfoList.FindIndex(x => x.Name == roomInfo.Name);
                 if (index >= 0)
                 {
-                    Debug.Log("update");
                     _roomInfoList[index] = roomInfo;
                 }
                 else
                 {
-                    Debug.Log("add");
                     _roomInfoList.Add(roomInfo);
                 }
             }
             
-        }
-
-        foreach (var VARIABLE in _roomInfoList)
-        {
-            Debug.Log($"roomcheck {VARIABLE.Name}");       
         }
         EventManager.Instance.RoomListUpdate();
     }
