@@ -12,8 +12,8 @@ public class BasicExplosion : Explosion
         SetStat(ID);
     }
 
-    public override void Explode(bool isFallingOut, PhotonView attackerPhotonView)
+    public override void Explode(bool isFallingOut, PhotonView attackerPhotonView, bool isNormalAttack = false)
     {
-        base.Explode(isFallingOut, attackerPhotonView);
+        base.Explode(isFallingOut, attackerPhotonView, isNormalAttack);
     }
 }

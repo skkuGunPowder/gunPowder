@@ -158,6 +158,32 @@ public class BasicBomb : Bomb
             _pulseTween.Kill();
         }
 
-        base.Explode();
+        //base.Explode();
+        // 폭발 프리펩 인스턴싱 (로컬에서만)
+        Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
+        explosion.transform.position = transform.position;
+        explosion.transform.rotation = Quaternion.identity;
+        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview, true);   
+
+        if (_vfx != null)
+        {
+            _vfx.transform.SetParent(transform);
+        }
+
+        // 소유자만 파괴 요청
+        if (PhotonView.IsMine)
+        {
+            
+            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
+            if (PhotonView != null && PhotonView.ViewID != 0)
+            {
+                PhotonNetwork.Destroy(gameObject);
+            }
+            else
+            {
+                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
+                Destroy(gameObject);
+            }
+        }
     }
 }

@@ -59,6 +59,9 @@ public class PlayerFallDeadState : PlayerBaseState
     {
         base.OnEnter();
 
+        // 
+        _owner.SetPausedNoAttack();
+
         // 안전성 검사
         if (!ValidateGameManagerAndComponents())
         {
@@ -92,6 +95,9 @@ public class PlayerFallDeadState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
+
+        //
+        _owner.ResetPausedNoAttack();
 
         // 애니메이션 및 효과 정리
         CleanupAnimationAndEffects();
@@ -445,6 +451,7 @@ public class PlayerFallDeadState : PlayerBaseState
                 _owner.transform.position, 
                 _owner.GetComponent<PhotonView>().ViewID, 
                 _owner.GetComponent<PhotonView>().OwnerActorNr, 
+                true,
                 true
             );
         }
