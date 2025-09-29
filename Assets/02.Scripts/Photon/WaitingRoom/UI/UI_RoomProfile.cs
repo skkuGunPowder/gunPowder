@@ -8,7 +8,7 @@ public class UI_RoomProfile : MonoBehaviour
 {
     public List<UI_ProfileSlot> UI_ProfileSlotList = new List<UI_ProfileSlot>();
     
-    private void Awake()
+    private void OnEnable()
     {
         EventManager.Instance.OnRoomDataChanged += Refresh;
         EventManager.Instance.OnReadyChanged += ReadyCheck;

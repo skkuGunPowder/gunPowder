@@ -608,7 +608,7 @@ MonoBehaviour:
   TimerOriginPosition: {x: 0, y: 100}
   ProfileOriginPosition: {x: 0, y: -200}
   GameStartTextScaleOrigin: {x: 0, y: 0, z: 0}
-  StartSound: {fileID: 8300000, guid: 4771b31b17c53244d936d80ddf998611, type: 3}
+  GameStartBell_1: {fileID: 0}
 --- !u!1 &2403866682721215137
 GameObject:
   m_ObjectHideFlags: 0
@@ -732,7 +732,8 @@ MonoBehaviour:
   GameSetStartPosition: {x: 0, y: 400}
   ProfileSlotStartPosition: {x: 0, y: 53.19}
   TimerOriginPosition: {x: 0, y: 0}
-  GameOver: {fileID: 8300000, guid: 88b51dc9d7ab31e4c8219582e1f17b09, type: 3}
+  GameEndBell_1: {fileID: 0}
+  GameEndCameraOff_2: {fileID: 0}
 --- !u!1 &3779694465325502095
 GameObject:
   m_ObjectHideFlags: 0
@@ -5276,6 +5277,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -30
       objectReference: {fileID: 0}
+    - target: {fileID: 4248003501473642583, guid: c604a4d462c74d647ab2276dad0247ea, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 5a5bd14f419f7457981f7478cffeb12c, type: 3}
     - target: {fileID: 5553666821936717286, guid: c604a4d462c74d647ab2276dad0247ea, type: 3}
       propertyPath: m_Name
       value: UI_KillLogSlot

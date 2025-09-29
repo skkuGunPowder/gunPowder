@@ -62,14 +62,14 @@ public class DamageChecker : Singleton<DamageChecker>
         }
     }
 
-    public void ActiveKillLog(int killer, int death)
+    public void ActiveKillLog(int killer, bool isNormal, int death)
     {
         if (GameManager.Instance.CurrentGameState != EGameState.Playing)
         {
             return;
         }
         
-        EventManager.Instance.OnUpdateLog(killer, death);
+        EventManager.Instance.OnUpdateLog(killer, isNormal, death);
     }
     
     public void RPC_RequestDamage(int gunpowder, int life, int attacker, int player)

@@ -3,14 +3,15 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-
+using Photon.Pun;
+using PhotonPlayer = Photon.Realtime.Player;
 public class UI_KillLogSlot : MonoBehaviour
 {
     public RectTransform KillLogPivot;
     
     public TextMeshProUGUI KillPlayerNickname;
     public TextMeshProUGUI DeathPlayerNickname;
-    public Image KillIcon;
+    public Image KillIcon; // 기본
 
     [Header("색상")] 
     [Tooltip("킬한 사람의 배경화면")]public Image KillBackground;
@@ -30,20 +31,19 @@ public class UI_KillLogSlot : MonoBehaviour
     
     
     [Header("아이콘")]
-    public Sprite Icon;
-
+    public Sprite BasicIcon; // 기본
+    public Sprite Suicide;   // 자살
     private void OnEnable()
     {
         KillLogPivot.anchoredPosition = _startPosition;
 
     }
 
-    public void Refresh(string kill,string death, bool killTeam, bool deathTeam)
+    public void Refresh(int killer, int death, bool killTeam, bool deathTeam, bool isNormal)
     {
-        KillPlayerNickname.text = kill;
-        DeathPlayerNickname.text = death;
-        KillIcon.sprite = Icon;
-
+        KillPlayerNickname.text = GetPlayerNickName(killer);
+        DeathPlayerNickname.text = GetPlayerNickName(death);
+        GetBombImage(killer, death, isNormal);
         TeamCheck(killTeam, deathTeam);
         
         Tween_KillLog();
@@ -59,7 +59,27 @@ public class UI_KillLogSlot : MonoBehaviour
             this.gameObject.SetActive(false);
         });
     }
-
+    
+    private void GetBombImage(int attacker,int death, bool isNormal)
+    {
+        if (attacker == death)
+        {
+            KillIcon.sprite = Suicide;
+            return;
+        }
+        
+        if (isNormal)
+        {
+            KillIcon.sprite = BasicIcon;
+            return;
+        }
+        
+        PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(attacker);
+        ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
+        Sprite sprite = item.Image;
+        
+        KillIcon.sprite = sprite;
+    }
     // 킬로그에 나온 사람이 누구 팀인가?
     private void TeamCheck(bool killTeam, bool deathTeam)
     {
@@ -82,7 +102,13 @@ public class UI_KillLogSlot : MonoBehaviour
             DeathBackground.color = ColorPalette.ColorDictionary[EColorType.KillLogEnemy];
         }
     }
-
+    
+    private string GetPlayerNickName(int playerNumber)
+    {
+        PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerNumber);
+        
+        return player.NickName;
+    }
     private void OnDisable()
     {
         DOTween.Kill(KillLogPivot);
