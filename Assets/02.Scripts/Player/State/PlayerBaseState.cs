@@ -365,14 +365,14 @@ public class PlayerBaseState : MonoState
         if(!_owner.PhotonView.IsMine)
             return;
 
-        // 특수 폭탄 사용 가능 여부 체크
-        if (!CanSpecialBomb())
+        // 에어드롭 아이템 사용 체크
+        if (TryUseAirDropItem())
         {
             return;
         }
 
-        // 에어드롭 아이템 사용 체크
-        if (TryUseAirDropItem())
+        // 특수 폭탄 사용 가능 여부 체크
+        if (!CanSpecialBomb())
         {
             return;
         }
