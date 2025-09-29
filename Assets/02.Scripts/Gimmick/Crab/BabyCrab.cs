@@ -68,7 +68,8 @@ public class BabyCrab : Crab
         {
             InputHandler.BlockInput = false;
         }
-        player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerIdleState));
+        
+        // player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerIdleState));
 
         _rigidbody.simulated = true;
         _rigidbody.AddForce(new Vector2(1, 1).normalized * 1f, ForceMode2D.Impulse);
