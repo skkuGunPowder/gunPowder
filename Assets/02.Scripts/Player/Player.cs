@@ -1179,7 +1179,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     }
 
-    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut)
+    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
     {
         EventManager.Instance.HitScreen();
         // 피격 VFX 재생
@@ -1210,16 +1210,18 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut);
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, PhotonMessageInfo info)
+    public void RPC_TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack, PhotonMessageInfo info)
     {
         if (_playerStat.IsImmune)
         {
             return;
         }
+
+        Debug.Log($"[RPC_TakeDamage] isNormalAttack: {isNormalAttack}");
 
         // 공격자 정보 가져오기
         PhotonView attackerView = PhotonView.Find(attackerViewId);
