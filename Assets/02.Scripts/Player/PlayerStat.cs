@@ -305,7 +305,7 @@ public class PlayerStat : MonoBehaviour
         OnGunpowderIncreased?.Invoke(amount);
     }
     
-    public bool DecreaseGunPowderCount(int amount, int attacker)
+    public bool DecreaseGunPowderCount(int amount, int attacker, bool isNormalAttack = true)
     {
         if (GameManager.Instance.CurrentGameState != EGameState.Playing)
         {
@@ -347,7 +347,7 @@ public class PlayerStat : MonoBehaviour
                 killerForLog = _photonView.OwnerActorNr; // 자살
             }
             
-            _photonView.RPC(nameof(RPC_Dead), RpcTarget.All, attacker, killerForLog);
+            _photonView.RPC(nameof(RPC_Dead), RpcTarget.All, killerForLog, isNormalAttack);
             OnGunPowderEmpty?.Invoke();
             
             // 킬 카운트 증가 로직 - 최근 공격자 기반
@@ -388,10 +388,10 @@ public class PlayerStat : MonoBehaviour
     }
 
     [PunRPC]
-    private void RPC_Dead(int attacker, int killerForLog, PhotonMessageInfo info)
+    private void RPC_Dead(int killerForLog, bool isNormal, PhotonMessageInfo info)
     {
         // 죽은 사람의 클라이언트에서 미리 결정된 킬러로 킬로그 표시
-        DamageChecker.Instance.ActiveKillLog(killerForLog, info.Sender.ActorNumber);
+        DamageChecker.Instance.ActiveKillLog(killerForLog, isNormal, info.Sender.ActorNumber);
     }
 
     // 데미지 & 통계 관리 메서드

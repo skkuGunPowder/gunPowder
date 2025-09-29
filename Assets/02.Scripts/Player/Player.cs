@@ -1258,7 +1258,7 @@ public class Player : MonoBehaviourPun, IDamagable
         maxDamage += increaseDamagePerDamagedCount;
 
         // 체력 감소
-        bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber);
+        bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber, isNormalAttack);
 
         // 날 때린 사람 딜량 증가
         if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
