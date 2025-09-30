@@ -16,6 +16,7 @@ public class GameManager : PhotonSingleton<GameManager>
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
     public bool LastPlayer = false;
+    private GameObject _myPlayer;
     
     [Header("부활 지점")]
     public Transform ResurrectPoint;                   // 부활 지점
@@ -132,6 +133,7 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         OnGameStart?.Invoke();
         EventManager.Instance.ProfileInit();
+        _myPlayer = GameObject.FindGameObjectWithTag("Player");
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
     }
 
@@ -157,8 +159,8 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
         
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        PlayerStat stat = playerObject.GetComponent<PlayerStat>();
+        PlayerStat stat = _myPlayer.GetComponent<PlayerStat>();
+        
         Hashtable properties = new Hashtable()
         {
             {EProperties.IsDead.ToString(), true},
