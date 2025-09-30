@@ -1260,11 +1260,11 @@ public class Player : MonoBehaviourPun, IDamagable
         // 체력 감소
         bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber, isNormalAttack);
 
-        // 날 때린 사람 딜량 증가
+        // 날 때린 사람 딜량 증가 (자기 자신일 경우 제외)
         if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
         {
             PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
-            if (attackerStat != null)
+            if (attackerStat != null  && attackerView != PhotonView)
             {
                 attackerStat.IncreaseTotalDamage(damage);
                 /*
