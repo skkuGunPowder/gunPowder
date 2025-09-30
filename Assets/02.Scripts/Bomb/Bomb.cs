@@ -9,7 +9,6 @@ public class Bomb : MonoBehaviourPun, IBomb
     protected Vector3 _fireDirection;
     protected float _currentSpeed;
     protected float _fuzeTimer;
-
     protected PhotonView _ownerPhotonview;
 
     public Transform TrailVFXPosition;
@@ -145,9 +144,19 @@ public class Bomb : MonoBehaviourPun, IBomb
         return _stat;
     }
 
-    public void ResetFuze()
+    public virtual void ResetFuze()
     {
         _fuzeTimer = 0f;
+    }
+
+    public virtual void PauseBomb()
+    {
+
+    }
+
+    public virtual void ResumeBomb()
+    {
+
     }
 
     [PunRPC]

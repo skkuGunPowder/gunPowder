@@ -22,6 +22,14 @@ public class UltimateManager : Singleton<UltimateManager>
         }
     }
 
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.U) && _player != null)
+        {
+            _player.Ultimate.ExcuteUltimate();
+        }
+    }
+
     public void SetPlayer(Player player)
     {
         _player = player;

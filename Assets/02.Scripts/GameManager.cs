@@ -62,7 +62,15 @@ public class GameManager : PhotonSingleton<GameManager>
 
         _photonView.RPC(nameof(RPC_GameStart), RpcTarget.All);
     }
-    
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            PhotonNetwork.Instantiate("AirDropJet", transform.position, Quaternion.identity);
+        }
+    }
+
     // 게임 종료
     public void RequestGameOver()
     {

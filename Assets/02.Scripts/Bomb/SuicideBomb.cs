@@ -19,6 +19,14 @@ public class SuicideBomb : Bomb
     private SpriteRenderer _spriteRenderer;
     private Player _owner;
 
+    private float _remainingTime;
+    private int _beatCount;
+    private float _timer;
+    private float _interval;
+    private bool _isBombActive = false;
+
+    private IEnumerator _bombCoroutine;
+
 
     protected override void Init()
     {
@@ -26,13 +34,30 @@ public class SuicideBomb : Bomb
         SetStat(ID);
 
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        _bombCoroutine = BombRoutine();
     }
 
     protected override void Update()
     {
         base.Update();
 
-        transform.position = _ownerPhotonview.transform.position;
+        CheckDirection();
+    }
+
+    public override void PauseBomb()
+    {
+        base.PauseBomb();
+        StopCoroutine(_bombCoroutine);
+    }
+
+    public override void ResumeBomb()
+    {
+        base.ResumeBomb();
+        StartCoroutine(_bombCoroutine);
+    }
+
+    private void CheckDirection()
+    {
         if (_owner.PlayerStat.MySpriteREndererList[0].flipX == true)
         {
             _spriteRenderer.flipX = true;
@@ -41,6 +66,28 @@ public class SuicideBomb : Bomb
         {
             _spriteRenderer.flipX = false;
         }
+    }
+
+    private void Beep(int beatCount)
+    {
+        if (_suicideBombSound != null)
+        {
+            Sound sound = SoundManager.Instance.PlayLocalSound(_suicideBombSound.name, transform);
+            AudioSource audioSource = sound.GetAudioSource();
+            audioSource.pitch = 1f + (beatCount * 0.1f);
+        }
+
+        if (beatCount <= 4)
+        {
+            transform.DOScale(Vector3.one * 1.2f, 0.1f).SetLoops(2, LoopType.Yoyo);
+        }
+        else
+        {
+            transform.DOScale(Vector3.one * 1.2f, 0.1f).SetEase(Ease.OutBack);
+        }
+
+        _spriteRenderer.sprite = _redSprite;
+        DOVirtual.DelayedCall(0.2f, () => _spriteRenderer.sprite = _defaultSprite);
     }
 
     private IEnumerator BombRoutine()
@@ -63,37 +110,14 @@ public class SuicideBomb : Bomb
         Explode();
     }
 
-    private void Beep(int beatCount)
-    {
-        // 사운드 피치 변경
-        if (_suicideBombSound != null)
-        {
-            Sound sound = SoundManager.Instance.PlayLocalSound(_suicideBombSound.name, transform);
-            AudioSource audioSource = sound.GetAudioSource();
-            audioSource.pitch = 1f + (beatCount * 0.1f);
-        }
-
-        // 스케일 변경
-        if (beatCount <= 4)
-        {
-            transform.DOScale(Vector3.one * 1.2f, 0.1f).SetLoops(2, LoopType.Yoyo);
-        }
-        else
-        {
-            transform.DOScale(Vector3.one * 1.2f, 0.1f).SetEase(Ease.OutBack);
-        }
-
-        // 스프라이트 변경
-        _spriteRenderer.sprite = _redSprite;
-        DOVirtual.DelayedCall(0.2f, () => _spriteRenderer.sprite = _defaultSprite);
-    }
-
-
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _owner = _ownerPhotonview.GetComponent<Player>();
-        StartCoroutine(BombRoutine());
+        CheckDirection();
+        transform.position = _ownerPhotonview.transform.position;
+        transform.parent = _owner.transform;
+        StartCoroutine(_bombCoroutine);
     }
 
     [PunRPC]

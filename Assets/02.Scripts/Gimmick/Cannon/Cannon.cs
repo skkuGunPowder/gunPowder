@@ -38,11 +38,18 @@ public class Cannon : MonoBehaviour
         if (target.CompareTag("Player"))
         {
             InputHandler.BlockInput = true;
+
+            if (target.GetComponentInChildren<Bomb>() != null)
+            {
+                Bomb bomb = target.GetComponentInChildren<Bomb>();
+                bomb.PauseBomb();
+                bomb.ResetFuze();
+            }
         }
 
         if (target.CompareTag("Bomb"))
         {
-            target.GetComponent<Bomb>().ResetFuze();
+            GetComponent<Bomb>().ResetFuze();
         }
 
         _isLoaded = true;
@@ -82,6 +89,11 @@ public class Cannon : MonoBehaviour
         if (target.CompareTag("Player"))
         {
             InputHandler.BlockInput = false;
+            if (target.GetComponentInChildren<Bomb>() != null)
+            {
+                Bomb bomb = target.GetComponentInChildren<Bomb>();
+                bomb.ResumeBomb();
+            }
         }
 
         _barrel.transform.DORotate(Vector3.zero, 0.5f).SetEase(Ease.InOutSine);
