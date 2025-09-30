@@ -2,25 +2,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PopupManager : MonoBehaviour
+public class PopupManager : Singleton<PopupManager>
 {
     [Header("팝업 UI")]
     public List<UI_Popup> PopupList = new List<UI_Popup>();
     private Stack<UI_Popup> _popupStack = new Stack<UI_Popup>();
-    public static PopupManager Instance;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Instance.PopupList = PopupList;
-            Destroy(this.gameObject);
-        }
-        DontDestroyOnLoad(gameObject);
+        base.Awake();
     }
 
     private void Update()
