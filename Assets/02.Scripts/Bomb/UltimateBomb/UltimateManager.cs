@@ -24,7 +24,7 @@ public class UltimateManager : Singleton<UltimateManager>
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.U) && _player != null)
+        if(Input.GetKeyDown(KeyCode.C) && _player != null)
         {
             _player.Ultimate.ExcuteUltimate();
         }
