@@ -230,4 +230,18 @@ public class AccountManager : DontDestroySingleton<AccountManager>
 		_myAccount = null;
 		_sessoinID = null;
 	}
+
+    public async Task<string> GetUserNicknameWithUid(string uid)
+    {
+        return await _accountRepository.GetUserNicknameWithUidAsync(uid);
+    }
+    public async Task<List<string>> GetUidsWithNickname(string nickname)
+    {
+        return await _accountRepository.GetUidsWithNicknameAsync(nickname);
+    }
+    public async Task<string> GetUserDisplayNameWithUid(string nickname)
+    {
+        return await _accountRepository.GetUserDisplayNameWithUidAsync(nickname);
+    }
+    
 }
