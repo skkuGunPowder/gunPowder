@@ -55,7 +55,6 @@ public class UI_RoomProfile : MonoBehaviour
             }
             else
             {
-                Debug.Log($"ui_readycheck {player.ActorNumber}");
                 UI_ProfileSlotList[i].ReadyCheck((bool)player.CustomProperties[EProperties.IsReady.ToString()]);
             }
         }
