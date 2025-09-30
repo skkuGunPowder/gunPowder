@@ -142,6 +142,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         if (changedProps.ContainsKey(EProperties.IsReady.ToString())) // 레디 변경
         {
             EventManager.Instance.ReadyChange();
+            Debug.Log("ready" + targetPlayer.ActorNumber + " " + changedProps[EProperties.IsReady.ToString()]);
         }
         
         if (changedProps.ContainsKey(EProperties.Team.ToString()))  // 팀 변경

@@ -15,6 +15,7 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void Init()
     {
+        Debug.Log("profile init");
         _playerActorNumberList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
 
         for (int i = 0; i < UI_InGameProfileSlotList.Count; i++)
@@ -88,6 +89,7 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnDataChanged += Refresh;
             EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
             EventManager.Instance.OnProfileInit += Init;   
+            Debug.Log("SubscribeEvents");       
         }
     }
 
@@ -98,6 +100,7 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnDataChanged -= Refresh;
             EventManager.Instance.OnTopPlayerChanged -= SetTopPlayer;
             EventManager.Instance.OnPlayEmotion -= PlayEmotion;
+            Debug.Log("UnsubscribeEvents");
         }
     }
 }

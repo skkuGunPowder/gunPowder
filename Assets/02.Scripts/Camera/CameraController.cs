@@ -12,15 +12,19 @@ public class CameraController : MonoBehaviour
     [SerializeField] private ProCamera2D _proCamera;
 
     private Player _target;
-
+    
     private bool _isObserving = false;
     private List<Player> _currentTargetList = new List<Player>();
     private int _currentTargetIndex = 0;
-
+    
     [Header("마지막 킬 관련")] 
     [Tooltip("시간 고치면 플레이어 라스트 다이 시간도 고쳐야함")]
     public float TargetZoomDuration = 1.5f;
     public float TargetZoomAmount = 1.5f;
+    
+    public event Action<bool> OnUIOnOff;                 // UI On/Off
+    public event Action<string> OnNicknameChanged; // 타겟 이름 전달
+
     private void Awake()
     {
         Init();
@@ -114,6 +118,7 @@ public class CameraController : MonoBehaviour
             return;
         }
         
+        Debug.Log("listup");
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();
         
@@ -124,7 +129,13 @@ public class CameraController : MonoBehaviour
                 // activefalse가 자기 자신이면 오저버모드
                 if (player.GetComponent<PhotonView>().Owner.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
+                    if (_isObserving)
+                    {
+                        continue;   
+                    }
+                    
                     _isObserving = true;
+                    OnUIOnOff?.Invoke(true);
                 };
                 continue;
             }
@@ -132,14 +143,11 @@ public class CameraController : MonoBehaviour
             _currentTargetList.Add(player);
             
         }
-        
-        EventManager.Instance.OnPlayerListUp -= TargetListUp;
     }
 
     private void LastAttack(int actorNumber)
     {
-        Debug.Log("LastAttack");
-        
+        OnUIOnOff?.Invoke(false);
         foreach (Player p in _currentTargetList)
         {
             PhotonPlayer photonPlayer = p.GetComponent<PhotonView>().Owner;
@@ -150,8 +158,6 @@ public class CameraController : MonoBehaviour
                 _proCamera.Zoom(-TargetZoomAmount, TargetZoomDuration);
                 EventManager.Instance.GameSet();
                 _currentTargetList.Clear();
-                _currentTargetList.Add(p);
-                Debug.Log($"player : {photonPlayer.ActorNumber}");
                 return;
             }
         }
@@ -176,7 +182,7 @@ public class CameraController : MonoBehaviour
 
     }
 
-    private void SelectTarget(int index)
+    public void SelectTarget(int index)
     {
         if (_currentTargetList.Count <= 1)
         {
@@ -195,6 +201,9 @@ public class CameraController : MonoBehaviour
         }
         
         Player player = _currentTargetList[_currentTargetIndex];
+        string nickname = player.GetComponent<PhotonView>().Owner.NickName;
+        OnNicknameChanged?.Invoke(nickname);
+        
         SetTarget(player);
     }
     
