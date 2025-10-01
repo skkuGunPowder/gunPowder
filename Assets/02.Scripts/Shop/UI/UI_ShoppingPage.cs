@@ -29,9 +29,10 @@ public class UI_ShoppingPage : MonoBehaviour
 
         if (_shopSlotList.Count < shopItemList.Count)
         {
-            for (int i = 0; i < shopItemList.Count - _shopSlotList.Count; i++)
+            int needSlotCount = shopItemList.Count - _shopSlotList.Count;
+            for (int i = 0; i < needSlotCount; i++)
             {
-                var newShopSlot = Instantiate(_shopSlotPrefab, _gridTransform);
+                UI_ShopItemSlot newShopSlot = Instantiate(_shopSlotPrefab, _gridTransform);
                 _shopSlotList.Add(newShopSlot);
                 newShopSlot.gameObject.SetActive(false);
             }
