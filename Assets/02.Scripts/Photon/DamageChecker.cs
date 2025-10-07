@@ -8,7 +8,7 @@ public class DamageChecker : Singleton<DamageChecker>
 {
     private PhotonView _photonView;
 
-    private int _currentTopPlayer;                           // 처음 1등은 방장
+    private int _currentTopPlayer;                           
     
     private Dictionary<int, int> _playerScoreDictionary;
     private List<int>  _playerList;
@@ -27,6 +27,7 @@ public class DamageChecker : Singleton<DamageChecker>
     private void Start()
     {
         Init();
+        EventManager.Instance.OnPlayerChanged += LeftPlayer;
     }
     private void Init()
     {
@@ -50,6 +51,36 @@ public class DamageChecker : Singleton<DamageChecker>
         _playerScoreDictionary.Add(_currentTopPlayer, -1); // 초기화
     }
 
+    private void LeftPlayer(PhotonPlayer leftPlayer)
+    {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        int playerNumber = leftPlayer.ActorNumber;
+        
+        _playerScoreDictionary[leftPlayer.ActorNumber] = -1;
+        
+        int topActor = _currentTopPlayer;
+        int topScore = _playerScoreDictionary[topActor];
+
+        foreach (var kvp in _playerScoreDictionary)
+        { 
+            if (kvp.Value > topScore) 
+            { 
+                topScore = kvp.Value; 
+                topActor = kvp.Key;
+            }
+        }
+
+        if (topActor != _currentTopPlayer)
+        {
+            _currentTopPlayer = topActor;
+            _photonView.RPC(nameof(RPC_RequestTopPlayer), RpcTarget.All, topActor);
+        }
+        
+    }
     public void SetPlayerView()
     {
         PlayerStat[] allPlayerStats = FindObjectsByType<PlayerStat>(FindObjectsSortMode.None);
@@ -110,32 +141,30 @@ public class DamageChecker : Singleton<DamageChecker>
     {
         if (life == 0)
         {
+            _playerScoreDictionary[playerNumber] = 0;
             return;
         }
         
         int score = life * gunpowder;
         
         _playerScoreDictionary[playerNumber] = score;
-        CheckTopPlayer();
+        CheckTopPlayer(playerNumber);
     }
 
-    private void CheckTopPlayer()
+    private void CheckTopPlayer(int playerNumber)
     {
-        int topActor = _currentTopPlayer;
-        int topScore = _playerScoreDictionary[topActor];
-        foreach (var kvp in _playerScoreDictionary)
+        if (playerNumber == _currentTopPlayer)
         {
-            if (kvp.Value > topScore)
-            {
-                topScore = kvp.Value;
-                topActor = kvp.Key;
-            }
+            return;       
         }
         
-        if (topActor != _currentTopPlayer)
+        int topActor = _currentTopPlayer;
+        int topScore = _playerScoreDictionary[topActor];
+
+        if (_playerScoreDictionary[playerNumber] > topScore)
         {
-            _currentTopPlayer = topActor;
-            _photonView.RPC(nameof(RPC_RequestTopPlayer), RpcTarget.All, topActor);
+            _currentTopPlayer = playerNumber;
+            _photonView.RPC(nameof(RPC_RequestTopPlayer), RpcTarget.All, _currentTopPlayer);
         }
     }
     
@@ -143,5 +172,10 @@ public class DamageChecker : Singleton<DamageChecker>
     private void RPC_RequestTopPlayer(int topActor)
     {
         EventManager.Instance.SetTopPlayer(topActor);
+    }
+    
+    private void OnDisable()
+    {
+        EventManager.Instance.OnPlayerChanged -= LeftPlayer;
     }
 }
