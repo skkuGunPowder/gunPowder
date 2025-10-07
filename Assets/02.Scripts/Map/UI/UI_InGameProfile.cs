@@ -6,7 +6,7 @@ public class UI_InGameProfile : MonoBehaviour
 { 
     [SerializeField]
     private List<UI_InGameProfileSlot> UI_InGameProfileSlotList = new List<UI_InGameProfileSlot>();
-    private List<PhotonPlayer> _playerActorNumberList = new List<PhotonPlayer>();
+    private List<int> _playerActorNumberList = new List<int>();
     
     private void OnEnable()
     {
@@ -15,19 +15,19 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void Init()
     {
-        Debug.Log("profile init");
-        _playerActorNumberList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
 
         for (int i = 0; i < UI_InGameProfileSlotList.Count; i++)
         {
-            if (i < _playerActorNumberList.Count)
+            if (i < players.Length)
             {
+                _playerActorNumberList.Add(players[i].ActorNumber);
                 // 후에 수정
-                ItemDTO item = ItemDatabase.Instance.GetItem(_playerActorNumberList[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
+                ItemDTO item = ItemDatabase.Instance.GetItem(players[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
                 Sprite bomb = item.Image;
-                string playerName = _playerActorNumberList[i].NickName;
-                EInGameTeam team = (EInGameTeam)_playerActorNumberList[i].CustomProperties[EProperties.Team.ToString()];
-                UI_InGameProfileSlotList[i].Init(playerName,bomb, team, _playerActorNumberList[i]);
+                string playerName = players[i].NickName;
+                EInGameTeam team = (EInGameTeam)players[i].CustomProperties[EProperties.Team.ToString()];
+                UI_InGameProfileSlotList[i].Init(playerName,bomb, team, players[i]);
                 UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife , 0);
             }
             else
@@ -43,13 +43,15 @@ public class UI_InGameProfile : MonoBehaviour
     {
         for(int i = 0; i < _playerActorNumberList.Count; i++)
         {
-            if (_playerActorNumberList[i].ActorNumber == playerNumber)
+            if (_playerActorNumberList[i] == playerNumber)
             {
                 UI_InGameProfileSlotList[i].SetTop(true);
+                
             }
             else
             {
                 UI_InGameProfileSlotList[i].SetTop(false);
+                
             }
         }
     }
@@ -58,7 +60,7 @@ public class UI_InGameProfile : MonoBehaviour
     {
         for (int i = 0; i < _playerActorNumberList.Count; i++)
         {
-            if (_playerActorNumberList[i].ActorNumber == playerNumber)
+            if (_playerActorNumberList[i] == playerNumber)
             {
                 UI_InGameProfileSlotList[i].Refresh(gunpowder,life,attacker);
             }
@@ -70,11 +72,28 @@ public class UI_InGameProfile : MonoBehaviour
     {
         for (int i = 0; i < _playerActorNumberList.Count; i++)
         {
-            if (_playerActorNumberList[i].ActorNumber == playerNumber)
+            if (_playerActorNumberList[i] == playerNumber)
             {
                 UI_InGameProfileSlotList[i].PlayEmotion(emotionName);
             }
         }
+    }
+
+    private void PlayerLeftRefresh(PhotonPlayer leftPlayer)
+    {
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
+
+        for (int i = 0; i < _playerActorNumberList.Count; i++)
+        {
+            if (_playerActorNumberList[i] == leftPlayer.ActorNumber)
+            {
+                UI_InGameProfileSlotList[i].LeftOverRefresh(true);
+                _playerActorNumberList[i] = 0;
+                break;
+            }
+        }
+        
+        
     }
     private void OnDisable()
     {
@@ -89,6 +108,7 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnDataChanged += Refresh;
             EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
             EventManager.Instance.OnProfileInit += Init;   
+            EventManager.Instance.OnPlayerLeft += PlayerLeftRefresh;
             Debug.Log("SubscribeEvents");       
         }
     }
@@ -100,6 +120,7 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnDataChanged -= Refresh;
             EventManager.Instance.OnTopPlayerChanged -= SetTopPlayer;
             EventManager.Instance.OnPlayEmotion -= PlayEmotion;
+            EventManager.Instance.OnPlayerLeft -= PlayerLeftRefresh;
             Debug.Log("UnsubscribeEvents");
         }
     }

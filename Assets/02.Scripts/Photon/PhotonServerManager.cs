@@ -3,6 +3,7 @@ using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using PhotonPlayer = Photon.Realtime.Player;
 
 public class PhotonServerManager : MonoBehaviourPunCallbacks
@@ -85,6 +86,13 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     {
     }
 
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        base.OnDisconnected(cause);
+        Debug.LogError("이제 연결 끊기면 포톤 씬으로 보냅니다.");
+        SceneManager.LoadScene(ESceneList.Photon.ToString());
+    }
+
     //마스터 서버에 접속
     public override void OnConnectedToMaster()
     {
@@ -139,13 +147,15 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(PhotonPlayer otherPlayer)
     {
-        EventManager.Instance.PlayerFind();
+     
+        EventManager.Instance.PlayerLeft(otherPlayer);
         
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
-        EventManager.Instance.PlayerLeftRoom(otherPlayer);
+        EventManager.Instance.PlayerLeftRoom(otherPlayer);   
+        EventManager.Instance.PlayerFind();
     }
 
     public void SetFirst(bool isFirst)

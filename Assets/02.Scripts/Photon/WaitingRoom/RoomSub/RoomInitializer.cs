@@ -73,6 +73,7 @@ public class RoomInitializer
         roomManager.Spawner.GeneratePlayers(0);
     }
 
+    // 처음 들어온 사람인가?
     public void PlayerInitial(int roomInitial)
     {
         if(PhotonNetwork.LocalPlayer.CustomProperties[EProperties.RoomInitial.ToString()] != null)
