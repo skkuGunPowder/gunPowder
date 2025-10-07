@@ -20,7 +20,7 @@ public class Explosion : MonoBehaviour
         _stat = ItemDatabase.Instance.GetStat<ExplosionStat>(id);
     }
 
-    public virtual void Explode(bool isFallingOut, PhotonView attackerPhotonView)
+    public virtual void Explode(bool isFallingOut, PhotonView attackerPhotonView, bool isNormalAttack = false)
     {
         
         VFXPool.Instance.Play(VFXPrefab.name, transform.position);
@@ -61,7 +61,7 @@ public class Explosion : MonoBehaviour
                     continue;
                 }
                 int damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
-                damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.HealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut);
+                damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.HealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut, isNormalAttack);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());

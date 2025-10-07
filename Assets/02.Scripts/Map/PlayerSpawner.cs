@@ -16,15 +16,9 @@ public class PlayerSpawner : MonoBehaviour
 
         if (player.PhotonView.IsMine)
         {
-            player.tag = "Player";
-
             CameraController proCamera = Camera.main.GetComponent<CameraController>();
             proCamera.SetTarget(player);
             UltimateManager.Instance.SetPlayer(player);
-        }
-        else
-        {
-            player.tag = "Enemy";
         }
     }
 

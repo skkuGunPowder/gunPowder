@@ -28,7 +28,7 @@ public class UI_KillLog : MonoBehaviour
         _playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
     }
 
-    public void Refresh(int kill, int death)
+    private void Refresh(int kill, bool isNormal, int death)
     {
         foreach (UI_KillLogSlot slot in KillLogSlotList)
         {
@@ -36,46 +36,27 @@ public class UI_KillLog : MonoBehaviour
             {
                 continue;
             }
-
-            string killPlayer = GetPlayerNickName(kill);
-            string deathPlayer = GetPlayerNickName(death);
             
             bool killerTeam = TeamCheck(kill);
             bool deathTeam = TeamCheck(death);
             
             slot.gameObject.SetActive(true); 
-            slot.Refresh(killPlayer, deathPlayer, killerTeam, deathTeam);
+            slot.Refresh(kill, death, killerTeam, deathTeam, isNormal);
             break;
         }
     }
-
-    private string GetPlayerNickName(int playerNumber)
-    {
-        foreach (PhotonPlayer player in _playerList)
-        {
-            if (player.ActorNumber == playerNumber)
-            {
-                return player.NickName;
-            }
-        }
-
-        return "";
-    }
-
+    
     private bool TeamCheck(int playerNumber)
     {
-        foreach (PhotonPlayer player in _playerList)
+        PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerNumber);
+        
+        int playerTeam = (int)player.CustomProperties[EProperties.Team.ToString()];
+        
+        if (playerTeam == _myTeam)
         {
-            if (player.ActorNumber == playerNumber)
-            {
-                int playerTeam = (int)player.CustomProperties[EProperties.Team.ToString()];
-
-                if (playerTeam == _myTeam)
-                {
-                    return true;
-                }
-            }
-        } 
+            return true;
+        }
+        
         return false;
     }
     private void OnDisable()

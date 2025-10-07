@@ -7,20 +7,12 @@ using UnityEngine;
 
 public class LobbyManager : PhotonSingleton<LobbyManager>
 {
-    private List<RoomInfo> _roomInfoList = new List<RoomInfo>();
-    public List<RoomInfo> RoomInfoList => _roomInfoList;
-    
     [Header("처음 맵 설정")] public EMap InitialMap = EMap.Forest1;
     
     protected override void Awake()
     {
         base.Awake();
         ClientManager.PlayBGM("Lobby");
-    }
-
-    private void Start()
-    {
-        _roomInfoList = PhotonServerManager.Instance.TempRoomInfoList;
     }
 
     // 방에 보내기
@@ -48,7 +40,9 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         roomOptions.CustomRoomProperties = roomProperties; 
         roomOptions.EmptyRoomTtl = 0;
         
-        string room = PhotonNetwork.LocalPlayer.UserId + " " + roomName;
+        DateTime now = DateTime.Now;
+        
+        string room = PhotonNetwork.LocalPlayer.UserId + $"{now}" + roomName;
         //방 만들기
         PhotonNetwork.CreateRoom(room,roomOptions, TypedLobby.Default);
     }
@@ -66,42 +60,5 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
         }
         
         return roomProperties;
-    }
-    // 계정 정보들 가져오기?
-    // 룸 추가, 삭제
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
-        if (PhotonNetwork.InLobby == false)
-        {
-            return;
-        }
-        
-        foreach (RoomInfo roomInfo in roomList)
-        {
-            if (roomInfo.RemovedFromList)
-            {
-                _roomInfoList.RemoveAll(x => x.Name == roomInfo.Name);
-            }
-            else
-            {
-                int index = _roomInfoList.FindIndex(x => x.Name == roomInfo.Name);
-                if (index >= 0)
-                {
-                    _roomInfoList[index] = roomInfo;
-                }
-                else
-                {
-                    _roomInfoList.Add(roomInfo);
-                }
-            }
-
-        }
-
-        EventManager.Instance.RoomListUpdate();
-    }
-
-    private void OnDestroy()
-    {
-        PhotonServerManager.Instance.SaveRoomList(_roomInfoList);
     }
 }

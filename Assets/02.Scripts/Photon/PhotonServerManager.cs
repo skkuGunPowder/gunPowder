@@ -17,8 +17,9 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     [Header("GameVersion")]
     [SerializeField] private string _gameVersion = "1.0.0";
     
-    
-    public List<RoomInfo> TempRoomInfoList = new List<RoomInfo>();
+    private List<RoomInfo> _roomInfoList = new List<RoomInfo>();
+    public List<RoomInfo> RoomInfoList => _roomInfoList;
+
     
     private bool _isTutorial = false;
     private bool _isFirst = false;
@@ -78,12 +79,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         string room = PhotonNetwork.LocalPlayer.UserId + " " + "Tutorial";
         PhotonNetwork.CreateRoom(room, roomOptions, TypedLobby.Default);
     }
-
-    public void TutorialMode(bool isTutorial)
-    {
-        _isTutorial = isTutorial;
-    }
-
+    
     // 포톤 마스터 서버에 접속하면 호출되는 함수
     public override void OnConnected()
     {
@@ -97,12 +93,14 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
+        _roomInfoList.Clear();
         _isTutorial = false;         
         
         PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
         Hashtable propertiesToRemove = new Hashtable
         {
-            { EProperties.Team.ToString(), null }
+            { EProperties.Team.ToString(), null },
+            { EProperties.RoomInitial.ToString(), null}
         };
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(propertiesToRemove);
@@ -154,8 +152,35 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     {
         _isFirst = isFirst;
     }
-    public void SaveRoomList(List<RoomInfo> roomList)
+    
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        TempRoomInfoList = roomList;
+        if (PhotonNetwork.InLobby == false)
+        {
+            return;
+        }
+        
+        foreach (RoomInfo roomInfo in roomList)
+        {
+            if (roomInfo.RemovedFromList)
+            {
+                _roomInfoList.RemoveAll(x => x.Name == roomInfo.Name);
+            }
+            else
+            {
+                int index = _roomInfoList.FindIndex(x => x.Name == roomInfo.Name);
+                if (index >= 0)
+                {
+                    _roomInfoList[index] = roomInfo;
+                }
+                else
+                {
+                    _roomInfoList.Add(roomInfo);
+                }
+            }
+            
+        }
+        EventManager.Instance.RoomListUpdate();
     }
+
 }

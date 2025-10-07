@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using Photon.Pun;
 
 [Serializable]
 public class UI_InputFields
@@ -25,6 +26,7 @@ public class UI_LoginScene : MonoBehaviour
 
     [Header("로그인")]
     public UI_InputFields LoginInputFields;
+    public Toggle RememberLoginToggle;
 
     [Header("회원가입")]
     public UI_InputFields SignupInputFields;
@@ -34,10 +36,15 @@ public class UI_LoginScene : MonoBehaviour
 
     private bool _isLoginCoolingDown;
 
+	[Header("씬 전환")]
+	public string LogoutRedirectSceneName = "Photon";
+
     private void Start()
     {
         OnClickGoToLoginButton();
         LoginCheck();
+        // 자동 로그인 토글 초기화
+        InitRememberToggle();
         
         // 구글 로그인 이벤트 구독
         if (GoogleLogIn.Instance != null)
@@ -162,6 +169,19 @@ public class UI_LoginScene : MonoBehaviour
         LoginInputFields.ResultText.text = result.Message;
         if (result.IsSuccess)
         {
+            // 닉네임 자동 저장
+            if (!string.IsNullOrEmpty(email))
+            {
+                if(RememberLoginToggle.isOn)
+                {
+                    PlayerPrefs.SetString("SavedLoginEmail", email);
+                }
+                else
+                {
+                    PlayerPrefs.DeleteKey("SavedLoginEmail");
+                }
+                PlayerPrefs.Save();
+            }
             // 닉네임이 없으면 닉네임 입력 패널 표시
             if (!AccountManager.Instance.HasNickname())
             {
@@ -191,6 +211,29 @@ public class UI_LoginScene : MonoBehaviour
             GoogleLogIn.Instance.SignIn();
         }
     }
+
+	private void InitRememberToggle()
+	{
+		if (RememberLoginToggle == null)
+		{
+			return;
+		}
+
+		bool defaultOn = true;
+        Debug.Log("RememberLoginToggle : " + defaultOn);
+        Debug.Log("RememberLoginToggle : " + PlayerPrefs.GetInt("RememberLoginToggle", defaultOn ? 1 : 0));
+		int saved = PlayerPrefs.GetInt("RememberLoginToggle", defaultOn ? 1 : 0);
+		bool isOn = saved == 1;
+		Debug.Log("RememberLoginToggle : " + isOn);
+		RememberLoginToggle.isOn = isOn;
+	}
+
+	public void OnRememberToggleChanged()
+	{
+        Debug.Log("RememberLoginToggle : " + RememberLoginToggle.isOn);
+		PlayerPrefs.SetInt("RememberLoginToggle", RememberLoginToggle.isOn ? 1 : 0);
+		PlayerPrefs.Save();
+	}
 
     public void OnClickGoogleLogOut()
     {

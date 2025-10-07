@@ -2901,9 +2901,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9183753075575295159}
-        m_TargetAssemblyTypeName: GoogleLogIn, Assembly-CSharp
-        m_MethodName: 
+      - m_Target: {fileID: 8692864853153894859}
+        m_TargetAssemblyTypeName: UI_LoginScene, Assembly-CSharp
+        m_MethodName: OnClickGoogleLogOut
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4977,7 +4977,19 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8692864853153894859}
+        m_TargetAssemblyTypeName: UI_LoginScene, Assembly-CSharp
+        m_MethodName: OnRememberToggleChanged
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 1
 --- !u!1 &1147918001
 GameObject:
@@ -8458,6 +8470,7 @@ GameObject:
   - component: {fileID: 5043439416554781249}
   - component: {fileID: 5043439416554781250}
   - component: {fileID: 5043439416554781251}
+  - component: {fileID: 5043439416554781252}
   m_Layer: 5
   m_Name: LoginPanel
   m_TagString: Untagged
@@ -8773,6 +8786,19 @@ MonoBehaviour:
   duration: 0.3
   ease: 27
   slideDirection: 0
+--- !u!114 &5043439416554781252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3539624150705404111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e73f811a938e6488cb6c9f1fd8de54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  emailInputField: {fileID: 5261328314341783386}
 --- !u!114 &5243900172852546117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10027,6 +10053,7 @@ MonoBehaviour:
     PasswordInputField: {fileID: 7484190734654835104}
     PasswordConfirmInputField: {fileID: 0}
     ConfirmButton: {fileID: 8095671715460063178}
+  RememberLoginToggle: {fileID: 1146832343}
   SignupInputFields:
     ResultText: {fileID: 8764956371272390684}
     IDInputField: {fileID: 771739441}
@@ -10041,6 +10068,7 @@ MonoBehaviour:
     PasswordInputField: {fileID: 0}
     PasswordConfirmInputField: {fileID: 0}
     ConfirmButton: {fileID: 1346232043}
+  LogoutRedirectSceneName: Photon
 --- !u!114 &8726608404202757776
 MonoBehaviour:
   m_ObjectHideFlags: 0

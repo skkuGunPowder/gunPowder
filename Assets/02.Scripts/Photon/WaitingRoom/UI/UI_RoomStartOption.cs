@@ -11,7 +11,7 @@ public class UI_RoomStartOption : MonoBehaviour
     public Image MapIcon;
     public TextMeshProUGUI MapNameGUGI;
     
-    private void Awake()
+    private void OnEnable()
     {
         EventManager.Instance.OnMapChanged += MapChange;
         EventManager.Instance.OnMasterChanged += ButtonSetup;

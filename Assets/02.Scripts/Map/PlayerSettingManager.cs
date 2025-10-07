@@ -45,7 +45,7 @@ public class PlayerSettingManager : MonoBehaviour
     {
         _playerList.Clear();
         _playerList = new List<int>(playerList);
-
+        
         SpawnPlayer();
     }
     
