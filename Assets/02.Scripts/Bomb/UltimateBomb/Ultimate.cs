@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 public abstract class Ultimate : MonoBehaviour
 {
@@ -31,7 +32,7 @@ public abstract class Ultimate : MonoBehaviour
     }
 
     public virtual void ExcuteUltimate()
-    {
+    { 
     }
 
     public int GetCost()

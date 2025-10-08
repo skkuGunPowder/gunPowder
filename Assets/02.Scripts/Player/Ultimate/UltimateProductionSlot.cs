@@ -29,8 +29,6 @@ public class UltimateProductionSlot : MonoBehaviour
     public Vector2 UltimateOriginPosition;
     public Vector2 UltimateOriginPosition2;
     
-    [Header("컬러")]
-    public ColorPalette ColorPalette;
     public void Play(string bomb, bool isMyTeam)
     {
         
