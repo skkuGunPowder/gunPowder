@@ -25,11 +25,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnRoomDataChanged?.Invoke();
     }
-    public event Action OnReadyChanged; // UI 변경 => 플레이어들이 레디를 할 때.
+    public event Action<PhotonPlayer> OnReadyChanged; // UI 변경 => 플레이어들이 레디를 할 때.
 
-    public void ReadyChange()
+    public void ReadyChange(PhotonPlayer player)
     {
-        OnReadyChanged?.Invoke();
+        OnReadyChanged?.Invoke(player);
     }
     public event Action OnMasterChanged; // 방장 변경 => 방장 권한 버튼 못 누르게 하기
 
@@ -155,5 +155,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     public void RoomListUpdate()
     {
         OnRoomListUpdate?.Invoke();
+    }
+    public event Action<PhotonPlayer> OnPlayerLeft;
+
+    public void PlayerLeft(PhotonPlayer player)
+    {
+        OnPlayerLeft?.Invoke(player);
     }
 }

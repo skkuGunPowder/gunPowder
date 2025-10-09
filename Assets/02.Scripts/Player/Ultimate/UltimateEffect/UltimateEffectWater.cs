@@ -3,9 +3,6 @@ using UnityEngine;
 
 public class UltimateEffectWater : UltimateEffectBase
 {
-    [Header("오버라이드")]
-    public GameObject LineEffect;
-    
     public override void Play()
     {
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
@@ -15,14 +12,12 @@ public class UltimateEffectWater : UltimateEffectBase
 
     public override void Stop()
     {
-        InnerEffect.SetActive(false);
-        LineEffect.SetActive(false);
+        LineEffectUp.SetActive(false);
     }
 
     protected override void EffectOn()
     {
-        InnerEffect.SetActive(true);
-        LineEffect.SetActive(true);
+        LineEffectUp.SetActive(true);
     }
 
     protected override void OnDisable()

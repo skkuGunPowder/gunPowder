@@ -31,7 +31,7 @@ public class UI_RoomProfile : MonoBehaviour
         }
     }
     
-    public void ReadyCheck()
+    public void ReadyCheck(PhotonPlayer player)
     {
         List<int> playerSlotList = RoomManager.Instance.PlayerList.PlayerSlotList;
 
@@ -42,11 +42,10 @@ public class UI_RoomProfile : MonoBehaviour
             {
                 continue;
             }
-            
-            PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
-            if (player == null)
+
+            if (playerSlotList[i] != player.ActorNumber)
             {
-                return;
+                continue;
             }
             
             if (player.IsMasterClient)
@@ -72,17 +71,7 @@ public class UI_RoomProfile : MonoBehaviour
             }
             
             PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerSlotList[i]);
-            
-            if (player.CustomProperties.ContainsKey(EProperties.Team.ToString()) == false)
-            {
-                EInGameTeam team = EInGameTeam.Red;
-                UI_ProfileSlotList[i].TeamSet(team);
-            }
-            else
-            {
-                EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-                UI_ProfileSlotList[i].TeamSet(team);
-            }
+            UI_ProfileSlotList[i].TeamSet(player);
         }
     }
     

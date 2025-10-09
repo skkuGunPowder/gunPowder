@@ -82,7 +82,6 @@ public class GameStartProduction : MonoBehaviour
 
     public void SoundStart()
     {
-        Debug.Log("Sound Start");
         SoundManager.Instance.PlayLocalSound(nameof(GameStartBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
     }
     private void OnDisable()
