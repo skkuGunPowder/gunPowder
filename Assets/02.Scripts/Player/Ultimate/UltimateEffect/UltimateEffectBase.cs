@@ -7,7 +7,6 @@ public abstract class UltimateEffectBase : MonoBehaviour,IUltimateEffect
     public string BombName;
     
     [Header("Base:이펙트 오브젝트들")]
-    public GameObject InnerEffect;
     public GameObject LineEffectUp;
     public GameObject LineEffectDown;
     
@@ -46,13 +45,11 @@ public abstract class UltimateEffectBase : MonoBehaviour,IUltimateEffect
         LineEffectUp.transform.localPosition = StartPositionUp;
         LineEffectDown.transform.localPosition = StartPositionDown;
         
-        InnerEffect.SetActive(false);
         LineEffectUp.gameObject.SetActive(false);
         LineEffectDown.gameObject.SetActive(false);
     }
     protected virtual void EffectOn()
     {
-        InnerEffect.SetActive(true);
         LineEffectUp.gameObject.SetActive(true);
         LineEffectDown.gameObject.SetActive(true);
     }

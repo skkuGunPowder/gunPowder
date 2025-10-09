@@ -38,21 +38,13 @@ public class UI_ProfileSlot : MonoBehaviour
         
         // life
         LifeSet();
-        
+        MasterCheck(player.IsMasterClient);
         // bomb
         ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
         BombImage.sprite = item.Image;
         
-        if(player.CustomProperties[EProperties.Team.ToString()] == null)
-        {
-            TeamSet(EInGameTeam.Red);
-        }
-        else
-        {
-            int teamNumber = (int)player.CustomProperties[EProperties.Team.ToString()];
-            EInGameTeam team = (EInGameTeam)teamNumber;
-            TeamSet(team);
-        }
+        TeamSet(player);
+        
     }
     
     private void LifeSet()
@@ -77,16 +69,8 @@ public class UI_ProfileSlot : MonoBehaviour
     {
         Master.gameObject.SetActive(false);
         
-        if (isReady)
-        {
-            Ready.SetActive(true);
-            NotReady.SetActive(false);
-        }
-        else
-        {
-            Ready.SetActive(false);
-            NotReady.SetActive(true);
-        }
+        Ready.SetActive(isReady);
+        NotReady.SetActive(!isReady);
     }
     
     public void MasterCheck(bool isMaster)
@@ -97,9 +81,9 @@ public class UI_ProfileSlot : MonoBehaviour
     }
     public void NoPlayer()
     {
+        Ready.SetActive(false);
         NotReady.SetActive(false);
         Lives.SetActive(false);
-        Ready.SetActive(false);
         NicknameTextUGUI.gameObject.SetActive(false);
         Master.SetActive(false);
         ProfileOutline.color = TeamColorSet(EInGameTeam.Default);
@@ -107,8 +91,16 @@ public class UI_ProfileSlot : MonoBehaviour
         BombImage.sprite = EmptyImage;
     }
 
-    public void TeamSet(EInGameTeam team)
+    public void TeamSet(PhotonPlayer player)
     {
+        EInGameTeam team = EInGameTeam.Red;
+        
+        if(player.CustomProperties.ContainsKey(EProperties.Team.ToString()))
+        {
+            int teamNumber = (int)player.CustomProperties[EProperties.Team.ToString()];
+            team = (EInGameTeam)teamNumber;
+        }
+        
         ProfileOutline.color = TeamColorSet(team);
         PlayerProfileSkin.TeamChanged(team);
     }

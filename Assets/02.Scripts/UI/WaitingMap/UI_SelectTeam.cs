@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 public class UI_SelectTeam : MonoBehaviour
@@ -10,7 +11,23 @@ public class UI_SelectTeam : MonoBehaviour
     {
         EventManager.Instance.OnTeamChanged += TeamSelected;
     }
-    
+
+    private void Start()
+    {
+        if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.Team.ToString()) == false)
+        {
+            Debug.Log("Team is not set");
+            return;
+        }
+        
+        EInGameTeam team = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];        
+        
+        foreach (UI_TeamSelcetButton teamButton in TeamButtonList)
+        {
+            teamButton.Refresh(team);
+        }
+        
+    }
     private void TeamSelected()
     {
         EInGameTeam team = RoomManager.Instance.SelectedTeam;

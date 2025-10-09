@@ -69,10 +69,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private void Init()
     {
         _initialized = true;
-        Initializer.Init(this);
-        
         SetRoom();
-        EventManager.Instance.TeamChanged();
+        Initializer.Init(this);
     }
 
     // 준비가 다 되었다면 마스터가 정한 맵으로 이동시킴
@@ -103,7 +101,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         InputHandler.BlockInput = false;
         
-        if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.RoomInitial.ToString()) == false)
+        // if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.RoomInitial.ToString()) == false)
+        if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false)
         {
             // 만약 방에 처음 들어왔다면 
             int[] playerList = new int[MaxPlayerCount];
@@ -132,7 +131,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
             _room.IsVisible = true;
             _room.IsOpen = true;
         }
-        
+
         EventManager.Instance.RoomDataChanged();
     }
     
@@ -141,7 +140,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         if (changedProps.ContainsKey(EProperties.IsReady.ToString())) // 레디 변경
         {
-            EventManager.Instance.ReadyChange();
+            EventManager.Instance.ReadyChange(targetPlayer);
         }
         
         if (changedProps.ContainsKey(EProperties.Team.ToString()))  // 팀 변경

@@ -111,14 +111,8 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    private void TargetListUp()
+    private void TargetListUp() // 로컬에서 알아서 각자 처리, 죽었을 때 나갔을 때 리스트 최신화
     {
-        if (_currentTargetList.Count == 2)
-        {
-            return;
-        }
-        
-        Debug.Log("listup");
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();
         
@@ -143,13 +137,21 @@ public class CameraController : MonoBehaviour
             _currentTargetList.Add(player);
             
         }
+        
+        _currentTargetIndex = 0;
     }
 
     private void LastAttack(int actorNumber)
     {
         OnUIOnOff?.Invoke(false);
+        
         foreach (Player p in _currentTargetList)
         {
+            if (p == null)
+            {
+                continue;
+            }
+            
             PhotonPlayer photonPlayer = p.GetComponent<PhotonView>().Owner;
             if (photonPlayer.ActorNumber == actorNumber)
             {
@@ -200,7 +202,14 @@ public class CameraController : MonoBehaviour
             _currentTargetIndex = 0;
         }
         
+        if (_currentTargetList[_currentTargetIndex] == null)
+        {
+            _currentTargetList.RemoveAt(_currentTargetIndex);
+            _currentTargetIndex = 0;
+        }
+        
         Player player = _currentTargetList[_currentTargetIndex];
+        
         string nickname = player.GetComponent<PhotonView>().Owner.NickName;
         OnNicknameChanged?.Invoke(nickname);
         

@@ -19,7 +19,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public UI_EmotionSlot Emotion;
     
     public List<GameObject> LifeList;
-    // public ColorPalette ColorPalette;
+    public GameObject LeftOver;
    
     [Header("Color")] 
     public int GunpowderMiddle = 50;
@@ -62,7 +62,11 @@ public class UI_InGameProfileSlot : MonoBehaviour
             }
         }
     }
-    
+   
+    public void LeftOverRefresh(bool isLeftOver)
+    {
+        LeftOver.SetActive(isLeftOver);
+    }
     private void ColorSet(int gunpowder)
     {
         if (gunpowder > GunpowderMiddle)
