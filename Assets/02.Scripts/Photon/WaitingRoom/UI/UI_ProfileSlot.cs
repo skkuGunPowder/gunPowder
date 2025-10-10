@@ -38,7 +38,6 @@ public class UI_ProfileSlot : MonoBehaviour
         
         // life
         LifeSet();
-        MasterCheck(player.IsMasterClient);
         // bomb
         ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
         BombImage.sprite = item.Image;
@@ -65,13 +64,22 @@ public class UI_ProfileSlot : MonoBehaviour
             }
         }
     }
-    public void ReadyCheck(bool isReady)
+    public void ReadyCheck(PhotonPlayer player)
     {
+        bool isReady = false;
+        
+        if (player.CustomProperties.ContainsKey(EProperties.IsReady.ToString()) &&
+            player.CustomProperties[EProperties.IsReady.ToString()] != null)
+        {
+            isReady = (bool)player.CustomProperties[EProperties.IsReady.ToString()];
+        }
+        
         Master.gameObject.SetActive(false);
         
         Ready.SetActive(isReady);
         NotReady.SetActive(!isReady);
     }
+    
     
     public void MasterCheck(bool isMaster)
     {
@@ -79,7 +87,8 @@ public class UI_ProfileSlot : MonoBehaviour
         Ready.gameObject.SetActive(!isMaster);
         NotReady.gameObject.SetActive(!isMaster);
     }
-    public void NoPlayer()
+    
+    private void NoPlayer()
     {
         Ready.SetActive(false);
         NotReady.SetActive(false);
