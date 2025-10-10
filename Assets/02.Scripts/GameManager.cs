@@ -118,7 +118,12 @@ public class GameManager : PhotonSingleton<GameManager>
         if ((bool)changedProps[EProperties.IsDead.ToString()])
         {
             OnTimeCheck?.Invoke(targetPlayer);
-        }   
+        }
+
+        if (LastPlayer)
+        {
+            return;
+        }
         
         PlayerDeadCheck();
     }
@@ -162,7 +167,12 @@ public class GameManager : PhotonSingleton<GameManager>
         if (notDead == 0)
         {
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
-        } 
+        }
+
+        if (LastPlayer && notDead == 1)
+        {
+            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+        }
     }
 
     [PunRPC]

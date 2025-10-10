@@ -108,7 +108,8 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         Hashtable propertiesToRemove = new Hashtable
         {
             { EProperties.Team.ToString(), null },
-            { EProperties.RoomInitial.ToString(), null}
+            { EProperties.RoomInitial.ToString(), null},
+            { EProperties.IsReady.ToString(), null}
         };
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(propertiesToRemove);
