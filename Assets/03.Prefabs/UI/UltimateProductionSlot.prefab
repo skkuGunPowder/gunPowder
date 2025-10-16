@@ -54731,7 +54731,7 @@ AudioSource:
   m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 74c40d0fdf56c4f48a1c580ab5512e14, type: 3}
+  m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 74c40d0fdf56c4f48a1c580ab5512e14, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
@@ -64669,7 +64669,7 @@ AudioSource:
   m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 74c40d0fdf56c4f48a1c580ab5512e14, type: 3}
+  m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 74c40d0fdf56c4f48a1c580ab5512e14, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
@@ -89734,6 +89734,8 @@ GameObject:
   - component: {fileID: 1253126981206651368}
   - component: {fileID: 7842151217563530945}
   - component: {fileID: 694802429710361681}
+  - component: {fileID: 2939710944878978881}
+  - component: {fileID: 7641941229940064154}
   - component: {fileID: 2323374610835001694}
   m_Layer: 5
   m_Name: UltimateProductionSlot
@@ -89817,6 +89819,8 @@ MonoBehaviour:
   - {fileID: 7842151217563530945}
   - {fileID: 694802429710361681}
   - {fileID: 2323374610835001694}
+  - {fileID: 7641941229940064154}
+  - {fileID: 2939710944878978881}
   UltimateEffectList:
   - {fileID: 0}
   - {fileID: 0}
@@ -89875,6 +89879,54 @@ MonoBehaviour:
   LineEffectUp: {fileID: 4345286030115455437}
   LineEffectDown: {fileID: 4658458658993105160}
   StartPositionUp: {x: -430, y: -195, z: 0}
+  EndPositionUp: {x: 489, y: -185, z: 0}
+  DurationUp: 1
+  EaseUp: 20
+  StartPositionDown: {x: 215, y: 6, z: 0}
+  EndPositionDown: {x: -211, y: 0, z: 0}
+  DurationDown: 1
+  EaseDown: 20
+  Delay: 0.4
+--- !u!114 &2939710944878978881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8977907968218122814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8978c3f6e839e154db3839426e28e03a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BombName: BO0018
+  LineEffectUp: {fileID: 4345286030115455437}
+  LineEffectDown: {fileID: 4658458658993105160}
+  StartPositionUp: {x: -430, y: -185, z: 0}
+  EndPositionUp: {x: 489, y: -185, z: 0}
+  DurationUp: 1
+  EaseUp: 20
+  StartPositionDown: {x: 215, y: 6, z: 0}
+  EndPositionDown: {x: -211, y: 0, z: 0}
+  DurationDown: 1
+  EaseDown: 20
+  Delay: 0.4
+--- !u!114 &7641941229940064154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8977907968218122814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b5ae1b20fa51d64ab85129d6cb1e24d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BombName: BO0009
+  LineEffectUp: {fileID: 4345286030115455437}
+  LineEffectDown: {fileID: 4658458658993105160}
+  StartPositionUp: {x: -430, y: -185, z: 0}
   EndPositionUp: {x: 489, y: -185, z: 0}
   DurationUp: 1
   EaseUp: 20
