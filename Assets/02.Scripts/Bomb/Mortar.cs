@@ -193,6 +193,12 @@ public class Mortar : Bomb
             _owner = _ownerPhotonview.GetComponent<Player>();
         }
 
+        if(_owner.PlayerFSM.IsCurrentState<PlayerJumpState>() || _owner.PlayerFSM.IsCurrentState<PlayerFallState>() || _owner.PlayerFSM.IsCurrentState<PlayerJumpDashState>())
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         if (_mortarDeploySound != null)
         {
             SoundManager.Instance.PlayLocalSound(_mortarDeploySound.name, transform);
