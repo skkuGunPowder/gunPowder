@@ -140,6 +140,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         if (changedProps.ContainsKey(EProperties.IsReady.ToString())) // 레디 변경
         {
+            Debug.Log("ready check" + targetPlayer.NickName);
             EventManager.Instance.ReadyChange(targetPlayer);
         }
         
@@ -205,7 +206,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // 맵 변경시 콜백
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
-        if (propertiesThatChanged.ContainsKey(ERoomProperties.MapSelected.ToString()) && propertiesThatChanged[ERoomProperties.MapSelected.ToString()] != null)
+        if (propertiesThatChanged.ContainsKey(ERoomProperties.MapSelected.ToString()) &&
+            propertiesThatChanged[ERoomProperties.MapSelected.ToString()] != null)
         {
             SelectedMap = (EMap)propertiesThatChanged[ERoomProperties.MapSelected.ToString()];
             EventManager.Instance.MapChanged(SelectedMap);
