@@ -148,6 +148,7 @@ public class Mortar : Bomb
                 SoundManager.Instance.PlayLocalSound(_mortarFireSound.name, transform);
             }
 
+
             if (PhotonView.IsMine)
             {
                 GameObject mortarShellObject = PhotonNetwork.Instantiate(_mortarShellPrefab.name, _muzzle.position, _muzzle.rotation);
@@ -158,7 +159,9 @@ public class Mortar : Bomb
                     mortarShell.PhotonView.RPC(nameof(mortarShell.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
                 }
             }
-            
+
+            _owner.ResetGunPowderDecreaseWithoutAttackTimer();
+        
             _currentAmmo--;
             if(_currentAmmo <= 0)
             {
@@ -195,7 +198,7 @@ public class Mortar : Bomb
 
         if(_owner.PlayerFSM.IsCurrentState<PlayerJumpState>() || _owner.PlayerFSM.IsCurrentState<PlayerFallState>() || _owner.PlayerFSM.IsCurrentState<PlayerJumpDashState>())
         {
-            Destroy(gameObject);
+            RemoveMortar();
             return;
         }
 
