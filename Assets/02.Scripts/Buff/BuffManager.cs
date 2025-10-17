@@ -39,13 +39,14 @@ public class BuffManager : DontDestroySingleton<BuffManager>
         }
     }
 
-    public Buff GetBuff(string buffID, Transform caller)
+    public Buff GetBuff(string buffID, Player owner)
     {
         if (_buffPrefabDict.TryGetValue(buffID, out Buff buff))
         {
-            Buff buffInstance = Instantiate(buff, caller);
+            Buff buffInstance = Instantiate(buff, owner.transform);
             buffInstance.Init();
             buffInstance.SetStat(buff.Stat);
+            buffInstance.SetOwner(owner);
             return buffInstance;
         }
 

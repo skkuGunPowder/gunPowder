@@ -14,8 +14,7 @@ public class AirDropItemBooster : AirDropItemBase, IAirDropItem
             Debug.LogError($"[{name}] :: 아이템 사용자가 없습니다.");
             return;
         }
-        boosterBuff = (BoosterBuff)BuffManager.Instance.GetBuff("BF0002", _owner.transform);
-        boosterBuff.SetOwner(_owner);
+        boosterBuff = (BoosterBuff)BuffManager.Instance.GetBuff("BF0002", _owner);
         boosterBuff.StartBuff();
     }
 }
