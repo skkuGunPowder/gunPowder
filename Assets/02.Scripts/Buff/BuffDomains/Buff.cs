@@ -7,7 +7,7 @@ public abstract class Buff : MonoBehaviour, IBuff
     public BuffStat Stat { get; private set; }
 
     protected Player _owner;
-    protected float _timer;
+    public float _timer;
     protected bool _isActive = false;
 
     public virtual void Init()
@@ -34,6 +34,11 @@ public abstract class Buff : MonoBehaviour, IBuff
         }
 
         _owner = player;
+    }
+
+    public void ResetTimer()
+    {
+        _timer = 0f;
     }
 
     public virtual void Update()
