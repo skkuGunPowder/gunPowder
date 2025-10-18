@@ -150,6 +150,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private PlayerBuffHandler _playerBuffHandler;
     public PlayerBuffHandler PlayerBuffHandler => _playerBuffHandler;
+    public bool IsSuperArmor = false;
 
 
     [SerializeField]
@@ -184,6 +185,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
 
         _playerBuffHandler = GetComponent<PlayerBuffHandler>();
+        IsSuperArmor = false;
 
 
         // 기본 폭탄 정보 가져오기
