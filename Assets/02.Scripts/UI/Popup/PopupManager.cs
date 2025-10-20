@@ -25,15 +25,15 @@ public class PopupManager : Singleton<PopupManager>
                     bool opened = popup.isActiveAndEnabled;
                     popup.Close();
 
-                    if (opened || _popupStack.Peek() == null)
+                    if (opened || _popupStack.Count == 0)
                     {
-                        break;
+                        break;   
                     }
                 }
             }
             else
             {
-                Open(EPopupType.UI_SystemPopup);
+                Open(EPopupType.UI_MenuPopup);
             }
         }
     }

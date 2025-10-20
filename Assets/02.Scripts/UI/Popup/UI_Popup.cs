@@ -13,7 +13,6 @@ public abstract class UI_Popup : MonoBehaviour
 
     public void Close()
     {
-        
         _closeCallback?.Invoke();
         gameObject.SetActive(false);
     }
