@@ -7,6 +7,7 @@ using DG.Tweening;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UI_InGameProfileSlot : MonoBehaviour
 {
+    // public int PlayerActorNumber { get; private set; }
     [SerializeField] private Vector2 _gunpowderTextOriginalRectTransform;
     public TextMeshProUGUI NicknameTextUGUI;
     public TextMeshProUGUI GunpowderTextUGUI;
@@ -32,9 +33,10 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public Ease EaseType;
     public float ScaleStrength = 1.2f;
    
-    public void Init(string playerName, Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
+    public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
     {
-        NicknameTextUGUI.text = playerName;
+        // PlayerActorNumber = player.ActorNumber;
+        NicknameTextUGUI.text = player.NickName;
         BombImage.sprite = bombImage;
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
