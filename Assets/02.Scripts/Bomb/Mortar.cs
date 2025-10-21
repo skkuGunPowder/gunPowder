@@ -176,7 +176,7 @@ public class Mortar : Bomb
         if (PhotonView.IsMine)
         {
             InputHandler.BlockInput = false;
-            _superArmorBuff.EndBuff();
+            _superArmorBuff.EndBuff();  
 
             if (PhotonView != null && PhotonView.ViewID != 0)
             {
