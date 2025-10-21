@@ -7,7 +7,6 @@ public class UI_InGameProfile : MonoBehaviour
     [SerializeField]
     private List<UI_InGameProfileSlot> UI_InGameProfileSlotList = new List<UI_InGameProfileSlot>();
     private List<int> _playerActorNumberList = new List<int>();
-    
     private void OnEnable()
     {
         SubscribeEvents();
@@ -16,23 +15,47 @@ public class UI_InGameProfile : MonoBehaviour
     private void Init()
     {
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
-
-        for (int i = 0; i < UI_InGameProfileSlotList.Count; i++)
+        PhotonPlayer[] reorderedPlayers = new PhotonPlayer[players.Length];
+        
+        // 로컬 플레이어를 첫 번째 위치로 배치하고, 나머지 플레이어들을 이후 위치에 배치
+        int localPlayerActorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+        int indexForOthers = 1; // 다른 플레이어들을 위한 인덱스
+    
+        for (int i = 0; i < players.Length; i++)
         {
-            if (i < players.Length)
+            if (players[i].ActorNumber == localPlayerActorNumber)
             {
-                _playerActorNumberList.Add(players[i].ActorNumber);
-                // 후에 수정
-                ItemDTO item = ItemDatabase.Instance.GetItem(players[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
-                Sprite bomb = item.Image;
-                string playerName = players[i].NickName;
-                EInGameTeam team = (EInGameTeam)players[i].CustomProperties[EProperties.Team.ToString()];
-                UI_InGameProfileSlotList[i].Init(playerName,bomb, team, players[i]);
-                UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife , 0);
+                reorderedPlayers[0] = players[i]; // 로컬 플레이어는 첫 번째 위치에 배치
             }
             else
             {
-                UI_InGameProfileSlotList[i].gameObject.SetActive(false);
+                if (indexForOthers > players.Length)
+                {
+                    return;
+                }
+
+                reorderedPlayers[indexForOthers] = players[i]; 
+                indexForOthers++;
+            }
+        }
+        
+        for (int i = 0; i < UI_InGameProfileSlotList.Count; i++)
+        {
+            if (i < reorderedPlayers.Length)
+            {
+                ItemDTO item = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
+                Sprite bomb = item.Image;
+                EInGameTeam team = (EInGameTeam)reorderedPlayers[i].CustomProperties[EProperties.Team.ToString()];
+                
+                UI_InGameProfileSlotList[i].gameObject.SetActive(true);
+                // 후에 수정
+                UI_InGameProfileSlotList[i].Init(bomb, team, reorderedPlayers[i]);
+                UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife , 0);
+                _playerActorNumberList.Add(reorderedPlayers[i].ActorNumber);
+            }
+            else
+            {
+                UI_InGameProfileSlotList[i].gameObject.SetActive(false);    
             }
         }
         
@@ -81,8 +104,6 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void PlayerLeftRefresh(PhotonPlayer leftPlayer)
     {
-        PhotonPlayer[] players = PhotonNetwork.PlayerList;
-
         for (int i = 0; i < _playerActorNumberList.Count; i++)
         {
             if (_playerActorNumberList[i] == leftPlayer.ActorNumber)

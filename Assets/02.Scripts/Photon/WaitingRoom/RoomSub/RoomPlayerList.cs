@@ -18,12 +18,35 @@ public class RoomPlayerList
         _playerSlotList = new List<int>(playerSlotList);
     }
 
-    // 플레이어 리스트 재설정
+    // 플레이어 리스트 재설정, 정렬 : 로컬 플레이어가 1번으로 들어가게 함
     public void GetPlayerList(int[] playerSlotList)
     {
         _playerSlotList.Clear();
-        _playerSlotList = new List<int>(playerSlotList);
+        int[] tempList = new int[playerSlotList.Length];
+        tempList[0] = PhotonNetwork.LocalPlayer.ActorNumber;
+        int tempIndex = 1; // 로컬 플레이어를 0번에 들어가게 하기 위함
+        foreach (var slot in playerSlotList)
+        {
+            if (slot == PhotonNetwork.LocalPlayer.ActorNumber)
+            {
+                continue;
+            }
+            
+            if (slot == 0)
+            {
+                continue;
+            }
+            
+            if (tempIndex < playerSlotList.Length)
+            {
+                Debug.Log("temp"+ tempIndex);
+                tempList[tempIndex] = slot;
+                tempIndex++;   
+            }
+        }
+        _playerSlotList = tempList.ToList();
     }
+    
     // 게임 시작했을 때와 게임이 끝나고 돌아온 후 플레이어 리스트를 비교후 리스트 재조정
     public void PlayerListCheck()
     {
@@ -44,6 +67,7 @@ public class RoomPlayerList
             Debug.Log($"{_playerSlotList[i]} : subtract");
             _playerSlotList[i] = 0;
         }
+        
     }
     public void AddPlayerPlacement(PhotonPlayer player)
     {

@@ -43,7 +43,6 @@ public class UI_RoomProfile : MonoBehaviour
     
     public void ReadyCheck(PhotonPlayer player)
     {
-        Debug.Log(player.NickName + "UI_readycheck");
         List<int> playerSlotList = RoomManager.Instance.PlayerList.PlayerSlotList;
 
         for (int i = 0; i < playerSlotList.Count; i++)

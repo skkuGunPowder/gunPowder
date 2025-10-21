@@ -73,16 +73,15 @@ public class GameStartProduction : MonoBehaviour
             .SetEase(GameStartTextEase));
         sequence.OnComplete(() =>
         {
-            GameManager.Instance.GameStartSetting();
-            
-            InputHandler.BlockInput = false;
             GameManager.Instance.OnGameStart -= GameStart;
         });
     }
-
-    public void SoundStart()
+    
+    private void SoundStart()
     {
+        GameManager.Instance.GameStartSetting();
         SoundManager.Instance.PlayLocalSound(nameof(GameStartBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
+        InputHandler.BlockInput = false;
     }
     private void OnDisable()
     {
