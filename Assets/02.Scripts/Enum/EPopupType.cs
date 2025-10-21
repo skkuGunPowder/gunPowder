@@ -13,7 +13,7 @@ public enum EPopupType
     UI_SettingPopup,
     UI_MenuPopup,
     UI_InformationPopup,
-    
+    UI_WithDrawPopup,
     
     Count
 }

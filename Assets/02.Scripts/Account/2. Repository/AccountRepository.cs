@@ -296,4 +296,23 @@ public class AccountRepository
         });
     }
 
+    public async Task<bool> DeleteAccount()
+    {
+        var user = FirebaseManager.Instance.Auth.CurrentUser;
+        if (user == null) return false;
+        try
+        {
+            var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
+            await userDoc.DeleteAsync();
+            await user.DeleteAsync();
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("계정 삭제 실패: " + e.Message);
+            return false;
+        }
+    }
+
 }
