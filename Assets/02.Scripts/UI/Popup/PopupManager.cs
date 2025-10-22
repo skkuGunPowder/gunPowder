@@ -54,6 +54,7 @@ public class PopupManager : Singleton<PopupManager>
                 return popup;
             }
         }
+        Debug.LogError($"[PopupManager] 팝업을 찾을 수 없습니다: {popupName}");
         return null;
     }
 
