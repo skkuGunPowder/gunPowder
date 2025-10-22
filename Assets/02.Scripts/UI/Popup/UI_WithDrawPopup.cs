@@ -1,5 +1,5 @@
 
-public class UI_WithDrawPopup : UI_Popup
+public class UI_WithdrawPopup : UI_Popup
 {
     public void OnClickCloseButton()
     {
