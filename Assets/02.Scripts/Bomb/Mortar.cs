@@ -31,6 +31,7 @@ public class Mortar : Bomb
     private bool _isFacingRight = false;
     private float _timer;
     private float _delayTimer;
+    private SuperAmorBuff _superArmorBuff;
 
 
 
@@ -175,6 +176,7 @@ public class Mortar : Bomb
         if (PhotonView.IsMine)
         {
             InputHandler.BlockInput = false;
+            _superArmorBuff.EndBuff();  
 
             if (PhotonView != null && PhotonView.ViewID != 0)
             {
@@ -210,6 +212,8 @@ public class Mortar : Bomb
         if (PhotonView.IsMine)
         {
             InputHandler.BlockInput = true;
+            _superArmorBuff = BuffManager.Instance.GetBuff("BF0003", _owner) as SuperAmorBuff;
+            _owner.PlayerBuffHandler.AddBuff(_superArmorBuff);
         }
     }
 

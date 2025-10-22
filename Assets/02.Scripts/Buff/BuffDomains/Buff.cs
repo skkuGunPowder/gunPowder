@@ -20,7 +20,8 @@ public abstract class Buff : MonoBehaviour, IBuff
     {
         if (stat == null)
         {
-            throw new Exception("Stat이 비어있습니다.");
+            Debug.LogError("Stat이 비어있습니다.");
+            // throw new Exception("Stat이 비어있습니다.");
         }
 
         Stat = stat;
@@ -74,6 +75,6 @@ public abstract class Buff : MonoBehaviour, IBuff
 
         _isActive = false;
         _timer = 0f;
-        Destroy(this);
+        _owner.PlayerBuffHandler.RemoveBuff(ID);
     }
 }
