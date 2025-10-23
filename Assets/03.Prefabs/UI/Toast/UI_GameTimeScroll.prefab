@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 960, y: -25}
-  m_SizeDelta: {x: 0, y: 50}
+  m_SizeDelta: {x: 995.28, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4622517852683579493
 CanvasRenderer:
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uAC8C\uC784\uC744 \uC774\uC6A9\uD55C \uC9C0 n\uC2DC\uAC04\uC774 \uC9C0\uB0AC\uC2B5\uB2C8\uB2E4.
+  m_text: "\uAC8C\uC784\uC744 \uC774\uC6A9\uD55C \uC9C0 7\uC2DC\uAC04\uC774 \uC9C0\uB0AC\uC2B5\uB2C8\uB2E4.
     \uACFC\uB3C4\uD55C \uAC8C\uC784\uC774\uC6A9\uC740 \uC815\uC0C1\uC801\uC778 \uC77C\uC0C1\uC0DD\uD65C\uC5D0
     \uC9C0\uC7A5\uC744 \uC904 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
   m_isRightToLeft: 0
@@ -257,7 +257,7 @@ GameObject:
   - component: {fileID: 5476462879056375486}
   - component: {fileID: 827552814915736395}
   m_Layer: 5
-  m_Name: GameTimeScroll
+  m_Name: UI_GameTimeScroll
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -366,6 +366,7 @@ MonoBehaviour:
   scrollRect: {fileID: 5476462879056375486}
   viewport: {fileID: 7185351895736524589}
   targetContent: {fileID: 5427248635817422092}
+  messageText: {fileID: 8736914154929337925}
   startDelay: 2
   endHoldTime: 2
   scrollSpeed: 150

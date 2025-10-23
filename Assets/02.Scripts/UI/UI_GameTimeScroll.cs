@@ -1,13 +1,16 @@
+using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_GameTimeScroll : MonoBehaviour
+public class UI_GameTimeScroll : UI_Toast
 {
     [Header("References")]
     public ScrollRect scrollRect;
     public RectTransform viewport;      // 뷰포트
     public RectTransform targetContent; // 흘러갈 실제 오브젝트(텍스트/패널)
+    public TextMeshProUGUI messageText;
 
     [Header("Timing")]
     [Tooltip("스크롤 시작 전 대기 시간(초)")]
@@ -48,6 +51,14 @@ public class UI_GameTimeScroll : MonoBehaviour
             scrollRect.vertical = false;
             scrollRect.inertia = false;
         }
+
+        gameObject.SetActive(false);
+    }
+
+    public override void Open(float duration, string message, Action callback = null)
+    {
+        messageText.text = $"게임을 이용한 지 {message}시간이 지났습니다. 과도한 게임이용은 정상적인 일상생활에 지장을 줄 수 있습니다.";
+        base.Open(duration, message, callback);
     }
 
     private void OnEnable()
@@ -132,6 +143,8 @@ public class UI_GameTimeScroll : MonoBehaviour
             StopAndReset();
             gameObject.SetActive(false);
         }
+
+        Destroy(gameObject);
     }
 
     /// <summary>
