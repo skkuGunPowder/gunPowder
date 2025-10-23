@@ -12,7 +12,7 @@ public class SpecialThanksSlotSpawner : MonoBehaviour
     // 슬롯을 담아둘 리스트 (나중에 접근용)
     private readonly List<SpecialThanksSlot> _slots = new();
 
-    private void Start()
+    private void Awake()
     {
         BuildCredits();
     }
