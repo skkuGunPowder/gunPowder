@@ -62,6 +62,7 @@ public class PopupManager : Singleton<PopupManager>
     {
         PopupClose(popupType.ToString());
     }
+    
     private void PopupClose(string popupName)
     {
         foreach (UI_Popup popup in PopupList)
