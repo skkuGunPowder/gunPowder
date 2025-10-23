@@ -11,7 +11,7 @@ public class UsedAssetSlotSpawner : MonoBehaviour
 
     private readonly List<UsedAssetSlot> _slots = new();
 
-    private void Start()
+    private void Awake()
     {
         BuildCredits();
     }

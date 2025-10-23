@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -42,8 +44,18 @@ public class CreditsAutoScroll : MonoBehaviour
 
     private void OnEnable()
     {
-        if (playOnEnable)
-            StartCoroutine(BootstrapAndStart());
+        // if (playOnEnable)
+        //     StartCoroutine(BootstrapAndStart());
+    }
+    
+    private void Start()
+    {
+        Canvas.ForceUpdateCanvases();
+        if (content != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+        Canvas.ForceUpdateCanvases();
+        
+        StartScroll();
     }
 
     private void OnDisable()
@@ -51,21 +63,21 @@ public class CreditsAutoScroll : MonoBehaviour
         StopAllCoroutines();
         _isScrolling = false;
     }
-
-    private IEnumerator BootstrapAndStart()
-    {
-        // 오토사이즈/레이아웃 반영 대기(1~2 프레임)
-        yield return null;
-        yield return null;
-
-        // 강제 리빌드 (동적 텍스트/콘텐츠 대비)
-        Canvas.ForceUpdateCanvases();
-        if (content != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
-        Canvas.ForceUpdateCanvases();
-
-        StartScroll();
-    }
+    
+    // private IEnumerator BootstrapAndStart()
+    // {
+    //     // 오토사이즈/레이아웃 반영 대기(1~2 프레임)
+    //     yield return null;
+    //     yield return null;
+    //
+    //     // 강제 리빌드 (동적 텍스트/콘텐츠 대비)
+    //     Canvas.ForceUpdateCanvases();
+    //     if (content != null)
+    //         LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+    //     Canvas.ForceUpdateCanvases();
+    //
+    //     StartScroll();
+    // }
 
     private void TryResolveReferences()
     {
@@ -84,31 +96,36 @@ public class CreditsAutoScroll : MonoBehaviour
 
         _maxScrollY = Mathf.Max(contentHeight - viewportHeight, minTravel);
 
-        // 시작 위치 초기화 (맨 아래에서 시작하여 위로 이동)
-        Vector2 anchored = content.anchoredPosition;
-        anchored.y = 0f;
-        content.anchoredPosition = anchored;
+        // // 시작 위치 초기화 (맨 아래에서 시작하여 위로 이동)
+        // Vector2 anchored = content.anchoredPosition;
+        // anchored.y = 0f;
+        // content.anchoredPosition = anchored;
 
         _timer = -startDelay;
         _isScrolling = true;
 
         // 스크롤할 내용이 없으면 즉시 종료 처리
-        if (_maxScrollY <= 0f)
-        {
-            _isScrolling = false;
-            StartCoroutine(HoldAtEnd());
-        }
+        // if (_maxScrollY <= 0f)
+        // {
+        //     _isScrolling = false;
+        //     StartCoroutine(HoldAtEnd());
+        // }
     }
 
     private void Update()
     {
+        if (InputHandler.GetKeyDown(KeyCode.Escape))
+        {
+            OnScrollFinished();
+        }
+        
         if (!_isScrolling || content == null) return;
 
         float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
 
         _timer += dt;
         if (_timer < 0f) return;
-
+        
         float newY = content.anchoredPosition.y + scrollSpeed * dt;
 
         if (newY >= _maxScrollY)
@@ -142,6 +159,8 @@ public class CreditsAutoScroll : MonoBehaviour
 
     private void OnScrollFinished()
     {
+        StopAllCoroutines();
         // TODO: 씬 전환/페이드 등
+        PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
     }
 }
