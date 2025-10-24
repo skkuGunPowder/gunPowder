@@ -29,8 +29,11 @@ public class ClientManager : DontDestroySingleton<ClientManager>
     public static void Quit()
     {
 #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
+        UI_MessagePopup quitMessage = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+        quitMessage.Init("정말 종료하시겠습니까?", true, ()=> UnityEditor.EditorApplication.isPlaying = false);
 #else
+        UI_MessagePopup quitMessage = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+        quitMessage.Init("정말 종료하시겠습니까?", true, ()=> Application.Quit());
             Application.Quit();
 #endif
     }
