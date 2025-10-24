@@ -190,7 +190,7 @@ GameObject:
   - component: {fileID: 5779851533322904186}
   - component: {fileID: 3475732228930392486}
   - component: {fileID: 7408507073633703420}
-  - component: {fileID: 2686836039836250826}
+  - component: {fileID: 1829879972132337743}
   m_Layer: 7
   m_Name: PlayerTest1
   m_TagString: Player
@@ -288,6 +288,7 @@ MonoBehaviour:
   - {fileID: 1151535419544871050}
   - {fileID: 976520604556629110}
   - {fileID: 7942881863121907201}
+  _diePartList: []
   PhotonView: {fileID: 0}
   _bombSpawnPointList:
   - {fileID: 6157283644371124128}
@@ -298,16 +299,30 @@ MonoBehaviour:
   - {fileID: 4670349720179722002}
   - {fileID: 2275629456946523352}
   - {fileID: 9029946444733129644}
-  _normalBomb: {fileID: 6483128911171500335, guid: 75311855345bce044ab3e26252e8fef7, type: 3}
-  _specialBomb: {fileID: 6483128911171500335, guid: 75311855345bce044ab3e26252e8fef7, type: 3}
+  _explosionSpawnPointList: []
+  _dashBomb: {fileID: 0}
   _attackTimer: 0
   _gunPowderDecreaseTimer: 0
   _gunPowderDecreaseWithoutAttackTimer: 0
+  _colorUpdateWithoutAttackTimer: 0
+  _storedVelocity: {x: 0, y: 0}
+  _hasStoredVelocity: 0
   _gunPowderSpreadAngle: 90
-  NormalBombPrefab: {fileID: 3001153516144104530, guid: b3fb438e801506a4ab38467990bf3887, type: 3}
-  SpecialBombPrefab: {fileID: 2493808269564610583, guid: c6c3d386220973f4db5354405d7a56fb, type: 3}
+  _groundRay2D: {fileID: 0}
+  HeadBombPrefab: {fileID: 0}
   GunPowderPrefab: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
   DieExplosionPrefab: {fileID: 0}
+  HitEffectPrefab: {fileID: 0}
+  UltimateEffectPrefab: {fileID: 0}
+  ExplosionEffectPrefab: {fileID: 0}
+  FallDeadVFXPrefab: {fileID: 0}
+  AirDropItemLootVFX: {fileID: 0}
+  IsSuperArmor: 0
+  _playerSFXAnimationEvent: {fileID: 0}
+  CrabHoldPoint: {fileID: 0}
+  LastDashTapTimeLeft: -999
+  LastDashTapTimeRight: -999
+  _ultimateChanceTimer: 0
 --- !u!114 &3777540811264207149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -334,32 +349,52 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerStatSO: {fileID: 11400000, guid: 24c91fb983f6a934f8d9ad203ab6b394, type: 2}
   _moveSpeed: 0
-  _jumpForce: 0
-  _dashTime: 0
-  _doubleTapTime: 0
-  _dashSpeed: 0
-  _breakTime: 0
   _runSpeed: 0
+  _jumpForce: 0
   _maxJumpCount: 0
+  _dashTime: 0
+  _dashSpeed: 0
+  _doubleTapTime: 0
+  _breakTime: 0
   _jumpDashCount: 0
   _recoilTime: 0
   _recoilSpeed: 0
   _normalRecoilTime: 0
   _normalRecoilSpeed: 0
+  _confuseTime: 5
+  _hitStopGunPowderCount: 50
+  _damagedTime: 0
+  _invincibleTime: 0
   _isRunning: 0
   _isJumping: 0
+  _isFallingDead: 0
+  _isImmune: 0
+  _isDownJump: 0
+  _isWet: 0
+  _isPausedNoAttack: 0
   _myMoveSpeed: 0
   _jumpCount: 0
   _facingDirection: 1
+  IsFallingFromLedge: 0
+  _currentPlayerGunPowderCount: 0
+  _currentPlayerLife: 0
+  _initGunpowderCount: 0
   _gunPowderDecreaseTime: 0
+  _currentPlayerDamagedCount: 0
   _attackPenaltyTime: 0
   _attackPenaltyAmount: 0
   _dieExplosionDamage: 0
   _dieExplosionRadius: 0
   _dieExplosionForce: 0
-  _invincibleTime: 0
-  _currentPlayerGunPowderCount: 0
-  _currentPlayerDamagedCount: 0
+  _totalDamage: 0
+  _totalKillCount: 0
+  _hasUltimateChance: 0
+  _hasUsedUltimateThisLife: 0
+  _ultimateChanceDuration: 10
+  _ultimateTriggerThreshold: 30
+  _lastAttackerActorNumber: -1
+  _lastAttackTime: 0
+  _attackTrackingDuration: 5
   _mySpriteRendererList:
   - {fileID: 1701887308453902453}
   - {fileID: 1106505575998821225}
@@ -368,8 +403,7 @@ MonoBehaviour:
   - {fileID: 3919705562379375888}
   - {fileID: 7946849780375415708}
   - {fileID: 5256302278628841903}
-  _damagedTime: 0
-  IsFallingFromLedge: 0
+  PlayerSFXAnimationEvent: {fileID: 0}
 --- !u!70 &3816746319477846524
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -516,11 +550,11 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 2686836039836250826}
+  - {fileID: 1829879972132337743}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &2686836039836250826
+--- !u!114 &1829879972132337743
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -529,13 +563,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 2957359368312737412}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Script: {fileID: 11500000, guid: 8efc6b1d64977384eb3405357896c656, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 1
-  m_UseLocal: 1
+  m_PositionModel:
+    SynchronizeEnabled: 1
+    TeleportEnabled: 1
+    TeleportIfDistanceGreaterThan: 3
+    InterpolateOption: 4
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 15
+    ExtrapolateOption: 0
+    ExtrapolateSpeed: 1
+    ExtrapolateIncludingRoundTripTime: 1
+    ExtrapolateNumberOfStoredPositions: 1
+  m_RotationModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 1
+    InterpolateRotateTowardsSpeed: 180
+    InterpolateLerpSpeed: 5
+  m_ScaleModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 0
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 0
 --- !u!1 &3819322129694444458
 GameObject:
   m_ObjectHideFlags: 0
