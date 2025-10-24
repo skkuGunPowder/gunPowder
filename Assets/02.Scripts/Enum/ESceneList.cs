@@ -6,6 +6,7 @@ public enum ESceneList
     StartSequence,
     Tutorial,
     Photon,
+    Credit,
     
     Count
     

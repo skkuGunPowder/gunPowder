@@ -148,6 +148,10 @@ public class Player : MonoBehaviourPun, IDamagable
     private AirDropItemBase _airDropItem;
     public AirDropItemBase AirDropItem => _airDropItem;
 
+    private PlayerBuffHandler _playerBuffHandler;
+    public PlayerBuffHandler PlayerBuffHandler => _playerBuffHandler;
+    public bool IsSuperArmor = false;
+
 
     [SerializeField]
     private PlayerSFXAnimationEvent _playerSFXAnimationEvent;
@@ -179,6 +183,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
+
+        _playerBuffHandler = GetComponent<PlayerBuffHandler>();
+        IsSuperArmor = false;
 
 
         // 기본 폭탄 정보 가져오기

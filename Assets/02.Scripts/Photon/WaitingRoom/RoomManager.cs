@@ -35,7 +35,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         ReadyCheck = new RoomReadyCheck();
         Initializer = new RoomInitializer();
         
-        EventManager.Instance.OnPlayerChanged += PlayerLeft;
+        EventManager.Instance.OnPlayerLeft += PlayerLeft;
     }
 
     // 방 세팅 시작 => Init
@@ -100,12 +100,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
     private void SetRoom()
     {
         InputHandler.BlockInput = false;
-        
+        int[] playerList = new int[MaxPlayerCount];
         // if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.RoomInitial.ToString()) == false)
-        if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false)
+        if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false ||
+           PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] == null)
         {
             // 만약 방에 처음 들어왔다면 
-            int[] playerList = new int[MaxPlayerCount];
             PlayerList = new RoomPlayerList(playerList);
             
             if (PhotonNetwork.IsMasterClient)
@@ -124,6 +124,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
         // 한판 끝나고 돌아왔을 때 플레이어 체크, 원래 있던 플레이어들 refresh
         int[] players = _room.CustomProperties[EProperties.PlayerList.ToString()] as int[];
         PlayerList = new RoomPlayerList(players);
+        PlayerList.GetPlayerList(players);
         PlayerList.PlayerListCheck(); // 현재 플레이어와 지금 플레이어의 차이를 체크 
         
         if (PhotonNetwork.IsMasterClient)
@@ -140,6 +141,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         if (changedProps.ContainsKey(EProperties.IsReady.ToString())) // 레디 변경
         {
+            Debug.Log("ready check" + targetPlayer.NickName);
             EventManager.Instance.ReadyChange(targetPlayer);
         }
         
@@ -175,24 +177,25 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         EventManager.Instance.PlayerItemChanged();
         
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
+        // if (PhotonNetwork.IsMasterClient == false)
+        // {
+        //     return;
+        // }
 
         PlayerList.AddPlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
-        _photonView.RPC(nameof(Rpc_UpdateSlots), RpcTarget.All, PlayerList.PlayerSlotList.ToArray()); // 전달
+        EventManager.Instance.RoomDataChanged();
+        // _photonView.RPC(nameof(Rpc_UpdateSlots), RpcTarget.All, PlayerList.PlayerSlotList.ToArray()); // 전달
     }
     
     public void PlayerLeft(PhotonPlayer player)
     {
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-        
+        // if (PhotonNetwork.IsMasterClient == false)
+        // {
+        //     return;
+        // }
+        //
         PlayerList.SubPlayerPlacement(player);
-        _photonView.RPC(nameof(Rpc_UpdateSlots), RpcTarget.All, PlayerList.PlayerSlotList.ToArray());
+        EventManager.Instance.RoomDataChanged();
     }
     
     [PunRPC]
@@ -205,7 +208,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
     // 맵 변경시 콜백
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
-        if (propertiesThatChanged.ContainsKey(ERoomProperties.MapSelected.ToString()) && propertiesThatChanged[ERoomProperties.MapSelected.ToString()] != null)
+        if (propertiesThatChanged.ContainsKey(ERoomProperties.MapSelected.ToString()) &&
+            propertiesThatChanged[ERoomProperties.MapSelected.ToString()] != null)
         {
             SelectedMap = (EMap)propertiesThatChanged[ERoomProperties.MapSelected.ToString()];
             EventManager.Instance.MapChanged(SelectedMap);
@@ -240,7 +244,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
     public override void OnDisable()
     {
         base.OnDisable();
-        EventManager.Instance.OnPlayerChanged -= PlayerLeft;
+        EventManager.Instance.OnPlayerLeft -= PlayerLeft;
     }
 
 }

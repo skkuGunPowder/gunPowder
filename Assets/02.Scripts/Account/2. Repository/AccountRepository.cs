@@ -296,75 +296,23 @@ public class AccountRepository
         });
     }
 
-    // UID로 닉네임 찾기
-    public async Task<string> GetUserNicknameWithUidAsync(string uid)
+    public async Task<bool> DeleteAccount()
     {
+        var user = FirebaseManager.Instance.Auth.CurrentUser;
+        if (user == null) return false;
         try
         {
-            var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(uid);
-            var snapshot = await userDoc.GetSnapshotAsync();
-        
-            if (snapshot.Exists && snapshot.TryGetValue("nickname", out string nickname))
-            {
-                return nickname;
-            }
-        
-            return null;
+            var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
+            await userDoc.DeleteAsync();
+            await user.DeleteAsync();
+
+            return true;
         }
         catch (Exception e)
         {
-            Debug.LogError($"닉네임 조회 실패 (UID: {uid}): {e.Message}");
-            return null;
+            Debug.LogError("계정 삭제 실패: " + e.Message);
+            return false;
         }
     }
-    
-    // 닉네임으로 UID 찾기 - 중복 닉네임 모두 반환
-    public async Task<List<string>> GetUidsWithNicknameAsync(string nickname)
-    {
-        try
-        {
-            var usersRef = FirebaseManager.Instance.DB.Collection("users");
-            var query = usersRef.WhereEqualTo("nickname", nickname);
-            var snapshot = await query.GetSnapshotAsync();
-        
-            List<string> uids = new List<string>();
-        
-            foreach (var doc in snapshot.Documents)
-            {
-                uids.Add(doc.Id);
-            }
-        
-            return uids;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"UID 조회 실패 (닉네임: {nickname}): {e.Message}");
-            return new List<string>();
-        }
-    }
-    
-    // UID로 닉네임#Discriminator 조회
-    public async Task<string> GetUserDisplayNameWithUidAsync(string uid)
-    {
-        try
-        {
-            var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(uid);
-            var snapshot = await userDoc.GetSnapshotAsync();
-        
-            if (snapshot.Exists)
-            {
-                string nickname = snapshot.TryGetValue("nickname", out string nick) ? nick : "";
-                string discriminator = snapshot.TryGetValue("discriminator", out string disc) ? disc : "0000";
-            
-                return $"{nickname}#{discriminator}";
-            }
-        
-            return null;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"사용자 표시 이름 조회 실패 (UID: {uid}): {e.Message}");
-            return null;
-        }
-    }
+
 }

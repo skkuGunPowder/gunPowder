@@ -222,26 +222,35 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         }
     }
 
-	/// <summary>
-	/// 로그아웃: 현재 계정과 세션 관련 상태 초기화
-	/// </summary>
-	public void Logout()
-	{
-		_myAccount = null;
-		_sessoinID = null;
-	}
+    /// <summary>
+    /// 로그아웃: 현재 계정과 세션 관련 상태 초기화
+    /// </summary>
+    public void Logout()
+    {
+        _myAccount = null;
+        _sessoinID = null;
+    }
 
-    public async Task<string> GetUserNicknameWithUid(string uid)
+    public void ChangePassword()
     {
-        return await _accountRepository.GetUserNicknameWithUidAsync(uid);
-    }
-    public async Task<List<string>> GetUidsWithNickname(string nickname)
-    {
-        return await _accountRepository.GetUidsWithNicknameAsync(nickname);
-    }
-    public async Task<string> GetUserDisplayNameWithUid(string nickname)
-    {
-        return await _accountRepository.GetUserDisplayNameWithUidAsync(nickname);
+        FirebaseManager.Instance.Auth.SendPasswordResetEmailAsync(_myAccount.Login_ID).ContinueWith(task =>
+        {
+            if (task.IsCanceled)
+            {
+                Debug.LogError("비밀번호 재설정 이메일 전송이 취소되었습니다.");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Debug.LogError("비밀번호 재설정 이메일 전송 중 오류가 발생했습니다: " + task.Exception);
+                return;
+            }
+        });
     }
     
+    public async void DeleteAccount()
+    {
+        await _accountRepository.DeleteAccount();
+        Logout();
+    }
 }

@@ -11,7 +11,9 @@ public enum EPopupType
     UI_EmotionPopup,
     UI_MessagePopup,
     UI_SettingPopup,
-    
+    UI_MenuPopup,
+    UI_InformationPopup,
+    UI_WithdrawPopup,
     
     Count
 }

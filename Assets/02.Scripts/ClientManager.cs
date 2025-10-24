@@ -4,12 +4,27 @@ using UnityEngine.SceneManagement;
 
 public class ClientManager : DontDestroySingleton<ClientManager>
 {
+    private const float PLAYTIME_UNIT = 3600f;
+    private int _playHour = 0;
+    private float _playTime = 0f;
+
     private void Start()
     {
         PlayBGM("Photon");
         ColorPalette.Init();
+        _playHour = 0;
     }
     
+    private void Update()
+    {
+        _playTime += Time.unscaledDeltaTime;
+        if (_playTime >= PLAYTIME_UNIT)
+        {
+            _playHour++;
+            _playTime = 0f;
+            ToastMessageManager.Instance.Open(EToastType.UI_GameTimeScroll, $"{_playHour}");
+        }        
+    }
 
     public static void Quit()
     {
@@ -56,7 +71,7 @@ public class ClientManager : DontDestroySingleton<ClientManager>
             case "Beach1":
                 SoundManager.Instance.PlayGlobalSound("Beach1", SoundType.BGM, 0, true);
                 break;
-            
+
             case "Tutorial":
                 SoundManager.Instance.PlayGlobalSound("Tutorial1", SoundType.BGM, 0, true);
                 break;
@@ -71,4 +86,6 @@ public class ClientManager : DontDestroySingleton<ClientManager>
                 break;
         }
     }
+
+    
 }

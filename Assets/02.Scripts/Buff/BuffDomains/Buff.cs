@@ -7,7 +7,7 @@ public abstract class Buff : MonoBehaviour, IBuff
     public BuffStat Stat { get; private set; }
 
     protected Player _owner;
-    protected float _timer;
+    public float _timer;
     protected bool _isActive = false;
 
     public virtual void Init()
@@ -20,7 +20,8 @@ public abstract class Buff : MonoBehaviour, IBuff
     {
         if (stat == null)
         {
-            throw new Exception("Stat이 비어있습니다.");
+            Debug.LogError("Stat이 비어있습니다.");
+            // throw new Exception("Stat이 비어있습니다.");
         }
 
         Stat = stat;
@@ -34,6 +35,11 @@ public abstract class Buff : MonoBehaviour, IBuff
         }
 
         _owner = player;
+    }
+
+    public void ResetTimer()
+    {
+        _timer = 0f;
     }
 
     public virtual void Update()
@@ -69,6 +75,6 @@ public abstract class Buff : MonoBehaviour, IBuff
 
         _isActive = false;
         _timer = 0f;
-        Destroy(this);
+        _owner.PlayerBuffHandler.RemoveBuff(ID);
     }
 }

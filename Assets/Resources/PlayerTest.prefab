@@ -4278,6 +4278,7 @@ GameObject:
   - component: {fileID: -5802715714338378822}
   - component: {fileID: 4027603407814374385}
   - component: {fileID: 741957198402514022}
+  - component: {fileID: 1860317133783251600}
   m_Layer: 7
   m_Name: PlayerTest
   m_TagString: Player
@@ -4432,6 +4433,7 @@ MonoBehaviour:
   ExplosionEffectPrefab: {fileID: 5682021106543877335, guid: e5f8e5526c3be7542b66d48b3c0ed76b, type: 3}
   FallDeadVFXPrefab: {fileID: 3011233550371498735, guid: 794e3e0914193c6458c4b710a6e3a79c, type: 3}
   AirDropItemLootVFX: {fileID: 3920707082676358601}
+  IsSuperArmor: 0
   _playerSFXAnimationEvent: {fileID: 8620183200267240798}
   CrabHoldPoint: {fileID: 84351679138067317}
   LastDashTapTimeLeft: -999
@@ -4744,6 +4746,18 @@ MonoBehaviour:
   _currentChestSkin: {fileID: 0}
   _capeSlotParent: {fileID: 5766752212389439708}
   _currentCapeSkin: {fileID: 0}
+--- !u!114 &1860317133783251600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49b467cf957af5648bc79237924be433, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6883906685738839930
 GameObject:
   m_ObjectHideFlags: 0

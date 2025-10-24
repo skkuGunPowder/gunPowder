@@ -25,15 +25,15 @@ public class PopupManager : Singleton<PopupManager>
                     bool opened = popup.isActiveAndEnabled;
                     popup.Close();
 
-                    if (opened || _popupStack.Peek() == null)
+                    if (opened || _popupStack.Count == 0)
                     {
-                        break;
+                        break;   
                     }
                 }
             }
             else
             {
-                Open(EPopupType.UI_SystemPopup);
+                Open(EPopupType.UI_MenuPopup);
             }
         }
     }
@@ -54,6 +54,7 @@ public class PopupManager : Singleton<PopupManager>
                 return popup;
             }
         }
+        Debug.LogError($"[PopupManager] 팝업을 찾을 수 없습니다: {popupName}");
         return null;
     }
 
@@ -61,6 +62,7 @@ public class PopupManager : Singleton<PopupManager>
     {
         PopupClose(popupType.ToString());
     }
+    
     private void PopupClose(string popupName)
     {
         foreach (UI_Popup popup in PopupList)

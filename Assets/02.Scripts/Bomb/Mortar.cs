@@ -31,6 +31,7 @@ public class Mortar : Bomb
     private bool _isFacingRight = false;
     private float _timer;
     private float _delayTimer;
+    private SuperAmorBuff _superArmorBuff;
 
 
 
@@ -148,6 +149,7 @@ public class Mortar : Bomb
                 SoundManager.Instance.PlayLocalSound(_mortarFireSound.name, transform);
             }
 
+
             if (PhotonView.IsMine)
             {
                 GameObject mortarShellObject = PhotonNetwork.Instantiate(_mortarShellPrefab.name, _muzzle.position, _muzzle.rotation);
@@ -158,7 +160,9 @@ public class Mortar : Bomb
                     mortarShell.PhotonView.RPC(nameof(mortarShell.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
                 }
             }
-            
+
+            _owner.ResetGunPowderDecreaseWithoutAttackTimer();
+        
             _currentAmmo--;
             if(_currentAmmo <= 0)
             {
@@ -172,6 +176,7 @@ public class Mortar : Bomb
         if (PhotonView.IsMine)
         {
             InputHandler.BlockInput = false;
+            _superArmorBuff.EndBuff();  
 
             if (PhotonView != null && PhotonView.ViewID != 0)
             {
@@ -193,6 +198,12 @@ public class Mortar : Bomb
             _owner = _ownerPhotonview.GetComponent<Player>();
         }
 
+        if(_owner.PlayerFSM.IsCurrentState<PlayerJumpState>() || _owner.PlayerFSM.IsCurrentState<PlayerFallState>() || _owner.PlayerFSM.IsCurrentState<PlayerJumpDashState>())
+        {
+            RemoveMortar();
+            return;
+        }
+
         if (_mortarDeploySound != null)
         {
             SoundManager.Instance.PlayLocalSound(_mortarDeploySound.name, transform);
@@ -201,6 +212,8 @@ public class Mortar : Bomb
         if (PhotonView.IsMine)
         {
             InputHandler.BlockInput = true;
+            _superArmorBuff = BuffManager.Instance.GetBuff("BF0003", _owner) as SuperAmorBuff;
+            _owner.PlayerBuffHandler.AddBuff(_superArmorBuff);
         }
     }
 

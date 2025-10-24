@@ -24,10 +24,10 @@ public class UltimateManager : Singleton<UltimateManager>
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.C) && _player != null)
-        {
-            _player.Ultimate.ExcuteUltimate();
-        }
+        // if(Input.GetKeyDown(KeyCode.C) && _player != null)
+        // {
+        //     _player.Ultimate.ExcuteUltimate();
+        // }
     }
 
     public void SetPlayer(Player player)
