@@ -43,11 +43,13 @@ public class UI_MessagePopup : UI_Popup
     public void OnClickOK()
     {
         _callback?.Invoke();
+        _callback = null;
         Close();
     }
 
     public void OnClickCancle()
     {
+        _callback = null;
         Close();
     }
 }
