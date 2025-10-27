@@ -67,7 +67,7 @@ public class BackendLogin
         else
         {
             Debug.LogError($"[BackendLogin] 로그인 실패 : {bro.ErrorCode} | {bro.Message}");
-            return new Result(false, "로그인에 실패하였습니다.");
+            return new Result(false, $"{bro.Message}");
         }
     }
 
@@ -82,7 +82,7 @@ public class BackendLogin
         else
         {
             Debug.LogError($"[BackendLogin] 닉네임 변경 실패 : {bro.ErrorCode} | {bro.Message}");
-            return new Result(false, "닉네임 변경에 실패하였습니다.");
+            return new Result(false, $"{bro.Message}");
         }
     }
 }

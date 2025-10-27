@@ -1,7 +1,6 @@
 using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class UI_InformationPopup : UI_Popup
 {
@@ -9,7 +8,7 @@ public class UI_InformationPopup : UI_Popup
     [SerializeField] private TextMeshProUGUI _emailText;
     [SerializeField] private TextMeshProUGUI _tagText;
     [SerializeField] private TextMeshProUGUI _nicknameText;
-    [SerializeField] private InputField _nicknameInputField;
+    [SerializeField] private TMP_InputField _nicknameInputField;
 
     private const int NicknameChangeCost = 50;
 
@@ -66,7 +65,20 @@ public class UI_InformationPopup : UI_Popup
 
     public async void OnSetNickname()
     {
+        Result result = await AccountManager.Instance.SetNickname(_nicknameInputField.text);
+        if (result.IsSuccess == true)
+        {
+            UI_MessagePopup messagePopup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup, null);
+            messagePopup.Init("닉네임이 변경되었습니다.", false);
+            Refresh();
+        }
+        else
+        {
+            UI_MessagePopup messagePopup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup, null);
+            messagePopup.Init($"닉네임 변경에 실패했습니다: {result.Message}", false);
+            return;
+        }
+
         CurrencyManager.Instance.SubtractCurrency(ECurrencyType.Diamond, NicknameChangeCost);
-        await AccountManager.Instance.SetNickname(_nicknameInputField.text);
     }
 }

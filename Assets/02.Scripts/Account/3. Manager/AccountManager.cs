@@ -148,16 +148,16 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         // 닉네임 중복 체크 및 discriminator 생성
         string discriminator = await GenerateDiscriminatorForNickname(nickname);
         
-        bool updated = await _accountRepository.UpdateNickname(nickname);
+        bool firebaseUpdated = await _accountRepository.UpdateNickname(nickname);
         _myAccount.SetNickname(nickname, discriminator);
 
         // 뒤끝 닉네임 업데이트
-        _backendLogin.UpdateNickName(nickname);
+        Result backendResult = _backendLogin.UpdateNickName(nickname);
         
-        if (updated)
+        if (firebaseUpdated && backendResult.IsSuccess)
             return new Result(true, "닉네임이 저장되었습니다.");
         else
-            return new Result(false, "닉네임 저장에 실패하였습니다.");
+            return new Result(false, $"{backendResult.Message}");
     }
 
     /// <summary>
