@@ -3,7 +3,7 @@ using BackEnd;
 using BackndChat;
 using UnityEngine;
 
-public class ChatManager : PhotonSingleton<ChatManager>, BackndChat.IChatClientListener
+public class ChatManager : Singleton<ChatManager>, BackndChat.IChatClientListener
 {
     // 뒤끝 Chat 사용
     private ChatClient _chatClient;
