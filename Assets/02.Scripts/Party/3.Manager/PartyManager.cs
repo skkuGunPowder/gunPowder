@@ -139,7 +139,7 @@ public class PartyManager : Singleton<PartyManager>, IChatClientListener
         if (string.IsNullOrEmpty(currentPartyName))
         {
             Debug.Log("파티가 없어 새로 생성합니다.");
-            currentPartyName = AccountManager.Instance.CurrencAccount.Account_ID;
+            currentPartyName = AccountManager.Instance.CurrentAccount.Account_ID;
             isJoiningParty = true;
             partyLeaderName = PhotonNetwork.NickName;
 

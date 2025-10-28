@@ -52,7 +52,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     {
         // 게임 버전 설정
         PhotonNetwork.GameVersion = _gameVersion;
-        PhotonNetwork.NickName = AccountManager.Instance.CurrencAccount.Nickname;
+        PhotonNetwork.NickName = AccountManager.Instance.CurrentAccount.Nickname;
         PhotonNetwork.ConnectUsingSettings();
         
         if (first)

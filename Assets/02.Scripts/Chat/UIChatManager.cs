@@ -9,35 +9,36 @@ using UnityEngine.UI;
 
 public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 {
-    public GameObject ChannelContent = null;
+    // public GameObject ChannelContent = null;
 
     public GameObject ChatContent = null;
 
-    public GameObject UserContent = null;
+    // public GameObject UserContent = null;
 
-    public Text ChannelUserCount = null;
+    // public Text ChannelUserCount = null;
 
     public InputField ChatInput = null;
 
     public Button SendButton = null;
 
-    public GameObject ReportPopup = null;
+    // public GameObject ReportPopup = null;
 
-    public Button JoinChannelButton = null;
+    // public Button JoinChannelButton = null;
 
-    public GameObject JoinChannelPopup = null;
+    // public GameObject JoinChannelPopup = null;
 
-    private string CurrentChannelGroup = string.Empty;
+    private string _currentChannelGroup = string.Empty;
 
-    private string CurrentChannelName = string.Empty;
+    private string _currentChannelName = string.Empty;
 
-    private UInt64 CurrentChannelNumber = 0;
+    private UInt64 _currentChannelNumber = 0;
 
-    private List<string> SelectMessageKey = new List<string>();
+    private List<string> _selectMessageKey = new List<string>();
 
-    private ChatClient ChatClient = null;
+    private ChatClient _chatClient = null;
 
-    private Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>> ChannelList = new Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>>();
+    private Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>> _channelList =
+        new Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>>();
 
     // Start is called before the first frame update
     void Start()
@@ -47,10 +48,6 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
             SendButton.onClick.AddListener(SendChatMessage);
         }
 
-        if (JoinChannelButton != null)
-        {
-            JoinChannelButton.onClick.AddListener(OnClickJoinChannel);
-        }
         
         if (ChatInput != null)
         {
@@ -77,17 +74,17 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
         string avatar = avatars[UnityEngine.Random.Range(0, avatars.Count)];
 
-        ChatClient = new ChatClient(this, new ChatClientArguments
+        _chatClient = new ChatClient(this, new ChatClientArguments
         {
             Avatar = avatar,
-            CustomAccessToken = GameManager.Instance.UserToken,
+            CustomAccessToken = "",
         });
     }
 
     // Update is called once per frame
     void Update()
     {
-        ChatClient?.Update();
+        _chatClient?.Update();
     }
 
     private void SendChatMessage()
@@ -102,17 +99,17 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
         if (string.IsNullOrEmpty(text)) return;
 
-        if (ChatClient == null) return;
+        if (_chatClient == null) return;
 
-        if (CurrentChannelName == string.Empty) return;
+        if (_currentChannelName == string.Empty) return;
 
-        if (!ChannelList.ContainsKey(CurrentChannelGroup)) return;
+        if (!_channelList.ContainsKey(_currentChannelGroup)) return;
 
-        if (!ChannelList[CurrentChannelGroup].ContainsKey(CurrentChannelName)) return;
+        if (!_channelList[_currentChannelGroup].ContainsKey(_currentChannelName)) return;
 
-        if (!ChannelList[CurrentChannelGroup][CurrentChannelName].ContainsKey(CurrentChannelNumber)) return;
+        if (!_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[CurrentChannelGroup][CurrentChannelName][CurrentChannelNumber];
+        ChannelInfo channelInfo = _channelList[_currentChannelGroup][_currentChannelName][_currentChannelNumber];
         if (channelInfo == null) return;
 
         if (text.IndexOf("/w") == 0)
@@ -133,11 +130,11 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                 message += whisper[i] + " ";
             }
 
-            ChatClient.SendWhisperMessage(whisper[1], message);
+            _chatClient.SendWhisperMessage(whisper[1], message);
         }
         else if (text.IndexOf("/translate") == 0)
         {
-            if (SelectMessageKey.Count == 0) return;
+            if (_selectMessageKey.Count == 0) return;
 
             List<string> langaues = new List<string>();
 
@@ -148,7 +145,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
             }
 
             List<MessageInfo> messages = new List<MessageInfo>();
-            foreach (var key in SelectMessageKey)
+            foreach (var key in _selectMessageKey)
             {
                 string[] keys = key.Split(',');
                 if (keys.Length < 2) continue;
@@ -168,7 +165,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
             for (int i = 0; i < messages.Count; ++i)
             {
-                ChatClient.SendTranslateChatMessage(messages[i], langaues);
+                _chatClient.SendTranslateChatMessage(messages[i], langaues);
             }
         }
         else if (text.IndexOf("/block") == 0)
@@ -177,7 +174,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
             if (strings.Length < 2)
             {
-                List<string> blocks = ChatClient?.GetBlockGamers();
+                List<string> blocks = _chatClient?.GetBlockGamers();
 
                 if (blocks.Count == 0)
                 {
@@ -188,9 +185,9 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                         Avatar = "Girl_5",
                         Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                         Tag = "",
-                        ChannelGroup = CurrentChannelGroup,
-                        ChannelName = CurrentChannelName,
-                        ChannelNumber = CurrentChannelNumber,
+                        ChannelGroup = _currentChannelGroup,
+                        ChannelName = _currentChannelName,
+                        ChannelNumber = _currentChannelNumber,
                         Message = "Empty Block Gamer"
                     };
 
@@ -209,9 +206,9 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                             Avatar = "Girl_5",
                             Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                             Tag = "",
-                            ChannelGroup = CurrentChannelGroup,
-                            ChannelName = CurrentChannelName,
-                            ChannelNumber = CurrentChannelNumber,
+                            ChannelGroup = _currentChannelGroup,
+                            ChannelName = _currentChannelName,
+                            ChannelNumber = _currentChannelNumber,
                             Message = i + ") Block Gamer : " + blocks[i]
                         };
 
@@ -227,14 +224,14 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                 {
                     if (strings.Length < 3) return;
 
-                    ChatClient.SendAddBlockGamer(strings[2]);
+                    _chatClient.SendAddBlockGamer(strings[2]);
 
                 }
                 else if (strings[1] == "remove")
                 {
                     if (strings.Length < 3) return;
 
-                    ChatClient.SendRemoveBlockGamer(strings[2]);
+                    _chatClient.SendRemoveBlockGamer(strings[2]);
                 }
                 else
                 {
@@ -245,9 +242,9 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                         Avatar = "Girl_5",
                         Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                         Tag = "",
-                        ChannelGroup = CurrentChannelGroup,
-                        ChannelName = CurrentChannelName,
-                        ChannelNumber = CurrentChannelNumber,
+                        ChannelGroup = _currentChannelGroup,
+                        ChannelName = _currentChannelName,
+                        ChannelNumber = _currentChannelNumber,
                         Message = "Invalid Command"
                     };
 
@@ -274,9 +271,9 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                     Avatar = "Girl_5",
                     Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     Tag = "",
-                    ChannelGroup = CurrentChannelGroup,
-                    ChannelName = CurrentChannelName,
-                    ChannelNumber = CurrentChannelNumber,
+                    ChannelGroup = _currentChannelGroup,
+                    ChannelName = _currentChannelName,
+                    ChannelNumber = _currentChannelNumber,
                     Message = player.GamerName + " / " + player.Avatar + " / " + player.Language + " / "
                 };
 
@@ -296,17 +293,14 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
             if (strings.Length < 2) return;
 
-            if (string.IsNullOrEmpty(GameManager.Instance.UserToken))
+            var returnObject = Backend.BMember.UpdateNickname(strings[1]);
+            if (!returnObject.IsSuccess())
             {
-                var returnObject = Backend.BMember.UpdateNickname(strings[1]);
-                if (!returnObject.IsSuccess())
-                {
-                    Debug.LogError("닉네임 변경 실패 : " + returnObject);
-                    return;
-                }
+                Debug.LogError("닉네임 변경 실패 : " + returnObject);
+                return;
             }
 
-            ChatClient.UpdateNickname(strings[1]);
+            _chatClient.UpdateNickname(strings[1]);
         }
         else if (text.IndexOf("/meta") == 0)
         {
@@ -314,9 +308,9 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
             if (strings.Length < 4) return;
 
-            if (!channelInfo.Players.ContainsKey(GameManager.Instance.MyNickname)) return;
+            if (!channelInfo.Players.ContainsKey(AccountManager.Instance.CurrentAccount.Nickname)) return;
 
-            PlayerInfo player = channelInfo.Players[GameManager.Instance.MyNickname];
+            PlayerInfo player = channelInfo.Players[AccountManager.Instance.CurrentAccount.Nickname];
 
             if (strings[1] == "add")
             {
@@ -337,7 +331,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                 player.Metadata[strings[2]] = strings[3];
             }
 
-            ChatClient.UpdateMetadata(player.Metadata);
+            _chatClient.UpdateMetadata(player.Metadata);
         }
         else if (text.IndexOf("/language") == 0)
         {
@@ -345,7 +339,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
             if (strings.Length < 2) return;
 
-            ChatClient.UpdateLanguage(strings[1]);
+            _chatClient.UpdateLanguage(strings[1]);
         }
         else if (text.IndexOf("/avatar") == 0)
         {
@@ -353,26 +347,26 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
             if (strings.Length < 2) return;
 
-            ChatClient.UpdateAvatar(strings[1]);
+            _chatClient.UpdateAvatar(strings[1]);
         }
         else
         {
-            ChatClient.SendChatMessage(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, text);
+            _chatClient.SendChatMessage(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, text);
         }
     }
 
     private void OnChannelSelected(string channelGroup, string channelName, UInt64 channelNumber)
     {
-        if (!ChannelList.ContainsKey(channelGroup)) return;
+        if (!_channelList.ContainsKey(channelGroup)) return;
 
-        if (!ChannelList[channelGroup].ContainsKey(channelName)) return;
+        if (!_channelList[channelGroup].ContainsKey(channelName)) return;
 
-        if (!ChannelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
+        if (!_channelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[channelGroup][channelName][channelNumber];
+        ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
         if (channelInfo == null) return;
 
-        SelectMessageKey.Clear();
+        _selectMessageKey.Clear();
 
         if (ChatContent != null)
         {
@@ -381,37 +375,26 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                 Destroy(child.gameObject);
             }
         }
-
-        if (UserContent != null)
-        {
-            foreach (Transform child in UserContent.transform)
-            {
-                Destroy(child.gameObject);
-            }
-        }
-
-        if (ChannelUserCount != null)
-        {
-            ChannelUserCount.text = string.Format("{0} / {1}", channelInfo.Players.Count, channelInfo.MaxCount);
-        }
-
-        if (UserContent != null)
-        {
-            foreach (var player in channelInfo.Players)
-            {
-                GameObject userList = Instantiate(Resources.Load<GameObject>("Prefabs/UserList"), UserContent.transform);
-                userList.name = player.Value.GamerName;
-
-                if (player.Value.GamerName == GameManager.Instance.MyNickname)
-                {
-                    userList.GetComponent<UIUserList>().SetData(player.Value.Avatar, player.Value.GamerName, true);
-                }
-                else
-                {
-                    userList.GetComponent<UIUserList>().SetData(player.Value.Avatar, player.Value.GamerName);
-                }
-            }
-        }
+        //
+        //
+        //
+        // if (UserContent != null)
+        // {
+        //     foreach (var player in channelInfo.Players)
+        //     {
+        //         GameObject userList = Instantiate(Resources.Load<GameObject>("Prefabs/UserList"), UserContent.transform);
+        //         userList.name = player.Value.GamerName;
+        //
+        //         if (player.Value.GamerName == AccountManager.Instance.CurrentAccount.Nickname)
+        //         {
+        //             userList.GetComponent<UIUserList>().SetData(player.Value.Avatar, player.Value.GamerName, true);
+        //         }
+        //         else
+        //         {
+        //             userList.GetComponent<UIUserList>().SetData(player.Value.Avatar, player.Value.GamerName);
+        //         }
+        //     }
+        // }
 
         if (ChatContent != null)
         {
@@ -419,7 +402,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
             {
                 GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
 
-                if (message.GamerName == GameManager.Instance.MyNickname)
+                if (message.GamerName == AccountManager.Instance.CurrentAccount.Nickname)
                 {
                     chatList.GetComponent<UIChatList>().SetData(message.Index, message.Avatar, message.GamerName, message.Message, message.Time, message.Tag, OnReportButton, OnTranslateCheckButton, true);
                 }
@@ -430,44 +413,41 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
             }
         }
 
-        CurrentChannelGroup = channelGroup;
-        CurrentChannelName = channelName;
-        CurrentChannelNumber = channelNumber;
+        _currentChannelGroup = channelGroup;
+        _currentChannelName = channelName;
+        _currentChannelNumber = channelNumber;
     }
 
     private void SendReportChat(UInt64 index, string tag, string keyword, string reason)
     {
-        if (ChatClient == null) return;
+        if (_chatClient == null) return;
 
-        ChatClient.SendReportChatMessage(index, tag, keyword, reason);
+        _chatClient.SendReportChatMessage(index, tag, keyword, reason);
     }
 
     private void OnReportButton(UInt64 index, string tag)
     {
-        if (ReportPopup)
-        {
-            ReportPopup.GetComponent<UIReportManager>().SetData(index, tag, ChatClient?.GetReportReasons(), SendReportChat);
-        }
+        Debug.Log("[UIChatManager] OnReportButton은 미구현");
     }
 
     private void OnTranslateCheckButton(bool isOn, string messageKey)
     {
         if (isOn)
         {
-            for (int i = 0; i < SelectMessageKey.Count; ++i)
+            for (int i = 0; i < _selectMessageKey.Count; ++i)
             {
-                if (SelectMessageKey[i] == messageKey) return;
+                if (_selectMessageKey[i] == messageKey) return;
             }
 
-            SelectMessageKey.Add(messageKey);
+            _selectMessageKey.Add(messageKey);
         }
         else
         {
-            for (int i = 0; i < SelectMessageKey.Count; ++i)
+            for (int i = 0; i < _selectMessageKey.Count; ++i)
             {
-                if (SelectMessageKey[i] == messageKey)
+                if (_selectMessageKey[i] == messageKey)
                 {
-                    SelectMessageKey.RemoveAt(i);
+                    _selectMessageKey.RemoveAt(i);
                     break;
                 }
             }
@@ -476,63 +456,63 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
     private void SendCreatePrivateChannel(string channelGroup, UInt64 channelNumber, string channelName, uint maxCount, string password)
     {
-        if (ChatClient == null) return;
+        if (_chatClient == null) return;
 
-        ChatClient.SendCreatePrivateChannel(channelGroup, channelNumber, channelName, maxCount, password);
+        _chatClient.SendCreatePrivateChannel(channelGroup, channelNumber, channelName, maxCount, password);
     }
 
     private void SendJoinOpenChannel(string channelGroup, string channelName)
     {
-        if (ChatClient == null) return;
+        if (_chatClient == null) return;
 
-        ChatClient.SendJoinOpenChannel(channelGroup, channelName);
+        _chatClient.SendJoinOpenChannel(channelGroup, channelName);
     }
 
     private void SendJoinPrivateChannel(string channelGroup, UInt64 channelNumber, string password)
     {
-        if (ChatClient == null) return;
+        if (_chatClient == null) return;
 
-        ChatClient.SendJoinPrivateChannel(channelGroup, channelNumber, password);
+        _chatClient.SendJoinPrivateChannel(channelGroup, channelNumber, password);
     }
 
     public void OnClickJoinChannel()
     {
-        if (JoinChannelPopup)
-        {
-            JoinChannelPopup.GetComponent<UIJoinChannelManager>().SetData(SendCreatePrivateChannel, SendJoinOpenChannel, SendJoinPrivateChannel);
-        }
+        // if (JoinChannelPopup)
+        // {
+        //     JoinChannelPopup.GetComponent<UIJoinChannelManager>().SetData(SendCreatePrivateChannel, SendJoinOpenChannel, SendJoinPrivateChannel);
+        // }
     }
 
     public void OnJoinChannel(ChannelInfo channelInfo)
     {
-        if (ChannelList.ContainsKey(channelInfo.ChannelGroup))
+        if (_channelList.ContainsKey(channelInfo.ChannelGroup))
         {
-            if (ChannelList[channelInfo.ChannelGroup].ContainsKey(channelInfo.ChannelName))
+            if (_channelList[channelInfo.ChannelGroup].ContainsKey(channelInfo.ChannelName))
             {
-                if (ChannelList[channelInfo.ChannelGroup][channelInfo.ChannelName].ContainsKey(channelInfo.ChannelNumber)) return;
+                if (_channelList[channelInfo.ChannelGroup][channelInfo.ChannelName].ContainsKey(channelInfo.ChannelNumber)) return;
             }
         }
 
-        if (!ChannelList.ContainsKey(channelInfo.ChannelGroup))
+        if (!_channelList.ContainsKey(channelInfo.ChannelGroup))
         {
-            ChannelList.Add(channelInfo.ChannelGroup, new Dictionary<string, Dictionary<UInt64, ChannelInfo>>());
-            ChannelList[channelInfo.ChannelGroup].Add(channelInfo.ChannelName, new Dictionary<UInt64, ChannelInfo>());
+            _channelList.Add(channelInfo.ChannelGroup, new Dictionary<string, Dictionary<UInt64, ChannelInfo>>());
+            _channelList[channelInfo.ChannelGroup].Add(channelInfo.ChannelName, new Dictionary<UInt64, ChannelInfo>());
         }
         else
         {
-            if (!ChannelList[channelInfo.ChannelGroup].ContainsKey(channelInfo.ChannelName))
+            if (!_channelList[channelInfo.ChannelGroup].ContainsKey(channelInfo.ChannelName))
             {
-                ChannelList[channelInfo.ChannelGroup].Add(channelInfo.ChannelName, new Dictionary<UInt64, ChannelInfo>());
+                _channelList[channelInfo.ChannelGroup].Add(channelInfo.ChannelName, new Dictionary<UInt64, ChannelInfo>());
             }
         }
 
-        ChannelList[channelInfo.ChannelGroup][channelInfo.ChannelName].Add(channelInfo.ChannelNumber, channelInfo);
+        _channelList[channelInfo.ChannelGroup][channelInfo.ChannelName].Add(channelInfo.ChannelNumber, channelInfo);
 
-        GameObject channelList = Instantiate(Resources.Load<GameObject>("Prefabs/ChannelList"), ChannelContent.transform);
-        channelList.name = channelInfo.ChannelGroup + "_" + channelInfo.ChannelName + "_" + channelInfo.ChannelNumber.ToString();
-        channelList.GetComponent<UIChannelList>().AddChannel(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, OnChannelSelected);
+        // GameObject channelList = Instantiate(Resources.Load<GameObject>("Prefabs/ChannelList"), ChannelContent.transform);
+        // channelList.name = channelInfo.ChannelGroup + "_" + channelInfo.ChannelName + "_" + channelInfo.ChannelNumber.ToString();
+        // channelList.GetComponent<UIChannelList>().AddChannel(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, OnChannelSelected);
 
-        if (ChannelList.Count == 1)
+        if (_channelList.Count == 1)
         {
             OnChannelSelected(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber);
         }
@@ -540,41 +520,41 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
     public void OnLeaveChannel(ChannelInfo channelInfo)
     {
-        if (!ChannelList.ContainsKey(channelInfo.ChannelGroup)) return;
+        if (!_channelList.ContainsKey(channelInfo.ChannelGroup)) return;
 
-        if (!ChannelList[channelInfo.ChannelGroup].ContainsKey(channelInfo.ChannelName)) return;
+        if (!_channelList[channelInfo.ChannelGroup].ContainsKey(channelInfo.ChannelName)) return;
 
-        if (!ChannelList[channelInfo.ChannelGroup][channelInfo.ChannelName].ContainsKey(channelInfo.ChannelNumber)) return;
+        if (!_channelList[channelInfo.ChannelGroup][channelInfo.ChannelName].ContainsKey(channelInfo.ChannelNumber)) return;
 
-        ChannelList[channelInfo.ChannelGroup][channelInfo.ChannelName].Remove(channelInfo.ChannelNumber);
+        _channelList[channelInfo.ChannelGroup][channelInfo.ChannelName].Remove(channelInfo.ChannelNumber);
 
-        if (ChannelList[channelInfo.ChannelGroup][channelInfo.ChannelName].Count == 0)
+        if (_channelList[channelInfo.ChannelGroup][channelInfo.ChannelName].Count == 0)
         {
-            ChannelList[channelInfo.ChannelGroup].Remove(channelInfo.ChannelName);
+            _channelList[channelInfo.ChannelGroup].Remove(channelInfo.ChannelName);
         }
 
-        if (ChannelList[channelInfo.ChannelGroup].Count == 0)
+        if (_channelList[channelInfo.ChannelGroup].Count == 0)
         {
-            ChannelList.Remove(channelInfo.ChannelGroup);
+            _channelList.Remove(channelInfo.ChannelGroup);
         }
+        //
+        // if (ChannelContent != null)
+        // {
+        //     foreach (Transform child in ChannelContent.transform)
+        //     {
+        //         if (child.name == channelInfo.ChannelGroup + "_" + channelInfo.ChannelName + "_" + channelInfo.ChannelNumber.ToString())
+        //         {
+        //             Destroy(child.gameObject);
+        //             break;
+        //         }
+        //     }
+        // }
 
-        if (ChannelContent != null)
+        if (_currentChannelGroup == channelInfo.ChannelGroup && _currentChannelName == channelInfo.ChannelName && _currentChannelNumber == channelInfo.ChannelNumber)
         {
-            foreach (Transform child in ChannelContent.transform)
+            if (_channelList.Count > 0)
             {
-                if (child.name == channelInfo.ChannelGroup + "_" + channelInfo.ChannelName + "_" + channelInfo.ChannelNumber.ToString())
-                {
-                    Destroy(child.gameObject);
-                    break;
-                }
-            }
-        }
-
-        if (CurrentChannelGroup == channelInfo.ChannelGroup && CurrentChannelName == channelInfo.ChannelName && CurrentChannelNumber == channelInfo.ChannelNumber)
-        {
-            if (ChannelList.Count > 0)
-            {
-                foreach (var channel in ChannelList)
+                foreach (var channel in _channelList)
                 {
                     foreach (var channelName in channel.Value)
                     {
@@ -596,140 +576,140 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                         Destroy(child.gameObject);
                     }
                 }
-
-                if (UserContent != null)
-                {
-                    foreach (Transform child in UserContent.transform)
-                    {
-                        Destroy(child.gameObject);
-                    }
-                }
-
-                if (ChannelUserCount != null)
-                {
-                    ChannelUserCount.text = "0 / 0";
-                }
+                //
+                // if (UserContent != null)
+                // {
+                //     foreach (Transform child in UserContent.transform)
+                //     {
+                //         Destroy(child.gameObject);
+                //     }
+                // }
+                //
+                // if (ChannelUserCount != null)
+                // {
+                //     ChannelUserCount.text = "0 / 0";
+                // }
             }
         }
     }
 
     public void OnJoinChannelPlayer(string channelGroup, string channelName, UInt64 channelNumber, PlayerInfo player)
     {
-        if (!ChannelList.ContainsKey(channelGroup)) return;
+        if (!_channelList.ContainsKey(channelGroup)) return;
 
-        if (!ChannelList[channelGroup].ContainsKey(channelName)) return;
+        if (!_channelList[channelGroup].ContainsKey(channelName)) return;
 
-        if (!ChannelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
+        if (!_channelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[channelGroup][channelName][channelNumber];
+        ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
         if (channelInfo == null) return;
 
         if (channelInfo.Players.ContainsKey(player.GamerName)) return;
 
         channelInfo.Players.Add(player.GamerName, player);
 
-        if (CurrentChannelGroup == channelGroup && CurrentChannelName == channelName && CurrentChannelNumber == channelNumber)
+        if (_currentChannelGroup == channelGroup && _currentChannelName == channelName && _currentChannelNumber == channelNumber)
         {
-            if (ChannelUserCount != null)
-            {
-                ChannelUserCount.text = string.Format("{0} / {1}", channelInfo.Players.Count, channelInfo.MaxCount);
-            }
-
-            if (UserContent != null)
-            {
-                GameObject userList = Instantiate(Resources.Load<GameObject>("Prefabs/UserList"), UserContent.transform);
-                userList.name = player.GamerName;
-
-                if (player.GamerName == GameManager.Instance.MyNickname)
-                {
-                    userList.GetComponent<UIUserList>().SetData(player.Avatar, player.GamerName, true);
-                }
-                else
-                {
-                    userList.GetComponent<UIUserList>().SetData(player.Avatar, player.GamerName);
-                }
-            }
+            // if (ChannelUserCount != null)
+            // {
+            //     ChannelUserCount.text = string.Format("{0} / {1}", channelInfo.Players.Count, channelInfo.MaxCount);
+            // }
+            //
+            // if (UserContent != null)
+            // {
+            //     GameObject userList = Instantiate(Resources.Load<GameObject>("Prefabs/UserList"), UserContent.transform);
+            //     userList.name = player.GamerName;
+            //
+            //     if (player.GamerName == AccountManager.Instance.CurrentAccount.Nickname)
+            //     {
+            //         userList.GetComponent<UIUserList>().SetData(player.Avatar, player.GamerName, true);
+            //     }
+            //     else
+            //     {
+            //         userList.GetComponent<UIUserList>().SetData(player.Avatar, player.GamerName);
+            //     }
+            // }
         }
     }
 
     public void OnLeaveChannelPlayer(string channelGroup, string channelName, UInt64 channelNumber, PlayerInfo player)
     {
-        if (!ChannelList.ContainsKey(channelGroup)) return;
+        if (!_channelList.ContainsKey(channelGroup)) return;
 
-        if (!ChannelList[channelGroup].ContainsKey(channelName)) return;
+        if (!_channelList[channelGroup].ContainsKey(channelName)) return;
 
-        if (!ChannelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
+        if (!_channelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[channelGroup][channelName][channelNumber];
+        ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
         if (channelInfo == null) return;
 
         if (!channelInfo.Players.ContainsKey(player.GamerName)) return;
 
         channelInfo.Players.Remove(player.GamerName);
 
-        if (CurrentChannelGroup == channelGroup && CurrentChannelName == channelName && CurrentChannelNumber == channelNumber)
+        if (_currentChannelGroup == channelGroup && _currentChannelName == channelName && _currentChannelNumber == channelNumber)
         {
-            if (ChannelUserCount != null)
-            {
-                ChannelUserCount.text = string.Format("{0} / {1}", channelInfo.Players.Count, channelInfo.MaxCount);
-            }
-
-            if (UserContent != null)
-            {
-                foreach (Transform child in UserContent.transform)
-                {
-                    if (child.name == player.GamerName)
-                    {
-                        Destroy(child.gameObject);
-                        break;
-                    }
-                }
-            }
+            // if (ChannelUserCount != null)
+            // {
+            //     ChannelUserCount.text = string.Format("{0} / {1}", channelInfo.Players.Count, channelInfo.MaxCount);
+            // }
+            //
+            // if (UserContent != null)
+            // {
+            //     foreach (Transform child in UserContent.transform)
+            //     {
+            //         if (child.name == player.GamerName)
+            //         {
+            //             Destroy(child.gameObject);
+            //             break;
+            //         }
+            //     }
+            // }
         }
     }
 
     public void OnUpdatePlayerInfo(string channelGroup, string channelName, UInt64 channelNumber, PlayerInfo player)
     {
-        if (!ChannelList.ContainsKey(channelGroup)) return;
+        if (!_channelList.ContainsKey(channelGroup)) return;
 
-        if (!ChannelList[channelGroup].ContainsKey(channelName)) return;
+        if (!_channelList[channelGroup].ContainsKey(channelName)) return;
 
-        if (!ChannelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
+        if (!_channelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[channelGroup][channelName][channelNumber];
+        ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
         if (channelInfo == null) return;
 
         if (!channelInfo.Players.ContainsKey(player.GamerName)) return;
 
         channelInfo.Players[player.GamerName] = player;
 
-        if (CurrentChannelGroup == channelGroup && CurrentChannelName == channelName && CurrentChannelNumber == channelNumber)
+        if (_currentChannelGroup == channelGroup && _currentChannelName == channelName && _currentChannelNumber == channelNumber)
         {
-            if (UserContent != null)
-            {
-                foreach (Transform child in UserContent.transform)
-                {
-                    UIUserList userList = child.GetComponent<UIUserList>();
-                    if (userList != null)
-                    {
-                        string name = userList.Name.text;
-                        name = name.Replace(" (You)", string.Empty);
-
-                        if (name == player.GamerName)
-                        {
-                            if (name == GameManager.Instance.MyNickname)
-                            {
-                                userList.SetData(player.Avatar, player.GamerName, true);
-                            }
-                            else
-                            {
-                                userList.SetData(player.Avatar, player.GamerName);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
+            // if (UserContent != null)
+            // {
+            //     foreach (Transform child in UserContent.transform)
+            //     {
+            //         UIUserList userList = child.GetComponent<UIUserList>();
+            //         if (userList != null)
+            //         {
+            //             string name = userList.Name.text;
+            //             name = name.Replace(" (You)", string.Empty);
+            //
+            //             if (name == player.GamerName)
+            //             {
+            //                 if (name == AccountManager.Instance.CurrentAccount.Nickname)
+            //                 {
+            //                     userList.SetData(player.Avatar, player.GamerName, true);
+            //                 }
+            //                 else
+            //                 {
+            //                     userList.SetData(player.Avatar, player.GamerName);
+            //                 }
+            //                 break;
+            //             }
+            //         }
+            //     }
+            // }
 
             MessageInfo messageInfo = new MessageInfo
             {
@@ -738,9 +718,9 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                 Avatar = "Girl_5",
                 Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 Tag = "",
-                ChannelGroup = CurrentChannelGroup,
-                ChannelName = CurrentChannelName,
-                ChannelNumber = CurrentChannelNumber,
+                ChannelGroup = _currentChannelGroup,
+                ChannelName = _currentChannelName,
+                ChannelNumber = _currentChannelNumber,
                 Message = player.GamerName + "님의 정보가 갱신되었습니다."
             };
 
@@ -753,7 +733,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
     public void OnChangeGamerName(string oldGamerName, string newGamerName)
     {
         // 모든 채널을 확인하여 변경된 닉네임을 갱신한다.
-        foreach(var channelGroup in ChannelList)
+        foreach(var channelGroup in _channelList)
         {
             foreach (var channelName in channelGroup.Value)
             {
@@ -772,37 +752,36 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
                     channelInfo.Players.Add(newGamerName, player);
 
-                    if (CurrentChannelGroup == channelGroup.Key && CurrentChannelName == channelName.Key && CurrentChannelNumber == channelNumber.Key)
+                    if (_currentChannelGroup == channelGroup.Key && _currentChannelName == channelName.Key && _currentChannelNumber == channelNumber.Key)
                     {
-                        if (UserContent != null)
-                        {
-                            foreach (Transform child in UserContent.transform)
-                            {
-                                UIUserList userList = child.GetComponent<UIUserList>();
-                                if (userList != null)
-                                {
-                                    string name = userList.Name.text;
-                                    name = name.Replace(" (You)", string.Empty);
-
-                                    if (name == oldGamerName)
-                                    {
-                                        if (name == GameManager.Instance.MyNickname)
-                                        {
-                                            userList.SetData(player.Avatar, player.GamerName, true);
-                                            GameManager.Instance.MyNickname = player.GamerName;
-                                        }
-                                        else
-                                        {
-                                            userList.SetData(player.Avatar, player.GamerName);
-                                        }
-
-                                        child.name = player.GamerName;
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        // if (UserContent != null)
+                        // {
+                        //     foreach (Transform child in UserContent.transform)
+                        //     {
+                        //         UIUserList userList = child.GetComponent<UIUserList>();
+                        //         if (userList != null)
+                        //         {
+                        //             string name = userList.Name.text;
+                        //             name = name.Replace(" (You)", string.Empty);
+                        //
+                        //             if (name == oldGamerName)
+                        //             {
+                        //                 if (name == AccountManager.Instance.CurrentAccount.Nickname)
+                        //                 {
+                        //                     userList.SetData(player.Avatar, player.GamerName, true);
+                        //                 }
+                        //                 else
+                        //                 {
+                        //                     userList.SetData(player.Avatar, player.GamerName);
+                        //                 }
+                        //
+                        //                 child.name = player.GamerName;
+                        //
+                        //                 break;
+                        //             }
+                        //         }
+                        //     }
+                        // }
 
                         MessageInfo messageInfo = new MessageInfo
                         {
@@ -811,9 +790,9 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                             Avatar = "Girl_5",
                             Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                             Tag = "",
-                            ChannelGroup = CurrentChannelGroup,
-                            ChannelName = CurrentChannelName,
-                            ChannelNumber = CurrentChannelNumber,
+                            ChannelGroup = _currentChannelGroup,
+                            ChannelName = _currentChannelName,
+                            ChannelNumber = _currentChannelNumber,
                             Message = oldGamerName + "님의 닉네임이 " + newGamerName + "으로 변경되었습니다."
                         };
 
@@ -828,24 +807,24 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
     public void OnChatMessage(MessageInfo messageInfo)
     {
-        if (!ChannelList.ContainsKey(messageInfo.ChannelGroup)) return;
+        if (!_channelList.ContainsKey(messageInfo.ChannelGroup)) return;
 
-        if (!ChannelList[messageInfo.ChannelGroup].ContainsKey(messageInfo.ChannelName)) return;
+        if (!_channelList[messageInfo.ChannelGroup].ContainsKey(messageInfo.ChannelName)) return;
 
-        if (!ChannelList[messageInfo.ChannelGroup][messageInfo.ChannelName].ContainsKey(messageInfo.ChannelNumber)) return;
+        if (!_channelList[messageInfo.ChannelGroup][messageInfo.ChannelName].ContainsKey(messageInfo.ChannelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[messageInfo.ChannelGroup][messageInfo.ChannelName][messageInfo.ChannelNumber];
+        ChannelInfo channelInfo = _channelList[messageInfo.ChannelGroup][messageInfo.ChannelName][messageInfo.ChannelNumber];
         if (channelInfo == null) return;
 
         channelInfo.Messages.Add(messageInfo);
 
-        if (CurrentChannelGroup == messageInfo.ChannelGroup && CurrentChannelName == messageInfo.ChannelName && CurrentChannelNumber == messageInfo.ChannelNumber)
+        if (_currentChannelGroup == messageInfo.ChannelGroup && _currentChannelName == messageInfo.ChannelName && _currentChannelNumber == messageInfo.ChannelNumber)
         {
             if (ChatContent != null)
             {
                 GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
 
-                if (messageInfo.GamerName == GameManager.Instance.MyNickname)
+                if (messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname)
                 {
                     chatList.GetComponent<UIChatList>().SetData(messageInfo.Index, messageInfo.Avatar, messageInfo.GamerName, messageInfo.Message, messageInfo.Time, messageInfo.Tag, OnReportButton, OnTranslateCheckButton, true);
                 }
@@ -859,13 +838,13 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
     public void OnWhisperMessage(WhisperMessageInfo messageInfo)
     {
-        if (!ChannelList.ContainsKey(CurrentChannelGroup)) return;
+        if (!_channelList.ContainsKey(_currentChannelGroup)) return;
 
-        if (!ChannelList[CurrentChannelGroup].ContainsKey(CurrentChannelName)) return;
+        if (!_channelList[_currentChannelGroup].ContainsKey(_currentChannelName)) return;
 
-        if (!ChannelList[CurrentChannelGroup][CurrentChannelName].ContainsKey(CurrentChannelNumber)) return;
+        if (!_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[CurrentChannelGroup][CurrentChannelName][CurrentChannelNumber];
+        ChannelInfo channelInfo = _channelList[_currentChannelGroup][_currentChannelName][_currentChannelNumber];
         if (channelInfo == null) return;
 
         MessageInfo add_messageInfo = new MessageInfo()
@@ -887,7 +866,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
         {
             GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
 
-            if (messageInfo.FromGamerName == GameManager.Instance.MyNickname)
+            if (messageInfo.FromGamerName == AccountManager.Instance.CurrentAccount.Nickname)
             {
                 chatList.GetComponent<UIChatList>().SetData(add_messageInfo.Index, add_messageInfo.Avatar, add_messageInfo.GamerName, add_messageInfo.Message, add_messageInfo.Time, add_messageInfo.Tag, OnReportButton, OnTranslateCheckButton, true);
             }
@@ -900,13 +879,13 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
     public void OnTranslateMessage(List<MessageInfo> messages)
     {
-        if (!ChannelList.ContainsKey(CurrentChannelGroup)) return;
+        if (!_channelList.ContainsKey(_currentChannelGroup)) return;
 
-        if (!ChannelList[CurrentChannelGroup].ContainsKey(CurrentChannelName)) return;
+        if (!_channelList[_currentChannelGroup].ContainsKey(_currentChannelName)) return;
 
-        if (!ChannelList[CurrentChannelGroup][CurrentChannelName].ContainsKey(CurrentChannelNumber)) return;
+        if (!_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[CurrentChannelGroup][CurrentChannelName][CurrentChannelNumber];
+        ChannelInfo channelInfo = _channelList[_currentChannelGroup][_currentChannelName][_currentChannelNumber];
         if (channelInfo == null) return;
 
         if (ChatContent != null)
@@ -917,7 +896,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
                 GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
 
-                if (message.GamerName == GameManager.Instance.MyNickname)
+                if (message.GamerName == AccountManager.Instance.CurrentAccount.Nickname)
                 {
                     chatList.GetComponent<UIChatList>().SetData(message.Index, message.Avatar, message.GamerName, message.Message, message.Time, message.Tag, null, null, true);
                 }
@@ -931,16 +910,16 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
     public void OnHideMessage(MessageInfo messageInfo)
     {
-        if (!ChannelList.ContainsKey(messageInfo.ChannelGroup)) return;
+        if (!_channelList.ContainsKey(messageInfo.ChannelGroup)) return;
 
-        if (!ChannelList[messageInfo.ChannelGroup].ContainsKey(messageInfo.ChannelName)) return;
+        if (!_channelList[messageInfo.ChannelGroup].ContainsKey(messageInfo.ChannelName)) return;
 
-        if (!ChannelList[messageInfo.ChannelGroup][messageInfo.ChannelName].ContainsKey(messageInfo.ChannelNumber)) return;
+        if (!_channelList[messageInfo.ChannelGroup][messageInfo.ChannelName].ContainsKey(messageInfo.ChannelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[messageInfo.ChannelGroup][messageInfo.ChannelName][messageInfo.ChannelNumber];
+        ChannelInfo channelInfo = _channelList[messageInfo.ChannelGroup][messageInfo.ChannelName][messageInfo.ChannelNumber];
         if (channelInfo == null) return;
 
-        if (CurrentChannelGroup == messageInfo.ChannelGroup && CurrentChannelName == messageInfo.ChannelName && CurrentChannelNumber == messageInfo.ChannelNumber)
+        if (_currentChannelGroup == messageInfo.ChannelGroup && _currentChannelName == messageInfo.ChannelName && _currentChannelNumber == messageInfo.ChannelNumber)
         {
             if (ChatContent != null)
             {
@@ -971,16 +950,16 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
     public void OnDeleteMessage(MessageInfo messageInfo)
     {
-        if (!ChannelList.ContainsKey(messageInfo.ChannelGroup)) return;
+        if (!_channelList.ContainsKey(messageInfo.ChannelGroup)) return;
 
-        if (!ChannelList[messageInfo.ChannelGroup].ContainsKey(messageInfo.ChannelName)) return;
+        if (!_channelList[messageInfo.ChannelGroup].ContainsKey(messageInfo.ChannelName)) return;
 
-        if (!ChannelList[messageInfo.ChannelGroup][messageInfo.ChannelName].ContainsKey(messageInfo.ChannelNumber)) return;
+        if (!_channelList[messageInfo.ChannelGroup][messageInfo.ChannelName].ContainsKey(messageInfo.ChannelNumber)) return;
 
-        ChannelInfo channelInfo = ChannelList[messageInfo.ChannelGroup][messageInfo.ChannelName][messageInfo.ChannelNumber];
+        ChannelInfo channelInfo = _channelList[messageInfo.ChannelGroup][messageInfo.ChannelName][messageInfo.ChannelNumber];
         if (channelInfo == null) return;
 
-        if (CurrentChannelGroup == messageInfo.ChannelGroup && CurrentChannelName == messageInfo.ChannelName && CurrentChannelNumber == messageInfo.ChannelNumber)
+        if (_currentChannelGroup == messageInfo.ChannelGroup && _currentChannelName == messageInfo.ChannelName && _currentChannelNumber == messageInfo.ChannelNumber)
         {
             if (ChatContent != null)
             {
@@ -1039,13 +1018,13 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                     messageInfo.Message = "차단 해제 처리가 완료되었습니다.";
                 }
 
-                if (ChannelList.ContainsKey(CurrentChannelGroup))
+                if (_channelList.ContainsKey(_currentChannelGroup))
                 {
-                    if (ChannelList[CurrentChannelGroup].ContainsKey(CurrentChannelName))
+                    if (_channelList[_currentChannelGroup].ContainsKey(_currentChannelName))
                     {
-                        if (ChannelList[CurrentChannelGroup][CurrentChannelName].ContainsKey(CurrentChannelNumber))
+                        if (_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber))
                         {
-                            ChannelInfo channelInfo = ChannelList[CurrentChannelGroup][CurrentChannelName][CurrentChannelNumber];
+                            ChannelInfo channelInfo = _channelList[_currentChannelGroup][_currentChannelName][_currentChannelNumber];
                             if (channelInfo != null)
                             {
                                 messageInfo.ChannelGroup = channelInfo.ChannelGroup;
@@ -1110,13 +1089,13 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
             messageInfo.Message = error.ToString();
         }
 
-        if (ChannelList.ContainsKey(CurrentChannelGroup))
+        if (_channelList.ContainsKey(_currentChannelGroup))
         {
-            if (ChannelList[CurrentChannelGroup].ContainsKey(CurrentChannelName))
+            if (_channelList[_currentChannelGroup].ContainsKey(_currentChannelName))
             {
-                if (ChannelList[CurrentChannelGroup][CurrentChannelName].ContainsKey(CurrentChannelNumber))
+                if (_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber))
                 {
-                    ChannelInfo channelInfo = ChannelList[CurrentChannelGroup][CurrentChannelName][CurrentChannelNumber];
+                    ChannelInfo channelInfo = _channelList[_currentChannelGroup][_currentChannelName][_currentChannelNumber];
                     if (channelInfo != null)
                     {
                         messageInfo.ChannelGroup = channelInfo.ChannelGroup;
@@ -1138,6 +1117,6 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
     private void OnApplicationQuit()
     {
-        ChatClient?.Dispose();
+        _chatClient?.Dispose();
     }
 }

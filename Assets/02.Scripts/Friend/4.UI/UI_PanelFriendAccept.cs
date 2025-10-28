@@ -20,7 +20,7 @@ public class UI_PanelFriendAccept : UI_Popup
             Destroy(child.gameObject);
         }
 
-        string myUid = AccountManager.Instance.CurrencAccount.Account_ID;
+        string myUid = AccountManager.Instance.CurrentAccount.Account_ID;
         List<string> requestersUid = await FriendManager.Instance.GetFriendRequests(myUid);
 
         foreach (var requesterUid in requestersUid)

@@ -26,7 +26,7 @@ public class UI_FriendList : UI_Popup
 
     private async Task LoadFriendList()
     {
-        string myUid = AccountManager.Instance.CurrencAccount.Account_ID;
+        string myUid = AccountManager.Instance.CurrentAccount.Account_ID;
 
         List<string> friendUids = await FriendManager.Instance.GetFriendUids(myUid);
 

@@ -17,6 +17,6 @@ public class UI_PanelFriendUser : MonoBehaviour
     // 친구 요청 보내기 버튼
     public async void OnRequestFriendSendButtonClicked()
     {
-        await FriendManager.Instance.SendFriendRequest(AccountManager.Instance.CurrencAccount.Account_ID, _uid);
+        await FriendManager.Instance.SendFriendRequest(AccountManager.Instance.CurrentAccount.Account_ID, _uid);
     }
 }

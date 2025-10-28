@@ -6,25 +6,19 @@ using UnityEngine.UI;
 public class UIChatList : MonoBehaviour
 {
     public Toggle CheckBox = null;
-
     public Image Avatar = null;
-
     public Text Name = null;
-
     public Text Message = null;
-
     public Text Time = null;
-
     public Button ReportButton = null;
 
-    private UInt64 Index = 0;
-
-    private string Tag = string.Empty;
+    private UInt64 _index = 0;
+    private string _tag = string.Empty;
 
     public void SetData(UInt64 index, string avatar, string name, string message, string time, string tag, Action<UInt64, string> report, Action<bool, string> translate, bool is_my = false)
     {
-        Index = index;
-        Tag = tag;
+        _index = index;
+        _tag = tag;
 
         if (avatar == string.Empty || avatar == "default")
         {
@@ -50,11 +44,11 @@ public class UIChatList : MonoBehaviour
         ReportButton.onClick.RemoveAllListeners();
         ReportButton.onClick.AddListener(() =>
         {
-            if (Index > 0 && Tag != string.Empty)
+            if (_index > 0 && _tag != string.Empty)
             {
                 if (report != null)
                 {
-                    report(Index, Tag);
+                    report(_index, _tag);
                 }
             }
         });
@@ -62,7 +56,7 @@ public class UIChatList : MonoBehaviour
         CheckBox.onValueChanged.RemoveAllListeners();
         CheckBox.onValueChanged.AddListener((bool isOn) =>
         {
-            if (Index > 0 && Tag != string.Empty)
+            if (_index > 0 && _tag != string.Empty)
             {
                 if (translate != null)
                 {
@@ -75,7 +69,7 @@ public class UIChatList : MonoBehaviour
 
     public bool IsEqual(UInt64 index, string tag)
     {
-        return Index == index && Tag == tag;
+        return _index == index && _tag == tag;
     }
 
     public void SetMessage(string message)

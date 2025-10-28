@@ -17,12 +17,12 @@ public class UI_RequestFriendslot : MonoBehaviour
 
     public async void OnClickAccept()
     {
-        await FriendManager.Instance.AcceptFriendRequest(AccountManager.Instance.CurrencAccount.Account_ID, _uid);
+        await FriendManager.Instance.AcceptFriendRequest(AccountManager.Instance.CurrentAccount.Account_ID, _uid);
         Destroy(gameObject);
     }
     public async void OnClickDecline()
     {
-        await FriendManager.Instance.DeclineFriendRequest(AccountManager.Instance.CurrencAccount.Account_ID, _uid);
+        await FriendManager.Instance.DeclineFriendRequest(AccountManager.Instance.CurrentAccount.Account_ID, _uid);
         Destroy(gameObject);
     }
 }

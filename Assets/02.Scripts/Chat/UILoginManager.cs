@@ -210,16 +210,9 @@ public class UILoginManager : MonoBehaviour
                         }
                     }
 
-                    GameManager.Instance.MyNickname = BackEnd.Backend.GetBackendChatSettings().nickname;
                 }
-                else
-                {
-                    GameManager.Instance.UserToken = JsonUtility.ToJson(userTokenJson);
-                    GameManager.Instance.MyNickname = Username.text;
-                }
-
                 Debug.Log("채팅을 시작합니다");
-                GameManager.Instance.StartBackendChat();
+                // 채팅 팝업 띄우기
             }
         }
     }

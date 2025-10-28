@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class AccountManager : DontDestroySingleton<AccountManager>
 {
     private Account _myAccount;
-    public AccountDTO CurrencAccount => _myAccount.ToDTO();
+    public AccountDTO CurrentAccount => _myAccount.ToDTO();
 
     private AccountRepository _accountRepository;
     private BackendLogin _backendLogin;

@@ -14,7 +14,7 @@ public class UI_PanelFriendSlot : MonoBehaviour
     public void OnClickFriendInvite()
     {
         string friendNickname = FriendName.text;
-        string myNickname = AccountManager.Instance.CurrencAccount.Nickname;
+        string myNickname = AccountManager.Instance.CurrentAccount.Nickname;
     
         Debug.Log("파티 초대 보내기 버튼 누름");
         // 친구 초대 전송
