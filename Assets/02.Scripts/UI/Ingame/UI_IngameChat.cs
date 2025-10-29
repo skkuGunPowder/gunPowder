@@ -2,21 +2,23 @@ using System.Collections.Generic;
 using BackndChat;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
-public class UI_IngameChat : UI_Popup
+public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
 {
     public GameObject ChatContent = null;
     public InputField ChatInput = null;
     public Button SendButton = null;
+    public GameObject ChatListPrefab;
 
-    private void Start()
+    private bool _isChatOpen = false;
+
+    // 인게임 채팅이 동작할 씬 목록
+    private readonly string[] _activeScenes = { "WaitingRoom", "Beach1", "Dock1", "Forest1" };
+
+    protected override void Awake()
     {
-        // UIChatManager의 채팅 메시지 이벤트 구독
-        if (UIChatManager.Instance != null)
-        {
-            UIChatManager.Instance.OnChatMessageReceived += OnChatMessageReceived;
-            Debug.Log("[UI_IngameChat] 채팅 메시지 이벤트 구독 완료");
-        }
+        base.Awake();
 
         // 버튼 및 입력 필드 리스너 설정
         if (SendButton != null)
@@ -27,11 +29,140 @@ public class UI_IngameChat : UI_Popup
         {
             ChatInput.onEndEdit.AddListener((string text) =>
             {
-                if (Input.GetKeyDown(KeyCode.Return))
+                if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
                 {
                     SendChatMessage();
                 }
             });
+        }
+
+        // 씬 변경 이벤트 구독
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        // 시작 시 현재 씬 체크
+        CheckCurrentScene();
+    }
+
+    private void Update()
+    {
+        // 인게임 씬이 아니면 동작하지 않음
+        if (!IsInGameScene()) return;
+
+        // 채팅창이 열려있지 않고, InputField에 포커스가 없을 때 Enter로 열기
+        if (!_isChatOpen && ChatInput != null && !ChatInput.isFocused)
+        {
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+            {
+                OpenChatPopup();
+            }
+        }
+
+        // Esc 키로 채팅창 닫기
+        if (_isChatOpen && Input.GetKeyDown(KeyCode.Escape))
+        {
+            ClosePopup();
+        }
+    }
+
+    /// <summary>
+    /// 현재 씬이 인게임 씬인지 확인
+    /// </summary>
+    private bool IsInGameScene()
+    {
+        string currentScene = SceneManager.GetActiveScene().name;
+        foreach (var sceneName in _activeScenes)
+        {
+            if (currentScene == sceneName)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 씬 로드 시 호출
+    /// </summary>
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        CheckCurrentScene();
+    }
+
+    /// <summary>
+    /// 현재 씬에 따라 UI 활성화/비활성화
+    /// </summary>
+    private void CheckCurrentScene()
+    {
+        if (IsInGameScene())
+        {
+            // 인게임 씬이면 GameObject 활성화 (하지만 Popup은 닫힌 상태)
+            gameObject.SetActive(true);
+            ClosePopup();
+            Debug.Log($"[UI_IngameChat] 인게임 씬 진입: {SceneManager.GetActiveScene().name}");
+        }
+        else
+        {
+            // 인게임 씬이 아니면 완전히 비활성화
+            gameObject.SetActive(false);
+            Debug.Log($"[UI_IngameChat] 인게임 씬 이탈: {SceneManager.GetActiveScene().name}");
+        }
+    }
+
+    /// <summary>
+    /// Popup 닫기
+    /// </summary>
+    private void ClosePopup()
+    {
+        _isChatOpen = false;
+
+        // 이벤트 구독 해제
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
+        }
+
+        // Canvas 또는 Panel을 비활성화 (여기서는 자식 오브젝트 가정)
+        if (transform.childCount > 0)
+        {
+            transform.GetChild(0).gameObject.SetActive(false);
+        }
+
+        Debug.Log("[UI_IngameChat] 채팅 Popup 닫힘");
+    }
+
+    /// <summary>
+    /// 채팅 Popup 열기
+    /// </summary>
+    private void OpenChatPopup()
+    {
+        _isChatOpen = true;
+
+        // 자식 오브젝트(Panel) 활성화
+        if (transform.childCount > 0)
+        {
+            transform.GetChild(0).gameObject.SetActive(true);
+        }
+
+        // 이벤트 구독
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived; // 중복 방지
+            UIChatManager.Instance.OnChatMessageReceived += OnChatMessageReceived;
+        }
+
+        FocusInputField();
+        Debug.Log("[UI_IngameChat] 채팅 Popup 열림");
+    }
+
+    /// <summary>
+    /// InputField에 포커스 설정
+    /// </summary>
+    private void FocusInputField()
+    {
+        if (ChatInput != null)
+        {
+            ChatInput.ActivateInputField();
+            ChatInput.Select();
         }
     }
 
@@ -43,7 +174,8 @@ public class UI_IngameChat : UI_Popup
         if (ChatContent == null) return;
 
         // 채팅 리스트 UI 생성
-        GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
+        //GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
+        GameObject chatList = Instantiate(ChatListPrefab, ChatContent.transform);
 
         if (chatList == null)
         {
@@ -87,21 +219,19 @@ public class UI_IngameChat : UI_Popup
 
         if (string.IsNullOrEmpty(text)) return;
 
+        // 채팅 메시지 전송
         UIChatManager.Instance.SendChatMessage(text);
-    }
 
-    private void OnDisable()
-    {
-        // 이벤트 구독 해제
-        if (UIChatManager.Instance != null)
-        {
-            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
-        }
+        // 전송 후에도 InputField에 포커스 유지 (연속 채팅 가능)
+        FocusInputField();
     }
 
     private void OnDestroy()
     {
-        // 이벤트 구독 해제 (안전장치)
+        // 씬 이벤트 구독 해제
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        // 채팅 메시지 이벤트 구독 해제
         if (UIChatManager.Instance != null)
         {
             UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;

@@ -37,9 +37,27 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         new Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>>();
 
     private List<string> _selectMessageKey = new List<string>();
-    // Start is called before the first frame update
-    private void Start()
+    private bool _isChatClientInitialized = false;
+
+    /// <summary>
+    /// ChatClient 초기화 (로그인 후 PhotonServerManager.Connect()에서 호출)
+    /// </summary>
+    public void InitializeChatClient()
     {
+        if (_isChatClientInitialized)
+        {
+            Debug.LogWarning("[UIChatManager] ChatClient가 이미 초기화되었습니다.");
+            return;
+        }
+
+        if (AccountManager.Instance == null ||
+            AccountManager.Instance.CurrentAccount == null ||
+            string.IsNullOrEmpty(AccountManager.Instance.CurrentAccount.Nickname))
+        {
+            Debug.LogError("[UIChatManager] AccountManager의 Nickname이 설정되지 않았습니다. ChatClient 초기화를 중단합니다.");
+            return;
+        }
+
         // 예시 이미지들, Resources 폴더의 경로를 string으로 지정, 추후 이미지 생기면 수정
         // 아마 Firebase나 뒤끝에 저장된 커스텀 사진(미리 저장된 이미지 중에서 선택한 사진)을 사용하게 될듯?
         List<string> avatars = new List<string>
@@ -55,12 +73,18 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         };
 
         string avatar = avatars[UnityEngine.Random.Range(0, avatars.Count)];
+        string nickname = AccountManager.Instance.CurrentAccount.Nickname;
+
+        Debug.Log($"[UIChatManager] ChatClient 초기화 시작 - Nickname: {nickname}, Avatar: {avatar}");
 
         _chatClient = new ChatClient(this, new ChatClientArguments
         {
-            UUID = AccountManager.Instance.CurrentAccount.Nickname,
+            
             Avatar = avatar,
         });
+
+        _isChatClientInitialized = true;
+        Debug.Log("[UIChatManager] ChatClient 초기화 완료");
     }
 
     // Update is called once per frame

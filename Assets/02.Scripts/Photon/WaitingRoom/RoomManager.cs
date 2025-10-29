@@ -247,16 +247,24 @@ public class RoomManager : PhotonSingleton<RoomManager>
         newMasterClient.SetCustomProperties(table);
     }
   
-    public override void OnDisable()
+    // 방을 나갈 때 채팅 채널 퇴장
+    public override void OnLeftRoom()
     {
-        base.OnDisable();
-        EventManager.Instance.OnPlayerLeft -= PlayerLeft;
+        base.OnLeftRoom();
+
+        Debug.Log("[RoomManager] 방을 나갔습니다. 인게임 채팅 채널 퇴장");
 
         // 인게임 채팅 채널 퇴장
         if (UIChatManager.Instance != null)
         {
             UIChatManager.Instance.LeaveInGameChannel();
         }
+    }
+
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        EventManager.Instance.OnPlayerLeft -= PlayerLeft;
     }
 
 }
