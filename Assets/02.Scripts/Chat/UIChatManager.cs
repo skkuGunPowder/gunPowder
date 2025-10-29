@@ -1,5 +1,6 @@
 using BackEnd;
 using BackndChat;
+using Photon.Pun;
 
 using System;
 using System.Collections.Generic;
@@ -7,59 +8,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
+public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.IChatClientListener
 {
-    // public GameObject ChannelContent = null;
+    // 인게임 채팅 채널 설정
+    private const string INGAME_CHANNEL_GROUP = "InGame";
+
+    // 채팅 메시지 수신 이벤트 (UI 클래스들이 구독)
+    public event Action<MessageInfo> OnChatMessageReceived;
 
     public GameObject ChatContent = null;
-
-    // public GameObject UserContent = null;
-
-    // public Text ChannelUserCount = null;
-
     public InputField ChatInput = null;
-
     public Button SendButton = null;
 
-    // public GameObject ReportPopup = null;
-
-    // public Button JoinChannelButton = null;
-
-    // public GameObject JoinChannelPopup = null;
-
+    public string CurrentChannelGroup => _currentChannelGroup;
     private string _currentChannelGroup = string.Empty;
-
+    
+    public string CurrentChannelName => _currentChannelName;
     private string _currentChannelName = string.Empty;
-
+    
+    public UInt64 CurrentChannelNumber => _currentChannelNumber;
     private UInt64 _currentChannelNumber = 0;
-
-    private List<string> _selectMessageKey = new List<string>();
-
+    
+    public ChatClient ChatClient => _chatClient;
     private ChatClient _chatClient = null;
 
+    public Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>> ChannelList => _channelList;
     private Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>> _channelList =
         new Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>>();
 
+    private List<string> _selectMessageKey = new List<string>();
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        if (SendButton != null)
-        {
-            SendButton.onClick.AddListener(SendChatMessage);
-        }
-
-        
-        if (ChatInput != null)
-        {
-            ChatInput.onEndEdit.AddListener((string text) =>
-            {
-                if (Input.GetKeyDown(KeyCode.Return))
-                {
-                    SendChatMessage();
-                }
-            });
-        }
-
+        // 예시 이미지들, Resources 폴더의 경로를 string으로 지정, 추후 이미지 생기면 수정
+        // 아마 Firebase나 뒤끝에 저장된 커스텀 사진(미리 저장된 이미지 중에서 선택한 사진)을 사용하게 될듯?
         List<string> avatars = new List<string>
         {
             "Boy_1",
@@ -76,42 +58,29 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
         _chatClient = new ChatClient(this, new ChatClientArguments
         {
+            UUID = AccountManager.Instance.CurrentAccount.Nickname,
             Avatar = avatar,
-            CustomAccessToken = "",
         });
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         _chatClient?.Update();
     }
 
-    private void SendChatMessage()
+    public void SendChatMessage(string text)
     {
-        if (ChatInput == null) return;
-
-        if (ChatInput.text.Length == 0) return;
-
-        string text = ChatInput.text;
-
-        ChatInput.text = string.Empty;
-
-        if (string.IsNullOrEmpty(text)) return;
-
         if (_chatClient == null) return;
-
         if (_currentChannelName == string.Empty) return;
-
         if (!_channelList.ContainsKey(_currentChannelGroup)) return;
-
         if (!_channelList[_currentChannelGroup].ContainsKey(_currentChannelName)) return;
-
         if (!_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber)) return;
 
         ChannelInfo channelInfo = _channelList[_currentChannelGroup][_currentChannelName][_currentChannelNumber];
         if (channelInfo == null) return;
 
+        // 귓속말
         if (text.IndexOf("/w") == 0)
         {
             string[] whisper = text.Split(' ');
@@ -132,6 +101,7 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
             _chatClient.SendWhisperMessage(whisper[1], message);
         }
+        // 번역기능?
         else if (text.IndexOf("/translate") == 0)
         {
             if (_selectMessageKey.Count == 0) return;
@@ -168,6 +138,8 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                 _chatClient.SendTranslateChatMessage(messages[i], langaues);
             }
         }
+        
+        // 차단 기능? 혹은 신고?
         else if (text.IndexOf("/block") == 0)
         {
             string[] strings = text.Split(' ');
@@ -254,6 +226,8 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                 }
             }
         }
+        
+        // 내 정보?
         else if (text.IndexOf("/info") == 0)
         {
             string[] strings = text.Split(' ');
@@ -287,80 +261,80 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
                 OnChatMessage(messageInfo);
             }
         }
-        else if (text.IndexOf("/nickname") == 0)
-        {
-            string[] strings = text.Split(' ');
-
-            if (strings.Length < 2) return;
-
-            var returnObject = Backend.BMember.UpdateNickname(strings[1]);
-            if (!returnObject.IsSuccess())
-            {
-                Debug.LogError("닉네임 변경 실패 : " + returnObject);
-                return;
-            }
-
-            _chatClient.UpdateNickname(strings[1]);
-        }
-        else if (text.IndexOf("/meta") == 0)
-        {
-            string[] strings = text.Split(' ');
-
-            if (strings.Length < 4) return;
-
-            if (!channelInfo.Players.ContainsKey(AccountManager.Instance.CurrentAccount.Nickname)) return;
-
-            PlayerInfo player = channelInfo.Players[AccountManager.Instance.CurrentAccount.Nickname];
-
-            if (strings[1] == "add")
-            {
-                if (player.Metadata.ContainsKey(strings[2])) return;
-
-                player.Metadata.Add(strings[2], strings[3]);
-            }
-            else if (strings[1] == "remove")
-            {
-                if (!player.Metadata.ContainsKey(strings[2])) return;
-
-                player.Metadata.Remove(strings[2]);
-            }
-            else if (strings[1] == "update")
-            {
-                if (!player.Metadata.ContainsKey(strings[2])) return;
-
-                player.Metadata[strings[2]] = strings[3];
-            }
-
-            _chatClient.UpdateMetadata(player.Metadata);
-        }
-        else if (text.IndexOf("/language") == 0)
-        {
-            string[] strings = text.Split(' ');
-
-            if (strings.Length < 2) return;
-
-            _chatClient.UpdateLanguage(strings[1]);
-        }
-        else if (text.IndexOf("/avatar") == 0)
-        {
-            string[] strings = text.Split(' ');
-
-            if (strings.Length < 2) return;
-
-            _chatClient.UpdateAvatar(strings[1]);
-        }
-        else
-        {
-            _chatClient.SendChatMessage(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, text);
-        }
+        // 닉네임 변경은 챗에서 사용할 수 없음
+        // else if (text.IndexOf("/nickname") == 0)
+        // {
+        //     string[] strings = text.Split(' ');
+        //
+        //     if (strings.Length < 2) return;
+        //
+        //     var returnObject = Backend.BMember.UpdateNickname(strings[1]);
+        //     if (!returnObject.IsSuccess())
+        //     {
+        //         Debug.LogError("닉네임 변경 실패 : " + returnObject);
+        //         return;
+        //     }
+        //
+        //     _chatClient.UpdateNickname(strings[1]);
+        // }
+        // 메타데이터 수정도 안댐
+        // else if (text.IndexOf("/meta") == 0)
+        // {
+        //     string[] strings = text.Split(' ');
+        //
+        //     if (strings.Length < 4) return;
+        //
+        //     if (!channelInfo.Players.ContainsKey(AccountManager.Instance.CurrentAccount.Nickname)) return;
+        //
+        //     PlayerInfo player = channelInfo.Players[AccountManager.Instance.CurrentAccount.Nickname];
+        //
+        //     if (strings[1] == "add")
+        //     {
+        //         if (player.Metadata.ContainsKey(strings[2])) return;
+        //
+        //         player.Metadata.Add(strings[2], strings[3]);
+        //     }
+        //     else if (strings[1] == "remove")
+        //     {
+        //         if (!player.Metadata.ContainsKey(strings[2])) return;
+        //
+        //         player.Metadata.Remove(strings[2]);
+        //     }
+        //     else if (strings[1] == "update")
+        //     {
+        //         if (!player.Metadata.ContainsKey(strings[2])) return;
+        //
+        //         player.Metadata[strings[2]] = strings[3];
+        //     }
+        //
+        //     _chatClient.UpdateMetadata(player.Metadata);
+        // }
+        // 언어변경은 아직 미지원
+        // else if (text.IndexOf("/language") == 0)
+        // {
+        //     string[] strings = text.Split(' ');
+        //
+        //     if (strings.Length < 2) return;
+        //
+        //     _chatClient.UpdateLanguage(strings[1]);
+        // }
+        // 아바타 수정도 아직
+        // else if (text.IndexOf("/avatar") == 0)
+        // {
+        //     string[] strings = text.Split(' ');
+        //
+        //     if (strings.Length < 2) return;
+        //
+        //     _chatClient.UpdateAvatar(strings[1]);
+        // }
+   
+        _chatClient.SendChatMessage(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, text);
     }
 
     private void OnChannelSelected(string channelGroup, string channelName, UInt64 channelNumber)
     {
         if (!_channelList.ContainsKey(channelGroup)) return;
-
         if (!_channelList[channelGroup].ContainsKey(channelName)) return;
-
         if (!_channelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
 
         ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
@@ -418,12 +392,13 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
         _currentChannelNumber = channelNumber;
     }
 
-    private void SendReportChat(UInt64 index, string tag, string keyword, string reason)
-    {
-        if (_chatClient == null) return;
-
-        _chatClient.SendReportChatMessage(index, tag, keyword, reason);
-    }
+    // Report는 미구현
+    // private void SendReportChat(UInt64 index, string tag, string keyword, string reason)
+    // {
+    //     if (_chatClient == null) return;
+    //
+    //     _chatClient.SendReportChatMessage(index, tag, keyword, reason);
+    // }
 
     private void OnReportButton(UInt64 index, string tag)
     {
@@ -818,8 +793,13 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
         channelInfo.Messages.Add(messageInfo);
 
+        // 현재 채널의 메시지만 처리
         if (_currentChannelGroup == messageInfo.ChannelGroup && _currentChannelName == messageInfo.ChannelName && _currentChannelNumber == messageInfo.ChannelNumber)
         {
+            // UI 클래스들에게 메시지 수신 이벤트 발생
+            OnChatMessageReceived?.Invoke(messageInfo);
+
+            // ChatContent가 설정되어 있으면 기본 UI 표시 (로비 등에서 사용)
             if (ChatContent != null)
             {
                 GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
@@ -862,6 +842,10 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
 
         channelInfo.Messages.Add(add_messageInfo);
 
+        // UI 클래스들에게 귓속말 수신 이벤트 발생
+        OnChatMessageReceived?.Invoke(add_messageInfo);
+
+        // ChatContent가 설정되어 있으면 기본 UI 표시
         if (ChatContent != null)
         {
             GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
@@ -1115,8 +1099,51 @@ public class UIChatManager : MonoBehaviour, BackndChat.IChatClientListener
         }
     }
 
+    /// <summary>
+    /// Photon 방 입장 시 인게임 채팅 채널에 자동으로 접속
+    /// RoomManager에서 호출
+    /// </summary>
+    public void JoinInGameChannel()
+    {
+        if (_chatClient == null)
+        {
+            Debug.LogError("[UIChatManager] ChatClient가 초기화되지 않았습니다.");
+            return;
+        }
+
+        if (!PhotonNetwork.InRoom)
+        {
+            Debug.LogError("[UIChatManager] Photon 방에 접속되어 있지 않습니다.");
+            return;
+        }
+
+        string roomName = PhotonNetwork.CurrentRoom.Name;
+
+        Debug.Log($"[UIChatManager] 인게임 채팅 채널 접속 시도: {INGAME_CHANNEL_GROUP} / {roomName}");
+
+        // 오픈 채널로 참가 (같은 Photon 방에 있는 플레이어끼리 채팅)
+        _chatClient.SendJoinOpenChannel(INGAME_CHANNEL_GROUP, roomName);
+    }
+
+    /// <summary>
+    /// 인게임 채팅 채널에서 퇴장
+    /// </summary>
+    public void LeaveInGameChannel()
+    {
+        if (_chatClient == null) return;
+
+        if (!string.IsNullOrEmpty(_currentChannelGroup) &&
+            _currentChannelGroup == INGAME_CHANNEL_GROUP &&
+            !string.IsNullOrEmpty(_currentChannelName))
+        {
+            Debug.Log($"[UIChatManager] 인게임 채팅 채널 퇴장: {_currentChannelGroup} / {_currentChannelName}");
+            _chatClient.SendLeaveChannel(_currentChannelGroup, _currentChannelName, _currentChannelNumber);
+        }
+    }
+
     private void OnApplicationQuit()
     {
+        LeaveInGameChannel();
         _chatClient?.Dispose();
     }
 }

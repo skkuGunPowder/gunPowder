@@ -71,6 +71,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _initialized = true;
         SetRoom();
         Initializer.Init(this);
+
+        // 인게임 채팅 채널 자동 참가
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.JoinInGameChannel();
+        }
     }
 
     // 준비가 다 되었다면 마스터가 정한 맵으로 이동시킴
@@ -245,6 +251,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         base.OnDisable();
         EventManager.Instance.OnPlayerLeft -= PlayerLeft;
+
+        // 인게임 채팅 채널 퇴장
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.LeaveInGameChannel();
+        }
     }
 
 }
