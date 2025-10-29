@@ -11,7 +11,7 @@ using UnityEngine.UI;
 public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.IChatClientListener
 {
     // 인게임 채팅 채널 설정
-    private const string INGAME_CHANNEL_GROUP = "InGame";
+    private const string INGAME_CHANNEL_GROUP = "ingame";
 
     // 채팅 메시지 수신 이벤트 (UI 클래스들이 구독)
     public event Action<MessageInfo> OnChatMessageReceived;
@@ -484,6 +484,14 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
     public void OnJoinChannel(ChannelInfo channelInfo)
     {
+        // "global" 채널은 SDK 기본 채널이므로 자동으로 나가기
+        if (channelInfo.ChannelGroup.ToLower() == "global")
+        {
+            Debug.Log($"[UIChatManager] 기본 채널({channelInfo.ChannelGroup}/{channelInfo.ChannelName})에서 자동으로 나갑니다.");
+            _chatClient.SendLeaveChannel(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber);
+            return;
+        }
+
         if (_channelList.ContainsKey(channelInfo.ChannelGroup))
         {
             if (_channelList[channelInfo.ChannelGroup].ContainsKey(channelInfo.ChannelName))
@@ -1141,12 +1149,25 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             return;
         }
 
-        string roomName = PhotonNetwork.CurrentRoom.Name;
+        // CustomProperties에서 채팅 채널 ID 가져오기
+        string channelName = null;
 
-        Debug.Log($"[UIChatManager] 인게임 채팅 채널 접속 시도: {INGAME_CHANNEL_GROUP} / {roomName}");
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.ChatChannelId.ToString()))
+        {
+            channelName = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelId.ToString()] as string;
+        }
+
+        // Fallback: CustomProperties에 없으면 HashCode 사용
+        if (string.IsNullOrEmpty(channelName))
+        {
+            channelName = $"room_{Math.Abs(PhotonNetwork.CurrentRoom.Name.GetHashCode())}";
+            Debug.LogWarning($"[UIChatManager] ChatChannelId가 CustomProperties에 없어 Fallback 사용: {channelName}");
+        }
+
+        Debug.Log($"[UIChatManager] 인게임 채팅 채널 접속 시도: {INGAME_CHANNEL_GROUP} / {channelName}");
 
         // 오픈 채널로 참가 (같은 Photon 방에 있는 플레이어끼리 채팅)
-        _chatClient.SendJoinOpenChannel(INGAME_CHANNEL_GROUP, roomName);
+        _chatClient.SendJoinOpenChannel(INGAME_CHANNEL_GROUP, channelName);
     }
 
     /// <summary>

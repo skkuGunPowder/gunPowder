@@ -18,6 +18,9 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
     // 방에 보내기
     public void MakeRoom(string roomName, int maxPlayers, int playTime, int life, int gunpowder, int decline, bool isLocked, string password = null)
     {
+        // 채팅 채널 ID 생성 (특수문자 없는 고유한 ID)
+        string chatChannelId = $"room_{Guid.NewGuid().ToString("N").Substring(0, 12)}";
+
         // 룸 프로퍼티에 들어가야할 것들 : 시간, 목숨, 시작 건파우더, 시간 당 감소
         Hashtable roomProperties = new Hashtable
         {
@@ -28,7 +31,8 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
             {ERoomProperties.Gunpowder.ToString(), gunpowder},
             {ERoomProperties.DeclinePowder.ToString(), decline},
             {ERoomProperties.IsLocked.ToString(),isLocked },
-            {ERoomProperties.Password.ToString(), password}
+            {ERoomProperties.Password.ToString(), password},
+            {ERoomProperties.ChatChannelId.ToString(), chatChannelId}
         };
         
         RoomOptions roomOptions = new RoomOptions();

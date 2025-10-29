@@ -8,6 +8,7 @@ public enum ERoomProperties
     IsLocked,
     Password,
     RoomName,
-    
+    ChatChannelId,
+
     Count
 }
