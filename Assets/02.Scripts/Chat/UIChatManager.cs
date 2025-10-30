@@ -16,6 +16,9 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     // 채팅 메시지 수신 이벤트 (UI 클래스들이 구독)
     public event Action<MessageInfo> OnChatMessageReceived;
 
+    // 채널 퇴장 이벤트 (UI 클래스들이 구독)
+    public event Action OnChannelLeft;
+
     public GameObject ChatContent = null;
     public InputField ChatInput = null;
     public Button SendButton = null;
@@ -484,6 +487,8 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
     public void OnJoinChannel(ChannelInfo channelInfo)
     {
+        Debug.Log($"[UIChatManager] 채널 입장 성공: Group={channelInfo.ChannelGroup}, Name={channelInfo.ChannelName}, Number={channelInfo.ChannelNumber}");
+
         // "global" 채널은 SDK 기본 채널이므로 자동으로 나가기
         if (channelInfo.ChannelGroup.ToLower() == "global")
         {
@@ -1065,6 +1070,8 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
     public void OnError(ERROR_MESSAGE error, object param)
     {
+        Debug.LogError($"[UIChatManager] Backend Chat 에러 발생: {error}, Param: {param}");
+
         MessageInfo messageInfo = new MessageInfo
         {
             Index = 0,
@@ -1149,25 +1156,84 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             return;
         }
 
-        // CustomProperties에서 채팅 채널 ID 가져오기
+        // CustomProperties에서 채팅 채널 정보 가져오기
+        string channelGroup = null;
         string channelName = null;
+        ulong channelNumber = 0;
 
+        // 채널 그룹 가져오기
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.ChatChannelGroup.ToString()))
+        {
+            channelGroup = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelGroup.ToString()] as string;
+        }
+
+        // 채널 이름 가져오기
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.ChatChannelId.ToString()))
         {
             channelName = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelId.ToString()] as string;
         }
 
-        // Fallback: CustomProperties에 없으면 HashCode 사용
-        if (string.IsNullOrEmpty(channelName))
+        // 채널 번호 가져오기
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.ChatChannelNumber.ToString()))
         {
-            channelName = $"room_{Math.Abs(PhotonNetwork.CurrentRoom.Name.GetHashCode())}";
-            Debug.LogWarning($"[UIChatManager] ChatChannelId가 CustomProperties에 없어 Fallback 사용: {channelName}");
+            object channelNumberObj = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelNumber.ToString()];
+
+            if (channelNumberObj is ulong)
+            {
+                channelNumber = (ulong)channelNumberObj;
+            }
+            else if (channelNumberObj is long)
+            {
+                channelNumber = (ulong)(long)channelNumberObj;
+            }
+            else if (channelNumberObj is int)
+            {
+                channelNumber = (ulong)(int)channelNumberObj;
+            }
         }
 
-        Debug.Log($"[UIChatManager] 인게임 채팅 채널 접속 시도: {INGAME_CHANNEL_GROUP} / {channelName}");
+        // Fallback: CustomProperties에 없으면 HashCode 사용 (Backend Chat SDK 길이 제한: 2~20자)
+        if (string.IsNullOrEmpty(channelGroup) || string.IsNullOrEmpty(channelName) || channelNumber == 0)
+        {
+            int roomHash = Math.Abs(PhotonNetwork.CurrentRoom.Name.GetHashCode());
+            channelGroup = $"ig_{roomHash}";  // "ig_" + 숫자 (최대 12자)
+            channelName = $"rm_{roomHash}";   // "rm_" + 숫자 (최대 12자)
+            channelNumber = (ulong)roomHash;
+            Debug.LogWarning($"[UIChatManager] 채팅 채널 정보가 CustomProperties에 없어 Fallback 사용: {channelGroup} / {channelName} / {channelNumber}");
+        }
 
-        // 오픈 채널로 참가 (같은 Photon 방에 있는 플레이어끼리 채팅)
-        _chatClient.SendJoinOpenChannel(INGAME_CHANNEL_GROUP, channelName);
+        Debug.Log($"[UIChatManager] 인게임 채팅 채널 접속 시도: {channelGroup} / {channelName} / {channelNumber}");
+
+        // 방장인 경우 Private Channel 생성, 다른 플레이어는 참가만
+        if (PhotonNetwork.IsMasterClient)
+        {
+            CreateInGameChannel(channelGroup, channelName, channelNumber);
+        }
+        else
+        {
+            // Private Channel로 참가 (비밀번호 없음)
+            _chatClient.SendJoinPrivateChannel(channelGroup, channelNumber, "");
+        }
+    }
+
+    /// <summary>
+    /// 인게임 채팅 Private Channel 생성 (방장만 호출)
+    /// </summary>
+    private void CreateInGameChannel(string channelGroup, string channelName, ulong channelNumber)
+    {
+        if (_chatClient == null)
+        {
+            Debug.LogError("[UIChatManager] ChatClient가 null입니다!");
+            return;
+        }
+
+        uint maxCount = (uint)PhotonNetwork.CurrentRoom.MaxPlayers;
+        string password = ""; // 비밀번호 없음 (공개 방처럼 사용)
+
+        Debug.Log($"[UIChatManager] Private Channel 생성 요청: Group={channelGroup}, Number={channelNumber}, Name={channelName}, MaxCount={maxCount}");
+
+        // Private Channel 생성
+        _chatClient.SendCreatePrivateChannel(channelGroup, channelNumber, channelName, maxCount, password);
     }
 
     /// <summary>
@@ -1177,12 +1243,15 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     {
         if (_chatClient == null) return;
 
+        // 현재 채널이 인게임 채널인지 확인
         if (!string.IsNullOrEmpty(_currentChannelGroup) &&
-            _currentChannelGroup == INGAME_CHANNEL_GROUP &&
             !string.IsNullOrEmpty(_currentChannelName))
         {
             Debug.Log($"[UIChatManager] 인게임 채팅 채널 퇴장: {_currentChannelGroup} / {_currentChannelName}");
             _chatClient.SendLeaveChannel(_currentChannelGroup, _currentChannelName, _currentChannelNumber);
+
+            // 채널 퇴장 이벤트 발행
+            OnChannelLeft?.Invoke();
         }
     }
 

@@ -18,8 +18,13 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
     // 방에 보내기
     public void MakeRoom(string roomName, int maxPlayers, int playTime, int life, int gunpowder, int decline, bool isLocked, string password = null)
     {
-        // 채팅 채널 ID 생성 (특수문자 없는 고유한 ID)
-        string chatChannelId = $"room_{Guid.NewGuid().ToString("N").Substring(0, 12)}";
+        // 채팅 채널 정보 생성 (Backend Chat SDK 길이 제한: 2~20자)
+        // GUID 8자만 사용 (충분한 고유성 보장)
+        string uniqueId = Guid.NewGuid().ToString("N").Substring(0, 8);
+        string chatChannelGroup = $"ingamechat";  
+        string chatChannelId = $"rm{uniqueId}";
+        // HashCode 사용 - Photon int 지원 + Backend Chat ulong 변환 가능 + 적절한 크기
+        int chatChannelNumber = Math.Abs(uniqueId.GetHashCode());
 
         // 룸 프로퍼티에 들어가야할 것들 : 시간, 목숨, 시작 건파우더, 시간 당 감소
         Hashtable roomProperties = new Hashtable
@@ -32,7 +37,9 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
             {ERoomProperties.DeclinePowder.ToString(), decline},
             {ERoomProperties.IsLocked.ToString(),isLocked },
             {ERoomProperties.Password.ToString(), password},
-            {ERoomProperties.ChatChannelId.ToString(), chatChannelId}
+            {ERoomProperties.ChatChannelGroup.ToString(), chatChannelGroup},
+            {ERoomProperties.ChatChannelId.ToString(), chatChannelId},
+            {ERoomProperties.ChatChannelNumber.ToString(), chatChannelNumber}
         };
         
         RoomOptions roomOptions = new RoomOptions();

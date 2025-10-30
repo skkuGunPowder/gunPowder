@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
+public class UI_IngameChat : MonoBehaviour
 {
     public GameObject ChatContent = null;
     public InputField ChatInput = null;
@@ -16,10 +16,8 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
     // 인게임 채팅이 동작할 씬 목록
     private readonly string[] _activeScenes = { "WaitingRoom", "Beach1", "Dock1", "Forest1" };
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
-
         // 버튼 및 입력 필드 리스너 설정
         if (SendButton != null)
         {
@@ -39,6 +37,15 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
         // 씬 변경 이벤트 구독
         SceneManager.sceneLoaded += OnSceneLoaded;
 
+        // 이벤트 구독
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived; // 중복 방지
+            UIChatManager.Instance.OnChatMessageReceived += OnChatMessageReceived;
+
+            UIChatManager.Instance.OnChannelLeft -= OnChannelLeft; // 중복 방지
+            UIChatManager.Instance.OnChannelLeft += OnChannelLeft;
+        }
         // 시작 시 현재 씬 체크
         CheckCurrentScene();
     }
@@ -105,6 +112,7 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
             // 인게임 씬이 아니면 완전히 비활성화
             gameObject.SetActive(false);
             Debug.Log($"[UI_IngameChat] 인게임 씬 이탈: {SceneManager.GetActiveScene().name}");
+            Destroy(this);
         }
     }
 
@@ -115,11 +123,7 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
     {
         _isChatOpen = false;
 
-        // 이벤트 구독 해제
-        if (UIChatManager.Instance != null)
-        {
-            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
-        }
+       
 
         // Canvas 또는 Panel을 비활성화 (여기서는 자식 오브젝트 가정)
         if (transform.childCount > 0)
@@ -143,12 +147,7 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
             transform.GetChild(0).gameObject.SetActive(true);
         }
 
-        // 이벤트 구독
-        if (UIChatManager.Instance != null)
-        {
-            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived; // 중복 방지
-            UIChatManager.Instance.OnChatMessageReceived += OnChatMessageReceived;
-        }
+
 
         FocusInputField();
         Debug.Log("[UI_IngameChat] 채팅 Popup 열림");
@@ -208,6 +207,21 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
         );
     }
 
+    /// <summary>
+    /// 채널 퇴장 시 호출되는 콜백
+    /// </summary>
+    private void OnChannelLeft()
+    {
+        // 이벤트 구독 해제
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
+            UIChatManager.Instance.OnChannelLeft -= OnChannelLeft;
+        }
+        ClearAllMessages();
+        Debug.Log("[UI_IngameChat] 채널 퇴장으로 인한 채팅 메시지 전체 삭제");
+    }
+
     private void SendChatMessage()
     {
         // 인게임 채팅 UI에서 검사할 부분은 내용이 비어있는가?
@@ -226,6 +240,22 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
         FocusInputField();
     }
 
+    /// <summary>
+    /// 생성된 모든 채팅 메시지를 삭제
+    /// </summary>
+    public void ClearAllMessages()
+    {
+        if (ChatContent == null) return;
+
+        // ChatContent의 모든 자식 오브젝트 삭제
+        foreach (Transform child in ChatContent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        Debug.Log("[UI_IngameChat] 모든 채팅 메시지 삭제됨");
+    }
+
     private void OnDestroy()
     {
         // 씬 이벤트 구독 해제
@@ -235,6 +265,7 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
         if (UIChatManager.Instance != null)
         {
             UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
+            UIChatManager.Instance.OnChannelLeft -= OnChannelLeft;
         }
     }
 }
