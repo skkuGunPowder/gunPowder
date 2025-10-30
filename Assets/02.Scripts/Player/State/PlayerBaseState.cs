@@ -381,14 +381,21 @@ public class PlayerBaseState : MonoState
             return;
         }
 
+        // 특수 폭탄 프리팹 이름 가져오기
+        string prefabName = _owner.EquipedItemDict[EItemType.Bomb].Prefab.name;
+        
+        // 박격포는 지상에서만 사용 가능
+        if (IsMortarBomb(prefabName) && !CanUseMortarInCurrentState())
+        {
+            Debug.Log("[PlayerBaseState] 박격포는 공중에서 사용할 수 없습니다.");
+            return;
+        }
+
         // 공통 처리
         ExecuteAttackCommonLogic();
         
         // 스폰 포인트 설정
         (Transform bombSpawnPoint, EBombSpawnPoint finalSpawnPoint) = GetBombSpawnPointInfo(spawnPoint);
-        
-        // 특수 폭탄 프리팹 이름 가져오기
-        string prefabName = _owner.EquipedItemDict[EItemType.Bomb].Prefab.name;
         
         // 폭탄 생성 및 실행
         ExecuteBombAction(prefabName, bombSpawnPoint, action);
@@ -662,6 +669,24 @@ public class PlayerBaseState : MonoState
                 spriteRenderer.enabled = isVisible;
             }
         }
+    }
+    
+    /// <summary>
+    /// 박격포 폭탄인지 확인
+    /// </summary>
+    private bool IsMortarBomb(string prefabName)
+    {
+        return prefabName.Contains("Mortar") || prefabName == "BM0002";
+    }
+    
+    /// <summary>
+    /// 현재 상태에서 박격포 사용 가능한지 확인 (지상에서만 가능)
+    /// </summary>
+    private bool CanUseMortarInCurrentState()
+    {
+        return !(_playerFSM.IsCurrentState<PlayerJumpState>() || 
+                 _playerFSM.IsCurrentState<PlayerFallState>() || 
+                 _playerFSM.IsCurrentState<PlayerJumpDashState>());
     }
     
     /// <summary>

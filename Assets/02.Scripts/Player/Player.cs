@@ -1190,13 +1190,16 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         EventManager.Instance.HitScreen();
         // 피격 VFX 재생
-        if (tag == "Player")
+        if (VFXPool.Instance != null)
         {
-            VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
-        }
-        else
-        {
-            VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
+            if (tag == "Player")
+            {
+                VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
+            }
+            else
+            {
+                VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
+            }
         }
 
         // SFX
