@@ -1188,7 +1188,23 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
     {
+        if (!PhotonView.IsMine)
+        {
+            return;
+        }
+        
+        // 모든 클라이언트에서 VFX와 데미지 처리를 동기화
+        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
+    }
+    
+    /// <summary>
+    /// 피격 VFX와 사운드를 재생하는 RPC 메서드
+    /// </summary>
+    [PunRPC]
+    private void RPC_PlayHitEffects(int damage, int maxDamage)
+    {
         EventManager.Instance.HitScreen();
+        
         // 피격 VFX 재생
         if (VFXPool.Instance != null)
         {
@@ -1202,8 +1218,6 @@ public class Player : MonoBehaviourPun, IDamagable
             }
         }
 
-        // SFX
-
         // 맥스 데미지를 받았을때 다른 사운드 재생
         if (damage == maxDamage)
         {
@@ -1215,12 +1229,6 @@ public class Player : MonoBehaviourPun, IDamagable
             SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
             SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 3, 0f, false, SoundType.SFX, true, 1f, 50f);
         }
-
-        if (!PhotonView.IsMine)
-        {
-            return;
-        }
-        PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
     }
 
     [PunRPC]
@@ -1230,6 +1238,9 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
+
+        // 모든 클라이언트에서 VFX와 사운드 재생 (공격자와 피격자 모두)
+        RPC_PlayHitEffects(damage, maxDamage);
 
         Debug.Log($"[RPC_TakeDamage] isNormalAttack: {isNormalAttack}");
 
