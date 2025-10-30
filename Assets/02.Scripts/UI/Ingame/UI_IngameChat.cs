@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class UI_IngameChat : MonoBehaviour
+public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
 {
     public GameObject ChatContent = null;
     public InputField ChatInput = null;
@@ -16,8 +16,9 @@ public class UI_IngameChat : MonoBehaviour
     // 인게임 채팅이 동작할 씬 목록
     private readonly string[] _activeScenes = { "WaitingRoom", "Beach1", "Dock1", "Forest1" };
 
-    private void Awake()
+    protected virtual void Awake()
     {
+        base.Awake();
         // 버튼 및 입력 필드 리스너 설정
         if (SendButton != null)
         {
