@@ -1201,7 +1201,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// 피격 VFX와 사운드를 재생하는 RPC 메서드
     /// </summary>
     [PunRPC]
-    private void RPC_PlayHitEffects(int damage, int maxDamage)
+    public void RPC_PlayHitEffects(int damage, int maxDamage)
     {
         EventManager.Instance.HitScreen();
         
@@ -1238,9 +1238,6 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-
-        // 모든 클라이언트에서 VFX와 사운드 재생 (공격자와 피격자 모두)
-        RPC_PlayHitEffects(damage, maxDamage);
 
         Debug.Log($"[RPC_TakeDamage] isNormalAttack: {isNormalAttack}");
 
@@ -1306,18 +1303,20 @@ public class Player : MonoBehaviourPun, IDamagable
         // 피격 이벤트 발생
         OnHit?.Invoke();
 
-        // 데미지 팝업: 중복 호출 방지
-        // 오직 RPC_TakeDamage를 원래 보낸 클라이언트(피격자 Owner)에서만 팝업 RPC를 전송한다
+        // 데미지 팝업 & VFX/사운드: 중복 호출 방지
+        // 오직 RPC_TakeDamage를 원래 보낸 클라이언트(피격자 Owner)에서만 RPC를 전송한다
         if (info.Sender != null && info.Sender.IsLocal)
         {
-            // 맞은 사람(Owner)에게는 -damage 표시
+            // 맞은 사람(Owner)에게 VFX/사운드와 데미지 팝업 표시
             if (PhotonView.Owner != null)
             {
+                PhotonView.RPC(nameof(RPC_PlayHitEffects), PhotonView.Owner, damage, maxDamage);
                 PhotonView.RPC(nameof(ShowDamagePopup), PhotonView.Owner, -damage, maxDamage);
             }
-            // 때린 사람(Attacker Owner)에게는 +damage 표시 (피해자와 동일 Owner면 중복 방지)
+            // 때린 사람(Attacker Owner)에게 VFX/사운드와 데미지 팝업 표시 (피해자와 동일 Owner면 중복 방지)
             if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy && attackerView.Owner != null && attackerView.Owner != PhotonView.Owner)
             {
+                PhotonView.RPC(nameof(RPC_PlayHitEffects), attackerView.Owner, damage, maxDamage);
                 PhotonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
             }
         }
