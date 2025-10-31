@@ -17,11 +17,22 @@ public class CrabSpawner : MonoBehaviour
     private void Awake()
     {
         _spawnedCrabs = new List<GameObject>();
+
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+        
         SpawnCrabs();
     }
 
     private void Update()
     {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+        
         _timer += Time.deltaTime;
         if(_timer >= _resetTime)
         {
