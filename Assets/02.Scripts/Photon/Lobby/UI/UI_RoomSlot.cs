@@ -21,7 +21,6 @@ public class UI_RoomSlot : MonoBehaviour
     public GameObject LockIcon;
     
     [Header("참조")]
-    public UI_PasswordPopup PasswordPopup;
     public RoomInfo _roomInfo;
     
     private bool _isLocked = false;
@@ -53,16 +52,17 @@ public class UI_RoomSlot : MonoBehaviour
         _isLocked = (bool)_roomInfo.CustomProperties[roomProperties.ToString()];
         LockIcon.SetActive(_isLocked);
     }
+
+    public void OnClicked()
+    {
+        
+    }
     public void LockedCheck()
     {
         if(_isLocked)
         {
-            PopupManager.Instance.Open(EPopupType.UI_PasswordPopup);
-            PasswordPopup.SetRoomInfo(_roomInfo);
-        }
-        else
-        { 
-            JoinRoom();
+            UI_PasswordPopup password = (UI_PasswordPopup)PopupManager.Instance.Open(EPopupType.UI_PasswordPopup);
+            password.SetRoomInfo(_roomInfo);
         }
     }
 

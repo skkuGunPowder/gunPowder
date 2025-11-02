@@ -33,7 +33,15 @@ public class UI_ReadyButton : MonoBehaviour
             ReadyTextUGUI.text = NotReady;
         }
     }
-    
+
+    private void Update()
+    {
+        if (InputHandler.GetKeyDown(KeyCode.F5))
+        {
+            OnClickReady();   
+        }
+    }
+
     // 레디 버튼을 눌렀을 때, 커스텀 프로퍼티를 바꾼다.
     public void OnClickReady()
     {
