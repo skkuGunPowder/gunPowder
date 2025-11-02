@@ -55,21 +55,22 @@ public class UI_RoomSlot : MonoBehaviour
 
     public void OnClicked()
     {
-        
-    }
-    public void LockedCheck()
-    {
+        // 잠겨있는 방인가?
         if(_isLocked)
         {
             UI_PasswordPopup password = (UI_PasswordPopup)PopupManager.Instance.Open(EPopupType.UI_PasswordPopup);
             password.SetRoomInfo(_roomInfo);
-        }
-    }
-
-    public void JoinRoom()
-    {
+            return;
+        }   
         
-        PhotonNetwork.JoinRoom(_roomInfo.Name);
+        // 풀방인가?
+        if (_roomInfo.PlayerCount >= _roomInfo.MaxPlayers)
+        {
+            UI_MessagePopup message = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
+            message.Init("방이 가득 찼습니다", false);
+            return;
+        }
+        
+        PhotonNetwork.JoinRoom(_roomInfo.Name);        
     }
-    
 }
