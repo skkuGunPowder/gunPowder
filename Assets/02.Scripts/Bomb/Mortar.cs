@@ -1,6 +1,8 @@
 using Photon.Pun;
 using UnityEngine;
 using Heathen.UnityPhysics;
+using Com.LuisPedroFonseca.ProCamera2D;
+using System;
 
 
 public class Mortar : Bomb
@@ -22,6 +24,9 @@ public class Mortar : Bomb
     [SerializeField] private float _maxAngle = 85f;
     [SerializeField] private float _rangeStep = 20f;
 
+    [Header("Camera Zoom Settings")]
+    [SerializeField] private float _maxZoomValue = 30f;
+
     private Player _owner;
     private Animator _animator;
     private BallisticPathLineRender _pathRenderer;
@@ -33,6 +38,10 @@ public class Mortar : Bomb
     private float _delayTimer;
     private SuperAmorBuff _superArmorBuff;
 
+    private ProCamera2D _proCamera;
+    private float _defaultZoom;
+    private float _targetZoom;
+
 
 
     protected override void Init()
@@ -41,6 +50,12 @@ public class Mortar : Bomb
         SetStat(ID);
 
         _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+        float normalizedAngle = Mathf.InverseLerp(_minAngle, _maxAngle, Mathf.Abs(_currentAngle));
+
+        _proCamera = Camera.main.GetComponent<ProCamera2D>();
+        _defaultZoom = Camera.main.orthographicSize;
+        _targetZoom = Mathf.Lerp(_maxZoomValue, _defaultZoom, normalizedAngle);
+
         _currentAmmo = _maxAmmo;
 
         _animator = GetComponent<Animator>();
@@ -94,7 +109,6 @@ public class Mortar : Bomb
             {
                 _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerJumpState));
             }
-
             RemoveMortar();
         }
 
@@ -108,13 +122,11 @@ public class Mortar : Bomb
             {
                 _currentAngle = Mathf.Max(_minAngle, _currentAngle - _rangeStep * Time.deltaTime);
             }
+            float normalizedAngle = Mathf.InverseLerp(_minAngle, _maxAngle, Mathf.Abs(_currentAngle));
+            _targetZoom = Mathf.Lerp(_maxZoomValue, _defaultZoom, normalizedAngle);
 
-            _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
-
-            _projectileData.velocity = _muzzle.right * _stat.Speed;
-            _pathRenderer.projectile = _projectileData;
-            _pathRenderer.start = _muzzle.position;
-            _animator.SetFloat("Angle", _currentAngle);
+            
+            UpdateMortar();
         }
 
         if (Input.GetKey(KeyCode.RightArrow))
@@ -127,18 +139,15 @@ public class Mortar : Bomb
             {
                 _currentAngle = Mathf.Min(_maxAngle, _currentAngle + _rangeStep * Time.deltaTime);
             }
+            float normalizedAngle = Mathf.InverseLerp(_minAngle, _maxAngle, Mathf.Abs(_currentAngle));
+            _targetZoom = Mathf.Lerp(_maxZoomValue, _defaultZoom, normalizedAngle);
 
-            _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
-
-            _projectileData.velocity = _muzzle.right * _stat.Speed;
-            _pathRenderer.projectile = _projectileData;
-            _pathRenderer.start = _muzzle.position;
-            _animator.SetFloat("Angle", _currentAngle);
+            UpdateMortar();
         }
 
         if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Z))
         {
-            if(_delayTimer < _firedelay)
+            if (_delayTimer < _firedelay)
             {
                 return;
             }
@@ -162,21 +171,35 @@ public class Mortar : Bomb
             }
 
             _owner.ResetGunPowderDecreaseWithoutAttackTimer();
-        
+
             _currentAmmo--;
-            if(_currentAmmo <= 0)
+            if (_currentAmmo <= 0)
             {
                 RemoveMortar();
             }
         }
     }
+    
+    private void UpdateMortar()
+    {
+        _barrel.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+
+        _projectileData.velocity = _muzzle.right * _stat.Speed;
+        _pathRenderer.projectile = _projectileData;
+        _pathRenderer.start = _muzzle.position;
+        _animator.SetFloat("Angle", _currentAngle);
+
+        _proCamera.UpdateScreenSize(_targetZoom);
+    }
 
     private void RemoveMortar()
     {
+        _proCamera.UpdateScreenSize(_defaultZoom);
+
         if (PhotonView.IsMine)
         {
             InputHandler.BlockInput = false;
-            _superArmorBuff.EndBuff();  
+            _superArmorBuff.EndBuff();
 
             if (PhotonView != null && PhotonView.ViewID != 0)
             {
@@ -188,6 +211,11 @@ public class Mortar : Bomb
                 Destroy(gameObject);
             }
         }
+    }
+    
+    private void OnDestroy()
+    {
+        _proCamera.UpdateScreenSize(_defaultZoom);
     }
 
     [PunRPC]

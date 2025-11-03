@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 6688180221441323649}
   - component: {fileID: 598473460444119424}
   - component: {fileID: 3257289808474687121}
+  - component: {fileID: 6979942551743966095}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -295,3 +296,49 @@ MonoBehaviour:
   _proCamera: {fileID: 0}
   TargetZoomDuration: 1.5
   TargetZoomAmount: 1.5
+--- !u!114 &6979942551743966095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420445649814059649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1f4d7058517540a6926e80c9fef48db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pc2D: {fileID: 808785234075494698}
+  _serializedAxis: 0
+  AutomaticInputDetection: 1
+  UseMouseInput: 0
+  UseTouchInput: 0
+  DisableOverUGUI: 1
+  AllowZoom: 1
+  MouseZoomSpeed: 10
+  PinchZoomSpeed: 50
+  ZoomSmoothness: 0.2
+  MaxZoomInAmount: 2
+  MaxZoomOutAmount: 2
+  ZoomToInputCenter: 1
+  IsZooming: 0
+  AllowPan: 1
+  UsePanByDrag: 1
+  StopSpeedOnDragStart: 0.95
+  DraggableAreaRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  DragPanSpeedMultiplier: {x: 1, y: 1}
+  UsePanByMoveToEdges: 0
+  EdgesPanSpeed: {x: 2, y: 2}
+  TopPanEdge: 0.9
+  BottomPanEdge: 0.9
+  LeftPanEdge: 0.9
+  RightPanEdge: 0.9
+  PanMouseButton: 0
+  MinPanAmount: 0.05
+  ResetPrevPanPoint: 0
+  IsPanning: 0
