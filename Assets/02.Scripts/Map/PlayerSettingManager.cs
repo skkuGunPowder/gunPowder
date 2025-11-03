@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
 using PhotonPlayer = Photon.Realtime.Player;
 
 [RequireComponent(typeof(PhotonView))]
