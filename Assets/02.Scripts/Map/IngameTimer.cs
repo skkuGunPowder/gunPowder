@@ -76,13 +76,18 @@ public class IngameTimer : MonoBehaviour
 
     public void GameOver()
     {
-        _isGameOver = true;
-        if (PhotonNetwork.IsMasterClient == false)
+        if (_isGameOver == true)
         {
             return;
         }
         
-        GameManager.Instance.RequestGameOver();
+        _isGameOver = true;
+        
+        // 모든 클라이언트에서 모드에 타이머 종료 알림
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnTimerExpired();
+        }
     }
 
     private void TimeCheck(PhotonPlayer targetPlayer)
