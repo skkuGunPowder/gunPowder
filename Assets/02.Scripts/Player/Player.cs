@@ -90,6 +90,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public event Action OnAttack;
     public event Action OnHit;
+    public event Action OnNormalAttack;
+    public event Action OnSpecialAttack;
 
     [SerializeField]
     private BoxRay2D _groundRay2D;
@@ -1668,6 +1670,16 @@ public class Player : MonoBehaviourPun, IDamagable
     public void InvokeAttack()
     {
         OnAttack?.Invoke();
+    }
+
+    public void InvokeNormalAttack()
+    {
+        OnNormalAttack?.Invoke();  // 일반 공격 전용 이벤트
+    }
+
+    public void InvokeSpecialAttack()
+    {
+        OnSpecialAttack?.Invoke(); // 특수 공격 전용 이벤트
     }
 
 

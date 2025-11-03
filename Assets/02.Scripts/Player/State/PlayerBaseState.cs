@@ -333,6 +333,9 @@ public class PlayerBaseState : MonoState
 
         // 공통 처리
         ExecuteAttackCommonLogic();
+
+        // 일반 공격 이벤트
+        _owner.InvokeNormalAttack();
         
         // 스폰 포인트 설정
         (Transform bombSpawnPoint, EBombSpawnPoint finalSpawnPoint) = GetBombSpawnPointInfo(spawnPoint);
@@ -393,6 +396,9 @@ public class PlayerBaseState : MonoState
 
         // 공통 처리
         ExecuteAttackCommonLogic();
+
+        // 특수 공격 이벤트
+        _owner.InvokeSpecialAttack();
         
         // 스폰 포인트 설정
         (Transform bombSpawnPoint, EBombSpawnPoint finalSpawnPoint) = GetBombSpawnPointInfo(spawnPoint);
