@@ -309,7 +309,11 @@ public class PlayerBaseState : MonoState
         // 4. RPC 호출 (SetOwner 먼저, 그 다음 폭탄 동작)
         try
         {
-            bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, ownerPhotonView.ViewID);
+            // 로컬에서 먼저 SetOwner 호출 (즉시 실행)
+            bombComponent.SetOwner(ownerPhotonView.ViewID);
+            
+            // 다른 클라이언트에게 SetOwner 전파
+            bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.Others, ownerPhotonView.ViewID);
             bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
         }
         catch (System.Exception e)
@@ -329,6 +333,9 @@ public class PlayerBaseState : MonoState
 
         // 공통 처리
         ExecuteAttackCommonLogic();
+
+        // 일반 공격 이벤트
+        _owner.InvokeNormalAttack();
         
         // 스폰 포인트 설정
         (Transform bombSpawnPoint, EBombSpawnPoint finalSpawnPoint) = GetBombSpawnPointInfo(spawnPoint);
@@ -377,14 +384,24 @@ public class PlayerBaseState : MonoState
             return;
         }
 
+        // 특수 폭탄 프리팹 이름 가져오기
+        string prefabName = _owner.EquipedItemDict[EItemType.Bomb].Prefab.name;
+        
+        // 박격포는 지상에서만 사용 가능
+        if (IsMortarBomb(prefabName) && !CanUseMortarInCurrentState())
+        {
+            Debug.Log("[PlayerBaseState] 박격포는 공중에서 사용할 수 없습니다.");
+            return;
+        }
+
         // 공통 처리
         ExecuteAttackCommonLogic();
+
+        // 특수 공격 이벤트
+        _owner.InvokeSpecialAttack();
         
         // 스폰 포인트 설정
         (Transform bombSpawnPoint, EBombSpawnPoint finalSpawnPoint) = GetBombSpawnPointInfo(spawnPoint);
-        
-        // 특수 폭탄 프리팹 이름 가져오기
-        string prefabName = _owner.EquipedItemDict[EItemType.Bomb].Prefab.name;
         
         // 폭탄 생성 및 실행
         ExecuteBombAction(prefabName, bombSpawnPoint, action);
@@ -658,6 +675,24 @@ public class PlayerBaseState : MonoState
                 spriteRenderer.enabled = isVisible;
             }
         }
+    }
+    
+    /// <summary>
+    /// 박격포 폭탄인지 확인
+    /// </summary>
+    private bool IsMortarBomb(string prefabName)
+    {
+        return prefabName.Contains("Mortar") || prefabName == "BM0002";
+    }
+    
+    /// <summary>
+    /// 현재 상태에서 박격포 사용 가능한지 확인 (지상에서만 가능)
+    /// </summary>
+    private bool CanUseMortarInCurrentState()
+    {
+        return !(_playerFSM.IsCurrentState<PlayerJumpState>() || 
+                 _playerFSM.IsCurrentState<PlayerFallState>() || 
+                 _playerFSM.IsCurrentState<PlayerJumpDashState>());
     }
     
     /// <summary>
