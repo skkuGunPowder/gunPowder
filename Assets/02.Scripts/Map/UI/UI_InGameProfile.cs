@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.UI;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UI_InGameProfile : MonoBehaviour
-{ 
+{
+    public Image MyBomb;
     [SerializeField]
     private List<UI_InGameProfileSlot> UI_InGameProfileSlotList = new List<UI_InGameProfileSlot>();
     private List<int> _playerActorNumberList = new List<int>();
+    
     private void OnEnable()
     {
         SubscribeEvents();
@@ -47,6 +50,10 @@ public class UI_InGameProfile : MonoBehaviour
                 Sprite bomb = item.Image;
                 EInGameTeam team = (EInGameTeam)reorderedPlayers[i].CustomProperties[EProperties.Team.ToString()];
                 
+                if(reorderedPlayers[i].ActorNumber == localPlayerActorNumber)
+                {
+                    MyBomb.sprite = bomb;
+                }
                 UI_InGameProfileSlotList[i].gameObject.SetActive(true);
                 // 후에 수정
                 UI_InGameProfileSlotList[i].Init(bomb, team, reorderedPlayers[i]);

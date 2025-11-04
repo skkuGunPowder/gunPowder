@@ -5,7 +5,7 @@ using TMPro;
 public class UI_PasswordPopup : UI_Popup
 {
     public TMP_InputField PasswordInputField;
-    public RoomInfo _currentRoomInfo;
+    private RoomInfo _currentRoomInfo;
     private string _tempPassword;
     
     public void SetRoomInfo(RoomInfo roomInfo)

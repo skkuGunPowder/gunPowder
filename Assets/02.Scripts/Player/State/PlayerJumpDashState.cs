@@ -36,7 +36,7 @@ public class PlayerJumpDashState : PlayerBaseState
     private IEnumerator JumpDashEffectOffCoroutine()
     {
         yield return new WaitForSeconds(_jumpDashEffectOffTime);
-         _owner.RPC_SetGhostTrail(false);
+        _owner.RPC_SetGhostTrail(false);
     }
 
     /// <summary>
@@ -60,9 +60,9 @@ public class PlayerJumpDashState : PlayerBaseState
         }
 
         // 대쉬 시간 종료 후 바닥 체크
-        if(_dashTimer >= _owner.PlayerStat.DashTime)
+        if (_dashTimer >= _owner.PlayerStat.DashTime)
         {
-            
+
             // 바닥에 있는지 체크
             if (IsGrounded2D())
             {
@@ -78,6 +78,7 @@ public class PlayerJumpDashState : PlayerBaseState
         {
             // 대쉬 이동후 낙하
             UpdateDashMovement();
+            HandleJumpDashAttack();
         }
     }
 
@@ -94,16 +95,16 @@ public class PlayerJumpDashState : PlayerBaseState
 
         _groundRay2D.Cast();
         bool isGroundedNow = _groundRay2D.Performed;
-        
+
         // 공중 시간 계산
         if (!isGroundedNow)
         {
             _airborneTimer += Time.deltaTime;
         }
-        
+
         // 착지 감지 (이전에 공중이었다가 지금 땅에 닿음)
         bool isLandingSoon = !_wasGroundedLastFrame && isGroundedNow && _airborneTimer > MIN_AIRBORNE_TIME;
-        
+
         if (isLandingSoon)
         {
             // 착지 애니메이션 트리거
@@ -111,7 +112,7 @@ public class PlayerJumpDashState : PlayerBaseState
             _isLanding = true;
             _landingCheckTimer = 0f;
         }
-        
+
         // 착지 확인 (일정 시간 후 상태 전환)
         if (_isLanding)
         {
@@ -121,7 +122,7 @@ public class PlayerJumpDashState : PlayerBaseState
                 _landingConfirmed = true;
             }
         }
-        
+
         _wasGroundedLastFrame = isGroundedNow;
     }
 
@@ -209,5 +210,24 @@ public class PlayerJumpDashState : PlayerBaseState
         _owner.Rigidbody2D.gravityScale = _originalGravityScale;
         _owner.RPC_ResetAnimatorTrigger("JumpDash");
         StartCoroutine(JumpDashEffectOffCoroutine());
+    }
+    
+    /// <summary>
+    /// 러닝 중 공격 처리 (직선 투척 후 Recoil 전환)
+    /// </summary>
+    private void HandleJumpDashAttack()
+    {
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        {
+            ThrowStraightNormalBomb();
+            _playerFSM.ChangeState<PlayerRecoilState>();
+            return;
+        }
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        {
+            ThrowStraightSpecialBomb();
+            _playerFSM.ChangeState<PlayerRecoilState>();
+            return;
+        }
     }
 }

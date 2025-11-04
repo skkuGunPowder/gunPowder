@@ -60,6 +60,7 @@ public class PlayerDashState : PlayerBaseState
         }
 
         HandleDashEndTransition();
+        HandleDashAttack();
     }
 
 
@@ -117,5 +118,24 @@ public class PlayerDashState : PlayerBaseState
         _owner.PlayerStat.IsFallingFromLedge = true;
         _owner.RPC_SetAnimatorTrigger("Fall");
         _playerFSM.ChangeState<PlayerFallState>();
+    }
+
+    /// <summary>
+    /// 대시 중 공격 처리 (직선 투척 후 Recoil 전환)
+    /// </summary>
+    private void HandleDashAttack()
+    {
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        {
+            ThrowStraightNormalBomb();
+            _playerFSM.ChangeState<PlayerRecoilState>();
+            return;
+        }
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        {
+            ThrowStraightSpecialBomb();
+            _playerFSM.ChangeState<PlayerRecoilState>();
+            return;
+        }
     }
 }
