@@ -30,7 +30,7 @@ public class AirDropBox : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (_dropWarningVFX != null)
+        if (_dropWarningVFX != null && PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.Destroy(_dropWarningVFX);
         }
@@ -55,6 +55,7 @@ public class AirDropBox : MonoBehaviour
         {
             return;
         }
+        
         Player player = other.gameObject.GetComponent<Player>();
 
         if (player.AirDropItem == null)
