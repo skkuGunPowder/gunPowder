@@ -12,7 +12,6 @@ public class UI_RoomSetting : MonoBehaviour
     
     public UI_RoomSetupButton Playtime;
     public UI_RoomSetupButton Powder;
-    public UI_RoomSetupButton Decline;
     public UI_RoomSetupButton Life;
     
     // 처음 설정한 방 세팅 가져오기
@@ -20,7 +19,6 @@ public class UI_RoomSetting : MonoBehaviour
     {
         PlaytimeInit = Init(ERoomProperties.PlayTime,Playtime);
         PowderInit = Init(ERoomProperties.Gunpowder,Powder);
-        DeclineInit = Init(ERoomProperties.DeclinePowder,Decline);
         LifeInit = Init(ERoomProperties.Life, Life);
     }
     
@@ -36,6 +34,25 @@ public class UI_RoomSetting : MonoBehaviour
         return value;
     }
 
+    public void OnclickDeathmatch()
+    {
+        Room currentRoom = PhotonNetwork.CurrentRoom;
+        Hashtable roomProperties = new Hashtable
+        {
+            {ERoomProperties.GameMode.ToString(), (int)EGameMode.Deathmatch}
+        };
+        currentRoom.SetCustomProperties(roomProperties);
+    }
+    
+    public void OnclickInfinite()
+    {
+        Room currentRoom = PhotonNetwork.CurrentRoom;
+        Hashtable roomProperties = new Hashtable
+        {
+            {ERoomProperties.GameMode.ToString(), (int)EGameMode.Infinite}
+        };
+        currentRoom.SetCustomProperties(roomProperties);
+    }
     public void AcceptButton()
     {
         Room currentRoom = PhotonNetwork.CurrentRoom;
@@ -44,15 +61,13 @@ public class UI_RoomSetting : MonoBehaviour
         {
             {$"{ERoomProperties.PlayTime}", Playtime.CurrentValue()},
             {$"{ERoomProperties.Life}",  Life.CurrentValue()},
-            {$"{ERoomProperties.Gunpowder}",  Powder.CurrentValue()},
-            {$"{ERoomProperties.DeclinePowder}",  Decline.CurrentValue()},
+            {$"{ERoomProperties.Gunpowder}",  Powder.CurrentValue()}
         };
         
         currentRoom.SetCustomProperties(roomProperties);
 
         PlaytimeInit = Playtime.CurrentValue();
         PowderInit = Powder.CurrentValue();
-        DeclineInit = Decline.CurrentValue();
         LifeInit = Life.CurrentValue();
     }
 
@@ -60,7 +75,6 @@ public class UI_RoomSetting : MonoBehaviour
     {
        Playtime.Reset(PlaytimeInit);
        Powder.Reset(PowderInit);
-       Decline.Reset(DeclineInit);
        Life.Reset(LifeInit);
     }
 }

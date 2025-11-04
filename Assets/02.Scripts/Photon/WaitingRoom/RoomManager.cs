@@ -220,6 +220,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             EventManager.Instance.RoomDataChanged();
         }
+
+        if (propertiesThatChanged.ContainsKey(ERoomProperties.GameMode.ToString()))
+        {
+            Debug.Log("GameModechange " + propertiesThatChanged[ERoomProperties.GameMode.ToString()]);
+        }
     }
 
     // 방장이 바뀌면 콜백

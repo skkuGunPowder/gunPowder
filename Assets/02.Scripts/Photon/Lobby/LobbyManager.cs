@@ -28,7 +28,8 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
             {ERoomProperties.Gunpowder.ToString(), gunpowder},
             {ERoomProperties.DeclinePowder.ToString(), decline},
             {ERoomProperties.IsLocked.ToString(),isLocked },
-            {ERoomProperties.Password.ToString(), password}
+            {ERoomProperties.Password.ToString(), password},
+            {ERoomProperties.GameMode.ToString(), (int)EGameMode.Deathmatch}
         };
         
         RoomOptions roomOptions = new RoomOptions();

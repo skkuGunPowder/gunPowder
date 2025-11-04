@@ -65,6 +65,8 @@ public class GameManager : PhotonSingleton<GameManager>
     /// </summary>
     private void SetupGameMode()
     {
+        SetGameMode();
+        
         _currentModeHandler = CreateModeHandler(_currentGameMode);
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
         _playerList = new List<PhotonPlayer>(players);
@@ -73,6 +75,20 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             _currentModeHandler.Initialize(this, _playerList);
         }
+    }
+    private void SetGameMode()
+    {
+        if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.GameMode.ToString()) == false)
+        {
+            Debug.Log("GameMode is not set, using Deathmatch");
+            _currentGameMode = EGameMode.Deathmatch;
+            return;
+        }
+        
+        EGameMode mode = (EGameMode)PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.GameMode.ToString()];
+        _currentGameMode = mode;
+        
+        Debug.Log($"GameMode is set to {_currentGameMode}");
     }
     
     /// <summary>

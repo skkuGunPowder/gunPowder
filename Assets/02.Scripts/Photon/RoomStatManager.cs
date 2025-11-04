@@ -13,8 +13,7 @@ public class RoomStatManager : Singleton<RoomStatManager>
     protected override void Awake()
     {
         base.Awake();
-        
-        PlayerLife = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.Life.ToString()]);
+        LifeSetting();
         PlayerGunpowder = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.Gunpowder.ToString()]); 
         PlayerDecreaseTime = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.DeclinePowder.ToString()]);
         
@@ -27,6 +26,28 @@ public class RoomStatManager : Singleton<RoomStatManager>
         
         PlayerTeam = (EInGameTeam)team;
 
+    }
+
+    private void LifeSetting()
+    {
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.Life.ToString()) == false)
+        {
+            PlayerLife = 3;
+            return;
+        }
+
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.GameMode.ToString()) && PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.GameMode.ToString()] != null)
+        {
+            EGameMode mode = (EGameMode)PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.GameMode.ToString()];
+
+            if (mode == EGameMode.Infinite)
+            {
+                PlayerLife = 1000;
+                return;
+            }
+        }
+        
+        PlayerLife = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.Life.ToString()]);
     }
     
     
