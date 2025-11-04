@@ -11271,6 +11271,7 @@ GameObject:
   - component: {fileID: 7421580483226123779}
   - component: {fileID: 3892670841946622108}
   - component: {fileID: 4166078470256695636}
+  - component: {fileID: 8788381626506705353}
   m_Layer: 5
   m_Name: MyItem
   m_TagString: Untagged
@@ -11379,9 +11380,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6107623103365794808}
-        m_TargetAssemblyTypeName: UI_ItemStorage, Assembly-CSharp
-        m_MethodName: Show
+      - m_Target: {fileID: 8788381626506705353}
+        m_TargetAssemblyTypeName: PopupSlot, Assembly-CSharp
+        m_MethodName: Open
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11391,6 +11392,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8788381626506705353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6863574863208204010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8db85499a788c444893714371e16291e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Popup: 14
 --- !u!1 &6881579969612018445
 GameObject:
   m_ObjectHideFlags: 0
@@ -18136,17 +18150,6 @@ MonoBehaviour:
   duration: 0.3
   ease: 27
   slideDirection: 0
---- !u!114 &6107623103365794808 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1895526354956625740, guid: 2b79e85a690d92d41a2448fe5825999c, type: 3}
-  m_PrefabInstance: {fileID: 5660147282998389940}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2351725985410248909}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e3333ef81af88c4aaacea959d516b4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &5995188260499161814
 PrefabInstance:
   m_ObjectHideFlags: 0

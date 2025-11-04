@@ -103,15 +103,15 @@ public class UI_ItemStorage : UI_Popup
         _itemStorage.SetPlayerCustomProperties();
     }
 
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public void Close()
-    {
-        gameObject.SetActive(false);
-    }
+    // public void Show()
+    // {
+    //     gameObject.SetActive(true);
+    // }
+    //
+    // public void Close()
+    // {
+    //     gameObject.SetActive(false);
+    // }
 
     private void OnDestroy()
     {
