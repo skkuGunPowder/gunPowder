@@ -147,7 +147,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         if (changedProps.ContainsKey(EProperties.IsReady.ToString())) // 레디 변경
         {
-            Debug.Log("ready check" + targetPlayer.NickName);
             EventManager.Instance.ReadyChange(targetPlayer);
         }
         

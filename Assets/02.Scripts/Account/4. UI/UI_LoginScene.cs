@@ -34,6 +34,8 @@ public class UI_LoginScene : MonoBehaviour
     [Header("닉네임")]
     public UI_InputFields NicknameInputFields;
 
+    public Button RegisterConfirmButton;
+
     private bool _isLoginCoolingDown;
 
 	[Header("씬 전환")]
@@ -45,7 +47,7 @@ public class UI_LoginScene : MonoBehaviour
         LoginCheck();
         // 자동 로그인 토글 초기화
         InitRememberToggle();
-        
+
         // 구글 로그인 이벤트 구독
         if (GoogleLogIn.Instance != null)
         {
@@ -53,6 +55,11 @@ public class UI_LoginScene : MonoBehaviour
             GoogleLogIn.Instance.OnLoginSuccess += OnGoogleLoginSuccess;
             GoogleLogIn.Instance.OnLoginError += OnGoogleLoginError;
         }
+
+        // 비밀번호 입력 필드와 회원가입 버튼 비활성화
+        SignupInputFields.PasswordInputField.interactable = false;
+        SignupInputFields.PasswordConfirmInputField.interactable = false;
+        RegisterConfirmButton.interactable = false;
     }
 
     private void OnDestroy()
@@ -110,6 +117,13 @@ public class UI_LoginScene : MonoBehaviour
     {
         var result = await AccountManager.Instance.CheckEmailVerified();
         SignupInputFields.ResultText.text = result.Message;
+        if(result.IsSuccess)
+        {
+            SignupInputFields.ResultText.text = "이메일 인증이 완료되었습니다. 비밀번호를 설정해주세요.";
+            SignupInputFields.PasswordInputField.interactable = true;
+            SignupInputFields.PasswordConfirmInputField.interactable = true;
+            RegisterConfirmButton.interactable = true;
+        }
     }
 
     // 3. 최종 회원가입 (비밀번호 입력 후)

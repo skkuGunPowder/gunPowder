@@ -32,8 +32,6 @@ public class SuperAmorBuff : Buff
         // TODO
         // 플레이어 넉백 제거 해제 설정
         _owner.IsSuperArmor = false;
-        _isActive = false;
-
         base.EndBuff();
     }
     

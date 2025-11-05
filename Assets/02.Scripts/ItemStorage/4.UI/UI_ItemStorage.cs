@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class UI_ItemStorage : MonoBehaviour
+public class UI_ItemStorage : UI_Popup
 {
     public TextMeshProUGUI ItemNameText;
     public UI_EquipmentSlot EquipmentSlot;
@@ -103,15 +103,15 @@ public class UI_ItemStorage : MonoBehaviour
         _itemStorage.SetPlayerCustomProperties();
     }
 
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public void Close()
-    {
-        gameObject.SetActive(false);
-    }
+    // public void Show()
+    // {
+    //     gameObject.SetActive(true);
+    // }
+    //
+    // public void Close()
+    // {
+    //     gameObject.SetActive(false);
+    // }
 
     private void OnDestroy()
     {

@@ -8,9 +8,13 @@ public class UI_KillLog : MonoBehaviour
 {
     // 슬롯 리스트를 가지고 있다.
     public List<UI_KillLogSlot> KillLogSlotList = new List<UI_KillLogSlot>();
-    private List<PhotonPlayer> _playerList = new List<PhotonPlayer>();
+    public UI_KillPannel KillPannel;
+    // 현재 플레이어별 팀
+    private Dictionary<PhotonPlayer, int> _playerTeamDictionary = new Dictionary<PhotonPlayer, int>();
+  
+    // 내 정보
+    private PhotonPlayer _myPlayer;
     private int _myTeam;
-    // 슬롯 리스트들 확인해서 현재 사용중인 슬롯인가 체크
     
     private void Awake()
     {
@@ -25,14 +29,32 @@ public class UI_KillLog : MonoBehaviour
     private void OnEnable()
     {
         EventManager.Instance.OnUpdateKillLog += Refresh;
-        _playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
+        Init();
     }
 
+    private void Init()
+    {
+        _myPlayer = PhotonNetwork.LocalPlayer;
+        _playerTeamDictionary.Clear();
+        
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
+        
+        foreach (PhotonPlayer player in players)
+        {
+            int team = (int)player.CustomProperties[EProperties.Team.ToString()];
+            _playerTeamDictionary.Add(player, team);
+        }
+    }
     private void Refresh(int kill, bool isNormal, int death)
     {
+        if (kill != death && kill == _myPlayer.ActorNumber)
+        {
+            KillPannelLog(death);
+        }
+        
         foreach (UI_KillLogSlot slot in KillLogSlotList)
         {
-            if (slot.gameObject.activeInHierarchy)
+            if (slot.gameObject.activeInHierarchy) // 킬 슬롯이 사용인지 체크
             {
                 continue;
             }
@@ -45,12 +67,20 @@ public class UI_KillLog : MonoBehaviour
             break;
         }
     }
+
+    private void KillPannelLog(int death)
+    {
+        PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(death);
+        
+        KillPannel.gameObject.SetActive(true);
+        KillPannel.Refresh(player.NickName);
+    }
     
     private bool TeamCheck(int playerNumber)
     {
         PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(playerNumber);
         
-        int playerTeam = (int)player.CustomProperties[EProperties.Team.ToString()];
+        int playerTeam = _playerTeamDictionary[player];
         
         if (playerTeam == _myTeam)
         {
@@ -63,6 +93,5 @@ public class UI_KillLog : MonoBehaviour
     {
         EventManager.Instance.OnUpdateKillLog -= Refresh;
     }
-    // 사용중인 것들 모두 건너 뛰고 다음 꺼 사용
     
 }

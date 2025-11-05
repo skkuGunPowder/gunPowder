@@ -624,6 +624,13 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Update()
     {
+        // Owner 전용 로직 (타이머 관리)
+        // AttackTimer는 웨이팅룸에서도 증가시켜야 쿨타임이 정상 작동함
+        if (PhotonView.IsMine)
+        {
+            _attackTimer += Time.deltaTime;
+        }
+
         // 대기방에서 작동 안하게 하기 위해 추가
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting
             || GameManager.Instance.CurrentGameState == EGameState.GameOver
@@ -632,10 +639,9 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
 
-        // Owner 전용 로직 (타이머 관리, 데미지 처리)
+        // Owner 전용 로직 (데미지 처리 등)
         if (PhotonView.IsMine)
         {
-            _attackTimer += Time.deltaTime;
 
             // 주기적으로 건파우더 감소
             /*
