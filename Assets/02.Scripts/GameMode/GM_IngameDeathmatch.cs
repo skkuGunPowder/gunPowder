@@ -1,4 +1,5 @@
 using Photon.Pun;
+using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
 /// <summary>
@@ -41,12 +42,14 @@ public class GM_IngameDeathmatch : GM_IngameBase
         // 시간이 다 되면 게임 종료
         if (_timerExpired)
         {
+            Debug.Log("Time is up!");
             return true;
         }
 
         // 혼자 남은 경우
         if (playerList.Count == 1)
         {
+            Debug.Log("Only one player left!");
             return true;
         }
         
@@ -55,6 +58,7 @@ public class GM_IngameDeathmatch : GM_IngameBase
         // 모두 죽으면 게임 종료
         if (aliveCount == 0)
         {
+            Debug.Log("All dead!");
             return true;
         }
         
@@ -84,6 +88,7 @@ public class GM_IngameDeathmatch : GM_IngameBase
         // 2명 이상인데 살아있는 사람이 1명일 때 (LastPlayer 페이즈 전)
         if (!_lastPlayerPhase && aliveCount == 1)
         {
+            Debug.Log("Only one player left!");
             return true;
         }
         

@@ -14,12 +14,13 @@ public class GameManager : PhotonSingleton<GameManager>
     public PhotonView PhotonView => _photonView;
     private List<PhotonPlayer> _playerList = new List<PhotonPlayer>();
     
+    [Header("게임 상태")]
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
     
     [Header("게임 모드")]
     [SerializeField] private EGameMode _currentGameMode = EGameMode.Deathmatch;
-    
+    public EGameMode CurrentGameMode => _currentGameMode;
     private GM_IngameBase _currentModeHandler;
     
     public bool LastPlayer = false;
@@ -164,7 +165,6 @@ public class GameManager : PhotonSingleton<GameManager>
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.Instantiate("AirDropJet", transform.position, Quaternion.identity);
-            Debug.Log("마스터가 요청받아 오브젝트를 생성했습니다.");
         }
     }
 
@@ -195,7 +195,6 @@ public class GameManager : PhotonSingleton<GameManager>
     private void RPC_GameOver()
     {
         GameStateChange(EGameState.Result);
-        EventManager.Instance.OnPlayerLeft -= PlayerLastCheck;
         OnGameOver?.Invoke();
     }
     
@@ -244,6 +243,7 @@ public class GameManager : PhotonSingleton<GameManager>
     /// </summary>
     private void CheckGameOverCondition()
     {
+        Debug.Log("GameOverCondition");
         if (_currentModeHandler == null)
         {
             return;
@@ -251,8 +251,9 @@ public class GameManager : PhotonSingleton<GameManager>
         
         if (_currentModeHandler.CheckGameOverCondition())
         {
+            Debug.Log("GameOver");
             // 강제 종료 (플레이어들이 비정상적으로 종료했을 때 또는 게임이 바로 끝나야 할때 : 라스트 어택을 안거칠때)
-            RPC_GameOver();
+            RequestGameOver();
         }
     }
 

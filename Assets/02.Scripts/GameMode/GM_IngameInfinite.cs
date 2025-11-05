@@ -39,6 +39,10 @@ public class GM_IngameInfinite : GM_IngameBase
             return true;
         }
         
+        if (playerList.Count == 1)
+        {
+            return true;
+        }
         // 무한 모드는 사망으로 인한 게임 종료 없음
         return false;
     }
