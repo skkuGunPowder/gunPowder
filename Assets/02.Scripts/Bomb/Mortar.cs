@@ -189,7 +189,10 @@ public class Mortar : Bomb
         _pathRenderer.start = _muzzle.position;
         _animator.SetFloat("Angle", _currentAngle);
 
-        _proCamera.UpdateScreenSize(_targetZoom);
+        if(PhotonView.IsMine)
+        {
+            _proCamera.UpdateScreenSize(_targetZoom);
+        }
     }
 
     private void RemoveMortar()
