@@ -25,9 +25,15 @@ public class PopupManager : Singleton<PopupManager>
                     bool opened = popup.isActiveAndEnabled;
                     popup.Close();
 
-                    if (opened || _popupStack.Count == 0)
+                    if (opened) // 열려 있는 팝업이 있으면 멈추기
                     {
                         break;   
+                    }
+                    
+                    if (_popupStack.Count == 0) // 열려있는 팝업이 없으면 바로 메뉴 팝업이 등장하도록
+                    {
+                        Open(EPopupType.UI_MenuPopup);
+                        break;  
                     }
                 }
             }
