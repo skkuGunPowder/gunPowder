@@ -1260,7 +1260,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        
+        EventManager.Instance.HitScreen();
         // 모든 클라이언트에서 VFX와 데미지 처리를 동기화
         PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
     }
@@ -1271,8 +1271,6 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_PlayHitEffects(int damage, int maxDamage)
     {
-        EventManager.Instance.HitScreen();
-        
         // 피격 VFX 재생
         if (VFXPool.Instance != null)
         {
@@ -1375,6 +1373,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // 오직 RPC_TakeDamage를 원래 보낸 클라이언트(피격자 Owner)에서만 RPC를 전송한다
         if (info.Sender != null && info.Sender.IsLocal)
         {
+            
             // 맞은 사람(Owner)에게 VFX/사운드와 데미지 팝업 표시
             if (PhotonView.Owner != null)
             {
