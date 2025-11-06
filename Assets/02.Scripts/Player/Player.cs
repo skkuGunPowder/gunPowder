@@ -920,7 +920,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 return;
             }
 
-            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr);
+            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr, isNormalAttack: true, ignoreImmune: true);
 
             RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, NO_ATTACK_RELEASE_COUNT, NO_ATTACK_RELEASE_SPREAD_ANGLE, NO_ATTACK_RELEASE_DISTANCE, true);
             if (PhotonView.IsMine && ExplosionEffectPrefab != null)
