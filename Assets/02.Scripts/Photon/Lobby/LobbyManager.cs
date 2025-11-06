@@ -37,6 +37,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
             {ERoomProperties.DeclinePowder.ToString(), decline},
             {ERoomProperties.IsLocked.ToString(),isLocked },
             {ERoomProperties.Password.ToString(), password},
+            {ERoomProperties.GameMode.ToString(), (int)EGameMode.Deathmatch},       
             {ERoomProperties.ChatChannelGroup.ToString(), chatChannelGroup},
             {ERoomProperties.ChatChannelId.ToString(), chatChannelId},
             {ERoomProperties.ChatChannelNumber.ToString(), chatChannelNumber}

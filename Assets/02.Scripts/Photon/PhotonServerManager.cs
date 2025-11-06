@@ -117,7 +117,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.LogWarning("OnJoinRandomFailed");
     }
 
     public override void OnJoinedRoom()

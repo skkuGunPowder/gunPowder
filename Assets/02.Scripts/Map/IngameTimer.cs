@@ -5,6 +5,10 @@ using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
 public class IngameTimer : MonoBehaviour
 {
+    [Header("기본 값")] 
+    public const int DefaultTime = 250;
+    public const int DefaultInfiniteTime = 180;
+    [Header("UI")]
     public UI_IngameTimer UI_Timer;
     private int _initTime;
     private float _timer;
@@ -15,16 +19,38 @@ public class IngameTimer : MonoBehaviour
     public float AirDropTime = 30f;
     private float _airDropTimer;
     [SerializeField] private GameObject _airDropJetPrefab;
+    
     private void Start()
     {
-        _initTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
-        _timer = _initTime;
+        TimeSet();
+        
         _previousTime = _initTime;
         UI_Timer.RefreshTimer(_initTime);
         _isGameOver = false;
         GameManager.Instance.OnTimeCheck += TimeCheck;
     }
-    
+
+    private void TimeSet()
+    {
+        if (GameManager.Instance.CurrentGameMode != EGameMode.Deathmatch)
+        {
+            _initTime = DefaultInfiniteTime;
+            _timer = _initTime;
+            return;       
+        }
+
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.PlayTime.ToString()) == false 
+            || PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()] == null)
+        {
+            _initTime = DefaultTime;
+            _timer = _initTime;
+            return;
+        }
+        
+        _initTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
+        _timer = _initTime;
+        Debug.Log($"PlayTime is set to {_initTime}");
+    }
     private void Update()
     {
         if (GameManager.Instance.CurrentGameState == EGameState.Playing || GameManager.Instance.CurrentGameState == EGameState.Result)
@@ -40,10 +66,11 @@ public class IngameTimer : MonoBehaviour
     
         if (_timer <= 0)
         {
-            if (_isGameOver == true)
+            if (_isGameOver)
             {
                 return;
             }
+            
             GameOver();
             UI_Timer.RefreshTimer(0);
         }
@@ -76,13 +103,18 @@ public class IngameTimer : MonoBehaviour
 
     public void GameOver()
     {
-        _isGameOver = true;
-        if (PhotonNetwork.IsMasterClient == false)
+        if (_isGameOver == true)
         {
             return;
         }
         
-        GameManager.Instance.RequestGameOver();
+        _isGameOver = true;
+        
+        // 모든 클라이언트에서 모드에 타이머 종료 알림
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnTimerExpired();
+        }
     }
 
     private void TimeCheck(PhotonPlayer targetPlayer)
