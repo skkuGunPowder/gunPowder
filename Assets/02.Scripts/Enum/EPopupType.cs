@@ -15,6 +15,7 @@ public enum EPopupType
     UI_InformationPopup,
     UI_WithdrawPopup,
     UI_ItemStorage,
+    UI_IngameChatPopup,
     
     
     Count

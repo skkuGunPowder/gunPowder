@@ -4,21 +4,32 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
+public class UI_IngameChat : UI_Popup
 {
+    public static UI_IngameChat Instance { get; private set; }
+
     public GameObject ChatContent = null;
     public InputField ChatInput = null;
     public Button SendButton = null;
     public GameObject ChatListPrefab;
 
-    private bool _isChatOpen = false;
-
-    // 인게임 채팅이 동작할 씬 목록
+    // 인게임 채팅이 동작할 씬 목록 (대화내용 유지)
     private readonly string[] _activeScenes = { "WaitingRoom", "Beach1", "Dock1", "Forest1" };
 
-    protected virtual void Awake()
+    private void Awake()
     {
-        base.Awake();
+        // 싱글톤 설정
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         // 버튼 및 입력 필드 리스너 설정
         if (SendButton != null)
         {
@@ -47,6 +58,7 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
             UIChatManager.Instance.OnChannelLeft -= OnChannelLeft; // 중복 방지
             UIChatManager.Instance.OnChannelLeft += OnChannelLeft;
         }
+
         // 시작 시 현재 씬 체크
         CheckCurrentScene();
     }
@@ -57,18 +69,12 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
         if (!IsInGameScene()) return;
 
         // 채팅창이 열려있지 않고, InputField에 포커스가 없을 때 Enter로 열기
-        if (!_isChatOpen && ChatInput != null && !ChatInput.isFocused)
+        if (!gameObject.activeSelf && ChatInput != null && !ChatInput.isFocused)
         {
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
             {
                 OpenChatPopup();
             }
-        }
-
-        // Esc 키로 채팅창 닫기
-        if (_isChatOpen && Input.GetKeyDown(KeyCode.Escape))
-        {
-            ClosePopup();
         }
     }
 
@@ -101,38 +107,26 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
     /// </summary>
     private void CheckCurrentScene()
     {
+        string currentScene = SceneManager.GetActiveScene().name;
+
         if (IsInGameScene())
         {
-            // 인게임 씬이면 GameObject 활성화 (하지만 Popup은 닫힌 상태)
-            gameObject.SetActive(true);
-            ClosePopup();
-            Debug.Log($"[UI_IngameChat] 인게임 씬 진입: {SceneManager.GetActiveScene().name}");
+            // 인게임 씬이면 채팅 UI 표시 가능하게 설정 (하지만 Popup은 닫힌 상태)
+            Close(); // UI_Popup의 Close() 호출
+            Debug.Log($"[UI_IngameChat] 인게임 씬 진입: {currentScene}");
         }
         else
         {
-            // 인게임 씬이 아니면 완전히 비활성화
-            gameObject.SetActive(false);
-            Debug.Log($"[UI_IngameChat] 인게임 씬 이탈: {SceneManager.GetActiveScene().name}");
-            Destroy(this);
+            // 로비 등 다른 씬으로 이동 시 채팅 내용 삭제
+            if (currentScene == "Lobby" || currentScene == "Photon" || currentScene == "StartSequence")
+            {
+                ClearAllMessages();
+                Debug.Log($"[UI_IngameChat] 로비 씬 진입 - 채팅 내용 삭제: {currentScene}");
+            }
+
+            // 팝업 닫기
+            Close();
         }
-    }
-
-    /// <summary>
-    /// Popup 닫기
-    /// </summary>
-    private void ClosePopup()
-    {
-        _isChatOpen = false;
-
-       
-
-        // Canvas 또는 Panel을 비활성화 (여기서는 자식 오브젝트 가정)
-        if (transform.childCount > 0)
-        {
-            transform.GetChild(0).gameObject.SetActive(false);
-        }
-
-        Debug.Log("[UI_IngameChat] 채팅 Popup 닫힘");
     }
 
     /// <summary>
@@ -140,16 +134,7 @@ public class UI_IngameChat : DontDestroySingleton<UI_IngameChat>
     /// </summary>
     private void OpenChatPopup()
     {
-        _isChatOpen = true;
-
-        // 자식 오브젝트(Panel) 활성화
-        if (transform.childCount > 0)
-        {
-            transform.GetChild(0).gameObject.SetActive(true);
-        }
-
-
-
+        Open(); // UI_Popup의 Open() 호출
         FocusInputField();
         Debug.Log("[UI_IngameChat] 채팅 Popup 열림");
     }

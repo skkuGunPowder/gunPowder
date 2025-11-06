@@ -10,10 +10,6 @@ public class ChatManager : Singleton<ChatManager>, BackndChat.IChatClientListene
     private ulong _currentChannelNumber = 0;
     private bool _isInChannel = false;
     private bool _isChatOpen = false;
-    void Start()
-    {
-        
-    }
 
     void Update()
     {
