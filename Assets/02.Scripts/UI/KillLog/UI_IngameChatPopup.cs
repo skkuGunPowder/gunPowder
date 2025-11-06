@@ -1,18 +1,20 @@
+using System;
 using System.Collections.Generic;
 using BackndChat;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class UI_IngameChat : UI_Popup
+public class UI_IngameChatPopup : UI_Popup
 {
-    public static UI_IngameChat Instance { get; private set; }
+    public static UI_IngameChatPopup Instance { get; private set; }
 
     public GameObject ChatContent = null;
     public InputField ChatInput = null;
     public Button SendButton = null;
     public GameObject ChatListPrefab;
 
+    private Action _closeCallback;
     // 인게임 채팅이 동작할 씬 목록 (대화내용 유지)
     private readonly string[] _activeScenes = { "WaitingRoom", "Beach1", "Dock1", "Forest1" };
 
@@ -59,24 +61,11 @@ public class UI_IngameChat : UI_Popup
             UIChatManager.Instance.OnChannelLeft += OnChannelLeft;
         }
 
+        _closeCallback = Close;
         // 시작 시 현재 씬 체크
         CheckCurrentScene();
     }
 
-    private void Update()
-    {
-        // 인게임 씬이 아니면 동작하지 않음
-        if (!IsInGameScene()) return;
-
-        // 채팅창이 열려있지 않고, InputField에 포커스가 없을 때 Enter로 열기
-        if (!gameObject.activeSelf && ChatInput != null && !ChatInput.isFocused)
-        {
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-            {
-                OpenChatPopup();
-            }
-        }
-    }
 
     /// <summary>
     /// 현재 씬이 인게임 씬인지 확인
@@ -130,14 +119,39 @@ public class UI_IngameChat : UI_Popup
     }
 
     /// <summary>
-    /// 채팅 Popup 열기
+    /// 채팅창을 열 수 있는지 체크 (조건 확인만)
     /// </summary>
-    private void OpenChatPopup()
+    public bool TryOpen()
     {
-        Open(); // UI_Popup의 Open() 호출
+        // 인게임 씬이 아니면 열지 않음
+        if (!IsInGameScene()) return false;
+
+        // 이미 열려있으면 열지 않음
+        if (gameObject.activeSelf) return false;
+
+        // InputField에 포커스가 있으면 열지 않음 (중복 방지)
+        if (ChatInput != null && ChatInput.isFocused) return false;
+
+        InputHandler.BlockInput = true;
         FocusInputField();
         Debug.Log("[UI_IngameChat] 채팅 Popup 열림");
+        
+        return true;
     }
+
+    private void OnDisable()
+    {
+        InputHandler.BlockInput = false;
+        Debug.Log("[UI_IngameChat] 채팅 Popup 닫힘");
+                
+    }
+    /// <summary>
+    /// UI_Popup.Open() 오버라이드 - PopupManager에서 호출
+    /// </summary>
+    // public new void Open(System.Action closeCallback = null)
+    // {
+    //     base.Open(closeCallback);
+    // }
 
     /// <summary>
     /// InputField에 포커스 설정

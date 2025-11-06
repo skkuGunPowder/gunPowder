@@ -438,8 +438,9 @@ GameObject:
   m_Component:
   - component: {fileID: 7763879160180391756}
   - component: {fileID: 7207987155497983852}
+  - component: {fileID: 5453959506361205459}
   m_Layer: 5
-  m_Name: ChatPopup
+  m_Name: UI_IngameChatPopup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -454,7 +455,7 @@ RectTransform:
   m_GameObject: {fileID: 4225694561731599691}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.013888889, y: 0.013888889, z: 0.013888889}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 979790288151356561}
@@ -481,6 +482,23 @@ MonoBehaviour:
   ChatInput: {fileID: 4237672881764298175}
   SendButton: {fileID: 1118033822290428929}
   ChatListPrefab: {fileID: 172612074726929484, guid: 08aab3ed4cce5e947811497b8a91ee92, type: 3}
+--- !u!114 &5453959506361205459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4225694561731599691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a01f084e9f1b249bd1170019ef8b70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  effectType: 0
+  testOpen: 0
+  duration: 0.3
+  ease: 27
+  slideDirection: 0
 --- !u!1 &4241441193039436913
 GameObject:
   m_ObjectHideFlags: 0

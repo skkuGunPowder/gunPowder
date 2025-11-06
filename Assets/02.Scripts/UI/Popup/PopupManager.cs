@@ -8,13 +8,34 @@ public class PopupManager : Singleton<PopupManager>
     public List<UI_Popup> PopupList = new List<UI_Popup>();
     private Stack<UI_Popup> _popupStack = new Stack<UI_Popup>();
 
+    private UI_IngameChatPopup _ingameChatPopup = null;
+
     protected override void Awake()
     {
         base.Awake();
+
+        // 인게임 채팅 팝업 레퍼런스 캐싱
+        foreach (UI_Popup popup in PopupList)
+        {
+            if (popup is UI_IngameChatPopup)
+            {
+                _ingameChatPopup = popup as UI_IngameChatPopup;
+                break;
+            }
+        }
     }
 
     private void Update()
     {
+        // Enter 키로 인게임 채팅창 열기
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            if (_ingameChatPopup != null && _ingameChatPopup.TryOpen())
+            {
+                Open(EPopupType.UI_IngameChatPopup);
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (_popupStack.Count > 0)
@@ -27,13 +48,13 @@ public class PopupManager : Singleton<PopupManager>
 
                     if (opened) // 열려 있는 팝업이 있으면 멈추기
                     {
-                        break;   
+                        break;
                     }
-                    
+
                     if (_popupStack.Count == 0) // 열려있는 팝업이 없으면 바로 메뉴 팝업이 등장하도록
                     {
                         Open(EPopupType.UI_MenuPopup);
-                        break;  
+                        break;
                     }
                 }
             }

@@ -38,21 +38,14 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     private bool _isChatClientInitialized = false;
 
     /// <summary>
-    /// ChatClient 초기화 (로그인 후 PhotonServerManager.Connect()에서 호출)
+    /// ChatClient 초기화 (로비 진입 시 호출)
+    /// Nickname은 채널 입장 시점에 검증
     /// </summary>
     public void InitializeChatClient()
     {
         if (_isChatClientInitialized)
         {
             Debug.LogWarning("[UIChatManager] ChatClient가 이미 초기화되었습니다.");
-            return;
-        }
-
-        if (AccountManager.Instance == null ||
-            AccountManager.Instance.CurrentAccount == null ||
-            string.IsNullOrEmpty(AccountManager.Instance.CurrentAccount.Nickname))
-        {
-            Debug.LogError("[UIChatManager] AccountManager의 Nickname이 설정되지 않았습니다. ChatClient 초기화를 중단합니다.");
             return;
         }
 
@@ -71,13 +64,11 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         };
 
         string avatar = avatars[UnityEngine.Random.Range(0, avatars.Count)];
-        string nickname = AccountManager.Instance.CurrentAccount.Nickname;
 
-        Debug.Log($"[UIChatManager] ChatClient 초기화 시작 - Nickname: {nickname}, Avatar: {avatar}");
+        Debug.Log($"[UIChatManager] ChatClient 초기화 시작 - Avatar: {avatar}");
 
         _chatClient = new ChatClient(this, new ChatClientArguments
         {
-            
             Avatar = avatar,
         });
 
@@ -95,6 +86,16 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     {
         if (_chatClient == null) return;
         if (_currentChannelName == string.Empty) return;
+
+        // Nickname 유효성 검사 (메시지 전송 시점에 검증)
+        if (AccountManager.Instance == null ||
+            AccountManager.Instance.CurrentAccount == null ||
+            string.IsNullOrEmpty(AccountManager.Instance.CurrentAccount.Nickname))
+        {
+            Debug.LogWarning("[UIChatManager] Nickname이 설정되지 않아 메시지를 전송할 수 없습니다.");
+            return;
+        }
+
         if (!_channelList.ContainsKey(_currentChannelGroup)) return;
         if (!_channelList[_currentChannelGroup].ContainsKey(_currentChannelName)) return;
         if (!_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber)) return;
@@ -518,6 +519,15 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         if (_chatClient == null)
         {
             Debug.LogError("[UIChatManager] ChatClient가 초기화되지 않았습니다.");
+            return;
+        }
+
+        // Nickname 유효성 검사 (채널 입장 시점에 검증)
+        if (AccountManager.Instance == null ||
+            AccountManager.Instance.CurrentAccount == null ||
+            string.IsNullOrEmpty(AccountManager.Instance.CurrentAccount.Nickname))
+        {
+            Debug.LogError("[UIChatManager] Nickname이 설정되지 않았습니다. 채팅 채널 입장을 중단합니다.");
             return;
         }
 
