@@ -99,14 +99,28 @@ public class BounceBomb : Bomb
             SoundManager.Instance.PlayLocalSound("BounceBomb_1", transform);
         });
 
-        if (collision.gameObject == _ownerPhotonview.gameObject)
+        // Owner null 체크 추가
+        if (_ownerPhotonview != null && collision.gameObject == _ownerPhotonview.gameObject)
         {
             return;
         }
 
         if (collision.gameObject.TryGetComponent(out IDamagable damagable))
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            // 소유자만 폭발 RPC 호출
+            if (PhotonView.IsMine && !isDestroyed)
+            {
+                PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // DOTween 정리
+        if (_wobbleTween != null && _wobbleTween.IsActive())
+        {
+            _wobbleTween.Kill();
         }
     }
 

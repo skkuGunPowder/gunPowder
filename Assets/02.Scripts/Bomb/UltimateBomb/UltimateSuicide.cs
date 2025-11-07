@@ -24,24 +24,26 @@ public class UltimateSuicide : Bomb
 
     protected override void Update()
     {
-        transform.position = _ownerPhotonview.transform.position;
-        if (_owner.PlayerStat.MySpriteREndererList[0].flipX == true)
+        // Owner와 PhotonView null 체크
+        if (_ownerPhotonview != null && _owner != null)
         {
-            _spriteRenderer.flipX = true;
-        }
-        else
-        {
-            _spriteRenderer.flipX = false;
-        }
+            // Transform 직접 수정 대신 부모로 설정 (PlaceBomb에서 이미 설정함)
+            // 매 프레임 위치 업데이트는 부모 관계로 자동 처리됨
 
-        _jumpTimer += Time.deltaTime;
-        if (_jumpTimer >= _jumpResetTime && _owner != null)
-        {
-            if (_owner.PlayerStat.JumpCount > 1)
+            if (_owner.PlayerStat.MySpriteREndererList != null && _owner.PlayerStat.MySpriteREndererList.Count > 0)
             {
-                _owner.PlayerStat.JumpCount = 1;
+                _spriteRenderer.flipX = _owner.PlayerStat.MySpriteREndererList[0].flipX;
             }
-            _jumpTimer = 0f;
+
+            _jumpTimer += Time.deltaTime;
+            if (_jumpTimer >= _jumpResetTime)
+            {
+                if (_owner.PlayerStat.JumpCount > 1)
+                {
+                    _owner.PlayerStat.JumpCount = 1;
+                }
+                _jumpTimer = 0f;
+            }
         }
 
         _timer += Time.deltaTime;
@@ -56,7 +58,8 @@ public class UltimateSuicide : Bomb
     {
         if (collision.CompareTag("Enemy"))
         {
-            if (_ownerPhotonview.IsMine)
+            // 소유자만 폭발 RPC 호출
+            if (PhotonView.IsMine && !isDestroyed)
             {
                 PhotonView.RPC(nameof(Explode), RpcTarget.All);
             }
@@ -86,14 +89,45 @@ public class UltimateSuicide : Bomb
     [PunRPC]
     public override void Explode()
     {
+        // 중복 파괴 방지
+        if (isDestroyed)
+        {
+            return;
+        }
+        isDestroyed = true;
+
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;
-        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
+
+        // Owner null 체크
+        if (_ownerPhotonview != null)
+        {
+            explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
+        }
+        else
+        {
+            Debug.LogWarning($"[UltimateSuicide] Owner PhotonView is null");
+            explosion.Explode(_stat.IsFallingOut, null);
+        }
 
         if (_vfx != null)
         {
             _vfx.transform.SetParent(transform);
+        }
+
+        // 🔴 CRITICAL FIX: 폭발 후 오브젝트 파괴 추가
+        if (PhotonView.IsMine)
+        {
+            if (PhotonView != null && PhotonView.ViewID != 0)
+            {
+                PhotonNetwork.Destroy(gameObject);
+            }
+            else
+            {
+                Debug.LogWarning($"[UltimateSuicide] PhotonView is invalid, destroying locally: {gameObject.name}");
+                Destroy(gameObject);
+            }
         }
     }
 

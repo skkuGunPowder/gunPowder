@@ -39,7 +39,11 @@ public class MortarShell : Bomb
             return;
         }
 
-        PhotonView.RPC(nameof(Explode), RpcTarget.All);
+        // 중복 방지 체크 추가
+        if (!isDestroyed)
+        {
+            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+        }
     }
 
 

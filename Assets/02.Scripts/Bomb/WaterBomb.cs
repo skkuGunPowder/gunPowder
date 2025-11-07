@@ -22,20 +22,24 @@ public class WaterBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
         }
-        
-        if (other.gameObject == _ownerPhotonview.gameObject)
+
+        // Owner null 체크 추가
+        if (_ownerPhotonview != null && other.gameObject == _ownerPhotonview.gameObject)
         {
             return;
         }
 
-        if(other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
+        if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            // 소유자만 폭발 RPC 호출
+            if (PhotonView.IsMine && !isDestroyed)
+            {
+                PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            }
         }
 
         ContactPoint2D contact = other.contacts[0];
@@ -46,7 +50,6 @@ public class WaterBomb : Bomb
 
         float xStretch = 1f + Mathf.Abs(normal.y) * _wobbleAmount * 0.5f;
         float yStretch = 1f + Mathf.Abs(normal.x) * _wobbleAmount * 0.5f;
-
 
         Vector3 squashedScale = new Vector3(
             _originalScale.x * xSquash * xStretch,
@@ -61,7 +64,6 @@ public class WaterBomb : Bomb
             transform.DOScale(_originalScale, _wobbleDuration / 2f)
                 .SetEase(Ease.InQuad);
         });
-
 
         if (CheckPriority(other))
         {

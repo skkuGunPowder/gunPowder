@@ -15,7 +15,7 @@ public class BasicBomb : Bomb
     public const string ID = "BO0001";
     private EBombVelocity _bombVelocity = EBombVelocity.SLOW;
     private bool _isFuzeActivate;
-    private bool isDestroyed = false; // 중복 파괴 방지 플래그
+    // isDestroyed는 베이스 클래스에서 관리
     private const float SLOW = 5f;
     private const float NORMAL = 10f;
 
@@ -34,9 +34,9 @@ public class BasicBomb : Bomb
         base.Init();
         SetStat(ID);
         _isFuzeActivate = false;
-        isDestroyed = false; // 재사용 시 초기화
+        // isDestroyed는 base.OnEnable()에서 초기화됨
         SoundManager.Instance.PlayLocalSound(this.GetType().Name, transform, 0, true);
-          Vector3 originalScale = transform.localScale;
+        Vector3 originalScale = transform.localScale;
 
         // DOTween으로 무한 반복 펄스 트윈 생성
         _pulseTween = transform.DOScale(originalScale * pulseScale, pulseDuration / 2f)
@@ -113,7 +113,7 @@ public class BasicBomb : Bomb
     {
         _fireDirection = fireRightDirection;
         _currentSpeed = 0f;
-        isDestroyed = false; // 재사용 시 초기화
+        // isDestroyed는 OnEnable()에서 초기화됨
     }
 
     [PunRPC]
@@ -150,20 +150,34 @@ public class BasicBomb : Bomb
     [PunRPC]
     public override void Explode()
     {
-        if (isDestroyed) return; // 중복 파괴 방지
-        isDestroyed = true;
+        // 중복 파괴 방지는 base.Explode()에서 처리
+        if (isDestroyed)
+        {
+            return;
+        }
 
         if (_pulseTween != null && _pulseTween.IsActive())
         {
             _pulseTween.Kill();
         }
 
-        //base.Explode();
-        // 폭발 프리펩 인스턴싱 (로컬에서만)
+        // BasicBomb 전용 폭발 로직 (isNormalAttack=true 파라미터)
+        isDestroyed = true;
+
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;
-        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview, true);   
+
+        // Owner null 체크
+        if (_ownerPhotonview != null)
+        {
+            explosion.Explode(_stat.IsFallingOut, _ownerPhotonview, true);
+        }
+        else
+        {
+            Debug.LogWarning($"[BasicBomb] Owner PhotonView is null");
+            explosion.Explode(_stat.IsFallingOut, null, true);
+        }
 
         if (_vfx != null)
         {
@@ -173,17 +187,24 @@ public class BasicBomb : Bomb
         // 소유자만 파괴 요청
         if (PhotonView.IsMine)
         {
-            
-            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
             if (PhotonView != null && PhotonView.ViewID != 0)
             {
                 PhotonNetwork.Destroy(gameObject);
             }
             else
             {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
+                Debug.LogWarning($"[BasicBomb] PhotonView is invalid, destroying locally: {gameObject.name}");
                 Destroy(gameObject);
             }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // DOTween 정리
+        if (_pulseTween != null && _pulseTween.IsActive())
+        {
+            _pulseTween.Kill();
         }
     }
 }
