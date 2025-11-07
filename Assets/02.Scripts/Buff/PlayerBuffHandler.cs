@@ -7,6 +7,7 @@ public class PlayerBuffHandler : MonoBehaviour
     private List<Buff> _buffs;
 
     public Action<Buff> OnBuffAdded;
+    public Action<Buff> OnBuffRemoved;
 
     private void OnEnable()
     {
@@ -54,20 +55,19 @@ public class PlayerBuffHandler : MonoBehaviour
         OnBuffAdded?.Invoke(newBuff);
     }
 
-    public void RemoveBuff(string buffID)
+    public void RemoveBuff(Buff removedBuff)
     {
         foreach (Buff buff in _buffs)
         {
-            if (buff.ID == buffID)
+            if (buff.ID == removedBuff.ID)
             {
-                buff.EndBuff();
+                OnBuffRemoved?.Invoke(buff);
                 _buffs.Remove(buff);
                 Destroy(buff.gameObject);
                 return;
             }
         }
-
-        Debug.LogWarning($"[{buffID}] 버프를 찾을 수 없습니다.");
+        Debug.LogWarning($"[{removedBuff.ID}] 버프를 찾을 수 없습니다.");
     }
 
     private void ClearBuffs()

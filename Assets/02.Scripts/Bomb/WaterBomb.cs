@@ -1,7 +1,6 @@
 using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
-using UnityEngine.Analytics;
 
 public class WaterBomb : Bomb
 {
@@ -18,15 +17,15 @@ public class WaterBomb : Bomb
         base.Init();
         SetStat(ID);
         _originalScale = transform.localScale;
-        
-        // 기존 트윈 정리
-        CleanupTweens();
     }
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        // 기존 트윈 정리
-        CleanupTweens();
+
+        if (_wobbleTween != null && _wobbleTween.IsActive())
+        {
+            _wobbleTween.Kill();
+        }
         
         if (other.gameObject == _ownerPhotonview.gameObject)
         {
@@ -35,7 +34,11 @@ public class WaterBomb : Bomb
 
         if(other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            if (photonView.IsMine)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
+            }
         }
 
         ContactPoint2D contact = other.contacts[0];
@@ -56,17 +59,10 @@ public class WaterBomb : Bomb
 
         _wobbleTween = transform.DOScale(squashedScale, _wobbleDuration / 2f)
         .SetEase(Ease.OutQuad)
-        .SetAutoKill(false)
-        .SetTarget(transform)
         .OnComplete(() =>
         {
-            // Transform 파괴 여부 확인
-            if (transform != null && gameObject != null)
-            {
-                transform.DOScale(_originalScale, _wobbleDuration / 2f)
-                    .SetEase(Ease.InQuad)
-                    .SetTarget(transform);
-            }
+            transform.DOScale(_originalScale, _wobbleDuration / 2f)
+                .SetEase(Ease.InQuad);
         });
 
 
@@ -76,35 +72,14 @@ public class WaterBomb : Bomb
         }
     }
 
-    [PunRPC]
-    public override void Explode()
-    {
-        CleanupTweens();
-        base.Explode();
-    }
-
-    private void OnDisable()
-    {
-        CleanupTweens();
-    }
-
-    private void OnDestroy()
-    {
-        CleanupTweens();
-    }
-
-    private void CleanupTweens()
+    protected override void OnDestroy()
     {
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
-            _wobbleTween = null;
         }
-        // transform에 연결된 모든 DOTween 정리
-        if (transform != null)
-        {
-            transform.DOKill();
-        }
+
+        base.OnDestroy();
     }
 
     [PunRPC]

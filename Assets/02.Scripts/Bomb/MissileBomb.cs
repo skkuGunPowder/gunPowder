@@ -40,7 +40,11 @@ public class MissileBomb : Bomb
             return;
         }
     
-        PhotonView.RPC(nameof(Explode), RpcTarget.All);
+        if (photonView.IsMine)
+        {
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
     [PunRPC]
@@ -99,9 +103,10 @@ public class MissileBomb : Bomb
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         // 코루틴 중지
         StopAllCoroutines();
+        base.OnDestroy();
     }
 }
