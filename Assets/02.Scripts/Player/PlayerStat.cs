@@ -135,7 +135,7 @@ public class PlayerStat : MonoBehaviour
     [Header("최근 공격자 추적")]
     [SerializeField] private int _lastAttackerActorNumber = -1; // 최근에 나를 공격한 사람의 ActorNumber
     [SerializeField] private float _lastAttackTime = 0f; // 마지막으로 공격받은 시간
-    [SerializeField] private float _attackTrackingDuration = 5f; // 공격자를 추적하는 시간(초)
+    [SerializeField] private float _attackTrackingDuration = 10f; // 공격자를 추적하는 시간(초)
     
     public int LastAttackerActorNumber => _lastAttackerActorNumber;
     public float LastAttackTime => _lastAttackTime;
@@ -305,7 +305,7 @@ public class PlayerStat : MonoBehaviour
         OnGunpowderIncreased?.Invoke(amount);
     }
     
-    public bool DecreaseGunPowderCount(int amount, int attacker, bool isNormalAttack = true)
+    public bool DecreaseGunPowderCount(int amount, int attacker, bool isNormalAttack = true, bool ignoreImmune = false)
     {
         if (GameManager.Instance.CurrentGameState != EGameState.Playing)
         {
@@ -317,7 +317,7 @@ public class PlayerStat : MonoBehaviour
             return false;
         }
 
-        if (_isImmune)
+        if (_isImmune && !ignoreImmune)
         {
             return false;
         }

@@ -37,6 +37,8 @@ public class UI_LoginScene : MonoBehaviour
     public Button RegisterConfirmButton;
 
     private bool _isLoginCoolingDown;
+    private bool _isNicknameCoolingDown;
+    private bool _isRegisterCoolingDown;
 
 	[Header("씬 전환")]
 	public string LogoutRedirectSceneName = "Photon";
@@ -129,6 +131,16 @@ public class UI_LoginScene : MonoBehaviour
     // 3. 최종 회원가입 (비밀번호 입력 후)
     public async void OnClickCompleteRegister()
     {
+        if (_isRegisterCoolingDown)
+        {
+            return;
+        }
+        _isRegisterCoolingDown = true;
+        if (RegisterConfirmButton != null)
+        {
+            RegisterConfirmButton.interactable = false;
+        }
+
         string email = SignupInputFields.IDInputField.text;
         string password = SignupInputFields.PasswordInputField.text;
         string confirmPwd = SignupInputFields.PasswordConfirmInputField.text;
@@ -136,6 +148,16 @@ public class UI_LoginScene : MonoBehaviour
         if (password != confirmPwd)
         {
             SignupInputFields.ResultText.text = "비밀번호가 일치하지 않습니다.";
+            SignupInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
+            Invoke(nameof(ResetRegisterCooldown), 1f);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(password))
+        {
+            SignupInputFields.ResultText.text = "비밀번호를 입력해주세요.";
+            SignupInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
+            Invoke(nameof(ResetRegisterCooldown), 1f);
             return;
         }
 
@@ -144,8 +166,22 @@ public class UI_LoginScene : MonoBehaviour
 
         if (result.IsSuccess)
         {
-            // 회원가입 성공 시 로그인 패널로 이동 등
+            // 회원가입 성공 시 로그인 패널로 이동 (버튼 비활성화 유지)
             OnClickGoToLoginButton();
+        }
+        else
+        {
+            // 회원가입 실패 시 1초 후 버튼 다시 활성화
+            Invoke(nameof(ResetRegisterCooldown), 1f);
+        }
+    }
+
+    private void ResetRegisterCooldown()
+    {
+        _isRegisterCoolingDown = false;
+        if (RegisterConfirmButton != null)
+        {
+            RegisterConfirmButton.interactable = true;
         }
     }
 
@@ -161,7 +197,6 @@ public class UI_LoginScene : MonoBehaviour
         {
             LoginInputFields.ConfirmButton.interactable = false;
         }
-        Invoke(nameof(ResetLoginCooldown), 1f);
 
         string email = LoginInputFields.IDInputField.text;
         string password = LoginInputFields.PasswordInputField.text;
@@ -170,12 +205,14 @@ public class UI_LoginScene : MonoBehaviour
         {
             LoginInputFields.ResultText.text = "이메일을 입력해주세요.";
             LoginInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
+            Invoke(nameof(ResetLoginCooldown), 1f);
             return;
         }
         if (string.IsNullOrEmpty(password))
         {
             LoginInputFields.ResultText.text = "비밀번호를 입력해주세요.";
             LoginInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
+            Invoke(nameof(ResetLoginCooldown), 1f);
             return;
         }
 
@@ -199,12 +236,18 @@ public class UI_LoginScene : MonoBehaviour
             // 닉네임이 없으면 닉네임 입력 패널 표시
             if (!AccountManager.Instance.HasNickname())
             {
+                LoginPanel.SetActive(false);
                 NicknamePanel.SetActive(true);
             }
             else
             {
                 PhotonServerManager.Instance.Connect();
             }
+        }
+        else
+        {
+            // 로그인 실패 시 1초 후 버튼 다시 활성화
+            Invoke(nameof(ResetLoginCooldown), 1f);
         }
     }
 
@@ -269,6 +312,7 @@ public class UI_LoginScene : MonoBehaviour
         // 닉네임이 없으면 닉네임 입력 패널 표시
         if (!AccountManager.Instance.HasNickname())
         {
+            LoginPanel.SetActive(false);
             NicknamePanel.SetActive(true);
         }
         else
@@ -287,18 +331,45 @@ public class UI_LoginScene : MonoBehaviour
     // 닉네임 저장 버튼에 연결
     public async void OnClickSaveNickname()
     {
+        if (_isNicknameCoolingDown)
+        {
+            return;
+        }
+        _isNicknameCoolingDown = true;
+        if (NicknameInputFields != null && NicknameInputFields.ConfirmButton != null)
+        {
+            NicknameInputFields.ConfirmButton.interactable = false;
+        }
+
         string nickname = NicknameInputFields.NicknameInputField.text;
         if (string.IsNullOrEmpty(nickname))
         {
             NicknameInputFields.ResultText.text = "닉네임을 입력해주세요.";
+            NicknameInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
+            Invoke(nameof(ResetNicknameCooldown), 1f);
             return;
         }
+
         var result = await AccountManager.Instance.SetNickname(nickname);
         NicknameInputFields.ResultText.text = result.Message;
         if (result.IsSuccess)
         {
             NicknamePanel.SetActive(false);
             PhotonServerManager.Instance.Connect(true);
+        }
+        else
+        {
+            // 닉네임 저장 실패 시 1초 후 버튼 다시 활성화
+            Invoke(nameof(ResetNicknameCooldown), 1f);
+        }
+    }
+
+    private void ResetNicknameCooldown()
+    {
+        _isNicknameCoolingDown = false;
+        if (NicknameInputFields != null && NicknameInputFields.ConfirmButton != null)
+        {
+            NicknameInputFields.ConfirmButton.interactable = true;
         }
     }
 }

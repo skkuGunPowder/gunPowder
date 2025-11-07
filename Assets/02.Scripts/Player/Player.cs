@@ -177,6 +177,10 @@ public class Player : MonoBehaviourPun, IDamagable
     private bool _isNoAttackWarningActive = false;
     private float _syncedWarningStartTime = 0f; // 경고 시작 시간 (PhotonNetwork.Time 기준)
 
+    // 최근 피격 데미지 비율 (거리 기반 넉백 효과를 위해)
+    private float _lastDamageRatio = 1f; // damage / maxDamage 비율
+    public float LastDamageRatio => _lastDamageRatio;
+
     private void Awake()
     {
         _playerStat = GetComponent<PlayerStat>();
@@ -916,7 +920,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 return;
             }
 
-            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr);
+            _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr, isNormalAttack: true, ignoreImmune: true);
 
             RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, NO_ATTACK_RELEASE_COUNT, NO_ATTACK_RELEASE_SPREAD_ANGLE, NO_ATTACK_RELEASE_DISTANCE, true);
             if (PhotonView.IsMine && ExplosionEffectPrefab != null)
@@ -1365,6 +1369,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // Gunpowder 낙출
         ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+
+        // 거리 기반 데미지 비율 저장 (넉백 효과에 사용)
+        _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
 
         // 피격 이벤트 발생
         OnHit?.Invoke();
