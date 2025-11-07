@@ -63,7 +63,15 @@ public class RoomInitializer
     private void SetCurrentMap(RoomManager roomManager)
     {
         Room room = PhotonNetwork.CurrentRoom;
-     
+
+        if (room.CustomProperties.ContainsKey(ERoomProperties.MapSelected.ToString()) == false
+            || room.CustomProperties[ERoomProperties.MapSelected.ToString()] == null)
+        {
+            roomManager.SelectedMap = EMap.Forest1;
+            EventManager.Instance.MapChanged(roomManager.SelectedMap);
+            return;
+        }
+        
         roomManager.SelectedMap = (EMap)room.CustomProperties[ERoomProperties.MapSelected.ToString()];
         EventManager.Instance.MapChanged(roomManager.SelectedMap);
     }
