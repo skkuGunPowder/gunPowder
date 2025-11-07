@@ -152,7 +152,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private PlayerBuffHandler _playerBuffHandler;
     public PlayerBuffHandler PlayerBuffHandler => _playerBuffHandler;
+    
     public bool IsSuperArmor = false;
+    private RigidbodyConstraints2D _originalConstraints; // SuperArmor 적용 전 원본 제약 조건
 
 
     [SerializeField]
@@ -196,6 +198,12 @@ public class Player : MonoBehaviourPun, IDamagable
 
         _playerBuffHandler = GetComponent<PlayerBuffHandler>();
         IsSuperArmor = false;
+        
+        // 원본 Rigidbody constraints 저장
+        if (_rigidbody2D != null)
+        {
+            _originalConstraints = _rigidbody2D.constraints;
+        }
 
 
         // 기본 폭탄 정보 가져오기
@@ -1898,5 +1906,29 @@ public class Player : MonoBehaviourPun, IDamagable
     public void ResetPausedNoAttack()
     {
         _playerStat.IsPausedNoAttack = false;
+    }
+
+    /// <summary>
+    /// SuperArmor 활성화: 위치 고정 및 속도 0
+    /// </summary>
+    public void SetSuperArmor()
+    {
+        if (_rigidbody2D == null) return;
+
+        IsSuperArmor = true;
+        _rigidbody2D.linearVelocity = Vector2.zero;
+        _rigidbody2D.angularVelocity = 0f;
+        _rigidbody2D.constraints = RigidbodyConstraints2D.FreezePosition | RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    /// <summary>
+    /// SuperArmor 비활성화: 원본 제약 조건 복원
+    /// </summary>
+    public void ResetSuperArmor()
+    {
+        if (_rigidbody2D == null) return;
+
+        IsSuperArmor = false;
+        _rigidbody2D.constraints = _originalConstraints;
     }
 }

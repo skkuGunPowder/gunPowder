@@ -57,13 +57,13 @@ public class PlayerDamagedState : PlayerBaseState
         
         // 무적 상태 설정
         SetImmuneState(true);
-        
+
         // 저장된 속도 복원 (히트스탑에서 온 경우)
         RestoreStoredVelocityIfExists();
-        
+
         // 체력 비례 추가 힘 적용
         ApplyHealthBasedForce();
-        
+
         // 체력 비율에 따른 넉백 효과 적용
         float currentHealthRatio = CalculateCurrentHealthRatio();
         ApplyKnockbackEffect(currentHealthRatio);
