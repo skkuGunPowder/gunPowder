@@ -6,7 +6,8 @@ using System;
 using System.Collections.Generic; // Added for HashSet
 using System.Linq;
 using System.Data.Common;
-using Firebase.Firestore; // Added for Count() method
+using Firebase.Firestore;
+using BackEnd; // Added for Count() method
 
 public class AccountRepository
 {
@@ -303,8 +304,31 @@ public class AccountRepository
         try
         {
             var userDoc = FirebaseManager.Instance.DB.Collection("users").Document(user.UserId);
-            await userDoc.DeleteAsync();
+            if(userDoc != null)
+            {
+                await userDoc.DeleteAsync();
+            }
+
+            var currencyDoc = FirebaseManager.Instance.DB.Collection("Currency").Document(user.UserId);
+            if(currencyDoc != null)
+            {
+                await currencyDoc.DeleteAsync();
+            }
+
+            var inventoryDoc = FirebaseManager.Instance.DB.Collection("Inventory").Document(user.UserId);
+            if (inventoryDoc != null)
+            {
+                await inventoryDoc.DeleteAsync();
+            }
+
+            var itemStorageDoc = FirebaseManager.Instance.DB.Collection("ItemStorage").Document(user.UserId);
+            if(itemStorageDoc != null)
+            {
+                await itemStorageDoc.DeleteAsync();
+            }
+
             await user.DeleteAsync();
+            Backend.BMember.WithdrawAccount();
 
             return true;
         }

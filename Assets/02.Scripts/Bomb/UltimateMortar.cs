@@ -1,3 +1,4 @@
+using Com.LuisPedroFonseca.ProCamera2D;
 using Heathen.UnityPhysics;
 using Photon.Pun;
 using UnityEngine;
@@ -20,6 +21,9 @@ public class UltimateMortar : Bomb
     [SerializeField] private float _maxAngle = 180f;
     [SerializeField] private float _rangeStep = 20f;
 
+    [Header("Camera Zoom Settings")]
+    [SerializeField] private float _maxZoomValue = 30f;
+
     private BallisticPathLineRender _pathRenderer;
     private BallisticsData _projectileData;
     private Player _owner;
@@ -27,6 +31,11 @@ public class UltimateMortar : Bomb
     private float _currentAngle = 90f;
     private float _timer;
     private float _delayTimer;
+    private SuperAmorBuff _superArmorBuff;
+
+    private ProCamera2D _proCamera;
+    private float _defaultZoom;
+    private float _targetZoom;
 
 
     protected override void Init()
@@ -35,6 +44,12 @@ public class UltimateMortar : Bomb
         SetStat(ID);
 
         _muzzle.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+        float normalizedAngle = Mathf.InverseLerp(_minAngle, _maxAngle, Mathf.Abs(_currentAngle));
+
+        _proCamera = Camera.main.GetComponent<ProCamera2D>();
+        _defaultZoom = Camera.main.orthographicSize;
+        _targetZoom = Mathf.Lerp(_maxZoomValue, _defaultZoom, normalizedAngle);
+
         _currentAmmo = _maxAmmo;
 
         _pathRenderer = GetComponent<BallisticPathLineRender>();
@@ -75,22 +90,20 @@ public class UltimateMortar : Bomb
         {
             _currentAngle = Mathf.Min(_maxAngle, _currentAngle + _rangeStep * Time.deltaTime);
 
-            _muzzle.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+            float normalizedAngle = Mathf.InverseLerp(_minAngle, _maxAngle, Mathf.Abs(_currentAngle));
+            _targetZoom = Mathf.Lerp(_maxZoomValue, _defaultZoom, normalizedAngle);
 
-            _projectileData.velocity = _muzzle.right * _stat.Speed;
-            _pathRenderer.projectile = _projectileData;
-            _pathRenderer.start = _muzzle.position;
+            UpdateMortar();
         }
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
             _currentAngle = Mathf.Max(_minAngle, _currentAngle - _rangeStep * Time.deltaTime);
 
-            _muzzle.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+            float normalizedAngle = Mathf.InverseLerp(_minAngle, _maxAngle, Mathf.Abs(_currentAngle));
+            _targetZoom = Mathf.Lerp(_maxZoomValue, _defaultZoom, normalizedAngle);
 
-            _projectileData.velocity = _muzzle.right * _stat.Speed;
-            _pathRenderer.projectile = _projectileData;
-            _pathRenderer.start = _muzzle.position;
+            UpdateMortar();
         }
 
         if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Z))
@@ -121,10 +134,25 @@ public class UltimateMortar : Bomb
         }
     }
 
+    private void UpdateMortar()
+    {
+        _muzzle.localRotation = Quaternion.Euler(0f, 0f, _currentAngle);
+
+        _projectileData.velocity = _muzzle.right * _stat.Speed;
+        _pathRenderer.projectile = _projectileData;
+        _pathRenderer.start = _muzzle.position;
+
+        if(PhotonView.IsMine)
+        {
+            _proCamera.UpdateScreenSize(_targetZoom);
+        }
+    }
+
     private void UltimateEnd()
     {
         if (PhotonView.IsMine)
         {
+            _proCamera.UpdateScreenSize(_defaultZoom);
             InputHandler.BlockInput = false;
             if (PhotonView != null && PhotonView.ViewID != 0)
             {
@@ -135,6 +163,14 @@ public class UltimateMortar : Bomb
                 Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
                 Destroy(gameObject);
             }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (PhotonView.IsMine)
+        {
+            _proCamera.UpdateScreenSize(_defaultZoom);
         }
     }
 
@@ -154,6 +190,33 @@ public class UltimateMortar : Bomb
         if (PhotonView.IsMine)
         {
             InputHandler.BlockInput = true;
+            _superArmorBuff = BuffManager.Instance.GetBuff("BF0003", _owner) as SuperAmorBuff;
+            _owner.PlayerBuffHandler.AddBuff(_superArmorBuff);
+            _owner.SetPausedNoAttack();
         }
+    }
+
+        [PunRPC]
+    public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
+    {
+        PlaceBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
+    }
+
+    [PunRPC]
+    public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
+    {
+        PlaceBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
+    }
+
+    [PunRPC]
+    public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
+    {
+        PlaceBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
+    }
+
+    [PunRPC]
+    public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
+    {
+        PlaceBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
 }
