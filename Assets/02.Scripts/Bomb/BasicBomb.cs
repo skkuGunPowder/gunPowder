@@ -18,6 +18,7 @@ public class BasicBomb : Bomb
     private bool isDestroyed = false; // 중복 파괴 방지 플래그
     private const float SLOW = 5f;
     private const float NORMAL = 10f;
+    private Coroutine _selfDestructionCoroutine;
 
     private Tween _pulseTween;
     [SerializeField] private float pulseScale = 2f; // 펄스 크기
@@ -85,18 +86,26 @@ public class BasicBomb : Bomb
 
         if (_bombVelocity == EBombVelocity.FAST)
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            if (photonView.IsMine)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
+            }
         }
 
         if (_bombVelocity == EBombVelocity.NORMAL && !_isFuzeActivate)
         {
             if (other.gameObject.TryGetComponent(out IDamagable damagableObject))
             {
-                PhotonView.RPC(nameof(Explode), RpcTarget.All);
+                if (photonView.IsMine)
+                {
+                    photonView.RPC(nameof(Explode), RpcTarget.All);
+                    PhotonNetwork.Destroy(gameObject);
+                }
             }
             else
             {
-                StartCoroutine(ActivateFuzeCoroutine(0.7f));
+                _selfDestructionCoroutine = StartCoroutine(ActivateFuzeCoroutine(0.7f));
             }
         }
     }
@@ -105,7 +114,11 @@ public class BasicBomb : Bomb
     {
         _isFuzeActivate = true;
         yield return new WaitForSeconds(fuzeTime);
-        PhotonView.RPC(nameof(Explode), RpcTarget.All);
+        if (photonView.IsMine)
+        {
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
     [PunRPC]
@@ -136,7 +149,11 @@ public class BasicBomb : Bomb
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         _fireDirection = fireRightDirection;
-        PhotonView.RPC(nameof(Explode), RpcTarget.All);
+        if (photonView.IsMine)
+        {
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
     [PunRPC]
@@ -147,43 +164,13 @@ public class BasicBomb : Bomb
         _rigidBody.AddForce(_fireDirection * _currentSpeed, ForceMode2D.Impulse);
     }
 
-    [PunRPC]
-    public override void Explode()
+    protected override void OnDestroy()
     {
-        if (isDestroyed) return; // 중복 파괴 방지
-        isDestroyed = true;
-
-        if (_pulseTween != null && _pulseTween.IsActive())
+        if (_selfDestructionCoroutine != null)
         {
-            _pulseTween.Kill();
+            StopCoroutine(_selfDestructionCoroutine);
         }
-
-        //base.Explode();
-        // 폭발 프리펩 인스턴싱 (로컬에서만)
-        Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
-        explosion.transform.position = transform.position;
-        explosion.transform.rotation = Quaternion.identity;
-        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview, true);   
-
-        if (_vfx != null)
-        {
-            _vfx.transform.SetParent(transform);
-        }
-
-        // 소유자만 파괴 요청
-        if (PhotonView.IsMine)
-        {
-            
-            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
-        }
+        
+        base.OnDestroy();
     }
 }

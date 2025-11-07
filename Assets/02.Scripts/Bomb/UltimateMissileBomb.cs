@@ -41,8 +41,12 @@ public class UltimateMissileBomb : Bomb
         {
             return;
         }
-    
-        PhotonView.RPC(nameof(Explode), RpcTarget.All);
+
+        if (photonView.IsMine)
+        {
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
     [PunRPC]
@@ -99,8 +103,9 @@ public class UltimateMissileBomb : Bomb
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         StopAllCoroutines();
+        base.OnDestroy();
     }
 }

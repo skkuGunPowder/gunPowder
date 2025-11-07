@@ -124,6 +124,7 @@ public class UltimateMortar : Bomb
             if (mortarShell.PhotonView.IsMine)
             {
                 mortarShell.PhotonView.RPC(nameof(mortarShell.ThrowBomb), RpcTarget.All, _muzzle.right, _muzzle.up, _muzzle.forward);
+                mortarShell.PhotonView.RPC(nameof(mortarShell.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
             }
 
             _currentAmmo--;
@@ -166,12 +167,14 @@ public class UltimateMortar : Bomb
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (PhotonView.IsMine)
         {
             _proCamera.UpdateScreenSize(_defaultZoom);
         }
+
+        base.OnDestroy();
     }
 
     [PunRPC]

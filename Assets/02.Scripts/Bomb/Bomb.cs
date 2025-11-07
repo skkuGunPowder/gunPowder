@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
 
@@ -62,7 +63,11 @@ public class Bomb : MonoBehaviourPun, IBomb
         _fuzeTimer += Time.deltaTime;
         if (_fuzeTimer >= _stat.FuzeTime)
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            if (photonView.IsMine)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
+            }
         }
     }
     
@@ -97,7 +102,11 @@ public class Bomb : MonoBehaviourPun, IBomb
             int otherPriority = otherBomb._stat.Priority;
             if (_stat.Priority <= otherPriority)
             {
-                PhotonView.RPC(nameof(Explode), RpcTarget.All);
+                if (photonView.IsMine)
+                {
+                    photonView.RPC(nameof(Explode), RpcTarget.All);
+                    PhotonNetwork.Destroy(gameObject);
+                }
             }
             else if (_stat.Priority - otherPriority < 2)
             {
@@ -111,32 +120,24 @@ public class Bomb : MonoBehaviourPun, IBomb
     [PunRPC]
     public virtual void Explode()
     {
-        // 폭발 프리펩 인스턴싱 (로컬에서만)
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;
-        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);   
+        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
 
         if (_vfx != null)
         {
             _vfx.transform.SetParent(transform);
         }
 
-        // 소유자만 파괴 요청
-        if (PhotonView.IsMine)
-        {
-            
-            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
-        }
+        // if (PhotonView != null && PhotonView.IsMine)
+        // {
+        //     PhotonNetwork.Destroy(gameObject);
+        // }
+        // else
+        // {
+        //     Destroy(gameObject);
+        // }
     }
 
     public BombStat GetBombStat()
@@ -157,6 +158,14 @@ public class Bomb : MonoBehaviourPun, IBomb
     public virtual void ResumeBomb()
     {
 
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (transform != null)
+        {
+            transform.DOKill();
+        }
     }
 
     [PunRPC]

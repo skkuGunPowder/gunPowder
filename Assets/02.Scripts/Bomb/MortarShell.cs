@@ -39,7 +39,11 @@ public class MortarShell : Bomb
             return;
         }
 
-        PhotonView.RPC(nameof(Explode), RpcTarget.All);
+        if (photonView.IsMine)
+        {
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
 
