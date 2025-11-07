@@ -25,7 +25,7 @@ public class PlayerBuffHandler : MonoBehaviour
         }
         else
         {
-            Debug.LogError("InGameHUD 태그를 가진 게임 오브젝트를 찾을 수 없습니다.");
+            Debug.LogWarning("InGameHUD 태그를 가진 게임 오브젝트를 찾을 수 없습니다.");
         }
 
         if (_buffs == null)
@@ -60,7 +60,6 @@ public class PlayerBuffHandler : MonoBehaviour
         {
             if (buff.ID == buffID)
             {
-                buff.EndBuff();
                 _buffs.Remove(buff);
                 Destroy(buff.gameObject);
                 return;

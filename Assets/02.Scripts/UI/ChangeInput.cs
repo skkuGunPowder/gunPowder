@@ -49,7 +49,7 @@ public class ChangeInput : MonoBehaviour
         {
             var current = navigationOrder[currentIndex];
             Button button = current.GetComponent<Button>();
-            if (button != null)
+            if (button != null && button.interactable)
             {
                 button.onClick.Invoke();
             }

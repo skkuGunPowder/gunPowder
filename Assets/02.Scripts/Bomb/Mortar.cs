@@ -189,17 +189,20 @@ public class Mortar : Bomb
         _pathRenderer.start = _muzzle.position;
         _animator.SetFloat("Angle", _currentAngle);
 
-        _proCamera.UpdateScreenSize(_targetZoom);
+        if(PhotonView.IsMine)
+        {
+            _proCamera.UpdateScreenSize(_targetZoom);
+        }
     }
 
     private void RemoveMortar()
     {
-        _proCamera.UpdateScreenSize(_defaultZoom);
-
         if (PhotonView.IsMine)
         {
+            _proCamera.UpdateScreenSize(_defaultZoom);
             InputHandler.BlockInput = false;
             _superArmorBuff.EndBuff();
+            _owner.ResetPausedNoAttack();
 
             if (PhotonView != null && PhotonView.ViewID != 0)
             {
@@ -215,7 +218,10 @@ public class Mortar : Bomb
     
     private void OnDestroy()
     {
-        _proCamera.UpdateScreenSize(_defaultZoom);
+        if (PhotonView.IsMine)
+        {
+            _proCamera.UpdateScreenSize(_defaultZoom);
+        }
     }
 
     [PunRPC]
@@ -242,6 +248,7 @@ public class Mortar : Bomb
             InputHandler.BlockInput = true;
             _superArmorBuff = BuffManager.Instance.GetBuff("BF0003", _owner) as SuperAmorBuff;
             _owner.PlayerBuffHandler.AddBuff(_superArmorBuff);
+            _owner.SetPausedNoAttack();
         }
     }
 

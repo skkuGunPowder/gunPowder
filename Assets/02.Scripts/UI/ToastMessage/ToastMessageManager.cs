@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.SceneManagement;
 
 public enum EToastType
 {
@@ -10,13 +11,22 @@ public enum EToastType
 
 public class ToastMessageManager : DontDestroySingleton<ToastMessageManager>
 {
-    [SerializeField] private List<UI_Toast> _toastList = new List<UI_Toast>();
+    [SerializeField] private List<UI_Toast> _toastList;
     [SerializeField] private Canvas _currentSceneCanvas;
 
     protected override void Awake()
     {
         base.Awake();
-        _currentSceneCanvas = GameObject.FindWithTag("MainCanvas").GetComponent<Canvas>();
+        SceneManager.sceneLoaded += Init;
+    }
+
+    private void Init(Scene scene, LoadSceneMode mode)
+    {
+        _currentSceneCanvas = FindAnyObjectByType<Canvas>();
+        if(_currentSceneCanvas == null)
+        {
+            Debug.LogError("[ToastMessageManager] || 현재 씬의 Canvas를 찾을 수 없습니다.");
+        }
     }
 
     public UI_Toast Open(EToastType toastType, string message, Action closeCallback = null)
@@ -40,7 +50,7 @@ public class ToastMessageManager : DontDestroySingleton<ToastMessageManager>
                 return toast;
             }
         }
-        Debug.LogError($"[ToastMessageManager] 토스트 메시지를 찾을 수 없습니다: {toastName}");
+        Debug.LogError($"[ToastMessageManager] || 토스트 메시지를 찾을 수 없습니다: {toastName}");
         return null;
     }
 }
