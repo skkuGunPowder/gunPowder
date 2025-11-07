@@ -1,7 +1,6 @@
 using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
-using UnityEngine.Analytics;
 
 public class WaterBomb : Bomb
 {
@@ -35,7 +34,11 @@ public class WaterBomb : Bomb
 
         if(other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            if (photonView.IsMine)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
+            }
         }
 
         ContactPoint2D contact = other.contacts[0];
@@ -69,12 +72,14 @@ public class WaterBomb : Bomb
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
         }
+
+        base.OnDestroy();
     }
 
     [PunRPC]

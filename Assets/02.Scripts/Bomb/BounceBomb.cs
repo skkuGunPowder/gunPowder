@@ -106,7 +106,11 @@ public class BounceBomb : Bomb
 
         if (collision.gameObject.TryGetComponent(out IDamagable damagable))
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            if (photonView.IsMine)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
+            }
         }
     }
 
