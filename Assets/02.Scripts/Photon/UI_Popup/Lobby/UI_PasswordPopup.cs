@@ -17,6 +17,12 @@ public class UI_PasswordPopup : UI_Popup
     // 비밀번호 확인해서 적용시킴
     public void PasswordCheck()
     {
+        if (PasswordInputField.text == "")
+        {
+            Fail();
+            return;
+        }
+        
         if (PasswordInputField.text != _tempPassword)
         {
             Fail();
