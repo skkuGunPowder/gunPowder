@@ -23,6 +23,9 @@ public class PlayerRecoilState : PlayerBaseState
         _recoilTimer = 0f;
         _owner.PlayerStat.IsRunning = false;
         _owner.PlayerStat.MyMoveSpeed = _owner.PlayerStat.MoveSpeed;
+        
+        // 반동 효과: 반대 방향으로 밀림
+        ApplyRecoilKnockback();
     }
 
     public override void OnExit()
@@ -51,6 +54,17 @@ public class PlayerRecoilState : PlayerBaseState
     private bool IsRecoilTimeElapsed()
     {
         return _recoilTimer >= _owner.PlayerStat.RecoilTime;
+    }
+
+    /// <summary>
+    /// 반동 속도 적용 (반대 방향으로 밀림)
+    /// </summary>
+    private void ApplyRecoilKnockback()
+    {
+        Vector2 velocity = _owner.Rigidbody2D.linearVelocity;
+        // 현재 바라보는 방향의 반대로 반동
+        velocity.x = -_owner.PlayerStat.FacingDirection * _owner.PlayerStat.MoveSpeed * 1.5f;
+        _owner.Rigidbody2D.linearVelocity = velocity;
     }
 
     /// <summary>

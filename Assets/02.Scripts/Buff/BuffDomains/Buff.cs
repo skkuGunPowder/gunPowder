@@ -1,10 +1,11 @@
 using System;
 using UnityEngine;
 
-public abstract class Buff : MonoBehaviour, IBuff
+public class Buff : MonoBehaviour, IBuff
 {
     public string ID { get; protected set; }
     public BuffStat Stat { get; private set; }
+    public Sprite Icon;
 
     protected Player _owner;
     public float _timer;
@@ -75,6 +76,6 @@ public abstract class Buff : MonoBehaviour, IBuff
 
         _isActive = false;
         _timer = 0f;
-        _owner.PlayerBuffHandler.RemoveBuff(ID);
+        _owner.PlayerBuffHandler.RemoveBuff(this);
     }
 }

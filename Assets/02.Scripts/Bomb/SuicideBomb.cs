@@ -35,6 +35,9 @@ public class SuicideBomb : Bomb
 
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _bombCoroutine = BombRoutine();
+        
+        // 기존 트윈 정리
+        CleanupTweens();
     }
 
     protected override void Update()
@@ -79,15 +82,25 @@ public class SuicideBomb : Bomb
 
         if (beatCount <= 4)
         {
-            transform.DOScale(Vector3.one * 1.2f, 0.1f).SetLoops(2, LoopType.Yoyo);
+            transform.DOScale(Vector3.one * 1.2f, 0.1f)
+                .SetLoops(2, LoopType.Yoyo)
+                .SetTarget(transform);
         }
         else
         {
-            transform.DOScale(Vector3.one * 1.2f, 0.1f).SetEase(Ease.OutBack);
+            transform.DOScale(Vector3.one * 1.2f, 0.1f)
+                .SetEase(Ease.OutBack)
+                .SetTarget(transform);
         }
 
         _spriteRenderer.sprite = _redSprite;
-        DOVirtual.DelayedCall(0.2f, () => _spriteRenderer.sprite = _defaultSprite);
+        DOVirtual.DelayedCall(0.2f, () => 
+        {
+            if (_spriteRenderer != null && gameObject != null)
+            {
+                _spriteRenderer.sprite = _defaultSprite;
+            }
+        }).SetTarget(transform);
     }
 
     private IEnumerator BombRoutine()
@@ -107,7 +120,12 @@ public class SuicideBomb : Bomb
             remainingTime -= interval;
         }
 
-        Explode();
+        if (photonView.IsMine)
+        {
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
+        }
+        // Explode();
     }
 
     [PunRPC]
@@ -142,5 +160,36 @@ public class SuicideBomb : Bomb
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         PlaceBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
+    }
+
+    [PunRPC]
+    public override void Explode()
+    {
+        CleanupTweens();
+        base.Explode();
+    }
+
+    private void OnDisable()
+    {
+        CleanupTweens();
+    }
+
+    private void OnDestroy()
+    {
+        CleanupTweens();
+    }
+
+    private void CleanupTweens()
+    {
+        // transform에 연결된 모든 DOTween 정리
+        if (transform != null)
+        {
+            transform.DOKill();
+        }
+        // 코루틴 정리
+        if (_bombCoroutine != null)
+        {
+            StopCoroutine(_bombCoroutine);
+        }
     }
 }

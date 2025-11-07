@@ -10,7 +10,7 @@ public class AirDropBox : MonoBehaviour
     public LayerMask layerMask;
     private bool _isInAir = true;
 
-    private GameObject _dropWarningVFX;
+    private ParticleSystem _dropWarningVFX;
     private Animator _animator;
 
     private void Awake()
@@ -22,9 +22,7 @@ public class AirDropBox : MonoBehaviour
             return;
         }
 
-        Debug.DrawLine(transform.position, hit.point, Color.red, 10f);
-
-        _dropWarningVFX = PhotonNetwork.Instantiate(DropWarningVFXPrefab.name, hit.point, Quaternion.identity);
+        _dropWarningVFX = Instantiate(DropWarningVFXPrefab, hit.point, Quaternion.identity);
     }
 
 
@@ -32,7 +30,8 @@ public class AirDropBox : MonoBehaviour
     {
         if (_dropWarningVFX != null)
         {
-            PhotonNetwork.Destroy(_dropWarningVFX);
+            _dropWarningVFX.gameObject.SetActive(false);
+            Destroy(_dropWarningVFX);
         }
 
         if (other.gameObject.layer == 6)
@@ -55,6 +54,7 @@ public class AirDropBox : MonoBehaviour
         {
             return;
         }
+        
         Player player = other.gameObject.GetComponent<Player>();
 
         if (player.AirDropItem == null)

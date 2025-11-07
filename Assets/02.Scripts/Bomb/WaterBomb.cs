@@ -21,20 +21,32 @@ public class WaterBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
         }
+        
+        if (other.gameObject == _ownerPhotonview.gameObject)
+        {
+            return;
+        }
+
+        if(other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
+        {
+            if (photonView.IsMine)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
+            }
+        }
 
         ContactPoint2D contact = other.contacts[0];
-        // Vector2 normal = contact.normal.normalized;
         Vector2 normal = transform.InverseTransformDirection(contact.normal.normalized);
 
-        // 축 계산: 충돌 방향에 수직한 축으로 부풀리기
         float xSquash = 1f - Mathf.Abs(normal.x) * _wobbleAmount;
         float ySquash = 1f - Mathf.Abs(normal.y) * _wobbleAmount;
 
-        // 반대 방향으로는 살짝 팽창 (보존하는 느낌)
         float xStretch = 1f + Mathf.Abs(normal.y) * _wobbleAmount * 0.5f;
         float yStretch = 1f + Mathf.Abs(normal.x) * _wobbleAmount * 0.5f;
 
@@ -60,12 +72,14 @@ public class WaterBomb : Bomb
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
         }
+
+        base.OnDestroy();
     }
 
     [PunRPC]

@@ -86,6 +86,10 @@ public class UltimateSuicide : Bomb
     [PunRPC]
     public override void Explode()
     {
+        // 중복 호출 방지
+        if (_isExploding) return;
+        _isExploding = true;
+
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;

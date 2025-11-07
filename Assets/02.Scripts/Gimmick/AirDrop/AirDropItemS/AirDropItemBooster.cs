@@ -15,6 +15,6 @@ public class AirDropItemBooster : AirDropItemBase, IAirDropItem
             return;
         }
         boosterBuff = (BoosterBuff)BuffManager.Instance.GetBuff("BF0002", _owner);
-        boosterBuff.StartBuff();
+        _owner.PlayerBuffHandler.AddBuff(boosterBuff);
     }
 }

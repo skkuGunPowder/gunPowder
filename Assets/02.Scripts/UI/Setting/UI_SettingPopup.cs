@@ -187,7 +187,7 @@ public class UI_SettingPopup : UI_Popup
     {
         // 현재 적용된 상태를 저장
         SettingManager.Instance.SaveCurrentResolutionAndMode();
-        gameObject.SetActive(false);
+        Close();
     }
 
     // 인스펙터에서 취소 버튼에 할당할 메서드
@@ -211,6 +211,6 @@ public class UI_SettingPopup : UI_Popup
             UpdateToggleInteractables(_originalFullscreenMode);
         }
         UpdateResolutionDropdownInteractable(_originalFullscreenMode);
-        gameObject.SetActive(false);
+        Close();
     }
 }

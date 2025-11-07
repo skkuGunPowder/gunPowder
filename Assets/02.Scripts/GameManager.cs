@@ -72,7 +72,17 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {
+            _photonView.RPC(nameof(RequestSpawn), RpcTarget.MasterClient);
+        }
+    }
+
+    [PunRPC]
+    void RequestSpawn()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
             PhotonNetwork.Instantiate("AirDropJet", transform.position, Quaternion.identity);
+            Debug.Log("마스터가 요청받아 오브젝트를 생성했습니다.");
         }
     }
 

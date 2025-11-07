@@ -24,6 +24,7 @@ public class PlayerDamagedState : PlayerBaseState
     private const float MAX_LINEAR_DAMPING = 2.5f;         // 최대 선형 감쇠값
     private const float HEALTH_RATIO_THRESHOLD = 0.5f;     // 체력 비율 임계값 (50%)
     private const float DAMPING_LERP_START = 0.5f;         // 감쇠 보간 시작값
+    private const float MIN_KNOCKBACK_RATIO = 0.5f;        // 최소 넉백 비율 (멀리서 맞았을 때 50%만 날아감)
     
     // 추가 힘 관련 상수
     private const float MAX_ADDITIONAL_FORCE = 10f;        // 최대 추가 힘
@@ -36,6 +37,7 @@ public class PlayerDamagedState : PlayerBaseState
     
     // 상태 변수들
     private float _damagedTimer = 0f;           // 피격 지속 시간 타이머
+    private float _actualDamagedTime = 0f;      // 실제 피격 시간 (거리 기반으로 조정된 값)
     private float _originalLinearDamping;       // 원본 선형 감쇠값
     private Tween _knockbackTween;              // 넉백 효과 트윈
 
@@ -47,17 +49,21 @@ public class PlayerDamagedState : PlayerBaseState
         base.OnEnter();
 
         _damagedTimer = 0f;
+        
+        // 거리 기반 실제 피격 시간 계산
+        CalculateActualDamagedTime();
+        
         _owner.RPC_SetAnimatorTrigger("HitLoop");
         
         // 무적 상태 설정
         SetImmuneState(true);
-        
+
         // 저장된 속도 복원 (히트스탑에서 온 경우)
         RestoreStoredVelocityIfExists();
-        
+
         // 체력 비례 추가 힘 적용
         ApplyHealthBasedForce();
-        
+
         // 체력 비율에 따른 넉백 효과 적용
         float currentHealthRatio = CalculateCurrentHealthRatio();
         ApplyKnockbackEffect(currentHealthRatio);
@@ -115,13 +121,16 @@ public class PlayerDamagedState : PlayerBaseState
     }
     
     /// <summary>
-    /// 체력 비율에 따른 넉백 효과 적용
+    /// 체력 비율에 따른 넉백 효과 적용 (거리 기반 데미지 비율도 고려)
     /// </summary>
     private void ApplyKnockbackEffect(float currentHealthRatio)
     {
         _originalLinearDamping = _owner.Rigidbody2D.linearDamping;
 
-        float startDamping = CalculateStartDamping(currentHealthRatio);
+        // 거리 기반 데미지 비율 가져오기 (가까이서 맞으면 1.0, 멀리서 맞으면 작은 값)
+        float damageRatio = _owner.LastDamageRatio;
+        
+        float startDamping = CalculateStartDamping(currentHealthRatio, damageRatio);
         _owner.Rigidbody2D.linearDamping = startDamping;
         
         // 시간에 따라 감쇠값을 증가시켜 점진적으로 감속
@@ -141,14 +150,24 @@ public class PlayerDamagedState : PlayerBaseState
     }
     
     /// <summary>
-    /// 체력 비율에 따라 추가 힘을 적용 (체력이 낮을수록 더 강한 힘)
+    /// 체력 비율과 거리에 따라 추가 힘을 적용
+    /// 가까이서 맞으면 기존 힘 유지 (100%), 멀리서 맞으면 최소 50% 힘 적용
     /// </summary>
     private void ApplyHealthBasedForce()
     {
         if (_owner.Rigidbody2D == null) return;
         
         float currentHealthRatio = CalculateCurrentHealthRatio();
+        float damageRatio = _owner.LastDamageRatio; // 거리 기반 데미지 비율
+        
+        // 체력 비율에 따른 기본 힘
         float additionalForceMagnitude = (1.0f - currentHealthRatio) * MAX_ADDITIONAL_FORCE;
+        
+        // 거리 기반 스케일 적용:
+        // damageRatio = 1.0 (가까이) -> distanceScale = 1.0 (100% 힘)
+        // damageRatio = 0.0 (멀리) -> distanceScale = 0.5 (50% 힘)
+        float distanceScale = Mathf.Lerp(MIN_KNOCKBACK_RATIO, 1.0f, damageRatio);
+        additionalForceMagnitude *= distanceScale;
         
         // 현재 속도 방향으로 추가 힘 적용
         ApplyForceBasedOnVelocity(additionalForceMagnitude);
@@ -238,24 +257,48 @@ public class PlayerDamagedState : PlayerBaseState
     /// </summary>
     private bool IsMinimumDamagedTimeElapsed()
     {
-        return _damagedTimer >= _owner.PlayerStat.DamagedTime;
+        return _damagedTimer >= _actualDamagedTime;
     }
 
     /// <summary>
-    /// 체력 비율에 따른 시작 감쇠값 계산
+    /// 거리 기반 데미지 비율에 따라 실제 피격 시간 계산
+    /// 가까이서 맞으면 최대 시간 (100%), 멀리서 맞으면 최소 절반 시간 (50%)
     /// </summary>
-    private float CalculateStartDamping(float currentHealthRatio)
+    private void CalculateActualDamagedTime()
     {
+        float damageRatio = _owner.LastDamageRatio; // 거리 기반 데미지 비율
+        float baseDamagedTime = _owner.PlayerStat.DamagedTime;
+
+        // damageRatio = 1.0 (가까이) -> 100% 시간 (baseDamagedTime)
+        // damageRatio = 0.0 (멀리) -> 30% 시간 (baseDamagedTime * 0.5)
+        _actualDamagedTime = Mathf.Lerp(baseDamagedTime * 0.3f, baseDamagedTime, damageRatio);
+    }
+
+    /// <summary>
+    /// 체력 비율과 거리 기반 데미지 비율에 따른 시작 감쇠값 계산
+    /// 가까이서 맞으면 기존 넉백 유지 (100%), 멀리서 맞으면 최소 50% 넉백
+    /// </summary>
+    private float CalculateStartDamping(float currentHealthRatio, float damageRatio)
+    {
+        float baseDamping;
+        
         if (currentHealthRatio >= HEALTH_RATIO_THRESHOLD)
         {
-            return _originalLinearDamping;
+            baseDamping = _originalLinearDamping;
         }
         else
         {
             // 50%에서 0%까지 시작값이 0.5에서 0.01로 변화
             float ratio = (HEALTH_RATIO_THRESHOLD - currentHealthRatio) / HEALTH_RATIO_THRESHOLD;
-            return Mathf.Lerp(DAMPING_LERP_START, MIN_LINEAR_DAMPING, ratio);
+            baseDamping = Mathf.Lerp(DAMPING_LERP_START, MIN_LINEAR_DAMPING, ratio);
         }
+
+        // 거리 기반 감쇠값 조정: 
+        // damageRatio = 1.0 (가까이) -> dampingMultiplier = 1.0 (100% 날아감)
+        // damageRatio = 0.0 (멀리) -> dampingMultiplier = 2.0 (50% 날아감, 감쇠값 2배로 빠르게 멈춤)
+        damageRatio = 1.0f;
+        float dampingMultiplier = Mathf.Lerp(1.0f / MIN_KNOCKBACK_RATIO, 1.0f, damageRatio);
+        return baseDamping * dampingMultiplier;
     }
 
     /// <summary>
@@ -267,7 +310,7 @@ public class PlayerDamagedState : PlayerBaseState
         _knockbackTween = DOTween.To(() => _owner.Rigidbody2D.linearDamping, 
             x => _owner.Rigidbody2D.linearDamping = x, 
             MAX_LINEAR_DAMPING, 
-            _owner.PlayerStat.DamagedTime)
+            _actualDamagedTime)
             .SetEase(Ease.InOutBack);
     }
 
