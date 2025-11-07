@@ -60,7 +60,6 @@ public class PlayerBuffHandler : MonoBehaviour
         {
             if (buff.ID == buffID)
             {
-                buff.EndBuff();
                 _buffs.Remove(buff);
                 Destroy(buff.gameObject);
                 return;
