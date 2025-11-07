@@ -915,6 +915,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
             _playerStat.DecreaseGunPowderCount(PlayerStat.AttackPenaltyAmount, photonView.OwnerActorNr, isNormalAttack: true, ignoreImmune: true);
 
+            // 히트스크린 추가
+            EventManager.Instance.HitScreen();
+
             RPC_ReleaseGunPowder(transform.position, PhotonView.OwnerActorNr, NO_ATTACK_RELEASE_COUNT, NO_ATTACK_RELEASE_SPREAD_ANGLE, NO_ATTACK_RELEASE_DISTANCE, true);
             if (PhotonView.IsMine && ExplosionEffectPrefab != null)
             {
