@@ -19,9 +19,8 @@ public class SuperAmorBuff : Buff
 
         _owner.OnHit += OnPlayerHit;
 
-        // TODO
-        // 플레이어 넉백 제거 설정
-        _owner.IsSuperArmor = true;
+        // 플레이어 슈퍼아머 활성화 (넉백 무효화 및 위치 고정)
+        _owner.SetSuperArmor();
         _isActive = true;
     }
 
@@ -29,9 +28,8 @@ public class SuperAmorBuff : Buff
     {
         _owner.OnHit -= OnPlayerHit;
 
-        // TODO
-        // 플레이어 넉백 제거 해제 설정
-        _owner.IsSuperArmor = false;
+        // 플레이어 슈퍼아머 비활성화 (원래 상태로 복원)
+        _owner.ResetSuperArmor();
         base.EndBuff();
     }
     
