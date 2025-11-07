@@ -15,7 +15,6 @@ public class BasicBomb : Bomb
     public const string ID = "BO0001";
     private EBombVelocity _bombVelocity = EBombVelocity.SLOW;
     private bool _isFuzeActivate;
-    private bool isDestroyed = false; // 중복 파괴 방지 플래그
     private const float SLOW = 5f;
     private const float NORMAL = 10f;
 
@@ -34,14 +33,21 @@ public class BasicBomb : Bomb
         base.Init();
         SetStat(ID);
         _isFuzeActivate = false;
-        isDestroyed = false; // 재사용 시 초기화
         SoundManager.Instance.PlayLocalSound(this.GetType().Name, transform, 0, true);
           Vector3 originalScale = transform.localScale;
+
+        // 기존 트윈이 있다면 정리
+        if (_pulseTween != null && _pulseTween.IsActive())
+        {
+            _pulseTween.Kill();
+        }
 
         // DOTween으로 무한 반복 펄스 트윈 생성
         _pulseTween = transform.DOScale(originalScale * pulseScale, pulseDuration / 2f)
         .SetLoops(-1, LoopType.Yoyo)
-        .SetEase(Ease.InOutSine); // 부드러운 감속/가속
+        .SetEase(Ease.InOutSine) // 부드러운 감속/가속
+        .SetAutoKill(false) // 수동으로 Kill하도록 설정
+        .SetTarget(transform); // Transform과 함께 자동 정리
     }
 
     protected override void Update()
@@ -78,7 +84,7 @@ public class BasicBomb : Bomb
             return;
         }
         
-        if (isDestroyed) // 이미 파괴된 경우 중복 호출 방지
+        if (_isExploding) // 이미 폭발 중인 경우 중복 호출 방지
         {
             return;
         }
@@ -113,7 +119,6 @@ public class BasicBomb : Bomb
     {
         _fireDirection = fireRightDirection;
         _currentSpeed = 0f;
-        isDestroyed = false; // 재사용 시 초기화
     }
 
     [PunRPC]
@@ -150,13 +155,11 @@ public class BasicBomb : Bomb
     [PunRPC]
     public override void Explode()
     {
-        if (isDestroyed) return; // 중복 파괴 방지
-        isDestroyed = true;
+        if (_isExploding) return; // 중복 파괴 방지
+        _isExploding = true;
 
-        if (_pulseTween != null && _pulseTween.IsActive())
-        {
-            _pulseTween.Kill();
-        }
+        // 트윈 정리
+        CleanupTweens();
 
         //base.Explode();
         // 폭발 프리펩 인스턴싱 (로컬에서만)
@@ -184,6 +187,25 @@ public class BasicBomb : Bomb
                 Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
                 Destroy(gameObject);
             }
+        }
+    }
+
+    private void OnDisable()
+    {
+        CleanupTweens();
+    }
+
+    private void OnDestroy()
+    {
+        CleanupTweens();
+    }
+
+    private void CleanupTweens()
+    {
+        if (_pulseTween != null && _pulseTween.IsActive())
+        {
+            _pulseTween.Kill();
+            _pulseTween = null;
         }
     }
 }

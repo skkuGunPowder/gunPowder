@@ -1,5 +1,6 @@
 using Photon.Pun;
 using UnityEngine;
+using DG.Tweening;
 
 public class Bomb : MonoBehaviourPun, IBomb
 {
@@ -16,6 +17,9 @@ public class Bomb : MonoBehaviourPun, IBomb
     protected ParticleSystem _vfx;
 
     public PhotonView PhotonView;
+    
+    // 중복 파괴 방지 플래그
+    protected bool _isExploding = false;
 
     private void Awake()
     {
@@ -38,6 +42,7 @@ public class Bomb : MonoBehaviourPun, IBomb
         _fuzeTimer = 0f;
         _currentSpeed = 0f;
         _fireDirection = Vector3.zero;
+        _isExploding = false;
     }
 
     protected virtual void Update()
@@ -111,6 +116,26 @@ public class Bomb : MonoBehaviourPun, IBomb
     [PunRPC]
     public virtual void Explode()
     {
+        // 중복 호출 방지 - 이미 폭발 중이면 무시
+        if (_isExploding)
+        {
+            return;
+        }
+
+        // 이미 파괴된 경우 무시
+        if (this == null || gameObject == null || !gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
+        _isExploding = true;
+
+        // 모든 DOTween 정리
+        if (transform != null)
+        {
+            transform.DOKill();
+        }
+
         // 폭발 프리펩 인스턴싱 (로컬에서만)
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
@@ -136,6 +161,24 @@ public class Bomb : MonoBehaviourPun, IBomb
                 Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
                 Destroy(gameObject);
             }
+        }
+    }
+
+    protected virtual void OnDisable()
+    {
+        // 비활성화 시 모든 DOTween 정리
+        if (transform != null)
+        {
+            transform.DOKill();
+        }
+    }
+
+    protected virtual void OnDestroy()
+    {
+        // 파괴 시 모든 DOTween 정리
+        if (transform != null)
+        {
+            transform.DOKill();
         }
     }
 

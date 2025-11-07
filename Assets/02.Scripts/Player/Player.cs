@@ -344,7 +344,6 @@ public class Player : MonoBehaviourPun, IDamagable
     private void SetPlayerOrderInLayer()
     {
         int playerOrderInLayerPlus = PhotonView.OwnerActorNr;
-        Debug.Log($"playerOrderInLayerPlus: {playerOrderInLayerPlus}");
         foreach (var item in _playerStat.MySpriteREndererList)
         {
             if (item != null)
@@ -471,6 +470,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if (PhotonView.Owner != null && PhotonView.Owner.CustomProperties.ContainsKey(EProperties.Team.ToString()))
         {
             _playerStat.Team = (EInGameTeam)PhotonView.Owner.CustomProperties[EProperties.Team.ToString()];
+            Debug.Log($"[Player] Team: {_playerStat.Team}");
         }
     }
 
@@ -646,7 +646,6 @@ public class Player : MonoBehaviourPun, IDamagable
         // Owner 전용 로직 (데미지 처리 등)
         if (PhotonView.IsMine)
         {
-
             // 주기적으로 건파우더 감소
             /*
             _gunPowderDecreaseTimer += Time.deltaTime;
@@ -684,7 +683,6 @@ public class Player : MonoBehaviourPun, IDamagable
                 {
                     RPC_UltimateEffect(true);
                     RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
-                    Debug.Log($"[UltimateEffect] ON request - player {PhotonView.OwnerActorNr}, timer={_ultimateChanceTimer:0.00}/{_playerStat.UltimateChanceDuration:0.00}");
                 }
                 _ultimateEffectOn = true;
             }
@@ -698,7 +696,6 @@ public class Player : MonoBehaviourPun, IDamagable
                 RPC_UltimateEffect(false);
                 RPC_SetMaterial((byte)EPlayerMaterial.Default);
                 _ultimateEffectOn = false;
-                Debug.Log($"[UltimateEffect] OFF by timeout - player {PhotonView.OwnerActorNr}");
             }
         }
     }
@@ -709,7 +706,6 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        Debug.Log($"[UltimateEffect] RPC_UltimateEffect send {isOn} - owner {PhotonView.OwnerActorNr}");
         PhotonView.RPC(nameof(UltimateEffect), RpcTarget.All, isOn);
     }
 
@@ -720,8 +716,6 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-
-        Debug.Log($"[UltimateEffect RPC] {(isOn ? "ON" : "OFF")} - view {PhotonView.ViewID}, owner {PhotonView.OwnerActorNr}");
 
         if (isOn)
         {
@@ -1309,10 +1303,11 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
 
-        Debug.Log($"[RPC_TakeDamage] isNormalAttack: {isNormalAttack}");
-
         // 공격자 정보 가져오기
         PhotonView attackerView = PhotonView.Find(attackerViewId);
+        
+        // 같은 팀 체크
+        bool isSameTeam = false;
         if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
         {
             PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
@@ -1321,66 +1316,73 @@ public class Player : MonoBehaviourPun, IDamagable
             EInGameTeam attackerTeam = attackerStat != null ? attackerStat.Team : EInGameTeam.Default;
             EInGameTeam victimTeam = _playerStat.Team;
 
-            // 팀 체크: 같은 팀이면서 자기 자신이 아닌 경우 데미지 무시
-            if (attackerTeam == victimTeam && attackerActorNumber != PhotonView.OwnerActorNr)
-            {
-                // 같은 팀이므로 데미지 적용하지 않음 (VFX, 사운드 등은 그대로 재생)
-                return;
-            }
+            // 팀 체크: 같은 팀이면서 자기 자신이 아닌 경우
+            isSameTeam = (attackerTeam == victimTeam && attackerActorNumber != PhotonView.OwnerActorNr);
         }
         else
         {
             Debug.LogWarning($"[RPC_TakeDamage] 공격자 뷰를 찾을 수 없습니다. ID: {attackerViewId}");
         }
 
-        // 피격 횟수 증가
-        _playerStat.IncreseDamagedCount();
-
-        // 건파우더 드랍량 계산 (힐량 계산)
-        float healPercent = HealPercent / 100f;
-        int gunPowderCount = Mathf.CeilToInt(maxDamage * healPercent);
-
-        // 플레이어가 맞은 횟수에 비례해서 데미지 증가
-        int increaseDamagePerDamagedCount = _playerStat.CurrentPlayerDamagedCount / 15;
-        damage += increaseDamagePerDamagedCount;
-        maxDamage += increaseDamagePerDamagedCount;
-
-        // 체력 감소
-        bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber, isNormalAttack);
-
-        // 날 때린 사람 딜량 증가 (자기 자신일 경우 제외)
-        if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
+        // 같은 팀이 아닐 때만 데미지 적용
+        if (!isSameTeam)
         {
-            PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
-            if (attackerStat != null  && attackerView != PhotonView)
+            // 피격 횟수 증가
+            _playerStat.IncreseDamagedCount();
+
+            // 건파우더 드랍량 계산 (힐량 계산)
+            float healPercent = HealPercent / 100f;
+            int gunPowderCount = Mathf.CeilToInt(maxDamage * healPercent);
+
+            // 플레이어가 맞은 횟수에 비례해서 데미지 증가
+            int increaseDamagePerDamagedCount = _playerStat.CurrentPlayerDamagedCount / 15;
+            damage += increaseDamagePerDamagedCount;
+            maxDamage += increaseDamagePerDamagedCount;
+
+            // 체력 감소
+            bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber, isNormalAttack);
+
+            // 날 때린 사람 딜량 증가 (자기 자신일 경우 제외)
+            if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
             {
-                attackerStat.IncreaseTotalDamage(damage);
-                /*
-                if (isDead)
+                PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
+                if (attackerStat != null  && attackerView != PhotonView)
                 {
-                    // 킬 카운트는 공격자 본인의 클라이언트에서만 증가시키도록 RPC 호출
-                    if (attackerView.Owner != null)
+                    attackerStat.IncreaseTotalDamage(damage);
+                    /*
+                    if (isDead)
                     {
-                        attackerView.RPC(nameof(PlayerStat.RPC_IncreaseTotalKillCount), attackerView.Owner);
-                    }
-                }*/
+                        // 킬 카운트는 공격자 본인의 클라이언트에서만 증가시키도록 RPC 호출
+                        if (attackerView.Owner != null)
+                        {
+                            attackerView.RPC(nameof(PlayerStat.RPC_IncreaseTotalKillCount), attackerView.Owner);
+                        }
+                    }*/
+                }
+            }
+
+            // Gunpowder 낙출
+            ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
+
+            // 거리 기반 데미지 비율 저장 (넉백 효과에 사용)
+            _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
+
+            // 피격 이벤트 발생
+            OnHit?.Invoke();
+        }
+        else
+        {
+            // 웨이팅 룸이라면 데미지 0으로 설정
+            if (GameManager.Instance.CurrentGameState == EGameState.Playing)
+            {
+                damage = 0;
             }
         }
-
-        // Gunpowder 낙출
-        ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
-
-        // 거리 기반 데미지 비율 저장 (넉백 효과에 사용)
-        _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
-
-        // 피격 이벤트 발생
-        OnHit?.Invoke();
 
         // 데미지 팝업 & VFX/사운드: 중복 호출 방지
         // 오직 RPC_TakeDamage를 원래 보낸 클라이언트(피격자 Owner)에서만 RPC를 전송한다
         if (info.Sender != null && info.Sender.IsLocal)
         {
-            
             // 맞은 사람(Owner)에게 VFX/사운드와 데미지 팝업 표시
             if (PhotonView.Owner != null)
             {

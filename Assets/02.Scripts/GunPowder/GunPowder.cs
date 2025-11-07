@@ -1,6 +1,7 @@
 using Photon.Pun;
 using UnityEngine;
 using SpriteTrail;
+using DG.Tweening;
 
 /// <summary>
 /// 건파우더(투사체) 네트워크 오브젝트
@@ -225,8 +226,23 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     /// </summary>
     public void SetTarget(int targetViewId)
     {
+        // 이미 파괴된 경우 무시
+        if (this == null || gameObject == null || !gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
         PhotonView targetView = PhotonView.Find(targetViewId);
         if (targetView != null && targetView.gameObject != null && targetView.gameObject.activeInHierarchy)
             _target = targetView.transform;
+    }
+
+    private void OnDestroy()
+    {
+        // 파괴 시 모든 트윈 정리
+        if (transform != null)
+        {
+            transform.DOKill();
+        }
     }
 }
