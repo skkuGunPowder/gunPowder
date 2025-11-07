@@ -470,7 +470,6 @@ public class Player : MonoBehaviourPun, IDamagable
         if (PhotonView.Owner != null && PhotonView.Owner.CustomProperties.ContainsKey(EProperties.Team.ToString()))
         {
             _playerStat.Team = (EInGameTeam)PhotonView.Owner.CustomProperties[EProperties.Team.ToString()];
-            Debug.Log($"[Player] Team: {_playerStat.Team}");
         }
     }
 
@@ -1363,21 +1362,21 @@ public class Player : MonoBehaviourPun, IDamagable
 
             // Gunpowder 낙출
             ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount, _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
-
-            // 거리 기반 데미지 비율 저장 (넉백 효과에 사용)
-            _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
-
-            // 피격 이벤트 발생
-            OnHit?.Invoke();
         }
         else
         {
-            // 웨이팅 룸이라면 데미지 0으로 설정
+            // 같은 팀일 때 데미지 0으로 설정
             if (GameManager.Instance.CurrentGameState == EGameState.Playing)
             {
                 damage = 0;
             }
         }
+
+        // 거리 기반 데미지 비율 저장 (넉백 효과에 사용) - 같은 팀이든 다른 팀이든 저장
+        _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
+
+        // 피격 이벤트 발생 (애니메이션 재생) - 같은 팀이든 다른 팀이든 발생
+        OnHit?.Invoke();
 
         // 데미지 팝업 & VFX/사운드: 중복 호출 방지
         // 오직 RPC_TakeDamage를 원래 보낸 클라이언트(피격자 Owner)에서만 RPC를 전송한다
