@@ -108,6 +108,8 @@ public class GameOverProduction : MonoBehaviour
                 return;
             }
             
+            PhotonNetwork.DestroyAll(); // 전부 다 지우기
+            
             if (!PhotonNetwork.IsMessageQueueRunning)
                 return; // 또는 로딩 상태 체크
 

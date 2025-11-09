@@ -461,8 +461,9 @@ namespace DistantLands.Lumen
                         MeshRenderer renderer = (MeshRenderer)currentMesh.renderer;
                         renderer.sharedMaterial = layer.EffectMaterial;
                         MeshFilter meshFilter = currentMesh.filter;
+                        currentMesh.transform.gameObject.layer = gameObject.layer;
 
-                        sharedBlock.Clear();
+                        sharedBlock?.Clear();
 
                         if (layer is DynamicRayLayer dynamicRay)
                         {
@@ -586,6 +587,7 @@ namespace DistantLands.Lumen
             while (instantiatedLumenLayers.Count < totalLayerCount)
             {
                 GameObject obj = new GameObject($"Layer");
+                obj.layer = gameObject.layer;
                 if (displayLayersInHierarchy)
                     obj.hideFlags = HideFlags.DontSaveInEditor;
                 else

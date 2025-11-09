@@ -86,6 +86,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _room.IsVisible = false;
         _room.IsOpen = false;
         
+        PhotonNetwork.DestroyAll(); // 오브젝트들 모두 제거
+        
         if (SelectedMap == EMap.Random)
         {
             int max = (int)EMap.Count - 1;
