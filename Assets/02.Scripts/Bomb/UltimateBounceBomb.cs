@@ -41,7 +41,6 @@ public class UltimateBounceBomb : Bomb
     [PunRPC]
     public override void Explode()
     {
-        // 소유자만 파괴 요청
         if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
         {
             Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);

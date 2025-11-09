@@ -76,6 +76,6 @@ public class Buff : MonoBehaviour, IBuff
 
         _isActive = false;
         _timer = 0f;
-        _owner.PlayerBuffHandler.RemoveBuff(ID);
+        _owner.PlayerBuffHandler.RemoveBuff(this);
     }
 }

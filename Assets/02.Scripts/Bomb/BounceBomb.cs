@@ -30,6 +30,9 @@ public class BounceBomb : Bomb
         base.Init();
         SetStat(ID);
         _originalScale = transform.localScale;
+        
+        // 기존 트윈 정리
+        CleanupTweens();
     }
 
     private void FixedUpdate()
@@ -68,10 +71,8 @@ public class BounceBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (_wobbleTween != null && _wobbleTween.IsActive())
-        {
-            _wobbleTween.Kill();
-        }
+        // 기존 트윈 정리
+        CleanupTweens();
 
         ContactPoint2D contact = collision.contacts[0];
         Vector2 normal = transform.InverseTransformDirection(contact.normal.normalized);
@@ -93,10 +94,18 @@ public class BounceBomb : Bomb
 
         _wobbleTween = transform.DOScale(squashedScale, _wobbleDuration / 2f)
         .SetEase(Ease.OutQuad)
+        .SetAutoKill(false)
+        .SetTarget(transform)
         .OnComplete(() =>
         {
-            transform.DOScale(_originalScale, _wobbleDuration / 2f).SetEase(Ease.InQuad);
-            SoundManager.Instance.PlayLocalSound("BounceBomb_1", transform);
+            // Transform 파괴 여부 확인
+            if (transform != null && gameObject != null)
+            {
+                transform.DOScale(_originalScale, _wobbleDuration / 2f)
+                    .SetEase(Ease.InQuad)
+                    .SetTarget(transform);
+                SoundManager.Instance.PlayLocalSound("BounceBomb_1", transform);
+            }
         });
 
         if (collision.gameObject == _ownerPhotonview.gameObject)
@@ -106,7 +115,11 @@ public class BounceBomb : Bomb
 
         if (collision.gameObject.TryGetComponent(out IDamagable damagable))
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            if (photonView.IsMine)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
+            }
         }
     }
 
@@ -140,5 +153,36 @@ public class BounceBomb : Bomb
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
+    }
+
+    [PunRPC]
+    public override void Explode()
+    {
+        CleanupTweens();
+        base.Explode();
+    }
+
+    private void OnDisable()
+    {
+        CleanupTweens();
+    }
+
+    private void OnDestroy()
+    {
+        CleanupTweens();
+    }
+
+    private void CleanupTweens()
+    {
+        if (_wobbleTween != null && _wobbleTween.IsActive())
+        {
+            _wobbleTween.Kill();
+            _wobbleTween = null;
+        }
+        // transform에 연결된 모든 DOTween 정리
+        if (transform != null)
+        {
+            transform.DOKill();
+        }
     }
 }
