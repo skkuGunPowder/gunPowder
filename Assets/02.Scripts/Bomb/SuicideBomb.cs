@@ -125,7 +125,6 @@ public class SuicideBomb : Bomb
             photonView.RPC(nameof(Explode), RpcTarget.All);
             PhotonNetwork.Destroy(gameObject);
         }
-        // Explode();
     }
 
     [PunRPC]

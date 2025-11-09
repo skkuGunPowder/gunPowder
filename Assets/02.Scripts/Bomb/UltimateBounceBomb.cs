@@ -47,18 +47,7 @@ public class UltimateBounceBomb : Bomb
             endExplosion.transform.position = transform.position;
             endExplosion.transform.rotation = Quaternion.identity;
             endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
-
-            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
-
+            PhotonNetwork.Destroy(gameObject);
             return;
         }
 

@@ -86,22 +86,16 @@ public class BasicBomb : Bomb
 
         if (_bombVelocity == EBombVelocity.FAST)
         {
-            if (photonView.IsMine)
-            {
-                photonView.RPC(nameof(Explode), RpcTarget.All);
-                PhotonNetwork.Destroy(gameObject);
-            }
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
         }
 
         if (_bombVelocity == EBombVelocity.NORMAL && !_isFuzeActivate)
         {
             if (other.gameObject.TryGetComponent(out IDamagable damagableObject))
             {
-                if (photonView.IsMine)
-                {
-                    photonView.RPC(nameof(Explode), RpcTarget.All);
-                    PhotonNetwork.Destroy(gameObject);
-                }
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
             }
             else
             {
