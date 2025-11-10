@@ -181,30 +181,6 @@ namespace DistantLands.Lumen.EditorScripts
                 DrawChecks();
             });
 
-            AddCheck("Opaque downsampling is set to none", checkHDR, () =>
-            {
-                for (int i = 0; i < GraphicsSettings.allConfiguredRenderPipelines.Length; i++)
-                {
-                    if (GraphicsSettings.allConfiguredRenderPipelines[i].GetType() != typeof(UniversalRenderPipelineAsset))
-                        continue;
-
-                    UniversalRenderPipelineAsset pipeline = (UniversalRenderPipelineAsset)GraphicsSettings.allConfiguredRenderPipelines[i];
-                    Type t = typeof(UniversalRenderPipelineAsset);
-                    FieldInfo fieldInfo = t.GetField("m_OpaqueDownsampling", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                    if (fieldInfo != null)
-                    {
-                        fieldInfo.SetValue(pipeline, Downsampling.None);
-                    }
-                    else
-                    {
-                        Debug.LogError("Field 'm_OpaqueDownsampling' not found!");
-                    }
-                    EditorUtility.SetDirty(pipeline);
-                }
-                DrawChecks();
-            });
-
             AddCheck("HDR is supported", checkHDR, () =>
             {
                 for (int i = 0; i < GraphicsSettings.allConfiguredRenderPipelines.Length; i++)
