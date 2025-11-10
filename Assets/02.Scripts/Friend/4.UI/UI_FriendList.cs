@@ -36,7 +36,11 @@ public class UI_FriendList : UI_Popup
         foreach (string uid in friendUids)
         {
             GameObject item = Instantiate(friendItemPrefab, contentParent);
-            item.GetComponent<UI_PanelFriendSlot>().Refresh(await AccountManager.Instance.GetUserNicknameWithUid(uid));
+            var friendSlot = item.GetComponent<UI_PanelFriendSlot>();
+
+            string nickname = await AccountManager.Instance.GetUserNicknameWithUid(uid);
+            friendSlot.Refresh(nickname);
+            friendSlot.SetFriendUid(uid); // UID 설정 추가
         }
     }
 }

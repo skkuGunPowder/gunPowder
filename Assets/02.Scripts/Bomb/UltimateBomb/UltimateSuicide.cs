@@ -59,7 +59,7 @@ public class UltimateSuicide : Bomb
         if (collision.CompareTag("Enemy"))
         {
             // 소유자만 폭발 RPC 호출
-            if (PhotonView.IsMine && !isDestroyed)
+            if (PhotonView.IsMine)
             {
                 PhotonView.RPC(nameof(Explode), RpcTarget.All);
             }
@@ -89,12 +89,6 @@ public class UltimateSuicide : Bomb
     [PunRPC]
     public override void Explode()
     {
-        // 중복 파괴 방지
-        if (isDestroyed)
-        {
-            return;
-        }
-        isDestroyed = true;
 
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;

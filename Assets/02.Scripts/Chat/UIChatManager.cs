@@ -16,6 +16,13 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     // 채팅 메시지 수신 이벤트 (UI 클래스들이 구독)
     public event Action<MessageInfo> OnChatMessageReceived;
 
+    // 채널별 이벤트
+    public event Action<MessageInfo> OnPartyChatReceived;
+    public event Action<MessageInfo> OnFriendChatReceived;
+
+    // 파티 초대 이벤트
+    public event Action<string, string> OnPartyInviteReceived; // (inviterName, partyId)
+
     // 채널 퇴장 이벤트 (UI 클래스들이 구독)
     public event Action OnChannelLeft;
 
@@ -292,18 +299,41 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
         channelInfo.Messages.Add(messageInfo);
 
-        // 현재 채널의 메시지만 처리하여 이벤트 발행
-        if (_currentChannelGroup == messageInfo.ChannelGroup &&
-            _currentChannelName == messageInfo.ChannelName &&
-            _currentChannelNumber == messageInfo.ChannelNumber)
+        // 채널 타입별 이벤트 발행
+        if (messageInfo.ChannelGroup == "ingame")
         {
-            // UI 클래스들에게 메시지 수신 이벤트 발생
-            OnChatMessageReceived?.Invoke(messageInfo);
+            // 현재 인게임 채널의 메시지만 처리
+            if (_currentChannelGroup == messageInfo.ChannelGroup &&
+                _currentChannelName == messageInfo.ChannelName &&
+                _currentChannelNumber == messageInfo.ChannelNumber)
+            {
+                OnChatMessageReceived?.Invoke(messageInfo);
+            }
+        }
+        else if (messageInfo.ChannelGroup == "party")
+        {
+            // 파티 채팅 이벤트 발행
+            OnPartyChatReceived?.Invoke(messageInfo);
+        }
+        else if (messageInfo.ChannelGroup == "friend")
+        {
+            // 친구 채팅 이벤트 발행
+            OnFriendChatReceived?.Invoke(messageInfo);
         }
     }
 
     public void OnWhisperMessage(WhisperMessageInfo messageInfo)
     {
+        // 파티 초대 메시지 처리
+        if (messageInfo.Message.StartsWith("!partyinvite "))
+        {
+            string partyId = messageInfo.Message.Substring(13).Trim();
+            Debug.Log($"[UIChatManager] 파티 초대 수신: {messageInfo.FromGamerName} → {partyId}");
+            OnPartyInviteReceived?.Invoke(messageInfo.FromGamerName, partyId);
+            return;
+        }
+
+        // 일반 귓속말 처리 (인게임 채팅에만 표시)
         if (!_channelList.ContainsKey(_currentChannelGroup)) return;
 
         if (!_channelList[_currentChannelGroup].ContainsKey(_currentChannelName)) return;
@@ -640,5 +670,186 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     {
         LeaveInGameChannel();
         _chatClient?.Dispose();
+    }
+
+    // ==================== 파티 채널 기능 ====================
+
+    /// <summary>
+    /// 파티 채널 생성 (파티장만 호출)
+    /// </summary>
+    public void CreatePartyChannel(string partyId, uint maxCount = 8)
+    {
+        if (_chatClient == null)
+        {
+            Debug.LogError("[UIChatManager] ChatClient가 초기화되지 않았습니다.");
+            return;
+        }
+
+        string channelGroup = "party";
+        string channelName = $"party_{partyId}";
+        ulong channelNumber = (ulong)Math.Abs(partyId.GetHashCode());
+        string password = ""; // 비밀번호 없음
+
+        Debug.Log($"[UIChatManager] 파티 채널 생성: {channelGroup} / {channelName} / {channelNumber}");
+        _chatClient.SendCreatePrivateChannel(channelGroup, channelNumber, channelName, maxCount, password);
+    }
+
+    /// <summary>
+    /// 파티 채널 입장
+    /// </summary>
+    public void JoinPartyChannel(string partyId)
+    {
+        if (_chatClient == null)
+        {
+            Debug.LogError("[UIChatManager] ChatClient가 초기화되지 않았습니다.");
+            return;
+        }
+
+        string channelGroup = "party";
+        ulong channelNumber = (ulong)Math.Abs(partyId.GetHashCode());
+
+        Debug.Log($"[UIChatManager] 파티 채널 입장: {channelGroup} / {channelNumber}");
+        _chatClient.SendJoinPrivateChannel(channelGroup, channelNumber, "");
+    }
+
+    /// <summary>
+    /// 파티 채널 퇴장
+    /// </summary>
+    public void LeavePartyChannel(string partyId)
+    {
+        if (_chatClient == null) return;
+
+        string channelGroup = "party";
+        string channelName = $"party_{partyId}";
+        ulong channelNumber = (ulong)Math.Abs(partyId.GetHashCode());
+
+        Debug.Log($"[UIChatManager] 파티 채널 퇴장: {channelGroup} / {channelName}");
+        _chatClient.SendLeaveChannel(channelGroup, channelName, channelNumber);
+    }
+
+    /// <summary>
+    /// 파티 채널에 메시지 전송
+    /// </summary>
+    public void SendPartyMessage(string partyId, string text)
+    {
+        if (_chatClient == null) return;
+
+        string channelGroup = "party";
+        string channelName = $"party_{partyId}";
+        ulong channelNumber = (ulong)Math.Abs(partyId.GetHashCode());
+
+        SendMessageToChannel(channelGroup, channelName, channelNumber, text);
+    }
+
+    // ==================== 친구 채팅 기능 ====================
+
+    /// <summary>
+    /// 친구 채팅 채널 생성/입장
+    /// </summary>
+    public void StartFriendChat(string myUid, string friendUid)
+    {
+        if (_chatClient == null)
+        {
+            Debug.LogError("[UIChatManager] ChatClient가 초기화되지 않았습니다.");
+            return;
+        }
+
+        string channelGroup = "friend";
+        string channelName = CreateFriendChannelName(myUid, friendUid);
+        ulong channelNumber = 0;
+
+        Debug.Log($"[UIChatManager] 친구 채팅 채널 입장: {channelGroup} / {channelName}");
+
+        // Private Channel 생성 시도 (이미 존재하면 자동으로 입장)
+        _chatClient.SendJoinPrivateChannel(channelGroup, channelNumber, "");
+    }
+
+    /// <summary>
+    /// 친구 채팅 채널명 생성 (항상 정렬된 순서)
+    /// </summary>
+    private string CreateFriendChannelName(string uid1, string uid2)
+    {
+        return string.Compare(uid1, uid2) < 0
+            ? $"{uid1}_{uid2}"
+            : $"{uid2}_{uid1}";
+    }
+
+    /// <summary>
+    /// 친구 채팅 채널 퇴장
+    /// </summary>
+    public void LeaveFriendChat(string myUid, string friendUid)
+    {
+        if (_chatClient == null) return;
+
+        string channelGroup = "friend";
+        string channelName = CreateFriendChannelName(myUid, friendUid);
+        ulong channelNumber = 0;
+
+        Debug.Log($"[UIChatManager] 친구 채팅 채널 퇴장: {channelGroup} / {channelName}");
+        _chatClient.SendLeaveChannel(channelGroup, channelName, channelNumber);
+    }
+
+    /// <summary>
+    /// 친구에게 메시지 전송
+    /// </summary>
+    public void SendFriendMessage(string myUid, string friendUid, string text)
+    {
+        if (_chatClient == null) return;
+
+        string channelGroup = "friend";
+        string channelName = CreateFriendChannelName(myUid, friendUid);
+        ulong channelNumber = 0;
+
+        SendMessageToChannel(channelGroup, channelName, channelNumber, text);
+    }
+
+    // ==================== 파티 초대 기능 (귓속말 사용) ====================
+
+    /// <summary>
+    /// 친구에게 파티 초대 전송
+    /// </summary>
+    public void SendPartyInvite(string friendNickname, string partyId)
+    {
+        if (_chatClient == null)
+        {
+            Debug.LogError("[UIChatManager] ChatClient가 초기화되지 않았습니다.");
+            return;
+        }
+
+        string message = $"!partyinvite {partyId}";
+        _chatClient.SendWhisperMessage(friendNickname, message);
+        Debug.Log($"[UIChatManager] 파티 초대 전송: {friendNickname} → {partyId}");
+    }
+
+    // ==================== 공통 메시지 전송 ====================
+
+    /// <summary>
+    /// 특정 채널에 메시지 전송
+    /// </summary>
+    private void SendMessageToChannel(string channelGroup, string channelName, ulong channelNumber, string text)
+    {
+        if (_chatClient == null) return;
+
+        if (!_channelList.ContainsKey(channelGroup)) return;
+        if (!_channelList[channelGroup].ContainsKey(channelName)) return;
+        if (!_channelList[channelGroup][channelName].ContainsKey(channelNumber)) return;
+
+        ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
+        if (channelInfo == null) return;
+
+        _chatClient.SendChatMessage(channelGroup, channelName, channelNumber, text);
+    }
+
+    /// <summary>
+    /// 특정 채널의 메시지 기록 가져오기
+    /// </summary>
+    public List<MessageInfo> GetChannelMessages(string channelGroup, string channelName, ulong channelNumber)
+    {
+        if (!_channelList.ContainsKey(channelGroup)) return new List<MessageInfo>();
+        if (!_channelList[channelGroup].ContainsKey(channelName)) return new List<MessageInfo>();
+        if (!_channelList[channelGroup][channelName].ContainsKey(channelNumber)) return new List<MessageInfo>();
+
+        ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
+        return channelInfo?.Messages ?? new List<MessageInfo>();
     }
 }
