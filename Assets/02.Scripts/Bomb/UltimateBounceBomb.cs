@@ -34,90 +34,40 @@ public class UltimateBounceBomb : Bomb
 
         if (collision.gameObject.GetComponent<IDamagable>() != null)
         {
-            // 🔴 CRITICAL FIX: 소유자만 폭발 RPC 호출
-            if (PhotonView.IsMine && !isDestroyed)
-            {
-                PhotonView.RPC(nameof(Explode), RpcTarget.All);
-            }
+            PhotonView.RPC(nameof(Explode), RpcTarget.All);
         }
     }
 
     [PunRPC]
     public override void Explode()
     {
-        // 중복 파괴 방지
-        if (isDestroyed)
-        {
-            return;
-        }
-        isDestroyed = true;
-
-        // 타이머 종료 시 최종 폭발
-        double elapsedTime = PhotonNetwork.Time - _spawnTime;
-        if (elapsedTime >= _stat.FuzeTime)
+        if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
         {
             Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
             endExplosion.transform.position = transform.position;
             endExplosion.transform.rotation = Quaternion.identity;
+            endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
 
-            if (_ownerPhotonview != null)
-            {
-                endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
-            }
-            else
-            {
-                Debug.LogWarning($"[UltimateBounceBomb] Owner PhotonView is null");
-                endExplosion.Explode(_stat.IsFallingOut, null);
-            }
-
-            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
-
-            // 소유자만 파괴 요청
-            if (PhotonView.IsMine)
-            {
-                if (PhotonView != null && PhotonView.ViewID != 0)
-                {
-                    PhotonNetwork.Destroy(gameObject);
-                }
-                else
-                {
-                    Debug.LogWarning($"[UltimateBounceBomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                    Destroy(gameObject);
-                }
-            }
-            return;
-        }
-
-        // 충돌 시 일반 폭발 (파괴 안 함)
-        SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
-
-        Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
-        explosion.transform.position = transform.position;
-        explosion.transform.rotation = Quaternion.identity;
-
-        if (_ownerPhotonview != null)
-        {
-            explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
-        }
-        else
-        {
-            Debug.LogWarning($"[UltimateBounceBomb] Owner PhotonView is null for normal explosion");
-            explosion.Explode(_stat.IsFallingOut, null);
-        }
-
-        // 충돌 시에도 파괴해야 함 (기존 로직 수정)
-        if (PhotonView.IsMine)
-        {
+            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
             if (PhotonView != null && PhotonView.ViewID != 0)
             {
                 PhotonNetwork.Destroy(gameObject);
             }
             else
             {
-                Debug.LogWarning($"[UltimateBounceBomb] PhotonView is invalid, destroying locally: {gameObject.name}");
+                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
                 Destroy(gameObject);
             }
+
+            return;
         }
+
+        SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
+
+        Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
+        explosion.transform.position = transform.position;
+        explosion.transform.rotation = Quaternion.identity;
+        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
     }
 
     [PunRPC]

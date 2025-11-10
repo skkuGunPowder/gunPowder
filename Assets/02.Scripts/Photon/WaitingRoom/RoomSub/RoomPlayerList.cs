@@ -22,29 +22,32 @@ public class RoomPlayerList
     public void GetPlayerList(int[] playerSlotList)
     {
         _playerSlotList.Clear();
-        int[] tempList = new int[playerSlotList.Length];
-        tempList[0] = PhotonNetwork.LocalPlayer.ActorNumber;
-        int tempIndex = 1; // 로컬 플레이어를 0번에 들어가게 하기 위함
-        foreach (var slot in playerSlotList)
+    
+        // 1. 로컬 플레이어를 먼저 추가
+        _playerSlotList.Add(PhotonNetwork.LocalPlayer.ActorNumber);
+    
+        // 2. 나머지 플레이어들을 추가 (로컬 플레이어 제외)
+        for (int i = 0; i < playerSlotList.Length; i++)
         {
-            if (slot == PhotonNetwork.LocalPlayer.ActorNumber)
+            // 로컬 플레이어는 이미 추가했으므로 스킵
+            if (playerSlotList[i] == PhotonNetwork.LocalPlayer.ActorNumber)
             {
                 continue;
             }
-            
-            if (slot == 0)
+        
+            // 0이 아닌 값만 추가
+            if (playerSlotList[i] != 0)
             {
-                continue;
-            }
-            
-            if (tempIndex < playerSlotList.Length)
-            {
-                Debug.Log("temp"+ tempIndex);
-                tempList[tempIndex] = slot;
-                tempIndex++;   
+                _playerSlotList.Add(playerSlotList[i]);
             }
         }
-        _playerSlotList = tempList.ToList();
+    
+        // 3. 4칸을 채우기 위해 부족한 만큼 0으로 채움
+        while (_playerSlotList.Count < 4)
+        {
+            _playerSlotList.Add(0);
+        }
+
     }
     
     // 게임 시작했을 때와 게임이 끝나고 돌아온 후 플레이어 리스트를 비교후 리스트 재조정

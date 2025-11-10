@@ -39,10 +39,10 @@ public class MortarShell : Bomb
             return;
         }
 
-        // 중복 방지 체크 추가
-        if (!isDestroyed)
+        if (photonView.IsMine)
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
         }
     }
 

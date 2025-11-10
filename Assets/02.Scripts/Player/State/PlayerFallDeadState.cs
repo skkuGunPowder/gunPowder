@@ -442,6 +442,8 @@ public class PlayerFallDeadState : PlayerBaseState
         {
             // 네트워크 동기화로 무적 상태 해제
             _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
+
+            EventManager.Instance.HitScreen();
             
             // 낙사 데미지 적용
             _owner.TakeDamage(

@@ -1,7 +1,6 @@
 using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
-using UnityEngine.Analytics;
 
 public class WaterBomb : Bomb
 {
@@ -22,23 +21,23 @@ public class WaterBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
         }
-
-        // Owner null 체크 추가
-        if (_ownerPhotonview != null && other.gameObject == _ownerPhotonview.gameObject)
+        
+        if (other.gameObject == _ownerPhotonview.gameObject)
         {
             return;
         }
 
-        if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
+        if(other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
         {
-            // 소유자만 폭발 RPC 호출
-            if (PhotonView.IsMine && !isDestroyed)
+            if (photonView.IsMine)
             {
-                PhotonView.RPC(nameof(Explode), RpcTarget.All);
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+                PhotonNetwork.Destroy(gameObject);
             }
         }
 
@@ -50,6 +49,7 @@ public class WaterBomb : Bomb
 
         float xStretch = 1f + Mathf.Abs(normal.y) * _wobbleAmount * 0.5f;
         float yStretch = 1f + Mathf.Abs(normal.x) * _wobbleAmount * 0.5f;
+
 
         Vector3 squashedScale = new Vector3(
             _originalScale.x * xSquash * xStretch,
@@ -65,18 +65,21 @@ public class WaterBomb : Bomb
                 .SetEase(Ease.InQuad);
         });
 
+
         if (CheckPriority(other))
         {
             return;
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
         }
+
+        base.OnDestroy();
     }
 
     [PunRPC]

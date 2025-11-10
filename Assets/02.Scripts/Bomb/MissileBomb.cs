@@ -25,26 +25,25 @@ public class MissileBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        // Owner null 체크 추가
-        if (_ownerPhotonview != null && other.gameObject == _ownerPhotonview.gameObject)
+        if (other.gameObject == _ownerPhotonview.gameObject)
         {
             return;
         }
 
         if (other.gameObject.tag == "Immune")
-        {
-            return;
-        }
+            {
+                return;
+            }
 
         if (CheckPriority(other))
         {
             return;
         }
-
-        // 소유자만 폭발 RPC 호출
-        if (PhotonView.IsMine && !isDestroyed)
+    
+        if (photonView.IsMine)
         {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(gameObject);
         }
     }
 
@@ -70,22 +69,18 @@ public class MissileBomb : Bomb
     {
         SoundManager.Instance.PlayLocalSound(MisiileTrailSound.name, transform);
         float timer = 0f;
-        while (timer < accelTime && !isDestroyed)
+        while (timer < accelTime)
         {
             float t = timer / accelTime;
             _currentSpeed = Mathf.Lerp(0f, maxSpeed, t);
-            // Transform 직접 수정 대신 Rigidbody2D 사용 (물리 엔진 동기화)
-            Vector2 newPosition = (Vector2)transform.position + (Vector2)direction * (_currentSpeed * Time.deltaTime);
-            _rigidBody.MovePosition(newPosition);
+            transform.position += direction * _currentSpeed * Time.deltaTime;
             timer += Time.deltaTime;
             yield return null;
         }
         _currentSpeed = maxSpeed;
-        while (!isDestroyed)
+        while (true)
         {
-            // Transform 직접 수정 대신 Rigidbody2D 사용
-            Vector2 newPosition = (Vector2)transform.position + (Vector2)direction * (_currentSpeed * Time.deltaTime);
-            _rigidBody.MovePosition(newPosition);
+            transform.position += direction * _currentSpeed * Time.deltaTime;
             yield return null;
         }
     }
@@ -108,9 +103,10 @@ public class MissileBomb : Bomb
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         // 코루틴 중지
         StopAllCoroutines();
+        base.OnDestroy();
     }
 }
