@@ -155,15 +155,7 @@ public class UltimateMortar : Bomb
         {
             _proCamera.UpdateScreenSize(_defaultZoom);
             InputHandler.BlockInput = false;
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
+            PhotonNetwork.Destroy(gameObject);
         }
     }
 

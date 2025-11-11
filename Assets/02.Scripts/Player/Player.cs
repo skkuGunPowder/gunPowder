@@ -1844,6 +1844,18 @@ public class Player : MonoBehaviourPun, IDamagable
             AirDropItemLootVFX.StartRoulette(airDropItem);
         }
         _airDropItem = airDropItem;
+        StartCoroutine(AirDropItemUseCoroutine());
+    }
+
+    private IEnumerator AirDropItemUseCoroutine()
+    {
+        yield return new WaitForSeconds(2.5f);
+        if(_airDropItem != null && AirDropItemLootVFX.IsSelected)
+        {
+            AirDropItemLootVFX.UseItem();
+            _airDropItem.Use();
+            RemoveAirDropItem();
+        }
     }
 
     public void RemoveAirDropItem()
