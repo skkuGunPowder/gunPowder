@@ -605,10 +605,11 @@ public class PlayerFallState : PlayerBaseState
         Vector3 position = _owner.GetExplosionSpawnPoint().position;
         GameObject prefab = PhotonNetwork.Instantiate("BasicBomb", position, Quaternion.identity);
         
-        if (prefab.TryGetComponent(out Bomb bomb))
+        if (prefab.TryGetComponent(out Bomb bomb) && _owner.PhotonView.IsMine)
         {
             bomb.PhotonView.RPC(nameof(bomb.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
             bomb.PhotonView.RPC(nameof(bomb.Explode), RpcTarget.All);
+            PhotonNetwork.Destroy(prefab);
             _explosionOverrideTimer = EXPLOSION_OVERRIDE_DURATION;
         }
     }
