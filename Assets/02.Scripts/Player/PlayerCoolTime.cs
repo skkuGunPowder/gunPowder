@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using TMPro;
 
 public class PlayerCoolTime : MonoBehaviour
 {
@@ -8,6 +9,12 @@ public class PlayerCoolTime : MonoBehaviour
 
     private Image _normalCoolTimeShadowImage;
     private Image _specialCoolTimeShadowImage;
+    
+    private TextMeshProUGUI _normalCoolTimeText;
+    private TextMeshProUGUI _specialCoolTimeText;
+
+    private Image _normalCoolTimeEndEffectImage;
+    private Image _specialCoolTimeEndEffectImage;
 
     private Coroutine _normalCoolTimeCoroutine;
     private Coroutine _specialCoolTimeCoroutine;
@@ -21,11 +28,56 @@ public class PlayerCoolTime : MonoBehaviour
         {
             GameObject normalShadow = GameObject.FindWithTag("NormalCoolTimeShadow");
             if (normalShadow != null)
+            {
                 _normalCoolTimeShadowImage = normalShadow.GetComponent<Image>();
+
+                _normalCoolTimeText = normalShadow.GetComponentInChildren<TextMeshProUGUI>();
+                if(_normalCoolTimeText != null)
+                {
+                    _normalCoolTimeText.text = "";
+                }
+                
+                // 자식 오브젝트를 이름으로 찾기
+                Transform endEffectTransform = normalShadow.transform.Find("BombCooltimeEffect");
+                if (endEffectTransform != null)
+                {
+                    _normalCoolTimeEndEffectImage = endEffectTransform.GetComponent<Image>();
+                    // 초기 알파값 0으로 설정
+                    if (_normalCoolTimeEndEffectImage != null)
+                    {
+                        Color color = _normalCoolTimeEndEffectImage.color;
+                        color.a = 0f;
+                        _normalCoolTimeEndEffectImage.color = color;
+                    }
+                }
+            }
+                
 
             GameObject specialShadow = GameObject.FindWithTag("SpecialCoolTimeShadow");
             if (specialShadow != null)
+            {
                 _specialCoolTimeShadowImage = specialShadow.GetComponent<Image>();
+
+                _specialCoolTimeText = specialShadow.GetComponentInChildren<TextMeshProUGUI>();
+                if(_specialCoolTimeText != null)
+                {
+                    _specialCoolTimeText.text = "";
+                }
+                
+                // 자식 오브젝트를 이름으로 찾기
+                Transform endEffectTransform = specialShadow.transform.Find("SpecialBombCooltimeEffect");
+                if (endEffectTransform != null)
+                {
+                    _specialCoolTimeEndEffectImage = endEffectTransform.GetComponent<Image>();
+                    // 초기 알파값 0으로 설정
+                    if (_specialCoolTimeEndEffectImage != null)
+                    {
+                        Color color = _specialCoolTimeEndEffectImage.color;
+                        color.a = 0f;
+                        _specialCoolTimeEndEffectImage.color = color;
+                    }
+                }
+            }
         }
     }
 
@@ -43,8 +95,7 @@ public class PlayerCoolTime : MonoBehaviour
             {
                 StopCoroutine(_normalCoolTimeCoroutine);
             }
-            Debug.Log($"SetNormalAttackCoolTime: {_myPlayer.BasicBombStat.CoolTime}초");
-            _normalCoolTimeCoroutine = StartCoroutine(CoolTimeCoroutine(_normalCoolTimeShadowImage, _myPlayer.BasicBombStat.CoolTime));
+            _normalCoolTimeCoroutine = StartCoroutine(CoolTimeCoroutine(_normalCoolTimeShadowImage, _normalCoolTimeText, _normalCoolTimeEndEffectImage, _myPlayer.BasicBombStat.CoolTime));
         }
     }
 
@@ -54,14 +105,14 @@ public class PlayerCoolTime : MonoBehaviour
         if (_specialCoolTimeShadowImage != null && _myPlayer.SpecialBombStat != null)
         {
             if (_specialCoolTimeCoroutine != null)
+            {
                 StopCoroutine(_specialCoolTimeCoroutine);
-
-            Debug.Log($"SetSpecialAttackCoolTime: {_myPlayer.SpecialBombStat.CoolTime}초");
-            _specialCoolTimeCoroutine = StartCoroutine(CoolTimeCoroutine(_specialCoolTimeShadowImage, _myPlayer.SpecialBombStat.CoolTime));
+            }
+            _specialCoolTimeCoroutine = StartCoroutine(CoolTimeCoroutine(_specialCoolTimeShadowImage, _specialCoolTimeText, _specialCoolTimeEndEffectImage, _myPlayer.SpecialBombStat.CoolTime));
         }
     }
 
-    private IEnumerator CoolTimeCoroutine(Image shadowImage, float coolTime)
+    private IEnumerator CoolTimeCoroutine(Image shadowImage, TextMeshProUGUI coolTimeText, Image endEffectImage, float coolTime)
     {
         float elapsed = 0f;
         shadowImage.fillAmount = 1f; // 쿨타임 시작 (가득 참)
@@ -69,11 +120,65 @@ public class PlayerCoolTime : MonoBehaviour
         while (elapsed < coolTime)
         {
             elapsed += Time.deltaTime;
+            float remainingTime = coolTime - elapsed;
+            
+            // fillAmount 업데이트
             shadowImage.fillAmount = 1f - (elapsed / coolTime); // 서서히 비워짐
+            
+            // 텍스트 업데이트
+            if (coolTimeText != null)
+            {
+                if (remainingTime > 1f)
+                {
+                    // 1초 초과일 때는 정수로 표시 (올림)
+                    coolTimeText.text = Mathf.Ceil(remainingTime).ToString("F0");
+                }
+                else
+                {
+                    // 1초 이하일 때는 소수점 한자리로 표시
+                    coolTimeText.text = remainingTime.ToString("F1");
+                }
+            }
+            
             yield return null;
         }
 
         shadowImage.fillAmount = 0f; // 쿨타임 완료
+        
+        // 쿨타임이 끝나면 텍스트 숨김
+        if (coolTimeText != null)
+        {
+            coolTimeText.text = "";
+        }
+        
+        // 쿨타임 종료 효과 이미지 페이드 아웃
+        if (endEffectImage != null)
+        {
+            StartCoroutine(FadeOutEffect(endEffectImage));
+        }
+    }
+    
+    private IEnumerator FadeOutEffect(Image effectImage)
+    {
+        // 알파값 200/255 = 약 0.784로 설정
+        Color color = effectImage.color;
+        color.a = 200f / 255f;
+        effectImage.color = color;
+        
+        float fadeTime = 0.3f;
+        float elapsed = 0f;
+        
+        while (elapsed < fadeTime)
+        {
+            elapsed += Time.deltaTime;
+            color.a = Mathf.Lerp(200f / 255f, 0f, elapsed / fadeTime);
+            effectImage.color = color;
+            yield return null;
+        }
+        
+        // 완전히 투명하게
+        color.a = 0f;
+        effectImage.color = color;
     }
     
     private void OnDestroy()
