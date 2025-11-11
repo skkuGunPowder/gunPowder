@@ -7,6 +7,8 @@ public class BabyCrab : Crab
     [SerializeField] private float _delay = 1.5f;
     [SerializeField] private float _druation = 5f;
 
+    ConfuseDebuff _debuff;
+
     private Rigidbody2D _rigidbody;
     private float _changeDirectionTimer = 0f;
     private float _changeDirectionInterval;
@@ -36,6 +38,9 @@ public class BabyCrab : Crab
             }
 
             Player player = collision.gameObject.GetComponent<Player>();
+            // _debuff = BuffManager.Instance.GetBuff("BF0003", player) as ConfuseDebuff;
+            // player.PlayerBuffHandler.AddBuff(_debuff);
+            
             StartCoroutine(BabyCrabCoroutine(player));
         }
     }
