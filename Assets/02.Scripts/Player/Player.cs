@@ -74,6 +74,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private Vector3 _defaultLocalScale;
     private Dictionary<SpriteRenderer, Color> _originalColorMap; // 게임 시작 시 저장되는 진짜 원본 색상
     private Dictionary<SpriteRenderer, int> _originalSortingOrderMap; // 스프라이트 렌더러의 원본 sortingOrder 저장
+    private bool _isColorRestored = true; // 색상이 원본 상태인지 추적
 
     [Header("히트스탑")]
     [SerializeField]
@@ -221,8 +222,25 @@ public class Player : MonoBehaviourPun, IDamagable
         InitializeBodyParts();
     }
 
+    private void OnDisable()
+    {
+        // DOTween 정리 (Kill 시 OnKill 콜백에서 RestoreOriginalColors 자동 호출됨)
+        if (_preExplosionPulseTween != null)
+        {
+            _preExplosionPulseTween.Kill(false);
+            _preExplosionPulseTween = null;
+        }
+        else
+        {
+            // Tween이 없는 경우에만 직접 복원
+            RestoreOriginalColors();
+        }
+    }
+
     private void OnDestroy()
     {
+        // OnDisable에서 이미 색상 복원이 처리되므로 여기서는 제거
+        
         // 이벤트 구독 해제
         if (EventManager.Instance != null)
         {
@@ -232,6 +250,13 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _playerStat.OnGunPowderEmpty -= HandleGunPowderEmpty;
             _playerStat.OnGunpowderIncreased -= HandleGunpowderIncreased;
+        }
+        
+        // DOTween 정리
+        if (_preExplosionPulseTween != null)
+        {
+            _preExplosionPulseTween.Kill(false);
+            _preExplosionPulseTween = null;
         }
     }
 
@@ -491,21 +516,33 @@ public class Player : MonoBehaviourPun, IDamagable
 
     /// <summary>
     /// 게임 시작 시 원본 색상을 저장합니다. (한 번만 실행)
+    /// 이 색상 정보는 절대 변경되지 않으며, 모든 색상 효과가 끝날 때 이 색상으로 복원됩니다.
     /// </summary>
     private void InitializeOriginalColors()
     {
+        // 이미 초기화되어 있다면 다시 초기화하지 않음 (원본 색상 보호)
+        if (_originalColorMap != null && _originalColorMap.Count > 0)
+        {
+            Debug.LogWarning("[Player] 원본 색상이 이미 초기화되어 있습니다. 재초기화를 건너뜁니다.");
+            return;
+        }
+
         _originalColorMap = new Dictionary<SpriteRenderer, Color>();
 
         foreach (var renderer in _playerStat.MySpriteREndererList)
         {
             if (renderer != null)
             {
+                // 원본 색상 저장 (이 값은 절대 변경되지 않음)
                 _originalColorMap[renderer] = renderer.color;
             }
         }
     }
 
-    // 스킨 동적 추가 시 색상 시스템에 편입/해제
+    /// <summary>
+    /// 스킨 동적 추가 시 색상 시스템에 편입
+    /// 주의: 스프라이트가 원본 색상 상태일 때 호출해야 합니다.
+    /// </summary>
     public void RegisterOriginalColor(SpriteRenderer renderer)
     {
         if (renderer == null) { return; }
@@ -515,6 +552,8 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         if (!_originalColorMap.ContainsKey(renderer))
         {
+            // 새로운 스프라이트의 현재 색상을 원본으로 저장
+            // (스프라이트가 추가될 때는 원본 색상 상태여야 함)
             _originalColorMap[renderer] = renderer.color;
         }
     }
@@ -974,7 +1013,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             // 경고 종료 시 효과 초기화
             StopPreExplosionPulse(true);
-            RestoreOriginalColors();
+            // StopPreExplosionPulse 내부에서 이미 RestoreOriginalColors가 호출되므로 중복 호출 제거
             _colorUpdateWithoutAttackTimer = 0f;
         }
     }
@@ -1003,11 +1042,19 @@ public class Player : MonoBehaviourPun, IDamagable
             // 비율에 따라 펄스 시작/정지 (경고 단계)
             if (ratio >= WARNING_RATIO_THRESHOLD)
             {
-                PlayPreExplosionPulse();
+                // 이미 재생 중이 아닐 때만 시작
+                if (_preExplosionPulseTween == null)
+                {
+                    PlayPreExplosionPulse();
+                }
             }
             else
             {
-                StopPreExplosionPulse(false);
+                // 재생 중일 때만 정지
+                if (_preExplosionPulseTween != null)
+                {
+                    StopPreExplosionPulse(false);
+                }
             }
 
             // ratio 0.4~1 -> S: 0~0.8로 맵핑 (H=0 고정, V는 유지)
@@ -1015,17 +1062,20 @@ public class Player : MonoBehaviourPun, IDamagable
             float targetS = Mathf.Lerp(0f, MAX_RED_SATURATION, t);
 
             // 원본 색상을 기반으로 빨간색 적용
+            // 주의: _originalColorMap의 값(원본 색상)은 절대 변경하지 않음
+            // 항상 원본 색상을 참조하여 새로운 색상을 계산함
             if (_originalColorMap != null)
             {
                 foreach (var kv in _originalColorMap)
                 {
                     if (kv.Key == null) { continue; }
-                    Color originalColor = kv.Value;
+                    Color originalColor = kv.Value; // 원본 색상 참조 (읽기 전용)
                     Color.RGBToHSV(originalColor, out float _, out float _, out float v);
                     Color newColor = Color.HSVToRGB(0f, targetS, v);
                     newColor.a = originalColor.a;
-                    kv.Key.color = newColor;
+                    kv.Key.color = newColor; // 스프라이트 색상만 변경
                 }
+                _isColorRestored = false; // 색상이 변경됨
             }
         }
     }
@@ -1037,6 +1087,7 @@ public class Player : MonoBehaviourPun, IDamagable
             if (renderer == null) { continue; }
             renderer.color = Color.white;
         }
+        _isColorRestored = false; // 색상이 변경됨
     }
 
     private void CheckAndPlayPreExplosionPulse()
@@ -1102,12 +1153,13 @@ public class Player : MonoBehaviourPun, IDamagable
                 foreach (var kv in _originalColorMap)
                 {
                     if (kv.Key == null) { continue; }
-                    Color originalColor = kv.Value;
+                    Color originalColor = kv.Value; // 원본 색상 참조 (읽기 전용)
                     Color.RGBToHSV(originalColor, out float _, out float _, out float v);
                     Color redCol = Color.HSVToRGB(0f, MAX_RED_SATURATION, v);
                     redCol.a = originalColor.a;
-                    kv.Key.color = redCol;
+                    kv.Key.color = redCol; // 스프라이트 색상만 변경
                 }
+                _isColorRestored = false; // 색상이 변경됨
             }
         });
         seq.Append(transform.DOScale(_defaultLocalScale * targetScaleMultiplier, halfDuration).SetEase(Ease.InOutSine));
@@ -1118,6 +1170,13 @@ public class Player : MonoBehaviourPun, IDamagable
         });
         seq.Append(transform.DOScale(_defaultLocalScale, halfDuration).SetEase(Ease.InOutSine));
         seq.SetLoops(-1, LoopType.Restart);
+        
+        // DOTween이 중단될 때도 색상 복원
+        seq.OnKill(() =>
+        {
+            RestoreOriginalColors();
+        });
+        
         _preExplosionPulseTween = seq;
     }
 
@@ -1127,10 +1186,14 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _preExplosionPulseTween.Kill(false);
             _preExplosionPulseTween = null;
+            // OnKill 콜백에서 이미 RestoreOriginalColors가 호출됨
         }
-
-        // 원본 색상으로 복구
-        RestoreOriginalColors();
+        else
+        {
+            // Tween이 없었다면 색상이 이미 복원된 상태거나 복원이 필요한 상태
+            // 안전을 위해 한 번 더 복원 (중복 호출이지만 한 번만 실행됨)
+            RestoreOriginalColors();
+        }
 
         if (resetScale)
         {
@@ -1140,23 +1203,35 @@ public class Player : MonoBehaviourPun, IDamagable
 
     /// <summary>
     /// 저장된 원본 색상으로 스프라이트를 복구합니다.
+    /// 모든 색상 효과가 끝날 때 반드시 이 메서드를 호출하여 원본 색상으로 돌아갑니다.
     /// </summary>
     private void RestoreOriginalColors()
     {
+        // 이미 복원된 상태라면 중복 실행 방지
+        if (_isColorRestored)
+        {
+            return;
+        }
+
         if (_originalColorMap != null && _originalColorMap.Count > 0)
         {
             foreach (var kv in _originalColorMap)
             {
                 if (kv.Key != null)
                 {
+                    // 원본 색상으로 복원
                     kv.Key.color = kv.Value;
                 }
             }
+            
+            _isColorRestored = true;
         }
         else
         {
-            // 원본 색상 정보가 없는 경우 흰색으로 설정
+            // 원본 색상 정보가 없는 경우 흰색으로 설정 (비상 조치)
+            Debug.LogWarning("[Player] 원본 색상 정보가 없습니다. 흰색으로 복원합니다.");
             SetSpriteRendererWhite();
+            _isColorRestored = true;
         }
     }
 
