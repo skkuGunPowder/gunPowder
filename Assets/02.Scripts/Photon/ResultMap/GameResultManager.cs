@@ -55,6 +55,7 @@ public class GameResultManager : Singleton<GameResultManager>
 
     private void Arrange()
     {
+        // 팀별로 묶기
         // 팀별로 묶고 정렬
         var groupedTeams = ResultDataList
             .GroupBy(p => p.Team)
@@ -69,6 +70,7 @@ public class GameResultManager : Singleton<GameResultManager>
             .ThenByDescending(teamGroup => teamGroup[0].Damage)       // 팀 대표의 딜 기준
             .ToList();
 
+
         ResultDataList.Clear();
 
         int currentRank = 1;
@@ -82,7 +84,7 @@ public class GameResultManager : Singleton<GameResultManager>
             // 등수 건너뛰기: 해당 팀 인원 수 만큼 증가
             currentRank += teamGroup.Count;
             
-            ResultDataList.AddRange(teamGroup);
+            ResultDataList.AddRange(teamGroup); // 팀별 생존시간 내림차순
         }
     }
 
