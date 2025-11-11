@@ -50,8 +50,6 @@ public class UI_InGameProfileSlot : MonoBehaviour
         // 50 ~ 20
         GunpowderMiddle = gunpowder / 2;
         GunpowderLow = (gunpowder / 10) * 3;
-        
-        Debug.Log($"gunpowder setting : {gunpowder} / {GunpowderMiddle} / {GunpowderLow}");
     }
     public void Refresh(int gunpowder, int life, int attacker)
     {
@@ -85,17 +83,14 @@ public class UI_InGameProfileSlot : MonoBehaviour
         if (gunpowder > GunpowderMiddle)
         {
             GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
-            Debug.Log($"CS(Default) : {gunpowder} / now {GunpowderMiddle}");
         }
         else if (gunpowder > GunpowderLow)
         {
             GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthMiddle];
-            Debug.Log($"CS(Middle) : {gunpowder} / now {GunpowderLow}");
         }
         else
         {
             GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthLow];
-            Debug.Log($"CS(Low) : {gunpowder} / now {GunpowderLow}");
         }
     }
 
