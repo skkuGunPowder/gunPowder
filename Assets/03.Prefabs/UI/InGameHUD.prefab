@@ -248,9 +248,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _pressCButtonUI: {fileID: 2989334134204017827}
   _pressCButtonImage: {fileID: 3640024419261815419}
+  _targetUIImage: {fileID: 6380680746234932054}
+  _targetOutLineUIImage: {fileID: 1325002627198034519}
+  _targetUIImage2: {fileID: 531123738214868583}
+  _targetOutLineUIImage2: {fileID: 5646874233555610233}
+  _fuseImage: {fileID: 6833794929871020424}
   _pressCRed: {fileID: 440653285, guid: 03fa4f08c339c6942b0ad3a838309f70, type: 3}
   _pressCYellow: {fileID: -1233611910, guid: 03fa4f08c339c6942b0ad3a838309f70, type: 3}
   _blinkInterval: 0.3
+  _colorYellow: {r: 0.984, g: 0.816, b: 0.212, a: 1}
+  _colorRed: {r: 1, g: 0, b: 0, a: 1}
+  _colorHigh: {r: 1, g: 0.627, b: 0.627, a: 1}
+  _colorMiddle: {r: 1, g: 0.38, b: 0.38, a: 1}
+  _colorLow: {r: 1, g: 0, b: 0, a: 1}
+  _middleThreshold: 50
+  _lowThreshold: 30
 --- !u!114 &6193279130030692437
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -264,6 +276,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetUIImage: {fileID: 6380680746234932054}
+  _targetOutLineUIImage: {fileID: 1325002627198034519}
+  _targetUIImage2: {fileID: 531123738214868583}
+  _targetOutLineUIImage2: {fileID: 5646874233555610233}
   _fuseImage: {fileID: 6833794929871020424}
   _coolTimeHigh: {fileID: 21300000, guid: 31a433f7bc5e71c479a1a21cb8f8de9b, type: 3}
   _coolTimeMiddle: {fileID: 21300000, guid: 2137d32549244c34a9877946c7723790, type: 3}
@@ -1269,7 +1284,7 @@ ParticleSystem:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  moveWithTransform: 1
+  moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 0
   randomSeed: 0
@@ -6253,7 +6268,7 @@ ParticleSystem:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  moveWithTransform: 1
+  moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 0
   randomSeed: 0

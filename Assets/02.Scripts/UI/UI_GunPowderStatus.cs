@@ -16,6 +16,9 @@ public class UI_GunPowderStatus : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private Image _targetUIImage; // 색상을 변경할 UI 이미지
+    [SerializeField] private Image _targetOutLineUIImage; // 색상을 변경할 UI 이미지
+    [SerializeField] private Image _targetUIImage2; // 색상을 변경할 UI 이미지
+    [SerializeField] private Image _targetOutLineUIImage2; // 색상을 변경할 UI 이미지
     [SerializeField] private Image _fuseImage; // Fuse 오브젝트의 이미지
     
     [Header("Fuse Sprites")]
@@ -157,6 +160,18 @@ public class UI_GunPowderStatus : MonoBehaviour
         {
             _targetUIImage.color = _colorHigh;
         }
+        if (_targetOutLineUIImage != null)
+        {
+            _targetOutLineUIImage.color = _colorHigh;
+        }
+        if (_targetUIImage2 != null)
+        {
+            _targetUIImage2.color = _colorHigh;
+        }
+        if (_targetOutLineUIImage2 != null)
+        {
+            _targetOutLineUIImage2.color = _colorHigh;
+        }
         
         // Fuse 이미지 변경
         if (_fuseImage != null && _coolTimeHigh != null)
@@ -183,6 +198,18 @@ public class UI_GunPowderStatus : MonoBehaviour
         {
             _targetUIImage.color = _colorMiddle;
         }
+        if (_targetOutLineUIImage != null)
+        {
+            _targetOutLineUIImage.color = _colorMiddle;
+        }
+        if (_targetUIImage2 != null)
+        {
+            _targetUIImage2.color = _colorMiddle;
+        }
+        if (_targetOutLineUIImage2 != null)
+        {
+            _targetOutLineUIImage2.color = _colorMiddle;
+        }
         
         // Fuse 이미지 변경
         if (_fuseImage != null && _coolTimeMiddle != null)
@@ -208,6 +235,18 @@ public class UI_GunPowderStatus : MonoBehaviour
         if (_targetUIImage != null)
         {
             _targetUIImage.color = _colorLow;
+        }
+        if (_targetOutLineUIImage != null)
+        {
+            _targetOutLineUIImage.color = _colorLow;
+        }
+        if (_targetUIImage2 != null)
+        {
+            _targetUIImage2.color = _colorLow;
+        }
+        if (_targetOutLineUIImage2 != null)
+        {
+            _targetOutLineUIImage2.color = _colorLow;
         }
         
         // Fuse 이미지 변경

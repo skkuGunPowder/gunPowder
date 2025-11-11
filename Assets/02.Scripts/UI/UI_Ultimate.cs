@@ -8,12 +8,29 @@ public class UI_Ultimate : MonoBehaviour
     [SerializeField] private GameObject _pressCButtonUI;
     [SerializeField] private Image _pressCButtonImage;
     
+    [SerializeField] private Image _targetUIImage; // 색상을 변경할 UI 이미지
+    [SerializeField] private Image _targetOutLineUIImage; // 색상을 변경할 UI 이미지
+    [SerializeField] private Image _targetUIImage2; // 색상을 변경할 UI 이미지
+    [SerializeField] private Image _targetOutLineUIImage2; // 색상을 변경할 UI 이미지
+    [SerializeField] private Image _fuseImage; // Fuse 오브젝트의 이미지
+    
     [Header("Image Sprites")]
     [SerializeField] private Sprite _pressCRed;
     [SerializeField] private Sprite _pressCYellow;
     
     [Header("Settings")]
     [SerializeField] private float _blinkInterval = 0.3f; // 깜빡임 간격
+    
+    [Header("Color Settings")]
+    [SerializeField] private Color _colorYellow = new Color(0.984f, 0.816f, 0.212f, 1f); // #FBD036
+    [SerializeField] private Color _colorRed = new Color(1f, 0f, 0f, 1f);                // #FF0000
+    [SerializeField] private Color _colorHigh = new Color(1f, 0.627f, 0.627f, 1f);       // #FFA0A0
+    [SerializeField] private Color _colorMiddle = new Color(1f, 0.38f, 0.38f, 1f);       // #FF6161
+    [SerializeField] private Color _colorLow = new Color(1f, 0f, 0f, 1f);                // #FF0000
+    
+    [Header("Threshold Settings")]
+    [SerializeField] private int _middleThreshold = 50; // 이 값 이하면 Middle 상태
+    [SerializeField] private int _lowThreshold = 30;    // 이 값 이하면 Low 상태
     
     private Player _player;
     private Coroutine _blinkCoroutine;
@@ -134,6 +151,9 @@ public class UI_Ultimate : MonoBehaviour
             _pressCButtonImage.sprite = _pressCRed;
         }
         
+        // 현재 건파우더 양에 따라 색상 복원
+        RestoreColorsByGunPowder();
+        
         // UI 비활성화
         _pressCButtonUI.SetActive(false);
     }
@@ -147,6 +167,7 @@ public class UI_Ultimate : MonoBehaviour
         
         while (true)
         {
+            // Press C 버튼 이미지 스프라이트 변경
             if (_pressCButtonImage != null)
             {
                 if (isRed && _pressCRed != null)
@@ -163,8 +184,94 @@ public class UI_Ultimate : MonoBehaviour
                 Debug.LogError("[UI_Ultimate] BlinkCoroutine - _pressCButtonImage가 null!");
             }
             
+            // 5개 이미지 색상 변경 (FBD036 노란색 <-> FF0000 빨간색)
+            Color currentColor = isRed ? _colorRed : _colorYellow;
+            
+            if (_targetUIImage != null)
+            {
+                _targetUIImage.color = currentColor;
+            }
+            if (_targetOutLineUIImage != null)
+            {
+                _targetOutLineUIImage.color = currentColor;
+            }
+            if (_targetUIImage2 != null)
+            {
+                _targetUIImage2.color = currentColor;
+            }
+            if (_targetOutLineUIImage2 != null)
+            {
+                _targetOutLineUIImage2.color = currentColor;
+            }
+            if (_fuseImage != null)
+            {
+                _fuseImage.color = currentColor;
+            }
+            
             isRed = !isRed;
             yield return new WaitForSeconds(_blinkInterval);
+        }
+    }
+    
+    /// <summary>
+    /// 현재 건파우더 양에 따라 색상 복원
+    /// </summary>
+    private void RestoreColorsByGunPowder()
+    {
+        if (_player == null)
+        {
+            Debug.LogError("[UI_Ultimate] _player가 null이어서 색상 복원 불가!");
+            return;
+        }
+        
+        // PlayerStat에서 현재 건파우더 양 가져오기
+        PlayerStat playerStat = _player.GetComponent<PlayerStat>();
+        if (playerStat == null)
+        {
+            Debug.LogError("[UI_Ultimate] PlayerStat 컴포넌트를 찾을 수 없습니다!");
+            return;
+        }
+        
+        int currentGunPowder = playerStat.CurrentPlayerGunPowderCount;
+        Color targetColor;
+        
+        // 건파우더 양에 따라 색상 결정
+        if (currentGunPowder > _middleThreshold)
+        {
+            targetColor = _colorHigh; // #FFA0A0
+            Debug.Log($"[UI_Ultimate] 색상 복원: High 상태 (건파우더 {currentGunPowder})");
+        }
+        else if (currentGunPowder > _lowThreshold)
+        {
+            targetColor = _colorMiddle; // #FF6161
+            Debug.Log($"[UI_Ultimate] 색상 복원: Middle 상태 (건파우더 {currentGunPowder})");
+        }
+        else
+        {
+            targetColor = _colorLow; // #FF0000
+            Debug.Log($"[UI_Ultimate] 색상 복원: Low 상태 (건파우더 {currentGunPowder})");
+        }
+        
+        // 5개 이미지 색상 복원
+        if (_targetUIImage != null)
+        {
+            _targetUIImage.color = targetColor;
+        }
+        if (_targetOutLineUIImage != null)
+        {
+            _targetOutLineUIImage.color = targetColor;
+        }
+        if (_targetUIImage2 != null)
+        {
+            _targetUIImage2.color = targetColor;
+        }
+        if (_targetOutLineUIImage2 != null)
+        {
+            _targetOutLineUIImage2.color = targetColor;
+        }
+        if (_fuseImage != null)
+        {
+            _fuseImage.color = targetColor;
         }
     }
     
