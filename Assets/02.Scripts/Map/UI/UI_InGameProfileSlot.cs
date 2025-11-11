@@ -33,14 +33,25 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public Ease EaseType;
     public float ScaleStrength = 1.2f;
    
-    public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
+    public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player, int gunpowder, int life)
     {
         // PlayerActorNumber = player.ActorNumber;
         NicknameTextUGUI.text = player.NickName;
         BombImage.sprite = bombImage;
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
+        GunpowderSetting(gunpowder);
+        LifeRefresh(life);
+    }
+
+    private void GunpowderSetting(int gunpowder) // 초기 건파우더 설정 (색상을 위한)
+    {
+        GunpowderTextUGUI.text = gunpowder.ToString();
+        // 50 ~ 20
+        GunpowderMiddle = gunpowder / 2;
+        GunpowderLow = (gunpowder / 10) * 3;
         
+        Debug.Log($"gunpowder setting : {gunpowder} / {GunpowderMiddle} / {GunpowderLow}");
     }
     public void Refresh(int gunpowder, int life, int attacker)
     {
@@ -74,14 +85,17 @@ public class UI_InGameProfileSlot : MonoBehaviour
         if (gunpowder > GunpowderMiddle)
         {
             GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
+            Debug.Log($"CS(Default) : {gunpowder} / now {GunpowderMiddle}");
         }
         else if (gunpowder > GunpowderLow)
         {
             GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthMiddle];
+            Debug.Log($"CS(Middle) : {gunpowder} / now {GunpowderLow}");
         }
         else
         {
             GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthLow];
+            Debug.Log($"CS(Low) : {gunpowder} / now {GunpowderLow}");
         }
     }
 
