@@ -62,8 +62,7 @@ public class UI_InGameProfile : MonoBehaviour
                 
                 UI_InGameProfileSlotList[i].gameObject.SetActive(true);
                 // 후에 수정
-                UI_InGameProfileSlotList[i].Init(bomb, team, reorderedPlayers[i]);
-                UI_InGameProfileSlotList[i].Refresh(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife , 0);
+                UI_InGameProfileSlotList[i].Init(bomb, team, reorderedPlayers[i],RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
                 _playerActorNumberList.Add(reorderedPlayers[i].ActorNumber);
             }
             else
