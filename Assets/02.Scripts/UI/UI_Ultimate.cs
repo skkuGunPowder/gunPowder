@@ -167,7 +167,7 @@ public class UI_Ultimate : MonoBehaviour
         
         while (true)
         {
-            // Press C 버튼 이미지 스프라이트 변경
+            // Press C 버튼 이미지 스프라이트 변경 (빨 노 빨 노)
             if (_pressCButtonImage != null)
             {
                 if (isRed && _pressCRed != null)
@@ -184,8 +184,8 @@ public class UI_Ultimate : MonoBehaviour
                 Debug.LogError("[UI_Ultimate] BlinkCoroutine - _pressCButtonImage가 null!");
             }
             
-            // 5개 이미지 색상 변경 (FBD036 노란색 <-> FF0000 빨간색)
-            Color currentColor = isRed ? _colorRed : _colorYellow;
+            // 5개 이미지 색상 변경 (노 빨 노 빨 - pressCButton과 반대)
+            Color currentColor = isRed ? _colorYellow : _colorRed;
             
             if (_targetUIImage != null)
             {

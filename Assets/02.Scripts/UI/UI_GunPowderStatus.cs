@@ -177,6 +177,7 @@ public class UI_GunPowderStatus : MonoBehaviour
         if (_fuseImage != null && _coolTimeHigh != null)
         {
             _fuseImage.sprite = _coolTimeHigh;
+            _fuseImage.color = _colorHigh; // Fuse 색상도 변경
         }
         
         // 파티클 위치 변경
@@ -215,6 +216,7 @@ public class UI_GunPowderStatus : MonoBehaviour
         if (_fuseImage != null && _coolTimeMiddle != null)
         {
             _fuseImage.sprite = _coolTimeMiddle;
+            _fuseImage.color = _colorMiddle; // Fuse 색상도 변경
         }
         
         // 파티클 위치 변경
@@ -253,6 +255,7 @@ public class UI_GunPowderStatus : MonoBehaviour
         if (_fuseImage != null && _coolTimeLow != null)
         {
             _fuseImage.sprite = _coolTimeLow;
+            _fuseImage.color = _colorLow; // Fuse 색상도 변경
         }
         
         // 파티클 위치 변경

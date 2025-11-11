@@ -80,7 +80,7 @@ public class UltimateMortar : Bomb
         {
             if (_owner.PhotonView.IsMine)
             {
-                _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerJumpState));
+                _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerIdleState));
             }
 
             UltimateEnd();
