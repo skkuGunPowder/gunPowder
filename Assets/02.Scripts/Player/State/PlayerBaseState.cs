@@ -373,10 +373,10 @@ public class PlayerBaseState : MonoState
             return;
 
         // 에어드롭 아이템 사용 체크
-        if (TryUseAirDropItem())
-        {
-            return;
-        }
+        // if (TryUseAirDropItem())
+        // {
+        //     return;
+        // }
 
         // 특수 폭탄 사용 가능 여부 체크
         if (!CanSpecialBomb())
@@ -465,17 +465,17 @@ public class PlayerBaseState : MonoState
     /// <summary>
     /// 에어드롭 아이템 사용 시도
     /// </summary>
-    protected virtual bool TryUseAirDropItem()
-    {
-        if (_owner.AirDropItem != null && _owner.AirDropItemLootVFX.IsSelected)
-        {
-            _owner.AirDropItemLootVFX.UseItem();
-            _owner.AirDropItem.Use();
-            _owner.RemoveAirDropItem();
-            return true;
-        }
-        return false;
-    }
+    // protected virtual bool TryUseAirDropItem()
+    // {
+    //     if (_owner.AirDropItem != null && _owner.AirDropItemLootVFX.IsSelected)
+    //     {
+    //         _owner.AirDropItemLootVFX.UseItem();
+    //         _owner.AirDropItem.Use();
+    //         _owner.RemoveAirDropItem();
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
     /// <summary>
     /// 폭탄 스폰 포인트 정보 가져오기
