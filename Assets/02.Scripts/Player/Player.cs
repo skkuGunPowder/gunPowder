@@ -93,6 +93,8 @@ public class Player : MonoBehaviourPun, IDamagable
     public event Action OnHit;
     public event Action OnNormalAttack;
     public event Action OnSpecialAttack;
+    public event Action OnUltimateChanceActivated;   // 궁극기 사용 가능 상태 활성화
+    public event Action OnUltimateChanceDeactivated; // 궁극기 사용 가능 상태 비활성화
 
     [SerializeField]
     private BoxRay2D _groundRay2D;
@@ -649,6 +651,13 @@ public class Player : MonoBehaviourPun, IDamagable
         // 궁극기 효과 초기화
         RPC_UltimateEffect(false);
         RPC_SetMaterial((byte)EPlayerMaterial.Default);
+        
+        // 궁극기가 활성화되어 있었다면 비활성화 이벤트 발생
+        if (_ultimateEffectOn)
+        {
+            OnUltimateChanceDeactivated?.Invoke();
+        }
+        
         _ultimateEffectOn = false;
         _playerStat.HasUltimateChance = false;
 
@@ -731,6 +740,9 @@ public class Player : MonoBehaviourPun, IDamagable
                     RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
                 }
                 _ultimateEffectOn = true;
+                
+                // 궁극기 활성화 이벤트 발생
+                OnUltimateChanceActivated?.Invoke();
             }
 
             _ultimateChanceTimer += Time.deltaTime;
@@ -742,6 +754,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 RPC_UltimateEffect(false);
                 RPC_SetMaterial((byte)EPlayerMaterial.Default);
                 _ultimateEffectOn = false;
+                
+                // 궁극기 비활성화 이벤트 발생
+                OnUltimateChanceDeactivated?.Invoke();
             }
         }
     }
@@ -908,6 +923,9 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.DecreaseGunPowderCount(ultimateCost, photonView.OwnerActorNr);
             RPC_SetMaterial((byte)EPlayerMaterial.Default);
             _ultimateEffectOn = false;
+
+            // 궁극기 비활성화 이벤트 발생 (궁극기 사용 시)
+            OnUltimateChanceDeactivated?.Invoke();
 
             // SFX
             _playerSFXAnimationEvent.PlayerUltimateUseSFX();
