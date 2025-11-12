@@ -66,7 +66,6 @@ public class Bomb : MonoBehaviourPun, IBomb
             if (photonView.IsMine)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
-                PhotonNetwork.Destroy(gameObject);
             }
         }
     }
@@ -102,13 +101,10 @@ public class Bomb : MonoBehaviourPun, IBomb
             int otherPriority = otherBomb._stat.Priority;
             if (_stat.Priority <= otherPriority)
             {
-                if (photonView.IsMine)
-                {
-                    photonView.RPC(nameof(Explode), RpcTarget.All);
-                    PhotonNetwork.Destroy(gameObject);
-                }
+                return false;
             }
-            else if (_stat.Priority - otherPriority < 2)
+            
+            if (_stat.Priority - otherPriority < 2)
             {
                 _rigidBody.linearVelocity /= 2;
                 return true;
@@ -130,14 +126,10 @@ public class Bomb : MonoBehaviourPun, IBomb
             _vfx.transform.SetParent(transform);
         }
 
-        // if (PhotonView != null && PhotonView.IsMine)
-        // {
-        //     PhotonNetwork.Destroy(gameObject);
-        // }
-        // else
-        // {
-        //     Destroy(gameObject);
-        // }
+        if (PhotonView.IsMine)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
     public BombStat GetBombStat()

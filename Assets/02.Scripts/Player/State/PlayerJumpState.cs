@@ -531,7 +531,6 @@ public class PlayerJumpState : PlayerBaseState
         {
             bomb.PhotonView.RPC(nameof(bomb.SetOwner), RpcTarget.All, _owner.PhotonView.ViewID);
             bomb.PhotonView.RPC(nameof(bomb.Explode), RpcTarget.All);
-            PhotonNetwork.Destroy(prefab);
             _explosionOverrideTimer = EXPLOSION_OVERRIDE_DURATION;
         }
     }

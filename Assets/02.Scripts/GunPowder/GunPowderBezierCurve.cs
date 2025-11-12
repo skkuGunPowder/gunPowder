@@ -39,6 +39,8 @@ public class GunPowderBezierCurve : MonoBehaviour
     private bool _hasTriggeredDestroy;
     private bool _hasPlayedDestroyVFX;
 
+    private PhotonView _photonView;
+
     public GameObject VFXPrefab;
 
     private void OnEnable()
@@ -47,6 +49,8 @@ public class GunPowderBezierCurve : MonoBehaviour
 
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _collider = GetComponent<BoxCollider2D>();
+        _photonView = GetComponent<PhotonView>();
+
         if (_rigidbody2D == null || _collider == null)
         {
             Debug.LogError("[GunPowderBezierCurve] Missing required components (Rigidbody2D/BoxCollider2D). Disabling component.");
@@ -101,7 +105,10 @@ public class GunPowderBezierCurve : MonoBehaviour
         // 타겟이 없거나 비활성화되었다면 즉시 제거
         if (_target == null || !_target.gameObject.activeInHierarchy)
         {
-            InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+            if(_photonView != null && _photonView.IsMine)
+            {
+                InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+            }
             return;
         }
         // 타겟과 SourceViewId가 같다면 파괴
@@ -112,7 +119,10 @@ public class GunPowderBezierCurve : MonoBehaviour
             {
                 if (gunPowder.SourceViewId == targetPhotonView.ViewID)
                 {
-                    InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+                    if(_photonView != null && _photonView.IsMine)
+                    {
+                        InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+                    }
                     return;
                 }
             }
@@ -162,14 +172,17 @@ public class GunPowderBezierCurve : MonoBehaviour
         // 플레이어가 사라지거나 비활성화된 경우 즉시 제거
         if (_target == null || _target.gameObject == null || !_target.gameObject.activeInHierarchy)
         {
-            InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+            if(_photonView != null && _photonView.IsMine)
+            {
+                InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+            }
             return;
         }
 
         if (!_bezierFinished)
         {
             if (_timerCurrent > _timerMax)
-            {
+            {   
                 _bezierFinished = true;
                 return;
             }
@@ -213,7 +226,10 @@ public class GunPowderBezierCurve : MonoBehaviour
                     if (targetView != null && targetView.gameObject.activeInHierarchy && targetView.Owner != null)
                     {
                         targetView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGunPowder), targetView.Owner, 1);
-                        InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+                        if(_photonView != null && _photonView.IsMine)
+                        {
+                            InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+                        }
                         _hasTriggeredDestroy = true;
                     }
                 }

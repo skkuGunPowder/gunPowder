@@ -41,22 +41,18 @@ public class UltimateBounceBomb : Bomb
     [PunRPC]
     public override void Explode()
     {
+        Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
+        endExplosion.transform.position = transform.position;
+        endExplosion.transform.rotation = Quaternion.identity;
+        endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
+        
         if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
         {
-            Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
-            endExplosion.transform.position = transform.position;
-            endExplosion.transform.rotation = Quaternion.identity;
-            endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
+            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
             PhotonNetwork.Destroy(gameObject);
             return;
         }
 
-        SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
-
-        Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
-        explosion.transform.position = transform.position;
-        explosion.transform.rotation = Quaternion.identity;
-        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
     }
 
     [PunRPC]
