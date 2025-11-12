@@ -66,7 +66,6 @@ public class Bomb : MonoBehaviourPun, IBomb
             if (photonView.IsMine)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
-                PhotonNetwork.Destroy(gameObject);
             }
         }
     }
