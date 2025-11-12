@@ -99,14 +99,7 @@ public class Bomb : MonoBehaviourPun, IBomb
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
             int otherPriority = otherBomb._stat.Priority;
-            if (_stat.Priority <= otherPriority)
-            {
-                if (photonView.IsMine)
-                {
-                    photonView.RPC(nameof(Explode), RpcTarget.All);
-                }
-            }
-            else if (_stat.Priority - otherPriority < 2)
+            if (_stat.Priority - otherPriority < 2)
             {
                 _rigidBody.linearVelocity /= 2;
                 return true;
