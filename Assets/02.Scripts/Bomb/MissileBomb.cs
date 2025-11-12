@@ -43,7 +43,6 @@ public class MissileBomb : Bomb
         if (photonView.IsMine)
         {
             photonView.RPC(nameof(Explode), RpcTarget.All);
-            PhotonNetwork.Destroy(gameObject);
         }
     }
 

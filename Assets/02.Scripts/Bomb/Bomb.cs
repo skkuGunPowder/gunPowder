@@ -130,14 +130,10 @@ public class Bomb : MonoBehaviourPun, IBomb
             _vfx.transform.SetParent(transform);
         }
 
-        // if (PhotonView != null && PhotonView.IsMine)
-        // {
-        //     PhotonNetwork.Destroy(gameObject);
-        // }
-        // else
-        // {
-        //     Destroy(gameObject);
-        // }
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
     public BombStat GetBombStat()

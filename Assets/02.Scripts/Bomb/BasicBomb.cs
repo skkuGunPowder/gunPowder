@@ -87,7 +87,6 @@ public class BasicBomb : Bomb
         if (_bombVelocity == EBombVelocity.FAST)
         {
             photonView.RPC(nameof(Explode), RpcTarget.All);
-            PhotonNetwork.Destroy(gameObject);
         }
 
         if (_bombVelocity == EBombVelocity.NORMAL && !_isFuzeActivate)
@@ -95,7 +94,6 @@ public class BasicBomb : Bomb
             if (other.gameObject.TryGetComponent(out IDamagable damagableObject))
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
-                PhotonNetwork.Destroy(gameObject);
             }
             else
             {
@@ -111,7 +109,6 @@ public class BasicBomb : Bomb
         if (photonView.IsMine)
         {
             photonView.RPC(nameof(Explode), RpcTarget.All);
-            PhotonNetwork.Destroy(gameObject);
         }
     }
 
