@@ -16,13 +16,17 @@ public class PlayerLastDieState : PlayerBaseState
         _owner.RPC_SetAnimatorTrigger("HitLoop");
         EventManager.Instance.OnGameSet += LastDiePlay;
         SetImmuneState();
-        EventManager.Instance.LastAttack(this._owner.PhotonView.OwnerActorNr);
+        EventManager.Instance.LastAttack(_owner.PhotonView.OwnerActorNr);
 
     }
 
     public override void OnExit()
     {
         base.OnExit();
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnGameSet -= LastDiePlay;
+        }
     }
     
     public override void MineUpdate()
@@ -35,7 +39,7 @@ public class PlayerLastDieState : PlayerBaseState
         EventManager.Instance.OnGameSet -= LastDiePlay;
         Sequence seq = DOTween.Sequence();
         seq.AppendInterval(IntervalTime);
-        seq.Append(this.gameObject.transform.DOShakePosition(VibrateDuration, VibratePower, Vibrato,90f, false,true,ShakeRandomnessMode.Harmonic));
+        seq.Append(_owner.transform.DOShakePosition(VibrateDuration, VibratePower, Vibrato,90f, false,true,ShakeRandomnessMode.Harmonic));
         seq.AppendCallback(ExecuteDeath);
     }
     
