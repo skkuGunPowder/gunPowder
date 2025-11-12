@@ -48,11 +48,11 @@ public class UltimateBounceBomb : Bomb
         
         if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
         {
+            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
             PhotonNetwork.Destroy(gameObject);
             return;
         }
 
-        SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
     }
 
     [PunRPC]
