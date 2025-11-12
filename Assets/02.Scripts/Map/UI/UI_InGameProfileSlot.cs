@@ -40,16 +40,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
         BombImage.sprite = bombImage;
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
-        GunpowderSetting(gunpowder);
         LifeRefresh(life);
-    }
-
-    private void GunpowderSetting(int gunpowder) // 초기 건파우더 설정 (색상을 위한)
-    {
-        GunpowderTextUGUI.text = gunpowder.ToString();
-        // 50 ~ 20
-        GunpowderMiddle = gunpowder / 2;
-        GunpowderLow = (gunpowder / 10) * 3;
     }
     public void Refresh(int gunpowder, int life, int attacker)
     {
@@ -80,7 +71,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     }
     private void ColorSet(int gunpowder)
     {
-        if (gunpowder > GunpowderMiddle)
+        if (gunpowder >= GunpowderMiddle)
         {
             GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
         }
