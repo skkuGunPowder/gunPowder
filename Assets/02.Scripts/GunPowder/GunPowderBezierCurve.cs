@@ -105,7 +105,7 @@ public class GunPowderBezierCurve : MonoBehaviour
         // 타겟이 없거나 비활성화되었다면 즉시 제거
         if (_target == null || !_target.gameObject.activeInHierarchy)
         {
-            if(_photonView.IsMine)
+            if(_photonView != null && _photonView.IsMine)
             {
                 InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
             }
@@ -119,7 +119,7 @@ public class GunPowderBezierCurve : MonoBehaviour
             {
                 if (gunPowder.SourceViewId == targetPhotonView.ViewID)
                 {
-                    if(_photonView.IsMine)
+                    if(_photonView != null && _photonView.IsMine)
                     {
                         InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
                     }
@@ -172,7 +172,7 @@ public class GunPowderBezierCurve : MonoBehaviour
         // 플레이어가 사라지거나 비활성화된 경우 즉시 제거
         if (_target == null || _target.gameObject == null || !_target.gameObject.activeInHierarchy)
         {
-            if(_photonView.IsMine)
+            if(_photonView != null && _photonView.IsMine)
             {
                 InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
             }
@@ -226,7 +226,7 @@ public class GunPowderBezierCurve : MonoBehaviour
                     if (targetView != null && targetView.gameObject.activeInHierarchy && targetView.Owner != null)
                     {
                         targetView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGunPowder), targetView.Owner, 1);
-                        if(_photonView.IsMine)
+                        if(_photonView != null && _photonView.IsMine)
                         {
                             InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
                         }
