@@ -99,6 +99,11 @@ public class Bomb : MonoBehaviourPun, IBomb
         if (other.gameObject.TryGetComponent(out Bomb otherBomb))
         {
             int otherPriority = otherBomb._stat.Priority;
+            if (_stat.Priority <= otherPriority)
+            {
+                return false;
+            }
+            
             if (_stat.Priority - otherPriority < 2)
             {
                 _rigidBody.linearVelocity /= 2;
