@@ -40,6 +40,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
         BombImage.sprite = bombImage;
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
+        GunpowderTextUGUI.text = gunpowder.ToString();
         LifeRefresh(life);
     }
     public void Refresh(int gunpowder, int life, int attacker)
