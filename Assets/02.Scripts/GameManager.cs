@@ -50,7 +50,7 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;       
         }
-     
+        
         PlayerDeadCheck();
     }
     
@@ -158,7 +158,7 @@ public class GameManager : PhotonSingleton<GameManager>
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
             return;
         }
-
+        
         // 플레이어가 두명 남았는가?
         if (LastPlayer == false && notDead == 2)
         {
@@ -252,6 +252,7 @@ public class GameManager : PhotonSingleton<GameManager>
     
     public override void OnDisable()
     { 
+        base.OnDisable();
         EventManager.Instance.OnLoadFinished -= Init;
     }
     
