@@ -84,8 +84,7 @@ public class WaterBomb : Bomb
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
-        _fireDirection = fireRightDirection;
-        _currentSpeed = 0f;
+        ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
 
     [PunRPC]
