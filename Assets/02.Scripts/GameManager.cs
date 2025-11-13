@@ -11,8 +11,6 @@ using UnityEngine.SceneManagement;
 public class GameManager : PhotonSingleton<GameManager> 
 {
     private PhotonView _photonView;
-    private List<PhotonPlayer> _playerList = new List<PhotonPlayer>();
-    
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
     public bool LastPlayer = false;
@@ -53,8 +51,6 @@ public class GameManager : PhotonSingleton<GameManager>
             return;       
         }
      
-        PhotonPlayer[] players = PhotonNetwork.PlayerList;
-        _playerList = new List<PhotonPlayer>(players);
         PlayerDeadCheck();
     }
     
@@ -109,7 +105,7 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
 
-        if (!changedProps.ContainsKey(EProperties.IsDead.ToString()) && changedProps[EProperties.IsDead.ToString()] == null)
+        if (!changedProps.ContainsKey(EProperties.IsDead.ToString()) || changedProps[EProperties.IsDead.ToString()] == null)
         {
             return;
         }
@@ -143,27 +139,31 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         int notDead = 0;
 
-        foreach (PhotonPlayer p in _playerList)
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
+        
+        foreach (PhotonPlayer p in players)
         {
             bool isDead = p.CustomProperties.ContainsKey(EProperties.IsDead.ToString()) &&
                           (bool)p.CustomProperties[EProperties.IsDead.ToString()];
+            
             if (isDead == false)
             {
                 notDead++;
             }
         }
+        
+        // 나가서 혼자인 경우
+        if (players.Length == 1)
+        {
+            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+            return;
+        }
 
         // 플레이어가 두명 남았는가?
         if (LastPlayer == false && notDead == 2)
         {
+            LastPlayer = true;
             _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.All);
-            return;
-        }
-
-        // 나가서 혼자인 경우
-        if (_playerList.Count == 1)
-        {
-            _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
             return;
         }
 
@@ -174,7 +174,7 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
 
-        if (notDead == 0)
+        if (notDead == 0)   
         {
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
         }
