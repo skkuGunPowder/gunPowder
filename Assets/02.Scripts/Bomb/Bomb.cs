@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
@@ -128,8 +129,14 @@ public class Bomb : MonoBehaviourPun, IBomb
 
         if (PhotonView.IsMine)
         {
-            PhotonNetwork.Destroy(gameObject);
+            StartCoroutine(DestoryCoroutine(gameObject));
         }
+    }
+
+    private IEnumerator DestoryCoroutine(GameObject toDestroyObject)
+    {
+        yield return null;
+        PhotonNetwork.Destroy(toDestroyObject);
     }
 
     public BombStat GetBombStat()

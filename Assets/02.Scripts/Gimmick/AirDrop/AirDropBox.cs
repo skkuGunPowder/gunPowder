@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Photon.Pun;
+using System.Collections;
 
 public class AirDropBox : MonoBehaviour
 {
@@ -66,7 +67,13 @@ public class AirDropBox : MonoBehaviour
 
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.Destroy(gameObject);
+            StartCoroutine(DestoryCoroutine(gameObject));
         }
+    }
+
+    private IEnumerator DestoryCoroutine(GameObject toDestroyObject)
+    {
+        yield return null;
+        PhotonNetwork.Destroy(toDestroyObject);
     }
 }
