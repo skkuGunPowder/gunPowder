@@ -308,12 +308,9 @@ public class PlayerBaseState : MonoState
         
         // 4. RPC 호출 (SetOwner 먼저, 그 다음 폭탄 동작)
         try
-        {
-            // 로컬에서 먼저 SetOwner 호출 (즉시 실행)
-            bombComponent.SetOwner(ownerPhotonView.ViewID);
-            
+        {      
             // 다른 클라이언트에게 SetOwner 전파
-            bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.Others, ownerPhotonView.ViewID);
+            bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, ownerPhotonView.ViewID);
             bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
         }
         catch (System.Exception e)
