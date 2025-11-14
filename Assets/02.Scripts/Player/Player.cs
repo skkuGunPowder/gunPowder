@@ -260,6 +260,9 @@ public class Player : MonoBehaviourPun, IDamagable
             _preExplosionPulseTween.Kill(false);
             _preExplosionPulseTween = null;
         }
+
+        UltimateManager.Instance.ReturnUltimate(_ultimate);
+        _ultimate = null;
     }
 
     /// <summary>

@@ -161,6 +161,7 @@ public class Bomb : MonoBehaviourPun, IBomb
 
     protected virtual void OnDestroy()
     {
+        StopAllCoroutines();
         if (transform != null)
         {
             transform.DOKill();
