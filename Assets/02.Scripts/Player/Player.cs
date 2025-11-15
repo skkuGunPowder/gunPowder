@@ -260,6 +260,9 @@ public class Player : MonoBehaviourPun, IDamagable
             _preExplosionPulseTween.Kill(false);
             _preExplosionPulseTween = null;
         }
+
+        UltimateManager.Instance.ReturnUltimate(_ultimate);
+        _ultimate = null;
     }
 
     /// <summary>
@@ -1401,7 +1404,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     public void RPC_TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack, PhotonMessageInfo info)
     {
-        if (_playerStat.IsImmune)
+        if (_playerStat.IsImmune || !PhotonView.IsMine)
         {
             return;
         }

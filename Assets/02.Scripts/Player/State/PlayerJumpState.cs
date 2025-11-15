@@ -203,6 +203,11 @@ public class PlayerJumpState : PlayerBaseState
         {
             HandleSpecialBombAttack();
         }
+
+        if(InputHandler.GetKeyDown(KeyCode.C))
+        {
+            _owner.ExecuteUltimate();
+        }
     }
 
     // ====== 새로 추가된 헬퍼 메서드들 ======

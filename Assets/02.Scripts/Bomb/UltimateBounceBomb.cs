@@ -1,3 +1,4 @@
+using System.Collections;
 using Photon.Pun;
 using UnityEngine;
 
@@ -49,10 +50,16 @@ public class UltimateBounceBomb : Bomb
         if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
         {
             SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
-            PhotonNetwork.Destroy(gameObject);
+            StartCoroutine(DestoryCoroutine(gameObject));
             return;
         }
 
+    }
+
+    private IEnumerator DestoryCoroutine(GameObject toDestroyObject)
+    {
+        yield return null;
+        PhotonNetwork.Destroy(toDestroyObject);
     }
 
     [PunRPC]
