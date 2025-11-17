@@ -22,6 +22,11 @@ public class UltimateMissileBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         if (other.gameObject == _ownerPhotonview.gameObject)
         {
             return;
@@ -100,11 +105,5 @@ public class UltimateMissileBomb : Bomb
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
-    }
-
-    protected override void OnDestroy()
-    {
-        StopAllCoroutines();
-        base.OnDestroy();
     }
 }

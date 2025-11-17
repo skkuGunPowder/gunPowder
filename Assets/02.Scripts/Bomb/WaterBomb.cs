@@ -21,7 +21,11 @@ public class WaterBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();

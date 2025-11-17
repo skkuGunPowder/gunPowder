@@ -19,11 +19,23 @@ public class UltimateBounceBomb : Bomb
     protected override void Update()
     {
         base.Update();
+        
+        if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
+        {
+            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
+            PhotonNetwork.Destroy(gameObject);
+            return;
+        }
         _cameraController.SmallShakeAt(transform, 2f);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
         if (collision.collider.CompareTag("Wall"))
         {
             Vector2 randomNormal = (collision.contacts[0].normal + new Vector2(Random.Range(-0.2f, 0.2f), Random.Range(-0.2f, 0.2f))).normalized;
@@ -42,24 +54,15 @@ public class UltimateBounceBomb : Bomb
     [PunRPC]
     public override void Explode()
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
         Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
         endExplosion.transform.position = transform.position;
         endExplosion.transform.rotation = Quaternion.identity;
         endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
-        
-        if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
-        {
-            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
-            StartCoroutine(DestoryCoroutine(gameObject));
-            return;
-        }
-
-    }
-
-    private IEnumerator DestoryCoroutine(GameObject toDestroyObject)
-    {
-        yield return null;
-        PhotonNetwork.Destroy(toDestroyObject);
     }
 
     [PunRPC]
