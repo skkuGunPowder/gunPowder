@@ -2,6 +2,7 @@ using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class BounceBomb : Bomb
 {
@@ -17,7 +18,7 @@ public class BounceBomb : Bomb
 
     [Header("수치 조정")]
     [SerializeField] private float _bounceDuration = 0.3f;
-    [SerializeField] private Transform _bottomChecker;
+    [SerializeField] private Transform _bottomTopChecker;
     [SerializeField] private LayerMask _groundLayer;
 
     private bool _isGrounded = false;
@@ -37,13 +38,22 @@ public class BounceBomb : Bomb
 
     private void FixedUpdate()
     {
-        _bottomChecker.localRotation = Quaternion.identity;
-        RaycastHit2D hit = Physics2D.Raycast(_bottomChecker.position, Vector2.down, 0.5f, _groundLayer);
-        if (hit.collider != null)
+        _bottomTopChecker.localRotation = Quaternion.identity;
+        RaycastHit2D bottomHit = Physics2D.Raycast(_bottomTopChecker.position, Vector2.down, 0.5f, _groundLayer);
+        RaycastHit2D topHit = Physics2D.Raycast(_bottomTopChecker.position, Vector2.up, 0.5f, _groundLayer);
+        if (bottomHit.collider != null)
         {
             if (!_isGrounded && !_isCharging)
             {
-                StartCoroutine(DelayCoroutine(_delayTime));
+                StartCoroutine(DelayCoroutine(_delayTime, true));
+            }
+            return;
+        }
+        else if (topHit.collider != null)
+        {
+            if (!_isGrounded && !_isCharging)
+            {
+                StartCoroutine(DelayCoroutine(_delayTime, false));
             }
             return;
         }
@@ -55,7 +65,7 @@ public class BounceBomb : Bomb
         _rigidBody.linearVelocity = new Vector2(_fireDirection.x * _currentSpeed, _rigidBody.linearVelocityY);
     }
 
-    private IEnumerator DelayCoroutine(float time)
+    private IEnumerator DelayCoroutine(float time, bool isBottom)
     {
         _isCharging = true;
         _rigidBody.linearVelocity = Vector2.zero;
@@ -64,7 +74,14 @@ public class BounceBomb : Bomb
         yield return new WaitForSeconds(time);
 
         _rigidBody.freezeRotation = false;
-        _rigidBody.linearVelocity = new Vector2(_fireDirection.x * _currentSpeed, _bounceSpeedY);
+        if (isBottom)
+        {
+            _rigidBody.linearVelocity = new Vector2(_fireDirection.x * _currentSpeed, _bounceSpeedY);
+        }
+        else
+        {
+            _rigidBody.linearVelocity = new Vector2(_fireDirection.x * _currentSpeed, -_bounceSpeedY);
+        }
         _isGrounded = true;
         _isCharging = false;
     }
@@ -118,7 +135,6 @@ public class BounceBomb : Bomb
             if (photonView.IsMine)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
-                PhotonNetwork.Destroy(gameObject);
             }
         }
     }
@@ -167,7 +183,7 @@ public class BounceBomb : Bomb
         CleanupTweens();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         CleanupTweens();
     }

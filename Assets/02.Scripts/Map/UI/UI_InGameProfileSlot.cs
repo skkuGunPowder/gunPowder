@@ -33,14 +33,15 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public Ease EaseType;
     public float ScaleStrength = 1.2f;
    
-    public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player)
+    public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player, int gunpowder, int life)
     {
         // PlayerActorNumber = player.ActorNumber;
         NicknameTextUGUI.text = player.NickName;
         BombImage.sprite = bombImage;
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
-        
+        GunpowderTextUGUI.text = gunpowder.ToString();
+        LifeRefresh(life);
     }
     public void Refresh(int gunpowder, int life, int attacker)
     {
@@ -71,7 +72,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     }
     private void ColorSet(int gunpowder)
     {
-        if (gunpowder > GunpowderMiddle)
+        if (gunpowder >= GunpowderMiddle)
         {
             GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
         }

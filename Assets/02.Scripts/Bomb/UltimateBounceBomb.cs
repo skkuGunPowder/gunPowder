@@ -1,3 +1,4 @@
+using System.Collections;
 using Photon.Pun;
 using UnityEngine;
 
@@ -41,33 +42,24 @@ public class UltimateBounceBomb : Bomb
     [PunRPC]
     public override void Explode()
     {
+        Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
+        endExplosion.transform.position = transform.position;
+        endExplosion.transform.rotation = Quaternion.identity;
+        endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
+        
         if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
         {
-            Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
-            endExplosion.transform.position = transform.position;
-            endExplosion.transform.rotation = Quaternion.identity;
-            endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
-
-            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
-
+            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
+            StartCoroutine(DestoryCoroutine(gameObject));
             return;
         }
 
-        SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
+    }
 
-        Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
-        explosion.transform.position = transform.position;
-        explosion.transform.rotation = Quaternion.identity;
-        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
+    private IEnumerator DestoryCoroutine(GameObject toDestroyObject)
+    {
+        yield return null;
+        PhotonNetwork.Destroy(toDestroyObject);
     }
 
     [PunRPC]

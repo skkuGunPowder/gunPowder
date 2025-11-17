@@ -1,3 +1,4 @@
+using System.Collections;
 using Photon.Pun;
 using UnityEngine;
 
@@ -45,12 +46,18 @@ public class InstantiateDestroyManager : MonoBehaviourPun
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            Destroy(viewID);
+            StartCoroutine(NonePhotonDestoryCoroutine(viewID));
         }
         else
         {
             _photonView.RPC(nameof(Destroy), RpcTarget.MasterClient, viewID);
         }
+    }
+
+    private IEnumerator NonePhotonDestoryCoroutine(int viewID)
+    {
+        yield return null;
+        Destroy(viewID);
     }
 
     [PunRPC]
@@ -73,7 +80,7 @@ public class InstantiateDestroyManager : MonoBehaviourPun
         // 1) 소유자가 나면 소유자가 파괴
         if (photonView.IsMine)
         {
-            PhotonNetwork.Destroy(objectToDelete);
+            StartCoroutine(DestoryCoroutine(objectToDelete));
             return;
         }
 
@@ -90,7 +97,7 @@ public class InstantiateDestroyManager : MonoBehaviourPun
         // 3) 소유자가 없거나 비활성이면, 마스터가 정리
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.Destroy(objectToDelete);
+            StartCoroutine(DestoryCoroutine(objectToDelete));
         }
         else
         {
@@ -108,8 +115,13 @@ public class InstantiateDestroyManager : MonoBehaviourPun
         }
         if (photonView.IsMine)
         {
-            PhotonNetwork.Destroy(photonView.gameObject);
+            StartCoroutine(DestoryCoroutine(photonView.gameObject));
         }
     }
-        
+
+    private IEnumerator DestoryCoroutine(GameObject toDestroyObject)
+    {
+        yield return null;
+        PhotonNetwork.Destroy(toDestroyObject);
+    }
 }

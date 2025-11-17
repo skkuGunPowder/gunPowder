@@ -107,7 +107,8 @@ public class Mortar : Bomb
         {
             if (_owner.PhotonView.IsMine)
             {
-                _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerJumpState));
+                //_owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerJumpState));
+                _owner.PhotonView.RPC(nameof(_owner.RPC_ChangeState), RpcTarget.All, nameof(PlayerIdleState));
             }
             RemoveMortar();
         }
@@ -203,25 +204,18 @@ public class Mortar : Bomb
             InputHandler.BlockInput = false;
             _superArmorBuff.EndBuff();
             _owner.ResetPausedNoAttack();
-
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
+            PhotonNetwork.Destroy(gameObject);
         }
     }
     
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (PhotonView.IsMine)
         {
             _proCamera.UpdateScreenSize(_defaultZoom);
         }
+
+        base.OnDestroy();
     }
 
     [PunRPC]

@@ -308,12 +308,9 @@ public class PlayerBaseState : MonoState
         
         // 4. RPC 호출 (SetOwner 먼저, 그 다음 폭탄 동작)
         try
-        {
-            // 로컬에서 먼저 SetOwner 호출 (즉시 실행)
-            bombComponent.SetOwner(ownerPhotonView.ViewID);
-            
+        {      
             // 다른 클라이언트에게 SetOwner 전파
-            bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.Others, ownerPhotonView.ViewID);
+            bombComponent.PhotonView.RPC(nameof(Bomb.SetOwner), RpcTarget.All, ownerPhotonView.ViewID);
             bombComponent.PhotonView.RPC(rpcMethodName, RpcTarget.All, rpcArgs);
         }
         catch (System.Exception e)
@@ -373,10 +370,10 @@ public class PlayerBaseState : MonoState
             return;
 
         // 에어드롭 아이템 사용 체크
-        if (TryUseAirDropItem())
-        {
-            return;
-        }
+        // if (TryUseAirDropItem())
+        // {
+        //     return;
+        // }
 
         // 특수 폭탄 사용 가능 여부 체크
         if (!CanSpecialBomb())
@@ -465,17 +462,17 @@ public class PlayerBaseState : MonoState
     /// <summary>
     /// 에어드롭 아이템 사용 시도
     /// </summary>
-    protected virtual bool TryUseAirDropItem()
-    {
-        if (_owner.AirDropItem != null && _owner.AirDropItemLootVFX.IsSelected)
-        {
-            _owner.AirDropItemLootVFX.UseItem();
-            _owner.AirDropItem.Use();
-            _owner.RemoveAirDropItem();
-            return true;
-        }
-        return false;
-    }
+    // protected virtual bool TryUseAirDropItem()
+    // {
+    //     if (_owner.AirDropItem != null && _owner.AirDropItemLootVFX.IsSelected)
+    //     {
+    //         _owner.AirDropItemLootVFX.UseItem();
+    //         _owner.AirDropItem.Use();
+    //         _owner.RemoveAirDropItem();
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
     /// <summary>
     /// 폭탄 스폰 포인트 정보 가져오기

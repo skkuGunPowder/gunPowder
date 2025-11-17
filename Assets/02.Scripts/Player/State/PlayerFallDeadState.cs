@@ -24,7 +24,7 @@ public class PlayerFallDeadState : PlayerBaseState
     // 이동 관련 상수
     private const float TOTAL_MOVE_DURATION = 3.0f;         // 전체 이동 시간 (초)
     private const float TO_START_MOVE_DURATION = 0.6f;      // 시작점까지 선행 이동 시간 (초)
-    private const float WAIT_DURATION_AT_GOAL = 2.0f;       // 부활 지점 도착 후 대기 시간 (초)
+    private const float WAIT_DURATION_AT_GOAL = 1.0f;       // 부활 지점 도착 후 대기 시간 (초)
     
     // 효과 관련 상수
     private const float EFFECT_PLAY_INTERVAL = 0.5f;        // VFX 효과 재생 간격 (초)

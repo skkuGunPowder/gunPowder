@@ -46,11 +46,6 @@ public class BabyCrab : Crab
         _isNeedToMove = false;
         _rigidbody.simulated = false;
         // _changeDirectionInterval = Random.Range(1f, 4f);
-
-        if (player.PhotonView.IsMine)
-        {
-            InputHandler.BlockInput = true;
-        }
         
         player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerConfuseState));
 
@@ -63,13 +58,6 @@ public class BabyCrab : Crab
             transform.rotation = Quaternion.FromToRotation(transform.up, dir) * transform.rotation;
             yield return null;
         }
-
-        if (player.PhotonView.IsMine)
-        {
-            InputHandler.BlockInput = false;
-        }
-        
-        // player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerIdleState));
 
         _rigidbody.simulated = true;
         _rigidbody.AddForce(new Vector2(1, 1).normalized * 1f, ForceMode2D.Impulse);

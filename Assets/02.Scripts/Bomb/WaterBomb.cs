@@ -37,7 +37,6 @@ public class WaterBomb : Bomb
             if (photonView.IsMine)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
-                PhotonNetwork.Destroy(gameObject);
             }
         }
 
@@ -85,8 +84,7 @@ public class WaterBomb : Bomb
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
-        _fireDirection = fireRightDirection;
-        _currentSpeed = 0f;
+        ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
 
     [PunRPC]
