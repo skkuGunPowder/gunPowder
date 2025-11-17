@@ -10,9 +10,9 @@ public class UI_FriendsListPopup : UI_Popup
     [Header("Top - My Profile")]
     public UI_MyProfilePanel MyProfilePanel;
 
-    [Header("Middle - Tab Buttons")]
-    public Button TabButton_Friends;
-    public Button TabButton_PartyChat;
+    // [Header("Middle - Tab Buttons")]
+    // public Button Button_Friends;
+    // public Button Button_PartyChat;
 
     [Header("Content Panels")]
     public UI_FriendList FriendListPanel;       // 기존 UI_FriendList
@@ -23,23 +23,23 @@ public class UI_FriendsListPopup : UI_Popup
     public GameObject PartyInvitePopupPrefab;
     public Transform PartyInvitePopupParent;
 
-    private enum TabType
-    {
-        FriendList,
-        PartyChat,
-        FriendChat
-    }
-
-    private TabType _currentTab = TabType.FriendList;
+    // private enum TabType
+    // {
+    //     FriendList,
+    //     PartyChat,
+    //     FriendChat
+    // }
+    //
+    // private TabType _currentTab = TabType.FriendList;
 
     private void Awake()
     {
         // 탭 버튼 이벤트 등록
-        if (TabButton_Friends != null)
-            TabButton_Friends.onClick.AddListener(() => ShowTab(TabType.FriendList));
-
-        if (TabButton_PartyChat != null)
-            TabButton_PartyChat.onClick.AddListener(() => ShowTab(TabType.PartyChat));
+        // if (TabButton_Friends != null)
+        //     TabButton_Friends.onClick.AddListener(() => ShowTab(TabType.FriendList));
+        //
+        // if (TabButton_PartyChat != null)
+        //     TabButton_PartyChat.onClick.AddListener(() => ShowTab(TabType.PartyChat));
     }
 
     private void OnEnable()
@@ -60,7 +60,7 @@ public class UI_FriendsListPopup : UI_Popup
         SubscribeToFriendListEvents();
 
         // 기본 탭 표시
-        ShowTab(TabType.FriendList);
+        //ShowTab(TabType.FriendList);
 
         // 내 프로필 갱신
         if (MyProfilePanel != null)
@@ -83,50 +83,50 @@ public class UI_FriendsListPopup : UI_Popup
     /// <summary>
     /// 탭 전환
     /// </summary>
-    private void ShowTab(TabType tabType)
-    {
-        _currentTab = tabType;
-
-        // 모든 패널 비활성화
-        if (FriendListPanel != null)
-            FriendListPanel.gameObject.SetActive(false);
-
-        if (PartyChatPanel != null)
-            PartyChatPanel.gameObject.SetActive(false);
-
-        if (FriendChatPanel != null)
-            FriendChatPanel.gameObject.SetActive(false);
-
-        // 선택된 탭만 활성화
-        switch (tabType)
-        {
-            case TabType.FriendList:
-                if (FriendListPanel != null)
-                    FriendListPanel.gameObject.SetActive(true);
-                break;
-
-            case TabType.PartyChat:
-                if (PartyChatPanel != null)
-                {
-                    PartyChatPanel.gameObject.SetActive(true);
-
-                    // 파티에 참여 중이면 초기화
-                    if (PartyManager.Instance != null && PartyManager.Instance.IsInParty())
-                    {
-                        PartyChatPanel.Initialize(PartyManager.Instance.CurrentPartyId);
-                    }
-                }
-                break;
-
-            case TabType.FriendChat:
-                if (FriendChatPanel != null)
-                    FriendChatPanel.gameObject.SetActive(true);
-                break;
-        }
-
-        // 탭 버튼 강조 (TODO: 버튼 색상 변경)
-        UpdateTabButtonHighlight();
-    }
+    // private void ShowTab(TabType tabType)
+    // {
+    //     _currentTab = tabType;
+    //
+    //     // 모든 패널 비활성화
+    //     if (FriendListPanel != null)
+    //         FriendListPanel.gameObject.SetActive(false);
+    //
+    //     if (PartyChatPanel != null)
+    //         PartyChatPanel.gameObject.SetActive(false);
+    //
+    //     if (FriendChatPanel != null)
+    //         FriendChatPanel.gameObject.SetActive(false);
+    //
+    //     // 선택된 탭만 활성화
+    //     switch (tabType)
+    //     {
+    //         case TabType.FriendList:
+    //             if (FriendListPanel != null)
+    //                 FriendListPanel.gameObject.SetActive(true);
+    //             break;
+    //
+    //         case TabType.PartyChat:
+    //             if (PartyChatPanel != null)
+    //             {
+    //                 PartyChatPanel.gameObject.SetActive(true);
+    //
+    //                 // 파티에 참여 중이면 초기화
+    //                 if (PartyManager.Instance != null && PartyManager.Instance.IsInParty())
+    //                 {
+    //                     PartyChatPanel.Initialize(PartyManager.Instance.CurrentPartyId);
+    //                 }
+    //             }
+    //             break;
+    //
+    //         case TabType.FriendChat:
+    //             if (FriendChatPanel != null)
+    //                 FriendChatPanel.gameObject.SetActive(true);
+    //             break;
+    //     }
+    //
+    //     // 탭 버튼 강조 (TODO: 버튼 색상 변경)
+    //     UpdateTabButtonHighlight();
+    // }
 
     /// <summary>
     /// 탭 버튼 강조 표시
@@ -179,7 +179,7 @@ public class UI_FriendsListPopup : UI_Popup
         Debug.Log($"[UI_FriendsListPopup] 친구 채팅 시작: {friendNickname}");
 
         // 친구 채팅 패널로 전환
-        ShowTab(TabType.FriendChat);
+        //ShowTab(TabType.FriendChat);
 
         // 친구 채팅 시작
         if (FriendChatPanel != null)
