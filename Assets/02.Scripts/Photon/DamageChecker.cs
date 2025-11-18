@@ -58,8 +58,6 @@ public class DamageChecker : Singleton<DamageChecker>
             return;
         }
         
-        int playerNumber = leftPlayer.ActorNumber;
-        
         _playerScoreDictionary[leftPlayer.ActorNumber] = -1;
         
         int topActor = _currentTopPlayer;
@@ -118,6 +116,7 @@ public class DamageChecker : Singleton<DamageChecker>
         {
             return;
         }
+        
         CalculateScore(gunpowder, life, player);
     }
     
@@ -145,7 +144,7 @@ public class DamageChecker : Singleton<DamageChecker>
             return;
         }
         
-        int score = life * gunpowder;
+        int score = (life * RoomStatManager.Instance.PlayerGunpowder) + gunpowder; // 처음 세팅 * 생명 + 현재 건파우더
         
         _playerScoreDictionary[playerNumber] = score;
         CheckTopPlayer(playerNumber);
