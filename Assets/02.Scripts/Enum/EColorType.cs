@@ -14,6 +14,8 @@ public enum EColorType
     UltimateEnemy,
     Fade,
     FadeOut,
-    UltiBack
+    UltiBack,
+    SelectedButton,
+    UnSelectedButton,
     
 }
