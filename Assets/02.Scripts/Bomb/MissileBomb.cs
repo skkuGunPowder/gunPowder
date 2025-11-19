@@ -10,17 +10,10 @@ public class MissileBomb : Bomb
     public AudioClip MisiileTrailSound;
 
 
-
     protected override void Init()
     {
         base.Init();
         SetStat(ID);
-    }
-
-
-    protected override void Update()
-    {
-        base.Update();
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -60,6 +53,11 @@ public class MissileBomb : Bomb
     [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         _fireDirection = fireRightDirection;
         transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), PREDELAY)
         .OnComplete(() =>

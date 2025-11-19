@@ -27,11 +27,6 @@ public class BasicBomb : Bomb
         {
             return;
         }
-        
-        if(!PhotonView.IsMine)
-        {
-            return;
-        }
 
         if (other.gameObject.tag == "Player" || other.gameObject.tag == "Immune")
         {
@@ -43,7 +38,10 @@ public class BasicBomb : Bomb
             return;
         }
         
-        photonView.RPC(nameof(Explode), RpcTarget.All);
+        if(photonView.IsMine)
+        {
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+        }
     }
 
     [PunRPC]
@@ -71,7 +69,13 @@ public class BasicBomb : Bomb
     [PunRPC]
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
         _fireDirection = fireRightDirection;
+
         if (photonView.IsMine)
         {
             photonView.RPC(nameof(Explode), RpcTarget.All);

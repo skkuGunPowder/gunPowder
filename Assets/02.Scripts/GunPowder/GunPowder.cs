@@ -26,7 +26,7 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     [SerializeField]
     private float _lifetimeSeconds = 10f;
     private float _lifeTimer = 0f;
-    private bool _hasRequestedLifeDestroy = false;
+    public bool _isDestroying = false;
 
     [Header("Lifetime Flicker")]
     [SerializeField]
@@ -80,6 +80,11 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     /// </summary>
     private void Update()
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         _timer += Time.deltaTime;
         if(_timer > _colliderOnTime)
         {
@@ -104,13 +109,19 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
             _nextFlickerTime = _lifeTimer + _flickerIntervalSeconds;
         }
 
-        if (!_hasRequestedLifeDestroy && _lifeTimer >= _lifetimeSeconds)
+        if (_lifeTimer >= _lifetimeSeconds)
         {
-            if (PhotonNetwork.IsMasterClient)
+            _isDestroying = true;
+            // if (PhotonNetwork.IsMasterClient)
+            // {
+            //     InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+            // }
+
+            if(_photonView.IsMine)
             {
-                InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+                transform.DOKill();
+                PhotonNetwork.Destroy(gameObject);
             }
-            _hasRequestedLifeDestroy = true;
         }
     }
 
@@ -234,15 +245,8 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
 
         PhotonView targetView = PhotonView.Find(targetViewId);
         if (targetView != null && targetView.gameObject != null && targetView.gameObject.activeInHierarchy)
-            _target = targetView.transform;
-    }
-
-    private void OnDestroy()
-    {
-        // 파괴 시 모든 트윈 정리
-        if (transform != null)
         {
-            transform.DOKill();
+            _target = targetView.transform;
         }
     }
 }

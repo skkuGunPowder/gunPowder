@@ -6,9 +6,17 @@ public class GunPowderTrigger : MonoBehaviour
     private CircleCollider2D _collider;
     private float _timer = 0f;
     private float _colliderOnTime = 3f;
+    private GunPowder _gunpowder;
 
     void OnEnable()
     {
+        _gunpowder = gameObject.GetComponentInParent<GunPowder>();
+        if(_gunpowder == null)
+        {
+            Debug.LogError("[GunPowderTrigger] || GunPowder 클래스를 찾을 수 없습니다!");
+            return;
+        }
+
         _collider = GetComponent<CircleCollider2D>();
         if (_collider == null)
         {
@@ -21,6 +29,11 @@ public class GunPowderTrigger : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+        if(_gunpowder._isDestroying)
+        {
+            return;
+        }
+        
         if (collision.CompareTag("Player") || collision.CompareTag("Enemy"))
         {
             GunPowder gunPowder = gameObject.GetComponentInParent<GunPowder>();

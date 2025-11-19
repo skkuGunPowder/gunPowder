@@ -18,13 +18,6 @@ public class SuicideBomb : Bomb
 
     private SpriteRenderer _spriteRenderer;
     private Player _owner;
-
-    private float _remainingTime;
-    private int _beatCount;
-    private float _timer;
-    private float _interval;
-    private bool _isBombActive = false;
-
     private IEnumerator _bombCoroutine;
 
 
@@ -35,9 +28,6 @@ public class SuicideBomb : Bomb
 
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _bombCoroutine = BombRoutine();
-        
-        // 기존 트윈 정리
-        CleanupTweens();
     }
 
     protected override void Update()
@@ -73,6 +63,11 @@ public class SuicideBomb : Bomb
 
     private void Beep(int beatCount)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         if (_suicideBombSound != null)
         {
             Sound sound = SoundManager.Instance.PlayLocalSound(_suicideBombSound.name, transform);
@@ -129,6 +124,11 @@ public class SuicideBomb : Bomb
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         _owner = _ownerPhotonview.GetComponent<Player>();
         CheckDirection();
         transform.position = _ownerPhotonview.transform.position;
@@ -158,36 +158,5 @@ public class SuicideBomb : Bomb
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         PlaceBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
-    }
-
-    [PunRPC]
-    public override void Explode()
-    {
-        CleanupTweens();
-        base.Explode();
-    }
-
-    private void OnDisable()
-    {
-        CleanupTweens();
-    }
-
-    private void OnDestroy()
-    {
-        CleanupTweens();
-    }
-
-    private void CleanupTweens()
-    {
-        // transform에 연결된 모든 DOTween 정리
-        if (transform != null)
-        {
-            transform.DOKill();
-        }
-        // 코루틴 정리
-        if (_bombCoroutine != null)
-        {
-            StopCoroutine(_bombCoroutine);
-        }
     }
 }

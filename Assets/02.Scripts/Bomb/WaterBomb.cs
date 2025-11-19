@@ -74,17 +74,7 @@ public class WaterBomb : Bomb
             return;
         }
     }
-
-    protected override void OnDestroy()
-    {
-        if (_wobbleTween != null && _wobbleTween.IsActive())
-        {
-            _wobbleTween.Kill();
-        }
-
-        base.OnDestroy();
-    }
-
+    
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {

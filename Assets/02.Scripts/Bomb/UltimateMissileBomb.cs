@@ -56,6 +56,11 @@ public class UltimateMissileBomb : Bomb
     [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         _fireDirection = fireRightDirection;
         transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), PREDELAY).OnComplete(() =>
         {

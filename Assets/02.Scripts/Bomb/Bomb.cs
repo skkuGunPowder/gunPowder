@@ -53,12 +53,6 @@ public class Bomb : MonoBehaviourPun, IBomb
             return;
         }
 
-        // 타이머는 소유자만 관리
-        if(!PhotonView.IsMine)
-        {
-            return;
-        }
-
         // VFX 위치 업데이트는 모든 클라이언트에서
         if (_vfx != null)
         {
@@ -69,13 +63,15 @@ public class Bomb : MonoBehaviourPun, IBomb
         {
             return;
         }
-
-        _fuzeTimer += Time.deltaTime;
+        
+        _fuzeTimer += Time.deltaTime;    
         if (_fuzeTimer >= _stat.FuzeTime)
         {
             _fuzeTimer = 0f;
-
-            photonView.RPC(nameof(Explode), RpcTarget.All);
+            if(PhotonView.IsMine)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+            }
         }
     }
     
@@ -130,6 +126,8 @@ public class Bomb : MonoBehaviourPun, IBomb
             return;
         }
         _isDestroying = true;
+        transform.DOKill();
+        StopAllCoroutines();
 
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
@@ -140,7 +138,7 @@ public class Bomb : MonoBehaviourPun, IBomb
         {
             _vfx.transform.SetParent(transform);
         }
-
+        
         if (PhotonView.IsMine)
         {
             PhotonNetwork.Destroy(gameObject);
@@ -174,13 +172,6 @@ public class Bomb : MonoBehaviourPun, IBomb
             _vfx.transform.SetParent(null);
             _vfx.gameObject.SetActive(false);
         }
-
-        if (transform != null)
-        {
-            transform.DOKill();
-        }
-
-        StopAllCoroutines();
     }
     
     [PunRPC]

@@ -35,6 +35,12 @@ public class BounceBomb : Bomb
 
     private void FixedUpdate()
     {
+        if(_isCharging)
+        {
+            return;
+        }
+
+
         _bottomTopChecker.localRotation = Quaternion.identity;
         RaycastHit2D bottomHit = Physics2D.Raycast(_bottomTopChecker.position, Vector2.down, 0.5f, _groundLayer);
         RaycastHit2D topHit = Physics2D.Raycast(_bottomTopChecker.position, Vector2.up, 0.5f, _groundLayer);
@@ -136,15 +142,6 @@ public class BounceBomb : Bomb
                 photonView.RPC(nameof(Explode), RpcTarget.All);
             }
         }
-    }
-
-    protected override void OnDestroy()
-    {
-        if (_wobbleTween != null && _wobbleTween.IsActive())
-        {
-            _wobbleTween.Kill();
-        }
-        base.OnDestroy();
     }
 
     [PunRPC]
