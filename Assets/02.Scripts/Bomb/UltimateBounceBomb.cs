@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
 
@@ -18,12 +19,46 @@ public class UltimateBounceBomb : Bomb
 
     protected override void Update()
     {
-        base.Update();
+        if(_isDestroying)
+        {
+            return;
+        }
+
+        if (_stat == null)
+        {
+            return;
+        }
+
         _cameraController.SmallShakeAt(transform, 2f);
+
+        _fuzeTimer += Time.deltaTime;
+        if (_fuzeTimer >= _stat.FuzeTime)
+        {
+            _fuzeTimer = 0f;
+            _isDestroying = true;
+            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
+
+            transform.DOKill();
+            StopAllCoroutines();
+            if(PhotonView.IsMine)
+            {
+                PhotonNetwork.Destroy(gameObject);
+            }
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
+        if(collision.gameObject.tag == "Player" || collision.gameObject.tag == "Immune")
+        {
+            return;
+        }
+
         if (collision.collider.CompareTag("Wall"))
         {
             Vector2 randomNormal = (collision.contacts[0].normal + new Vector2(Random.Range(-0.2f, 0.2f), Random.Range(-0.2f, 0.2f))).normalized;
@@ -33,7 +68,7 @@ public class UltimateBounceBomb : Bomb
             SoundManager.Instance.PlayLocalSound("BounceBombUlt_3", transform);
         }
 
-        if (collision.gameObject.GetComponent<IDamagable>() != null)
+        if(photonView.IsMine)
         {
             PhotonView.RPC(nameof(Explode), RpcTarget.All);
         }
@@ -42,24 +77,15 @@ public class UltimateBounceBomb : Bomb
     [PunRPC]
     public override void Explode()
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
         Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
         endExplosion.transform.position = transform.position;
         endExplosion.transform.rotation = Quaternion.identity;
         endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
-        
-        if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
-        {
-            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
-            StartCoroutine(DestoryCoroutine(gameObject));
-            return;
-        }
-
-    }
-
-    private IEnumerator DestoryCoroutine(GameObject toDestroyObject)
-    {
-        yield return null;
-        PhotonNetwork.Destroy(toDestroyObject);
     }
 
     [PunRPC]

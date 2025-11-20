@@ -22,6 +22,11 @@ public class UltimateMissileBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         if (other.gameObject == _ownerPhotonview.gameObject)
         {
             return;
@@ -51,6 +56,11 @@ public class UltimateMissileBomb : Bomb
     [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         _fireDirection = fireRightDirection;
         transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), PREDELAY).OnComplete(() =>
         {
@@ -100,11 +110,5 @@ public class UltimateMissileBomb : Bomb
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
-    }
-
-    protected override void OnDestroy()
-    {
-        StopAllCoroutines();
-        base.OnDestroy();
     }
 }
