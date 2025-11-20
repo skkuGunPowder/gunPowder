@@ -21,7 +21,11 @@ public class WaterBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
@@ -37,7 +41,6 @@ public class WaterBomb : Bomb
             if (photonView.IsMine)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
-                PhotonNetwork.Destroy(gameObject);
             }
         }
 
@@ -71,22 +74,11 @@ public class WaterBomb : Bomb
             return;
         }
     }
-
-    protected override void OnDestroy()
-    {
-        if (_wobbleTween != null && _wobbleTween.IsActive())
-        {
-            _wobbleTween.Kill();
-        }
-
-        base.OnDestroy();
-    }
-
+    
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
-        _fireDirection = fireRightDirection;
-        _currentSpeed = 0f;
+        ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
     }
 
     [PunRPC]

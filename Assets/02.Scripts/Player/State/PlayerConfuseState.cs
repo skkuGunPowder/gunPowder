@@ -39,6 +39,11 @@ public class PlayerConfuseState : PlayerBaseState
     public override void OnEnter()
     {
         base.OnEnter();
+
+        if (_owner.PhotonView.IsMine)
+        {
+            InputHandler.BlockInput = true;
+        }
         
         // 타이머 초기화
         InitializeTimers();
@@ -61,6 +66,10 @@ public class PlayerConfuseState : PlayerBaseState
     {
         base.OnExit();
         _owner.RPC_ResetAnimatorTrigger("Confuse");
+        if (_owner.PhotonView.IsMine)
+        {
+            InputHandler.BlockInput = false;
+        }
     }
 
     /// <summary>

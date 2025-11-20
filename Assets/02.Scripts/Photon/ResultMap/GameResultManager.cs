@@ -56,12 +56,20 @@ public class GameResultManager : Singleton<GameResultManager>
     private void Arrange()
     {
         // 팀별로 묶기
+        // 팀별로 묶고 정렬
         var groupedTeams = ResultDataList
             .GroupBy(p => p.Team)
-            .Select(g => g.OrderByDescending(p => p.SurviveTime).ToList())
+            .Select(g => g
+                .OrderByDescending(p => p.SurviveTime)  // 1. 생존시간 (오래할수록)
+                .ThenByDescending(p => p.Kill)          // 2. 킬 (많이할수록)
+                .ThenByDescending(p => p.Damage)        // 3. 딜 (많이할수록)
+                .ToList())
             .Where(g => g.Count > 0) // 빈 그룹 제거
             .OrderByDescending(teamGroup => teamGroup[0].SurviveTime) // 각 팀 대표의 생존시간 기준
+            .ThenByDescending(teamGroup => teamGroup[0].Kill)         // 팀 대표의 킬 기준
+            .ThenByDescending(teamGroup => teamGroup[0].Damage)       // 팀 대표의 딜 기준
             .ToList();
+
 
         ResultDataList.Clear();
 

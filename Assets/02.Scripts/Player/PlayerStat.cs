@@ -149,6 +149,7 @@ public class PlayerStat : MonoBehaviour
     public PlayerSFXAnimationEvent PlayerSFXAnimationEvent;
     public event Action OnGunPowderEmpty;
     public event Action<int> OnGunpowderIncreased;
+    public event Action<int> OnGunPowderChanged; // 건파우더 값이 변경될 때마다 호출 (현재 값 전달)
 
     void Start()
     {
@@ -279,6 +280,7 @@ public class PlayerStat : MonoBehaviour
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife, 0);
         OnGunpowderIncreased?.Invoke(amount);
+        OnGunPowderChanged?.Invoke(_currentPlayerGunPowderCount); // 건파우더 변경 이벤트 발생
     }
 
     [PunRPC]
@@ -303,6 +305,7 @@ public class PlayerStat : MonoBehaviour
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife, 0);
         OnGunpowderIncreased?.Invoke(amount);
+        OnGunPowderChanged?.Invoke(_currentPlayerGunPowderCount); // 건파우더 변경 이벤트 발생
     }
     
     public bool DecreaseGunPowderCount(int amount, int attacker, bool isNormalAttack = true, bool ignoreImmune = false)
@@ -378,6 +381,8 @@ public class PlayerStat : MonoBehaviour
         _photonView.RPC(nameof(RPC_ChangeGunpowder), RpcTarget.All, _currentPlayerGunPowderCount,
             _currentPlayerLife, attacker);
 
+        OnGunPowderChanged?.Invoke(_currentPlayerGunPowderCount); // 건파우더 변경 이벤트 발생
+        
         return isDead;
     }
 

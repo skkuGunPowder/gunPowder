@@ -1,3 +1,4 @@
+using System.Collections;
 using Photon.Pun;
 using UnityEngine;
 
@@ -111,5 +112,4 @@ public class InstantiateDestroyManager : MonoBehaviourPun
             PhotonNetwork.Destroy(photonView.gameObject);
         }
     }
-        
 }

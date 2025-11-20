@@ -52,7 +52,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     {
         // 게임 버전 설정
         PhotonNetwork.GameVersion = _gameVersion;
-        PhotonNetwork.NickName = AccountManager.Instance.CurrencAccount.Nickname;
+        PhotonNetwork.NickName = AccountManager.Instance.CurrentAccount.Nickname;
         PhotonNetwork.ConnectUsingSettings();
         
         if (first)
@@ -117,7 +117,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.LogWarning("OnJoinRandomFailed");
     }
 
     public override void OnJoinedRoom()

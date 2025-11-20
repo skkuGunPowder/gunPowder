@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
 
@@ -36,17 +37,25 @@ public class GunPowderBezierCurve : MonoBehaviour
 
     private Transform _target;
     private bool _isFallingOut;
-    private bool _hasTriggeredDestroy;
     private bool _hasPlayedDestroyVFX;
 
+    private PhotonView _photonView;
+
     public GameObject VFXPrefab;
+    private GunPowder _gunPowder;
+
+    private void Awake()
+    {
+        _gunPowder = GetComponent<GunPowder>();
+    }
 
     private void OnEnable()
     {
         //Random.InitState(RANDOM_SEED);
-
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _collider = GetComponent<BoxCollider2D>();
+        _photonView = GetComponent<PhotonView>();
+
         if (_rigidbody2D == null || _collider == null)
         {
             Debug.LogError("[GunPowderBezierCurve] Missing required components (Rigidbody2D/BoxCollider2D). Disabling component.");
@@ -101,9 +110,20 @@ public class GunPowderBezierCurve : MonoBehaviour
         // 타겟이 없거나 비활성화되었다면 즉시 제거
         if (_target == null || !_target.gameObject.activeInHierarchy)
         {
-            InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+            if(_gunPowder._isDestroying)
+            {
+                return;
+            }
+
+            if(_photonView != null && _photonView.IsMine)
+            {
+                _gunPowder._isDestroying = true;
+                PhotonNetwork.Destroy(gameObject);
+                // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+            }
             return;
         }
+
         // 타겟과 SourceViewId가 같다면 파괴
         if (gunPowder.Target != null)
         {
@@ -112,7 +132,17 @@ public class GunPowderBezierCurve : MonoBehaviour
             {
                 if (gunPowder.SourceViewId == targetPhotonView.ViewID)
                 {
-                    InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+                    if(_gunPowder._isDestroying)
+                    {
+                        return;
+                    }
+
+                    if(_photonView != null && _photonView.IsMine)
+                    {
+                        _gunPowder._isDestroying = true;
+                        PhotonNetwork.Destroy(gameObject);
+                        // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+                    }
                     return;
                 }
             }
@@ -159,17 +189,28 @@ public class GunPowderBezierCurve : MonoBehaviour
 
     private void Update()
     {
+        if (_gunPowder._isDestroying)
+        {
+            return;
+        }
+
         // 플레이어가 사라지거나 비활성화된 경우 즉시 제거
         if (_target == null || _target.gameObject == null || !_target.gameObject.activeInHierarchy)
         {
-            InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
+            if(_photonView != null && _photonView.IsMine)
+            {
+                _gunPowder._isDestroying = true;
+                transform.DOKill();
+                PhotonNetwork.Destroy(gameObject);
+                // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+            }
             return;
         }
 
         if (!_bezierFinished)
         {
             if (_timerCurrent > _timerMax)
-            {
+            {   
                 _bezierFinished = true;
                 return;
             }
@@ -189,6 +230,11 @@ public class GunPowderBezierCurve : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D collision)
     {
+        if(_gunPowder._isDestroying)
+        {
+            return;
+        }
+
         if(collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy")
           || collision.gameObject.CompareTag("Immune"))
         {
@@ -202,19 +248,25 @@ public class GunPowderBezierCurve : MonoBehaviour
                 }
             }
 
-                        // 플레이어 컴포넌트 확인
+            // 플레이어 컴포넌트 확인
             Player player = collision.gameObject.GetComponent<Player>();
             if (player != null && player.PlayerStat != null)
             {
                 // 건파우더 제거 - 마스터에서만 처리
-                if (!_hasTriggeredDestroy && PhotonNetwork.IsMasterClient)
+                // if (PhotonNetwork.IsMasterClient)
+                if(_photonView != null && _photonView.IsMine)
                 {
                     var targetView = player.GetComponent<PhotonView>();
                     if (targetView != null && targetView.gameObject.activeInHierarchy && targetView.Owner != null)
                     {
                         targetView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGunPowder), targetView.Owner, 1);
-                        InstantiateDestroyManager.Instance.RequestDestroy(GetComponent<PhotonView>().ViewID);
-                        _hasTriggeredDestroy = true;
+                        _gunPowder._isDestroying = true;
+                        transform.DOKill();
+                        PhotonNetwork.Destroy(gameObject);
+                        // if(_photonView != null && _photonView.IsMine)
+                        // {
+                        //     InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+                        // }
                     }
                 }
             }

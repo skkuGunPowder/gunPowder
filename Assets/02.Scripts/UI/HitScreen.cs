@@ -1,8 +1,5 @@
-using System;
-using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
-using PhotonPlayer = Photon.Realtime.Player;
 using DG.Tweening;
 public class HitScreen : MonoBehaviour
 {
@@ -11,13 +8,11 @@ public class HitScreen : MonoBehaviour
     public int MaxValue = 1;
     public float FadeSpeed = 0.5f;
     public float FadeInSpeed = 0.3f;
-    public Color ScreenColor = Color.white;
     private Sequence currentSequence;
 
     private void Awake()
     {
         EventManager.Instance.OnHitScreen += PlayHitScreen;
-        ScreenColor = HitScreenImage.color;
     }
 
     private void PlayHitScreen()

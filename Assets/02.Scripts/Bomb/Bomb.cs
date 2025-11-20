@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
@@ -18,10 +19,13 @@ public class Bomb : MonoBehaviourPun, IBomb
 
     public PhotonView PhotonView;
 
+    protected bool _isDestroying;
+
     private void Awake()
     {
         PhotonView = GetComponent<PhotonView>();
         _rigidBody = GetComponent<Rigidbody2D>();
+        _isDestroying = false;
 
         Init();
 
@@ -36,6 +40,7 @@ public class Bomb : MonoBehaviourPun, IBomb
     protected virtual void OnEnable()
     {
         // 모든 클라이언트에서 초기화
+        _isDestroying = false;
         _fuzeTimer = 0f;
         _currentSpeed = 0f;
         _fireDirection = Vector3.zero;
@@ -43,8 +48,7 @@ public class Bomb : MonoBehaviourPun, IBomb
 
     protected virtual void Update()
     {
-        // 타이머는 소유자만 관리
-        if(!PhotonView.IsMine)
+        if(_isDestroying)
         {
             return;
         }
@@ -59,14 +63,14 @@ public class Bomb : MonoBehaviourPun, IBomb
         {
             return;
         }
-
-        _fuzeTimer += Time.deltaTime;
+        
+        _fuzeTimer += Time.deltaTime;    
         if (_fuzeTimer >= _stat.FuzeTime)
         {
-            if (photonView.IsMine)
+            _fuzeTimer = 0f;
+            if(PhotonView.IsMine)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
-                PhotonNetwork.Destroy(gameObject);
             }
         }
     }
@@ -86,7 +90,7 @@ public class Bomb : MonoBehaviourPun, IBomb
         }
         else
         {
-            Debug.LogWarning($"Owner PhotonView with ID {ownerViewId} not found");
+            Debug.LogWarning($"ID{ownerViewId}를 찾을 수 없습니다.");
         }
     }
 
@@ -102,13 +106,10 @@ public class Bomb : MonoBehaviourPun, IBomb
             int otherPriority = otherBomb._stat.Priority;
             if (_stat.Priority <= otherPriority)
             {
-                if (photonView.IsMine)
-                {
-                    photonView.RPC(nameof(Explode), RpcTarget.All);
-                    PhotonNetwork.Destroy(gameObject);
-                }
+                return false;
             }
-            else if (_stat.Priority - otherPriority < 2)
+            
+            if (_stat.Priority - otherPriority < 2)
             {
                 _rigidBody.linearVelocity /= 2;
                 return true;
@@ -120,6 +121,14 @@ public class Bomb : MonoBehaviourPun, IBomb
     [PunRPC]
     public virtual void Explode()
     {
+        if (_isDestroying)
+        {
+            return;
+        }
+        _isDestroying = true;
+        transform.DOKill();
+        StopAllCoroutines();
+
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;
@@ -129,15 +138,11 @@ public class Bomb : MonoBehaviourPun, IBomb
         {
             _vfx.transform.SetParent(transform);
         }
-
-        // if (PhotonView != null && PhotonView.IsMine)
-        // {
-        //     PhotonNetwork.Destroy(gameObject);
-        // }
-        // else
-        // {
-        //     Destroy(gameObject);
-        // }
+        
+        if (PhotonView.IsMine)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
     public BombStat GetBombStat()
@@ -162,12 +167,13 @@ public class Bomb : MonoBehaviourPun, IBomb
 
     protected virtual void OnDestroy()
     {
-        if (transform != null)
+        if (_vfx != null)
         {
-            transform.DOKill();
+            _vfx.transform.SetParent(null);
+            _vfx.gameObject.SetActive(false);
         }
     }
-
+    
     [PunRPC]
     // 폭탄 두기
     public virtual void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)

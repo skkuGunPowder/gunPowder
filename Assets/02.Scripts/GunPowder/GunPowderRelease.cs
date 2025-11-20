@@ -1,5 +1,3 @@
-using Photon.Pun.UtilityScripts;
-using RaycastPro.RaySensors;
 using RaycastPro.RaySensors2D;
 using UnityEngine;
 
@@ -27,6 +25,7 @@ public class GunPowderRelease : MonoBehaviour
     private BoxRay2D _groundRay2D;
 
     private Rigidbody2D _rigidbody2D;
+    private GunPowder _gunPowder;
 
     private int _randomSeed;
 
@@ -34,6 +33,7 @@ public class GunPowderRelease : MonoBehaviour
 
     void OnEnable()
     {
+        _gunPowder = GetComponent<GunPowder>();
         _collider = GetComponent<BoxCollider2D>();
         _groundRay2D = GetComponent<BoxRay2D>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
@@ -63,6 +63,11 @@ public class GunPowderRelease : MonoBehaviour
 
     void Update()
     {
+        if(_gunPowder._isDestroying)
+        {
+            return;
+        }
+        
         if (!isGrounded)
         {
             CheckGroundHit();

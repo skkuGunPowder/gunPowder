@@ -893,7 +893,7 @@ GameObject:
   - component: {fileID: 9132079472274357184}
   - component: {fileID: 3291587386075111323}
   - component: {fileID: 2161372930500741118}
-  - component: {fileID: 1694469692039550700}
+  - component: {fileID: 6819545381762039517}
   m_Layer: 7
   m_Name: PlayerTest
   m_TagString: Player
@@ -991,7 +991,7 @@ MonoBehaviour:
   - {fileID: 7133949878334549731}
   - {fileID: 2297686660635884882}
   - {fileID: 6433354483379324661}
-  _myDiePartList: []
+  _diePartList: []
   PhotonView: {fileID: 0}
   _bombSpawnPointList:
   - {fileID: 6130512474795203499}
@@ -1007,6 +1007,7 @@ MonoBehaviour:
   _attackTimer: 0
   _gunPowderDecreaseTimer: 0
   _gunPowderDecreaseWithoutAttackTimer: 0
+  _colorUpdateWithoutAttackTimer: 0
   _storedVelocity: {x: 0, y: 0}
   _hasStoredVelocity: 0
   _gunPowderSpreadAngle: 90
@@ -1016,6 +1017,14 @@ MonoBehaviour:
   DieExplosionPrefab: {fileID: 0}
   HitEffectPrefab: {fileID: 0}
   UltimateEffectPrefab: {fileID: 0}
+  ExplosionEffectPrefab: {fileID: 0}
+  FallDeadVFXPrefab: {fileID: 0}
+  AirDropItemLootVFX: {fileID: 0}
+  IsSuperArmor: 0
+  _playerSFXAnimationEvent: {fileID: 0}
+  CrabHoldPoint: {fileID: 0}
+  LastDashTapTimeLeft: -999
+  LastDashTapTimeRight: -999
   _ultimateChanceTimer: 0
 --- !u!114 &4024883436230281669
 MonoBehaviour:
@@ -1043,13 +1052,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerStatSO: {fileID: 11400000, guid: 24c91fb983f6a934f8d9ad203ab6b394, type: 2}
   _moveSpeed: 0
-  _jumpForce: 0
-  _dashTime: 0
-  _doubleTapTime: 0
-  _dashSpeed: 0
-  _breakTime: 0
   _runSpeed: 0
+  _jumpForce: 0
   _maxJumpCount: 0
+  _dashTime: 0
+  _dashSpeed: 0
+  _doubleTapTime: 0
+  _breakTime: 0
   _jumpDashCount: 0
   _recoilTime: 0
   _recoilSpeed: 0
@@ -1057,26 +1066,38 @@ MonoBehaviour:
   _normalRecoilSpeed: 0
   _confuseTime: 5
   _hitStopGunPowderCount: 50
+  _damagedTime: 0
+  _invincibleTime: 0
   _isRunning: 0
   _isJumping: 0
   _isFallingDead: 0
   _isImmune: 0
   _isDownJump: 0
   _isWet: 0
+  _isPausedNoAttack: 0
   _myMoveSpeed: 0
   _jumpCount: 0
   _facingDirection: 1
+  IsFallingFromLedge: 0
+  _currentPlayerGunPowderCount: 0
+  _currentPlayerLife: 0
+  _initGunpowderCount: 0
   _gunPowderDecreaseTime: 0
+  _currentPlayerDamagedCount: 0
   _attackPenaltyTime: 0
   _attackPenaltyAmount: 0
-  _initGunpowderCount: 0
   _dieExplosionDamage: 0
   _dieExplosionRadius: 0
   _dieExplosionForce: 0
-  _invincibleTime: 0
-  _currentPlayerGunPowderCount: 0
-  _currentPlayerLife: 0
-  _currentPlayerDamagedCount: 0
+  _totalDamage: 0
+  _totalKillCount: 0
+  _hasUltimateChance: 0
+  _hasUsedUltimateThisLife: 0
+  _ultimateChanceDuration: 5
+  _ultimateTriggerThreshold: 30
+  _lastAttackerActorNumber: -1
+  _lastAttackTime: 0
+  _attackTrackingDuration: 5
   _mySpriteRendererList:
   - {fileID: 4841738079202767485}
   - {fileID: 6646158249678255210}
@@ -1085,14 +1106,7 @@ MonoBehaviour:
   - {fileID: 1204886375384353146}
   - {fileID: 4296287364748657003}
   - {fileID: 1012296347412030769}
-  _damagedTime: 0
-  _totalDamage: 0
-  _totalKillCount: 0
-  IsFallingFromLedge: 0
-  _hasUltimateChance: 0
-  _hasUsedUltimateThisLife: 0
-  _ultimateChanceDuration: 5
-  _ultimateTriggerThreshold: 30
+  PlayerSFXAnimationEvent: {fileID: 0}
 --- !u!70 &975501548764073768
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1239,11 +1253,11 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 1694469692039550700}
+  - {fileID: 6819545381762039517}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &1694469692039550700
+--- !u!114 &6819545381762039517
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1252,13 +1266,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 6871245214315820508}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Script: {fileID: 11500000, guid: 8efc6b1d64977384eb3405357896c656, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 1
-  m_UseLocal: 1
+  m_PositionModel:
+    SynchronizeEnabled: 1
+    TeleportEnabled: 1
+    TeleportIfDistanceGreaterThan: 3
+    InterpolateOption: 4
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 1
+    ExtrapolateOption: 0
+    ExtrapolateSpeed: 1
+    ExtrapolateIncludingRoundTripTime: 1
+    ExtrapolateNumberOfStoredPositions: 1
+  m_RotationModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 0
+    InterpolateRotateTowardsSpeed: 180
+    InterpolateLerpSpeed: 5
+  m_ScaleModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 0
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 0
 --- !u!1 &7107957649425927777
 GameObject:
   m_ObjectHideFlags: 0

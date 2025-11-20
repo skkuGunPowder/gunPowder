@@ -12,8 +12,9 @@
     {
         public float minDepth = .5f;
         public float maxDepth = -.5f;
-        public float MinDepth => transform.position.z + minDepth;
-        public float MaxDepth => transform.position.z + maxDepth;
+
+        public float MinDepth => transform.position.z + Mathf.Min(minDepth, maxDepth);
+        public float MaxDepth => transform.position.z + Mathf.Max(minDepth, maxDepth);
 
         protected bool isDetect;
         public override bool Performed
@@ -262,7 +263,7 @@
             if (triggerInteraction != QueryTriggerInteraction.UseGlobal) Physics2D.queriesHitTriggers = triggerInteraction == QueryTriggerInteraction.Collide;
             OnCast();
             if (triggerInteraction != QueryTriggerInteraction.UseGlobal) Physics2D.queriesHitTriggers = tQ;
-            Physics2D.queriesStartInColliders = Physics2D.queriesStartInColliders;
+            Physics2D.queriesStartInColliders = tHB;
         }
 
         public override void UpdateStamp()

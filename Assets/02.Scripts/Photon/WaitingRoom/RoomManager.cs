@@ -71,6 +71,12 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _initialized = true;
         SetRoom();
         Initializer.Init(this);
+
+        // 인게임 채팅 채널 자동 참가
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.JoinInGameChannel();
+        }
     }
 
     // 준비가 다 되었다면 마스터가 정한 맵으로 이동시킴
@@ -85,6 +91,8 @@ public class RoomManager : PhotonSingleton<RoomManager>
         
         _room.IsVisible = false;
         _room.IsOpen = false;
+        
+        PhotonNetwork.DestroyAll(); // 오브젝트들 모두 제거
         
         if (SelectedMap == EMap.Random)
         {
@@ -220,6 +228,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
         {
             EventManager.Instance.RoomDataChanged();
         }
+
+        if (propertiesThatChanged.ContainsKey(ERoomProperties.GameMode.ToString()))
+        {
+            Debug.Log("GameModechange " + propertiesThatChanged[ERoomProperties.GameMode.ToString()]);
+        }
     }
 
     // 방장이 바뀌면 콜백
@@ -240,6 +253,20 @@ public class RoomManager : PhotonSingleton<RoomManager>
         newMasterClient.SetCustomProperties(table);
     }
   
+    // 방을 나갈 때 채팅 채널 퇴장
+    public override void OnLeftRoom()
+    {
+        base.OnLeftRoom();
+
+        Debug.Log("[RoomManager] 방을 나갔습니다. 인게임 채팅 채널 퇴장");
+
+        // 인게임 채팅 채널 퇴장
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.LeaveInGameChannel();
+        }
+    }
+
     public override void OnDisable()
     {
         base.OnDisable();

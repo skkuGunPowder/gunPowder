@@ -1,3 +1,5 @@
+using System.Collections;
+using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
 
@@ -17,12 +19,46 @@ public class UltimateBounceBomb : Bomb
 
     protected override void Update()
     {
-        base.Update();
+        if(_isDestroying)
+        {
+            return;
+        }
+
+        if (_stat == null)
+        {
+            return;
+        }
+
         _cameraController.SmallShakeAt(transform, 2f);
+
+        _fuzeTimer += Time.deltaTime;
+        if (_fuzeTimer >= _stat.FuzeTime)
+        {
+            _fuzeTimer = 0f;
+            _isDestroying = true;
+            SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
+
+            transform.DOKill();
+            StopAllCoroutines();
+            if(PhotonView.IsMine)
+            {
+                PhotonNetwork.Destroy(gameObject);
+            }
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
+        if(collision.gameObject.tag == "Player" || collision.gameObject.tag == "Immune")
+        {
+            return;
+        }
+
         if (collision.collider.CompareTag("Wall"))
         {
             Vector2 randomNormal = (collision.contacts[0].normal + new Vector2(Random.Range(-0.2f, 0.2f), Random.Range(-0.2f, 0.2f))).normalized;
@@ -32,7 +68,7 @@ public class UltimateBounceBomb : Bomb
             SoundManager.Instance.PlayLocalSound("BounceBombUlt_3", transform);
         }
 
-        if (collision.gameObject.GetComponent<IDamagable>() != null)
+        if(photonView.IsMine)
         {
             PhotonView.RPC(nameof(Explode), RpcTarget.All);
         }
@@ -41,38 +77,15 @@ public class UltimateBounceBomb : Bomb
     [PunRPC]
     public override void Explode()
     {
-        // 중복 호출 방지
-        if (_isExploding) return;
-        _isExploding = true;
-
-        // 소유자만 파괴 요청
-        if (PhotonView.IsMine && _fuzeTimer >= _stat.FuzeTime)
+        if(_isDestroying)
         {
-            Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
-            endExplosion.transform.position = transform.position;
-            endExplosion.transform.rotation = Quaternion.identity;
-            endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
-
-            // 추가 안전장치: PhotonView가 여전히 유효한지 확인
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
-
             return;
         }
 
-        SoundManager.Instance.StopLoopSound("BounceBombUlt_2");
-
-        Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
-        explosion.transform.position = transform.position;
-        explosion.transform.rotation = Quaternion.identity;
-        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
+        Explosion endExplosion = ExplosionPool.Instance.Get(EndExplosion.name);
+        endExplosion.transform.position = transform.position;
+        endExplosion.transform.rotation = Quaternion.identity;
+        endExplosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
     }
 
     [PunRPC]

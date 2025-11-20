@@ -39,8 +39,9 @@ public class UltimateManager : Singleton<UltimateManager>
     {
         if (_ultimateDict.TryGetValue(bombID, out Ultimate ultimate))
         {
-            ultimate.SetOwner(player);
-            return ultimate;
+            Ultimate ultimateInstance = Instantiate(ultimate);
+            ultimateInstance.SetOwner(player);
+            return ultimateInstance;
         }
         
         Debug.LogError($"[{bombID}]는 궁극기가 없습니다.");
@@ -51,11 +52,17 @@ public class UltimateManager : Singleton<UltimateManager>
     {
         if (_ultimateDict.TryGetValue(bombID, out Ultimate ultimate))
         {
-            ultimate.SetOwner(player);
-            return ultimate as T;
+            Ultimate ultimateInstance = Instantiate(ultimate);
+            ultimateInstance.SetOwner(player);
+            return ultimateInstance as T;
         }
 
         Debug.LogError($"[{bombID}]는 궁극기가 없습니다.");
         return null;
+    }
+    
+    public void ReturnUltimate(Ultimate ultimate)
+    {
+        Destroy(ultimate.gameObject);
     }
 }
