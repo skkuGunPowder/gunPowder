@@ -91,8 +91,20 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
     public void SendChatMessage(string text)
     {
-        if (_chatClient == null) return;
-        if (_currentChannelName == string.Empty) return;
+        Debug.Log($"[UIChatManager] SendChatMessage 호출: {text}");
+        Debug.Log($"[UIChatManager] 현재 채널: Group={_currentChannelGroup}, Name={_currentChannelName}, Number={_currentChannelNumber}");
+
+        if (_chatClient == null)
+        {
+            Debug.LogError("[UIChatManager] ChatClient가 null입니다!");
+            return;
+        }
+
+        if (_currentChannelName == string.Empty)
+        {
+            Debug.LogError("[UIChatManager] 현재 채널이 설정되지 않았습니다!");
+            return;
+        }
 
         // Nickname 유효성 검사 (메시지 전송 시점에 검증)
         if (AccountManager.Instance == null ||
@@ -103,12 +115,30 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             return;
         }
 
-        if (!_channelList.ContainsKey(_currentChannelGroup)) return;
-        if (!_channelList[_currentChannelGroup].ContainsKey(_currentChannelName)) return;
-        if (!_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber)) return;
+        if (!_channelList.ContainsKey(_currentChannelGroup))
+        {
+            Debug.LogError($"[UIChatManager] ChannelGroup '{_currentChannelGroup}'가 채널 리스트에 없습니다!");
+            return;
+        }
+
+        if (!_channelList[_currentChannelGroup].ContainsKey(_currentChannelName))
+        {
+            Debug.LogError($"[UIChatManager] ChannelName '{_currentChannelName}'이 채널 리스트에 없습니다!");
+            return;
+        }
+
+        if (!_channelList[_currentChannelGroup][_currentChannelName].ContainsKey(_currentChannelNumber))
+        {
+            Debug.LogError($"[UIChatManager] ChannelNumber '{_currentChannelNumber}'가 채널 리스트에 없습니다!");
+            return;
+        }
 
         ChannelInfo channelInfo = _channelList[_currentChannelGroup][_currentChannelName][_currentChannelNumber];
-        if (channelInfo == null) return;
+        if (channelInfo == null)
+        {
+            Debug.LogError("[UIChatManager] ChannelInfo가 null입니다!");
+            return;
+        }
 
         // 귓속말
         if (text.IndexOf("/w") == 0)
@@ -129,12 +159,15 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
                 message += whisper[i] + " ";
             }
 
+            Debug.Log($"[UIChatManager] 귓속말 전송: To={whisper[1]}, Msg={message}");
             _chatClient.SendWhisperMessage(whisper[1], message);
             return;
         }
 
         // 일반 채팅 메시지 전송
+        Debug.Log($"[UIChatManager] 채팅 메시지 전송: Group={channelInfo.ChannelGroup}, Name={channelInfo.ChannelName}, Number={channelInfo.ChannelNumber}, Msg={text}");
         _chatClient.SendChatMessage(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, text);
+        Debug.Log("[UIChatManager] ChatClient.SendChatMessage 호출 완료");
     }
 
     public void OnJoinChannel(ChannelInfo channelInfo)
@@ -288,26 +321,52 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
     public void OnChatMessage(MessageInfo messageInfo)
     {
-        if (!_channelList.ContainsKey(messageInfo.ChannelGroup)) return;
+        Debug.Log($"[UIChatManager] OnChatMessage 수신: Group={messageInfo.ChannelGroup}, Name={messageInfo.ChannelName}, Number={messageInfo.ChannelNumber}, From={messageInfo.GamerName}, Msg={messageInfo.Message}");
+        Debug.Log($"[UIChatManager] 현재 채널: Group={_currentChannelGroup}, Name={_currentChannelName}, Number={_currentChannelNumber}");
 
-        if (!_channelList[messageInfo.ChannelGroup].ContainsKey(messageInfo.ChannelName)) return;
+        if (!_channelList.ContainsKey(messageInfo.ChannelGroup))
+        {
+            Debug.LogWarning($"[UIChatManager] ChannelGroup '{messageInfo.ChannelGroup}'가 채널 리스트에 없습니다.");
+            return;
+        }
 
-        if (!_channelList[messageInfo.ChannelGroup][messageInfo.ChannelName].ContainsKey(messageInfo.ChannelNumber)) return;
+        if (!_channelList[messageInfo.ChannelGroup].ContainsKey(messageInfo.ChannelName))
+        {
+            Debug.LogWarning($"[UIChatManager] ChannelName '{messageInfo.ChannelName}'이 채널 리스트에 없습니다.");
+            return;
+        }
+
+        if (!_channelList[messageInfo.ChannelGroup][messageInfo.ChannelName].ContainsKey(messageInfo.ChannelNumber))
+        {
+            Debug.LogWarning($"[UIChatManager] ChannelNumber '{messageInfo.ChannelNumber}'가 채널 리스트에 없습니다.");
+            return;
+        }
 
         ChannelInfo channelInfo = _channelList[messageInfo.ChannelGroup][messageInfo.ChannelName][messageInfo.ChannelNumber];
-        if (channelInfo == null) return;
+        if (channelInfo == null)
+        {
+            Debug.LogWarning("[UIChatManager] ChannelInfo가 null입니다.");
+            return;
+        }
 
         channelInfo.Messages.Add(messageInfo);
 
         // 채널 타입별 이벤트 발행
-        if (messageInfo.ChannelGroup == "ingame")
+        if (messageInfo.ChannelGroup.Contains("ingame") || messageInfo.ChannelGroup.StartsWith("ig_"))
         {
             // 현재 인게임 채널의 메시지만 처리
             if (_currentChannelGroup == messageInfo.ChannelGroup &&
                 _currentChannelName == messageInfo.ChannelName &&
                 _currentChannelNumber == messageInfo.ChannelNumber)
             {
+                Debug.Log($"[UIChatManager] 인게임 채팅 이벤트 발행: {messageInfo.Message}");
+                int subscriberCount = OnChatMessageReceived?.GetInvocationList().Length ?? 0;
+                Debug.Log($"[UIChatManager] OnChatMessageReceived 구독자 수: {subscriberCount}");
                 OnChatMessageReceived?.Invoke(messageInfo);
+            }
+            else
+            {
+                Debug.LogWarning($"[UIChatManager] 채널 불일치로 이벤트 발행 안 함. 현재=({_currentChannelGroup}/{_currentChannelName}/{_currentChannelNumber}), 메시지=({messageInfo.ChannelGroup}/{messageInfo.ChannelName}/{messageInfo.ChannelNumber})");
             }
         }
         else if (messageInfo.ChannelGroup == "party")

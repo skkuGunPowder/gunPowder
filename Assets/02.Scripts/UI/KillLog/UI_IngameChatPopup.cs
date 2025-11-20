@@ -51,7 +51,14 @@ public class UI_IngameChatPopup : UI_Popup
         // 씬 변경 이벤트 구독
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        // 이벤트 구독
+        _closeCallback = Close;
+        // 시작 시 현재 씬 체크
+        CheckCurrentScene();
+    }
+
+    private void Start()
+    {
+        // UIChatManager가 준비된 후 이벤트 구독
         if (UIChatManager.Instance != null)
         {
             UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived; // 중복 방지
@@ -59,11 +66,13 @@ public class UI_IngameChatPopup : UI_Popup
 
             UIChatManager.Instance.OnChannelLeft -= OnChannelLeft; // 중복 방지
             UIChatManager.Instance.OnChannelLeft += OnChannelLeft;
-        }
 
-        _closeCallback = Close;
-        // 시작 시 현재 씬 체크
-        CheckCurrentScene();
+            Debug.Log("[UI_IngameChatPopup] UIChatManager 이벤트 구독 완료");
+        }
+        else
+        {
+            Debug.LogError("[UI_IngameChatPopup] UIChatManager.Instance가 null입니다!");
+        }
     }
 
 
@@ -170,28 +179,42 @@ public class UI_IngameChatPopup : UI_Popup
     /// </summary>
     private void OnChatMessageReceived(MessageInfo messageInfo)
     {
-        if (ChatContent == null) return;
+        Debug.Log($"[UI_IngameChatPopup] OnChatMessageReceived 콜백 호출: {messageInfo.GamerName} - {messageInfo.Message}");
+
+        if (ChatContent == null)
+        {
+            Debug.LogError("[UI_IngameChatPopup] ChatContent가 null입니다!");
+            return;
+        }
+
+        if (ChatListPrefab == null)
+        {
+            Debug.LogError("[UI_IngameChatPopup] ChatListPrefab이 null입니다!");
+            return;
+        }
 
         // 채팅 리스트 UI 생성
-        //GameObject chatList = Instantiate(Resources.Load<GameObject>("Prefabs/ChatList"), ChatContent.transform);
         GameObject chatList = Instantiate(ChatListPrefab, ChatContent.transform);
 
         if (chatList == null)
         {
-            Debug.LogError("[UI_IngameChat] ChatList 프리팹을 로드할 수 없습니다.");
+            Debug.LogError("[UI_IngameChatPopup] ChatList 프리팹 Instantiate 실패!");
             return;
         }
+
+        Debug.Log($"[UI_IngameChatPopup] ChatList 프리팹 Instantiate 성공: {chatList.name}");
 
         UIChatList chatListComponent = chatList.GetComponent<UIChatList>();
         if (chatListComponent == null)
         {
-            Debug.LogError("[UI_IngameChat] UIChatList 컴포넌트를 찾을 수 없습니다.");
+            Debug.LogError("[UI_IngameChatPopup] UIChatList 컴포넌트를 찾을 수 없습니다.");
             Destroy(chatList);
             return;
         }
 
         // 자신의 메시지인지 확인
         bool isMyMessage = messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname;
+        Debug.Log($"[UI_IngameChatPopup] 메시지 설정: isMyMessage={isMyMessage}");
 
         // 채팅 리스트에 데이터 설정
         chatListComponent.SetData(
@@ -205,6 +228,8 @@ public class UI_IngameChatPopup : UI_Popup
             null, // OnTranslateCheckButton - 인게임에서는 사용하지 않음
             isMyMessage
         );
+
+        Debug.Log("[UI_IngameChatPopup] 채팅 메시지 UI 생성 완료");
     }
 
     /// <summary>
@@ -233,8 +258,18 @@ public class UI_IngameChatPopup : UI_Popup
 
         if (string.IsNullOrEmpty(text)) return;
 
+        Debug.Log($"[UI_IngameChatPopup] 채팅 메시지 전송: {text}");
+
         // 채팅 메시지 전송
-        UIChatManager.Instance.SendChatMessage(text);
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.SendChatMessage(text);
+            Debug.Log($"[UI_IngameChatPopup] UIChatManager.SendChatMessage 호출 완료");
+        }
+        else
+        {
+            Debug.LogError("[UI_IngameChatPopup] UIChatManager.Instance가 null입니다!");
+        }
 
         // 전송 후에도 InputField에 포커스 유지 (연속 채팅 가능)
         FocusInputField();
