@@ -10,30 +10,28 @@ public class MissileBomb : Bomb
     public AudioClip MisiileTrailSound;
 
 
-
     protected override void Init()
     {
         base.Init();
         SetStat(ID);
     }
 
-
-    protected override void Update()
-    {
-        base.Update();
-    }
-
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
         if (other.gameObject == _ownerPhotonview.gameObject)
         {
             return;
         }
 
         if (other.gameObject.tag == "Immune")
-            {
-                return;
-            }
+        {
+            return;
+        }
 
         if (CheckPriority(other))
         {
@@ -55,6 +53,11 @@ public class MissileBomb : Bomb
     [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        
         _fireDirection = fireRightDirection;
         transform.DORotateQuaternion(Quaternion.LookRotation(fireFowordDirection, fireUpDrection), PREDELAY)
         .OnComplete(() =>
@@ -100,12 +103,5 @@ public class MissileBomb : Bomb
     public override void SmashBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
-    }
-
-    protected override void OnDestroy()
-    {
-        // 코루틴 중지
-        StopAllCoroutines();
-        base.OnDestroy();
     }
 }
