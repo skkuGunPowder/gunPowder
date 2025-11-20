@@ -49,8 +49,8 @@ public class UI_IngameChatPopup : UI_Popup
         // 팝업이 열릴 때 InputField에 자동 포커스
         FocusInputField();
 
-        // 스크롤을 맨 아래로
-        ScrollToBottom();
+        // 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
+        StartCoroutine(ScrollToBottomCoroutine());
     }
 
     private void Start()
@@ -106,8 +106,8 @@ public class UI_IngameChatPopup : UI_Popup
 
         Debug.Log($"[UI_IngameChatPopup] 기존 메시지 복원 완료: {messages.Count}개");
 
-        // 메시지 복원 후 스크롤을 맨 아래로
-        ScrollToBottom();
+        // 메시지 복원 후 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
+        StartCoroutine(ScrollToBottomCoroutine());
     }
 
     /// <summary>
@@ -181,8 +181,8 @@ public class UI_IngameChatPopup : UI_Popup
         Debug.Log($"[UI_IngameChatPopup] OnChatMessageReceived 콜백 호출: {messageInfo.GamerName} - {messageInfo.Message}");
         CreateChatListUI(messageInfo);
 
-        // 새 메시지 추가 후 스크롤을 맨 아래로
-        ScrollToBottom();
+        // 새 메시지 추가 후 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
+        StartCoroutine(ScrollToBottomCoroutine());
     }
 
     /// <summary>
@@ -249,16 +249,24 @@ public class UI_IngameChatPopup : UI_Popup
 
     /// <summary>
     /// 스크롤을 맨 아래로 이동 (최신 메시지 보이도록)
+    /// Coroutine으로 지연 처리하여 레이아웃이 완전히 업데이트된 후 스크롤
     /// </summary>
-    private void ScrollToBottom()
+    private System.Collections.IEnumerator ScrollToBottomCoroutine()
     {
-        if (ChatScrollRect == null) return;
+        if (ChatScrollRect == null) yield break;
+
+        // 레이아웃이 완전히 업데이트될 때까지 대기 (2프레임)
+        yield return null;
+        yield return null;
 
         // Canvas를 강제로 업데이트하여 레이아웃 재계산
         Canvas.ForceUpdateCanvases();
 
-        // verticalNormalizedPosition: 0 = 맨 아래, 1 = 맨 위
+        // verticalNormalizedPosition: 0 = 맨 위, 1 = 맨 아래
+        // (Content의 Pivot 설정에 따라 다를 수 있음. 0과 1 중 맨 아래로 가는 값 사용)
         ChatScrollRect.verticalNormalizedPosition = 0f;
+
+        Debug.Log($"[UI_IngameChatPopup] 스크롤을 맨 아래로 이동 완료 (position: {ChatScrollRect.verticalNormalizedPosition})");
     }
 
     /// <summary>
@@ -279,13 +287,27 @@ public class UI_IngameChatPopup : UI_Popup
     private void SendChatMessage()
     {
         // 인게임 채팅 UI에서 검사할 부분은 내용이 비어있는가?
-        if (ChatInput == null) return;
-        if (ChatInput.text.Length == 0) return;
+        if (ChatInput == null)
+        {
+            return;
+        }
+
+        // 빈 메시지인 경우 포커스 유지하고 return
+        if (ChatInput.text.Length == 0)
+        {
+            FocusInputField();
+            return;
+        }
 
         string text = ChatInput.text;
         ChatInput.text = string.Empty;
 
-        if (string.IsNullOrEmpty(text)) return;
+        // 공백만 있는 경우 포커스 유지하고 return
+        if (string.IsNullOrEmpty(text.Trim()))
+        {
+            FocusInputField();
+            return;
+        }
 
         Debug.Log($"[UI_IngameChatPopup] 채팅 메시지 전송: {text}");
 
