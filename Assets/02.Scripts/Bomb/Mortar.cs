@@ -2,7 +2,6 @@ using Photon.Pun;
 using UnityEngine;
 using Heathen.UnityPhysics;
 using Com.LuisPedroFonseca.ProCamera2D;
-using System;
 
 
 public class Mortar : Bomb
@@ -214,7 +213,6 @@ public class Mortar : Bomb
         {
             _proCamera.UpdateScreenSize(_defaultZoom);
         }
-
         base.OnDestroy();
     }
 

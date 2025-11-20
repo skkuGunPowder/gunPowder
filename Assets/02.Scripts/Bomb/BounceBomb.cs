@@ -10,8 +10,8 @@ public class BounceBomb : Bomb
 
     private Vector3 _originalScale;
     private Tween _wobbleTween;
-    private float _wobbleAmount = 0.6f;     // 출렁이는 크기 변화 비율
-    private float _wobbleDuration = 0.1f;   // 출렁이는 애니메이션 시간
+    private float _wobbleAmount = 0.6f;
+    private float _wobbleDuration = 0.1f;
 
     private float _delayTime = 0.1f;
     private float _bounceSpeedY = 24f;
@@ -31,13 +31,16 @@ public class BounceBomb : Bomb
         base.Init();
         SetStat(ID);
         _originalScale = transform.localScale;
-        
-        // 기존 트윈 정리
-        CleanupTweens();
     }
 
     private void FixedUpdate()
     {
+        if(_isCharging)
+        {
+            return;
+        }
+
+
         _bottomTopChecker.localRotation = Quaternion.identity;
         RaycastHit2D bottomHit = Physics2D.Raycast(_bottomTopChecker.position, Vector2.down, 0.5f, _groundLayer);
         RaycastHit2D topHit = Physics2D.Raycast(_bottomTopChecker.position, Vector2.up, 0.5f, _groundLayer);
@@ -88,8 +91,10 @@ public class BounceBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 기존 트윈 정리
-        CleanupTweens();
+        if(_isDestroying)
+        {
+            return;
+        }
 
         ContactPoint2D contact = collision.contacts[0];
         Vector2 normal = transform.InverseTransformDirection(contact.normal.normalized);
@@ -169,36 +174,5 @@ public class BounceBomb : Bomb
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
         ThrowBomb(fireRightDirection, fireUpDrection, fireFowordDirection);
-    }
-
-    [PunRPC]
-    public override void Explode()
-    {
-        CleanupTweens();
-        base.Explode();
-    }
-
-    private void OnDisable()
-    {
-        CleanupTweens();
-    }
-
-    protected override void OnDestroy()
-    {
-        CleanupTweens();
-    }
-
-    private void CleanupTweens()
-    {
-        if (_wobbleTween != null && _wobbleTween.IsActive())
-        {
-            _wobbleTween.Kill();
-            _wobbleTween = null;
-        }
-        // transform에 연결된 모든 DOTween 정리
-        if (transform != null)
-        {
-            transform.DOKill();
-        }
     }
 }

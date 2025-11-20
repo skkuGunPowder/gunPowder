@@ -1,14 +1,7 @@
-using System.Collections;
 using UnityEngine;
 using DG.Tweening;
 using Photon.Pun;
 
-public enum EBombVelocity
-{
-    SLOW,
-    NORMAL,
-    FAST
-}
 
 public class BasicBomb : Bomb
 {
@@ -16,12 +9,6 @@ public class BasicBomb : Bomb
 
     [SerializeField] private float pulseScale = 2f; // 펄스 크기
     [SerializeField] private float pulseDuration = 0.1f; // 펄스 지속 시간
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        Init();
-    }
 
     protected override void Init()
     {
@@ -36,7 +23,7 @@ public class BasicBomb : Bomb
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if(!PhotonView.IsMine)
+        if (_isDestroying)
         {
             return;
         }
@@ -51,7 +38,10 @@ public class BasicBomb : Bomb
             return;
         }
         
-        photonView.RPC(nameof(Explode), RpcTarget.All);
+        if(photonView.IsMine)
+        {
+            photonView.RPC(nameof(Explode), RpcTarget.All);
+        }
     }
 
     [PunRPC]
@@ -79,7 +69,13 @@ public class BasicBomb : Bomb
     [PunRPC]
     public override void BoostBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
         _fireDirection = fireRightDirection;
+
         if (photonView.IsMine)
         {
             photonView.RPC(nameof(Explode), RpcTarget.All);

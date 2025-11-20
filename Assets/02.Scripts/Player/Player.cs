@@ -169,7 +169,8 @@ public class Player : MonoBehaviourPun, IDamagable
     [Header("크랩용")]
     public Transform CrabHoldPoint;
 
-
+    private PlayerHealthBar _playerHealthBar;
+    public PlayerHealthBar PlayerHealthBar => _playerHealthBar;
 
     // 대시 탭 타임
     public float LastDashTapTimeLeft = -999f;
@@ -186,6 +187,9 @@ public class Player : MonoBehaviourPun, IDamagable
     private float _lastDamageRatio = 1f; // damage / maxDamage 비율
     public float LastDamageRatio => _lastDamageRatio;
 
+    // 부활 후 첫 공격 여부 (HP bar 최대값 리셋용)
+    private bool _isAfterResurrect = false;
+
     private void Awake()
     {
         _playerStat = GetComponent<PlayerStat>();
@@ -195,6 +199,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerFSM = GetComponent<PlayerFSM>();
         _damagePopup = GetComponent<DamagePopup>();
         _skinManager = GetComponent<PlayerSkinManager>();
+        _playerHealthBar = GetComponentInChildren<PlayerHealthBar>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
@@ -636,6 +641,15 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 플레이어 스탯 초기화 (건파우더 초기화)
         _playerStat.ResurrectPlayerStat();
+
+        // HP bar 초기화 (부활 시 maxHP를 초기값으로 리셋)
+        if (_playerHealthBar != null)
+        {
+            _playerHealthBar.ResetHealthBarOnResurrect();
+        }
+
+        // 부활 후 첫 공격 플래그 설정
+        _isAfterResurrect = true;
     }
 
     private void HandleGunpowderIncreased(int amount)
@@ -1500,6 +1514,11 @@ public class Player : MonoBehaviourPun, IDamagable
             {
                 PhotonView.RPC(nameof(RPC_PlayHitEffects), attackerView.Owner, damage, maxDamage);
                 PhotonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
+                // 피격자의 정확한 HP 정보를 공격자에게 전달 (부활 후 첫 공격 여부 포함)
+                PhotonView.RPC(nameof(ShowHealthBarForAttacker), attackerView.Owner, 
+                    _playerStat.CurrentPlayerGunPowderCount, damage, _isAfterResurrect);
+                // 첫 공격 후 플래그 리셋
+                _isAfterResurrect = false;
             }
         }
     }
@@ -1984,6 +2003,15 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
         _damagePopup.SpawnPopup(value, maxDamage);
+    }
+
+    [PunRPC]
+    public void ShowHealthBarForAttacker(int currentHP, int damage, bool isAfterResurrect)
+    {
+        if (_playerHealthBar != null)
+        {
+            _playerHealthBar.ShowHealthBarForAttacker(currentHP, damage, isAfterResurrect);
+        }
     }
 
     /// <summary>
