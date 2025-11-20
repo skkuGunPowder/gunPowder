@@ -11,6 +11,7 @@ public class UI_IngameChatPopup : UI_Popup
     public InputField ChatInput = null;
     public Button SendButton = null;
     public GameObject ChatListPrefab;
+    public ScrollRect ChatScrollRect = null; // 채팅 스크롤뷰
 
     private Action _closeCallback;
     // 인게임 채팅이 동작할 씬 목록
@@ -35,6 +36,21 @@ public class UI_IngameChatPopup : UI_Popup
         }
 
         _closeCallback = Close;
+
+        // ChatScrollRect가 설정되지 않았으면 자동으로 찾기
+        if (ChatScrollRect == null && ChatContent != null)
+        {
+            ChatScrollRect = ChatContent.GetComponentInParent<ScrollRect>();
+        }
+    }
+
+    private void OnEnable()
+    {
+        // 팝업이 열릴 때 InputField에 자동 포커스
+        FocusInputField();
+
+        // 스크롤을 맨 아래로
+        ScrollToBottom();
     }
 
     private void Start()
@@ -82,13 +98,16 @@ public class UI_IngameChatPopup : UI_Popup
 
         Debug.Log($"[UI_IngameChatPopup] 기존 메시지 {messages.Count}개 복원 중...");
 
-        // 각 메시지를 UI에 추가
+        // 각 메시지를 UI에 추가 (시스템 메시지는 제외)
         foreach (MessageInfo messageInfo in messages)
         {
             CreateChatListUI(messageInfo);
         }
 
         Debug.Log($"[UI_IngameChatPopup] 기존 메시지 복원 완료: {messages.Count}개");
+
+        // 메시지 복원 후 스크롤을 맨 아래로
+        ScrollToBottom();
     }
 
     /// <summary>
@@ -161,6 +180,9 @@ public class UI_IngameChatPopup : UI_Popup
     {
         Debug.Log($"[UI_IngameChatPopup] OnChatMessageReceived 콜백 호출: {messageInfo.GamerName} - {messageInfo.Message}");
         CreateChatListUI(messageInfo);
+
+        // 새 메시지 추가 후 스크롤을 맨 아래로
+        ScrollToBottom();
     }
 
     /// <summary>
@@ -168,6 +190,13 @@ public class UI_IngameChatPopup : UI_Popup
     /// </summary>
     private void CreateChatListUI(MessageInfo messageInfo)
     {
+        // 시스템 메시지는 UI에 표시하지 않음
+        if (messageInfo.GamerName == "SYSTEM")
+        {
+            Debug.Log($"[UI_IngameChatPopup] 시스템 메시지 필터링: {messageInfo.Message}");
+            return;
+        }
+
         if (ChatContent == null)
         {
             Debug.LogError("[UI_IngameChatPopup] ChatContent가 null입니다!");
@@ -216,6 +245,20 @@ public class UI_IngameChatPopup : UI_Popup
             null, // OnTranslateCheckButton - 인게임에서는 사용하지 않음
             isMyMessage
         );
+    }
+
+    /// <summary>
+    /// 스크롤을 맨 아래로 이동 (최신 메시지 보이도록)
+    /// </summary>
+    private void ScrollToBottom()
+    {
+        if (ChatScrollRect == null) return;
+
+        // Canvas를 강제로 업데이트하여 레이아웃 재계산
+        Canvas.ForceUpdateCanvases();
+
+        // verticalNormalizedPosition: 0 = 맨 아래, 1 = 맨 위
+        ChatScrollRect.verticalNormalizedPosition = 0f;
     }
 
     /// <summary>
