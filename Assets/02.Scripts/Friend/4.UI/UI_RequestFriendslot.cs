@@ -7,22 +7,45 @@ public class UI_RequestFriendslot : MonoBehaviour
     public TextMeshProUGUI SenderNickname;
     public Button AcceptButton;
     public Button DenyButton;
-    private string _uid;
-    
-    public void Refresh(string nickname, string uid)
+    private string _inDate; // UID 대신 inDate 사용
+
+    public void Refresh(string nickname, string inDate)
     {
         SenderNickname.text = nickname;
-        _uid = uid;
+        _inDate = inDate;
     }
 
-    public async void OnClickAccept()
+    // 친구 요청 수락 (inDate 기반)
+    public void OnClickAccept()
     {
-        await FriendManager.Instance.AcceptFriendRequest(AccountManager.Instance.CurrentAccount.Account_ID, _uid);
-        Destroy(gameObject);
+        FriendManagerLegacy.Instance.AcceptFriendRequest(_inDate, (success, message) =>
+        {
+            if (success)
+            {
+                Debug.Log($"친구 요청 수락 성공: {message}");
+                Destroy(gameObject);
+            }
+            else
+            {
+                Debug.LogError($"친구 요청 수락 실패: {message}");
+            }
+        });
     }
-    public async void OnClickDecline()
+
+    // 친구 요청 거절 (inDate 기반)
+    public void OnClickDecline()
     {
-        await FriendManager.Instance.DeclineFriendRequest(AccountManager.Instance.CurrentAccount.Account_ID, _uid);
-        Destroy(gameObject);
+        FriendManagerLegacy.Instance.DeclineFriendRequest(_inDate, (success, message) =>
+        {
+            if (success)
+            {
+                Debug.Log($"친구 요청 거절 성공: {message}");
+                Destroy(gameObject);
+            }
+            else
+            {
+                Debug.LogError($"친구 요청 거절 실패: {message}");
+            }
+        });
     }
 }

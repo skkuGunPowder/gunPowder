@@ -1,58 +1,40 @@
-using System.Linq;
-using System.Threading.Tasks;
+using BackEnd; // Base SDK
+using UnityEngine;
 using System.Collections.Generic;
 
-public class FriendManager : Singleton<FriendManager>
+public class FriendManager : DontDestroySingleton<FriendManager>
 {
-    private readonly FriendRepository _repository = new FriendRepository();
+    public List<BackendReturnObject> FriendList = new List<BackendReturnObject>();
+
+    // 친구 목록 갱신 (로비 진입 시 호출)
+    public void RefreshFriendList()
+    {
+        Backend.Friend.GetFriendList(100, callback =>
+        {
+            if (callback.IsSuccess())
+            {
+                var rows = callback.Rows();
+                FriendList.Clear();
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    // 친구 정보 파싱
+                    // 친구의 닉네임, indate 등을 저장
+                    // UI 갱신 이벤트 호출
+                }
+                Debug.Log($"친구 목록 갱신 완료: {FriendList.Count}명");
+            }
+        });
+    }
 
     // 친구 요청 보내기
-    public async Task SendFriendRequest(string senderUid, string recipientUid)
+    public void RequestFriend(string nickname)
     {
-        var requests = await _repository.GetFriendRequestsAsync(recipientUid);
-        await _repository.AddFriendRequestAsync(recipientUid, senderUid);
-    }
-
-    // 친구 요청 수락
-    public async Task AcceptFriendRequest(string userUid, string requesterUid)
-    {
-        var requests = await _repository.GetFriendRequestsAsync(userUid);
-
-        var currentFriends = await _repository.GetFriendsAsync(userUid);
-        if (!currentFriends.Contains(requesterUid))
+        Backend.Friend.RequestFriend(nickname, callback =>
         {
-            await _repository.AddFriendAsync(userUid, requesterUid);
-        }
-
-        await _repository.RemoveFriendRequestAsync(userUid, requesterUid);
+            if (callback.IsSuccess()) Debug.Log("친구 요청 전송 성공");
+            else Debug.LogError($"친구 요청 실패: {callback.ToString()}");
+        });
     }
-
-    // 친구 요청 거절
-    public async Task DeclineFriendRequest(string userUid, string requesterUid)
-    {
-        var requests = await _repository.GetFriendRequestsAsync(userUid);
-        await _repository.RemoveFriendRequestAsync(userUid, requesterUid);
-    }
-
-    // 친구 삭제
-    public async Task RemoveFriend(string userUid, string friendUid)
-    {
-        var currentFriends = await _repository.GetFriendsAsync(userUid);
-        if (currentFriends.Contains(friendUid))
-        {
-            await _repository.RemoveFriendAsync(userUid, friendUid);
-        }
-    }
-
-    // 친구 목록 가져오기
-    public async Task<List<string>> GetFriendUids(string userUid)
-    {
-        return await _repository.GetFriendsAsync(userUid);
-    }
-
-    // 친구 요청 목록 가져오기
-    public async Task<List<string>> GetFriendRequests(string userUid)
-    {
-        return await _repository.GetFriendRequestsAsync(userUid);
-    }
+    
+    // 친구 수락 등 추가 구현 필요...
 }

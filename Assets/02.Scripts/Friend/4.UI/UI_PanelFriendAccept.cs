@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class UI_PanelFriendAccept : UI_Popup
@@ -7,12 +6,12 @@ public class UI_PanelFriendAccept : UI_Popup
     [SerializeField] private Transform content; // Content 오브젝트
     [SerializeField] private GameObject requestFriendPrefab;
 
-    private async void OnEnable()
+    private void OnEnable()
     {
-        await RefreshRequestList();
+        RefreshRequestList();
     }
 
-    private async Task RefreshRequestList()
+    private void RefreshRequestList()
     {
         // 기존 프리팹 정리
         foreach (Transform child in content)
@@ -20,15 +19,24 @@ public class UI_PanelFriendAccept : UI_Popup
             Destroy(child.gameObject);
         }
 
-        string myUid = AccountManager.Instance.CurrentAccount.Account_ID;
-        List<string> requestersUid = await FriendManager.Instance.GetFriendRequests(myUid);
-
-        foreach (var requesterUid in requestersUid)
+        // 받은 친구 요청 목록 조회 (콜백 패턴)
+        FriendManagerLegacy.Instance.GetReceivedFriendRequests((success, requestList) =>
         {
-            GameObject go = Instantiate(requestFriendPrefab, content);
-            var ui = go.GetComponent<UI_RequestFriendslot>();
-            string senderNickname = await AccountManager.Instance.GetUserNicknameWithUid(requesterUid);
-            ui.Refresh(senderNickname, requesterUid);
-        }
+            if (success && requestList != null)
+            {
+                foreach (var request in requestList)
+                {
+                    GameObject go = Instantiate(requestFriendPrefab, content);
+                    var ui = go.GetComponent<UI_RequestFriendslot>();
+
+                    // FriendInfo에서 닉네임과 inDate 사용
+                    ui.Refresh(request.nickname, request.inDate);
+                }
+            }
+            else
+            {
+                Debug.LogError("친구 요청 목록 조회 실패");
+            }
+        });
     }
 }

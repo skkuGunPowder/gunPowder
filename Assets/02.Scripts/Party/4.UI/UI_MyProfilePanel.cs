@@ -63,7 +63,7 @@ public class UI_MyProfilePanel : MonoBehaviour
         if (AccountManager.Instance?.CurrentAccount == null) return;
 
         string myUid = AccountManager.Instance.CurrentAccount.Account_ID;
-        var friendUids = await FriendManager.Instance.GetFriendUids(myUid);
+        var friendUids = await FriendManagerLegacy.Instance.GetFriendUids(myUid);
 
         if (FriendCountText != null)
         {

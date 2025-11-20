@@ -15,6 +15,7 @@ public class UI_PanelFriendSlot : MonoBehaviour
 
     private string _friendUid;
     private string _friendNickname;
+    private string _friendInDate; // 뒤끝 친구 식별자
 
     // 채팅 시작 이벤트
     public event Action<string, string> OnChatButtonClicked; // (friendUid, friendNickname)
@@ -42,6 +43,14 @@ public class UI_PanelFriendSlot : MonoBehaviour
     public void SetFriendUid(string uid)
     {
         _friendUid = uid;
+    }
+
+    /// <summary>
+    /// 친구 inDate 설정 (뒤끝 친구 식별자)
+    /// </summary>
+    public void SetFriendInDate(string inDate)
+    {
+        _friendInDate = inDate;
     }
 
     /// <summary>
