@@ -9,10 +9,16 @@ public class RoomStatManager : Singleton<RoomStatManager>
     public int PlayerGunpowder;
     public int PlayerDecreaseTime;
     public EInGameTeam PlayerTeam;
+    public bool IsManual = false;
     
     protected override void Awake()
     {
         base.Awake();
+
+        if (IsManual)
+        {
+            return;
+        }
         
         PlayerLife = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.Life.ToString()]);
         PlayerGunpowder = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.Gunpowder.ToString()]); 
