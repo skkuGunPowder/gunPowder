@@ -7192,9 +7192,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthBar: {fileID: 2272723030157075251}
-  canvasGroup: {fileID: 0}
+  canvasGroup: {fileID: 1065353505640763161}
+  hpBarImage: {fileID: 3890008792730650206}
+  hpGhostBarImage: {fileID: 2641942048975362776}
   displayDuration: 1.5
   fadeOutDuration: 0.5
+  selfHPBarColor: {r: 0.2, g: 1, b: 0.48235294, a: 1}
+  selfGhostBarColor: {r: 1, g: 0.2, b: 0.2, a: 1}
 --- !u!225 &1065353505640763161
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -7959,23 +7963,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5521805096293915113, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
       propertyPath: m_Color.b
-      value: 0.19999999
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 5521805096293915113, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
       propertyPath: m_Color.g
-      value: 0.19999999
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5521805096293915113, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
+      propertyPath: m_Color.r
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 6770988671081973103, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
       propertyPath: m_Color.b
-      value: 0.48396644
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 6770988671081973103, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
       propertyPath: m_Color.g
-      value: 1
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 6770988671081973103, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
       propertyPath: m_Color.r
-      value: 0.19999999
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7991,6 +7999,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 09da2f98b89e85d4daf792708bdc0f06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2641942048975362776 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5521805096293915113, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
+  m_PrefabInstance: {fileID: 7497213760400147249}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3890008792730650206 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6770988671081973103, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
+  m_PrefabInstance: {fileID: 7497213760400147249}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &8224014204224284694 stripped
