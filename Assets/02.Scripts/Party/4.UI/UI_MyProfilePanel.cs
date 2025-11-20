@@ -22,7 +22,7 @@ public class UI_MyProfilePanel : MonoBehaviour
     /// <summary>
     /// 내 프로필 정보 로드
     /// </summary>
-    private async void LoadMyProfile()
+    private void LoadMyProfile()
     {
         if (AccountManager.Instance?.CurrentAccount == null)
         {
@@ -45,7 +45,7 @@ public class UI_MyProfilePanel : MonoBehaviour
         // }
 
         // 친구 수 로드
-        await UpdateFriendCount();
+        UpdateFriendCount();
 
         // 프로필 이미지 설정 (TODO: 실제 이미지 로드)
         if (MyProfileImage != null)
@@ -58,17 +58,21 @@ public class UI_MyProfilePanel : MonoBehaviour
     /// <summary>
     /// 친구 수 업데이트
     /// </summary>
-    public async Task UpdateFriendCount()
+    private void UpdateFriendCount()
     {
         if (AccountManager.Instance?.CurrentAccount == null) return;
 
         string myUid = AccountManager.Instance.CurrentAccount.Account_ID;
-        var friendUids = await FriendManagerLegacy.Instance.GetFriendUids(myUid);
-
-        if (FriendCountText != null)
+        FriendManagerLegacy.Instance.GetFriendList(100, (success, friendList) =>
         {
-            FriendCountText.text = $"친구: {friendUids.Count}명";
-        }
+            if (success && friendList != null)
+            {
+                if (FriendCountText != null)
+                {
+                    FriendCountText.text = $"친구: {friendList.Count}명";
+                }
+            }
+        });
     }
 
     /// <summary>
@@ -76,6 +80,6 @@ public class UI_MyProfilePanel : MonoBehaviour
     /// </summary>
     public void RefreshFriendCount()
     {
-        _ = UpdateFriendCount();
+        UpdateFriendCount();
     }
 }
