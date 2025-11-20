@@ -2,36 +2,22 @@ using System;
 using System.Collections.Generic;
 using BackndChat;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UI_IngameChatPopup : UI_Popup
 {
-    public static UI_IngameChatPopup Instance { get; private set; }
-
     public GameObject ChatContent = null;
     public InputField ChatInput = null;
     public Button SendButton = null;
     public GameObject ChatListPrefab;
 
     private Action _closeCallback;
-    // 인게임 채팅이 동작할 씬 목록 (대화내용 유지)
+    // 인게임 채팅이 동작할 씬 목록
     private readonly string[] _activeScenes = { "WaitingRoom", "Beach1", "Dock1", "Forest1" };
 
     private void Awake()
     {
-        // 싱글톤 설정
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
-
         // 버튼 및 입력 필드 리스너 설정
         if (SendButton != null)
         {
@@ -48,19 +34,15 @@ public class UI_IngameChatPopup : UI_Popup
             });
         }
 
-        // 씬 변경 이벤트 구독
-        SceneManager.sceneLoaded += OnSceneLoaded;
-
         _closeCallback = Close;
-        // 시작 시 현재 씬 체크
-        CheckCurrentScene();
     }
 
     private void Start()
     {
-        // UIChatManager가 준비된 후 이벤트 구독
+        // UIChatManager 이벤트 구독 및 기존 메시지 로드
         if (UIChatManager.Instance != null)
         {
+            // 이벤트 구독
             UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived; // 중복 방지
             UIChatManager.Instance.OnChatMessageReceived += OnChatMessageReceived;
 
@@ -68,6 +50,9 @@ public class UI_IngameChatPopup : UI_Popup
             UIChatManager.Instance.OnChannelLeft += OnChannelLeft;
 
             Debug.Log("[UI_IngameChatPopup] UIChatManager 이벤트 구독 완료");
+
+            // 기존 메시지 복원
+            LoadPreviousMessages();
         }
         else
         {
@@ -75,6 +60,36 @@ public class UI_IngameChatPopup : UI_Popup
         }
     }
 
+    /// <summary>
+    /// UIChatManager에서 기존 메시지를 가져와서 UI에 표시
+    /// </summary>
+    private void LoadPreviousMessages()
+    {
+        if (UIChatManager.Instance == null)
+        {
+            Debug.LogWarning("[UI_IngameChatPopup] UIChatManager.Instance가 null입니다.");
+            return;
+        }
+
+        // 현재 채널의 메시지 가져오기
+        List<MessageInfo> messages = UIChatManager.Instance.GetCurrentChannelMessages();
+
+        if (messages.Count == 0)
+        {
+            Debug.Log("[UI_IngameChatPopup] 복원할 메시지가 없습니다.");
+            return;
+        }
+
+        Debug.Log($"[UI_IngameChatPopup] 기존 메시지 {messages.Count}개 복원 중...");
+
+        // 각 메시지를 UI에 추가
+        foreach (MessageInfo messageInfo in messages)
+        {
+            CreateChatListUI(messageInfo);
+        }
+
+        Debug.Log($"[UI_IngameChatPopup] 기존 메시지 복원 완료: {messages.Count}개");
+    }
 
     /// <summary>
     /// 현재 씬이 인게임 씬인지 확인
@@ -90,41 +105,6 @@ public class UI_IngameChatPopup : UI_Popup
             }
         }
         return false;
-    }
-
-    /// <summary>
-    /// 씬 로드 시 호출
-    /// </summary>
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        CheckCurrentScene();
-    }
-
-    /// <summary>
-    /// 현재 씬에 따라 UI 활성화/비활성화
-    /// </summary>
-    private void CheckCurrentScene()
-    {
-        string currentScene = SceneManager.GetActiveScene().name;
-
-        if (IsInGameScene())
-        {
-            // 인게임 씬이면 채팅 UI 표시 가능하게 설정 (하지만 Popup은 닫힌 상태)
-            Close(); // UI_Popup의 Close() 호출
-            Debug.Log($"[UI_IngameChat] 인게임 씬 진입: {currentScene}");
-        }
-        else
-        {
-            // 로비 등 다른 씬으로 이동 시 채팅 내용 삭제
-            if (currentScene == "Lobby" || currentScene == "Photon" || currentScene == "StartSequence")
-            {
-                ClearAllMessages();
-                Debug.Log($"[UI_IngameChat] 로비 씬 진입 - 채팅 내용 삭제: {currentScene}");
-            }
-
-            // 팝업 닫기
-            Close();
-        }
     }
 
     /// <summary>
@@ -180,7 +160,14 @@ public class UI_IngameChatPopup : UI_Popup
     private void OnChatMessageReceived(MessageInfo messageInfo)
     {
         Debug.Log($"[UI_IngameChatPopup] OnChatMessageReceived 콜백 호출: {messageInfo.GamerName} - {messageInfo.Message}");
+        CreateChatListUI(messageInfo);
+    }
 
+    /// <summary>
+    /// 채팅 메시지 UI 생성 (신규 메시지 및 기존 메시지 복원에 공통 사용)
+    /// </summary>
+    private void CreateChatListUI(MessageInfo messageInfo)
+    {
         if (ChatContent == null)
         {
             Debug.LogError("[UI_IngameChatPopup] ChatContent가 null입니다!");
@@ -202,8 +189,6 @@ public class UI_IngameChatPopup : UI_Popup
             return;
         }
 
-        Debug.Log($"[UI_IngameChatPopup] ChatList 프리팹 Instantiate 성공: {chatList.name}");
-
         UIChatList chatListComponent = chatList.GetComponent<UIChatList>();
         if (chatListComponent == null)
         {
@@ -213,8 +198,11 @@ public class UI_IngameChatPopup : UI_Popup
         }
 
         // 자신의 메시지인지 확인
-        bool isMyMessage = messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname;
-        Debug.Log($"[UI_IngameChatPopup] 메시지 설정: isMyMessage={isMyMessage}");
+        bool isMyMessage = false;
+        if (AccountManager.Instance != null && AccountManager.Instance.CurrentAccount != null)
+        {
+            isMyMessage = messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname;
+        }
 
         // 채팅 리스트에 데이터 설정
         chatListComponent.SetData(
@@ -228,8 +216,6 @@ public class UI_IngameChatPopup : UI_Popup
             null, // OnTranslateCheckButton - 인게임에서는 사용하지 않음
             isMyMessage
         );
-
-        Debug.Log("[UI_IngameChatPopup] 채팅 메시지 UI 생성 완료");
     }
 
     /// <summary>
@@ -293,14 +279,13 @@ public class UI_IngameChatPopup : UI_Popup
 
     private void OnDestroy()
     {
-        // 씬 이벤트 구독 해제
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-
         // 채팅 메시지 이벤트 구독 해제
         if (UIChatManager.Instance != null)
         {
             UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
             UIChatManager.Instance.OnChannelLeft -= OnChannelLeft;
         }
+
+        Debug.Log("[UI_IngameChatPopup] Destroyed - 이벤트 구독 해제 완료");
     }
 }

@@ -13,6 +13,13 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
     {
         base.Awake();
         ClientManager.PlayBGM("Lobby");
+
+        // 로비 진입 시 인게임 채팅 데이터 삭제
+        if (UIChatManager.Instance != null)
+        {
+            UIChatManager.Instance.ClearInGameChannelMessages();
+            Debug.Log("[LobbyManager] 인게임 채팅 데이터 삭제 완료");
+        }
     }
 
     // 방에 보내기
