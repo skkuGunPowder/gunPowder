@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
@@ -9,6 +10,7 @@ using UnityEngine.SceneManagement;
 
 public class UI_RoomSlot : MonoBehaviour
 {
+    public float ClickInterval = 0.5f;
     [Header("상단 정보")]
     public TextMeshProUGUI RoomName;
     public TextMeshProUGUI PlayerCount;
@@ -27,9 +29,10 @@ public class UI_RoomSlot : MonoBehaviour
     public RoomInfo _roomInfo;
     
     private bool _isLocked = false;
-    
+    private bool _isClicked = false;
     public void Refresh(Sprite mapIcon, RoomInfo roomInfo)
     {
+        _isClicked = false;
         _roomInfo = roomInfo;
         
         RoomName.text = roomInfo.CustomProperties[ERoomProperties.RoomName.ToString()].ToString();
@@ -58,6 +61,13 @@ public class UI_RoomSlot : MonoBehaviour
 
     public void OnClicked()
     {
+        if (_isClicked) // 중복 클릭 방지
+        {
+            return;
+        }
+        
+        StartCoroutine(OnClick_Coroutine());
+        
         // 잠겨있는 방인가?
         if(_isLocked)
         {
@@ -77,4 +87,18 @@ public class UI_RoomSlot : MonoBehaviour
         TransitionManager.Instance.StartAnimation(0.3f);
         PhotonNetwork.JoinRoom(_roomInfo.Name);
     }
+
+    private IEnumerator OnClick_Coroutine()
+    {
+        _isClicked = true;
+        yield return new WaitForSeconds(ClickInterval);
+        _isClicked = false;
+
+    }
+
+    private void OnDisable()
+    {
+        StopCoroutine(OnClick_Coroutine());
+    }
 }
+
