@@ -4,6 +4,9 @@ using Photon.Realtime;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using MaskTransitions;
+using UnityEngine.SceneManagement;
+
 public class UI_RoomSlot : MonoBehaviour
 {
     [Header("상단 정보")]
@@ -71,6 +74,7 @@ public class UI_RoomSlot : MonoBehaviour
             return;
         }
         
-        PhotonNetwork.JoinRoom(_roomInfo.Name);        
+        TransitionManager.Instance.StartAnimation(0.3f);
+        PhotonNetwork.JoinRoom(_roomInfo.Name);
     }
 }

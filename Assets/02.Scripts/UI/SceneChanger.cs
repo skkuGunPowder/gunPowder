@@ -1,8 +1,5 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using Photon.Pun;
-using Photon.Realtime;
-using ExitGames.Client.Photon;
+using MaskTransitions;
 public class SceneChanger : MonoBehaviour
 {
     public ESceneList Scene;
@@ -15,7 +12,7 @@ public class SceneChanger : MonoBehaviour
             return;
         }
         
-        SceneManager.LoadScene(Scene.ToString());
+        TransitionManager.Instance.LoadLevel(Scene);
     }
 
     public void Tutorial()

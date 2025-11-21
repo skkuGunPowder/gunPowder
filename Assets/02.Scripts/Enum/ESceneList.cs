@@ -7,6 +7,7 @@ public enum ESceneList
     Tutorial,
     Photon,
     Credit,
+    LoadingScene,
     
     Count
     
