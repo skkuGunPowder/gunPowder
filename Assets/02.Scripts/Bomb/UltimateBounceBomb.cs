@@ -54,10 +54,15 @@ public class UltimateBounceBomb : Bomb
             return;
         }
 
-        if(collision.gameObject.tag == "Player" || collision.gameObject.tag == "Immune")
+        if(collision.gameObject.GetComponent<PhotonView>() == _ownerPhotonview || collision.gameObject.tag == "Immune")
         {
             return;
         }
+
+        PhotonView.RPC(nameof(Explode), RpcTarget.All);
+        // if(photonView.IsMine)
+        // {
+        // }
 
         if (collision.collider.CompareTag("Wall"))
         {
@@ -66,11 +71,6 @@ public class UltimateBounceBomb : Bomb
             _rigidBody.linearVelocity = reflectDir * _stat.Speed;
 
             SoundManager.Instance.PlayLocalSound("BounceBombUlt_3", transform);
-        }
-
-        if(photonView.IsMine)
-        {
-            PhotonView.RPC(nameof(Explode), RpcTarget.All);
         }
     }
 
