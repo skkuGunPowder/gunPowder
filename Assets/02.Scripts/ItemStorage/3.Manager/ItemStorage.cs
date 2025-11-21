@@ -58,7 +58,6 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
                 {
                     _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0005")));
                     _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0007")));
-                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0009")));
                     _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0011")));
                     _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0018")));
                 }
