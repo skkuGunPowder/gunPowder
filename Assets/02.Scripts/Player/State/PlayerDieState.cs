@@ -320,9 +320,12 @@ public class PlayerDieState : PlayerBaseState
        // 플레이어가 두명 남았으면 LastDie로 넘어감
         if (GameManager.Instance.LastPlayer)
         {
-            SyncStateChange<PlayerLastDieState>();
-            UpdatePlayerStatistics();
-            return;
+            if (GameManager.Instance.LastAttackCheck(_owner.PlayerStat.Team))
+            {
+                SyncStateChange<PlayerLastDieState>();
+                UpdatePlayerStatistics();
+                return;   
+            }
         }
         
         ExecuteDeath();

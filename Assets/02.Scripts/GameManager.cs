@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(PhotonView))]
 public class GameManager : PhotonSingleton<GameManager> 
 {
+    private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>();
     private PhotonView _photonView;
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
@@ -109,12 +110,12 @@ public class GameManager : PhotonSingleton<GameManager>
         {
             return;
         }
-
-        if (LastPlayer == false)
-        {
-            // 현재 살아있는 사람들 체크, 관전
-            EventManager.Instance.TargetChanged();
-        }
+        
+        EInGameTeam team = (EInGameTeam)targetPlayer.CustomProperties[EProperties.Team.ToString()];
+        _teamCount[team]--;
+        
+        EventManager.Instance.PlayObserve();
+        
         // 게임오버 체크
         if (PhotonNetwork.IsMasterClient == false)
         {
@@ -158,14 +159,21 @@ public class GameManager : PhotonSingleton<GameManager>
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
             return;
         }
-        
-        // 플레이어가 두명 남았는가?
-        if (LastPlayer == false && notDead == 2)
+
+        if (LastPlayer == false && LastTeamCheck())
         {
             LastPlayer = true;
-            _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.All);
+            _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.Others);
             return;
         }
+        
+        // // 플레이어가 두명 남았는가?
+        // if (LastPlayer == false && notDead == 2)
+        // {
+        //     LastPlayer = true;
+        //     _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.Others);
+        //     return;
+        // }
 
         // 2명 이상인데 살아있는 사람이 1명일 때
         if (LastPlayer == false && notDead == 1)
@@ -190,6 +198,7 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         OnGameStart?.Invoke();
         EventManager.Instance.ProfileInit();
+        TeamSetting();
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
     }
 
@@ -198,6 +207,7 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         LastPlayer = true;
     }
+    
     public void GameStartSetting()
     { 
         EventManager.Instance.PlayerListUp();
@@ -255,9 +265,44 @@ public class GameManager : PhotonSingleton<GameManager>
         base.OnDisable();
         EventManager.Instance.OnLoadFinished -= Init;
     }
-    
-    private void OnDestroy()
+
+    private void TeamSetting()
     {
+        PhotonPlayer[] players = PhotonNetwork.PlayerList;
+
+        foreach (PhotonPlayer player in players)
+        {
+            EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+
+            if (_teamCount.ContainsKey(team))
+            {
+                _teamCount[team]++;
+            }
+            else
+            {
+                _teamCount.Add(team, 1);
+            }
+        }
+    }
+
+    private bool LastTeamCheck() // 살아있는 팀원이 1명 이상 있는지 체크 -> 2팀이라면 lastPlayer = true
+    {
+        int count = 0;
+        
+        foreach (int value in _teamCount.Values)
+        {
+            if(value > 0) 
+            {
+                count++; // ( value > 0)
+            }
+        }
+        
+        return count <= 2;
+    }
+    // 플레이어가 죽었을 때 -> 막타로 가야하는지 체크
+    public bool LastAttackCheck(EInGameTeam team)
+    {
+        return _teamCount[team] <= 1;
     }
 }
 
