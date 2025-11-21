@@ -1152,7 +1152,6 @@ public class Player : MonoBehaviourPun, IDamagable
                     kv.Key.color = newColor; // 스프라이트 색상만 변경
                     changedCount++;
                 }
-                Debug.Log($"[색상변경] ratio: {ratio:F2}, targetS: {targetS:F2}, 변경된 렌더러: {changedCount}/{_originalColorMap.Count}");
                 _isColorRestored = false; // 색상이 변경됨
             }
         }
@@ -1303,7 +1302,6 @@ public class Player : MonoBehaviourPun, IDamagable
                     restoredCount++;
                 }
             }
-            Debug.Log($"[색상복원] {restoredCount}/{_originalColorMap.Count}개의 렌더러 색상 복원됨");
             
             _isColorRestored = true;
         }

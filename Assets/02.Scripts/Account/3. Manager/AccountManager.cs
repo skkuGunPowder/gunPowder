@@ -9,8 +9,8 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     public AccountDTO CurrentAccount => _myAccount.ToDTO();
 
     private AccountRepository _accountRepository;
-    private BackendLogin _backendLogin;
-    private const string SALT = "12315";
+    public BackendLogin _backendLogin;
+    public const string SALT = "12315";
 
     private string _sessoinID;
 

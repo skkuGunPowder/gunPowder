@@ -18,11 +18,15 @@ public class PlayerCoolTime : MonoBehaviour
 
     private Coroutine _normalCoolTimeCoroutine;
     private Coroutine _specialCoolTimeCoroutine;
+    
+    [Header("Special Cool Time")]
+    [SerializeField] private GameObject _specialCoolTimeEffectPrefab;
+    [SerializeField] private AudioClip _specialCoolTimeEndAudio;
 
     private void Awake()
     {
         _myPlayer = GetComponent<Player>();
-        
+
         // 로컬 플레이어만 UI를 찾음 (멀티플레이어 환경 대응)
         if (_myPlayer.PhotonView.IsMine)
         {
@@ -32,11 +36,11 @@ public class PlayerCoolTime : MonoBehaviour
                 _normalCoolTimeShadowImage = normalShadow.GetComponent<Image>();
 
                 _normalCoolTimeText = normalShadow.GetComponentInChildren<TextMeshProUGUI>();
-                if(_normalCoolTimeText != null)
+                if (_normalCoolTimeText != null)
                 {
                     _normalCoolTimeText.text = "";
                 }
-                
+
                 // 자식 오브젝트를 이름으로 찾기
                 Transform endEffectTransform = normalShadow.transform.Find("BombCooltimeEffect");
                 if (endEffectTransform != null)
@@ -51,7 +55,7 @@ public class PlayerCoolTime : MonoBehaviour
                     }
                 }
             }
-                
+
 
             GameObject specialShadow = GameObject.FindWithTag("SpecialCoolTimeShadow");
             if (specialShadow != null)
@@ -59,11 +63,11 @@ public class PlayerCoolTime : MonoBehaviour
                 _specialCoolTimeShadowImage = specialShadow.GetComponent<Image>();
 
                 _specialCoolTimeText = specialShadow.GetComponentInChildren<TextMeshProUGUI>();
-                if(_specialCoolTimeText != null)
+                if (_specialCoolTimeText != null)
                 {
                     _specialCoolTimeText.text = "";
                 }
-                
+
                 // 자식 오브젝트를 이름으로 찾기
                 Transform endEffectTransform = specialShadow.transform.Find("SpecialBombCooltimeEffect");
                 if (endEffectTransform != null)
@@ -156,6 +160,13 @@ public class PlayerCoolTime : MonoBehaviour
         {
             StartCoroutine(FadeOutEffect(endEffectImage));
         }
+        
+        // 스페셜 쿨타임 종료 시 VFX & SFX 프리팹 재생
+        if (shadowImage == _specialCoolTimeShadowImage && _specialCoolTimeEffectPrefab != null)
+        {
+            PlayCoolTimeEndVFX(_specialCoolTimeEffectPrefab);
+            SoundManager.Instance.PlayLocalSound(_specialCoolTimeEndAudio.name, _myPlayer.transform, 0, true);
+        }
     }
     
     private IEnumerator FadeOutEffect(Image effectImage)
@@ -179,6 +190,22 @@ public class PlayerCoolTime : MonoBehaviour
         // 완전히 투명하게
         color.a = 0f;
         effectImage.color = color;
+    }
+    
+    private void PlayCoolTimeEndVFX(GameObject vfxPrefab)
+    {
+        if (vfxPrefab != null && VFXPool.Instance != null)
+        {
+            FollowVFX vfx = VFXPool.Instance.Get(vfxPrefab.name) as FollowVFX;
+            if (vfx != null)
+            {
+                if (_myPlayer != null && _myPlayer.gameObject.activeInHierarchy)
+                {
+                    Debug.Log("PlayCoolTimeEndVFX: " + _myPlayer.transform.position);
+                    vfx.PlayAttached(_myPlayer.transform);
+                }
+            }
+        }
     }
     
     private void OnDestroy()

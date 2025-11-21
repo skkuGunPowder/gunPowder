@@ -14,7 +14,6 @@ public class UltimateSuicide : Bomb
 
     private Player _owner;
     private float _timer;
-    private float _jumpTimer;
 
     protected override void Init()
     {
@@ -24,26 +23,14 @@ public class UltimateSuicide : Bomb
 
     protected override void Update()
     {
-        // Owner와 PhotonView null 체크
-        if (_ownerPhotonview != null && _owner != null)
+        if(_isDestroying)
         {
-            // Transform 직접 수정 대신 부모로 설정 (PlaceBomb에서 이미 설정함)
-            // 매 프레임 위치 업데이트는 부모 관계로 자동 처리됨
+            return;
+        }
 
-            if (_owner.PlayerStat.MySpriteREndererList != null && _owner.PlayerStat.MySpriteREndererList.Count > 0)
-            {
-                _spriteRenderer.flipX = _owner.PlayerStat.MySpriteREndererList[0].flipX;
-            }
-
-            _jumpTimer += Time.deltaTime;
-            if (_jumpTimer >= _jumpResetTime)
-            {
-                if (_owner.PlayerStat.JumpCount > 1)
-                {
-                    _owner.PlayerStat.JumpCount = 1;
-                }
-                _jumpTimer = 0f;
-            }
+        if (_owner == null)
+        {
+            return;
         }
 
         _timer += Time.deltaTime;
@@ -52,13 +39,29 @@ public class UltimateSuicide : Bomb
             _timer = 0f;
             UltimateEnd();
         }
+
+        transform.position = _owner.transform.position;
+
+        if (_owner.PlayerStat.MySpriteREndererList != null && _owner.PlayerStat.MySpriteREndererList.Count > 0)
+        {
+            _spriteRenderer.flipX = _owner.PlayerStat.MySpriteREndererList[0].flipX;
+        }
+
+        if (_owner.PlayerStat.JumpCount > 1)
+        {
+            _owner.PlayerStat.JumpCount = 1;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+
         if (collision.CompareTag("Enemy"))
         {
-            // 소유자만 폭발 RPC 호출
             if (PhotonView.IsMine)
             {
                 PhotonView.RPC(nameof(Explode), RpcTarget.All);
@@ -68,20 +71,18 @@ public class UltimateSuicide : Bomb
 
     private void UltimateEnd()
     {
+        if(_isDestroying)
+        {
+            return;
+        }
+        _isDestroying = true;
+
         // TODO
         // _ultimateMaterial OFF
 
         if (PhotonView.IsMine)
         {
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[Bomb] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
+            PhotonNetwork.Destroy(gameObject);
         }
     }
 
@@ -89,39 +90,22 @@ public class UltimateSuicide : Bomb
     [PunRPC]
     public override void Explode()
     {
-
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;
 
-        // Owner null 체크
         if (_ownerPhotonview != null)
         {
             explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
         }
         else
         {
-            Debug.LogWarning($"[UltimateSuicide] Owner PhotonView is null");
-            explosion.Explode(_stat.IsFallingOut, null);
+            Debug.LogError($"[UltimateSuicide] Owner PhotonView가 없습니다!");
         }
 
         if (_vfx != null)
         {
-            _vfx.transform.SetParent(transform);
-        }
-
-        // 🔴 CRITICAL FIX: 폭발 후 오브젝트 파괴 추가
-        if (PhotonView.IsMine)
-        {
-            if (PhotonView != null && PhotonView.ViewID != 0)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"[UltimateSuicide] PhotonView is invalid, destroying locally: {gameObject.name}");
-                Destroy(gameObject);
-            }
+            _vfx.transform.position = transform.position;
         }
     }
 

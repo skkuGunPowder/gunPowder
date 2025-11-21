@@ -40,7 +40,6 @@ public class FireTruck : MonoBehaviour
     {
         if (_damageCollider is BoxCollider2D box)
         {
-            box.size = _attackRange;
             box.isTrigger = true;
         }
 
