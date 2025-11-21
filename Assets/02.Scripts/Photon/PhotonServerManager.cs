@@ -102,7 +102,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        _roomInfoList.Clear();
+        // _roomInfoList.Clear();
         _isTutorial = false;         
         
         Hashtable propertiesToRemove = new Hashtable

@@ -58,6 +58,12 @@ public class UI_LoginScene : MonoBehaviour
             GoogleLogIn.Instance.OnLoginError += OnGoogleLoginError;
         }
 
+        if(STOVEManager.Instance != null)
+        {
+            STOVEManager.Instance.OnLoginResult += OnSTOVELoginResult;
+            STOVEManager.Instance.OnLoginSuccess += OnSTOVELoginSuccess;
+        }
+
         // 비밀번호 입력 필드와 회원가입 버튼 비활성화
         SignupInputFields.PasswordInputField.interactable = false;
         SignupInputFields.PasswordConfirmInputField.interactable = false;
@@ -72,6 +78,12 @@ public class UI_LoginScene : MonoBehaviour
             GoogleLogIn.Instance.OnLoginResult -= OnGoogleLoginResult;
             GoogleLogIn.Instance.OnLoginSuccess -= OnGoogleLoginSuccess;
             GoogleLogIn.Instance.OnLoginError -= OnGoogleLoginError;
+        }
+
+        if(STOVEManager.Instance != null)
+        {
+            STOVEManager.Instance.OnLoginResult = null;
+            STOVEManager.Instance.OnLoginSuccess = null;
         }
     }
 
@@ -269,6 +281,17 @@ public class UI_LoginScene : MonoBehaviour
         }
     }
 
+    public void OnClickSTOVELogin()
+    {
+        if(STOVEManager.Instance == null)
+        {
+            Debug.LogError("STOVEManager가 초기화 되지 않았습니다.");
+            return;
+        }
+
+        STOVEManager.Instance.STOVELogin();
+    }
+
 	private void InitRememberToggle()
 	{
 		if (RememberLoginToggle == null)
@@ -370,6 +393,28 @@ public class UI_LoginScene : MonoBehaviour
         if (NicknameInputFields != null && NicknameInputFields.ConfirmButton != null)
         {
             NicknameInputFields.ConfirmButton.interactable = true;
+        }
+    }
+
+    private void OnSTOVELoginResult(Result result)
+    {
+        LoginInputFields.ResultText.text = result.Message;
+        if (!result.IsSuccess)
+        {
+            LoginInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
+        }
+    }
+
+    private void OnSTOVELoginSuccess()
+    {
+        if (!AccountManager.Instance.HasNickname())
+        {
+            LoginPanel.SetActive(false);
+            NicknamePanel.SetActive(true);
+        }
+        else
+        {
+            PhotonServerManager.Instance.Connect();
         }
     }
 }
