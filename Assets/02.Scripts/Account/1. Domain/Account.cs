@@ -7,7 +7,8 @@ public enum AuthProvider
 {
     Local,
     Google,
-    Steam
+    Steam,
+    STOVE
 }
 
 public enum AccountFlags
