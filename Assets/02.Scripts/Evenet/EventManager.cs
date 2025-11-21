@@ -161,4 +161,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnPlayerLeft?.Invoke(player);
     }
+    
+    public event Action OnPlayObserve;
+
+    public void PlayObserve()
+    {
+        OnPlayObserve?.Invoke();
+    }
 }

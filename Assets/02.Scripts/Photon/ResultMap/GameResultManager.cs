@@ -1,21 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using RaycastPro.RaySensors;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
-public class GameResultManager : Singleton<GameResultManager>
+public class GameResultManager : PhotonSingleton<GameResultManager>
 {
     public List<GameResultData> ResultDataList = new List<GameResultData>();
     public PlayerSpawner Spawner;
+    private bool _isEnd = false;
+
     private void Start()
     {
+        ReadyReset();
+        
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
  
         foreach (PhotonPlayer player in playerList)
         {
+            if(player == null) continue;
+            
             int damage = Convert.ToInt32(player.CustomProperties[EProperties.Damage.ToString()]);
             int kill = Convert.ToInt32(player.CustomProperties[EProperties.Kill.ToString()]);
             int survieTime = Convert.ToInt32(player.CustomProperties[EProperties.SurvivorTime.ToString()]);
@@ -123,11 +130,42 @@ public class GameResultManager : Singleton<GameResultManager>
 
     public void LoadScene()
     {
+        _isEnd = true;
+        
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.DestroyAll();
             
             PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());
         }
+    }
+    
+    public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
+    {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
+        MasterChange();
+    }
+
+    private void MasterChange()
+    {
+        if (_isEnd == false)
+        {
+            return;
+        }
+        
+        LoadScene();
+    }
+    private void ReadyReset()
+    {
+        Hashtable ready = new Hashtable
+        {
+            { EProperties.IsReady.ToString(), false }
+        };
+        
+        PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
     }
 }

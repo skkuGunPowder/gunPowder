@@ -5,7 +5,7 @@ using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using PhotonPlayer = Photon.Realtime.Player;
-
+using MaskTransitions;
 public class PhotonServerManager : MonoBehaviourPunCallbacks
 {
     public static PhotonServerManager Instance;
@@ -84,6 +84,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     // 포톤 마스터 서버에 접속하면 호출되는 함수
     public override void OnConnected()
     {
+        TransitionManager.Instance.LoadLevel(ESceneList.Lobby);
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -104,7 +105,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         _roomInfoList.Clear();
         _isTutorial = false;         
         
-        PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
         Hashtable propertiesToRemove = new Hashtable
         {
             { EProperties.Team.ToString(), null },
@@ -113,7 +113,6 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         };
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(propertiesToRemove);
-        
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
@@ -123,7 +122,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     {
         if (_isTutorial)
         {
-            PhotonNetwork.LoadLevel(ESceneList.Tutorial.ToString());
+            TransitionManager.Instance.LoadLevel(ESceneList.Tutorial);
         }
     }
 
@@ -132,7 +131,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
         if (!_isTutorial)
         {
             PopupManager.Instance.Close(EPopupType.UI_RoomSearchPopup);
-            PhotonNetwork.LoadLevel(ESceneList.WaitingRoom.ToString());   
+            TransitionManager.Instance.LoadLevel(ESceneList.WaitingRoom);
         }
     }
 
