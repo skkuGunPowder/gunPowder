@@ -182,6 +182,7 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 		{
 			int addedRenderers = 0;
 			SpriteRenderer[] srs = instance.GetComponentsInChildren<SpriteRenderer>(true);
+			Debug.Log($"[SkinMgr] 발견된 SpriteRenderer 수: {srs.Length}");
 			for (int i = 0; i < srs.Length; i++)
 			{
 				SpriteRenderer sr = srs[i];
@@ -191,6 +192,7 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 					{
 						_playerStat.MySpriteREndererList.Add(sr);
 						addedRenderers++;
+						Debug.Log($"[SkinMgr] SpriteRenderer 추가: {sr.gameObject.name} (색상: R:{sr.color.r:F2}, G:{sr.color.g:F2}, B:{sr.color.b:F2})");
 					}
 					// 색상 시스템 편입
 					_player?.RegisterOriginalColor(sr);
@@ -198,6 +200,7 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 					_player?.RegisterOriginalSortingOrder(sr);
 				}
 			}
+			Debug.Log($"[SkinMgr] MySpriteREndererList에 추가된 렌더러 수: {addedRenderers}, 전체 렌더러 수: {_playerStat.MySpriteREndererList.Count}");
 		}
 	}
 
@@ -226,27 +229,44 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 	private void RemoveInstanceComponentsFromLists(GameObject instance)
 	{
 		if (instance == null) { return; }
+		Debug.Log($"[SkinMgr] RemoveInstanceComponentsFromLists start. instance={instance.name}");
 
 		if (_player != null && _player.MyAnimatorList != null)
 		{
-			Animator animator = instance.GetComponent<Animator>();
-			if (animator != null)
+			Animator[] animators = instance.GetComponentsInChildren<Animator>(true);
+			for (int i = 0; i < animators.Length; i++)
 			{
-				_player.MyAnimatorList.Remove(animator);
+				Animator animator = animators[i];
+				if (animator != null)
+				{
+					_player.MyAnimatorList.Remove(animator);
+				}
 			}
 		}
 
 		if (_playerStat != null && _playerStat.MySpriteREndererList != null)
 		{
-			SpriteRenderer sr = instance.GetComponent<SpriteRenderer>();
-			if (sr != null)
+			int removedCount = 0;
+			SpriteRenderer[] srs = instance.GetComponentsInChildren<SpriteRenderer>(true);
+			Debug.Log($"[SkinMgr] 제거할 SpriteRenderer 수: {srs.Length}");
+			for (int i = 0; i < srs.Length; i++)
 			{
-				_playerStat.MySpriteREndererList.Remove(sr);
-				// 색상 시스템 해제
-				_player?.UnregisterOriginalColor(sr);
-				// sortingOrder 시스템 해제
-				_player?.UnregisterOriginalSortingOrder(sr);
+				SpriteRenderer sr = srs[i];
+				if (sr != null)
+				{
+					if (_playerStat.MySpriteREndererList.Contains(sr))
+					{
+						_playerStat.MySpriteREndererList.Remove(sr);
+						removedCount++;
+						Debug.Log($"[SkinMgr] SpriteRenderer 제거: {sr.gameObject.name}");
+					}
+					// 색상 시스템 해제
+					_player?.UnregisterOriginalColor(sr);
+					// sortingOrder 시스템 해제
+					_player?.UnregisterOriginalSortingOrder(sr);
+				}
 			}
+			Debug.Log($"[SkinMgr] MySpriteREndererList에서 제거된 렌더러 수: {removedCount}, 남은 렌더러 수: {_playerStat.MySpriteREndererList.Count}");
 		}
 	}
 }
