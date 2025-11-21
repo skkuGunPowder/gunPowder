@@ -3,8 +3,8 @@ using UnityEngine;
 using System.Text;
 
 using static Stove.PCSDK.Base;
-using static Stove.PCSDK.IAP;
-using NUnit;
+// using static Stove.PCSDK.IAP;
+using System;
 using System.Threading.Tasks;
 
 
@@ -19,6 +19,10 @@ public class STOVEManager : MonoBehaviour
 
     private static STOVEManager _instance;
     private static object _lockObject = new object();
+
+    public Action<Result> OnLoginResult;
+    public Action OnLoginSuccess;
+
 
     public static STOVEManager Instance
     {
@@ -65,18 +69,14 @@ public class STOVEManager : MonoBehaviour
 
             if (restartAppIfNecessary)
             {
-                // 런처를 통해 게임을 실행하지 않았므로 게임종료 처리를 진행합니다. 
                 Debug.LogError("Please run the game through the stove launcher.");
             }
             else
             {
-                // 런처를 통해 게임이 실행되었으므로 초기화를 진행합니다.
                 Debug.Log("Success to run through stove launcher.");
                 Initialize(EnvLoader.Get("SHOP_KEY"));
             }
         // });
-    
-        
     }
 
     private void OnDestroy()
@@ -161,6 +161,7 @@ public class STOVEManager : MonoBehaviour
                 Stove.PCSDK.Base.Result result = default;
 
                 Debug.Log("Success to initialize Base SDK");
+                // TODO
                 // result = IAP_Initialize(shopKey);
                 PrintResult(result);
 
@@ -182,9 +183,86 @@ public class STOVEManager : MonoBehaviour
         result = Base_UnInitialize();
         PrintResult(result);
 
-        result = IAP_UnInitialize();
-        PrintResult(result);
+        // TODO
+        // result = IAP_UnInitialize();
+        // PrintResult(result);
 
         _isInitialized = false;
+    }
+
+    public void OnSTOVELogin()
+    {
+        STOVELogin();
+    }
+
+    public async void STOVELogin()
+    {
+        StovePCUser user = default;
+
+        var result = Base_GetUser(ref user);
+        if(result.IsSuccessful())
+        {
+            string id = $"{user.gameUserId}@stovelogin.com";
+            string pw = $"{user.gameUserId}";
+
+            var loginResult  = await AccountManager.Instance.TryLogin(id, pw);
+            if (loginResult.IsSuccess)
+            {
+                Debug.Log("STOVE 로그인 성공");
+                OnLoginResult?.Invoke(loginResult);
+                OnLoginSuccess?.Invoke();
+            }
+            else
+            {
+                Debug.LogWarning($"STOVE 로그인 실패: {loginResult.Message}");
+                STOVERegister(id, pw);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("STOVE 로그인 실패");
+            OnLoginResult?.Invoke(new Result(false, "STOVE 로그인 실패"));
+        }
+    }
+
+    private async void STOVERegister(string id, string pw)
+    {
+        string encryptedPassword = CryptoUtil.Encryption(pw, AccountManager.SALT);
+        AccountDTO newAccountDTO = new AccountDTO(
+            "",
+            id,
+            pw,
+            AccountManager.SALT,
+            AuthProvider.STOVE,
+            "",
+            "",
+            false,
+            AccountFlags.None
+        );
+
+        var fbRegisterResult = await AccountManager.Instance.TryRegister(newAccountDTO);
+        var beRegisterResult = AccountManager.Instance._backendLogin.CustomSignUp(id, encryptedPassword);
+        if(fbRegisterResult.IsSuccess)
+        {
+            Debug.Log("STOVE 회원가입 성공");
+            var loginResult  = await AccountManager.Instance.TryLogin(id, pw);
+            if (loginResult.IsSuccess)
+            {
+                Debug.Log("STOVE 로그인 성공");
+                OnLoginResult?.Invoke(loginResult);
+                OnLoginSuccess?.Invoke();
+            }
+            else
+            {
+                Debug.LogWarning($"STOVE 로그인 실패: {loginResult.Message}");
+                OnLoginResult?.Invoke(loginResult);
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"STOVE Firebase: {fbRegisterResult.IsSuccess} | {fbRegisterResult.Message}");
+            Debug.LogWarning($"STOVE Backend: {beRegisterResult.IsSuccess} | {beRegisterResult.Message}");
+            OnLoginResult?.Invoke(fbRegisterResult);
+        }
     }
 }
