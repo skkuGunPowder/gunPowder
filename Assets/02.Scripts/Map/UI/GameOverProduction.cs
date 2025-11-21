@@ -81,8 +81,7 @@ public class GameOverProduction : MonoBehaviour
     public void Play()
     {
         SoundManager.Instance.PlayLocalSound(nameof(GameEndBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
-
-
+        
         GameOverProductionPanel.gameObject.SetActive(true);
         
         GameManager.Instance.OnGameOver -= Play;
