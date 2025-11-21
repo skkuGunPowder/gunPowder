@@ -5,6 +5,7 @@ using System.Text;
 using static Stove.PCSDK.Base;
 using static Stove.PCSDK.IAP;
 using NUnit;
+using System.Threading.Tasks;
 
 
 public class STOVEManager : MonoBehaviour
@@ -54,9 +55,13 @@ public class STOVEManager : MonoBehaviour
             applicationKey = EnvLoader.Get("APPLICATION_KEY")
         };
 
-        Base_RestartAppIfNecessaryAsync(_initParam, 60_000, (CallbackResult callbackResult, bool restartAppIfNecessary) =>
-        {
-            PrintCallbackResult(callbackResult);
+        // TODO : Deprecated 된거라 나중에 수정해야할 가능서 높음!
+        bool restartAppIfNecessary = Base_RestartAppIfNecessary(_initParam);
+
+        // TODO : 지금은 무한루프만 돌고 콜백이 안옴 -> Base_RestartAppIfNecessary가 완전히 Deprecated 되어서 지원안하면 바꿔야할 듯
+        // Base_RestartAppIfNecessaryAsync(_initParam, 60_000, (CallbackResult callbackResult, bool restartAppIfNecessary) =>
+        // {
+        //     PrintCallbackResult(callbackResult);
 
             if (restartAppIfNecessary)
             {
@@ -69,7 +74,8 @@ public class STOVEManager : MonoBehaviour
                 Debug.Log("Success to run through stove launcher.");
                 Initialize(EnvLoader.Get("SHOP_KEY"));
             }
-        });
+        // });
+    
         
     }
 
