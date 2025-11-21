@@ -42,6 +42,7 @@ public class GunPowderBezierCurve : MonoBehaviour
     private PhotonView _photonView;
 
     public GameObject VFXPrefab;
+    public GameObject HealVFXPrefab;
     private GunPowder _gunPowder;
 
     private void Awake()
@@ -273,7 +274,7 @@ public class GunPowderBezierCurve : MonoBehaviour
         }
     }
 
-    
+
     private void OnDisable()
     {
         // 파괴(네트워크 동기화 포함) 시 로컬에서 VFX 재생
@@ -286,6 +287,18 @@ public class GunPowderBezierCurve : MonoBehaviour
         if (VFXPrefab != null)
         {
             FollowVFX vfx = VFXPool.Instance.Get(VFXPrefab.name) as FollowVFX;
+            if (vfx != null)
+            {
+                if (_target != null && _target.gameObject.activeInHierarchy)
+                {
+                    vfx.PlayAttached(_target);
+                }
+            }
+        }
+        
+        if (HealVFXPrefab != null)
+        {
+            FollowVFX vfx = VFXPool.Instance.Get(HealVFXPrefab.name) as FollowVFX;
             if (vfx != null)
             {
                 if (_target != null && _target.gameObject.activeInHierarchy)
