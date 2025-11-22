@@ -95,17 +95,6 @@ public class AccountManager : DontDestroySingleton<AccountManager>
             accountDTO.Email_Verified,
             accountDTO.Account_Flags
         );
-
-        // ChatClient 초기화 (로그인 후 Nickname이 설정된 상태)
-        if (UIChatManager.Instance != null)
-        {
-            Debug.Log("UIChatManager Init 시작");
-            UIChatManager.Instance.InitializeChatClient();
-        }
-        else
-        {
-            Debug.Log("UIChatManager Init 실패");
-        }
         
         return new Result(true, "로그인 성공!");
     }
