@@ -44,6 +44,14 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
     private bool _isChatClientInitialized = false;
 
+    protected override void Awake()
+    {
+        base.Awake();
+
+        // ChatClient 초기화 (로그인 후 Nickname이 설정된 상태)
+        InitializeChatClient();
+    }
+
     /// <summary>
     /// ChatClient 초기화 (로비 진입 시 호출)
     /// Nickname은 채널 입장 시점에 검증
