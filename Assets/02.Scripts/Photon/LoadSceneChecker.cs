@@ -13,6 +13,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
     private void Awake()
     {
         _photonView = GetComponent<PhotonView>();
+        EventManager.Instance.OnPlayerChanged += PlayerLoadCheck;
     }
 
     private void Update()
@@ -31,14 +32,20 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
                 return;
             }
 
-            if (PlayerLoadCheck())
-            {
-                _photonView.RPC(nameof(Rpc_LoadEnd), RpcTarget.All);
-            }
+            PlayerLoadCheck();
+
+        }
+    }
+
+    private void PlayerLoadCheck(PhotonPlayer player = null)
+    {
+        if (IsLoadEnd())
+        {
+            _photonView.RPC(nameof(Rpc_LoadEnd), RpcTarget.All);
         }
     }
     
-    private bool PlayerLoadCheck()
+    private bool IsLoadEnd(PhotonPlayer player = null)
     {
         List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.PlayerList);
         
