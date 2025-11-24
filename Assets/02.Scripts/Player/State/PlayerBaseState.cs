@@ -275,7 +275,11 @@ public class PlayerBaseState : MonoState
                 return;
             }
             
-            _owner.PlayerStat.DecreaseGunPowderCount(_owner.SpecialBombStat.Cost, _owner.PhotonView.Owner.ActorNumber);
+            int cost = _owner.SpecialBombStat.Cost;
+            _owner.PlayerStat.DecreaseGunPowderCount(cost, _owner.PhotonView.Owner.ActorNumber);
+            
+            // 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
+            _owner.RPC_SpawnGunPowderUseParticle();
         }
 
         // 1. 폭탄 인스턴싱

@@ -303,7 +303,8 @@ public class GunPowderBezierCurve : MonoBehaviour
             {
                 if (_target != null && _target.gameObject.activeInHierarchy)
                 {
-                    vfx.PlayAttached(_target);
+                    // 타겟 위쪽으로 호를 그려서 랜덤 위치에 생성
+                    vfx.PlayAttachedWithArcOffset(_target, arcRadius: 1.5f, arcAngleRange: 90f);
                 }
             }
         }

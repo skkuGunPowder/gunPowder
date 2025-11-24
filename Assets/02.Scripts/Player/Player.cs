@@ -195,6 +195,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField] private GameObject _playerHitParticlePrefab;  // 상대방 위치에 생성
     [SerializeField] private GameObject _playerCritHitPrefab;       // 자신의 우측에 생성 (크리티컬)
     [SerializeField] private GameObject _playerCritHitParticlePrefab;  // 상대방 위치에 생성 (크리티컬)
+    [SerializeField] private GameObject _playerGunPowderUsePrefab;     // 건파우더 사용 파티클
     [SerializeField] private Vector3 _playerHitVFXOffset = new Vector3(0, 5f, 0f); // 히트 파티클 오프셋 (위쪽으로 5f만큼 올림)
     private const float PLAYER_HIT_PARTICLE_OFFSET = 0.5f;  // 자신의 우측 오프셋
     
@@ -202,7 +203,9 @@ public class Player : MonoBehaviourPun, IDamagable
     private class PendingExplosionHit
     {
         public List<Vector3> victimPositions = new List<Vector3>();
-        public bool hasCrit = false;
+        public List<int> victimViewIds = new List<int>(); // 피격자 ViewID (FollowVFX용)
+        public List<bool> victimIsCrits = new List<bool>(); // 각 피격자의 크리티컬 여부 (개별 파티클용)
+        public bool hasCrit = false; // 폭발에 크리티컬이 하나라도 있는지 (공격자 이펙트/사운드용)
     }
     private PendingExplosionHit _currentExplosionHit;
     private Coroutine _processHitCoroutine;
@@ -1584,7 +1587,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 if (!isSameTeam)
                 {
                     bool isCrit = (damage == maxDamage);
-                    attackerView.RPC(nameof(SpawnAttackerHitParticles), attackerView.Owner, transform.position, isCrit);
+                    attackerView.RPC(nameof(SpawnAttackerHitParticles), attackerView.Owner, transform.position, isCrit, PhotonView.ViewID);
                 }
             }
         }
@@ -2078,8 +2081,9 @@ public class Player : MonoBehaviourPun, IDamagable
     /// </summary>
     /// <param name="victimPosition">피격자 위치</param>
     /// <param name="isCrit">크리티컬 여부</param>
+    /// <param name="victimViewId">피격자 PhotonView ID (FollowVFX용)</param>
     [PunRPC]
-    public void SpawnAttackerHitParticles(Vector3 victimPosition, bool isCrit)
+    public void SpawnAttackerHitParticles(Vector3 victimPosition, bool isCrit, int victimViewId)
     {
         if (VFXPool.Instance == null)
         {
@@ -2102,9 +2106,11 @@ public class Player : MonoBehaviourPun, IDamagable
         
         // 2. 피격 정보 수집
         _currentExplosionHit.victimPositions.Add(victimPosition);
+        _currentExplosionHit.victimViewIds.Add(victimViewId);
+        _currentExplosionHit.victimIsCrits.Add(isCrit); // 각 피격자의 크리티컬 여부 저장
         if (isCrit)
         {
-            _currentExplosionHit.hasCrit = true; // 한 명이라도 크리티컬이면 전체 크리티컬
+            _currentExplosionHit.hasCrit = true; // 한 명이라도 크리티컬이면 true (공격자 이펙트/사운드용)
         }
     }
     
@@ -2122,32 +2128,54 @@ public class Player : MonoBehaviourPun, IDamagable
             yield break;
         }
         
-        bool isCrit = _currentExplosionHit.hasCrit;
+        bool explosionHasCrit = _currentExplosionHit.hasCrit; // 폭발에 크리티컬이 있는지 (공격자 이펙트/사운드용)
         
-        // 1. 각 피격자 위치에 파티클 생성 (플레이어마다 하나씩)
-        GameObject particlePrefab = isCrit ? _playerCritHitParticlePrefab : _playerHitParticlePrefab;
-        if (particlePrefab != null)
+        // 1. 각 피격자를 따라다니는 파티클 생성 (플레이어마다 개별 파티클!)
+        for (int i = 0; i < _currentExplosionHit.victimViewIds.Count; i++)
         {
-            foreach (var pos in _currentExplosionHit.victimPositions)
+            int victimViewId = _currentExplosionHit.victimViewIds[i];
+            bool individualCrit = _currentExplosionHit.victimIsCrits[i]; // 각 피격자의 크리티컬 여부
+            
+            // 각 피격자에 맞는 파티클 선택
+            GameObject particlePrefab = individualCrit ? _playerCritHitParticlePrefab : _playerHitParticlePrefab;
+            
+            if (particlePrefab != null)
             {
-                VFXPool.Instance.Play(particlePrefab.name, pos);
+                PhotonView victimView = PhotonView.Find(victimViewId);
+                
+                if (victimView != null && victimView.gameObject.activeInHierarchy)
+                {
+                    // FollowVFX로 피격자를 따라다니게 함
+                    FollowVFX vfx = VFXPool.Instance.Get(particlePrefab.name) as FollowVFX;
+                    if (vfx != null)
+                    {
+                        vfx.PlayAttached(victimView.transform);
+                    }
+                }
+                else
+                {
+                    // 피격자를 찾을 수 없으면 위치에 고정
+                    Vector3 pos = _currentExplosionHit.victimPositions[i];
+                    VFXPool.Instance.Play(particlePrefab.name, pos);
+                }
             }
         }
         
-        // 2. 자신 우측에 이펙트 생성 (폭발당 1개만!)
-        GameObject hitPrefab = isCrit ? _playerCritHitPrefab : _playerHitPrefab;
+        // 2. 자신 우측에 이펙트 생성 (폭발당 1개만! 크리티컬 우선)
+        GameObject hitPrefab = explosionHasCrit ? _playerCritHitPrefab : _playerHitPrefab;
         if (hitPrefab != null)
         {
             Vector3 spawnPos = transform.position + Vector3.right * PLAYER_HIT_PARTICLE_OFFSET;
             VFXPool.Instance.Play(hitPrefab.name, spawnPos);
         }
         
-        // 3. 사운드 재생 (폭발당 1번만!)
+        /*
+        // 3. 사운드 재생 (폭발당 1번만! 크리티컬 우선)
         if (SoundManager.Instance != null)
         {
-            string soundName = isCrit ? "PlayerCrit_1" : "PlayerHit_1";
+            string soundName = explosionHasCrit ? "PlayerCrit_1" : "PlayerHit_1";
             SoundManager.Instance.PlayLocalSound(soundName, transform, 0f, false, SoundType.SFX, true, 1f, 50f);
-        }
+        }*/
         
         // 정리
         _currentExplosionHit = null;
@@ -2162,6 +2190,42 @@ public class Player : MonoBehaviourPun, IDamagable
     //         _playerHealthBar.ShowHealthBarForAttacker(currentHP, damage, isAfterResurrect);
     //     }
     // }
+
+    /// <summary>
+    /// 특수 폭탄 사용 시 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
+    /// </summary>
+    /// <param name="amount">소모한 건파우더 양 (파티클 개수)</param>
+    public void RPC_SpawnGunPowderUseParticle()
+    {
+        if (!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(SpawnGunPowderUseParticle), RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void SpawnGunPowderUseParticle()
+    {
+        if (_playerGunPowderUsePrefab == null)
+        {
+            Debug.LogWarning("[Player] _playerGunPowderUsePrefab is null.");
+            return;
+        }
+
+        if (VFXPool.Instance == null)
+        {
+            Debug.LogWarning("[Player] VFXPool.Instance is null.");
+            return;
+        }
+
+        FollowVFX vfx = VFXPool.Instance.Get(_playerGunPowderUsePrefab.name) as FollowVFX;
+        if (vfx != null)
+        {
+            // 플레이어 위쪽으로 호를 그려서 랜덤 위치에 생성
+            vfx.PlayAttachedWithArcOffset(transform, arcRadius: 1.5f, arcAngleRange: 90f);
+        }
+    }
 
     /// <summary>
     /// 강제로 궁극기 사용가능상태 만들기
