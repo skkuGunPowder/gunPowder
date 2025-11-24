@@ -207,6 +207,7 @@ public class Player : MonoBehaviourPun, IDamagable
         public List<bool> victimIsCrits = new List<bool>(); // 각 피격자의 크리티컬 여부 (개별 파티클용)
         public bool hasCrit = false; // 폭발에 크리티컬이 하나라도 있는지 (공격자 이펙트/사운드용)
     }
+    
     private PendingExplosionHit _currentExplosionHit;
     private Coroutine _processHitCoroutine;
 
@@ -530,9 +531,12 @@ public class Player : MonoBehaviourPun, IDamagable
         InitializeOriginalColors();
 
         // 로컬 필드 팀을 항상 네트워크 프로퍼티와 동기화
-        if (PhotonView.Owner != null && PhotonView.Owner.CustomProperties.ContainsKey(EProperties.Team.ToString()))
+        SyncTeamFromCustomProperties();
+        
+        // 모든 플레이어의 팀 동기화 (지연 호출로 CustomProperties 동기화 대기)
+        if (PhotonView.IsMine)
         {
-            _playerStat.Team = (EInGameTeam)PhotonView.Owner.CustomProperties[EProperties.Team.ToString()];
+            Invoke(nameof(SyncAllPlayersTeam), 0.5f); // 0.5초 후 모든 플레이어의 팀 동기화
         }
     }
 
@@ -542,6 +546,9 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _playerFSM.SyncStateChange<PlayerIdleState>();
         }
+        
+        // GameObject가 활성화될 때 팀 동기화 (뒤에 들어온 플레이어의 경우)
+        SyncTeamFromCustomProperties();
     }
 
     /// <summary>
@@ -1475,6 +1482,54 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             SoundManager.Instance.PlayLocalRandomSound("PlayerDamage", transform, 1, 7, 0f, false, SoundType.SFX, true, 1f, 50f);
             SoundManager.Instance.PlayLocalRandomSound("PlayerDamageVoice", transform, 1, 3, 0f, false, SoundType.SFX, true, 1f, 50f);
+        }
+    }
+
+    /// <summary>
+    /// 자신의 팀을 CustomProperties에서 동기화
+    /// </summary>
+    private void SyncTeamFromCustomProperties()
+    {
+        if (PhotonView.Owner != null && PhotonView.Owner.CustomProperties.ContainsKey(EProperties.Team.ToString()))
+        {
+            _playerStat.Team = (EInGameTeam)PhotonView.Owner.CustomProperties[EProperties.Team.ToString()];
+        }
+    }
+
+    /// <summary>
+    /// 모든 플레이어의 팀을 CustomProperties에서 동기화
+    /// </summary>
+    private void SyncAllPlayersTeam()
+    {
+        foreach (var player in PhotonNetwork.PlayerList)
+        {
+            if (!player.CustomProperties.ContainsKey(EProperties.Team.ToString()))
+            {
+                continue;
+            }
+
+            EInGameTeam teamFromProperties = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+            
+            // 해당 플레이어의 GameObject 찾기
+            GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
+            GameObject[] enemyObjects = GameObject.FindGameObjectsWithTag("Enemy");
+            GameObject[] allPlayerObjects = new GameObject[playerObjects.Length + enemyObjects.Length];
+            playerObjects.CopyTo(allPlayerObjects, 0);
+            enemyObjects.CopyTo(allPlayerObjects, playerObjects.Length);
+            
+            foreach (var obj in allPlayerObjects)
+            {
+                PhotonView pv = obj.GetComponent<PhotonView>();
+                if (pv != null && pv.Owner != null && pv.Owner.ActorNumber == player.ActorNumber)
+                {
+                    PlayerStat stat = obj.GetComponent<PlayerStat>();
+                    if (stat != null)
+                    {
+                        stat.Team = teamFromProperties;
+                        break;
+                    }
+                }
+            }
         }
     }
 
