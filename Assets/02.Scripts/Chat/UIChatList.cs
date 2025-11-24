@@ -9,9 +9,9 @@ public class UIChatList : MonoBehaviour
 {
     public Toggle CheckBox = null;
     public Image Avatar = null;
-    public Text Name = null;
+    public TextMeshProUGUI Name = null;
     public TextMeshProUGUI Message = null;
-    public Text Time = null;
+    public TextMeshProUGUI Time = null;
     public Button ReportButton = null;
     public Image OutLineImage = null;
 
@@ -70,8 +70,8 @@ public class UIChatList : MonoBehaviour
         else
             Avatar.sprite = Resources.Load<Sprite>("Images/" + avatar);
 
-        if (is_my) Name.text = "";
-        else Name.text = name;
+        if (is_my) Name.text = "[전체]";
+        else Name.text = $"[전체] {name}";
         
         Message.text = message;
 

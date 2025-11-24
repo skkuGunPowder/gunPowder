@@ -2,16 +2,17 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// 범용 채팅 InputField 컴포넌트
 /// 인게임, 파티, 귓속말 등 다양한 채팅에서 재사용 가능
 /// </summary>
-[RequireComponent(typeof(InputField))]
+[RequireComponent(typeof(TMP_InputField))]
 public class UI_IngameChatInputField : MonoBehaviour
 {
-    private InputField _inputField;
-    private Text _placeholderText;
+    private TMP_InputField _inputField;
+    private TMP_Text _placeholderText;
 
     [Header("Settings")]
     [SerializeField] private string defaultPlaceholder = "ENTER MESSAGE...";
@@ -34,19 +35,17 @@ public class UI_IngameChatInputField : MonoBehaviour
 
     private void Awake()
     {
-        _inputField = GetComponent<InputField>();
+        _inputField = GetComponent<TMP_InputField>();
 
-        // Placeholder 텍스트 가져오기
         if (_inputField != null && _inputField.placeholder != null)
         {
-            _placeholderText = _inputField.placeholder.GetComponent<Text>();
+            _placeholderText = _inputField.placeholder as TMP_Text;
             if (_placeholderText != null)
             {
-                _placeholderText.text = defaultPlaceholder;
+                _placeholderText.text = defaultPlaceholder; 
             }
         }
 
-        // Enter 키 이벤트 리스너 추가
         if (_inputField != null)
         {
             _inputField.onEndEdit.AddListener(OnEndEdit);
@@ -277,5 +276,5 @@ public class UI_IngameChatInputField : MonoBehaviour
     /// <summary>
     /// InputField 참조 가져오기 (읽기 전용)
     /// </summary>
-    public InputField GetInputField() => _inputField;
+    public TMP_InputField GetInputField() => _inputField;
 }
