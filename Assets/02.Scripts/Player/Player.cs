@@ -169,8 +169,8 @@ public class Player : MonoBehaviourPun, IDamagable
     [Header("크랩용")]
     public Transform CrabHoldPoint;
 
-    private PlayerHealthBar _playerHealthBar;
-    public PlayerHealthBar PlayerHealthBar => _playerHealthBar;
+    // private PlayerHealthBar _playerHealthBar;
+    // public PlayerHealthBar PlayerHealthBar => _playerHealthBar;
 
     // 대시 탭 타임
     public float LastDashTapTimeLeft = -999f;
@@ -190,6 +190,14 @@ public class Player : MonoBehaviourPun, IDamagable
     // 부활 후 첫 공격 여부 (HP bar 최대값 리셋용)
     private bool _isAfterResurrect = false;
 
+    [Header("PlayerHitParticle")]
+    [SerializeField] private GameObject _playerHitPrefab;           // 자신의 우측에 생성
+    [SerializeField] private GameObject _playerHitParticlePrefab;  // 상대방 위치에 생성
+    [SerializeField] private GameObject _playerCritHitPrefab;       // 자신의 우측에 생성 (크리티컬)
+    [SerializeField] private GameObject _playerCritHitParticlePrefab;  // 상대방 위치에 생성 (크리티컬)
+    [SerializeField] private Vector3 _playerHitVFXOffset = new Vector3(0, 5f, 0f); // 히트 파티클 오프셋 (위쪽으로 5f만큼 올림)
+    private const float PLAYER_HIT_PARTICLE_OFFSET = 0.5f;  // 자신의 우측 오프셋
+
     private void Awake()
     {
         _playerStat = GetComponent<PlayerStat>();
@@ -199,14 +207,14 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerFSM = GetComponent<PlayerFSM>();
         _damagePopup = GetComponent<DamagePopup>();
         _skinManager = GetComponent<PlayerSkinManager>();
-        _playerHealthBar = GetComponentInChildren<PlayerHealthBar>();
+        // _playerHealthBar = GetComponentInChildren<PlayerHealthBar>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
 
         _playerBuffHandler = GetComponent<PlayerBuffHandler>();
         IsSuperArmor = false;
-        
+
         // 원본 Rigidbody constraints 저장
         if (_rigidbody2D != null)
         {
@@ -535,18 +543,14 @@ public class Player : MonoBehaviourPun, IDamagable
             _originalColorMap = new Dictionary<SpriteRenderer, Color>();
         }
 
-        int addedCount = 0;
         foreach (var renderer in _playerStat.MySpriteREndererList)
         {
             if (renderer != null && !_originalColorMap.ContainsKey(renderer))
             {
                 // 원본 색상 저장 (이 값은 절대 변경되지 않음)
                 _originalColorMap[renderer] = renderer.color;
-                addedCount++;
-                Debug.Log($"[색상초기화] {renderer.gameObject.name}: 원본 색상 저장 (R:{renderer.color.r:F2}, G:{renderer.color.g:F2}, B:{renderer.color.b:F2})");
             }
         }
-        Debug.Log($"[색상초기화] {addedCount}개의 기본 렌더러 색상 초기화 완료, 총 렌더러: {_originalColorMap.Count}");
     }
 
     /// <summary>
@@ -575,15 +579,12 @@ public class Player : MonoBehaviourPun, IDamagable
                 _originalColorMap[renderer] = Color.white;
                 // 실제 스프라이트도 흰색으로 즉시 변경
                 renderer.color = Color.white;
-                Debug.Log($"[색상등록] {renderer.gameObject.name}: 경고상태 감지 → 흰색으로 저장 및 변경");
             }
             else
             {
                 // 정상 색상이면 현재 색상을 원본으로 저장
                 _originalColorMap[renderer] = currentColor;
-                Debug.Log($"[색상등록] {renderer.gameObject.name}: 정상색상 저장 (R:{currentColor.r:F2}, G:{currentColor.g:F2}, B:{currentColor.b:F2})");
             }
-            Debug.Log($"[색상등록] 총 등록된 렌더러 수: {_originalColorMap.Count}");
         }
     }
 
@@ -593,8 +594,6 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_originalColorMap.ContainsKey(renderer))
         {
             _originalColorMap.Remove(renderer);
-            Debug.Log($"[색상해제] {renderer.gameObject.name}: 색상 시스템에서 제거됨");
-            Debug.Log($"[색상해제] 남은 렌더러 수: {_originalColorMap.Count}");
         }
     }
 
@@ -658,10 +657,10 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.ResurrectPlayerStat();
 
         // HP bar 초기화 (부활 시 maxHP를 초기값으로 리셋)
-        if (_playerHealthBar != null)
-        {
-            _playerHealthBar.ResetHealthBarOnResurrect();
-        }
+        // if (_playerHealthBar != null)
+        // {
+        //     _playerHealthBar.ResetHealthBarOnResurrect();
+        // }
 
         // 부활 후 첫 공격 플래그 설정
         _isAfterResurrect = true;
@@ -1446,11 +1445,11 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             if (tag == "Player")
             {
-                VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
+                VFXPool.Instance.RandomPlay("Damaged", transform.position + _playerHitVFXOffset, 1, 3);
             }
             else
             {
-                VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
+                VFXPool.Instance.RandomPlay("Hit", transform.position + _playerHitVFXOffset, 1, 6);
             }
         }
 
@@ -1567,10 +1566,17 @@ public class Player : MonoBehaviourPun, IDamagable
                 PhotonView.RPC(nameof(RPC_PlayHitEffects), attackerView.Owner, damage, maxDamage);
                 PhotonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
                 // 피격자의 정확한 HP 정보를 공격자에게 전달 (부활 후 첫 공격 여부 포함)
-                PhotonView.RPC(nameof(ShowHealthBarForAttacker), attackerView.Owner, 
-                    _playerStat.CurrentPlayerGunPowderCount, damage, _isAfterResurrect);
+                // PhotonView.RPC(nameof(ShowHealthBarForAttacker), attackerView.Owner, 
+                //     _playerStat.CurrentPlayerGunPowderCount, damage, _isAfterResurrect);
                 // 첫 공격 후 플래그 리셋
-                _isAfterResurrect = false;
+                // _isAfterResurrect = false;
+                
+                // 공격자에게 히트 파티클 생성 요청 (로컬에서만 실행)
+                if (!isSameTeam)
+                {
+                    bool isCrit = (damage == maxDamage);
+                    attackerView.RPC(nameof(SpawnAttackerHitParticles), attackerView.Owner, transform.position, isCrit);
+                }
             }
         }
     }
@@ -2057,14 +2063,44 @@ public class Player : MonoBehaviourPun, IDamagable
         _damagePopup.SpawnPopup(value, maxDamage);
     }
 
+    /// <summary>
+    /// 공격자(자신)가 적을 맞췄을 때 파티클 생성 (로컬에서만 실행)
+    /// </summary>
+    /// <param name="victimPosition">피격자 위치</param>
+    /// <param name="isCrit">크리티컬 여부</param>
     [PunRPC]
-    public void ShowHealthBarForAttacker(int currentHP, int damage, bool isAfterResurrect)
+    public void SpawnAttackerHitParticles(Vector3 victimPosition, bool isCrit)
     {
-        if (_playerHealthBar != null)
+        if (VFXPool.Instance == null)
         {
-            _playerHealthBar.ShowHealthBarForAttacker(currentHP, damage, isAfterResurrect);
+            Debug.LogWarning("[Player] VFXPool.Instance is null. Cannot spawn hit particles.");
+            return;
+        }
+
+        // 1. 자신의 우측에 GameObject 생성 (항상 월드 좌표 기준 우측)
+        GameObject hitPrefab = isCrit ? _playerCritHitPrefab : _playerHitPrefab;
+        if (hitPrefab != null)
+        {
+            Vector3 spawnPos = transform.position + Vector3.right * PLAYER_HIT_PARTICLE_OFFSET;
+            VFXPool.Instance.Play(hitPrefab.name, spawnPos);
+        }
+
+        // 2. 피격자 위치에 GameObject 생성
+        GameObject hitParticlePrefab = isCrit ? _playerCritHitParticlePrefab : _playerHitParticlePrefab;
+        if (hitParticlePrefab != null)
+        {
+            VFXPool.Instance.Play(hitParticlePrefab.name, victimPosition);
         }
     }
+
+    // [PunRPC]
+    // public void ShowHealthBarForAttacker(int currentHP, int damage, bool isAfterResurrect)
+    // {
+    //     if (_playerHealthBar != null)
+    //     {
+    //         _playerHealthBar.ShowHealthBarForAttacker(currentHP, damage, isAfterResurrect);
+    //     }
+    // }
 
     /// <summary>
     /// 강제로 궁극기 사용가능상태 만들기
