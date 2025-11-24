@@ -100,7 +100,6 @@ public class UI_ItemStorage : UI_Popup
         {
             _itemStorage.EquipItem(selectedITem);
         }
-        _itemStorage.SetPlayerCustomProperties();
     }
 
     // public void Show()
