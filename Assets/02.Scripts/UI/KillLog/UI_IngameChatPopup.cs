@@ -3,22 +3,29 @@ using System.Collections.Generic;
 using BackndChat;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
+public enum ChatChannel { All, Team, Whisper }
 public class UI_IngameChatPopup : UI_Popup
 {
     public GameObject ChatContent = null;
-    public InputField ChatInput = null;
     public Button SendButton = null;
-    public GameObject ChatListPrefab;
     public ScrollRect ChatScrollRect = null; // 채팅 스크롤뷰
-    public GameObject ChatOutsidePrefab;
+    public GameObject ChatBubblePrefab;
+
+    // ChatPrefab
+    public GameObject ChatListLeftPrefab;
+    public GameObject ChatListRightPrefab; // 내 메세지
 
     // UI 토글 관련
-    public Button ToggleChatButton = null; // 채팅 창 토글 버튼
-    public GameObject ScrollViewObject = null; // Scroll View
-    public GameObject PopupTopBarBackground = null; // Popup Top Bar Background
-    public Image ChatImageComponent = null; // Chat의 Image Component
+    [SerializeField] private GameObject MiniStateGroup;
+    [SerializeField] private GameObject FullStateGroup;
+    private bool _isChatOpen = false;
+
+    // InputField 컴포넌트들
+    [SerializeField] private UI_IngameChatInputField inputFieldMini;
+    [SerializeField] private UI_IngameChatInputField inputFieldFull;
 
     private Action _closeCallback;
     // 인게임 채팅이 동작할 씬 목록
@@ -26,35 +33,28 @@ public class UI_IngameChatPopup : UI_Popup
 
     // 채팅 도배 방지 시스템
     private Queue<float> _recentChatTimes = new Queue<float>(); // 최근 채팅 시간 기록
-    private const int MAX_MESSAGES_THRESHOLD = 5; // 연속 채팅 제한 횟수
-    private const float SPAM_CHECK_WINDOW = 2f; // 도배 체크 시간 (3초 내 5번)
+    private const int MAX_MESSAGES_THRESHOLD = 4; // 연속 채팅 제한 횟수
+    private const float SPAM_CHECK_WINDOW = 3f; // 도배 체크 시간 (3초 내 4번 초과)
     private const float CHAT_BAN_DURATION = 10f; // 채팅 금지 시간 (10초)
     private float _chatBanEndTime = 0f; // 채팅 금지 종료 시간
     private bool _isChatBanned = false; // 채팅 금지 상태
+    private bool _chatBanMessageShown = false; // 채팅 금지 메시지 표시 여부 (중복 방지)
 
+    // 채팅 채널 관련
+    private ChatChannel _currentChannel = ChatChannel.All;
+    private string _whisperTargetName = ""; // 귓속말 대상
+    
     private void Awake()
     {
-        // 버튼 및 입력 필드 리스너 설정
-        if (SendButton != null)
+        // InputField 컴포넌트들의 OnSubmit 이벤트 구독
+        if (inputFieldMini != null)
         {
-            SendButton.onClick.AddListener(SendChatMessage);
+            inputFieldMini.OnSubmit += OnChatSubmit;
         }
 
-        // 토글 버튼 리스너 설정
-        if (ToggleChatButton != null)
+        if (inputFieldFull != null)
         {
-            ToggleChatButton.onClick.AddListener(ToggleChatUI);
-        }
-
-        if (ChatInput != null)
-        {
-            ChatInput.onEndEdit.AddListener((string text) =>
-            {
-                if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-                {
-                    SendChatMessage();
-                }
-            });
+            inputFieldFull.OnSubmit += OnChatSubmit;
         }
 
         _closeCallback = Close;
@@ -68,12 +68,9 @@ public class UI_IngameChatPopup : UI_Popup
 
     private void OnEnable()
     {
-        // 팝업이 열릴 때 InputField에 자동 포커스
-        FocusInputField();
-
-        // 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
-        StartCoroutine(ScrollToBottomCoroutine());
+        ScrollToBottomCoroutine();
     }
+
 
     private void Start()
     {
@@ -97,7 +94,75 @@ public class UI_IngameChatPopup : UI_Popup
             Debug.LogError("[UI_IngameChatPopup] UIChatManager.Instance가 null입니다!");
         }
     }
+    private void Update()
+    {
+        // Tab 키로 채널 변경
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            CycleChannel();
+        }
 
+        // T 키로 Mini/Full 전환 (InputField가 포커스 중이 아닐 때만)
+        if (Input.GetKeyDown(KeyCode.T) && !IsAnyInputFieldFocused())
+        {
+            ToggleChatPopup();
+        }
+    }
+
+    /// <summary>
+    /// Mini 또는 Full InputField가 포커스 중인지 확인
+    /// </summary>
+    private bool IsAnyInputFieldFocused()
+    {
+        bool miniFocused = inputFieldMini != null && inputFieldMini.IsFocused();
+        bool fullFocused = inputFieldFull != null && inputFieldFull.IsFocused();
+        return miniFocused || fullFocused;
+    }
+
+    public void ToggleChatPopup()
+    {
+        if (MiniStateGroup.activeInHierarchy)
+        {
+            MiniStateGroup.SetActive(false);
+            FullStateGroup.SetActive(true);
+        }
+        else
+        {
+            MiniStateGroup.SetActive(true);
+            FullStateGroup.SetActive(false);
+        }
+    }
+    // 채널 변경 로직 (Tab 키)
+    private void CycleChannel()
+    {
+        // 귓속말 대상이 없으면 전체 <-> 팀 전환, 있으면 3개 순환
+        int next = (int)_currentChannel + 1;
+        // ... 분기 처리 로직 ...
+    
+       // UpdateChannelUI();
+    }
+    // 채널 변경시 나올 UI
+    private void UpdateChannelUI()
+    {
+        //TODO: 채팅채널 바뀔때마다 나올 UI 추가
+    }
+
+    // 채널 변경 시 호출 - 글자 수 제한 업데이트
+    private void UpdateCharacterLimit()
+    {
+        int limit = (_currentChannel == ChatChannel.Whisper) ? 50 : 20;
+
+        if (inputFieldMini != null)
+        {
+            inputFieldMini.SetCharacterLimit(limit);
+        }
+
+        if (inputFieldFull != null)
+        {
+            inputFieldFull.SetCharacterLimit(limit);
+        }
+    }
+    
     /// <summary>
     /// UIChatManager에서 기존 메시지를 가져와서 UI에 표시
     /// </summary>
@@ -129,7 +194,7 @@ public class UI_IngameChatPopup : UI_Popup
         Debug.Log($"[UI_IngameChatPopup] 기존 메시지 복원 완료: {messages.Count}개");
 
         // 메시지 복원 후 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
-        StartCoroutine(ScrollToBottomCoroutine());
+        ScrollToBottomCoroutine();
     }
 
     /// <summary>
@@ -159,13 +224,10 @@ public class UI_IngameChatPopup : UI_Popup
         // 이미 열려있으면 열지 않음
         if (gameObject.activeSelf) return false;
 
-        // InputField에 포커스가 있으면 열지 않음 (중복 방지)
-        if (ChatInput != null && ChatInput.isFocused) return false;
-
         InputHandler.BlockInput = true;
-        FocusInputField();
+
         Debug.Log("[UI_IngameChat] 채팅 Popup 열림");
-        
+
         return true;
     }
 
@@ -183,17 +245,6 @@ public class UI_IngameChatPopup : UI_Popup
     //     base.Open(closeCallback);
     // }
 
-    /// <summary>
-    /// InputField에 포커스 설정
-    /// </summary>
-    private void FocusInputField()
-    {
-        if (ChatInput != null)
-        {
-            ChatInput.ActivateInputField();
-            ChatInput.Select();
-        }
-    }
 
     /// <summary>
     /// 채팅 메시지 수신 시 호출되는 콜백
@@ -204,7 +255,7 @@ public class UI_IngameChatPopup : UI_Popup
         CreateChatListUI(messageInfo);
 
         // 새 메시지 추가 후 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
-        StartCoroutine(ScrollToBottomCoroutine());
+        ScrollToBottomCoroutine();
     }
 
     /// <summary>
@@ -212,27 +263,33 @@ public class UI_IngameChatPopup : UI_Popup
     /// </summary>
     private void CreateChatListUI(MessageInfo messageInfo)
     {
-        // 시스템 메시지는 UI에 표시하지 않음
-        if (messageInfo.GamerName == "SYSTEM")
-        {
-            Debug.Log($"[UI_IngameChatPopup] 시스템 메시지 필터링: {messageInfo.Message}");
-            return;
-        }
-
         if (ChatContent == null)
         {
             Debug.LogError("[UI_IngameChatPopup] ChatContent가 null입니다!");
             return;
         }
 
-        if (ChatListPrefab == null)
+        if (ChatListLeftPrefab == null)
         {
             Debug.LogError("[UI_IngameChatPopup] ChatListPrefab이 null입니다!");
             return;
         }
 
-        // 채팅 리스트 UI 생성
-        GameObject chatList = Instantiate(ChatListPrefab, ChatContent.transform);
+        bool isMyMessage = false;
+        bool isSystemMessage = messageInfo.GamerName == "SYSTEM";
+        GameObject chatList;
+
+        // 시스템 메시지가 아닌 경우 자신의 메시지인지 확인
+        if (!isSystemMessage && AccountManager.Instance != null && AccountManager.Instance.CurrentAccount != null)
+        {
+            isMyMessage = messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname;
+        }
+
+        // 채팅 리스트 UI 생성 (시스템 메시지는 항상 왼쪽)
+        if(isMyMessage)
+            chatList = Instantiate(ChatListRightPrefab, ChatContent.transform);
+        else
+            chatList = Instantiate(ChatListLeftPrefab, ChatContent.transform);
 
         if (chatList == null)
         {
@@ -248,13 +305,6 @@ public class UI_IngameChatPopup : UI_Popup
             return;
         }
 
-        // 자신의 메시지인지 확인
-        bool isMyMessage = false;
-        if (AccountManager.Instance != null && AccountManager.Instance.CurrentAccount != null)
-        {
-            isMyMessage = messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname;
-        }
-
         // 채팅 리스트에 데이터 설정
         chatListComponent.SetData(
             messageInfo.Index,
@@ -267,19 +317,22 @@ public class UI_IngameChatPopup : UI_Popup
             null, // OnTranslateCheckButton - 인게임에서는 사용하지 않음
             isMyMessage
         );
+
+        // 시스템 메시지인 경우 노란색 스타일 적용
+        if (isSystemMessage)
+        {
+            chatListComponent.ApplySystemMessageStyle();
+            Debug.Log($"[UI_IngameChatPopup] 시스템 메시지 표시: {messageInfo.Message}");
+        }
     }
 
     /// <summary>
     /// 스크롤을 맨 아래로 이동 (최신 메시지 보이도록)
     /// Coroutine으로 지연 처리하여 레이아웃이 완전히 업데이트된 후 스크롤
     /// </summary>
-    private System.Collections.IEnumerator ScrollToBottomCoroutine()
+    private void ScrollToBottomCoroutine()
     {
-        if (ChatScrollRect == null) yield break;
-
-        // 레이아웃이 완전히 업데이트될 때까지 대기 (2프레임)
-        yield return null;
-        yield return null;
+        if (ChatScrollRect == null) return;
 
         // Canvas를 강제로 업데이트하여 레이아웃 재계산
         Canvas.ForceUpdateCanvases();
@@ -306,31 +359,11 @@ public class UI_IngameChatPopup : UI_Popup
         Debug.Log("[UI_IngameChat] 채널 퇴장으로 인한 채팅 메시지 전체 삭제");
     }
 
-    private void SendChatMessage()
+    /// <summary>
+    /// 채팅 제출 이벤트 핸들러 (UI_IngameChatInputField에서 호출)
+    /// </summary>
+    private void OnChatSubmit(string text)
     {
-        // 인게임 채팅 UI에서 검사할 부분은 내용이 비어있는가?
-        if (ChatInput == null)
-        {
-            return;
-        }
-
-        // 빈 메시지인 경우 포커스 유지하고 return
-        if (ChatInput.text.Length == 0)
-        {
-            FocusInputField();
-            return;
-        }
-
-        string text = ChatInput.text;
-
-        // 공백만 있는 경우 포커스 유지하고 return
-        if (string.IsNullOrEmpty(text.Trim()))
-        {
-            ChatInput.text = string.Empty;
-            FocusInputField();
-            return;
-        }
-
         // 채팅 금지 상태 체크
         if (_isChatBanned)
         {
@@ -338,20 +371,22 @@ public class UI_IngameChatPopup : UI_Popup
             if (remainingTime > 0)
             {
                 Debug.LogWarning($"[UI_IngameChatPopup] 채팅 금지 중입니다. 남은 시간: {remainingTime:F1}초");
-                ChatInput.text = string.Empty;
-                FocusInputField();
 
-                // 사용자에게 알림 (시스템 메시지로 표시 가능)
-                ShowChatBanMessage(Mathf.CeilToInt(remainingTime));
+                // 채팅 금지 메시지를 한 번만 표시 (중복 방지)
+                if (!_chatBanMessageShown)
+                {
+                    ShowChatBanMessage(Mathf.CeilToInt(remainingTime));
+                    _chatBanMessageShown = true;
+                }
+
                 return;
             }
             else
             {
-                // 금지 시간 종료
+                // 금지 시간 종료 - 모든 플래그 리셋
                 _isChatBanned = false;
+                _chatBanMessageShown = false;
                 Debug.Log("[UI_IngameChatPopup] 채팅 금지 해제");
-
-                // Placeholder를 원래대로 복구
                 RestorePlaceholderToDefault();
             }
         }
@@ -361,21 +396,16 @@ public class UI_IngameChatPopup : UI_Popup
         {
             // 도배로 판단 - 10초 채팅 금지
             _isChatBanned = true;
+            _chatBanMessageShown = false; // 새로운 금지이므로 플래그 리셋
             _chatBanEndTime = Time.time + CHAT_BAN_DURATION;
             Debug.LogWarning($"[UI_IngameChatPopup] 도배 감지! {CHAT_BAN_DURATION}초간 채팅 금지");
-
-            ChatInput.text = string.Empty;
-            FocusInputField();
-
-            // 사용자에게 알림
             ShowChatBanMessage(Mathf.CeilToInt(CHAT_BAN_DURATION));
+            _chatBanMessageShown = true; // 메시지 표시했으므로 플래그 설정
             return;
         }
 
         // 채팅 시간 기록
         _recentChatTimes.Enqueue(Time.time);
-
-        ChatInput.text = string.Empty;
 
         Debug.Log($"[UI_IngameChatPopup] 채팅 메시지 전송: {text}");
 
@@ -383,34 +413,30 @@ public class UI_IngameChatPopup : UI_Popup
         if (UIChatManager.Instance != null)
         {
             UIChatManager.Instance.SendChatMessage(text);
-            Debug.Log($"[UI_IngameChatPopup] UIChatManager.SendChatMessage 호출 완료");
         }
         else
         {
             Debug.LogError("[UI_IngameChatPopup] UIChatManager.Instance가 null입니다!");
         }
-
-        // 전송 후에도 InputField에 포커스 유지 (연속 채팅 가능)
-        FocusInputField();
     }
 
     /// <summary>
-    /// 도배 여부 체크 (3초 내 5번 채팅하면 도배로 판단)
+    /// 도배 여부 체크 (5초 내 4번 초과 채팅하면 도배로 판단)
     /// </summary>
     private bool CheckForSpam()
     {
         float currentTime = Time.time;
 
-        // 오래된 채팅 시간 제거 (3초 이상 지난 것들)
+        // 오래된 채팅 시간 제거 (5초 이상 지난 것들)
         while (_recentChatTimes.Count > 0 && currentTime - _recentChatTimes.Peek() > SPAM_CHECK_WINDOW)
         {
             _recentChatTimes.Dequeue();
         }
 
-        // 현재 큐에 5번째 메시지가 들어가려고 할 때 체크
+        // 현재 큐에 5번째 메시지가 들어가려고 할 때 체크 (4번 초과)
         if (_recentChatTimes.Count >= MAX_MESSAGES_THRESHOLD)
         {
-            // 첫 번째 메시지와 현재 시간의 차이가 3초 이하면 도배
+            // 첫 번째 메시지와 현재 시간의 차이가 5초 이하면 도배
             float firstMessageTime = _recentChatTimes.Peek();
             if (currentTime - firstMessageTime <= SPAM_CHECK_WINDOW)
             {
@@ -428,50 +454,37 @@ public class UI_IngameChatPopup : UI_Popup
     /// </summary>
     private void ShowChatBanMessage(int seconds)
     {
-        // 시스템 메시지로 표시하지 않고 로그만 출력
-        // 필요하면 UI 토스트 메시지나 InputField placeholder로 표시 가능
         Debug.LogWarning($"[채팅 금지] 도배 방지를 위해 {seconds}초간 채팅이 제한됩니다.");
 
-        // InputField placeholder에 메시지 표시 (선택사항)
-        if (ChatInput != null && ChatInput.placeholder != null)
+        // SYSTEM 메시지 생성하여 채팅 리스트에 추가
+        BackndChat.MessageInfo systemMessage = new BackndChat.MessageInfo()
         {
-            Text placeholderText = ChatInput.placeholder.GetComponent<Text>();
-            if (placeholderText != null)
-            {
-                string originalPlaceholder = placeholderText.text;
-                placeholderText.text = $"채팅 금지 ({seconds}초 남음)";
+            GamerName = "SYSTEM",
+            Message = "요청이 너무 빠르게 입력되고 있어요. 잠시 후 다시 시도해주세요.",
+            Avatar = "",
+            Time = System.DateTime.Now.ToString("HH:mm"),
+            Index = 0,
+            Tag = "",
+            ChannelGroup = "",
+            ChannelName = "",
+            ChannelNumber = 0
+        };
 
-                // 1초 후 원래 placeholder로 복구
-                StartCoroutine(RestorePlaceholder(placeholderText, originalPlaceholder, 1f));
-            }
+        // 채팅 리스트에 시스템 메시지 추가
+        CreateChatListUI(systemMessage);
+
+        // 스크롤을 맨 아래로 이동
+        ScrollToBottomCoroutine();
+
+        // 두 InputField의 placeholder 업데이트
+        if (inputFieldMini != null)
+        {
+            inputFieldMini.UpdatePlaceholder($"채팅 금지 ({seconds}초 남음)", 1f);
         }
-    }
 
-    /// <summary>
-    /// Placeholder 복구 Coroutine
-    /// </summary>
-    private System.Collections.IEnumerator RestorePlaceholder(Text placeholderText, string originalText, float delay)
-    {
-        yield return new UnityEngine.WaitForSeconds(delay);
-        if (placeholderText != null)
+        if (inputFieldFull != null)
         {
-            placeholderText.text = originalText;
-        }
-    }
-
-    /// <summary>
-    /// Placeholder를 기본값으로 복구 (채팅 금지 해제 시)
-    /// </summary>
-    private void RestorePlaceholderToDefault()
-    {
-        if (ChatInput != null && ChatInput.placeholder != null)
-        {
-            Text placeholderText = ChatInput.placeholder.GetComponent<Text>();
-            if (placeholderText != null)
-            {
-                placeholderText.text = "ENTER MESSAGE...";
-                Debug.Log("[UI_IngameChatPopup] Placeholder 복구: ENTER MESSAGE...");
-            }
+            inputFieldFull.UpdatePlaceholder($"채팅 금지 ({seconds}초 남음)", 1f);
         }
     }
 
@@ -492,33 +505,21 @@ public class UI_IngameChatPopup : UI_Popup
     }
 
     /// <summary>
-    /// 채팅 UI 요소들을 토글 (켜고 끄기)
+    /// 모든 InputField의 Placeholder를 기본값으로 복구
     /// </summary>
-    private void ToggleChatUI()
+    private void RestorePlaceholderToDefault()
     {
-        // Scroll View 토글
-        if (ScrollViewObject != null)
+        if (inputFieldMini != null)
         {
-            bool newState = !ScrollViewObject.activeSelf;
-            ScrollViewObject.SetActive(newState);
-            Debug.Log($"[UI_IngameChatPopup] Scroll View 토글: {newState}");
+            inputFieldMini.RestorePlaceholderToDefault();
         }
 
-        // Popup Top Bar Background 토글
-        if (PopupTopBarBackground != null)
+        if (inputFieldFull != null)
         {
-            bool newState = !PopupTopBarBackground.activeSelf;
-            PopupTopBarBackground.SetActive(newState);
-            Debug.Log($"[UI_IngameChatPopup] Popup Top Bar Background 토글: {newState}");
+            inputFieldFull.RestorePlaceholderToDefault();
         }
 
-        // Chat Image Component 토글
-        if (ChatImageComponent != null)
-        {
-            bool newState = !ChatImageComponent.enabled;
-            ChatImageComponent.enabled = newState;
-            Debug.Log($"[UI_IngameChatPopup] Chat Image Component 토글: {newState}");
-        }
+        Debug.Log("[UI_IngameChatPopup] Placeholder 복구: ENTER MESSAGE...");
     }
 
     private void OnDestroy()
@@ -528,6 +529,17 @@ public class UI_IngameChatPopup : UI_Popup
         {
             UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
             UIChatManager.Instance.OnChannelLeft -= OnChannelLeft;
+        }
+
+        // InputField 이벤트 구독 해제
+        if (inputFieldMini != null)
+        {
+            inputFieldMini.OnSubmit -= OnChatSubmit;
+        }
+
+        if (inputFieldFull != null)
+        {
+            inputFieldFull.OnSubmit -= OnChatSubmit;
         }
 
         Debug.Log("[UI_IngameChatPopup] Destroyed - 이벤트 구독 해제 완료");

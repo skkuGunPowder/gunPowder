@@ -1,5 +1,5 @@
 using System;
-
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +8,7 @@ public class UIChatList : MonoBehaviour
     public Toggle CheckBox = null;
     public Image Avatar = null;
     public Text Name = null;
-    public Text Message = null;
+    public TextMeshProUGUI Message = null;
     public Text Time = null;
     public Button ReportButton = null;
 
@@ -75,5 +75,21 @@ public class UIChatList : MonoBehaviour
     public void SetMessage(string message)
     {
         Message.text = message;
+    }
+
+    /// <summary>
+    /// 시스템 메시지 스타일 적용 (이름과 메시지 텍스트를 노란색으로)
+    /// </summary>
+    public void ApplySystemMessageStyle()
+    {
+        if (Name != null)
+        {
+            Name.color = Color.yellow;
+        }
+
+        if (Message != null)
+        {
+            Message.color = Color.yellow;
+        }
     }
 }
