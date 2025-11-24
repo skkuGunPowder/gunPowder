@@ -169,8 +169,8 @@ public class Player : MonoBehaviourPun, IDamagable
     [Header("크랩용")]
     public Transform CrabHoldPoint;
 
-    private PlayerHealthBar _playerHealthBar;
-    public PlayerHealthBar PlayerHealthBar => _playerHealthBar;
+    // private PlayerHealthBar _playerHealthBar;
+    // public PlayerHealthBar PlayerHealthBar => _playerHealthBar;
 
     // 대시 탭 타임
     public float LastDashTapTimeLeft = -999f;
@@ -190,6 +190,26 @@ public class Player : MonoBehaviourPun, IDamagable
     // 부활 후 첫 공격 여부 (HP bar 최대값 리셋용)
     private bool _isAfterResurrect = false;
 
+    [Header("PlayerHitParticle")]
+    [SerializeField] private GameObject _playerHitPrefab;           // 자신의 우측에 생성
+    [SerializeField] private GameObject _playerHitParticlePrefab;  // 상대방 위치에 생성
+    [SerializeField] private GameObject _playerCritHitPrefab;       // 자신의 우측에 생성 (크리티컬)
+    [SerializeField] private GameObject _playerCritHitParticlePrefab;  // 상대방 위치에 생성 (크리티컬)
+    [SerializeField] private GameObject _playerGunPowderUsePrefab;     // 건파우더 사용 파티클
+    [SerializeField] private Vector3 _playerHitVFXOffset = new Vector3(0, 5f, 0f); // 히트 파티클 오프셋 (위쪽으로 5f만큼 올림)
+    private const float PLAYER_HIT_PARTICLE_OFFSET = 0.5f;  // 자신의 우측 오프셋
+    
+    // 폭발당 히트 파티클 수집용
+    private class PendingExplosionHit
+    {
+        public List<Vector3> victimPositions = new List<Vector3>();
+        public List<int> victimViewIds = new List<int>(); // 피격자 ViewID (FollowVFX용)
+        public List<bool> victimIsCrits = new List<bool>(); // 각 피격자의 크리티컬 여부 (개별 파티클용)
+        public bool hasCrit = false; // 폭발에 크리티컬이 하나라도 있는지 (공격자 이펙트/사운드용)
+    }
+    private PendingExplosionHit _currentExplosionHit;
+    private Coroutine _processHitCoroutine;
+
     private void Awake()
     {
         _playerStat = GetComponent<PlayerStat>();
@@ -199,14 +219,14 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerFSM = GetComponent<PlayerFSM>();
         _damagePopup = GetComponent<DamagePopup>();
         _skinManager = GetComponent<PlayerSkinManager>();
-        _playerHealthBar = GetComponentInChildren<PlayerHealthBar>();
+        // _playerHealthBar = GetComponentInChildren<PlayerHealthBar>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
         _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
 
         _playerBuffHandler = GetComponent<PlayerBuffHandler>();
         IsSuperArmor = false;
-        
+
         // 원본 Rigidbody constraints 저장
         if (_rigidbody2D != null)
         {
@@ -535,18 +555,14 @@ public class Player : MonoBehaviourPun, IDamagable
             _originalColorMap = new Dictionary<SpriteRenderer, Color>();
         }
 
-        int addedCount = 0;
         foreach (var renderer in _playerStat.MySpriteREndererList)
         {
             if (renderer != null && !_originalColorMap.ContainsKey(renderer))
             {
                 // 원본 색상 저장 (이 값은 절대 변경되지 않음)
                 _originalColorMap[renderer] = renderer.color;
-                addedCount++;
-                Debug.Log($"[색상초기화] {renderer.gameObject.name}: 원본 색상 저장 (R:{renderer.color.r:F2}, G:{renderer.color.g:F2}, B:{renderer.color.b:F2})");
             }
         }
-        Debug.Log($"[색상초기화] {addedCount}개의 기본 렌더러 색상 초기화 완료, 총 렌더러: {_originalColorMap.Count}");
     }
 
     /// <summary>
@@ -575,15 +591,12 @@ public class Player : MonoBehaviourPun, IDamagable
                 _originalColorMap[renderer] = Color.white;
                 // 실제 스프라이트도 흰색으로 즉시 변경
                 renderer.color = Color.white;
-                Debug.Log($"[색상등록] {renderer.gameObject.name}: 경고상태 감지 → 흰색으로 저장 및 변경");
             }
             else
             {
                 // 정상 색상이면 현재 색상을 원본으로 저장
                 _originalColorMap[renderer] = currentColor;
-                Debug.Log($"[색상등록] {renderer.gameObject.name}: 정상색상 저장 (R:{currentColor.r:F2}, G:{currentColor.g:F2}, B:{currentColor.b:F2})");
             }
-            Debug.Log($"[색상등록] 총 등록된 렌더러 수: {_originalColorMap.Count}");
         }
     }
 
@@ -593,8 +606,6 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_originalColorMap.ContainsKey(renderer))
         {
             _originalColorMap.Remove(renderer);
-            Debug.Log($"[색상해제] {renderer.gameObject.name}: 색상 시스템에서 제거됨");
-            Debug.Log($"[색상해제] 남은 렌더러 수: {_originalColorMap.Count}");
         }
     }
 
@@ -658,10 +669,10 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.ResurrectPlayerStat();
 
         // HP bar 초기화 (부활 시 maxHP를 초기값으로 리셋)
-        if (_playerHealthBar != null)
-        {
-            _playerHealthBar.ResetHealthBarOnResurrect();
-        }
+        // if (_playerHealthBar != null)
+        // {
+        //     _playerHealthBar.ResetHealthBarOnResurrect();
+        // }
 
         // 부활 후 첫 공격 플래그 설정
         _isAfterResurrect = true;
@@ -1446,11 +1457,11 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             if (tag == "Player")
             {
-                VFXPool.Instance.RandomPlay("Damaged", transform.position, 1, 3);
+                VFXPool.Instance.RandomPlay("Damaged", transform.position + _playerHitVFXOffset, 1, 3);
             }
             else
             {
-                VFXPool.Instance.RandomPlay("Hit", transform.position, 1, 6);
+                VFXPool.Instance.RandomPlay("Hit", transform.position + _playerHitVFXOffset, 1, 6);
             }
         }
 
@@ -1567,10 +1578,17 @@ public class Player : MonoBehaviourPun, IDamagable
                 PhotonView.RPC(nameof(RPC_PlayHitEffects), attackerView.Owner, damage, maxDamage);
                 PhotonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
                 // 피격자의 정확한 HP 정보를 공격자에게 전달 (부활 후 첫 공격 여부 포함)
-                PhotonView.RPC(nameof(ShowHealthBarForAttacker), attackerView.Owner, 
-                    _playerStat.CurrentPlayerGunPowderCount, damage, _isAfterResurrect);
+                // PhotonView.RPC(nameof(ShowHealthBarForAttacker), attackerView.Owner, 
+                //     _playerStat.CurrentPlayerGunPowderCount, damage, _isAfterResurrect);
                 // 첫 공격 후 플래그 리셋
-                _isAfterResurrect = false;
+                // _isAfterResurrect = false;
+                
+                // 공격자에게 히트 파티클 생성 요청 (로컬에서만 실행)
+                if (!isSameTeam)
+                {
+                    bool isCrit = (damage == maxDamage);
+                    attackerView.RPC(nameof(SpawnAttackerHitParticles), attackerView.Owner, transform.position, isCrit, PhotonView.ViewID);
+                }
             }
         }
     }
@@ -2057,12 +2075,155 @@ public class Player : MonoBehaviourPun, IDamagable
         _damagePopup.SpawnPopup(value, maxDamage);
     }
 
+    /// <summary>
+    /// 공격자(자신)가 적을 맞췄을 때 파티클 생성 (로컬에서만 실행)
+    /// 폭발당 1개의 이펙트만 생성하기 위해 0.05초 동안 수집 후 일괄 처리
+    /// </summary>
+    /// <param name="victimPosition">피격자 위치</param>
+    /// <param name="isCrit">크리티컬 여부</param>
+    /// <param name="victimViewId">피격자 PhotonView ID (FollowVFX용)</param>
     [PunRPC]
-    public void ShowHealthBarForAttacker(int currentHP, int damage, bool isAfterResurrect)
+    public void SpawnAttackerHitParticles(Vector3 victimPosition, bool isCrit, int victimViewId)
     {
-        if (_playerHealthBar != null)
+        if (VFXPool.Instance == null)
         {
-            _playerHealthBar.ShowHealthBarForAttacker(currentHP, damage, isAfterResurrect);
+            Debug.LogWarning("[Player] VFXPool.Instance is null. Cannot spawn hit particles.");
+            return;
+        }
+
+        // 1. 데이터 수집 시작 (첫 번째 피격)
+        if (_currentExplosionHit == null)
+        {
+            _currentExplosionHit = new PendingExplosionHit();
+            
+            // 0.05초 후에 일괄 처리하기로 예약
+            if (_processHitCoroutine != null)
+            {
+                StopCoroutine(_processHitCoroutine);
+            }
+            _processHitCoroutine = StartCoroutine(ProcessHitsDelayed());
+        }
+        
+        // 2. 피격 정보 수집
+        _currentExplosionHit.victimPositions.Add(victimPosition);
+        _currentExplosionHit.victimViewIds.Add(victimViewId);
+        _currentExplosionHit.victimIsCrits.Add(isCrit); // 각 피격자의 크리티컬 여부 저장
+        if (isCrit)
+        {
+            _currentExplosionHit.hasCrit = true; // 한 명이라도 크리티컬이면 true (공격자 이펙트/사운드용)
+        }
+    }
+    
+    /// <summary>
+    /// 0.05초 대기 후 수집된 히트 정보를 일괄 처리
+    /// </summary>
+    private IEnumerator ProcessHitsDelayed()
+    {
+        // 같은 프레임의 모든 피격 정보를 수집하기 위해 대기
+        yield return new WaitForSeconds(0.05f);
+        
+        if (_currentExplosionHit == null)
+        {
+            _processHitCoroutine = null;
+            yield break;
+        }
+        
+        bool explosionHasCrit = _currentExplosionHit.hasCrit; // 폭발에 크리티컬이 있는지 (공격자 이펙트/사운드용)
+        
+        // 1. 각 피격자를 따라다니는 파티클 생성 (플레이어마다 개별 파티클!)
+        for (int i = 0; i < _currentExplosionHit.victimViewIds.Count; i++)
+        {
+            int victimViewId = _currentExplosionHit.victimViewIds[i];
+            bool individualCrit = _currentExplosionHit.victimIsCrits[i]; // 각 피격자의 크리티컬 여부
+            
+            // 각 피격자에 맞는 파티클 선택
+            GameObject particlePrefab = individualCrit ? _playerCritHitParticlePrefab : _playerHitParticlePrefab;
+            
+            if (particlePrefab != null)
+            {
+                PhotonView victimView = PhotonView.Find(victimViewId);
+                
+                if (victimView != null && victimView.gameObject.activeInHierarchy)
+                {
+                    // FollowVFX로 피격자를 따라다니게 함
+                    FollowVFX vfx = VFXPool.Instance.Get(particlePrefab.name) as FollowVFX;
+                    if (vfx != null)
+                    {
+                        vfx.PlayAttached(victimView.transform);
+                    }
+                }
+                else
+                {
+                    // 피격자를 찾을 수 없으면 위치에 고정
+                    Vector3 pos = _currentExplosionHit.victimPositions[i];
+                    VFXPool.Instance.Play(particlePrefab.name, pos);
+                }
+            }
+        }
+        
+        // 2. 자신 우측에 이펙트 생성 (폭발당 1개만! 크리티컬 우선)
+        GameObject hitPrefab = explosionHasCrit ? _playerCritHitPrefab : _playerHitPrefab;
+        if (hitPrefab != null)
+        {
+            Vector3 spawnPos = transform.position + Vector3.right * PLAYER_HIT_PARTICLE_OFFSET;
+            VFXPool.Instance.Play(hitPrefab.name, spawnPos);
+        }
+        
+        /*
+        // 3. 사운드 재생 (폭발당 1번만! 크리티컬 우선)
+        if (SoundManager.Instance != null)
+        {
+            string soundName = explosionHasCrit ? "PlayerCrit_1" : "PlayerHit_1";
+            SoundManager.Instance.PlayLocalSound(soundName, transform, 0f, false, SoundType.SFX, true, 1f, 50f);
+        }*/
+        
+        // 정리
+        _currentExplosionHit = null;
+        _processHitCoroutine = null;
+    }
+
+    // [PunRPC]
+    // public void ShowHealthBarForAttacker(int currentHP, int damage, bool isAfterResurrect)
+    // {
+    //     if (_playerHealthBar != null)
+    //     {
+    //         _playerHealthBar.ShowHealthBarForAttacker(currentHP, damage, isAfterResurrect);
+    //     }
+    // }
+
+    /// <summary>
+    /// 특수 폭탄 사용 시 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
+    /// </summary>
+    /// <param name="amount">소모한 건파우더 양 (파티클 개수)</param>
+    public void RPC_SpawnGunPowderUseParticle()
+    {
+        if (!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(SpawnGunPowderUseParticle), RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void SpawnGunPowderUseParticle()
+    {
+        if (_playerGunPowderUsePrefab == null)
+        {
+            Debug.LogWarning("[Player] _playerGunPowderUsePrefab is null.");
+            return;
+        }
+
+        if (VFXPool.Instance == null)
+        {
+            Debug.LogWarning("[Player] VFXPool.Instance is null.");
+            return;
+        }
+
+        FollowVFX vfx = VFXPool.Instance.Get(_playerGunPowderUsePrefab.name) as FollowVFX;
+        if (vfx != null)
+        {
+            // 플레이어 위쪽으로 호를 그려서 랜덤 위치에 생성
+            vfx.PlayAttachedWithArcOffset(transform, arcRadius: 1.5f, arcAngleRange: 90f);
         }
     }
 
