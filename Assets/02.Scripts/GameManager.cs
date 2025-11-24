@@ -83,23 +83,23 @@ public class GameManager : PhotonSingleton<GameManager>
         _photonView.RPC(nameof(RPC_GameStart), RpcTarget.All);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            _photonView.RPC(nameof(RequestSpawn), RpcTarget.MasterClient);
-        }
-    }
+    // private void Update()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.Alpha0))
+    //     {
+    //         _photonView.RPC(nameof(RequestSpawn), RpcTarget.MasterClient);
+    //     }
+    // }
 
-    [PunRPC]
-    void RequestSpawn()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.Instantiate("AirDropJet", transform.position, Quaternion.identity);
-            Debug.Log("마스터가 요청받아 오브젝트를 생성했습니다.");
-        }
-    }
+    // [PunRPC]
+    // void RequestSpawn()
+    // {
+    //     if (PhotonNetwork.IsMasterClient)
+    //     {
+    //         PhotonNetwork.Instantiate("AirDropJet", transform.position, Quaternion.identity);
+    //         Debug.Log("마스터가 요청받아 오브젝트를 생성했습니다.");
+    //     }
+    // }
 
     // 게임 종료
     public void RequestGameOver()
