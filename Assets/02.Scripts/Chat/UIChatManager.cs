@@ -581,6 +581,18 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
             messageInfo.Message = error.ToString() + " : " + banTime.ToString("yyyy-MM-dd HH:mm:ss") + " 까지";
         }
+        else if (error == ERROR_MESSAGE.CHANNEL_NAME_FILTERED ||
+            error == ERROR_MESSAGE.CHANNEL_GROUP_FILTERED)
+        {
+            ErrorMessageChannelParam errorMessageChannelParam = (ErrorMessageChannelParam)param;
+            if (errorMessageChannelParam == null) return;
+
+            // 채널 이름 필터링 에러 - 사용자 친화적 메시지
+            messageInfo.Message = "채팅 채널 연결에 실패했습니다. 잠시 후 다시 시도해주세요.";
+            Debug.LogWarning($"[UIChatManager] 채널 이름 필터링 감지: {errorMessageChannelParam.ChannelGroup} / {errorMessageChannelParam.ChannelName}");
+
+            // 자동 재시도는 하지 않음 (무한 루프 방지)
+        }
         else if (error == ERROR_MESSAGE.CHANNEL_FULL ||
             error == ERROR_MESSAGE.INVALID_PASSWORD ||
             error == ERROR_MESSAGE.ALREADY_CREATED_CHANNEL ||
@@ -589,9 +601,7 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             error == ERROR_MESSAGE.CHANNEL_NAME_TOO_SHORT ||
             error == ERROR_MESSAGE.CHANNEL_NAME_TOO_LONG ||
             error == ERROR_MESSAGE.DUPLICATE_CHANNEL_GROUP ||
-            error == ERROR_MESSAGE.PASSWORD_TOO_LONG ||
-            error == ERROR_MESSAGE.CHANNEL_GROUP_FILTERED ||
-            error == ERROR_MESSAGE.CHANNEL_NAME_FILTERED)
+            error == ERROR_MESSAGE.PASSWORD_TOO_LONG)
         {
             ErrorMessageChannelParam errorMessageChannelParam = (ErrorMessageChannelParam)param;
             if (errorMessageChannelParam == null) return;
@@ -692,13 +702,22 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             }
         }
 
-        // Fallback: CustomProperties에 없으면 HashCode 사용 (Backend Chat SDK 길이 제한: 2~20자)
+        // Fallback: CustomProperties에 없으면 안전한 해시 사용 (Backend Chat SDK 길이 제한: 2~20자)
         if (string.IsNullOrEmpty(channelGroup) || string.IsNullOrEmpty(channelName) || channelNumber == 0)
         {
-            int roomHash = Math.Abs(PhotonNetwork.CurrentRoom.Name.GetHashCode());
-            channelGroup = $"ig_{roomHash}";  // "ig_" + 숫자 (최대 12자)
-            channelName = $"rm_{roomHash}";   // "rm_" + 숫자 (최대 12자)
-            channelNumber = (ulong)roomHash;
+            // 16진수 해시 사용 (필터링에 걸릴 가능성 낮음)
+            int roomHash = PhotonNetwork.CurrentRoom.Name.GetHashCode();
+            string hexHash = Math.Abs(roomHash).ToString("X"); // 16진수로 변환 (0-9, A-F만 사용)
+
+            // 길이 제한 (최대 12자)
+            if (hexHash.Length > 12)
+            {
+                hexHash = hexHash.Substring(0, 12);
+            }
+
+            channelGroup = $"game{hexHash}";  // "game" + 16진수
+            channelName = $"room{hexHash}";   // "room" + 16진수
+            channelNumber = (ulong)Math.Abs(roomHash);
             Debug.LogWarning($"[UIChatManager] 채팅 채널 정보가 CustomProperties에 없어 Fallback 사용: {channelGroup} / {channelName} / {channelNumber}");
         }
 
