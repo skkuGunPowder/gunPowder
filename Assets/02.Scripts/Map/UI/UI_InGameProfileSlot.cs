@@ -33,6 +33,8 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public Ease EaseType;
     public float ScaleStrength = 1.2f;
    
+    public ChatBubbleListener ChatListener;
+    
     public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player, int gunpowder, int life)
     {
         // PlayerActorNumber = player.ActorNumber;
@@ -42,6 +44,10 @@ public class UI_InGameProfileSlot : MonoBehaviour
         PlayerProfileSkin.Init(player);
         GunpowderTextUGUI.text = gunpowder.ToString();
         LifeRefresh(life);
+        if(ChatListener == null) 
+            ChatListener = GetComponent<ChatBubbleListener>();
+        if (ChatListener != null) 
+            ChatListener.SetOwner(player.NickName);
     }
     public void Refresh(int gunpowder, int life, int attacker)
     {
@@ -49,6 +55,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
         Shake(attacker);
         GunpowderTextUGUI.text = gunpowder.ToString();
         LifeRefresh(life);
+
     }
 
     private void LifeRefresh(int life)
