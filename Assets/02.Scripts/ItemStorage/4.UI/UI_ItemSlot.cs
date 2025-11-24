@@ -8,6 +8,9 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable
     public Image ItemIcon;
     public Image SelectedIcon;
 
+    private int _clickCount = 0;
+    private float _clickTimer = 0f;
+
 
     public void Refresh(InventoryItem item)
     {
@@ -49,5 +52,23 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable
         }
 
         ItemStorage.Instance.SelectItem(Item);
+
+        // 더블클릭 시 장착
+        _clickCount++;
+        if (_clickCount == 1)
+        {
+            _clickTimer = Time.time;
+        }
+        else if (_clickCount == 2 && Time.time - _clickTimer <= 0.5f)
+        {
+            ItemStorage.Instance.EquipItem(Item);
+            _clickCount = 0;
+        }
+        else
+        {
+            _clickCount = 1;
+            _clickTimer = Time.time;
+        }
+
     }
 }
