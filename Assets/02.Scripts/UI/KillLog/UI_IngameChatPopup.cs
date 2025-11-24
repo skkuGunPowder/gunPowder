@@ -38,6 +38,7 @@ public class UI_IngameChatPopup : UI_Popup
     private const float CHAT_BAN_DURATION = 10f; // 채팅 금지 시간 (10초)
     private float _chatBanEndTime = 0f; // 채팅 금지 종료 시간
     private bool _isChatBanned = false; // 채팅 금지 상태
+    private bool _chatBanMessageShown = false; // 채팅 금지 메시지 표시 여부 (중복 방지)
 
     // 채팅 채널 관련
     private ChatChannel _currentChannel = ChatChannel.All;
@@ -100,6 +101,22 @@ public class UI_IngameChatPopup : UI_Popup
         {
             CycleChannel();
         }
+
+        // T 키로 Mini/Full 전환 (InputField가 포커스 중이 아닐 때만)
+        if (Input.GetKeyDown(KeyCode.T) && !IsAnyInputFieldFocused())
+        {
+            ToggleChatPopup();
+        }
+    }
+
+    /// <summary>
+    /// Mini 또는 Full InputField가 포커스 중인지 확인
+    /// </summary>
+    private bool IsAnyInputFieldFocused()
+    {
+        bool miniFocused = inputFieldMini != null && inputFieldMini.IsFocused();
+        bool fullFocused = inputFieldFull != null && inputFieldFull.IsFocused();
+        return miniFocused || fullFocused;
     }
 
     public void ToggleChatPopup()
@@ -354,13 +371,21 @@ public class UI_IngameChatPopup : UI_Popup
             if (remainingTime > 0)
             {
                 Debug.LogWarning($"[UI_IngameChatPopup] 채팅 금지 중입니다. 남은 시간: {remainingTime:F1}초");
-                ShowChatBanMessage(Mathf.CeilToInt(remainingTime));
+
+                // 채팅 금지 메시지를 한 번만 표시 (중복 방지)
+                if (!_chatBanMessageShown)
+                {
+                    ShowChatBanMessage(Mathf.CeilToInt(remainingTime));
+                    _chatBanMessageShown = true;
+                }
+
                 return;
             }
             else
             {
-                // 금지 시간 종료
+                // 금지 시간 종료 - 모든 플래그 리셋
                 _isChatBanned = false;
+                _chatBanMessageShown = false;
                 Debug.Log("[UI_IngameChatPopup] 채팅 금지 해제");
                 RestorePlaceholderToDefault();
             }
@@ -371,9 +396,11 @@ public class UI_IngameChatPopup : UI_Popup
         {
             // 도배로 판단 - 10초 채팅 금지
             _isChatBanned = true;
+            _chatBanMessageShown = false; // 새로운 금지이므로 플래그 리셋
             _chatBanEndTime = Time.time + CHAT_BAN_DURATION;
             Debug.LogWarning($"[UI_IngameChatPopup] 도배 감지! {CHAT_BAN_DURATION}초간 채팅 금지");
             ShowChatBanMessage(Mathf.CeilToInt(CHAT_BAN_DURATION));
+            _chatBanMessageShown = true; // 메시지 표시했으므로 플래그 설정
             return;
         }
 

@@ -132666,6 +132666,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7002655204383373226, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
+      propertyPath: PopupList.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7002655204383373226, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
+      propertyPath: 'PopupList.Array.data[4]'
+      value: 
+      objectReference: {fileID: 856509428}
     - target: {fileID: 7015435504948028485, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -132811,6 +132819,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
+--- !u!114 &856509428 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5001214791895878145, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
+  m_PrefabInstance: {fileID: 856509427}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5554118871a01647a32907fc539f72e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &913824059
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -233345,7 +233364,7 @@ Tilemap:
       - {fileID: -547152429, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: -12183806, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: 1776429012, guid: b9ed25721137402438b691f5b79386fe, type: 3}
-      m_AnimationSpeed: 5.0000005
+      m_AnimationSpeed: 5
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -3, y: -1, z: 0}
@@ -233495,7 +233514,7 @@ Tilemap:
       - {fileID: -547152429, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: -12183806, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: 1776429012, guid: b9ed25721137402438b691f5b79386fe, type: 3}
-      m_AnimationSpeed: 5.0000005
+      m_AnimationSpeed: 5
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 7, y: -1, z: 0}
@@ -233675,7 +233694,7 @@ Tilemap:
       - {fileID: -547152429, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: -12183806, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: 1776429012, guid: b9ed25721137402438b691f5b79386fe, type: 3}
-      m_AnimationSpeed: 5
+      m_AnimationSpeed: 5.0000005
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 19, y: -1, z: 0}

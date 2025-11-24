@@ -25,6 +25,11 @@ public class UI_IngameChatInputField : MonoBehaviour
     /// </summary>
     public event Action<string> OnSubmit;
 
+    // 자동 포커스를 위한 변수
+    private bool _shouldAutoFocus = false;
+    private float _focusAttemptTime = 0f;
+    private const float FOCUS_ATTEMPT_DURATION = 0.5f; // 0.5초 동안 계속 시도
+
     private void Awake()
     {
         _inputField = GetComponent<InputField>();
@@ -51,7 +56,31 @@ public class UI_IngameChatInputField : MonoBehaviour
     {
         if (autoFocusOnEnable)
         {
-            StartCoroutine(FocusDelayed());
+            _shouldAutoFocus = true;
+            _focusAttemptTime = Time.unscaledTime;
+        }
+    }
+
+    private void Update()
+    {
+        // 자동 포커스가 활성화되어 있고, 아직 포커스되지 않았다면 계속 시도
+        if (_shouldAutoFocus)
+        {
+            // 0.5초 동안 계속 포커스 시도
+            if (Time.unscaledTime - _focusAttemptTime < FOCUS_ATTEMPT_DURATION)
+            {
+                // 강제로 계속 포커스 시도
+                if (_inputField != null && !_inputField.isFocused)
+                {
+                    _inputField.ActivateInputField();
+                    _inputField.Select();
+                }
+            }
+            else
+            {
+                // 0.5초 경과하면 포커스 시도 중단
+                _shouldAutoFocus = false;
+            }
         }
     }
 
@@ -157,10 +186,10 @@ public class UI_IngameChatInputField : MonoBehaviour
     /// <summary>
     /// 포커스 설정 (지연 처리)
     /// </summary>
-    public IEnumerator FocusDelayed()
+    public void FocusDelayed()
     {
-        yield return null;
-        Focus();
+        _shouldAutoFocus = true;
+        _focusAttemptTime = Time.unscaledTime;
     }
 
     /// <summary>
