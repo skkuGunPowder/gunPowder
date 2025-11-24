@@ -15,7 +15,9 @@ public class UI_QuickStart : MonoBehaviour
         {
             return;
         }
-
+        
+        _isClickInterval = true;
+       
         StartCoroutine(ClickInterval_Coroutine());
 
         Hashtable hash = new Hashtable()
@@ -34,7 +36,6 @@ public class UI_QuickStart : MonoBehaviour
     }
     private IEnumerator ClickInterval_Coroutine()
     {
-        _isClickInterval = true;
         yield return new WaitForSeconds(_clickInterval);
         _isClickInterval = false;
     }
