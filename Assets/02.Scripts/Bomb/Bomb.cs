@@ -68,7 +68,7 @@ public class Bomb : MonoBehaviourPun, IBomb
         if (_fuzeTimer >= _stat.FuzeTime)
         {
             _fuzeTimer = 0f;
-            if(PhotonView.IsMine)
+            if(photonView.IsMine)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
             }
@@ -139,10 +139,11 @@ public class Bomb : MonoBehaviourPun, IBomb
             _vfx.transform.SetParent(transform);
         }
         
-        if (PhotonView.IsMine)
-        {
-            PhotonNetwork.Destroy(gameObject);
-        }
+        DestroyCollector.Instance.PhotonLazyDestory(gameObject, photonView);
+        // if (PhotonView.IsMine)
+        // {
+        //     PhotonNetwork.Destroy(gameObject);
+        // }
     }
 
     public BombStat GetBombStat()

@@ -40,10 +40,12 @@ public class UltimateBounceBomb : Bomb
 
             transform.DOKill();
             StopAllCoroutines();
-            if(PhotonView.IsMine)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
+            
+            DestroyCollector.Instance.PhotonLazyDestory(gameObject, PhotonView);
+            // if(photonView.IsMine)
+            // {
+            //     PhotonNetwork.Destroy(gameObject);
+            // }
         }
     }
 
