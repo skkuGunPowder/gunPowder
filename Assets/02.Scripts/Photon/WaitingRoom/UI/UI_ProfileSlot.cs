@@ -21,6 +21,13 @@ public class UI_ProfileSlot : MonoBehaviour
     public Sprite EmptyImage;
     public ColorPalette ColorPalette;
     
+    public ChatBubbleListener ChatListener;
+
+    private void Awake()
+    {
+        if(ChatListener == null) 
+            ChatListener = GetComponent<ChatBubbleListener>();
+    }
     // 후에 프로필 이미지 추가하기
     public void Refresh(PhotonPlayer player = null)
     {
@@ -41,6 +48,9 @@ public class UI_ProfileSlot : MonoBehaviour
         // bomb
         ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
         BombImage.sprite = item.Image;
+        
+        if (ChatListener != null) 
+            ChatListener.SetOwner(player.NickName);
         
         TeamSet(player);
         
@@ -98,6 +108,8 @@ public class UI_ProfileSlot : MonoBehaviour
         ProfileOutline.color = TeamColorSet(EInGameTeam.Default);
         PlayerProfileSkin.gameObject.SetActive(false);
         BombImage.sprite = EmptyImage;
+        if (ChatListener != null) 
+            ChatListener.SetOwner("");
     }
 
     public void TeamSet(PhotonPlayer player)
