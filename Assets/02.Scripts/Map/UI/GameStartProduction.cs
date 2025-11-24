@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameStartProduction : MonoBehaviour
 {
-    public RectTransform Timer;
+    public RectTransform TopPivot;
     public RectTransform Profile;
     [Header("게임 시작 텍스트")]
     public GameObject GameStartCountText1;
@@ -14,6 +14,7 @@ public class GameStartProduction : MonoBehaviour
     
     [Header("게임 시작 Dotween")]
     public float DotweenDuration;
+    public int TopPivotY;
     public Vector2 TimerEndPosition;
     public Ease TimerEase;
     public Vector2 ProfileEndPosition;
@@ -43,7 +44,9 @@ public class GameStartProduction : MonoBehaviour
     }
     public void Play()
     {
-        Timer.DOAnchorPos(TimerEndPosition, DotweenDuration).SetEase(TimerEase).SetUpdate(true);
+        DOTween.To(() => TopPivot.offsetMax, x => TopPivot.offsetMax = x, new Vector2(TopPivot.offsetMax.x, TopPivotY),
+            DotweenDuration).SetEase(TimerEase).SetUpdate(true);
+        // TopPivot.do(TimerEndPosition, DotweenDuration).SetEase(TimerEase).SetUpdate(true);
         Profile.DOAnchorPos(ProfileEndPosition, DotweenDuration).SetEase(ProfileEase).SetUpdate(true);
     }
 
@@ -85,7 +88,7 @@ public class GameStartProduction : MonoBehaviour
     }
     private void OnDisable()
     {
-        Timer.anchoredPosition = TimerOriginPosition;
+        TopPivot.offsetMax = TimerOriginPosition;
         Profile.anchoredPosition = ProfileOriginPosition;
         
         EventManager.Instance.OnLoadFinished -= Play;

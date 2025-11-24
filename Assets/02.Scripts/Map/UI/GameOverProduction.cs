@@ -12,7 +12,7 @@ public class GameOverProduction : MonoBehaviour
     [Header("위치 액션")] 
     public RectTransform GameOverProductionPanel;
     public RectTransform ProfileSlot;
-    public RectTransform Timer;
+    public RectTransform TopPivot;
     [Header("카메라 액션")]
     public RectTransform CameraObject;
     public Image BlackOut;
@@ -119,7 +119,8 @@ public class GameOverProduction : MonoBehaviour
 
     private void TimerOff()
     {
-        Timer.DOAnchorPos(TimerEndPosition, TimerTime).SetEase(TimerEase);
+        DOTween.To(() => TopPivot.offsetMax, x => TopPivot.offsetMax = x, TimerEndPosition,
+            TimerTime).SetEase(TimerEase);
         ProfileSlot.DOAnchorPos(ProfileSlotEndPosition,ProfileSlotTime).SetEase(ProfileSlotEase);
     }
     private void CameraOn()
@@ -151,7 +152,7 @@ public class GameOverProduction : MonoBehaviour
         BlackOut.color = new Color(0, 0, 0, 0);
         ProfileSlot.anchoredPosition = ProfileSlotStartPosition;
         ProfileSlot.localScale = new Vector3(1,1,1);
-        Timer.anchoredPosition = TimerOriginPosition;
+        TopPivot.offsetMax = TimerOriginPosition;
         DOTween.Kill(this);
     }
 }
