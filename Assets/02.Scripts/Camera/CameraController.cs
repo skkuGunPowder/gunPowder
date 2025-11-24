@@ -112,7 +112,7 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    private void SetObserveTarget() // 시작할 때, 누군가 나갔을 때 리스트 최신화
+    private void SetObserveTarget() // 시작할 때, 리스트 최신화
     {
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();

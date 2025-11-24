@@ -1764,7 +1764,6 @@ GameObject:
   - component: {fileID: 7780634570047479318}
   - component: {fileID: 2982065854920572933}
   - component: {fileID: 5188226735554669029}
-  - component: {fileID: 7574484284043341005}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -1887,22 +1886,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &5188226735554669029
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1108638076429464665}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleMultiplier: 1.03
-  duration: 0.15
-  easing: 3
-  useUnscaledTime: 1
---- !u!114 &7574484284043341005
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2406,7 +2389,6 @@ GameObject:
   - component: {fileID: 1922918147648743558}
   - component: {fileID: 9200257637210524031}
   - component: {fileID: 4730715917667500352}
-  - component: {fileID: 8401722449700202994}
   m_Layer: 5
   m_Name: AcceptButton
   m_TagString: Untagged
@@ -2516,7 +2498,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 4100331669480420910}
         m_TargetAssemblyTypeName: UI_RoomSetting, Assembly-CSharp
         m_MethodName: AcceptButton
         m_Mode: 1
@@ -2529,22 +2511,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &4730715917667500352
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1580687349096614196}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleMultiplier: 1.03
-  duration: 0.15
-  easing: 3
-  useUnscaledTime: 1
---- !u!114 &8401722449700202994
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3044,6 +3010,7 @@ GameObject:
   - component: {fileID: 2618478300630342571}
   - component: {fileID: 116836896169490434}
   - component: {fileID: 6907074535032945165}
+  - component: {fileID: 4100331669480420910}
   m_Layer: 5
   m_Name: Tab_Setting
   m_TagString: Untagged
@@ -3125,6 +3092,21 @@ MonoBehaviour:
   TapObject: {fileID: 2015575655737518878}
   TapButton: {fileID: 870227749295971840}
   IsMaster: 1
+--- !u!114 &4100331669480420910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015575655737518878}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f50017a59c70394d854974fc102f92c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Playtime: {fileID: 2410710963803961525}
+  Powder: {fileID: 7976779269201535057}
+  Life: {fileID: 691637400209537048}
 --- !u!1 &2041355478120164472
 GameObject:
   m_ObjectHideFlags: 0
@@ -3138,7 +3120,6 @@ GameObject:
   - component: {fileID: 2295591626233318597}
   - component: {fileID: 587753864883778878}
   - component: {fileID: 8963428626334515667}
-  - component: {fileID: 8486260745263760919}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -3261,22 +3242,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &8963428626334515667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2041355478120164472}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleMultiplier: 1.03
-  duration: 0.15
-  easing: 3
-  useUnscaledTime: 1
---- !u!114 &8486260745263760919
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4746,8 +4711,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f50017a59c70394d854974fc102f92c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InfiniteModeButton: {fileID: 0}
-  DeathmatchModeButton: {fileID: 0}
   Playtime: {fileID: 1811406496435320429}
   Powder: {fileID: 454492752049084140}
   Life: {fileID: 220652416912066461}
@@ -5788,7 +5751,6 @@ GameObject:
   - component: {fileID: 7322766506857529726}
   - component: {fileID: 5148089380513724758}
   - component: {fileID: 5433018293696554665}
-  - component: {fileID: 2291298361375373560}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -5911,22 +5873,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &5433018293696554665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3808171262297087463}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleMultiplier: 1.03
-  duration: 0.15
-  easing: 3
-  useUnscaledTime: 1
---- !u!114 &2291298361375373560
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9496,7 +9442,6 @@ GameObject:
   - component: {fileID: 7099332914249545463}
   - component: {fileID: 3385835535528154940}
   - component: {fileID: 2001096331200669683}
-  - component: {fileID: 5744727691876357210}
   m_Layer: 5
   m_Name: CancelButton
   m_TagString: Untagged
@@ -9606,7 +9551,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 4100331669480420910}
         m_TargetAssemblyTypeName: UI_RoomSetting, Assembly-CSharp
         m_MethodName: CancelButton
         m_Mode: 1
@@ -9619,22 +9564,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &2001096331200669683
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6317283527371474349}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleMultiplier: 1.03
-  duration: 0.15
-  easing: 3
-  useUnscaledTime: 1
---- !u!114 &5744727691876357210
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10276,7 +10205,6 @@ GameObject:
   - component: {fileID: 8444220242407059464}
   - component: {fileID: 7311073481806365647}
   - component: {fileID: 8295857081691204513}
-  - component: {fileID: 7334155866867219511}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -10399,22 +10327,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &8295857081691204513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6881579969612018445}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleMultiplier: 1.03
-  duration: 0.15
-  easing: 3
-  useUnscaledTime: 1
---- !u!114 &7334155866867219511
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10579,7 +10491,6 @@ GameObject:
   - component: {fileID: 4039284395493705912}
   - component: {fileID: 848646730171786886}
   - component: {fileID: 5259073734700824548}
-  - component: {fileID: 9108224194408859066}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -10702,22 +10613,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &5259073734700824548
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7269206356790481410}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleMultiplier: 1.03
-  duration: 0.15
-  easing: 3
-  useUnscaledTime: 1
---- !u!114 &9108224194408859066
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -11275,7 +11170,6 @@ GameObject:
   - component: {fileID: 322065832587723329}
   - component: {fileID: 5416246893332851049}
   - component: {fileID: 573278989398808494}
-  - component: {fileID: 5649492832602919433}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -11398,22 +11292,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &573278989398808494
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7541558454575276042}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c58688fe6dc70347ba0fb6713f93dc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleMultiplier: 1.03
-  duration: 0.15
-  easing: 3
-  useUnscaledTime: 1
---- !u!114 &5649492832602919433
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -14089,7 +13967,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758830735295862484, guid: 0fa5234d3374c6142b307bb400d76f84, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 65.53
       objectReference: {fileID: 0}
     - target: {fileID: 2758830735295862484, guid: 0fa5234d3374c6142b307bb400d76f84, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -14145,7 +14023,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4732398072400541837, guid: 0fa5234d3374c6142b307bb400d76f84, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 65.53
       objectReference: {fileID: 0}
     - target: {fileID: 4732398072400541837, guid: 0fa5234d3374c6142b307bb400d76f84, type: 3}
       propertyPath: m_AnchoredPosition.x

@@ -11,8 +11,8 @@ public class UI_RoomSetting : MonoBehaviour
     private int DeclineInit;
     private int LifeInit;
     [Header("모드 버튼")] 
-    public Button InfiniteModeButton;
-    public Button DeathmatchModeButton;
+    // public Button InfiniteModeButton;
+    // public Button DeathmatchModeButton;
     public UI_RoomSetupButton Playtime;
     public UI_RoomSetupButton Powder;
     public UI_RoomSetupButton Life;
@@ -23,7 +23,7 @@ public class UI_RoomSetting : MonoBehaviour
         PlaytimeInit = Init(ERoomProperties.PlayTime,Playtime);
         PowderInit = Init(ERoomProperties.Gunpowder,Powder);
         LifeInit = Init(ERoomProperties.Life, Life);
-        ModeButtonSetup();
+        // ModeButtonSetup();
     }
     
     private int Init(ERoomProperties properties, UI_RoomSetupButton button)
@@ -38,50 +38,50 @@ public class UI_RoomSetting : MonoBehaviour
         return value;
     }
     
-    private void ModeButtonSetup()
-    {
-        Room currentRoom = PhotonNetwork.CurrentRoom;
-        
-        int mode = int.Parse(currentRoom.CustomProperties[ERoomProperties.GameMode.ToString()].ToString());
-        
-        if (mode == (int)EGameMode.Deathmatch)
-        {
-            ButtonOnOff(false);
-        }
-        else
-        {
-            ButtonOnOff(true);
-        }
-    }
-    
-    private void ButtonOnOff(bool deathMatch)
-    {
-        DeathmatchModeButton.interactable = deathMatch;
-        InfiniteModeButton.interactable = !deathMatch;
-    }
-    public void OnclickDeathmatch()
-    {
-        Room currentRoom = PhotonNetwork.CurrentRoom;
-        
-        Hashtable roomProperties = new Hashtable
-        {
-            {ERoomProperties.GameMode.ToString(), (int)EGameMode.Deathmatch}
-        };
-        
-        currentRoom.SetCustomProperties(roomProperties);
-        ButtonOnOff(false);
-    }
-    
-    public void OnclickInfinite()
-    {
-        Room currentRoom = PhotonNetwork.CurrentRoom;
-        Hashtable roomProperties = new Hashtable
-        {
-            {ERoomProperties.GameMode.ToString(), (int)EGameMode.Infinite}
-        };
-        currentRoom.SetCustomProperties(roomProperties);
-        ButtonOnOff(true);
-    }
+    // private void ModeButtonSetup()
+    // {
+    //     Room currentRoom = PhotonNetwork.CurrentRoom;
+    //     
+    //     int mode = int.Parse(currentRoom.CustomProperties[ERoomProperties.GameMode.ToString()].ToString());
+    //     
+    //     if (mode == (int)EGameMode.Deathmatch)
+    //     {
+    //         ButtonOnOff(false);
+    //     }
+    //     else
+    //     {
+    //         ButtonOnOff(true);
+    //     }
+    // }
+    //
+    // // private void ButtonOnOff(bool deathMatch)
+    // // {
+    // //     DeathmatchModeButton.interactable = deathMatch;
+    // //     InfiniteModeButton.interactable = !deathMatch;
+    // // }
+    // public void OnclickDeathmatch()
+    // {
+    //     Room currentRoom = PhotonNetwork.CurrentRoom;
+    //     
+    //     Hashtable roomProperties = new Hashtable
+    //     {
+    //         {ERoomProperties.GameMode.ToString(), (int)EGameMode.Deathmatch}
+    //     };
+    //     
+    //     currentRoom.SetCustomProperties(roomProperties);
+    //     ButtonOnOff(false);
+    // }
+    //
+    // public void OnclickInfinite()
+    // {
+    //     Room currentRoom = PhotonNetwork.CurrentRoom;
+    //     Hashtable roomProperties = new Hashtable
+    //     {
+    //         {ERoomProperties.GameMode.ToString(), (int)EGameMode.Infinite}
+    //     };
+    //     currentRoom.SetCustomProperties(roomProperties);
+    //     ButtonOnOff(true);
+    // }
     public void AcceptButton()
     {
         Room currentRoom = PhotonNetwork.CurrentRoom;

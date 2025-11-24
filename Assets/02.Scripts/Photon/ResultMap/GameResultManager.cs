@@ -88,8 +88,7 @@ public class GameResultManager : PhotonSingleton<GameResultManager>
                 data.Rank = currentRank;
             }
 
-            // 등수 건너뛰기: 해당 팀 인원 수 만큼 증가
-            currentRank += teamGroup.Count;
+            currentRank ++;
             
             ResultDataList.AddRange(teamGroup); // 팀별 생존시간 내림차순
         }
