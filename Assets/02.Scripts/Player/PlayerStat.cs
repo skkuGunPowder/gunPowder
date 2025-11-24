@@ -161,8 +161,9 @@ public class PlayerStat : MonoBehaviour
         }
         
         //InitializeStats(); 
+        // 팀은 Player.Start()에서 CustomProperties로 동기화되므로 여기서는 설정하지 않음
         SetPlayer(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife, 
-                 RoomStatManager.Instance.PlayerDecreaseTime, RoomStatManager.Instance.PlayerTeam);
+                 RoomStatManager.Instance.PlayerDecreaseTime);
     }
 
 
@@ -217,13 +218,12 @@ public class PlayerStat : MonoBehaviour
         }
     }
 
-    public void SetPlayer(int gunpowder, int life, int decrease, EInGameTeam team)
+    public void SetPlayer(int gunpowder, int life, int decrease)
     {
         _currentPlayerGunPowderCount = gunpowder;
         _currentPlayerLife = life;
         _initGunpowderCount = gunpowder;
         _gunPowderDecreaseTime = decrease;
-        Team = team;
     }
 
     public void SetPlayerGunPowderCountAndLife(int gunpowder, int life)
