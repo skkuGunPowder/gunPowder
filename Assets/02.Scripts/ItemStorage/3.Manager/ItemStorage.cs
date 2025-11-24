@@ -245,6 +245,7 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         _repo.SaveInventory(_equippedItemDict);
         _repo.SaveItemStorage(_storedItemDict);
 
+        SetPlayerCustomProperties();
         OnDataChanged?.Invoke(item.Item.ItemType);
     }
 
@@ -273,6 +274,7 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         _repo.SaveInventory(_equippedItemDict);
         _repo.SaveItemStorage(_storedItemDict);
 
+        SetPlayerCustomProperties();
         OnDataChanged?.Invoke(item.Item.ItemType);
     }
 
