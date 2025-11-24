@@ -13,6 +13,9 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     // 인게임 채팅 채널 설정
     private const string INGAME_CHANNEL_GROUP = "ingame";
 
+    // 채널별 최대 메시지 보관 개수
+    private const int MAX_MESSAGES_PER_CHANNEL = 100;
+
     // 채팅 메시지 수신 이벤트 (UI 클래스들이 구독)
     public event Action<MessageInfo> OnChatMessageReceived;
 
@@ -327,6 +330,25 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         }
     }
 
+    /// <summary>
+    /// 채널에 메시지 추가 (최대 100개 제한)
+    /// </summary>
+    private void AddMessageToChannel(ChannelInfo channelInfo, MessageInfo messageInfo)
+    {
+        if (channelInfo == null) return;
+
+        // 메시지 추가
+        channelInfo.Messages.Add(messageInfo);
+
+        // 100개 초과 시 가장 오래된 메시지 삭제
+        if (channelInfo.Messages.Count > MAX_MESSAGES_PER_CHANNEL)
+        {
+            int removeCount = channelInfo.Messages.Count - MAX_MESSAGES_PER_CHANNEL;
+            channelInfo.Messages.RemoveRange(0, removeCount);
+            Debug.Log($"[UIChatManager] 채널 '{channelInfo.ChannelGroup}/{channelInfo.ChannelName}' 메시지 {removeCount}개 삭제 (100개 제한)");
+        }
+    }
+
     public void OnChatMessage(MessageInfo messageInfo)
     {
         Debug.Log($"[UIChatManager] OnChatMessage 수신: Group={messageInfo.ChannelGroup}, Name={messageInfo.ChannelName}, Number={messageInfo.ChannelNumber}, From={messageInfo.GamerName}, Msg={messageInfo.Message}");
@@ -357,7 +379,7 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             return;
         }
 
-        channelInfo.Messages.Add(messageInfo);
+        AddMessageToChannel(channelInfo, messageInfo);
 
         // 채널 타입별 이벤트 발행
         if (messageInfo.ChannelGroup.Contains("ingame") || messageInfo.ChannelGroup.StartsWith("ig_"))
@@ -423,7 +445,7 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             Tag = messageInfo.Tag
         };
 
-        channelInfo.Messages.Add(add_messageInfo);
+        AddMessageToChannel(channelInfo, add_messageInfo);
 
         // UI 클래스들에게 귓속말 수신 이벤트 발생
         OnChatMessageReceived?.Invoke(add_messageInfo);
@@ -521,7 +543,7 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
                                 messageInfo.ChannelName = channelInfo.ChannelName;
                                 messageInfo.ChannelNumber = channelInfo.ChannelNumber;
 
-                                channelInfo.Messages.Add(messageInfo);
+                                AddMessageToChannel(channelInfo, messageInfo);
                             }
                         }
                     }
@@ -559,6 +581,18 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
             messageInfo.Message = error.ToString() + " : " + banTime.ToString("yyyy-MM-dd HH:mm:ss") + " 까지";
         }
+        else if (error == ERROR_MESSAGE.CHANNEL_NAME_FILTERED ||
+            error == ERROR_MESSAGE.CHANNEL_GROUP_FILTERED)
+        {
+            ErrorMessageChannelParam errorMessageChannelParam = (ErrorMessageChannelParam)param;
+            if (errorMessageChannelParam == null) return;
+
+            // 채널 이름 필터링 에러 - 사용자 친화적 메시지
+            messageInfo.Message = "채팅 채널 연결에 실패했습니다. 잠시 후 다시 시도해주세요.";
+            Debug.LogWarning($"[UIChatManager] 채널 이름 필터링 감지: {errorMessageChannelParam.ChannelGroup} / {errorMessageChannelParam.ChannelName}");
+
+            // 자동 재시도는 하지 않음 (무한 루프 방지)
+        }
         else if (error == ERROR_MESSAGE.CHANNEL_FULL ||
             error == ERROR_MESSAGE.INVALID_PASSWORD ||
             error == ERROR_MESSAGE.ALREADY_CREATED_CHANNEL ||
@@ -567,9 +601,7 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             error == ERROR_MESSAGE.CHANNEL_NAME_TOO_SHORT ||
             error == ERROR_MESSAGE.CHANNEL_NAME_TOO_LONG ||
             error == ERROR_MESSAGE.DUPLICATE_CHANNEL_GROUP ||
-            error == ERROR_MESSAGE.PASSWORD_TOO_LONG ||
-            error == ERROR_MESSAGE.CHANNEL_GROUP_FILTERED ||
-            error == ERROR_MESSAGE.CHANNEL_NAME_FILTERED)
+            error == ERROR_MESSAGE.PASSWORD_TOO_LONG)
         {
             ErrorMessageChannelParam errorMessageChannelParam = (ErrorMessageChannelParam)param;
             if (errorMessageChannelParam == null) return;
@@ -594,7 +626,7 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
                         messageInfo.ChannelName = channelInfo.ChannelName;
                         messageInfo.ChannelNumber = channelInfo.ChannelNumber;
 
-                        channelInfo.Messages.Add(messageInfo);
+                        AddMessageToChannel(channelInfo, messageInfo);
                     }
                 }
             }
@@ -670,13 +702,22 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             }
         }
 
-        // Fallback: CustomProperties에 없으면 HashCode 사용 (Backend Chat SDK 길이 제한: 2~20자)
+        // Fallback: CustomProperties에 없으면 안전한 해시 사용 (Backend Chat SDK 길이 제한: 2~20자)
         if (string.IsNullOrEmpty(channelGroup) || string.IsNullOrEmpty(channelName) || channelNumber == 0)
         {
-            int roomHash = Math.Abs(PhotonNetwork.CurrentRoom.Name.GetHashCode());
-            channelGroup = $"ig_{roomHash}";  // "ig_" + 숫자 (최대 12자)
-            channelName = $"rm_{roomHash}";   // "rm_" + 숫자 (최대 12자)
-            channelNumber = (ulong)roomHash;
+            // 16진수 해시 사용 (필터링에 걸릴 가능성 낮음)
+            int roomHash = PhotonNetwork.CurrentRoom.Name.GetHashCode();
+            string hexHash = Math.Abs(roomHash).ToString("X"); // 16진수로 변환 (0-9, A-F만 사용)
+
+            // 길이 제한 (최대 12자)
+            if (hexHash.Length > 12)
+            {
+                hexHash = hexHash.Substring(0, 12);
+            }
+
+            channelGroup = $"game{hexHash}";  // "game" + 16진수
+            channelName = $"room{hexHash}";   // "room" + 16진수
+            channelNumber = (ulong)Math.Abs(roomHash);
             Debug.LogWarning($"[UIChatManager] 채팅 채널 정보가 CustomProperties에 없어 Fallback 사용: {channelGroup} / {channelName} / {channelNumber}");
         }
 
@@ -918,5 +959,83 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
         ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
         return channelInfo?.Messages ?? new List<MessageInfo>();
+    }
+
+    /// <summary>
+    /// 현재 채널의 메시지 기록 가져오기
+    /// </summary>
+    public List<MessageInfo> GetCurrentChannelMessages()
+    {
+        if (string.IsNullOrEmpty(_currentChannelGroup) ||
+            string.IsNullOrEmpty(_currentChannelName) ||
+            _currentChannelNumber == 0)
+        {
+            return new List<MessageInfo>();
+        }
+
+        return GetChannelMessages(_currentChannelGroup, _currentChannelName, _currentChannelNumber);
+    }
+
+    /// <summary>
+    /// 특정 채널의 최근 N개 메시지 가져오기
+    /// </summary>
+    public List<MessageInfo> GetRecentMessages(string channelGroup, string channelName, ulong channelNumber, int count = 50)
+    {
+        List<MessageInfo> allMessages = GetChannelMessages(channelGroup, channelName, channelNumber);
+
+        if (allMessages.Count <= count)
+        {
+            return allMessages;
+        }
+
+        // 최근 N개만 반환
+        return allMessages.GetRange(allMessages.Count - count, count);
+    }
+
+    /// <summary>
+    /// 현재 채널의 최근 N개 메시지 가져오기
+    /// </summary>
+    public List<MessageInfo> GetRecentMessagesFromCurrentChannel(int count = 50)
+    {
+        if (string.IsNullOrEmpty(_currentChannelGroup) ||
+            string.IsNullOrEmpty(_currentChannelName) ||
+            _currentChannelNumber == 0)
+        {
+            return new List<MessageInfo>();
+        }
+
+        return GetRecentMessages(_currentChannelGroup, _currentChannelName, _currentChannelNumber, count);
+    }
+
+    /// <summary>
+    /// 인게임 채널 메시지만 삭제 (게임 종료 시 호출)
+    /// </summary>
+    public void ClearInGameChannelMessages()
+    {
+        List<string> inGameChannelGroups = new List<string>();
+
+        // "ingame" 포함하거나 "ig_"로 시작하는 채널 찾기
+        foreach (var channelGroupPair in _channelList)
+        {
+            if (channelGroupPair.Key.Contains("ingame") || channelGroupPair.Key.StartsWith("ig_"))
+            {
+                inGameChannelGroups.Add(channelGroupPair.Key);
+            }
+        }
+
+        // 찾은 인게임 채널들 삭제
+        foreach (string channelGroup in inGameChannelGroups)
+        {
+            _channelList.Remove(channelGroup);
+            Debug.Log($"[UIChatManager] 인게임 채널 메시지 삭제: {channelGroup}");
+        }
+
+        // 현재 채널이 인게임 채널이었다면 초기화
+        if (_currentChannelGroup.Contains("ingame") || _currentChannelGroup.StartsWith("ig_"))
+        {
+            _currentChannelGroup = string.Empty;
+            _currentChannelName = string.Empty;
+            _currentChannelNumber = 0;
+        }
     }
 }
