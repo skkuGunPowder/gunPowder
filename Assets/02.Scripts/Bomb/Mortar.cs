@@ -197,7 +197,7 @@ public class Mortar : Bomb
 
     private void RemoveMortar()
     {
-        if (PhotonView.IsMine)
+        if (photonView.IsMine)
         {
             _proCamera.UpdateScreenSize(_defaultZoom);
             InputHandler.BlockInput = false;

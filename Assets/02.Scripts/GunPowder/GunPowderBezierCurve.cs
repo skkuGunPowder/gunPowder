@@ -115,13 +115,15 @@ public class GunPowderBezierCurve : MonoBehaviour
             {
                 return;
             }
+            _gunPowder._isDestroying = true;
 
-            if(_photonView != null && _photonView.IsMine)
-            {
-                _gunPowder._isDestroying = true;
-                PhotonNetwork.Destroy(gameObject);
-                // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
-            }
+            // if(_photonView != null && _photonView.IsMine)
+            // {
+            //     // PhotonNetwork.Destroy(gameObject);
+            //     // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+            // }
+
+            DestroyCollector.Instance.PhotonLazyDestory(gameObject, _photonView);
             return;
         }
 
@@ -137,13 +139,14 @@ public class GunPowderBezierCurve : MonoBehaviour
                     {
                         return;
                     }
+                    _gunPowder._isDestroying = true;
 
-                    if(_photonView != null && _photonView.IsMine)
-                    {
-                        _gunPowder._isDestroying = true;
-                        PhotonNetwork.Destroy(gameObject);
-                        // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
-                    }
+                    // if(_photonView != null && _photonView.IsMine)
+                    // {
+                    //     // PhotonNetwork.Destroy(gameObject);
+                    //     // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+                    // }
+                    DestroyCollector.Instance.PhotonLazyDestory(gameObject, _photonView);
                     return;
                 }
             }
@@ -198,13 +201,14 @@ public class GunPowderBezierCurve : MonoBehaviour
         // 플레이어가 사라지거나 비활성화된 경우 즉시 제거
         if (_target == null || _target.gameObject == null || !_target.gameObject.activeInHierarchy)
         {
-            if(_photonView != null && _photonView.IsMine)
-            {
-                _gunPowder._isDestroying = true;
-                transform.DOKill();
-                PhotonNetwork.Destroy(gameObject);
-                // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
-            }
+            // if(_photonView != null && _photonView.IsMine)
+            // {
+            //     // PhotonNetwork.Destroy(gameObject);
+            //     // InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
+            // }
+            _gunPowder._isDestroying = true;
+            transform.DOKill();
+            DestroyCollector.Instance.PhotonLazyDestory(gameObject, _photonView);
             return;
         }
 
@@ -261,15 +265,17 @@ public class GunPowderBezierCurve : MonoBehaviour
                     if (targetView != null && targetView.gameObject.activeInHierarchy && targetView.Owner != null)
                     {
                         targetView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGunPowder), targetView.Owner, 1);
-                        _gunPowder._isDestroying = true;
-                        transform.DOKill();
-                        PhotonNetwork.Destroy(gameObject);
+                        // PhotonNetwork.Destroy(gameObject);
+
                         // if(_photonView != null && _photonView.IsMine)
                         // {
                         //     InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
                         // }
                     }
                 }
+                _gunPowder._isDestroying = true;
+                transform.DOKill();
+                DestroyCollector.Instance.PhotonLazyDestory(gameObject, _photonView);
             }
         }
     }
