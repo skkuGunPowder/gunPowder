@@ -4,7 +4,7 @@ using TMPro;
 
 public class ChatBubble : MonoBehaviour
 {
-    [SerializeField] private Text messageText; // 혹은 Text
+    [SerializeField] private TextMeshProUGUI messageText; // 혹은 Text
     [SerializeField] private float lifeTime = 3.0f;
 
     public void Setup(string text)
