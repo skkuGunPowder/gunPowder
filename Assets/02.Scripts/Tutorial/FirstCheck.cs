@@ -15,7 +15,7 @@ public class FirstCheck : MonoBehaviour
             return;
         }
         UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
-        popup.Init(TutorialMessage,true, PhotonServerManager.Instance.TutorialMode);
+        popup.Init(TutorialMessage,false, PhotonServerManager.Instance.TutorialMode);
         
         PhotonServerManager.Instance.SetFirst(false);
     }

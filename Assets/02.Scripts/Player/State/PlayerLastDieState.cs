@@ -11,7 +11,6 @@ public class PlayerLastDieState : PlayerBaseState
     private bool _effectInitial = false;
     public override void OnEnter()
     {
-        Debug.Log("LastDieState Enter");
         base.OnEnter();
         _owner.RPC_SetAnimatorTrigger("HitLoop");
         EventManager.Instance.OnGameSet += LastDiePlay;

@@ -27,6 +27,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
 
     protected override void Awake()
     {
+        InputHandler.BlockInput = true;
         base.Awake();
 
         _photonView = GetComponent<PhotonView>();

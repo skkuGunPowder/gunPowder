@@ -530,23 +530,23 @@ public class Player : MonoBehaviourPun, IDamagable
     /// </summary>
     private void InitializeOriginalColors()
     {
-        // 이미 초기화되어 있다면 다시 초기화하지 않음 (원본 색상 보호)
-        if (_originalColorMap != null && _originalColorMap.Count > 0)
+        if (_originalColorMap == null)
         {
-            Debug.LogWarning("[Player] 원본 색상이 이미 초기화되어 있습니다. 재초기화를 건너뜁니다.");
-            return;
+            _originalColorMap = new Dictionary<SpriteRenderer, Color>();
         }
 
-        _originalColorMap = new Dictionary<SpriteRenderer, Color>();
-
+        int addedCount = 0;
         foreach (var renderer in _playerStat.MySpriteREndererList)
         {
-            if (renderer != null)
+            if (renderer != null && !_originalColorMap.ContainsKey(renderer))
             {
                 // 원본 색상 저장 (이 값은 절대 변경되지 않음)
                 _originalColorMap[renderer] = renderer.color;
+                addedCount++;
+                Debug.Log($"[색상초기화] {renderer.gameObject.name}: 원본 색상 저장 (R:{renderer.color.r:F2}, G:{renderer.color.g:F2}, B:{renderer.color.b:F2})");
             }
         }
+        Debug.Log($"[색상초기화] {addedCount}개의 기본 렌더러 색상 초기화 완료, 총 렌더러: {_originalColorMap.Count}");
     }
 
     /// <summary>
@@ -562,9 +562,28 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         if (!_originalColorMap.ContainsKey(renderer))
         {
-            // 새로운 스프라이트의 현재 색상을 원본으로 저장
-            // (스프라이트가 추가될 때는 원본 색상 상태여야 함)
-            _originalColorMap[renderer] = renderer.color;
+            // 현재 색상이 빨간색(경고 상태)인지 확인
+            Color currentColor = renderer.color;
+            Color.RGBToHSV(currentColor, out float h, out float s, out float v);
+            
+            // H가 0이고 S가 높으면 빨간색으로 판단 -> 흰색으로 저장
+            bool isRedWarning = (h < 0.05f || h > 0.95f) && s > 0.3f;
+            
+            if (isRedWarning)
+            {
+                // 빨간색 경고 상태이면 기본 색상(흰색)을 원본으로 저장
+                _originalColorMap[renderer] = Color.white;
+                // 실제 스프라이트도 흰색으로 즉시 변경
+                renderer.color = Color.white;
+                Debug.Log($"[색상등록] {renderer.gameObject.name}: 경고상태 감지 → 흰색으로 저장 및 변경");
+            }
+            else
+            {
+                // 정상 색상이면 현재 색상을 원본으로 저장
+                _originalColorMap[renderer] = currentColor;
+                Debug.Log($"[색상등록] {renderer.gameObject.name}: 정상색상 저장 (R:{currentColor.r:F2}, G:{currentColor.g:F2}, B:{currentColor.b:F2})");
+            }
+            Debug.Log($"[색상등록] 총 등록된 렌더러 수: {_originalColorMap.Count}");
         }
     }
 
@@ -574,6 +593,8 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_originalColorMap.ContainsKey(renderer))
         {
             _originalColorMap.Remove(renderer);
+            Debug.Log($"[색상해제] {renderer.gameObject.name}: 색상 시스템에서 제거됨");
+            Debug.Log($"[색상해제] 남은 렌더러 수: {_originalColorMap.Count}");
         }
     }
 
@@ -627,17 +648,11 @@ public class Player : MonoBehaviourPun, IDamagable
         _warningSfxTimer = 0f;
         // legacy SFX state removed (moved to PlayerSFXAnimationEvent)
 
-        // 경고 상태 종료
-        if (PhotonView.IsMine)
-        {
-            RPC_SetNoAttackWarningState(false, 0f);
-        }
-
         // 저장된 속도 상태 초기화
         ClearStoredVelocity();
 
-        // 색상 및 펄스 효과 초기화
-        ResetColorAndEffects();
+        // 경고 상태 완전 해제
+        ClearNoAttackWarning();
 
         // 플레이어 스탯 초기화 (건파우더 초기화)
         _playerStat.ResurrectPlayerStat();
@@ -662,23 +677,20 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void HandleGunPowderEmpty()
     {
-        // 죽을 때 색상 및 효과 초기화
-        ResetColorAndEffects();
-
-        // 궁극기 효과 초기화
-        RPC_UltimateEffect(false);
-        RPC_SetMaterial((byte)EPlayerMaterial.Default);
-        
-        // 궁극기가 활성화되어 있었다면 비활성화 이벤트 발생
+        // 죽을 때 모든 효과 초기화 (경고 + 궁극기)
+        // 순서: 깜박임 해제 → 궁극기 해제 → 색상 복원
         if (_ultimateEffectOn)
         {
-            OnUltimateChanceDeactivated?.Invoke();
+            // 궁극기 효과 비활성화 (내부에서 경고도 자동으로 해제됨)
+            SetUltimateEffectState(false);
+        }
+        else
+        {
+            // 궁극기가 없으면 경고만 해제
+            ClearNoAttackWarning();
         }
         
-        _ultimateEffectOn = false;
         _playerStat.HasUltimateChance = false;
-
-        // 궁극기 관련 타이머 초기화
         _ultimateChanceTimer = 0f;
 
         // PlayerFSM을 통해 SyncStateChange 호출
@@ -742,6 +754,41 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
     /// <summary>
+    /// 궁극기 효과 활성화/비활성화 (Material + VFX + 이벤트)
+    /// </summary>
+    private void SetUltimateEffectState(bool isActive, bool invokeEvent = true)
+    {
+        if (isActive)
+        {
+            // 궁극기 활성화 시 경고 상태 해제
+            ClearNoAttackWarning();
+            
+            RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
+            RPC_UltimateEffect(true);
+            _ultimateEffectOn = true;
+            
+            if (invokeEvent)
+            {
+                OnUltimateChanceActivated?.Invoke();
+            }
+        }
+        else
+        {
+            // 궁극기 비활성화: 깜박임 완전 중단 → 색상 복원 → Material 복구 순서
+            ClearNoAttackWarning();  // 1. 깜박임 중단 + 타이머 초기화 + 색상 복원
+            
+            RPC_SetMaterial((byte)EPlayerMaterial.Default);  // 2. Material 기본으로
+            RPC_UltimateEffect(false);  // 3. 궁극기 VFX 끄기 (내부에서 색상 복원 재확인)
+            _ultimateEffectOn = false;
+            
+            if (invokeEvent)
+            {
+                OnUltimateChanceDeactivated?.Invoke();
+            }
+        }
+    }
+
+    /// <summary>
     /// 궁극기 사용 가능 상태 타이머 업데이트
     /// </summary>
     private void UltimateChanceTimerUpdate()
@@ -753,13 +800,8 @@ public class Player : MonoBehaviourPun, IDamagable
             {
                 if (UltimateEffectPrefab != null && !UltimateEffectPrefab.activeSelf)
                 {
-                    RPC_UltimateEffect(true);
-                    RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
+                    SetUltimateEffectState(true);
                 }
-                _ultimateEffectOn = true;
-                
-                // 궁극기 활성화 이벤트 발생
-                OnUltimateChanceActivated?.Invoke();
             }
 
             _ultimateChanceTimer += Time.deltaTime;
@@ -768,12 +810,8 @@ public class Player : MonoBehaviourPun, IDamagable
                 _playerStat.HasUltimateChance = false;
                 _playerStat.HasUsedUltimateThisLife = true;
                 _ultimateChanceTimer = 0f;
-                RPC_UltimateEffect(false);
-                RPC_SetMaterial((byte)EPlayerMaterial.Default);
-                _ultimateEffectOn = false;
                 
-                // 궁극기 비활성화 이벤트 발생
-                OnUltimateChanceDeactivated?.Invoke();
+                SetUltimateEffectState(false);
             }
         }
     }
@@ -797,6 +835,9 @@ public class Player : MonoBehaviourPun, IDamagable
 
         if (isOn)
         {
+            // 궁극기 활성화 시 색상 복원 (모든 클라이언트에서 실행)
+            RestoreOriginalColors();
+            
             UltimateEffectPrefab.SetActive(true);
             if (_ultimateEffectOffRoutine != null)
             {
@@ -808,6 +849,9 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         else
         {
+            // 궁극기 비활성화 시 색상 복원 (모든 클라이언트에서 실행)
+            RestoreOriginalColors();
+            
             if (_ultimateEffectOffRoutine != null)
             {
                 StopCoroutine(_ultimateEffectOffRoutine);
@@ -935,14 +979,11 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.HasUsedUltimateThisLife = true;
             _playerStat.HasUltimateChance = false;
             _ultimateChanceTimer = 0f;
-            RPC_UltimateEffect(false);
             int ultimateCost = _ultimate.GetCost();
             _playerStat.DecreaseGunPowderCount(ultimateCost, photonView.OwnerActorNr);
-            RPC_SetMaterial((byte)EPlayerMaterial.Default);
-            _ultimateEffectOn = false;
-
-            // 궁극기 비활성화 이벤트 발생 (궁극기 사용 시)
-            OnUltimateChanceDeactivated?.Invoke();
+            
+            // 궁극기 효과 비활성화 (내부에서 경고도 자동으로 해제됨)
+            SetUltimateEffectState(false);
 
             // SFX
             _playerSFXAnimationEvent.PlayerUltimateUseSFX();
@@ -1046,9 +1087,8 @@ public class Player : MonoBehaviourPun, IDamagable
 
         if (!isActive)
         {
-            // 경고 종료 시 효과 초기화
+            // 경고 종료 시 펄스 효과 중단 (내부에서 색상 복원 처리됨)
             StopPreExplosionPulse(true);
-            // StopPreExplosionPulse 내부에서 이미 RestoreOriginalColors가 호출되므로 중복 호출 제거
             _colorUpdateWithoutAttackTimer = 0f;
         }
     }
@@ -1101,6 +1141,7 @@ public class Player : MonoBehaviourPun, IDamagable
             // 항상 원본 색상을 참조하여 새로운 색상을 계산함
             if (_originalColorMap != null)
             {
+                int changedCount = 0;
                 foreach (var kv in _originalColorMap)
                 {
                     if (kv.Key == null) { continue; }
@@ -1109,6 +1150,7 @@ public class Player : MonoBehaviourPun, IDamagable
                     Color newColor = Color.HSVToRGB(0f, targetS, v);
                     newColor.a = originalColor.a;
                     kv.Key.color = newColor; // 스프라이트 색상만 변경
+                    changedCount++;
                 }
                 _isColorRestored = false; // 색상이 변경됨
             }
@@ -1250,12 +1292,14 @@ public class Player : MonoBehaviourPun, IDamagable
 
         if (_originalColorMap != null && _originalColorMap.Count > 0)
         {
+            int restoredCount = 0;
             foreach (var kv in _originalColorMap)
             {
                 if (kv.Key != null)
                 {
                     // 원본 색상으로 복원
                     kv.Key.color = kv.Value;
+                    restoredCount++;
                 }
             }
             
@@ -1334,7 +1378,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
     /// <summary>
-    /// 색상과 시각적 효과를 모두 초기화하는 메서드
+    /// 색상과 시각적 효과를 모두 초기화하는 메서드 (로컬 효과만)
     /// </summary>
     private void ResetColorAndEffects()
     {
@@ -1355,16 +1399,24 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
     /// <summary>
-    /// 공격을 하면 타이머 초기화
+    /// 공격 없음 경고를 완전히 해제 (네트워크 동기화 + 로컬 효과)
+    /// 공격 시, 궁극기 활성화 시, 부활 시 등에 사용
     /// </summary>
-    public void ResetGunPowderDecreaseWithoutAttackTimer()
+    private void ClearNoAttackWarning()
     {
         if (PhotonView.IsMine)
         {
-            // 경고 상태 종료
             RPC_SetNoAttackWarningState(false, 0f);
         }
         ResetColorAndEffects();
+    }
+
+    /// <summary>
+    /// 공격을 하면 타이머 초기화 (외부 호출용 public 메서드)
+    /// </summary>
+    public void ResetGunPowderDecreaseWithoutAttackTimer()
+    {
+        ClearNoAttackWarning();
     }
 
     public void PlayerTeamCheck()
@@ -2023,20 +2075,15 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.HasUltimateChance = true;
         _playerStat.HasUsedUltimateThisLife = false;
         _ultimateChanceTimer = 0f;
-        RPC_UltimateEffect(true);
-        RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
-        _ultimateEffectOn = true;
         _playerStat.UltimateChanceDuration = 999999999f;
+        
+        SetUltimateEffectState(true);
     }
 
     public void SetPausedNoAttack()
     {
         _playerStat.IsPausedNoAttack = true;
-        if (PhotonView.IsMine)
-        {
-            RPC_SetNoAttackWarningState(false, 0f);
-        }
-        ResetColorAndEffects();
+        ClearNoAttackWarning();
     }
 
     public void ResetPausedNoAttack()

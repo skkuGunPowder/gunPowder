@@ -36,8 +36,9 @@ public class CameraController : MonoBehaviour
         {
             return;
         }
-        EventManager.Instance.OnTargetChanged += TargetListUp;
+        EventManager.Instance.OnTargetChanged += SetObserveTarget;
         EventManager.Instance.OnLastAttack += LastAttack;
+        EventManager.Instance.OnPlayObserve += PlayObservingMode;
     }
 
     private void Init()
@@ -111,12 +112,25 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    private void TargetListUp() // 로컬에서 알아서 각자 처리, 죽었을 때 나갔을 때 리스트 최신화
+    private void SetObserveTarget() // 시작할 때, 누군가 나갔을 때 리스트 최신화
     {
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         _currentTargetList.Clear();
-        
+
         foreach (var player in players)
+        {
+            _currentTargetList.Add(player);
+        }
+    }
+    
+    private void PlayObservingMode() // 로컬에서 알아서 각자 처리, 죽었을 때 나갔을 때 리스트 최신화
+    {
+        if (_isObserving)
+        {
+            return;
+        }
+        
+        foreach (var player in _currentTargetList)
         {
             if (player.gameObject.activeSelf == false)
             {
@@ -125,19 +139,15 @@ public class CameraController : MonoBehaviour
                 {
                     if (_isObserving)
                     {
-                        continue;   
+                        continue;
                     }
-                    
+
                     _isObserving = true;
                     OnUIOnOff?.Invoke(true);
-                };
-                continue;
+                }
             }
-            
-            _currentTargetList.Add(player);
-            
         }
-        
+
         _currentTargetIndex = 0;
     }
 
@@ -190,23 +200,46 @@ public class CameraController : MonoBehaviour
         {
             return;
         }
-        
-        _currentTargetIndex += index;
-        
-        if (_currentTargetIndex < 0)
+    
+        int attempts = 0;
+        int maxAttempts = _currentTargetList.Count; // 무한 루프 방지
+    
+        while (attempts < maxAttempts)
         {
-            _currentTargetIndex = _currentTargetList.Count - 1;
+            _currentTargetIndex += index;
+        
+            if (_currentTargetIndex < 0)
+            {
+                _currentTargetIndex = _currentTargetList.Count - 1;
+            }
+            else if (_currentTargetIndex >= _currentTargetList.Count)
+            {
+                _currentTargetIndex = 0;
+            }
+        
+            // 유효한 타겟을 찾았으면 루프 종료
+            if (_currentTargetList[_currentTargetIndex] != null && 
+                _currentTargetList[_currentTargetIndex].gameObject.activeSelf)
+            {
+                break;
+            }
+        
+            attempts++;
         }
-        else if (_currentTargetIndex >= _currentTargetList.Count)
+    
+        // 모든 타겟이 유효하지 않으면 리스트 정리
+        if (attempts >= maxAttempts)
         {
+            _currentTargetList.RemoveAll(target => target == null || !target.gameObject.activeSelf);
+        
+            if (_currentTargetList.Count == 0)
+            {
+                return;
+            }
+        
             _currentTargetIndex = 0;
         }
-        
-        if (_currentTargetList[_currentTargetIndex] == null)
-        {
-            _currentTargetList.RemoveAt(_currentTargetIndex);
-            _currentTargetIndex = 0;
-        }
+
         
         Player player = _currentTargetList[_currentTargetIndex];
         
@@ -230,6 +263,7 @@ public class CameraController : MonoBehaviour
             _proCamera.RemoveAllCameraTargets();
         }
         EventManager.Instance.OnLastAttack -= LastAttack;
-        EventManager.Instance.OnTargetChanged -= TargetListUp;
+        EventManager.Instance.OnTargetChanged -= SetObserveTarget;
+        EventManager.Instance.OnPlayObserve -= PlayObservingMode;
     }
 }
