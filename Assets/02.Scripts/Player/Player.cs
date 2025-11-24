@@ -197,6 +197,15 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField] private GameObject _playerCritHitParticlePrefab;  // 상대방 위치에 생성 (크리티컬)
     [SerializeField] private Vector3 _playerHitVFXOffset = new Vector3(0, 5f, 0f); // 히트 파티클 오프셋 (위쪽으로 5f만큼 올림)
     private const float PLAYER_HIT_PARTICLE_OFFSET = 0.5f;  // 자신의 우측 오프셋
+    
+    // 폭발당 히트 파티클 수집용
+    private class PendingExplosionHit
+    {
+        public List<Vector3> victimPositions = new List<Vector3>();
+        public bool hasCrit = false;
+    }
+    private PendingExplosionHit _currentExplosionHit;
+    private Coroutine _processHitCoroutine;
 
     private void Awake()
     {
@@ -2065,6 +2074,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     /// <summary>
     /// 공격자(자신)가 적을 맞췄을 때 파티클 생성 (로컬에서만 실행)
+    /// 폭발당 1개의 이펙트만 생성하기 위해 0.05초 동안 수집 후 일괄 처리
     /// </summary>
     /// <param name="victimPosition">피격자 위치</param>
     /// <param name="isCrit">크리티컬 여부</param>
@@ -2077,20 +2087,71 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
 
-        // 1. 자신의 우측에 GameObject 생성 (항상 월드 좌표 기준 우측)
+        // 1. 데이터 수집 시작 (첫 번째 피격)
+        if (_currentExplosionHit == null)
+        {
+            _currentExplosionHit = new PendingExplosionHit();
+            
+            // 0.05초 후에 일괄 처리하기로 예약
+            if (_processHitCoroutine != null)
+            {
+                StopCoroutine(_processHitCoroutine);
+            }
+            _processHitCoroutine = StartCoroutine(ProcessHitsDelayed());
+        }
+        
+        // 2. 피격 정보 수집
+        _currentExplosionHit.victimPositions.Add(victimPosition);
+        if (isCrit)
+        {
+            _currentExplosionHit.hasCrit = true; // 한 명이라도 크리티컬이면 전체 크리티컬
+        }
+    }
+    
+    /// <summary>
+    /// 0.05초 대기 후 수집된 히트 정보를 일괄 처리
+    /// </summary>
+    private IEnumerator ProcessHitsDelayed()
+    {
+        // 같은 프레임의 모든 피격 정보를 수집하기 위해 대기
+        yield return new WaitForSeconds(0.05f);
+        
+        if (_currentExplosionHit == null)
+        {
+            _processHitCoroutine = null;
+            yield break;
+        }
+        
+        bool isCrit = _currentExplosionHit.hasCrit;
+        
+        // 1. 각 피격자 위치에 파티클 생성 (플레이어마다 하나씩)
+        GameObject particlePrefab = isCrit ? _playerCritHitParticlePrefab : _playerHitParticlePrefab;
+        if (particlePrefab != null)
+        {
+            foreach (var pos in _currentExplosionHit.victimPositions)
+            {
+                VFXPool.Instance.Play(particlePrefab.name, pos);
+            }
+        }
+        
+        // 2. 자신 우측에 이펙트 생성 (폭발당 1개만!)
         GameObject hitPrefab = isCrit ? _playerCritHitPrefab : _playerHitPrefab;
         if (hitPrefab != null)
         {
             Vector3 spawnPos = transform.position + Vector3.right * PLAYER_HIT_PARTICLE_OFFSET;
             VFXPool.Instance.Play(hitPrefab.name, spawnPos);
         }
-
-        // 2. 피격자 위치에 GameObject 생성
-        GameObject hitParticlePrefab = isCrit ? _playerCritHitParticlePrefab : _playerHitParticlePrefab;
-        if (hitParticlePrefab != null)
+        
+        // 3. 사운드 재생 (폭발당 1번만!)
+        if (SoundManager.Instance != null)
         {
-            VFXPool.Instance.Play(hitParticlePrefab.name, victimPosition);
+            string soundName = isCrit ? "PlayerCrit_1" : "PlayerHit_1";
+            SoundManager.Instance.PlayLocalSound(soundName, transform, 0f, false, SoundType.SFX, true, 1f, 50f);
         }
+        
+        // 정리
+        _currentExplosionHit = null;
+        _processHitCoroutine = null;
     }
 
     // [PunRPC]
