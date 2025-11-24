@@ -12,10 +12,25 @@ public class UI_IngameChatPopup : UI_Popup
     public Button SendButton = null;
     public GameObject ChatListPrefab;
     public ScrollRect ChatScrollRect = null; // 채팅 스크롤뷰
+    public GameObject ChatOutsidePrefab;
+
+    // UI 토글 관련
+    public Button ToggleChatButton = null; // 채팅 창 토글 버튼
+    public GameObject ScrollViewObject = null; // Scroll View
+    public GameObject PopupTopBarBackground = null; // Popup Top Bar Background
+    public Image ChatImageComponent = null; // Chat의 Image Component
 
     private Action _closeCallback;
     // 인게임 채팅이 동작할 씬 목록
     private readonly string[] _activeScenes = { "WaitingRoom", "Beach1", "Dock1", "Forest1" };
+
+    // 채팅 도배 방지 시스템
+    private Queue<float> _recentChatTimes = new Queue<float>(); // 최근 채팅 시간 기록
+    private const int MAX_MESSAGES_THRESHOLD = 5; // 연속 채팅 제한 횟수
+    private const float SPAM_CHECK_WINDOW = 2f; // 도배 체크 시간 (3초 내 5번)
+    private const float CHAT_BAN_DURATION = 10f; // 채팅 금지 시간 (10초)
+    private float _chatBanEndTime = 0f; // 채팅 금지 종료 시간
+    private bool _isChatBanned = false; // 채팅 금지 상태
 
     private void Awake()
     {
@@ -24,6 +39,13 @@ public class UI_IngameChatPopup : UI_Popup
         {
             SendButton.onClick.AddListener(SendChatMessage);
         }
+
+        // 토글 버튼 리스너 설정
+        if (ToggleChatButton != null)
+        {
+            ToggleChatButton.onClick.AddListener(ToggleChatUI);
+        }
+
         if (ChatInput != null)
         {
             ChatInput.onEndEdit.AddListener((string text) =>
@@ -300,14 +322,60 @@ public class UI_IngameChatPopup : UI_Popup
         }
 
         string text = ChatInput.text;
-        ChatInput.text = string.Empty;
 
         // 공백만 있는 경우 포커스 유지하고 return
         if (string.IsNullOrEmpty(text.Trim()))
         {
+            ChatInput.text = string.Empty;
             FocusInputField();
             return;
         }
+
+        // 채팅 금지 상태 체크
+        if (_isChatBanned)
+        {
+            float remainingTime = _chatBanEndTime - Time.time;
+            if (remainingTime > 0)
+            {
+                Debug.LogWarning($"[UI_IngameChatPopup] 채팅 금지 중입니다. 남은 시간: {remainingTime:F1}초");
+                ChatInput.text = string.Empty;
+                FocusInputField();
+
+                // 사용자에게 알림 (시스템 메시지로 표시 가능)
+                ShowChatBanMessage(Mathf.CeilToInt(remainingTime));
+                return;
+            }
+            else
+            {
+                // 금지 시간 종료
+                _isChatBanned = false;
+                Debug.Log("[UI_IngameChatPopup] 채팅 금지 해제");
+
+                // Placeholder를 원래대로 복구
+                RestorePlaceholderToDefault();
+            }
+        }
+
+        // 도배 방지 체크
+        if (CheckForSpam())
+        {
+            // 도배로 판단 - 10초 채팅 금지
+            _isChatBanned = true;
+            _chatBanEndTime = Time.time + CHAT_BAN_DURATION;
+            Debug.LogWarning($"[UI_IngameChatPopup] 도배 감지! {CHAT_BAN_DURATION}초간 채팅 금지");
+
+            ChatInput.text = string.Empty;
+            FocusInputField();
+
+            // 사용자에게 알림
+            ShowChatBanMessage(Mathf.CeilToInt(CHAT_BAN_DURATION));
+            return;
+        }
+
+        // 채팅 시간 기록
+        _recentChatTimes.Enqueue(Time.time);
+
+        ChatInput.text = string.Empty;
 
         Debug.Log($"[UI_IngameChatPopup] 채팅 메시지 전송: {text}");
 
@@ -327,6 +395,87 @@ public class UI_IngameChatPopup : UI_Popup
     }
 
     /// <summary>
+    /// 도배 여부 체크 (3초 내 5번 채팅하면 도배로 판단)
+    /// </summary>
+    private bool CheckForSpam()
+    {
+        float currentTime = Time.time;
+
+        // 오래된 채팅 시간 제거 (3초 이상 지난 것들)
+        while (_recentChatTimes.Count > 0 && currentTime - _recentChatTimes.Peek() > SPAM_CHECK_WINDOW)
+        {
+            _recentChatTimes.Dequeue();
+        }
+
+        // 현재 큐에 5번째 메시지가 들어가려고 할 때 체크
+        if (_recentChatTimes.Count >= MAX_MESSAGES_THRESHOLD)
+        {
+            // 첫 번째 메시지와 현재 시간의 차이가 3초 이하면 도배
+            float firstMessageTime = _recentChatTimes.Peek();
+            if (currentTime - firstMessageTime <= SPAM_CHECK_WINDOW)
+            {
+                // 도배 감지 - 큐 초기화
+                _recentChatTimes.Clear();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 채팅 금지 메시지 표시
+    /// </summary>
+    private void ShowChatBanMessage(int seconds)
+    {
+        // 시스템 메시지로 표시하지 않고 로그만 출력
+        // 필요하면 UI 토스트 메시지나 InputField placeholder로 표시 가능
+        Debug.LogWarning($"[채팅 금지] 도배 방지를 위해 {seconds}초간 채팅이 제한됩니다.");
+
+        // InputField placeholder에 메시지 표시 (선택사항)
+        if (ChatInput != null && ChatInput.placeholder != null)
+        {
+            Text placeholderText = ChatInput.placeholder.GetComponent<Text>();
+            if (placeholderText != null)
+            {
+                string originalPlaceholder = placeholderText.text;
+                placeholderText.text = $"채팅 금지 ({seconds}초 남음)";
+
+                // 1초 후 원래 placeholder로 복구
+                StartCoroutine(RestorePlaceholder(placeholderText, originalPlaceholder, 1f));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Placeholder 복구 Coroutine
+    /// </summary>
+    private System.Collections.IEnumerator RestorePlaceholder(Text placeholderText, string originalText, float delay)
+    {
+        yield return new UnityEngine.WaitForSeconds(delay);
+        if (placeholderText != null)
+        {
+            placeholderText.text = originalText;
+        }
+    }
+
+    /// <summary>
+    /// Placeholder를 기본값으로 복구 (채팅 금지 해제 시)
+    /// </summary>
+    private void RestorePlaceholderToDefault()
+    {
+        if (ChatInput != null && ChatInput.placeholder != null)
+        {
+            Text placeholderText = ChatInput.placeholder.GetComponent<Text>();
+            if (placeholderText != null)
+            {
+                placeholderText.text = "ENTER MESSAGE...";
+                Debug.Log("[UI_IngameChatPopup] Placeholder 복구: ENTER MESSAGE...");
+            }
+        }
+    }
+
+    /// <summary>
     /// 생성된 모든 채팅 메시지를 삭제
     /// </summary>
     public void ClearAllMessages()
@@ -340,6 +489,36 @@ public class UI_IngameChatPopup : UI_Popup
         }
 
         Debug.Log("[UI_IngameChat] 모든 채팅 메시지 삭제됨");
+    }
+
+    /// <summary>
+    /// 채팅 UI 요소들을 토글 (켜고 끄기)
+    /// </summary>
+    private void ToggleChatUI()
+    {
+        // Scroll View 토글
+        if (ScrollViewObject != null)
+        {
+            bool newState = !ScrollViewObject.activeSelf;
+            ScrollViewObject.SetActive(newState);
+            Debug.Log($"[UI_IngameChatPopup] Scroll View 토글: {newState}");
+        }
+
+        // Popup Top Bar Background 토글
+        if (PopupTopBarBackground != null)
+        {
+            bool newState = !PopupTopBarBackground.activeSelf;
+            PopupTopBarBackground.SetActive(newState);
+            Debug.Log($"[UI_IngameChatPopup] Popup Top Bar Background 토글: {newState}");
+        }
+
+        // Chat Image Component 토글
+        if (ChatImageComponent != null)
+        {
+            bool newState = !ChatImageComponent.enabled;
+            ChatImageComponent.enabled = newState;
+            Debug.Log($"[UI_IngameChatPopup] Chat Image Component 토글: {newState}");
+        }
     }
 
     private void OnDestroy()
