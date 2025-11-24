@@ -147,8 +147,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: b1bd5bd01ea754146944b12131e36a24, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -156,7 +156,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 4
 --- !u!114 &237334979514255614
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -933,7 +933,6 @@ GameObject:
   - component: {fileID: 7974083084307535964}
   - component: {fileID: 6063208059462422894}
   - component: {fileID: 3205920109860411607}
-  - component: {fileID: 8323071388148795216}
   - component: {fileID: 7493422216688187073}
   - component: {fileID: 4250761651179150845}
   - component: {fileID: 8199994054464460991}
@@ -1007,25 +1006,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8323071388148795216
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4044218083426050907}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49aa82f739da5ea468b50d4679adef0e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CheckBox: {fileID: 5214514207493693683}
-  Avatar: {fileID: 7535728692775234061}
-  Name: {fileID: 8163532784242427599}
-  Message: {fileID: 2467452486436847159}
-  Time: {fileID: 0}
-  ReportButton: {fileID: 1478131241242425104}
-  OutLineImage: {fileID: 8621959517322910597}
 --- !u!114 &7493422216688187073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1172,6 +1152,7 @@ GameObject:
   - component: {fileID: 5095702042352456494}
   - component: {fileID: 562237600665482191}
   - component: {fileID: 5208168393533890523}
+  - component: {fileID: 570862884314317704}
   m_Layer: 5
   m_Name: IngameRightChatBox
   m_TagString: Untagged
@@ -1237,3 +1218,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &570862884314317704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8938302652845765594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49aa82f739da5ea468b50d4679adef0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CheckBox: {fileID: 5214514207493693683}
+  Avatar: {fileID: 7535728692775234061}
+  Name: {fileID: 8163532784242427599}
+  Message: {fileID: 2467452486436847159}
+  Time: {fileID: 0}
+  ReportButton: {fileID: 1478131241242425104}
+  OutLineImage: {fileID: 8621959517322910597}

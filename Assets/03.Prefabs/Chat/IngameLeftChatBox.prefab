@@ -677,6 +677,7 @@ GameObject:
   - component: {fileID: 985484560865211865}
   - component: {fileID: 5056030313398535138}
   - component: {fileID: 6458045354640299340}
+  - component: {fileID: 7427159684527690388}
   m_Layer: 5
   m_Name: IngameLeftChatBox
   m_TagString: Untagged
@@ -742,6 +743,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7427159684527690388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5715961387486670105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49aa82f739da5ea468b50d4679adef0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CheckBox: {fileID: 6912276935025298574}
+  Avatar: {fileID: 1042541431931098631}
+  Name: {fileID: 8831942372096448442}
+  Message: {fileID: 831750398894258357}
+  Time: {fileID: 0}
+  ReportButton: {fileID: 7191561167962198672}
+  OutLineImage: {fileID: 3783060406635630930}
 --- !u!1 &5913195197118927211
 GameObject:
   m_ObjectHideFlags: 0
@@ -753,7 +773,6 @@ GameObject:
   - component: {fileID: 340500100941474412}
   - component: {fileID: 4482426072856060766}
   - component: {fileID: 5074894882997349095}
-  - component: {fileID: 1842372524618315104}
   - component: {fileID: 1070241777870785214}
   - component: {fileID: 5754214690249418861}
   - component: {fileID: 682018534501645593}
@@ -827,25 +846,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1842372524618315104
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5913195197118927211}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49aa82f739da5ea468b50d4679adef0e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CheckBox: {fileID: 6912276935025298574}
-  Avatar: {fileID: 1042541431931098631}
-  Name: {fileID: 8831942372096448442}
-  Message: {fileID: 831750398894258357}
-  Time: {fileID: 0}
-  ReportButton: {fileID: 7191561167962198672}
-  OutLineImage: {fileID: 3783060406635630930}
 --- !u!114 &1070241777870785214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1131,8 +1131,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: b1bd5bd01ea754146944b12131e36a24, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1140,7 +1140,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 4
 --- !u!114 &8550946524383663531
 MonoBehaviour:
   m_ObjectHideFlags: 0
