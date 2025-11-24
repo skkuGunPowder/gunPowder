@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using BackndChat;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using PhotonPlayer = Photon.Realtime.Player;
 
 public enum ChatChannel { All, Team, Whisper }
 public class UI_IngameChatPopup : UI_Popup
@@ -44,17 +46,27 @@ public class UI_IngameChatPopup : UI_Popup
     private ChatChannel _currentChannel = ChatChannel.All;
     private string _whisperTargetName = ""; // 귓속말 대상
     
+    // 방금 닫혔는가?
+    private float _lastCloseTime = 0f;
+    
+    // [추가] 게임 종료 상태 플래그
+    private bool _isGameEnded = false;
+    
     private void Awake()
     {
         // InputField 컴포넌트들의 OnSubmit 이벤트 구독
         if (inputFieldMini != null)
         {
             inputFieldMini.OnSubmit += OnChatSubmit;
+            // [변경] Close -> CloseByEnter 로 변경
+            inputFieldMini.OnEmptySubmit += CloseByEnter;
         }
 
         if (inputFieldFull != null)
         {
             inputFieldFull.OnSubmit += OnChatSubmit;
+            // [변경] Close -> CloseByEnter 로 변경
+            inputFieldFull.OnEmptySubmit += CloseByEnter;
         }
 
         _closeCallback = Close;
@@ -64,13 +76,109 @@ public class UI_IngameChatPopup : UI_Popup
         {
             ChatScrollRect = ChatContent.GetComponentInParent<ScrollRect>();
         }
+
+        // [변경] 기존 Close 대신 OnGameStartWrapper 연결
+        GameManager.Instance.OnGameStart += OnGameStartWrapper;
+        // [추가] 게임 오버 이벤트 연결
+        GameManager.Instance.OnGameOver += OnGameOverWrapper;
+        
+        // ★ 팀 컬러 변경 이벤트 구독 추가 (여기서 해도 되고 Start에서 해도 됨)
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnPlayerColorChanged += OnPlayerColorChangedWrapper;
+        }
     }
 
     private void OnEnable()
     {
-        ScrollToBottomCoroutine();
+        StartCoroutine(ScrollToBottomCoroutine());
+    }
+    // [추가] 게임 시작 시 상태 초기화 (재시작 시 채팅 가능)
+    private void OnGameStartWrapper()
+    {
+        _isGameEnded = false;
+        Close();
     }
 
+    private void CreateChatListUI(MessageInfo messageInfo)
+    {
+        if (ChatContent == null || ChatListLeftPrefab == null) return;
+
+        bool isMyMessage = false;
+        bool isSystemMessage = messageInfo.GamerName == "SYSTEM";
+        
+        // 내 메시지인지 확인
+        if (!isSystemMessage && AccountManager.Instance != null && AccountManager.Instance.CurrentAccount != null)
+        {
+            isMyMessage = messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname;
+        }
+
+        // 프리팹 생성
+        GameObject chatListObj = isMyMessage 
+            ? Instantiate(ChatListRightPrefab, ChatContent.transform) 
+            : Instantiate(ChatListLeftPrefab, ChatContent.transform);
+
+        UIChatList chatListComponent = chatListObj.GetComponent<UIChatList>();
+        if (chatListComponent == null) return;
+
+        // ★ 핵심: 메시지 작성자의 팀 정보 가져오기
+        EInGameTeam playerTeam = EInGameTeam.Red;
+
+        if (!isSystemMessage)
+        {
+            // MessageInfo의 Index가 ActorNumber라고 가정 (BackndChat의 Index가 아닐 경우 별도 매핑 필요)
+            // 보통 Photon Chat을 쓴다면 Sender가 필요하지만, 여기선 MessageInfo.Index를 ActorNumber로 쓰고 있다고 가정합니다.
+            
+            // 만약 messageInfo.Index가 ActorNumber가 맞다면:
+            int actorNumber = (int)messageInfo.Index; 
+            playerTeam = GetTeamByActorNumber(actorNumber);
+        }
+
+        // 데이터 설정 (team 정보 전달)
+        chatListComponent.SetData(
+            messageInfo.Index,
+            messageInfo.Avatar,
+            messageInfo.GamerName,
+            messageInfo.Message,
+            messageInfo.Time,
+            messageInfo.Tag,
+            null, 
+            null, 
+            isMyMessage,
+            playerTeam // ★ 찾아낸 팀 정보를 넘겨줌
+        );
+
+        if (isSystemMessage)
+        {
+            chatListComponent.ApplySystemMessageStyle();
+        }
+    }
+
+    /// <summary>
+    /// ActorNumber를 이용해 현재 룸에 있는 플레이어의 팀 정보를 가져오는 헬퍼 함수
+    /// </summary>
+    private EInGameTeam GetTeamByActorNumber(int actorNumber)
+    {
+        if (PhotonNetwork.CurrentRoom == null) return EInGameTeam.Red;
+
+        // 현재 방의 플레이어 리스트에서 검색
+        if (PhotonNetwork.CurrentRoom.Players.TryGetValue(actorNumber, out PhotonPlayer targetPlayer))
+        {
+            // 커스텀 프로퍼티에서 Team 정보 추출
+            if (targetPlayer.CustomProperties.TryGetValue(EProperties.Team.ToString(), out object teamObj))
+            {
+                return (EInGameTeam)teamObj;
+            }
+        }
+
+        return EInGameTeam.Red;
+    }
+    // [추가] 게임 종료 시 플래그 설정 및 창 닫기
+    private void OnGameOverWrapper()
+    {
+        _isGameEnded = true;
+        Close();
+    }
 
     private void Start()
     {
@@ -96,6 +204,10 @@ public class UI_IngameChatPopup : UI_Popup
     }
     private void Update()
     {
+        
+        if(this.isActiveAndEnabled)
+            InputHandler.BlockInput = true;
+            
         // Tab 키로 채널 변경
         if (Input.GetKeyDown(KeyCode.Tab))
         {
@@ -194,7 +306,7 @@ public class UI_IngameChatPopup : UI_Popup
         Debug.Log($"[UI_IngameChatPopup] 기존 메시지 복원 완료: {messages.Count}개");
 
         // 메시지 복원 후 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
-        ScrollToBottomCoroutine();
+        StartCoroutine(ScrollToBottomCoroutine());
     }
 
     /// <summary>
@@ -218,19 +330,28 @@ public class UI_IngameChatPopup : UI_Popup
     /// </summary>
     public bool TryOpen()
     {
+        // [추가] 게임이 끝났으면 채팅창 열기 차단
+        if (_isGameEnded) return false;
         // 인게임 씬이 아니면 열지 않음
         if (!IsInGameScene()) return false;
 
         // 이미 열려있으면 열지 않음
         if (gameObject.activeSelf) return false;
-
-        InputHandler.BlockInput = true;
+        
+        // [추가] 닫힌지 0.2초가 안 지났으면(같은 프레임 포함) 열지 않음
+        if (Time.time - _lastCloseTime < 0.2f) return false;
 
         Debug.Log("[UI_IngameChat] 채팅 Popup 열림");
 
         return true;
     }
 
+    // [추가] 엔터키 입력으로 닫힐 때 호출되는 함수
+    private void CloseByEnter()
+    {
+        _lastCloseTime = Time.time; // 닫힌 시간 기록
+        Close();
+    }
     private void OnDisable()
     {
         InputHandler.BlockInput = false;
@@ -255,92 +376,96 @@ public class UI_IngameChatPopup : UI_Popup
         CreateChatListUI(messageInfo);
 
         // 새 메시지 추가 후 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
-        ScrollToBottomCoroutine();
+        StartCoroutine(ScrollToBottomCoroutine());
     }
 
     /// <summary>
     /// 채팅 메시지 UI 생성 (신규 메시지 및 기존 메시지 복원에 공통 사용)
     /// </summary>
-    private void CreateChatListUI(MessageInfo messageInfo)
-    {
-        if (ChatContent == null)
-        {
-            Debug.LogError("[UI_IngameChatPopup] ChatContent가 null입니다!");
-            return;
-        }
-
-        if (ChatListLeftPrefab == null)
-        {
-            Debug.LogError("[UI_IngameChatPopup] ChatListPrefab이 null입니다!");
-            return;
-        }
-
-        bool isMyMessage = false;
-        bool isSystemMessage = messageInfo.GamerName == "SYSTEM";
-        GameObject chatList;
-
-        // 시스템 메시지가 아닌 경우 자신의 메시지인지 확인
-        if (!isSystemMessage && AccountManager.Instance != null && AccountManager.Instance.CurrentAccount != null)
-        {
-            isMyMessage = messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname;
-        }
-
-        // 채팅 리스트 UI 생성 (시스템 메시지는 항상 왼쪽)
-        if(isMyMessage)
-            chatList = Instantiate(ChatListRightPrefab, ChatContent.transform);
-        else
-            chatList = Instantiate(ChatListLeftPrefab, ChatContent.transform);
-
-        if (chatList == null)
-        {
-            Debug.LogError("[UI_IngameChatPopup] ChatList 프리팹 Instantiate 실패!");
-            return;
-        }
-
-        UIChatList chatListComponent = chatList.GetComponent<UIChatList>();
-        if (chatListComponent == null)
-        {
-            Debug.LogError("[UI_IngameChatPopup] UIChatList 컴포넌트를 찾을 수 없습니다.");
-            Destroy(chatList);
-            return;
-        }
-
-        // 채팅 리스트에 데이터 설정
-        chatListComponent.SetData(
-            messageInfo.Index,
-            messageInfo.Avatar,
-            messageInfo.GamerName,
-            messageInfo.Message,
-            messageInfo.Time,
-            messageInfo.Tag,
-            null, // OnReportButton - 인게임에서는 사용하지 않음
-            null, // OnTranslateCheckButton - 인게임에서는 사용하지 않음
-            isMyMessage
-        );
-
-        // 시스템 메시지인 경우 노란색 스타일 적용
-        if (isSystemMessage)
-        {
-            chatListComponent.ApplySystemMessageStyle();
-            Debug.Log($"[UI_IngameChatPopup] 시스템 메시지 표시: {messageInfo.Message}");
-        }
-    }
+    // private void CreateChatListUI(MessageInfo messageInfo)
+    // {
+    //     if (ChatContent == null)
+    //     {
+    //         Debug.LogError("[UI_IngameChatPopup] ChatContent가 null입니다!");
+    //         return;
+    //     }
+    //
+    //     if (ChatListLeftPrefab == null)
+    //     {
+    //         Debug.LogError("[UI_IngameChatPopup] ChatListPrefab이 null입니다!");
+    //         return;
+    //     }
+    //
+    //     bool isMyMessage = false;
+    //     bool isSystemMessage = messageInfo.GamerName == "SYSTEM";
+    //     GameObject chatList;
+    //
+    //     // 시스템 메시지가 아닌 경우 자신의 메시지인지 확인
+    //     if (!isSystemMessage && AccountManager.Instance != null && AccountManager.Instance.CurrentAccount != null)
+    //     {
+    //         isMyMessage = messageInfo.GamerName == AccountManager.Instance.CurrentAccount.Nickname;
+    //     }
+    //
+    //     // 채팅 리스트 UI 생성 (시스템 메시지는 항상 왼쪽)
+    //     if(isMyMessage)
+    //         chatList = Instantiate(ChatListRightPrefab, ChatContent.transform);
+    //     else
+    //         chatList = Instantiate(ChatListLeftPrefab, ChatContent.transform);
+    //
+    //     if (chatList == null)
+    //     {
+    //         Debug.LogError("[UI_IngameChatPopup] ChatList 프리팹 Instantiate 실패!");
+    //         return;
+    //     }
+    //
+    //     UIChatList chatListComponent = chatList.GetComponent<UIChatList>();
+    //     if (chatListComponent == null)
+    //     {
+    //         Debug.LogError("[UI_IngameChatPopup] UIChatList 컴포넌트를 찾을 수 없습니다.");
+    //         Destroy(chatList);
+    //         return;
+    //     }
+    //
+    //     // 채팅 리스트에 데이터 설정
+    //     chatListComponent.SetData(
+    //         messageInfo.Index,
+    //         messageInfo.Avatar,
+    //         messageInfo.GamerName,
+    //         messageInfo.Message,
+    //         messageInfo.Time,
+    //         messageInfo.Tag,
+    //         null, // OnReportButton - 인게임에서는 사용하지 않음
+    //         null, // OnTranslateCheckButton - 인게임에서는 사용하지 않음
+    //         isMyMessage
+    //     );
+    //
+    //     // 시스템 메시지인 경우 노란색 스타일 적용
+    //     if (isSystemMessage)
+    //     {
+    //         chatListComponent.ApplySystemMessageStyle();
+    //         Debug.Log($"[UI_IngameChatPopup] 시스템 메시지 표시: {messageInfo.Message}");
+    //     }
+    // }
 
     /// <summary>
     /// 스크롤을 맨 아래로 이동 (최신 메시지 보이도록)
     /// Coroutine으로 지연 처리하여 레이아웃이 완전히 업데이트된 후 스크롤
     /// </summary>
-    private void ScrollToBottomCoroutine()
+    private System.Collections.IEnumerator ScrollToBottomCoroutine()
     {
-        if (ChatScrollRect == null) return;
+        if (ChatScrollRect == null) yield break;
 
-        // Canvas를 강제로 업데이트하여 레이아웃 재계산
+        // 레이아웃이 갱신될 때까지 1프레임 대기 (가장 확실한 방법은 WaitForEndOfFrame)
+        yield return new WaitForEndOfFrame();
+
+        // 강제 업데이트 (혹시 모를 레이아웃 꼬임 방지)
         Canvas.ForceUpdateCanvases();
 
-        // verticalNormalizedPosition: 0 = 맨 위, 1 = 맨 아래
-        // (Content의 Pivot 설정에 따라 다를 수 있음. 0과 1 중 맨 아래로 가는 값 사용)
+        // 스크롤 내리기
         ChatScrollRect.verticalNormalizedPosition = 0f;
-
+        // [방어 코드] 한 번 더 확실하게 내리기 (복잡한 레이아웃에서 튕김 방지)
+        yield return null; 
+        ChatScrollRect.verticalNormalizedPosition = 0f;
         Debug.Log($"[UI_IngameChatPopup] 스크롤을 맨 아래로 이동 완료 (position: {ChatScrollRect.verticalNormalizedPosition})");
     }
 
@@ -402,6 +527,7 @@ public class UI_IngameChatPopup : UI_Popup
             ShowChatBanMessage(Mathf.CeilToInt(CHAT_BAN_DURATION));
             _chatBanMessageShown = true; // 메시지 표시했으므로 플래그 설정
             return;
+            
         }
 
         // 채팅 시간 기록
@@ -474,7 +600,7 @@ public class UI_IngameChatPopup : UI_Popup
         CreateChatListUI(systemMessage);
 
         // 스크롤을 맨 아래로 이동
-        ScrollToBottomCoroutine();
+        StartCoroutine(ScrollToBottomCoroutine());
 
         // 두 InputField의 placeholder 업데이트
         if (inputFieldMini != null)
@@ -521,7 +647,24 @@ public class UI_IngameChatPopup : UI_Popup
 
         Debug.Log("[UI_IngameChatPopup] Placeholder 복구: ENTER MESSAGE...");
     }
+    // ★ 플레이어 팀(색상) 변경 시 호출되는 콜백
+    private void OnPlayerColorChangedWrapper(int actorNumber, EInGameTeam newTeam)
+    {
+        // ChatContent 산하의 모든 UIChatList를 찾아서 갱신
+        if (ChatContent != null)
+        {
+            UIChatList[] chatLists = ChatContent.GetComponentsInChildren<UIChatList>();
 
+            foreach (var chatItem in chatLists)
+            {
+                // 이 채팅의 주인이 팀을 바꾼 그 사람(actorNumber)인가?
+                if (chatItem.ActorNumber == actorNumber)
+                {
+                    chatItem.UpdateTeamColor(newTeam);
+                }
+            }
+        }
+    }
     private void OnDestroy()
     {
         // 채팅 메시지 이벤트 구독 해제
@@ -530,18 +673,30 @@ public class UI_IngameChatPopup : UI_Popup
             UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
             UIChatManager.Instance.OnChannelLeft -= OnChannelLeft;
         }
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnGameStart -= OnGameStartWrapper;
+            GameManager.Instance.OnGameOver -= OnGameOverWrapper;
+        }
 
         // InputField 이벤트 구독 해제
         if (inputFieldMini != null)
         {
             inputFieldMini.OnSubmit -= OnChatSubmit;
+            inputFieldMini.OnEmptySubmit -= CloseByEnter;
         }
 
         if (inputFieldFull != null)
         {
             inputFieldFull.OnSubmit -= OnChatSubmit;
+            inputFieldFull.OnEmptySubmit -= CloseByEnter;
         }
 
+        // ★ 팀 컬러 변경 이벤트 구독 해제
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnPlayerColorChanged -= OnPlayerColorChangedWrapper;
+        }
         Debug.Log("[UI_IngameChatPopup] Destroyed - 이벤트 구독 해제 완료");
     }
 }

@@ -24,6 +24,8 @@ public class UI_IngameChatInputField : MonoBehaviour
     /// 텍스트가 제출되었을 때 호출되는 이벤트 (비어있지 않은 텍스트만)
     /// </summary>
     public event Action<string> OnSubmit;
+    // 비어있는텍스트 이벤트
+    public event Action OnEmptySubmit;
 
     // 자동 포커스를 위한 변수
     private bool _shouldAutoFocus = false;
@@ -131,7 +133,8 @@ public class UI_IngameChatInputField : MonoBehaviour
             {
                 _inputField.text = string.Empty;
             }
-
+            // [추가] 빈 상태에서 엔터 입력 시 이벤트 발생
+            OnEmptySubmit?.Invoke();
             if (focusAfterSubmit)
             {
                 Focus();
