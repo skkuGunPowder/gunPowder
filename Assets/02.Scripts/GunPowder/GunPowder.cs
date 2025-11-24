@@ -117,11 +117,12 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
             //     InstantiateDestroyManager.Instance.RequestDestroy(_photonView.ViewID);
             // }
 
-            if(_photonView.IsMine)
-            {
-                transform.DOKill();
-                PhotonNetwork.Destroy(gameObject);
-            }
+            transform.DOKill();
+            DestroyCollector.Instance.PhotonLazyDestory(gameObject, PhotonView);
+            // if(photonView.IsMine)
+            // {
+            //     PhotonNetwork.Destroy(gameObject);
+            // }
         }
     }
 

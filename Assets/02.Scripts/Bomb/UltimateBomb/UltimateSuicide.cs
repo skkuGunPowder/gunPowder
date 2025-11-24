@@ -80,10 +80,11 @@ public class UltimateSuicide : Bomb
         // TODO
         // _ultimateMaterial OFF
 
-        if (PhotonView.IsMine)
-        {
-            PhotonNetwork.Destroy(gameObject);
-        }
+        DestroyCollector.Instance.PhotonLazyDestory(gameObject, PhotonView);
+        // if (photonView.IsMine)
+        // {
+        //     PhotonNetwork.Destroy(gameObject);
+        // }
     }
 
 
