@@ -267,19 +267,26 @@ public class PlayerBaseState : MonoState
         }
 
         // 특수 폭탄일 경우 건파우더 소모
+        // 머리 폭탄은 일반 폭탄의 변형이므로 건파우더를 소모하지 않음
         if(prefabName != BASIC_BOMB_PREFAB)
         {
-            // 건파우더가 부족한 경우 폭탄 생성 중단
-            if (_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.SpecialBombStat.Cost)
+            // 머리 폭탄인지 확인 (건파우더 소모 제외)
+            bool isHeadBomb = _owner.HeadBombPrefab != null && prefabName == _owner.HeadBombPrefab.name;
+            
+            if (!isHeadBomb)
             {
-                return;
+                // 건파우더가 부족한 경우 폭탄 생성 중단
+                if (_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.SpecialBombStat.Cost)
+                {
+                    return;
+                }
+                
+                int cost = _owner.SpecialBombStat.Cost;
+                _owner.PlayerStat.DecreaseGunPowderCount(cost, _owner.PhotonView.Owner.ActorNumber);
+                
+                // 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
+                _owner.RPC_SpawnGunPowderUseParticle();
             }
-            
-            int cost = _owner.SpecialBombStat.Cost;
-            _owner.PlayerStat.DecreaseGunPowderCount(cost, _owner.PhotonView.Owner.ActorNumber);
-            
-            // 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
-            _owner.RPC_SpawnGunPowderUseParticle();
         }
 
         // 1. 폭탄 인스턴싱
