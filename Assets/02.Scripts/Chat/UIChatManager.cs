@@ -698,66 +698,70 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         string channelName = null;
         ulong channelNumber = 0;
 
+        // ★ 핵심: 채널을 새로 개설해야 하는지 여부를 판단하는 플래그
+        bool shouldCreate = false;
+        
         if (PhotonNetwork.IsMasterClient)
         {
-            // 타임스탬프 기반으로 100% 중복 방지
-            // Unix 타임스탬프(밀리초)를 사용하여 매번 고유한 값 생성
-            long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            // 1. 방 속성에 이미 채널 정보가 있는지 먼저 확인
+            bool hasExistingChannel = false;
+            if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(ERoomProperties.ChatChannelGroup.ToString(), out object groupObj))
+            {
+                // 채널 그룹이 존재하고, 유효한(ingamechat) 값인지 확인
+                if (groupObj != null && groupObj.ToString() == "ingamechat")
+                {
+                    hasExistingChannel = true;
+                }
+            }
+            if (hasExistingChannel)
+            {
+                // A. 이미 채널이 존재한다면 -> 기존 정보를 가져옴 (새로 생성 X)
+                channelGroup = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelGroup.ToString()] as string;
+                channelName = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelId.ToString()] as string;
+                
+                object numObj = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelNumber.ToString()];
+                // 타입 변환 안전 장치
+                if (numObj is ulong ul) channelNumber = ul;
+                else if (numObj is long l) channelNumber = (ulong)l;
+                else if (numObj is int i) channelNumber = (ulong)i;
 
-            // channelGroup: ig + 타임스탬프 16진수 8자리 = 10자
-            // 예: "ig5F3A2B1C"
-            // string groupSuffix = (timestamp & 0xFFFFFFFF).ToString("X8");
-            // channelGroup은 항상 ingamechat이여야함
-            channelGroup = $"ingamechat";
+                Debug.Log($"[UIChatManager] (방장) 기존 채널 유지: {channelGroup} / {channelName}");
+                
+                // ★ 중요: 기존 방이 있으므로 새로 만들지 않음
+            }
+            else
+            {
+                long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                channelGroup = $"ingamechat";
+                string nameSuffix = ((timestamp + 1) & 0xFFFFFFFF).ToString("X8");
+                channelName = $"rm{nameSuffix}";
+                channelNumber = (ulong)(timestamp & 0x7FFFFFFF); // int 범위 내로 제한
 
-            // channelName: rm + (타임스탬프 + 1) 16진수 8자리 = 10자
-            // 1ms 차이로 Group과 Name이 달라짐
-            // 예: "rm5F3A2B1D"
-            string nameSuffix = ((timestamp + 1) & 0xFFFFFFFF).ToString("X8");
-            channelName = $"rm{nameSuffix}";
+                // Photon Room 속성에 저장
+                ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable();
+                props[ERoomProperties.ChatChannelGroup.ToString()] = channelGroup;
+                props[ERoomProperties.ChatChannelId.ToString()] = channelName;
+                props[ERoomProperties.ChatChannelNumber.ToString()] = (long)channelNumber; // Photon 직렬화 위해 long 형변환
+                PhotonNetwork.CurrentRoom.SetCustomProperties(props);
 
-            // channelNumber: 타임스탬프 하위 32비트를 ulong으로 사용
-            // 매번 증가하는 값이므로 중복 불가능
-            channelNumber = (ulong)(timestamp & 0x7FFFFFFF); // int 범위 내로 제한
-
-            // Photon Room 속성에 저장
-            ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable();
-            props[ERoomProperties.ChatChannelGroup.ToString()] = channelGroup;
-            props[ERoomProperties.ChatChannelId.ToString()] = channelName;
-            props[ERoomProperties.ChatChannelNumber.ToString()] = (long)channelNumber; // Photon 직렬화 위해 long 형변환
-            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
-
-            Debug.Log($"[UIChatManager] (방장) 채널 정보 생성 완료: {channelGroup} / {channelName} / {channelNumber}");
+                Debug.Log($"[UIChatManager] (방장) 새로 채널 정보 생성 완료: {channelGroup} / {channelName} / {channelNumber}");
+            }
         }
         else
         {
             // 방장이 아닌 경우, CustomProperties에서 채널 정보 가져오기
             if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.ChatChannelGroup.ToString()))
-            {
                 channelGroup = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelGroup.ToString()] as string;
-            }
 
             if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.ChatChannelId.ToString()))
-            {
                 channelName = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelId.ToString()] as string;
-            }
 
             if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.ChatChannelNumber.ToString()))
             {
                 object channelNumberObj = PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.ChatChannelNumber.ToString()];
-
-                if (channelNumberObj is ulong)
-                {
-                    channelNumber = (ulong)channelNumberObj;
-                }
-                else if (channelNumberObj is long)
-                {
-                    channelNumber = (ulong)(long)channelNumberObj;
-                }
-                else if (channelNumberObj is int)
-                {
-                    channelNumber = (ulong)(int)channelNumberObj;
-                }
+                if (channelNumberObj is ulong) channelNumber = (ulong)channelNumberObj;
+                else if (channelNumberObj is long) channelNumber = (ulong)(long)channelNumberObj;
+                else if (channelNumberObj is int) channelNumber = (ulong)(int)channelNumberObj;
             }
 
             if (string.IsNullOrEmpty(channelGroup) || string.IsNullOrEmpty(channelName) || channelNumber == 0)
@@ -768,6 +772,8 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             }
 
             Debug.Log($"[UIChatManager] CustomProperties에서 채널 정보 읽음: {channelGroup} / {channelName} / {channelNumber}");
+            // ★ 중요: 기존 방이 있으므로 새로 만들지 않음
+            shouldCreate = false;
         }
 
         Debug.Log($"[UIChatManager] 인게임 채팅 채널 접속 시도: {channelGroup} / {channelName} / {channelNumber}");
@@ -790,14 +796,16 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             LeaveInGameChannel();
         }
 
-        // 방장인 경우 Private Channel 생성, 다른 플레이어는 참가만
         if (PhotonNetwork.IsMasterClient)
         {
+            // 방장: "이 방 열어줘(없으면 만들고, 있으면 내가 주인)"
+            Debug.Log($"[UIChatManager] (방장) 채널 개설/복구 시도: {channelName}");
             CreateInGameChannel(channelGroup, channelName, channelNumber);
         }
         else
         {
-            // Private Channel로 참가 (비밀번호 없음)
+            // 일반 유저: "이 방에 들어갈래"
+            Debug.Log($"[UIChatManager] (유저) 채널 참가 시도: {channelName}");
             _chatClient.SendJoinPrivateChannel(channelGroup, channelNumber, "");
         }
     }
