@@ -80,18 +80,46 @@ public class UI_IngameChatPopup : UI_Popup
             ChatScrollRect = ChatContent.GetComponentInParent<ScrollRect>();
         }
 
-        // [변경] 기존 Close 대신 OnGameStartWrapper 연결
-        GameManager.Instance.OnGameStart += OnGameStartWrapper;
-        // [추가] 게임 오버 이벤트 연결
-        GameManager.Instance.OnGameOver += OnGameOverWrapper;
         
-        // ★ 팀 컬러 변경 이벤트 구독 추가 (여기서 해도 되고 Start에서 해도 됨)
-        if (EventManager.Instance != null)
-        {
-            EventManager.Instance.OnPlayerColorChanged += OnPlayerColorChangedWrapper;
-        }
     }
 
+    private void Start()
+    {
+        // UIChatManager 이벤트 구독 및 기존 메시지 로드
+        if (UIChatManager.Instance != null)
+        {
+            // 이벤트 구독
+            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived; // 중복 방지
+            UIChatManager.Instance.OnChatMessageReceived += OnChatMessageReceived;
+
+            UIChatManager.Instance.OnChannelLeft -= OnChannelLeft; // 중복 방지
+            UIChatManager.Instance.OnChannelLeft += OnChannelLeft;
+
+            Debug.Log("[UI_IngameChatPopup] UIChatManager 이벤트 구독 완료");
+
+           
+        }
+        else
+        {
+            Debug.LogError("[UI_IngameChatPopup] UIChatManager.Instance가 null입니다!");
+        }
+
+        if (GameManager.Instance != null)
+        {
+            // [변경] 기존 Close 대신 OnGameStartWrapper 연결
+            GameManager.Instance.OnGameStart += OnGameStartWrapper;
+            // [추가] 게임 오버 이벤트 연결
+            GameManager.Instance.OnGameOver += OnGameOverWrapper;
+        
+            // ★ 팀 컬러 변경 이벤트 구독 추가 (여기서 해도 되고 Start에서 해도 됨)
+            if (EventManager.Instance != null)
+            {
+                EventManager.Instance.OnPlayerColorChanged += OnPlayerColorChangedWrapper;
+            }
+            // 기존 메시지 복원
+            LoadPreviousMessages();
+        }
+    }
     private void OnEnable()
     {
         StartCoroutine(ScrollToBottomCoroutine());
@@ -229,28 +257,7 @@ public class UI_IngameChatPopup : UI_Popup
         Close();
     }
 
-    private void Start()
-    {
-        // UIChatManager 이벤트 구독 및 기존 메시지 로드
-        if (UIChatManager.Instance != null)
-        {
-            // 이벤트 구독
-            UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived; // 중복 방지
-            UIChatManager.Instance.OnChatMessageReceived += OnChatMessageReceived;
-
-            UIChatManager.Instance.OnChannelLeft -= OnChannelLeft; // 중복 방지
-            UIChatManager.Instance.OnChannelLeft += OnChannelLeft;
-
-            Debug.Log("[UI_IngameChatPopup] UIChatManager 이벤트 구독 완료");
-
-            // 기존 메시지 복원
-            LoadPreviousMessages();
-        }
-        else
-        {
-            Debug.LogError("[UI_IngameChatPopup] UIChatManager.Instance가 null입니다!");
-        }
-    }
+    
     private void Update()
     {
         
@@ -424,8 +431,11 @@ public class UI_IngameChatPopup : UI_Popup
         Debug.Log($"[UI_IngameChatPopup] OnChatMessageReceived 콜백 호출: {messageInfo.GamerName} - {messageInfo.Message}");
         CreateChatListUI(messageInfo);
 
-        // 새 메시지 추가 후 스크롤을 맨 아래로 (Coroutine으로 지연 처리)
-        StartCoroutine(ScrollToBottomCoroutine());
+        // [수정] 오브젝트가 켜져있을 때만 코루틴을 실행하도록 방어 코드 추가
+        if (this.gameObject.activeInHierarchy)
+        {
+            StartCoroutine(ScrollToBottomCoroutine());
+        }
     }
 
     /// <summary>
