@@ -50,6 +50,12 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     protected override void Awake()
     {
         base.Awake();
+        // [수정] 자신이 싱글톤 인스턴스가 아니라면(중복 생성된 객체라면) 
+        // ChatClient를 초기화하지 않고 여기서 멈춥니다.
+        if (Instance != null && Instance != this)
+        {
+            return;
+        }
 
         // ChatClient 초기화 (로그인 후 Nickname이 설정된 상태)
         InitializeChatClient();
@@ -61,7 +67,9 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     /// </summary>
     public void InitializeChatClient()
     {
-        if (_isChatClientInitialized)
+        // [추가] 중복 객체이거나 이미 초기화 되었다면 중단
+        if (Instance != null && Instance != this) return;
+        if (_isChatClientInitialized )
         {
             Debug.LogWarning("[UIChatManager] ChatClient가 이미 초기화되었습니다.");
             return;
