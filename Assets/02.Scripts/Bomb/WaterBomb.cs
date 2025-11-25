@@ -36,13 +36,13 @@ public class WaterBomb : Bomb
             return;
         }
 
-        if(other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
-        {
-            if (photonView.IsMine)
-            {
-                photonView.RPC(nameof(Explode), RpcTarget.All);
-            }
-        }
+        // if(other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy"))
+        // {
+        //     if (photonView.IsMine)
+        //     {
+        //         photonView.RPC(nameof(Explode), RpcTarget.All);
+        //     }
+        // }
 
         ContactPoint2D contact = other.contacts[0];
         Vector2 normal = transform.InverseTransformDirection(contact.normal.normalized);
