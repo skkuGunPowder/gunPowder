@@ -42,6 +42,9 @@ public class UI_IngameChatPopup : UI_Popup
     private bool _isChatBanned = false; // 채팅 금지 상태
     private bool _chatBanMessageShown = false; // 채팅 금지 메시지 표시 여부 (중복 방지)
 
+    // 채팅 개수 제한
+    private const int MAX_CHAT_MESSAGES = 50; // 최대 채팅 메시지 개수
+
     // 채팅 채널 관련
     private ChatChannel _currentChannel = ChatChannel.All;
     private string _whisperTargetName = ""; // 귓속말 대상
@@ -106,7 +109,7 @@ public class UI_IngameChatPopup : UI_Popup
 
         bool isMyMessage = false;
         bool isSystemMessage = messageInfo.GamerName == "SYSTEM";
-        
+
         // 내 메시지인지 확인
         if (!isSystemMessage && AccountManager.Instance != null && AccountManager.Instance.CurrentAccount != null)
         {
@@ -114,36 +117,39 @@ public class UI_IngameChatPopup : UI_Popup
         }
 
         // 프리팹 생성
-        GameObject chatListObj = isMyMessage 
-            ? Instantiate(ChatListRightPrefab, ChatContent.transform) 
+        GameObject chatListObj = isMyMessage
+            ? Instantiate(ChatListRightPrefab, ChatContent.transform)
             : Instantiate(ChatListLeftPrefab, ChatContent.transform);
 
         UIChatList chatListComponent = chatListObj.GetComponent<UIChatList>();
         if (chatListComponent == null) return;
 
-        // ★ 핵심: 메시지 작성자의 팀 정보 가져오기
+        // ★ 핵심: 메시지 작성자의 팀 정보 가져오기 (닉네임 기반)
         EInGameTeam playerTeam = EInGameTeam.Red;
+        int actualActorNumber = -1;
 
         if (!isSystemMessage)
         {
-            // MessageInfo의 Index가 ActorNumber라고 가정 (BackndChat의 Index가 아닐 경우 별도 매핑 필요)
-            // 보통 Photon Chat을 쓴다면 Sender가 필요하지만, 여기선 MessageInfo.Index를 ActorNumber로 쓰고 있다고 가정합니다.
-            
-            // 만약 messageInfo.Index가 ActorNumber가 맞다면:
-            int actorNumber = (int)messageInfo.Index; 
-            playerTeam = GetTeamByActorNumber(actorNumber);
+            // 닉네임으로 실제 Photon ActorNumber 찾기
+            actualActorNumber = GetActorNumberByNickname(messageInfo.GamerName);
+
+            // 닉네임으로 팀 정보 가져오기
+            playerTeam = GetTeamByNickname(messageInfo.GamerName);
         }
 
         // 데이터 설정 (team 정보 전달)
+        // ★ 실제 ActorNumber를 Index로 전달 (음수가 아닐 때만)
+        UInt64 indexToUse = actualActorNumber > 0 ? (UInt64)actualActorNumber : messageInfo.Index;
+
         chatListComponent.SetData(
-            messageInfo.Index,
+            indexToUse,
             messageInfo.Avatar,
             messageInfo.GamerName,
             messageInfo.Message,
             messageInfo.Time,
             messageInfo.Tag,
-            null, 
-            null, 
+            null,
+            null,
             isMyMessage,
             playerTeam // ★ 찾아낸 팀 정보를 넘겨줌
         );
@@ -152,6 +158,9 @@ public class UI_IngameChatPopup : UI_Popup
         {
             chatListComponent.ApplySystemMessageStyle();
         }
+
+        // 채팅 개수 제한: 50개 초과 시 가장 오래된 것 삭제
+        LimitChatMessageCount();
     }
 
     /// <summary>
@@ -168,6 +177,46 @@ public class UI_IngameChatPopup : UI_Popup
             if (targetPlayer.CustomProperties.TryGetValue(EProperties.Team.ToString(), out object teamObj))
             {
                 return (EInGameTeam)teamObj;
+            }
+        }
+
+        return EInGameTeam.Red;
+    }
+
+    /// <summary>
+    /// 닉네임으로 Photon 플레이어를 찾아서 ActorNumber를 반환
+    /// </summary>
+    private int GetActorNumberByNickname(string nickname)
+    {
+        if (PhotonNetwork.CurrentRoom == null) return -1;
+
+        foreach (var playerPair in PhotonNetwork.CurrentRoom.Players)
+        {
+            if (playerPair.Value.NickName == nickname)
+            {
+                return playerPair.Value.ActorNumber;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// 닉네임으로 플레이어의 팀 정보를 가져오는 헬퍼 함수
+    /// </summary>
+    private EInGameTeam GetTeamByNickname(string nickname)
+    {
+        if (PhotonNetwork.CurrentRoom == null) return EInGameTeam.Red;
+
+        foreach (var playerPair in PhotonNetwork.CurrentRoom.Players)
+        {
+            if (playerPair.Value.NickName == nickname)
+            {
+                // 커스텀 프로퍼티에서 Team 정보 추출
+                if (playerPair.Value.CustomProperties.TryGetValue(EProperties.Team.ToString(), out object teamObj))
+                {
+                    return (EInGameTeam)teamObj;
+                }
             }
         }
 
@@ -647,23 +696,71 @@ public class UI_IngameChatPopup : UI_Popup
 
         Debug.Log("[UI_IngameChatPopup] Placeholder 복구: ENTER MESSAGE...");
     }
+
+    /// <summary>
+    /// 채팅 메시지 개수를 최대 50개로 제한
+    /// </summary>
+    private void LimitChatMessageCount()
+    {
+        if (ChatContent == null) return;
+
+        // ChatContent의 자식 개수 확인
+        int childCount = ChatContent.transform.childCount;
+
+        // 50개 초과 시 가장 오래된 것부터 삭제
+        while (childCount > MAX_CHAT_MESSAGES)
+        {
+            Transform oldestChild = ChatContent.transform.GetChild(0);
+            Destroy(oldestChild.gameObject);
+            childCount--;
+        }
+    }
+
     // ★ 플레이어 팀(색상) 변경 시 호출되는 콜백
     private void OnPlayerColorChangedWrapper(int actorNumber, EInGameTeam newTeam)
     {
         // ChatContent 산하의 모든 UIChatList를 찾아서 갱신
         if (ChatContent != null)
         {
+            // ActorNumber로 닉네임 찾기
+            string targetNickname = GetNicknameByActorNumber(actorNumber);
+
+            if (string.IsNullOrEmpty(targetNickname))
+            {
+                Debug.LogWarning($"[UI_IngameChatPopup] ActorNumber {actorNumber}에 해당하는 플레이어를 찾을 수 없습니다.");
+                return;
+            }
+
             UIChatList[] chatLists = ChatContent.GetComponentsInChildren<UIChatList>();
 
+            int updatedCount = 0;
             foreach (var chatItem in chatLists)
             {
-                // 이 채팅의 주인이 팀을 바꾼 그 사람(actorNumber)인가?
-                if (chatItem.ActorNumber == actorNumber)
+                // ★ 닉네임으로 비교 (더 안전함)
+                if (chatItem.GamerName == targetNickname)
                 {
                     chatItem.UpdateTeamColor(newTeam);
+                    updatedCount++;
                 }
             }
+
+            Debug.Log($"[UI_IngameChatPopup] {targetNickname}의 채팅 {updatedCount}개 색상을 {newTeam}으로 변경했습니다.");
         }
+    }
+
+    /// <summary>
+    /// ActorNumber로 닉네임 찾기
+    /// </summary>
+    private string GetNicknameByActorNumber(int actorNumber)
+    {
+        if (PhotonNetwork.CurrentRoom == null) return string.Empty;
+
+        if (PhotonNetwork.CurrentRoom.Players.TryGetValue(actorNumber, out PhotonPlayer player))
+        {
+            return player.NickName;
+        }
+
+        return string.Empty;
     }
     private void OnDestroy()
     {

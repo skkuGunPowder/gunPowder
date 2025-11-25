@@ -42,14 +42,15 @@ public class UI_IngameChatInputField : MonoBehaviour
             _placeholderText = _inputField.placeholder as TMP_Text;
             if (_placeholderText != null)
             {
-                _placeholderText.text = defaultPlaceholder; 
+                _placeholderText.text = defaultPlaceholder;
             }
         }
 
         if (_inputField != null)
         {
-            _inputField.onEndEdit.AddListener(OnEndEdit);
-            _inputField.onValueChanged.AddListener(OnValueChanged);
+            _inputField.onSubmit.AddListener(HandleInputFieldSubmit);      // TMP_InputField 전용 이벤트
+            _inputField.onEndEdit.AddListener(HandleInputFieldEndEdit);
+            _inputField.onValueChanged.AddListener(HandleInputFieldValueChanged);
         }
     }
 
@@ -89,26 +90,32 @@ public class UI_IngameChatInputField : MonoBehaviour
     {
         if (_inputField != null)
         {
-            _inputField.onEndEdit.RemoveListener(OnEndEdit);
-            _inputField.onValueChanged.RemoveListener(OnValueChanged);
+            _inputField.onSubmit.RemoveListener(HandleInputFieldSubmit);
+            _inputField.onEndEdit.RemoveListener(HandleInputFieldEndEdit);
+            _inputField.onValueChanged.RemoveListener(HandleInputFieldValueChanged);
         }
     }
 
     /// <summary>
-    /// InputField의 onEndEdit 콜백
+    /// TMP_InputField의 onSubmit 콜백 (엔터키 입력 시)
     /// </summary>
-    private void OnEndEdit(string text)
+    private void HandleInputFieldSubmit(string text)
     {
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-        {
-            SubmitText();
-        }
+        SubmitText();
     }
 
     /// <summary>
-    /// InputField의 onValueChanged 콜백 - 글자 수 제한
+    /// TMP_InputField의 onEndEdit 콜백 (포커스를 잃을 때)
     /// </summary>
-    private void OnValueChanged(string text)
+    private void HandleInputFieldEndEdit(string text)
+    {
+        // TMP_InputField는 onSubmit이 별도로 처리하므로 여기서는 아무것도 하지 않음
+    }
+
+    /// <summary>
+    /// TMP_InputField의 onValueChanged 콜백 - 글자 수 제한
+    /// </summary>
+    private void HandleInputFieldValueChanged(string text)
     {
         if (text.Length > characterLimit)
         {
