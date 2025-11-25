@@ -168,4 +168,18 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnPlayObserve?.Invoke();
     }
+    
+    public event Action OnGameStart;
+
+    public void GameStart()
+    {
+        OnGameStart?.Invoke();
+    }
+    
+    public event Action OnGameOver;
+    
+    public void GameOver()
+    {
+        OnGameOver?.Invoke();
+    }
 }

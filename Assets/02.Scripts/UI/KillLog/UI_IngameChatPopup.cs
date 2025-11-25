@@ -104,21 +104,17 @@ public class UI_IngameChatPopup : UI_Popup
             Debug.LogError("[UI_IngameChatPopup] UIChatManager.Instance가 null입니다!");
         }
 
-        if (GameManager.Instance != null)
+    
+        // ★ 팀 컬러 변경 이벤트 구독 추가 (여기서 해도 되고 Start에서 해도 됨)
+        if (EventManager.Instance != null)
         {
-            // [변경] 기존 Close 대신 OnGameStartWrapper 연결
-            GameManager.Instance.OnGameStart += OnGameStartWrapper;
+            EventManager.Instance.OnPlayerColorChanged += OnPlayerColorChangedWrapper;
             // [추가] 게임 오버 이벤트 연결
-            GameManager.Instance.OnGameOver += OnGameOverWrapper;
-        
-            // ★ 팀 컬러 변경 이벤트 구독 추가 (여기서 해도 되고 Start에서 해도 됨)
-            if (EventManager.Instance != null)
-            {
-                EventManager.Instance.OnPlayerColorChanged += OnPlayerColorChangedWrapper;
-            }
-            // 기존 메시지 복원
-            LoadPreviousMessages();
+            EventManager.Instance.OnGameStart += OnGameStartWrapper;
+            EventManager.Instance.OnGameOver += OnGameOverWrapper;
         }
+            // 기존 메시지 복원
+        LoadPreviousMessages();
     }
     private void OnEnable()
     {
@@ -780,11 +776,6 @@ public class UI_IngameChatPopup : UI_Popup
             UIChatManager.Instance.OnChatMessageReceived -= OnChatMessageReceived;
             UIChatManager.Instance.OnChannelLeft -= OnChannelLeft;
         }
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnGameStart -= OnGameStartWrapper;
-            GameManager.Instance.OnGameOver -= OnGameOverWrapper;
-        }
 
         // InputField 이벤트 구독 해제
         if (inputFieldMini != null)
@@ -802,6 +793,8 @@ public class UI_IngameChatPopup : UI_Popup
         // ★ 팀 컬러 변경 이벤트 구독 해제
         if (EventManager.Instance != null)
         {
+            EventManager.Instance.OnGameStart -= OnGameStartWrapper;
+            EventManager.Instance.OnGameOver -= OnGameOverWrapper;
             EventManager.Instance.OnPlayerColorChanged -= OnPlayerColorChangedWrapper;
         }
         Debug.Log("[UI_IngameChatPopup] Destroyed - 이벤트 구독 해제 완료");

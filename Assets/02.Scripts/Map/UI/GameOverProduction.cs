@@ -64,7 +64,7 @@ public class GameOverProduction : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnGameOver += Play;
+        EventManager.Instance.OnGameOver += Play;
     }
     // private void OnEnable()
     // {
@@ -84,7 +84,7 @@ public class GameOverProduction : MonoBehaviour
         
         GameOverProductionPanel.gameObject.SetActive(true);
         
-        GameManager.Instance.OnGameOver -= Play;
+        EventManager.Instance.OnGameOver -= Play;
         
         Sequence sequence = DOTween.Sequence();
         sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
