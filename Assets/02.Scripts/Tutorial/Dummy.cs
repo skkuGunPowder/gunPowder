@@ -133,5 +133,26 @@ public class Dummy : MonoBehaviourPun, IDamagable
     public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut = false, bool isNormalAttack = false)
     {
         TriggerExplosionEffect(maxDamage, damage, attackerViewId);
+        
+        // 공격자에게 히트 파티클 생성 요청 (Player와 동일한 로직)
+        // 공격자의 Owner 클라이언트에서만 한 번만 실행되도록 보장
+        if (attackerViewId != 0)
+        {
+            PhotonView attackerView = PhotonView.Find(attackerViewId);
+            if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy && attackerView.Owner != null)
+            {
+                // 공격자가 Player인지 확인
+                Player attackerPlayer = attackerView.GetComponent<Player>();
+                if (attackerPlayer != null)
+                {
+                    // 공격자의 Owner가 로컬 플레이어일 때만 RPC 호출 (중복 방지)
+                    if (attackerView.Owner == PhotonNetwork.LocalPlayer)
+                    {
+                        bool isCrit = (damage == maxDamage);
+                        attackerView.RPC(nameof(Player.SpawnAttackerHitParticles), attackerView.Owner, transform.position, isCrit, photonView.ViewID);
+                    }
+                }
+            }
+        }
     }
 }
