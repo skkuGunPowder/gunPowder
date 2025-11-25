@@ -1625,13 +1625,21 @@ public class Player : MonoBehaviourPun, IDamagable
             if (PhotonView.Owner != null)
             {
                 PhotonView.RPC(nameof(RPC_PlayHitEffects), PhotonView.Owner, damage, maxDamage);
-                PhotonView.RPC(nameof(ShowDamagePopup), PhotonView.Owner, -damage, maxDamage);
+                // 같은 팀이 아닐 때만 데미지 팝업 표시
+                if (!isSameTeam)
+                {
+                    PhotonView.RPC(nameof(ShowDamagePopup), PhotonView.Owner, -damage, maxDamage);
+                }
             }
             // 때린 사람(Attacker Owner)에게 VFX/사운드와 데미지 팝업 표시 (피해자와 동일 Owner면 중복 방지)
             if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy && attackerView.Owner != null && attackerView.Owner != PhotonView.Owner)
             {
                 PhotonView.RPC(nameof(RPC_PlayHitEffects), attackerView.Owner, damage, maxDamage);
-                PhotonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
+                // 같은 팀이 아닐 때만 데미지 팝업 표시
+                if (!isSameTeam)
+                {
+                    PhotonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
+                }
                 // 피격자의 정확한 HP 정보를 공격자에게 전달 (부활 후 첫 공격 여부 포함)
                 // PhotonView.RPC(nameof(ShowHealthBarForAttacker), attackerView.Owner, 
                 //     _playerStat.CurrentPlayerGunPowderCount, damage, _isAfterResurrect);
