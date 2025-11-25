@@ -1,8 +1,9 @@
 using UnityEngine;
 using DG.Tweening;
 using RaycastPro.RaySensors2D;
+using Photon.Pun;
 
-public class Dummy : MonoBehaviour
+public class Dummy : MonoBehaviourPun, IDamagable
 {
     protected Animator _animator;
     private Rigidbody2D _rigidbody2D;
@@ -31,6 +32,8 @@ public class Dummy : MonoBehaviour
         _animator = GetComponent<Animator>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _damagePopup = GetComponent<DamagePopup>();
+        
+        _rigidbody2D.interpolation = RigidbodyInterpolation2D.None; // 보간 비활성화
     }
 
 
@@ -71,7 +74,7 @@ public class Dummy : MonoBehaviour
     }
 
     // 폭발을 맞았을 때 실행할 처리 (Explosion 수정 없이 내부 감지로 호출)
-    protected virtual void OnExplosionImpact()
+    protected virtual void OnExplosionImpact(int attackerViewId = 0)
     {
         // 로직 호출 가능 (예: 사운드, 이펙트, 애니메이션 등)\
         ApplyTemporaryDampingEffect();
@@ -82,13 +85,13 @@ public class Dummy : MonoBehaviour
         _animator.SetTrigger("Damaged");
 
         // 건파우더 낙출
-        ReleaseGunPowder();
+        ReleaseGunPowder(attackerViewId);
 
     }
 
-    public void TriggerExplosionEffect(int maxDamage, int damage)
+    public void TriggerExplosionEffect(int maxDamage, int damage, int attackerViewId = 0)
     {
-        OnExplosionImpact();
+        OnExplosionImpact(attackerViewId);
         if (_damagePopup != null && maxDamage > 0)
         {
             _damagePopup.SpawnPopup(damage, maxDamage);
@@ -107,9 +110,14 @@ public class Dummy : MonoBehaviour
         }
     }
 
-    protected virtual void ReleaseGunPowder()
+    protected virtual void ReleaseGunPowder(int attackerViewId = 0)
     {
-        Instantiate(_gunpowderPrefab, transform.position, Quaternion.identity);
+        GameObject gunpowderObj = Instantiate(_gunpowderPrefab, transform.position, Quaternion.identity);
+        TutorialGunpowder tutorialGunpowder = gunpowderObj.GetComponent<TutorialGunpowder>();
+        if (tutorialGunpowder != null && attackerViewId != 0)
+        {
+            tutorialGunpowder.SetTargetByViewId(attackerViewId);
+        }
     }
 
     protected virtual bool IsGrounded2D()
@@ -120,5 +128,10 @@ public class Dummy : MonoBehaviour
         }
         _groundRay2D.Cast();
         return _groundRay2D.Performed;
+    }
+
+    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut = false, bool isNormalAttack = false)
+    {
+        TriggerExplosionEffect(maxDamage, damage, attackerViewId);
     }
 }
