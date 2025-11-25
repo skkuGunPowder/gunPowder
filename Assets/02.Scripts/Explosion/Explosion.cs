@@ -56,7 +56,7 @@ public class Explosion : MonoBehaviour
                     }
                 }
 
-                if (attackerPhotonView.IsMine && !_stat.IsSelfDamage)
+                if (other.gameObject == attackerPhotonView.gameObject && !_stat.IsSelfDamage)
                 {
                     continue;
                 }

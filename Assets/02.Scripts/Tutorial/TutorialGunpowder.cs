@@ -1,10 +1,12 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
+using Photon.Pun;
 
 public class TutorialGunpowder : MonoBehaviour
 {
     private const string PLAYER_TAG = "Player";
     private Transform _target;
+    private int _targetViewId = 0;
     private Vector2[] _points = new Vector2[4];
     private float _speed = 5f;
     private float _timerMax = 1.5f;
@@ -15,16 +17,63 @@ public class TutorialGunpowder : MonoBehaviour
     private float _timerCurrent = 0f;
     private bool _bezierFinished = false;
     private float _followSpeed = 10f;
+    
     private void Start()
     {
         Init();
     }
 
+    /// <summary>
+    /// ViewID를 통해 타겟 플레이어를 설정
+    /// </summary>
+    public void SetTargetByViewId(int viewId)
+    {
+        _targetViewId = viewId;
+        FindTargetByViewId();
+    }
+
+    private void FindTargetByViewId()
+    {
+        if (_targetViewId == 0)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        PhotonView targetView = PhotonView.Find(_targetViewId);
+        if (targetView != null && targetView.gameObject != null)
+        {
+            _target = targetView.transform;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
     private void Init()
     {
-        GameObject player = GameObject.FindGameObjectWithTag(PLAYER_TAG);
-        if (player != null)
+        // ViewID가 설정되어 있으면 ViewID로 찾기, 없으면 태그로 찾기 (하위 호환성)
+        if (_targetViewId != 0)
         {
+            FindTargetByViewId();
+            if (_target == null)
+            {
+                return; // FindTargetByViewId에서 이미 Destroy 호출됨
+            }
+        }
+        else
+        {
+            // 1. Player 오브젝트 찾기 (하위 호환성)
+            GameObject player = GameObject.FindGameObjectWithTag(PLAYER_TAG);
+            if (player == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            // 4. 타겟 설정
             _target = player.transform;
         }
 
@@ -51,6 +100,35 @@ public class TutorialGunpowder : MonoBehaviour
 
     private void Update()
     {
+        // _target이 null이면 다시 찾기 시도
+        if (_target == null)
+        {
+            if (_targetViewId != 0)
+            {
+                // ViewID로 다시 찾기 시도
+                FindTargetByViewId();
+                if (_target == null)
+                {
+                    return; // FindTargetByViewId에서 이미 Destroy 호출됨
+                }
+            }
+            else
+            {
+                // 하위 호환성: 태그로 찾기
+                GameObject player = GameObject.FindGameObjectWithTag(PLAYER_TAG);
+                if (player != null)
+                {
+                    _target = player.transform;
+                }
+                else
+                {
+                    // 플레이어를 찾을 수 없으면 오브젝트 파괴
+                    Destroy(gameObject);
+                    return;
+                }
+            }
+        }
+
         if (!_bezierFinished)
         {
             if (_timerCurrent > _timerMax)
