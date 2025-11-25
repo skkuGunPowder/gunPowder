@@ -1229,7 +1229,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -1733,7 +1733,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -1782,6 +1782,7 @@ GameObject:
   - component: {fileID: 7732116569899365347}
   - component: {fileID: 6869303054503320378}
   - component: {fileID: 4970979939921637317}
+  - component: {fileID: 6108479794646066701}
   m_Layer: 5
   m_Name: InputField (TMP)
   m_TagString: Untagged
@@ -1889,7 +1890,7 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 7732116569899365347}
-  m_TextViewport: {fileID: 0}
+  m_TextViewport: {fileID: 847779890302885931}
   m_TextComponent: {fileID: 475038296254180433}
   m_Placeholder: {fileID: 2969682762093643944}
   m_VerticalScrollbar: {fileID: 0}
@@ -1966,6 +1967,19 @@ MonoBehaviour:
   autoFocusOnEnable: 1
   clearOnSubmit: 1
   focusAfterSubmit: 1
+--- !u!114 &6108479794646066701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6181913613297334749}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1
 --- !u!1 &6995546203965158993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1979,6 +1993,7 @@ GameObject:
   - component: {fileID: 2260834014698939239}
   - component: {fileID: 3496143859398925196}
   - component: {fileID: 619550127112410337}
+  - component: {fileID: 6706078966542626449}
   m_Layer: 5
   m_Name: InputField (TMP)
   m_TagString: Untagged
@@ -2163,6 +2178,19 @@ MonoBehaviour:
   autoFocusOnEnable: 1
   clearOnSubmit: 1
   focusAfterSubmit: 1
+--- !u!114 &6706078966542626449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6995546203965158993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1
 --- !u!1 &7008342555991054505
 GameObject:
   m_ObjectHideFlags: 0

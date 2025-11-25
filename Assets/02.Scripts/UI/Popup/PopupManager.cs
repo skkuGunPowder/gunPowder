@@ -28,7 +28,7 @@ public class PopupManager : Singleton<PopupManager>
     private void Update()
     {
         // Enter 키로 인게임 채팅창 열기
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        if (InputHandler.GetKeyDown(KeyCode.Return) || InputHandler.GetKeyDown(KeyCode.KeypadEnter))
         {
             if (_ingameChatPopup != null && _ingameChatPopup.TryOpen())
             {

@@ -25394,6 +25394,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 102a389f2151d2b4c91b1384912885c6, type: 3}
+--- !u!20 &259590561 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 4609103941145457808, guid: 102a389f2151d2b4c91b1384912885c6, type: 3}
+  m_PrefabInstance: {fileID: 259590560}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &302194098
 GameObject:
   m_ObjectHideFlags: 0
@@ -66933,7 +66938,7 @@ PrefabInstance:
     - target: {fileID: 4605534070802416733, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
       propertyPath: m_Camera
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 259590561}
     - target: {fileID: 4605534070802416733, guid: a1a926a4d672aa14fa40c19a6ecad3b5, type: 3}
       propertyPath: m_SortingLayerID
       value: -1160091713
@@ -131822,6 +131827,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 614919775855291197, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 259590561}
     - target: {fileID: 641920167786950513, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -233274,7 +233283,7 @@ Tilemap:
       - {fileID: -547152429, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: -12183806, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: 1776429012, guid: b9ed25721137402438b691f5b79386fe, type: 3}
-      m_AnimationSpeed: 5
+      m_AnimationSpeed: 5.0000005
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -9, y: -1, z: 0}
@@ -233454,7 +233463,7 @@ Tilemap:
       - {fileID: -547152429, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: -12183806, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: 1776429012, guid: b9ed25721137402438b691f5b79386fe, type: 3}
-      m_AnimationSpeed: 5
+      m_AnimationSpeed: 5.0000005
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 3, y: -1, z: 0}
@@ -233694,7 +233703,7 @@ Tilemap:
       - {fileID: -547152429, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: -12183806, guid: b9ed25721137402438b691f5b79386fe, type: 3}
       - {fileID: 1776429012, guid: b9ed25721137402438b691f5b79386fe, type: 3}
-      m_AnimationSpeed: 5.0000005
+      m_AnimationSpeed: 5
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 19, y: -1, z: 0}

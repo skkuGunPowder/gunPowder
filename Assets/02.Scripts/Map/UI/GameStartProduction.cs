@@ -40,7 +40,7 @@ public class GameStartProduction : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnGameStart += GameStart;    
+        EventManager.Instance.OnGameStart += GameStart;    
     }
     public void Play()
     {
@@ -76,7 +76,7 @@ public class GameStartProduction : MonoBehaviour
             .SetEase(GameStartTextEase));
         sequence.OnComplete(() =>
         {
-            GameManager.Instance.OnGameStart -= GameStart;
+            EventManager.Instance.OnGameStart -= GameStart;
         });
     }
     

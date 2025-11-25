@@ -17,9 +17,11 @@ public class UIChatList : MonoBehaviour
 
     private UInt64 _index = 0;
     private string _tag = string.Empty;
-    
+    private string _gamerName = string.Empty;  // ★ 닉네임 저장
+
     // ★ 외부에서 이 글이 누구 건지 확인할 수 있게 프로퍼티 추가
     public int ActorNumber => (int)_index;
+    public string GamerName => _gamerName;  // ★ 닉네임 프로퍼티
     
     // 팀 컬러 변경 로직
     // ★ 팀에 따른 색상 변경 로직 (ColorPalette 사용)
@@ -41,14 +43,17 @@ public class UIChatList : MonoBehaviour
             case EInGameTeam.Green:
                 targetColorType = EColorType.Green;
                 break;
+            case EInGameTeam.Yellow:
+                targetColorType = EColorType.Yellow;
+                break;
             default:
                 // 팀이 없거나(None) 개인전일 경우 기본 흰색 혹은 투명
-                OutLineImage.color = Color.white; 
+                OutLineImage.color = Color.white;
                 return;
         }
 
         // ColorPalette에서 색상 가져와 적용
-        if (ColorPalette.ColorDictionary != null && 
+        if (ColorPalette.ColorDictionary != null &&
             ColorPalette.ColorDictionary.ContainsKey(targetColorType))
         {
             OutLineImage.color = ColorPalette.ColorDictionary[targetColorType];
@@ -59,20 +64,21 @@ public class UIChatList : MonoBehaviour
             OutLineImage.color = Color.white;
         }
     }
-    public void SetData(UInt64 index, string avatar, string name, string message, string time, string tag, 
-        Action<UInt64, string> report, Action<bool, string> translate, 
+    public void SetData(UInt64 index, string avatar, string name, string message, string time, string tag,
+        Action<UInt64, string> report, Action<bool, string> translate,
         bool is_my = false, EInGameTeam team = EInGameTeam.Red)
     {
         _index = index;
+        _gamerName = name;  // ★ 닉네임 저장
 
-        if (string.IsNullOrEmpty(avatar) || avatar == "default")
-            Avatar.sprite = Resources.Load<Sprite>("Images/Girl_5");
-        else
-            Avatar.sprite = Resources.Load<Sprite>("Images/" + avatar);
+        // if (string.IsNullOrEmpty(avatar) || avatar == "default")
+        //     Avatar.sprite = Resources.Load<Sprite>("Images/Girl_5");
+        // else
+        //     Avatar.sprite = Resources.Load<Sprite>("Images/" + avatar);
 
         if (is_my) Name.text = "[전체]";
         else Name.text = $"[전체] {name}";
-        
+
         Message.text = message;
 
         // 초기 색상 설정
@@ -96,12 +102,15 @@ public class UIChatList : MonoBehaviour
             case EInGameTeam.Green:
                 targetColorType = EColorType.Green;
                 break;
+            case EInGameTeam.Yellow:
+                targetColorType = EColorType.Yellow;
+                break;
             default:
                 OutLineImage.color = Color.white; // 팀 없음/개인전
                 return;
         }
 
-        if (ColorPalette.ColorDictionary != null && 
+        if (ColorPalette.ColorDictionary != null &&
             ColorPalette.ColorDictionary.ContainsKey(targetColorType))
         {
             OutLineImage.color = ColorPalette.ColorDictionary[targetColorType];

@@ -19,10 +19,7 @@ public class GameManager : PhotonSingleton<GameManager>
     
     [Header("부활 지점")]
     public Transform ResurrectPoint;                   // 부활 지점
-    
     public event Action<PhotonPlayer> OnTimeCheck;
-    public event Action OnGameStart;
-    public event Action OnGameOver;
 
     protected override void Awake()
     {
@@ -112,7 +109,7 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         GameStateChange(EGameState.Result);
         EventManager.Instance.OnPlayerLeft -= PlayerLastCheck;
-        OnGameOver?.Invoke();
+        EventManager.Instance.GameOver();
     }
     
     // 프로퍼티가 바뀌었을 때 호출되는 함수
@@ -249,7 +246,7 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC]
     public void RPC_GameStart()
     {
-        OnGameStart?.Invoke();
+        EventManager.Instance.GameStart();
         EventManager.Instance.ProfileInit();
         TeamSetting();
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString());
