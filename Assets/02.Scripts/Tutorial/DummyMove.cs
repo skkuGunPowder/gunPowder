@@ -42,7 +42,7 @@ public class DummyMove : Dummy
         }
     }
 
-    protected override void OnExplosionImpact()
+    protected override void OnExplosionImpact(int attackerViewId = 0)
     {
         // 로직 호출 가능 (예: 사운드, 이펙트, 애니메이션 등)\
         ApplyTemporaryDampingEffect();
@@ -55,6 +55,6 @@ public class DummyMove : Dummy
         _animator.ResetTrigger("Land");
 
         // 건파우더 낙출
-        ReleaseGunPowder();
+        ReleaseGunPowder(attackerViewId);
     }
 }
