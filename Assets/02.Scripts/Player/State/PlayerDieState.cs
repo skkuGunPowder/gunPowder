@@ -320,28 +320,34 @@ public class PlayerDieState : PlayerBaseState
        // 죽었음을 먼저 알려주기 
        if (_owner.photonView.IsMine)
        {
-           UpdatePlayerStatistics();
+           TransitionToObserveState();
+           EventManager.Instance.PlayObserve();   
        }
     }
 
-    public void LastDieCheck(bool isLastPlayer)
-    {
-        if (isLastPlayer)
-        {
-            SyncStateChange<PlayerLastDieState>();
-            return;
-        }
-        
-        ExecuteDeath();
-
-        // 본인의 클라이언트에서만 관전 상태로 전환 및 통계 업데이트
-        if (_owner.PhotonView.IsMine)
-        {
-            TransitionToObserveState();
-            EventManager.Instance.PlayObserve();   
-        }
-        
-    }
+    // public void LastDieCheck(bool isLastPlayer)
+    // {
+    //     Photon.Realtime.Player player = PhotonNetwork.LocalPlayer;
+    //     
+    //     if (isLastPlayer)
+    //     {
+    //         
+    //         Debug.Log($"{player.NickName}player Die = LastDie");
+    //         SyncStateChange<PlayerLastDieState>();
+    //         return;
+    //     }
+    //     
+    //     Debug.Log("player Die");
+    //     ExecuteDeath();
+    //
+    //     // 본인의 클라이언트에서만 관전 상태로 전환 및 통계 업데이트
+    //     if (_owner.PhotonView.IsMine)
+    //     {
+    //         TransitionToObserveState();
+    //         EventManager.Instance.PlayObserve();   
+    //     }
+    //     
+    // }
 
     /// <summary>
     /// 부활 프로세스 처리
@@ -378,12 +384,12 @@ public class PlayerDieState : PlayerBaseState
     /// </summary>
     private void UpdatePlayerStatistics()
     {
-        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
-        {
-            {EProperties.IsDead.ToString(), true},
-            {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
-            {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
-        });
+        // PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+        // {
+        //     {EProperties.IsDead.ToString(), true},
+        //     {EProperties.Kill.ToString(), _owner.PlayerStat.TotalKillCount},
+        //     {EProperties.Damage.ToString(), _owner.PlayerStat.TotalDamage}
+        // });
     }
 
     /// <summary>

@@ -707,25 +707,43 @@ public class Player : MonoBehaviourPun, IDamagable
             // 궁극기가 없으면 경고만 해제
             ClearNoAttackWarning();
         }
-        
+
         _playerStat.HasUltimateChance = false;
         _ultimateChanceTimer = 0f;
 
-        // PlayerFSM을 통해 SyncStateChange 호출
-        if (_playerFSM != null)
+        if (_playerStat.CurrentPlayerLife > 0)
         {
-            // 네트워크 동기화된 상태 변경
-            _playerFSM.SyncStateChange<PlayerDieState>();
+            // PlayerFSM을 통해 SyncStateChange 호출
+            if (_playerFSM != null)
+            {
+                // 네트워크 동기화된 상태 변경
+                _playerFSM.SyncStateChange<PlayerDieState>();
+                return;
+            }
+
+            // PlayerFSM이 없는 경우 방어적으로 컴포넌트 조회 후 변경
+            var fsm = GetComponent<PlayerFSM>();
+            if (fsm != null)
+            {
+                // 네트워크 동기화된 상태 변경
+                _playerFSM.SyncStateChange<PlayerDieState>();
+            }
+            
             return;
         }
 
-        // PlayerFSM이 없는 경우 방어적으로 컴포넌트 조회 후 변경
-        var fsm = GetComponent<PlayerFSM>();
-        if (fsm != null)
+        if (photonView.IsMine == false)
         {
-            // 네트워크 동기화된 상태 변경
-            _playerFSM.SyncStateChange<PlayerDieState>();
+            return;
         }
+        
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+        {
+            {EProperties.IsDead.ToString(), true},
+            {EProperties.Kill.ToString(), PlayerStat.TotalKillCount},
+            {EProperties.Damage.ToString(), PlayerStat.TotalDamage}
+        });
+        
     }
 
     private void Update()

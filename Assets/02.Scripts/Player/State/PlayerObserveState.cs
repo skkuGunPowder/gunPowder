@@ -9,6 +9,11 @@ public class PlayerObserveState : PlayerBaseState
         _owner = _playerFSM.Owner;
         _groundRay2D = _owner.GroundRay2D;
         _owner.gameObject.SetActive(false);
+
+        if (_owner.PhotonView.IsMine)
+        {
+            Debug.Log("observe");
+        }
     }
 
     public override void OnExit()
