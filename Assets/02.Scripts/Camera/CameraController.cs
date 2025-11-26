@@ -130,23 +130,23 @@ public class CameraController : MonoBehaviour
             return;
         }
         
-        foreach (var player in _currentTargetList)
-        {
-            if (player.gameObject.activeSelf == false)
-            {
-                // activefalse가 자기 자신이면 오저버모드
-                if (player.GetComponent<PhotonView>().Owner.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
-                {
-                    if (_isObserving)
-                    {
-                        continue;
-                    }
-
-                    _isObserving = true;
-                    OnUIOnOff?.Invoke(true);
-                }
-            }
-        }
+        _isObserving = true;
+        OnUIOnOff?.Invoke(true);
+        
+        // foreach (var player in _currentTargetList)
+        // {
+        //     if (player.gameObject.activeSelf == false)
+        //     {
+        //         // activefalse가 자기 자신이면 오저버모드
+        //         if (player.GetComponent<PhotonView>().Owner.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+        //         {
+        //             if (_isObserving)
+        //             {
+        //                 continue;
+        //             }
+        //         }
+        //     }
+        // }
 
         _currentTargetIndex = 0;
     }
