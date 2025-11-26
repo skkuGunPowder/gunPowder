@@ -316,16 +316,20 @@ public class PlayerDieState : PlayerBaseState
         // 중복 처리 방지
         if (_hasRequestedDestroy) return;
        _hasRequestedDestroy = true;
-        
-       // 플레이어가 두명 남았으면 LastDie로 넘어감
-        if (GameManager.Instance.LastPlayer)
+       
+       // 죽었음을 먼저 알려주기 
+       if (_owner.photonView.IsMine)
+       {
+           UpdatePlayerStatistics();
+       }
+    }
+
+    public void LastDieCheck(bool isLastPlayer)
+    {
+        if (isLastPlayer)
         {
-            if (GameManager.Instance.LastAttackCheck(_owner.PlayerStat.Team))
-            {
-                SyncStateChange<PlayerLastDieState>();
-                UpdatePlayerStatistics();
-                return;   
-            }
+            SyncStateChange<PlayerLastDieState>();
+            return;
         }
         
         ExecuteDeath();
@@ -334,8 +338,9 @@ public class PlayerDieState : PlayerBaseState
         if (_owner.PhotonView.IsMine)
         {
             TransitionToObserveState();
-            UpdatePlayerStatistics();
+            EventManager.Instance.PlayObserve();   
         }
+        
     }
 
     /// <summary>
