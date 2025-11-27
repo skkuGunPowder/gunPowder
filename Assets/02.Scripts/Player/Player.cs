@@ -75,6 +75,8 @@ public class Player : MonoBehaviourPun, IDamagable
     private Dictionary<SpriteRenderer, Color> _originalColorMap; // 게임 시작 시 저장되는 진짜 원본 색상
     private Dictionary<SpriteRenderer, int> _originalSortingOrderMap; // 스프라이트 렌더러의 원본 sortingOrder 저장
     private bool _isColorRestored = true; // 색상이 원본 상태인지 추적
+    private readonly List<SpriteRenderer> _dieSpriteRendererList = new List<SpriteRenderer>();
+    public IReadOnlyList<SpriteRenderer> DieSpriteRendererList => _dieSpriteRendererList;
 
     [Header("히트스탑")]
     [SerializeField]
@@ -346,6 +348,51 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             Debug.LogWarning("BodyPartMarker를 찾지 못했습니다. PlayerSprites 루트에 마커를 추가해주세요.");
         }
+
+        InitializeDieSpriteRenderers();
+    }
+
+    private void InitializeDieSpriteRenderers()
+    {
+        _dieSpriteRendererList.Clear();
+        foreach (var part in _diePartList)
+        {
+            if (part == null) continue;
+
+            SpriteRenderer[] spriteRenderers = part.GetComponentsInChildren<SpriteRenderer>(true);
+            foreach (var spriteRenderer in spriteRenderers)
+            {
+                RegisterDieSpriteRenderer(spriteRenderer);
+            }
+        }
+    }
+
+    public void RegisterDieSpriteRenderer(SpriteRenderer spriteRenderer)
+    {
+        if (spriteRenderer == null || _dieSpriteRendererList.Contains(spriteRenderer))
+        {
+            return;
+        }
+
+        _dieSpriteRendererList.Add(spriteRenderer);
+        RegisterOriginalColor(spriteRenderer);
+        RegisterOriginalSortingOrder(spriteRenderer);
+    }
+
+    public void UnregisterDieSpriteRenderer(SpriteRenderer spriteRenderer)
+    {
+        if (spriteRenderer == null)
+        {
+            return;
+        }
+
+        if (_dieSpriteRendererList.Contains(spriteRenderer))
+        {
+            _dieSpriteRendererList.Remove(spriteRenderer);
+        }
+
+        UnregisterOriginalColor(spriteRenderer);
+        UnregisterOriginalSortingOrder(spriteRenderer);
     }
 
     [PunRPC]
@@ -984,6 +1031,10 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
         _playerMaterial.ApplyMaterialById(id, _playerStat.MySpriteREndererList);
+        if (_dieSpriteRendererList.Count > 0)
+        {
+            _playerMaterial.ApplyMaterialById(id, _dieSpriteRendererList);
+        }
     }
 
     public void RPC_SetMaterial(byte id)
@@ -1196,6 +1247,11 @@ public class Player : MonoBehaviourPun, IDamagable
     private void SetSpriteRendererWhite()
     {
         foreach (var renderer in _playerStat.MySpriteREndererList)
+        {
+            if (renderer == null) { continue; }
+            renderer.color = Color.white;
+        }
+        foreach (var renderer in _dieSpriteRendererList)
         {
             if (renderer == null) { continue; }
             renderer.color = Color.white;
@@ -1858,6 +1914,18 @@ public class Player : MonoBehaviourPun, IDamagable
     private void SpriteFlipx()
     {
         foreach (SpriteRenderer spriteRenderer in _playerStat.MySpriteREndererList)
+        {
+            if (_playerStat.FacingDirection == 1)
+            {
+                spriteRenderer.flipX = false;
+            }
+            else
+            {
+                spriteRenderer.flipX = true;
+            }
+        }
+
+        foreach (SpriteRenderer spriteRenderer in _dieSpriteRendererList)
         {
             if (_playerStat.FacingDirection == 1)
             {
