@@ -11,6 +11,8 @@ using PhotonPlayer = Photon.Realtime.Player;
 public enum ChatChannel { All, Team, Whisper }
 public class UI_IngameChatPopup : UI_Popup
 {
+
+    
     public GameObject ChatContent = null;
     public Button SendButton = null;
     public ScrollRect ChatScrollRect = null; // 채팅 스크롤뷰
@@ -151,7 +153,7 @@ public class UI_IngameChatPopup : UI_Popup
         // ★ 핵심: 메시지 작성자의 팀 정보 가져오기 (닉네임 기반)
         EInGameTeam playerTeam = EInGameTeam.Red;
         int actualActorNumber = -1;
-
+        
         if (!isSystemMessage)
         {
             // 닉네임으로 실제 Photon ActorNumber 찾기
@@ -165,11 +167,15 @@ public class UI_IngameChatPopup : UI_Popup
         // ★ 실제 ActorNumber를 Index로 전달 (음수가 아닐 때만)
         UInt64 indexToUse = actualActorNumber > 0 ? (UInt64)actualActorNumber : messageInfo.Index;
 
+        // ★ [수정] UIChatManager에서 이미 파싱 완료 - 옷 정보만 가져오기
+        List<string> outfitList = UIChatManager.Instance.GetMessageOutfit(messageInfo.Index);
+
         chatListComponent.SetData(
+            outfitList,
             indexToUse,
             messageInfo.Avatar,
             messageInfo.GamerName,
-            messageInfo.Message,
+            messageInfo.Message, // ★ UIChatManager에서 이미 파싱된 메시지
             messageInfo.Time,
             messageInfo.Tag,
             null,
@@ -186,6 +192,7 @@ public class UI_IngameChatPopup : UI_Popup
         // 채팅 개수 제한: 50개 초과 시 가장 오래된 것 삭제
         LimitChatMessageCount();
     }
+
 
     /// <summary>
     /// ActorNumber를 이용해 현재 룸에 있는 플레이어의 팀 정보를 가져오는 헬퍼 함수
