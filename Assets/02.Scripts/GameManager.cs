@@ -102,11 +102,14 @@ public class GameManager : PhotonSingleton<GameManager>
     public void RequestGameOver()
     {
         _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
+        
+        Debug.Log("GameOver");
     }
     
     [PunRPC]
     private void RPC_GameOver()
     {
+        Debug.Log("GameOver");
         GameStateChange(EGameState.Result);
         EventManager.Instance.OnPlayerLeft -= PlayerLastCheck;
         EventManager.Instance.GameOver();
@@ -140,8 +143,14 @@ public class GameManager : PhotonSingleton<GameManager>
             OnTimeCheck?.Invoke(targetPlayer);
         }
 
+        Debug.Log($"{targetPlayer.NickName}이 죽었습니다. 지금 남은 팀 {LastTeamCheck()}팀");
         if (LastPlayer)
         {
+            if (LastTeamCheck() < 1)
+            {
+                return;
+            }
+            
             bool end;
             
             if (LastAttackCheck(team) == false)
@@ -153,13 +162,13 @@ public class GameManager : PhotonSingleton<GameManager>
                 end = true;
             }
             
+            Debug.Log($"{targetPlayer.NickName}이 죽습니다. 라스트 어택 상태 {end}");
             _photonView.RPC(nameof(RPC_RequestPlayerDie), targetPlayer, end);
             return;
         }
-        else
-        {
-            _photonView.RPC(nameof(RPC_RequestPlayerDie), targetPlayer, false);
-        }
+        
+        _photonView.RPC(nameof(RPC_RequestPlayerDie), targetPlayer, false);
+
         
         PlayerDeadCheck();
     }
@@ -372,9 +381,16 @@ public class GameManager : PhotonSingleton<GameManager>
     [PunRPC] // [RPC] [PunRPC]
     private void RPC_RequestPlayerDie(bool isLastPlayer)
     {
-        PlayerDieState dieState = _myPlayer.GetComponent<PlayerDieState>();
-        
-        dieState.LastDieCheck(isLastPlayer);
+        PlayerFSM fsm = _myPlayer.GetComponent<PlayerFSM>();
+
+        if (isLastPlayer)
+        {
+            fsm.SyncStateChange<PlayerLastDieState>();
+        }
+        else
+        {
+            fsm.SyncStateChange<PlayerDieState>();
+        }
     }
 }
 

@@ -13,7 +13,7 @@ public class FallDeadZone : MonoBehaviour
             }
 
             PlayerFSM playerFSM = collision.GetComponent<PlayerFSM>();
-            playerFSM.ChangeState<PlayerFallDeadState>();
+            playerFSM.SyncStateChange<PlayerFallDeadState>();
         }
     }
 }

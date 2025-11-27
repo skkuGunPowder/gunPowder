@@ -19,7 +19,7 @@ public class TeamColorSetting : MonoBehaviour
         {
             if (color.Team == team)
             {
-                MyAnimator.runtimeAnimatorController = color.TeamAnimator;;   
+                MyAnimator.runtimeAnimatorController = color.TeamAnimator;
                 break;
             }
         }

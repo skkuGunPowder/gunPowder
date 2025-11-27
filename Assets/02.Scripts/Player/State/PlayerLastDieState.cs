@@ -17,6 +17,11 @@ public class PlayerLastDieState : PlayerBaseState
         SetImmuneState();
         EventManager.Instance.LastAttack(_owner.PhotonView.OwnerActorNr);
 
+        if (_owner.photonView.IsMine)
+        {
+            Debug.Log("LastDie Start");
+        }
+
     }
 
     public override void OnExit()
