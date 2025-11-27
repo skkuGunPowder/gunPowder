@@ -115,6 +115,23 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
 
         return _selectedItem;
     }
+    // ItemStorage.cs 안에 추가
+    public string GetMyOutfitString()
+    {
+        List<string> ids = new List<string>();
+    
+        // 현재 장착된 아이템들의 ID를 수집
+        foreach (var kvp in _equippedItemDict)
+        {
+            if (kvp.Value != null && !string.IsNullOrEmpty(kvp.Value.ID))
+            {
+                ids.Add(kvp.Value.ID);
+            }
+        }
+    
+        // 콤마로 이어붙여서 반환 (예: "Hair_01,Face_02,Body_01")
+        return string.Join(",", ids);
+    }
 
     public void ChangeMainCategory(EMainCategory nextMainCategory)
     {
