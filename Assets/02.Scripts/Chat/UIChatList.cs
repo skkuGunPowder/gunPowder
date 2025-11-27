@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
@@ -8,7 +9,7 @@ using PhotonPlayer = Photon.Realtime.Player;
 public class UIChatList : MonoBehaviour
 {
     public Toggle CheckBox = null;
-    public Image Avatar = null;
+    public ProfileSkin PlayerProfileSkin = null;
     public TextMeshProUGUI Name = null;
     public TextMeshProUGUI Message = null;
     public TextMeshProUGUI Time = null;
@@ -22,62 +23,21 @@ public class UIChatList : MonoBehaviour
     // ★ 외부에서 이 글이 누구 건지 확인할 수 있게 프로퍼티 추가
     public int ActorNumber => (int)_index;
     public string GamerName => _gamerName;  // ★ 닉네임 프로퍼티
-    
-    // 팀 컬러 변경 로직
-    // ★ 팀에 따른 색상 변경 로직 (ColorPalette 사용)
-    private void SetTeamColor(EInGameTeam team)
-    {
-        if (OutLineImage == null) return;
-
-        EColorType targetColorType = EColorType.Red;
-
-        // EInGameTeam -> EColorType 변환
-        switch (team)
-        {
-            case EInGameTeam.Red:
-                targetColorType = EColorType.Red;
-                break;
-            case EInGameTeam.Blue:
-                targetColorType = EColorType.Blue;
-                break;
-            case EInGameTeam.Green:
-                targetColorType = EColorType.Green;
-                break;
-            case EInGameTeam.Yellow:
-                targetColorType = EColorType.Yellow;
-                break;
-            default:
-                // 팀이 없거나(None) 개인전일 경우 기본 흰색 혹은 투명
-                OutLineImage.color = Color.white;
-                return;
-        }
-
-        // ColorPalette에서 색상 가져와 적용
-        if (ColorPalette.ColorDictionary != null &&
-            ColorPalette.ColorDictionary.ContainsKey(targetColorType))
-        {
-            OutLineImage.color = ColorPalette.ColorDictionary[targetColorType];
-        }
-        else
-        {
-            // 팔레트가 로드되지 않았을 경우를 대비한 기본값
-            OutLineImage.color = Color.white;
-        }
-    }
-    public void SetData(UInt64 index, string avatar, string name, string message, string time, string tag,
+ 
+    public void SetData(List<string> outfitIds,UInt64 index, string avatar, string nickname, string message, string time, string tag,
         Action<UInt64, string> report, Action<bool, string> translate,
         bool is_my = false, EInGameTeam team = EInGameTeam.Red)
     {
         _index = index;
-        _gamerName = name;  // ★ 닉네임 저장
+        _gamerName = nickname;  // ★ 닉네임 저장
 
-        // if (string.IsNullOrEmpty(avatar) || avatar == "default")
-        //     Avatar.sprite = Resources.Load<Sprite>("Images/Girl_5");
-        // else
-        //     Avatar.sprite = Resources.Load<Sprite>("Images/" + avatar);
-
+        if (PlayerProfileSkin != null)
+        {
+            PlayerProfileSkin.gameObject.SetActive(true);
+            PlayerProfileSkin.Init(outfitIds); 
+        }
         if (is_my) Name.text = "[전체]";
-        else Name.text = $"[전체] {name}";
+        else Name.text = $"[전체] {nickname}";
 
         Message.text = message;
 
@@ -87,48 +47,24 @@ public class UIChatList : MonoBehaviour
 // ★ public으로 변경하여 Popup에서 호출 가능하게 함
     public void UpdateTeamColor(EInGameTeam team)
     {
-        if (OutLineImage == null) return;
-
+        if (!OutLineImage) return;
         EColorType targetColorType = EColorType.Red;
-
         switch (team)
         {
-            case EInGameTeam.Red:
-                targetColorType = EColorType.Red;
-                break;
-            case EInGameTeam.Blue:
-                targetColorType = EColorType.Blue;
-                break;
-            case EInGameTeam.Green:
-                targetColorType = EColorType.Green;
-                break;
-            case EInGameTeam.Yellow:
-                targetColorType = EColorType.Yellow;
-                break;
-            default:
-                OutLineImage.color = Color.white; // 팀 없음/개인전
-                return;
+            case EInGameTeam.Red: targetColorType = EColorType.Red; break;
+            case EInGameTeam.Blue: targetColorType = EColorType.Blue; break;
+            case EInGameTeam.Green: targetColorType = EColorType.Green; break;
+            case EInGameTeam.Yellow: targetColorType = EColorType.Yellow; break;
+            default: OutLineImage.color = Color.white; return;
         }
-
         if (ColorPalette.ColorDictionary != null &&
-            ColorPalette.ColorDictionary.ContainsKey(targetColorType))
-        {
-            OutLineImage.color = ColorPalette.ColorDictionary[targetColorType];
-        }
+            ColorPalette.ColorDictionary.TryGetValue(targetColorType, out var value))
+            OutLineImage.color = value;
         else
-        {
             OutLineImage.color = Color.white;
-        }
     }
-    public bool IsEqual(UInt64 index, string tag)
-    {
-        return _index == index && _tag == tag;
-    }
-
-    public void SetMessage(string message)
-    {
-        Message.text = message;
-    }
+    public bool IsEqual(UInt64 index, string tag) { return _index == index && _tag == tag; }
+    public void SetMessage(string message) {Message.text = message;}
 
     /// <summary>
     /// 시스템 메시지 스타일 적용 (이름과 메시지 텍스트를 노란색으로)

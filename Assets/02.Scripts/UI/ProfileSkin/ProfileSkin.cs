@@ -17,6 +17,18 @@ public class ProfileSkin : MonoBehaviour
             slot.Refresh(item);
         }
     }
+    // [추가] 채팅으로 받은 ID 리스트로 초기화 (로비/채팅용)
+    public void Init(List<string> itemIds)
+    {
+        if (itemIds == null || itemIds.Count == 0) return;
+
+        foreach (ProfileSkinSlot slot in SkinSlotList)
+        {
+            // 리스트에서 해당 슬롯 타입(Face, Hair 등)에 맞는 아이템을 찾아옴
+            Sprite itemSprite = FindItemFromList(slot.SkinSlotType, itemIds);
+            slot.Refresh(itemSprite);
+        }
+    }
 
     public void TeamChanged(EInGameTeam team)
     {
@@ -51,4 +63,19 @@ public class ProfileSkin : MonoBehaviour
         return item.SkinImage;
         
     }
+    // [추가] ID 리스트(문자열)에서 찾기
+    private Sprite FindItemFromList(EItemType itemType, List<string> itemIds)
+    {
+        foreach (string id in itemIds)
+        {
+            ItemDTO itemDTO = ItemDatabase.Instance.GetItem(id);
+            // 아이템 DB에서 ID로 정보를 가져왔는데, 그게 지금 찾으려는 부위(예: Hair)가 맞다면 리턴
+            if (itemDTO != null && itemDTO.ItemType == itemType)
+            {
+                return itemDTO.SkinImage;
+            }
+        }
+        return null;
+    }
 }
+

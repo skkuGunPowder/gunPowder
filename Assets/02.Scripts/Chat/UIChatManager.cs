@@ -10,6 +10,9 @@ using UnityEngine.UI;
 
 public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.IChatClientListener
 {
+    // 메시지와 데이터 구분자
+    public const string SPLIT_TAG = "$$DATA$$";
+    
     // 인게임 채팅 채널 설정
     private const string INGAME_CHANNEL_GROUP = "ig_";
 
@@ -46,6 +49,9 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         new Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>>();
 
     private bool _isChatClientInitialized = false;
+
+    // ★ [추가] 메시지 Index별 옷 정보 저장 (UI에서 ProfileSkin 표시용)
+    private Dictionary<ulong, List<string>> _messageOutfits = new Dictionary<ulong, List<string>>();
 
     protected override void Awake()
     {
@@ -183,9 +189,13 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             return;
         }
 
+        // ★ [수정] 내 옷 정보를 가져와서 메시지 뒤에 숨김
+        string myOutfit = ItemStorage.Instance.GetMyOutfitString();
+        string finalMessage = $"{text}{SPLIT_TAG}{myOutfit}";
+        
         // 일반 채팅 메시지 전송
         Debug.Log($"[UIChatManager] 채팅 메시지 전송: Group={channelInfo.ChannelGroup}, Name={channelInfo.ChannelName}, Number={channelInfo.ChannelNumber}, Msg={text}");
-        _chatClient.SendChatMessage(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, text);
+        _chatClient.SendChatMessage(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, finalMessage);
         Debug.Log("[UIChatManager] ChatClient.SendChatMessage 호출 완료");
     }
 
@@ -404,6 +414,25 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         {
             Debug.LogWarning("[UIChatManager] ChannelInfo가 null입니다.");
             return;
+        }
+
+        // ★ [추가] 메시지 파싱: $$DATA$$ 이후 내용 제거 (중앙 집중식 처리)
+        if (messageInfo.Message.Contains(SPLIT_TAG))
+        {
+            string[] parts = messageInfo.Message.Split(new string[] { SPLIT_TAG }, System.StringSplitOptions.None);
+            messageInfo.Message = parts[0]; // 실제 메시지만 남김 ("안녕하세요")
+
+            // 옷 정보 파싱 및 저장
+            if (parts.Length > 1 && !string.IsNullOrEmpty(parts[1]))
+            {
+                List<string> outfitList = new List<string>(parts[1].Split(','));
+                _messageOutfits[messageInfo.Index] = outfitList;
+                Debug.Log($"[UIChatManager] 메시지 파싱 완료 - 메시지: {messageInfo.Message}, 옷 정보: {parts[1]}");
+            }
+            else
+            {
+                Debug.Log($"[UIChatManager] 메시지 파싱 완료: {messageInfo.Message}");
+            }
         }
 
         AddMessageToChannel(channelInfo, messageInfo);
@@ -1090,6 +1119,18 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
     }
 
     /// <summary>
+    /// 메시지의 옷 정보 가져오기
+    /// </summary>
+    public List<string> GetMessageOutfit(ulong messageIndex)
+    {
+        if (_messageOutfits.TryGetValue(messageIndex, out List<string> outfit))
+        {
+            return outfit;
+        }
+        return null;
+    }
+
+    /// <summary>
     /// 인게임 채널 메시지만 삭제 (게임 종료 시 호출)
     /// </summary>
     public void ClearInGameChannelMessages()
@@ -1119,5 +1160,9 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             _currentChannelName = string.Empty;
             _currentChannelNumber = 0;
         }
+
+        // ★ [추가] 옷 정보 Dictionary도 정리
+        _messageOutfits.Clear();
+        Debug.Log("[UIChatManager] 메시지 옷 정보 Dictionary 초기화");
     }
 }
