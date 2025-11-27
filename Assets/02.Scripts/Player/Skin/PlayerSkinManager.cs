@@ -18,6 +18,23 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 	[SerializeField] private Transform _capeSlotParent;
 	[SerializeField] private GameObject _currentCapeSkin;
 
+	[Header("Die 슬롯 부모")]
+	[SerializeField] private Transform _dieHeadSlotParent;
+	[SerializeField] private Transform _dieFaceSlotParent;
+	[SerializeField] private Transform _dieChestSlotParent;
+	[SerializeField] private Transform _dieCapeSlotParent;
+
+	[Header("Die 기본 스킨")]
+	[SerializeField] private GameObject _dieOriginalHeadSkin;
+	[SerializeField] private GameObject _dieOriginalFaceSkin;
+	[SerializeField] private GameObject _dieOriginalChestSkin;
+	[SerializeField] private GameObject _dieOriginalCapeSkin;
+
+	private GameObject _currentDieHeadSkin;
+	private GameObject _currentDieFaceSkin;
+	private GameObject _currentDieChestSkin;
+	private GameObject _currentDieCapeSkin;
+
 	private void Awake()
 	{
 		_player = GetComponent<Player>();
@@ -28,44 +45,52 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 	{
 		if (item == null || item.Prefab == null) { return; }
 		_currentHeadSkin = ReplacePrefabInSlot(_currentHeadSkin, _originalHeadSkin, item.Prefab, _headSlotParent);
+		_currentDieHeadSkin = ReplaceDiePrefabInSlot(_currentDieHeadSkin, _dieOriginalHeadSkin, item.Prefab, _dieHeadSlotParent);
 	}
 
 	public void ClearHead()
 	{
 		_currentHeadSkin = ClearPrefabInSlot(_currentHeadSkin, _originalHeadSkin);
+		_currentDieHeadSkin = ClearDiePrefabInSlot(_currentDieHeadSkin, _dieOriginalHeadSkin);
 	}
 
 	public void ApplyFace(ItemDTO item)
 	{
 		if (item == null || item.Prefab == null) { return; }
 		_currentFaceSkin = ReplacePrefabInSlot(_currentFaceSkin, _originalFaceSkin, item.Prefab, _faceSlotParent);
+		_currentDieFaceSkin = ReplaceDiePrefabInSlot(_currentDieFaceSkin, _dieOriginalFaceSkin, item.Prefab, _dieFaceSlotParent);
 	}
 
 	public void ClearFace()
 	{
 		_currentFaceSkin = ClearPrefabInSlot(_currentFaceSkin, _originalFaceSkin);
+		_currentDieFaceSkin = ClearDiePrefabInSlot(_currentDieFaceSkin, _dieOriginalFaceSkin);
 	}
 
 	public void ApplyChest(ItemDTO item)
 	{
 		if (item == null || item.Prefab == null) { return; }
 		_currentChestSkin = AdditiveEquip(_currentChestSkin, _chestSlotParent, item.Prefab, true);
+		_currentDieChestSkin = AdditiveEquipDie(_currentDieChestSkin, _dieChestSlotParent, item.Prefab, _dieOriginalChestSkin);
 	}
 
 	public void ClearChest()
 	{
 		_currentChestSkin = RemoveAdditive(_currentChestSkin, true);
+		_currentDieChestSkin = RemoveAdditiveDie(_currentDieChestSkin, _dieOriginalChestSkin);
 	}
 
 	public void ApplyCape(ItemDTO item)
 	{
 		if (item == null || item.Prefab == null) { return; }
 		_currentCapeSkin = AdditiveEquip(_currentCapeSkin, _capeSlotParent, item.Prefab, true);
+		_currentDieCapeSkin = AdditiveEquipDie(_currentDieCapeSkin, _dieCapeSlotParent, item.Prefab, _dieOriginalCapeSkin);
 	}
 
 	public void ClearCape()
 	{
 		_currentCapeSkin = RemoveAdditive(_currentCapeSkin, true);
+		_currentDieCapeSkin = RemoveAdditiveDie(_currentDieCapeSkin, _dieOriginalCapeSkin);
 	}
 
 	private GameObject ReplacePrefabInSlot(GameObject currentInstance, GameObject originalObject, GameObject newPrefab, Transform overrideParent = null)
@@ -154,6 +179,84 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 			if (manageLists) { RemoveInstanceComponentsFromLists(currentInstance); }
 			Destroy(currentInstance);
 		}
+		return null;
+	}
+
+	private GameObject ReplaceDiePrefabInSlot(GameObject currentInstance, GameObject originalObject, GameObject newPrefab, Transform overrideParent = null)
+	{
+		if (currentInstance != null)
+		{
+			RemoveDieInstanceComponentsFromLists(currentInstance);
+			Destroy(currentInstance);
+			currentInstance = null;
+		}
+
+		if (originalObject == null || newPrefab == null) { return null; }
+
+		Transform parent = overrideParent != null ? overrideParent : originalObject.transform;
+		Vector3 localPos = originalObject.transform.localPosition;
+		Quaternion localRot = originalObject.transform.localRotation;
+		Vector3 localScale = originalObject.transform.localScale;
+
+		GameObject instance = Instantiate(newPrefab, parent);
+		instance.transform.localPosition = localPos;
+		instance.transform.localRotation = localRot;
+		instance.transform.localScale = localScale;
+
+		SetDieOriginalVisibility(originalObject, false);
+		AddDieInstanceComponentsToLists(instance);
+		return instance;
+	}
+
+	private GameObject ClearDiePrefabInSlot(GameObject currentInstance, GameObject originalObject)
+	{
+		if (currentInstance != null)
+		{
+			RemoveDieInstanceComponentsFromLists(currentInstance);
+			Destroy(currentInstance);
+			currentInstance = null;
+		}
+		SetDieOriginalVisibility(originalObject, true);
+		return null;
+	}
+
+	private GameObject AdditiveEquipDie(GameObject currentInstance, Transform slotParent, GameObject prefab, GameObject originalObject)
+	{
+		if (slotParent == null || prefab == null) { return currentInstance; }
+		if (currentInstance != null)
+		{
+			RemoveDieInstanceComponentsFromLists(currentInstance);
+			Destroy(currentInstance);
+			currentInstance = null;
+		}
+
+		GameObject instance = Instantiate(prefab, slotParent);
+		instance.transform.localPosition = Vector3.zero;
+		instance.transform.localRotation = Quaternion.identity;
+		instance.transform.localScale = Vector3.one;
+
+		if (originalObject != null)
+		{
+			SetDieOriginalVisibility(originalObject, false);
+		}
+
+		AddDieInstanceComponentsToLists(instance);
+		return instance;
+	}
+
+	private GameObject RemoveAdditiveDie(GameObject currentInstance, GameObject originalObject)
+	{
+		if (currentInstance != null)
+		{
+			RemoveDieInstanceComponentsFromLists(currentInstance);
+			Destroy(currentInstance);
+		}
+
+		if (originalObject != null)
+		{
+			SetDieOriginalVisibility(originalObject, true);
+		}
+
 		return null;
 	}
 
@@ -253,6 +356,77 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 					// sortingOrder 시스템 해제
 					_player?.UnregisterOriginalSortingOrder(sr);
 				}
+			}
+		}
+	}
+
+	private void AddDieInstanceComponentsToLists(GameObject instance)
+	{
+		if (instance == null || _player == null) { return; }
+		
+		EnableDiePartComponents(instance, true);
+
+		SpriteRenderer[] srs = instance.GetComponentsInChildren<SpriteRenderer>(true);
+		for (int i = 0; i < srs.Length; i++)
+		{
+			SpriteRenderer sr = srs[i];
+			if (sr == null) { continue; }
+			_player.RegisterDieSpriteRenderer(sr);
+			sr.enabled = false;
+		}
+	}
+
+	private void RemoveDieInstanceComponentsFromLists(GameObject instance)
+	{
+		if (instance == null || _player == null) { return; }
+		
+		EnableDiePartComponents(instance, false);
+
+		SpriteRenderer[] srs = instance.GetComponentsInChildren<SpriteRenderer>(true);
+		for (int i = 0; i < srs.Length; i++)
+		{
+			SpriteRenderer sr = srs[i];
+			if (sr == null) { continue; }
+			_player.UnregisterDieSpriteRenderer(sr);
+		}
+	}
+
+	private void SetDieOriginalVisibility(GameObject target, bool isVisible)
+	{
+		if (target == null) { return; }
+
+		SpriteRenderer[] srs = target.GetComponentsInChildren<SpriteRenderer>(true);
+		for (int i = 0; i < srs.Length; i++)
+		{
+			if (srs[i] != null)
+			{
+				srs[i].enabled = isVisible;
+			}
+		}
+	}
+
+	private void EnableDiePartComponents(GameObject root, bool enable)
+	{
+		if (root == null)
+		{
+			return;
+		}
+
+		PlayerDiePart[] dieParts = root.GetComponentsInChildren<PlayerDiePart>(true);
+		for (int i = 0; i < dieParts.Length; i++)
+		{
+			if (dieParts[i] != null)
+			{
+				dieParts[i].enabled = enable;
+			}
+		}
+
+		BodyPartMarker[] markers = root.GetComponentsInChildren<BodyPartMarker>(true);
+		for (int i = 0; i < markers.Length; i++)
+		{
+			if (markers[i] != null)
+			{
+				markers[i].enabled = enable;
 			}
 		}
 	}
