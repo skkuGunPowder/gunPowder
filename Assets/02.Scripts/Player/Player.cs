@@ -595,7 +595,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         
         // GameObject가 활성화될 때 팀 동기화 (뒤에 들어온 플레이어의 경우)
-        SyncTeamFromCustomProperties();
+        // SyncTeamFromCustomProperties();
     }
 
     /// <summary>
