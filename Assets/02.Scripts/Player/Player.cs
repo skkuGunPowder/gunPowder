@@ -151,9 +151,6 @@ public class Player : MonoBehaviourPun, IDamagable
     public DamagePopup DamagePopup => _damagePopup;
     private IPlayerSkinManager _skinManager;
 
-    public AirDropItemLootVFX AirDropItemLootVFX;
-    private AirDropItemBase _airDropItem;
-    public AirDropItemBase AirDropItem => _airDropItem;
 
     private PlayerBuffHandler _playerBuffHandler;
     public PlayerBuffHandler PlayerBuffHandler => _playerBuffHandler;
@@ -2096,31 +2093,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _storedVelocity = Vector2.zero;
     }
 
-    public void SetAirDropItem(AirDropItemBase airDropItem)
-    {
-        if (PhotonView.IsMine)
-        {
-            AirDropItemLootVFX.StartRoulette(airDropItem);
-        }
-        _airDropItem = airDropItem;
-        StartCoroutine(AirDropItemUseCoroutine());
-    }
-
-    private IEnumerator AirDropItemUseCoroutine()
-    {
-        yield return new WaitForSeconds(2.5f);
-        if(_airDropItem != null && AirDropItemLootVFX.IsSelected)
-        {
-            AirDropItemLootVFX.UseItem();
-            _airDropItem.Use();
-            RemoveAirDropItem();
-        }
-    }
-
-    public void RemoveAirDropItem()
-    {
-        _airDropItem = null;
-    }
+    
 
     [PunRPC]
     public void RPC_SetIsImmune(bool isImmune)

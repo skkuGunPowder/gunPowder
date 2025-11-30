@@ -56,13 +56,12 @@ public class AirDropBox : MonoBehaviour
             return;
         }
         
-        Player player = other.gameObject.GetComponent<Player>();
+        PlayerAirDropHandler playerAirDropHandler = other.gameObject.GetComponent<PlayerAirDropHandler>();
 
-        if (player.AirDropItem == null)
+        if (playerAirDropHandler.AirDropItem == null)
         {
             AirDropItemBase item = DropItemList[Random.Range(0, DropItemList.Count)];
-            item.SetOwner(player);
-            player.SetAirDropItem(item);
+            playerAirDropHandler.SetAirDropItem(item);
         }
 
         if (PhotonNetwork.IsMasterClient)

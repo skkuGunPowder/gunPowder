@@ -4344,6 +4344,7 @@ GameObject:
   - component: {fileID: 741957198402514022}
   - component: {fileID: 1860317133783251600}
   - component: {fileID: -8973116378369359023}
+  - component: {fileID: 5518879131900154970}
   m_Layer: 7
   m_Name: PlayerTest
   m_TagString: Player
@@ -4498,7 +4499,6 @@ MonoBehaviour:
   UltimateEffectPrefab: {fileID: 1121568680264472322}
   ExplosionEffectPrefab: {fileID: 5682021106543877335, guid: e5f8e5526c3be7542b66d48b3c0ed76b, type: 3}
   FallDeadVFXPrefab: {fileID: 3011233550371498735, guid: 794e3e0914193c6458c4b710a6e3a79c, type: 3}
-  AirDropItemLootVFX: {fileID: 3920707082676358601}
   IsSuperArmor: 0
   _playerSFXAnimationEvent: {fileID: 8620183200267240798}
   CrabHoldPoint: {fileID: 84351679138067317}
@@ -4856,6 +4856,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _specialCoolTimeEffectPrefab: {fileID: 1207442892207398649, guid: 3f04fbe4828604b498507c859c481cd3, type: 3}
   _specialCoolTimeEndAudio: {fileID: 8300000, guid: 791bd3939f714ac46a269075c3bdb10a, type: 3}
+--- !u!114 &5518879131900154970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b987b0c66a683c541b025c12372c00ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AirDropItemLootVFX: {fileID: 3920707082676358601}
 --- !u!1 &6883906685738839930
 GameObject:
   m_ObjectHideFlags: 0
