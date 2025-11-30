@@ -7,8 +7,9 @@ public class ProfileSkin : MonoBehaviour
 {
     public List<ProfileSkinSlot> SkinSlotList;
     public List<ProfileTeamSlot> TeamSlotList;
-    // 스킨 전체 바꾸기 : 첫 입장
+    [SerializeField] private Sprite _playerLeftImage;
     
+    // 스킨 전체 바꾸기 : 첫 입장
     public void Init(PhotonPlayer player) 
     {
         foreach (ProfileSkinSlot slot in SkinSlotList)
@@ -46,6 +47,19 @@ public class ProfileSkin : MonoBehaviour
             {
                 Sprite item = FindItem(itemType, player);
                 slot.Refresh(item);
+                break;  
+            }
+        }
+    }
+
+    public void PlayerLeft() // 플레이어가 나갔을 때 사용할 이미지
+    {
+        foreach (ProfileSkinSlot slot in SkinSlotList)
+        {
+            if(slot.SkinSlotType == EItemType.Face)
+            {
+                slot.SkinImage.enabled = false; // 만약에 스킨이 있을 경우를 대비해 스킨 이미지를 끄기
+                slot.Refresh(_playerLeftImage);
                 break;  
             }
         }

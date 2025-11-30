@@ -20,11 +20,11 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public UI_EmotionSlot Emotion;
     
     public List<GameObject> LifeList;
-    public GameObject LeftOver;
    
     [Header("Color")] 
     public int GunpowderMiddle = 50;
     public int GunpowderLow = 20;
+    public Color32 LeftoverColor;
     
     [Header("Shaker")]
     public float Strength = 20f;
@@ -73,9 +73,12 @@ public class UI_InGameProfileSlot : MonoBehaviour
         }
     }
    
-    public void LeftOverRefresh(bool isLeftOver)
+    public void LeftOverRefresh()
     {
-        LeftOver.SetActive(isLeftOver);
+        PlayerProfileSkin.PlayerLeft();
+        GunpowderTextUGUI.text = "0";
+        GunpowderTextUGUI.color = LeftoverColor;
+        LifeRefresh(0);
     }
     private void ColorSet(int gunpowder)
     {

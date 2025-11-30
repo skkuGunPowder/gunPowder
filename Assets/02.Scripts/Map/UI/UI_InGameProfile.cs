@@ -120,7 +120,7 @@ public class UI_InGameProfile : MonoBehaviour
         {
             if (_playerActorNumberList[i] == leftPlayer.ActorNumber)
             {
-                UI_InGameProfileSlotList[i].LeftOverRefresh(true);
+                UI_InGameProfileSlotList[i].LeftOverRefresh();
                 _playerActorNumberList[i] = 0;
                 break;
             }
