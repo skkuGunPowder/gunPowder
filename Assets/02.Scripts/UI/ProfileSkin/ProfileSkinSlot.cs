@@ -23,4 +23,5 @@ public class ProfileSkinSlot : MonoBehaviour
             SkinImage.sprite = skinImage;
         }
     }
+    
 }
