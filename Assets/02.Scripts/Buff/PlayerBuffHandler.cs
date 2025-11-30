@@ -9,7 +9,7 @@ public class PlayerBuffHandler : MonoBehaviour
     public Action<Buff> OnBuffAdded;
     public Action<Buff> OnBuffRemoved;
 
-    private void OnEnable()
+    private void Awake()
     {
         GameObject hud = GameObject.FindWithTag("InGameHUD");
         if (hud != null)

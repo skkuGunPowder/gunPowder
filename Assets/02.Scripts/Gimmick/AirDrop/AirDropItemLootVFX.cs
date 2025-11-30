@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using DG.Tweening;
 using System.Collections;
-using System;
 
 public class AirDropItemLootVFX : MonoBehaviour
 {
@@ -23,7 +22,6 @@ public class AirDropItemLootVFX : MonoBehaviour
 
     private void OnEnable()
     {
-        IsSelected = false;
         _spriteRenderer = Icon.GetComponent<SpriteRenderer>();
         _spriteRenderer.sprite = ItemSpriteList[UnityEngine.Random.Range(0, ItemSpriteList.Count)];
     }
@@ -100,5 +98,10 @@ public class AirDropItemLootVFX : MonoBehaviour
         _scaleTween = icon.DOScale(1.2f, 0.6f)
         .SetEase(Ease.InOutSine)
         .SetLoops(-1, LoopType.Yoyo);
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
     }
 }
