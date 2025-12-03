@@ -94,6 +94,13 @@ public class PlayerFallDeadState : PlayerBaseState
     /// </summary>
     public override void OnExit()
     {
+        // 목표 지점에 도달했지만 아직 사망 이벤트가 발생하지 않았다면 강제로 실행
+        if (_hasReachedGoal && !_hasTriggeredDeathEvents)
+        {
+            _hasTriggeredDeathEvents = true;
+            ExecuteDeathEvents();
+        }
+        
         base.OnExit();
 
         //
@@ -428,6 +435,10 @@ public class PlayerFallDeadState : PlayerBaseState
             dieExplosion.transform.position = _owner.transform.position;
             dieExplosion.Explode(true, _owner.PhotonView);
         }
+        else
+        {
+            Debug.LogWarning("[PlayerFallDeadState] 폭발 효과를 풀에서 가져오지 못함");
+        }
     }
 
     /// <summary>
@@ -467,5 +478,14 @@ public class PlayerFallDeadState : PlayerBaseState
         if (_owner.Rigidbody2D == null) return;
 
         _owner.Rigidbody2D.linearVelocity = Vector2.zero;
+    }
+
+    /// <summary>
+    /// 낙사 상태 중에는 피격에 의한 상태 전환을 막음
+    /// </summary>
+    protected override void HandleHit()
+    {
+        // 낙사 상태 중에는 피격 이벤트를 무시하여 상태 변경을 방지
+        // 아무것도 하지 않음 (상태 변경 방지)
     }
 }
