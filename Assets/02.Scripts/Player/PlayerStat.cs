@@ -266,6 +266,12 @@ public class PlayerStat : MonoBehaviour
     // 건파우더 관리 메서드
     public void IncreaseGunPowderCount(int amount)
     {
+        if (GameManager.Instance.CurrentGameState != EGameState.Playing &&
+            GameManager.Instance.CurrentGameState != EGameState.Tutorial)
+        {
+            return;
+        }
+        
         if (!_photonView.IsMine)
         {
             return;
