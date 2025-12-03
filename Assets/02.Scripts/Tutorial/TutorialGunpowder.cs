@@ -17,6 +17,10 @@ public class TutorialGunpowder : MonoBehaviour
     private float _timerCurrent = 0f;
     private bool _bezierFinished = false;
     private float _followSpeed = 10f;
+    private bool _hasPlayedDestroyVFX;
+
+    public GameObject VFXPrefab;
+    public GameObject HealVFXPrefab;
     
     private void Start()
     {
@@ -153,6 +157,41 @@ public class TutorialGunpowder : MonoBehaviour
         {
             _target.GetComponent<Player>().PlayerStat.IncreaseGunPowderCount(1);
             Destroy(gameObject);
+        }
+    }
+
+    private void OnDisable()
+    {
+        // 파괴 시 로컬에서 VFX 재생
+        if (_hasPlayedDestroyVFX)
+        {
+            return;
+        }
+        _hasPlayedDestroyVFX = true;
+
+        if (VFXPrefab != null)
+        {
+            FollowVFX vfx = VFXPool.Instance.Get(VFXPrefab.name) as FollowVFX;
+            if (vfx != null)
+            {
+                if (_target != null && _target.gameObject.activeInHierarchy)
+                {
+                    vfx.PlayAttached(_target);
+                }
+            }
+        }
+        
+        if (HealVFXPrefab != null)
+        {
+            FollowVFX vfx = VFXPool.Instance.Get(HealVFXPrefab.name) as FollowVFX;
+            if (vfx != null)
+            {
+                if (_target != null && _target.gameObject.activeInHierarchy)
+                {
+                    // 타겟 위쪽으로 호를 그려서 랜덤 위치에 생성
+                    vfx.PlayAttachedWithArcOffset(_target, arcRadius: 1.5f, arcAngleRange: 90f);
+                }
+            }
         }
     }
 }
