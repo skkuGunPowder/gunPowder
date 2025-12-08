@@ -296,6 +296,9 @@ public class UI_IngameChatPopup : UI_Popup
         {
             MiniStateGroup.SetActive(false);
             FullStateGroup.SetActive(true);
+
+            // [추가] Full 모드가 열릴 때 스크롤을 맨 아래로 내림
+            StartCoroutine(ScrollToBottomCoroutine());
         }
         else
         {
