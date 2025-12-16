@@ -1,6 +1,6 @@
 using UnityEngine;
-using System.Collections;
 using Photon.Pun;
+using Cysharp.Threading.Tasks;
 
 public class DestroyCollector: DontDestroySingleton<DestroyCollector>
 {
@@ -11,13 +11,13 @@ public class DestroyCollector: DontDestroySingleton<DestroyCollector>
 
         if(photonView.IsMine)
         {
-            StartCoroutine(LazyDestroy(gameObject, 5f));
+            LazyDestroy(gameObject, 5f);
         }
     }
 
-    private IEnumerator LazyDestroy(GameObject gameObject, float seconds)
+    private async UniTaskVoid LazyDestroy(GameObject gameObject, float seconds)
     {
-        yield return new WaitForSeconds(seconds);
+        await UniTask.WaitForSeconds(seconds);
         if(gameObject != null)
         {
             PhotonNetwork.Destroy(gameObject);
