@@ -10,8 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 641311591552772888}
   - component: {fileID: 3570492691703544958}
+  - component: {fileID: 9135146056783026098}
+  - component: {fileID: 8192998866502710399}
   m_Layer: 0
-  m_Name: Spawner
+  m_Name: ModeNSpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -55,6 +57,41 @@ MonoBehaviour:
   - {fileID: 3535362149955156681}
   - {fileID: 2309529194117650474}
   RankSpawnPointList: []
+--- !u!114 &9135146056783026098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035945805825258251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &8192998866502710399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035945805825258251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdeefac84ecfa14439ee1064d0d8a5f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _resurrectPoint: {fileID: 0}
 --- !u!1 &3019794214641518552
 GameObject:
   m_ObjectHideFlags: 0
@@ -298,7 +335,6 @@ GameObject:
   - component: {fileID: 2624095906149335305}
   - component: {fileID: 2982785862916926680}
   - component: {fileID: 3020084340095007817}
-  - component: {fileID: 5017262461831941984}
   - component: {fileID: 4367302821097132648}
   - component: {fileID: 2847490097301047938}
   m_Layer: 0
@@ -336,8 +372,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _currentGameState: 1
-  LastPlayer: 0
-  ResurrectPoint: {fileID: 0}
+  GameMode: {fileID: 8192998866502710399}
 --- !u!114 &3020084340095007817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -360,19 +395,6 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &5017262461831941984
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5037097267527444411}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b688369ea6dc7d43950d42ef947d047, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Spawner: {fileID: 3570492691703544958}
 --- !u!114 &4367302821097132648
 MonoBehaviour:
   m_ObjectHideFlags: 0

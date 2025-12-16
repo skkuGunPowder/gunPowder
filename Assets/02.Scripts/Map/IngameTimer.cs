@@ -5,7 +5,7 @@ using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
 public class IngameTimer : MonoBehaviour
 {
-    public UI_IngameTimer UI_Timer;
+    public UI_TextSlot UI_Timer;
     private int _initTime;
     private float _timer;
     private int _previousTime;
@@ -20,7 +20,7 @@ public class IngameTimer : MonoBehaviour
         _initTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
         _timer = _initTime;
         _previousTime = _initTime;
-        UI_Timer.RefreshTimer(_initTime);
+        UI_Timer.TextRefresh(ConvertTime(_initTime));
         _isGameOver = false;
         GameManager.Instance.OnTimeCheck += TimeCheck;
     }
@@ -31,6 +31,13 @@ public class IngameTimer : MonoBehaviour
         {
             GameTimer();
         }
+    }
+
+    private string ConvertTime(int time)
+    {
+        string timeText = TimeSpan.FromSeconds(time).ToString(@"mm\:ss");
+        
+        return timeText;
     }
 
     private void GameTimer()
@@ -45,7 +52,7 @@ public class IngameTimer : MonoBehaviour
                 return;
             }
             GameOver();
-            UI_Timer.RefreshTimer(0);
+            UI_Timer.TextRefresh(ConvertTime(0));
         }
 
         int currentTime = Mathf.FloorToInt(_timer);
@@ -54,7 +61,7 @@ public class IngameTimer : MonoBehaviour
         if (_previousTime != currentTime)
         {
             _previousTime = currentTime;
-            UI_Timer.RefreshTimer(currentTime);
+            UI_Timer.TextRefresh(ConvertTime(currentTime));
         }
     
         if (PhotonNetwork.IsMasterClient == false)
