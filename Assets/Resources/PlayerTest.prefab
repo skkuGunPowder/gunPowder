@@ -4345,6 +4345,7 @@ GameObject:
   - component: {fileID: 1860317133783251600}
   - component: {fileID: -8973116378369359023}
   - component: {fileID: 5518879131900154970}
+  - component: {fileID: 115014031193163826}
   m_Layer: 7
   m_Name: PlayerTest
   m_TagString: Player
@@ -4496,7 +4497,6 @@ MonoBehaviour:
   GunPowderPrefab: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
   DieExplosionPrefab: {fileID: 913711826124557560, guid: 804d65cb3af63d94f8021d7f15b82be5, type: 3}
   HitEffectPrefab: {fileID: 8841075394196172437}
-  UltimateEffectPrefab: {fileID: 1121568680264472322}
   ExplosionEffectPrefab: {fileID: 5682021106543877335, guid: e5f8e5526c3be7542b66d48b3c0ed76b, type: 3}
   FallDeadVFXPrefab: {fileID: 3011233550371498735, guid: 794e3e0914193c6458c4b710a6e3a79c, type: 3}
   IsSuperArmor: 0
@@ -4504,7 +4504,6 @@ MonoBehaviour:
   CrabHoldPoint: {fileID: 84351679138067317}
   LastDashTapTimeLeft: -999
   LastDashTapTimeRight: -999
-  _ultimateChanceTimer: 0
   _playerHitPrefab: {fileID: 2035258430509604298, guid: 41d74accc0c13ea49a73d4a8e72b6753, type: 3}
   _playerHitParticlePrefab: {fileID: 5165221273104778726, guid: 0671084d3f7c9ea4596f21e58a274a5a, type: 3}
   _playerCritHitPrefab: {fileID: 8239534582076007557, guid: 4071981ad495ce949b0be18381acbb03, type: 3}
@@ -4869,6 +4868,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AirDropItemLootVFX: {fileID: 3920707082676358601}
+--- !u!114 &115014031193163826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05f70ab8c5c93fc4783cb2bbed5cea3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UltimateEffectPrefab: {fileID: 0}
+  _ultimateChanceTimer: 0
 --- !u!1 &6883906685738839930
 GameObject:
   m_ObjectHideFlags: 0

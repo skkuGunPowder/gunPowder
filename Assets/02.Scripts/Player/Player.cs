@@ -98,6 +98,9 @@ public class Player : MonoBehaviourPun, IDamagable
     public event Action OnUltimateChanceActivated;   // 궁극기 사용 가능 상태 활성화
     public event Action OnUltimateChanceDeactivated; // 궁극기 사용 가능 상태 비활성화
 
+    private PlayerUltimateController _ultimateController;
+    public PlayerUltimateController UltimateController => _ultimateController;
+
     [SerializeField]
     private BoxRay2D _groundRay2D;
     public BoxRay2D GroundRay2D => _groundRay2D;
@@ -107,7 +110,6 @@ public class Player : MonoBehaviourPun, IDamagable
     public GameObject GunPowderPrefab;
     public GameObject DieExplosionPrefab;
     public GameObject HitEffectPrefab;
-    public GameObject UltimateEffectPrefab;
     public GameObject ExplosionEffectPrefab;
     public GameObject FallDeadVFXPrefab;
 
@@ -139,10 +141,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public float LastNormalBombTime => _lastNormalBombTime;
     public float LastSpecialBombTime => _lastSpecialBombTime;
 
-    private Ultimate _ultimate;
-    public Ultimate Ultimate => _ultimate;
-    private bool _ultimateEffectOn = false;
-    private Coroutine _ultimateEffectOffRoutine;
+    public Ultimate Ultimate => _ultimateController != null ? _ultimateController.Ultimate : null;
 
     private PlayerMaterial _playerMaterial;
     private PlayerFSM _playerFSM;
@@ -154,7 +153,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private PlayerBuffHandler _playerBuffHandler;
     public PlayerBuffHandler PlayerBuffHandler => _playerBuffHandler;
-    
+
     public bool IsSuperArmor = false;
     private RigidbodyConstraints2D _originalConstraints; // SuperArmor 적용 전 원본 제약 조건
 
@@ -175,8 +174,7 @@ public class Player : MonoBehaviourPun, IDamagable
     public float LastDashTapTimeLeft = -999f;
     public float LastDashTapTimeRight = -999f;
 
-    [SerializeField] private float _ultimateChanceTimer = 0f; // 내부 타이머(갱신/소모 로직은 별도 구현 예정)
-    public float UltimateChanceTimer { get => _ultimateChanceTimer; set => _ultimateChanceTimer = value; }
+    public float UltimateChanceTimer { get => _ultimateController != null ? _ultimateController.UltimateChanceTimer : 0f; set { if (_ultimateController != null) _ultimateController.UltimateChanceTimer = value; } }
 
     // 공격 없을 때 경고 상태 동기화
     private bool _isNoAttackWarningActive = false;
@@ -197,7 +195,7 @@ public class Player : MonoBehaviourPun, IDamagable
     [SerializeField] private GameObject _playerGunPowderUsePrefab;     // 건파우더 사용 파티클
     [SerializeField] private Vector3 _playerHitVFXOffset = new Vector3(0, 5f, 0f); // 히트 파티클 오프셋 (위쪽으로 5f만큼 올림)
     private const float PLAYER_HIT_PARTICLE_OFFSET = 0.5f;  // 자신의 우측 오프셋
-    
+
     // 폭발당 히트 파티클 수집용
     private class PendingExplosionHit
     {
@@ -206,7 +204,7 @@ public class Player : MonoBehaviourPun, IDamagable
         public List<bool> victimIsCrits = new List<bool>(); // 각 피격자의 크리티컬 여부 (개별 파티클용)
         public bool hasCrit = false; // 폭발에 크리티컬이 하나라도 있는지 (공격자 이펙트/사운드용)
     }
-    
+
     private PendingExplosionHit _currentExplosionHit;
     private Coroutine _processHitCoroutine;
 
@@ -219,6 +217,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerFSM = GetComponent<PlayerFSM>();
         _damagePopup = GetComponent<DamagePopup>();
         _skinManager = GetComponent<PlayerSkinManager>();
+        _ultimateController = GetComponent<PlayerUltimateController>();
         // _playerHealthBar = GetComponentInChildren<PlayerHealthBar>();
 
         EquipedItemDict = new Dictionary<EItemType, ItemDTO>();
@@ -267,7 +266,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void OnDestroy()
     {
         // OnDisable에서 이미 색상 복원이 처리되므로 여기서는 제거
-        
+
         // 이벤트 구독 해제
         if (EventManager.Instance != null)
         {
@@ -278,16 +277,13 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.OnGunPowderEmpty -= HandleGunPowderEmpty;
             _playerStat.OnGunpowderIncreased -= HandleGunpowderIncreased;
         }
-        
+
         // DOTween 정리
         if (_preExplosionPulseTween != null)
         {
             _preExplosionPulseTween.Kill(false);
             _preExplosionPulseTween = null;
         }
-
-        UltimateManager.Instance.ReturnUltimate(_ultimate);
-        _ultimate = null;
     }
 
     /// <summary>
@@ -441,9 +437,11 @@ public class Player : MonoBehaviourPun, IDamagable
         // 특수폭탄 정보 받아오기                
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
-        if (UltimateManager.Instance != null)
+        // 궁극기 설정
+        if (UltimateManager.Instance != null && _ultimateController != null)
         {
-            _ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
+            Ultimate ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
+            _ultimateController.SetUltimate(ultimate);
         }
 
         SetPlayerOrderInLayer();
@@ -531,6 +529,13 @@ public class Player : MonoBehaviourPun, IDamagable
         _playerStat.OnGunpowderIncreased += HandleGunpowderIncreased;
         EventManager.Instance.OnPlayerItemChanged += LoadItems;
 
+        // 궁극기 컨트롤러 이벤트 연결
+        if (_ultimateController != null)
+        {
+            _ultimateController.OnUltimateChanceActivated += () => OnUltimateChanceActivated?.Invoke();
+            _ultimateController.OnUltimateChanceDeactivated += () => OnUltimateChanceDeactivated?.Invoke();
+        }
+
         // 2. Rigidbody2D 최적화된 초기화
         if (photonView.IsMine)
         {
@@ -555,7 +560,10 @@ public class Player : MonoBehaviourPun, IDamagable
         _gunPowderDecreaseTimer = 0f;
         _gunPowderDecreaseWithoutAttackTimer = 0f;
         _colorUpdateWithoutAttackTimer = 0f;
-        _ultimateChanceTimer = 0f;
+        if (_ultimateController != null)
+        {
+            _ultimateController.ResetUltimateChanceTimer();
+        }
 
         if (PhotonView.IsMine)
         {
@@ -576,7 +584,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 로컬 필드 팀을 항상 네트워크 프로퍼티와 동기화
         SyncTeamFromCustomProperties();
-        
+
         // 모든 플레이어의 팀 동기화 (지연 호출로 CustomProperties 동기화 대기)
         if (PhotonView.IsMine)
         {
@@ -590,7 +598,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _playerFSM.SyncStateChange<PlayerIdleState>();
         }
-        
+
         // GameObject가 활성화될 때 팀 동기화 (뒤에 들어온 플레이어의 경우)
         // SyncTeamFromCustomProperties();
     }
@@ -632,10 +640,10 @@ public class Player : MonoBehaviourPun, IDamagable
             // 현재 색상이 빨간색(경고 상태)인지 확인
             Color currentColor = renderer.color;
             Color.RGBToHSV(currentColor, out float h, out float s, out float v);
-            
+
             // H가 0이고 S가 높으면 빨간색으로 판단 -> 흰색으로 저장
             bool isRedWarning = (h < 0.05f || h > 0.95f) && s > 0.3f;
-            
+
             if (isRedWarning)
             {
                 // 빨간색 경고 상태이면 기본 색상(흰색)을 원본으로 저장
@@ -706,7 +714,10 @@ public class Player : MonoBehaviourPun, IDamagable
         _colorUpdateWithoutAttackTimer = 0f;
         _lastNormalBombTime = 0f;
         _lastSpecialBombTime = 0f;
-        _ultimateChanceTimer = 0f;
+        if (_ultimateController != null)
+        {
+            _ultimateController.ResetUltimateChanceTimer();
+        }
         _warningSfxTimer = 0f;
         // legacy SFX state removed (moved to PlayerSFXAnimationEvent)
 
@@ -741,10 +752,10 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         // 죽을 때 모든 효과 초기화 (경고 + 궁극기)
         // 순서: 깜박임 해제 → 궁극기 해제 → 색상 복원
-        if (_ultimateEffectOn)
+        if (_ultimateController != null && _ultimateController.IsUltimateEffectOn())
         {
             // 궁극기 효과 비활성화 (내부에서 경고도 자동으로 해제됨)
-            SetUltimateEffectState(false);
+            _ultimateController.SetUltimateEffectState(false);
         }
         else
         {
@@ -753,7 +764,10 @@ public class Player : MonoBehaviourPun, IDamagable
         }
 
         _playerStat.HasUltimateChance = false;
-        _ultimateChanceTimer = 0f;
+        if (_ultimateController != null)
+        {
+            _ultimateController.ResetUltimateChanceTimer();
+        }
 
         if (_playerStat.CurrentPlayerLife > 0)
         {
@@ -772,7 +786,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 // 네트워크 동기화된 상태 변경
                 _playerFSM.SyncStateChange<PlayerDieState>();
             }
-            
+
             return;
         }
 
@@ -780,14 +794,14 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-        
+
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
         {
             {EProperties.IsDead.ToString(), true},
             {EProperties.Kill.ToString(), PlayerStat.TotalKillCount},
             {EProperties.Damage.ToString(), PlayerStat.TotalDamage}
         });
-        
+
     }
 
     private void Update()
@@ -826,163 +840,14 @@ public class Player : MonoBehaviourPun, IDamagable
             // Gunpowder heal SFX window is managed in PlayerSFXAnimationEvent
             UpdateWarningSfx();
 
-            UltimateChanceTimerUpdate();
+            if (_ultimateController != null)
+            {
+                _ultimateController.UpdateUltimateChanceTimer();
+            }
         }
 
         // 모든 클라이언트에서 실행 (시각적 효과)
         UpdateNoAttackWarningVisuals();
-    }
-
-    /// <summary>
-    /// 궁극기 효과 활성화/비활성화 (Material + VFX + 이벤트)
-    /// </summary>
-    private void SetUltimateEffectState(bool isActive, bool invokeEvent = true)
-    {
-        if (isActive)
-        {
-            // 궁극기 활성화 시 경고 상태 해제
-            ClearNoAttackWarning();
-            
-            RPC_SetMaterial((byte)EPlayerMaterial.Ultimate);
-            RPC_UltimateEffect(true);
-            _ultimateEffectOn = true;
-            
-            if (invokeEvent)
-            {
-                OnUltimateChanceActivated?.Invoke();
-            }
-        }
-        else
-        {
-            // 궁극기 비활성화: 깜박임 완전 중단 → 색상 복원 → Material 복구 순서
-            ClearNoAttackWarning();  // 1. 깜박임 중단 + 타이머 초기화 + 색상 복원
-            
-            RPC_SetMaterial((byte)EPlayerMaterial.Default);  // 2. Material 기본으로
-            RPC_UltimateEffect(false);  // 3. 궁극기 VFX 끄기 (내부에서 색상 복원 재확인)
-            _ultimateEffectOn = false;
-            
-            if (invokeEvent)
-            {
-                OnUltimateChanceDeactivated?.Invoke();
-            }
-        }
-    }
-
-    /// <summary>
-    /// 궁극기 사용 가능 상태 타이머 업데이트
-    /// </summary>
-    private void UltimateChanceTimerUpdate()
-    {
-        // 궁극기 사용가능 상태
-        if (_playerStat.HasUltimateChance)
-        {
-            if (!_ultimateEffectOn)
-            {
-                if (UltimateEffectPrefab != null && !UltimateEffectPrefab.activeSelf)
-                {
-                    SetUltimateEffectState(true);
-                }
-            }
-
-            _ultimateChanceTimer += Time.deltaTime;
-            if (_ultimateChanceTimer >= _playerStat.UltimateChanceDuration)
-            {
-                _playerStat.HasUltimateChance = false;
-                _playerStat.HasUsedUltimateThisLife = true;
-                _ultimateChanceTimer = 0f;
-                
-                SetUltimateEffectState(false);
-            }
-        }
-    }
-
-    public void RPC_UltimateEffect(bool isOn)
-    {
-        if (!PhotonView.IsMine)
-        {
-            return;
-        }
-        PhotonView.RPC(nameof(UltimateEffect), RpcTarget.All, isOn);
-    }
-
-    [PunRPC]
-    public void UltimateEffect(bool isOn)
-    {
-        if (UltimateEffectPrefab == null)
-        {
-            return;
-        }
-
-        if (isOn)
-        {
-            // 궁극기 활성화 시 색상 복원 (모든 클라이언트에서 실행)
-            RestoreOriginalColors();
-            
-            UltimateEffectPrefab.SetActive(true);
-            if (_ultimateEffectOffRoutine != null)
-            {
-                StopCoroutine(_ultimateEffectOffRoutine);
-                _ultimateEffectOffRoutine = null;
-            }
-            UltimateEffectPrefab.SetActive(true);
-            PlayParticleGroup(UltimateEffectPrefab);
-        }
-        else
-        {
-            // 궁극기 비활성화 시 색상 복원 (모든 클라이언트에서 실행)
-            RestoreOriginalColors();
-            
-            if (_ultimateEffectOffRoutine != null)
-            {
-                StopCoroutine(_ultimateEffectOffRoutine);
-            }
-            _ultimateEffectOffRoutine = StartCoroutine(StopParticleGroupThenDisable(UltimateEffectPrefab));
-        }
-    }
-
-    private void PlayParticleGroup(GameObject root)
-    {
-        var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
-        for (int i = 0; i < particleSystems.Length; i++)
-        {
-            ParticleSystem ps = particleSystems[i];
-            if (ps == null) { continue; }
-            var emission = ps.emission;
-            emission.enabled = true;
-            ps.Play(true);
-        }
-    }
-
-    private IEnumerator StopParticleGroupThenDisable(GameObject root)
-    {
-        var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
-        for (int i = 0; i < particleSystems.Length; i++)
-        {
-            ParticleSystem ps = particleSystems[i];
-            if (ps == null) { continue; }
-            var emission = ps.emission;
-            emission.enabled = false;
-            ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-        }
-
-        bool anyAlive = true;
-        while (anyAlive)
-        {
-            anyAlive = false;
-            for (int i = 0; i < particleSystems.Length; i++)
-            {
-                ParticleSystem ps = particleSystems[i];
-                if (ps != null && ps.IsAlive(true))
-                {
-                    anyAlive = true;
-                    break;
-                }
-            }
-            yield return null;
-        }
-
-        root.SetActive(false);
-        _ultimateEffectOffRoutine = null;
     }
 
     /// <summary>
@@ -1045,43 +910,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void ExecuteUltimate()
     {
-        if (_playerStat.HasUltimateChance && !_playerStat.HasUsedUltimateThisLife)
+        if (_ultimateController != null)
         {
-            if (_ultimate == null)
-            {
-                Debug.LogError("궁극기 스크립트를 찾을 수 없습니다.");
-                return;
-            }
-
-            // 피가 부족하면 궁극기 사용 불가
-            if (_playerStat.CurrentPlayerGunPowderCount <= _ultimate.GetCost())
-            {
-                return;
-            }
-
-            _ultimate.ExcuteUltimate();
-            _playerStat.HasUsedUltimateThisLife = true;
-            _playerStat.HasUltimateChance = false;
-            _ultimateChanceTimer = 0f;
-            int ultimateCost = _ultimate.GetCost();
-            _playerStat.DecreaseGunPowderCount(ultimateCost, photonView.OwnerActorNr);
-            
-            // 궁극기 효과 비활성화 (내부에서 경고도 자동으로 해제됨)
-            SetUltimateEffectState(false);
-
-            // SFX
-            _playerSFXAnimationEvent.PlayerUltimateUseSFX();
-
-            // 궁극기 연출
-            PhotonView.RPC(nameof(Rpc_UltimateProduction), RpcTarget.All, _ultimate.GetBombID());
+            _ultimateController.ExecuteUltimate();
         }
-    }
-
-    [PunRPC]
-    public void Rpc_UltimateProduction(string bomb, PhotonMessageInfo info)
-    {
-        PhotonPlayer player = info.Sender;
-        EventManager.Instance.Ultimate(bomb, player);
     }
     /// <summary>
     /// 주기적으로 건파우더 감소
@@ -1137,7 +969,7 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             // 경고 상태 확인 및 동기화
             float ratio = _gunPowderDecreaseWithoutAttackTimer / PlayerStat.AttackPenaltyTime;
-            
+
             // 경고 시작 (ratio가 0.4 이상일 때)
             if (ratio >= REDNESS_START_RATIO && !_isNoAttackWarningActive)
             {
@@ -1336,13 +1168,13 @@ public class Player : MonoBehaviourPun, IDamagable
         });
         seq.Append(transform.DOScale(_defaultLocalScale, halfDuration).SetEase(Ease.InOutSine));
         seq.SetLoops(-1, LoopType.Restart);
-        
+
         // DOTween이 중단될 때도 색상 복원
         seq.OnKill(() =>
         {
             RestoreOriginalColors();
         });
-        
+
         _preExplosionPulseTween = seq;
     }
 
@@ -1371,7 +1203,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// 저장된 원본 색상으로 스프라이트를 복구합니다.
     /// 모든 색상 효과가 끝날 때 반드시 이 메서드를 호출하여 원본 색상으로 돌아갑니다.
     /// </summary>
-    private void RestoreOriginalColors()
+    public void RestoreOriginalColors()
     {
         // 이미 복원된 상태라면 중복 실행 방지
         if (_isColorRestored)
@@ -1391,7 +1223,7 @@ public class Player : MonoBehaviourPun, IDamagable
                     restoredCount++;
                 }
             }
-            
+
             _isColorRestored = true;
         }
         else
@@ -1491,7 +1323,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// 공격 없음 경고를 완전히 해제 (네트워크 동기화 + 로컬 효과)
     /// 공격 시, 궁극기 활성화 시, 부활 시 등에 사용
     /// </summary>
-    private void ClearNoAttackWarning()
+    public void ClearNoAttackWarning()
     {
         if (PhotonView.IsMine)
         {
@@ -1523,7 +1355,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // 모든 클라이언트에서 VFX와 데미지 처리를 동기화
         PhotonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
     }
-    
+
     /// <summary>
     /// 피격 VFX와 사운드를 재생하는 RPC 메서드
     /// </summary>
@@ -1580,14 +1412,14 @@ public class Player : MonoBehaviourPun, IDamagable
             }
 
             EInGameTeam teamFromProperties = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-            
+
             // 해당 플레이어의 GameObject 찾기
             GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
             GameObject[] enemyObjects = GameObject.FindGameObjectsWithTag("Enemy");
             GameObject[] allPlayerObjects = new GameObject[playerObjects.Length + enemyObjects.Length];
             playerObjects.CopyTo(allPlayerObjects, 0);
             enemyObjects.CopyTo(allPlayerObjects, playerObjects.Length);
-            
+
             foreach (var obj in allPlayerObjects)
             {
                 PhotonView pv = obj.GetComponent<PhotonView>();
@@ -1614,7 +1446,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 공격자 정보 가져오기
         PhotonView attackerView = PhotonView.Find(attackerViewId);
-        
+
         // 같은 팀 체크
         bool isSameTeam = false;
         if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
@@ -1655,7 +1487,7 @@ public class Player : MonoBehaviourPun, IDamagable
             if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
             {
                 PlayerStat attackerStat = attackerView.GetComponent<PlayerStat>();
-                if (attackerStat != null  && attackerView != PhotonView)
+                if (attackerStat != null && attackerView != PhotonView)
                 {
                     attackerStat.IncreaseTotalDamage(damage);
                     /*
@@ -1716,7 +1548,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 //     _playerStat.CurrentPlayerGunPowderCount, damage, _isAfterResurrect);
                 // 첫 공격 후 플래그 리셋
                 // _isAfterResurrect = false;
-                
+
                 // 공격자에게 히트 파티클 생성 요청 (로컬에서만 실행)
                 if (!isSameTeam)
                 {
@@ -2093,7 +1925,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _storedVelocity = Vector2.zero;
     }
 
-    
+
 
     [PunRPC]
     public void RPC_SetIsImmune(bool isImmune)
@@ -2217,7 +2049,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if (_currentExplosionHit == null)
         {
             _currentExplosionHit = new PendingExplosionHit();
-            
+
             // 0.05초 후에 일괄 처리하기로 예약
             if (_processHitCoroutine != null)
             {
@@ -2225,7 +2057,7 @@ public class Player : MonoBehaviourPun, IDamagable
             }
             _processHitCoroutine = StartCoroutine(ProcessHitsDelayed());
         }
-        
+
         // 2. 피격 정보 수집
         _currentExplosionHit.victimPositions.Add(victimPosition);
         _currentExplosionHit.victimViewIds.Add(victimViewId);
@@ -2235,7 +2067,7 @@ public class Player : MonoBehaviourPun, IDamagable
             _currentExplosionHit.hasCrit = true; // 한 명이라도 크리티컬이면 true (공격자 이펙트/사운드용)
         }
     }
-    
+
     /// <summary>
     /// 0.05초 대기 후 수집된 히트 정보를 일괄 처리
     /// </summary>
@@ -2243,28 +2075,28 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         // 같은 프레임의 모든 피격 정보를 수집하기 위해 대기
         yield return new WaitForSeconds(0.05f);
-        
+
         if (_currentExplosionHit == null)
         {
             _processHitCoroutine = null;
             yield break;
         }
-        
+
         bool explosionHasCrit = _currentExplosionHit.hasCrit; // 폭발에 크리티컬이 있는지 (공격자 이펙트/사운드용)
-        
+
         // 1. 각 피격자를 따라다니는 파티클 생성 (플레이어마다 개별 파티클!)
         for (int i = 0; i < _currentExplosionHit.victimViewIds.Count; i++)
         {
             int victimViewId = _currentExplosionHit.victimViewIds[i];
             bool individualCrit = _currentExplosionHit.victimIsCrits[i]; // 각 피격자의 크리티컬 여부
-            
+
             // 각 피격자에 맞는 파티클 선택
             GameObject particlePrefab = individualCrit ? _playerCritHitParticlePrefab : _playerHitParticlePrefab;
-            
+
             if (particlePrefab != null)
             {
                 PhotonView victimView = PhotonView.Find(victimViewId);
-                
+
                 if (victimView != null && victimView.gameObject.activeInHierarchy)
                 {
                     // FollowVFX로 피격자를 따라다니게 함
@@ -2282,7 +2114,7 @@ public class Player : MonoBehaviourPun, IDamagable
                 }
             }
         }
-        
+
         // 2. 자신 우측에 이펙트 생성 (폭발당 1개만! 크리티컬 우선)
         GameObject hitPrefab = explosionHasCrit ? _playerCritHitPrefab : _playerHitPrefab;
         if (hitPrefab != null)
@@ -2290,7 +2122,7 @@ public class Player : MonoBehaviourPun, IDamagable
             Vector3 spawnPos = transform.position + Vector3.right * PLAYER_HIT_PARTICLE_OFFSET;
             VFXPool.Instance.Play(hitPrefab.name, spawnPos);
         }
-        
+
         /*
         // 3. 사운드 재생 (폭발당 1번만! 크리티컬 우선)
         if (SoundManager.Instance != null)
@@ -2298,7 +2130,7 @@ public class Player : MonoBehaviourPun, IDamagable
             string soundName = explosionHasCrit ? "PlayerCrit_1" : "PlayerHit_1";
             SoundManager.Instance.PlayLocalSound(soundName, transform, 0f, false, SoundType.SFX, true, 1f, 50f);
         }*/
-        
+
         // 정리
         _currentExplosionHit = null;
         _processHitCoroutine = null;
@@ -2355,12 +2187,10 @@ public class Player : MonoBehaviourPun, IDamagable
     /// </summary>
     public void ForceUltimateChance()
     {
-        _playerStat.HasUltimateChance = true;
-        _playerStat.HasUsedUltimateThisLife = false;
-        _ultimateChanceTimer = 0f;
-        _playerStat.UltimateChanceDuration = 999999999f;
-        
-        SetUltimateEffectState(true);
+        if (_ultimateController != null)
+        {
+            _ultimateController.ForceUltimateChance();
+        }
     }
 
     public void SetPausedNoAttack()
@@ -2396,5 +2226,14 @@ public class Player : MonoBehaviourPun, IDamagable
 
         IsSuperArmor = false;
         _rigidbody2D.constraints = _originalConstraints;
+    }
+
+    /// <summary>
+    /// 현재 플레이어의 바라보는 방향을 반환
+    /// </summary>
+    /// <returns>바라보는 방향 (1: 오른쪽, -1: 왼쪽)</returns>
+    public int GetFacingDirection()
+    {
+        return _playerStat.FacingDirection == 1 ? 1 : -1;
     }
 }
