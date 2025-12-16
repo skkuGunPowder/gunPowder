@@ -7,12 +7,17 @@ public class PlayerUltimateController : MonoBehaviour
 {
     private Player _player;
     private PlayerStat _playerStat;
+    
+    [Header("컴포넌트 참조")]
+    [SerializeField]
     private PlayerSFXAnimationEvent _playerSFXAnimationEvent;
+    
     private PhotonView _photonView;
 
     private Ultimate _ultimate;
     public Ultimate Ultimate => _ultimate;
 
+    [Header("프리팹 참조")]
     [SerializeField]
     private GameObject UltimateEffectPrefab;
 
@@ -31,7 +36,6 @@ public class PlayerUltimateController : MonoBehaviour
     {
         _player = GetComponent<Player>();
         _playerStat = GetComponent<PlayerStat>();
-        _playerSFXAnimationEvent = GetComponent<PlayerSFXAnimationEvent>();
         _photonView = GetComponent<PhotonView>();
     }
 

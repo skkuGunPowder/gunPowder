@@ -4329,6 +4329,8 @@ GameObject:
   - component: {fileID: 4940759914797866220}
   - component: {fileID: 2824176436178951148}
   - component: {fileID: 2410395664852380072}
+  - component: {fileID: 115014031193163826}
+  - component: {fileID: -8007391661386075954}
   - component: {fileID: 4024883436230281669}
   - component: {fileID: 3208017360404246875}
   - component: {fileID: 975501548764073768}
@@ -4345,7 +4347,6 @@ GameObject:
   - component: {fileID: 1860317133783251600}
   - component: {fileID: -8973116378369359023}
   - component: {fileID: 5518879131900154970}
-  - component: {fileID: 115014031193163826}
   m_Layer: 7
   m_Name: PlayerTest
   m_TagString: Player
@@ -4485,10 +4486,6 @@ MonoBehaviour:
   - {fileID: 7871627632937552931}
   - {fileID: 5196373830168965635}
   _dashBomb: {fileID: 3535361995329531145, guid: f1faae4f139fbdb45828139c6354ebd0, type: 3}
-  _attackTimer: 0
-  _gunPowderDecreaseTimer: 0
-  _gunPowderDecreaseWithoutAttackTimer: 0
-  _colorUpdateWithoutAttackTimer: 0
   _storedVelocity: {x: 0, y: 0}
   _hasStoredVelocity: 0
   _gunPowderSpreadAngle: 90
@@ -4510,6 +4507,38 @@ MonoBehaviour:
   _playerCritHitParticlePrefab: {fileID: 5165221273104778726, guid: 47cee4349dbeaf249800924be5c06877, type: 3}
   _playerGunPowderUsePrefab: {fileID: 1784645803948900694, guid: c0766ff88c50cb047b0a1b6c9a82bef3, type: 3}
   _playerHitVFXOffset: {x: 0.5, y: 1.5, z: 0}
+--- !u!114 &115014031193163826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05f70ab8c5c93fc4783cb2bbed5cea3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerSFXAnimationEvent: {fileID: 8620183200267240798}
+  UltimateEffectPrefab: {fileID: 1121568680264472322}
+  _ultimateChanceTimer: 0
+--- !u!114 &-8007391661386075954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95eda26324cbd1b4893e7dc670eb8102, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerSFXAnimationEvent: {fileID: 8620183200267240798}
+  _attackTimer: 0
+  _gunPowderDecreaseTimer: 0
+  _gunPowderDecreaseWithoutAttackTimer: 0
+  _colorUpdateWithoutAttackTimer: 0
 --- !u!114 &4024883436230281669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4868,20 +4897,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AirDropItemLootVFX: {fileID: 3920707082676358601}
---- !u!114 &115014031193163826
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6871245214315820508}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05f70ab8c5c93fc4783cb2bbed5cea3f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  UltimateEffectPrefab: {fileID: 0}
-  _ultimateChanceTimer: 0
 --- !u!1 &6883906685738839930
 GameObject:
   m_ObjectHideFlags: 0
