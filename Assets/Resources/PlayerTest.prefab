@@ -4332,6 +4332,7 @@ GameObject:
   - component: {fileID: 115014031193163826}
   - component: {fileID: -8007391661386075954}
   - component: {fileID: -1414300847274725604}
+  - component: {fileID: -4863702246898416452}
   - component: {fileID: 4024883436230281669}
   - component: {fileID: 3208017360404246875}
   - component: {fileID: 975501548764073768}
@@ -4458,15 +4459,6 @@ MonoBehaviour:
   - {fileID: 2297686660635884882}
   - {fileID: 6433354483379324661}
   - {fileID: 3088665711032286281}
-  _diePartList:
-  - {fileID: 954121986114294003}
-  - {fileID: 7541523809711689117}
-  - {fileID: 4373107127214203765}
-  - {fileID: 6883906685738839930}
-  - {fileID: 7764269824478446261}
-  - {fileID: 8789152129179738349}
-  - {fileID: 8723950012076221833}
-  - {fileID: 6903566443520954797}
   PhotonView: {fileID: 0}
   _bombSpawnPointList:
   - {fileID: 6130512474795203499}
@@ -4553,6 +4545,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _gunPowderSpreadAngle: 90
   _playerSFXAnimationEvent: {fileID: 8620183200267240798}
+--- !u!114 &-4863702246898416452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3a29150e88402a4a8c80e261260e69c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _diePartList:
+  - {fileID: 954121986114294003}
+  - {fileID: 7541523809711689117}
+  - {fileID: 4373107127214203765}
+  - {fileID: 6883906685738839930}
+  - {fileID: 7764269824478446261}
+  - {fileID: 8789152129179738349}
+  - {fileID: 8723950012076221833}
+  - {fileID: 6903566443520954797}
 --- !u!114 &4024883436230281669
 MonoBehaviour:
   m_ObjectHideFlags: 0

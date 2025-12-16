@@ -371,7 +371,7 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 		{
 			SpriteRenderer sr = srs[i];
 			if (sr == null) { continue; }
-			_player.RegisterDieSpriteRenderer(sr);
+			_player.VisualController?.RegisterDieSpriteRenderer(sr);
 			sr.enabled = false;
 		}
 	}
@@ -387,7 +387,7 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 		{
 			SpriteRenderer sr = srs[i];
 			if (sr == null) { continue; }
-			_player.UnregisterDieSpriteRenderer(sr);
+			_player.VisualController?.UnregisterDieSpriteRenderer(sr);
 		}
 	}
 

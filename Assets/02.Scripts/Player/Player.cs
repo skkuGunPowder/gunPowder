@@ -5,7 +5,6 @@ using RaycastPro.RaySensors2D;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
 using System.Collections;
-using DG.Tweening;
 
 public class Player : MonoBehaviourPun, IDamagable
 {
@@ -14,21 +13,14 @@ public class Player : MonoBehaviourPun, IDamagable
     public List<Animator> MyAnimatorList => _myAnimatorList;
 
     [Header("죽음 파츠")]
-    [SerializeField]
-    private List<GameObject> _diePartList;
-    public List<GameObject> DiePartList => _diePartList;
-    private List<GameObject> _headPartList;
-    public List<GameObject> HeadPartList => _headPartList;
-    private List<GameObject> _bodyPartList;
-    public List<GameObject> BodyPartList => _bodyPartList;
-    private List<GameObject> _leftArmPartList;
-    public List<GameObject> LeftArmPartList => _leftArmPartList;
-    private List<GameObject> _leftLegPartList;
-    public List<GameObject> LeftLegPartList => _leftLegPartList;
-    private List<GameObject> _rightArmPartList;
-    public List<GameObject> RightArmPartList => _rightArmPartList;
-    private List<GameObject> _rightLegPartList;
-    public List<GameObject> RightLegPartList => _rightLegPartList;
+    // 실제 데이터는 PlayerVisualController가 소유, Player는 접근자만 제공
+    public List<GameObject> DiePartList => _visualController != null ? _visualController.DiePartList : null;
+    public List<GameObject> HeadPartList => _visualController != null ? _visualController.HeadPartList : null;
+    public List<GameObject> BodyPartList => _visualController != null ? _visualController.BodyPartList : null;
+    public List<GameObject> LeftArmPartList => _visualController != null ? _visualController.LeftArmPartList : null;
+    public List<GameObject> LeftLegPartList => _visualController != null ? _visualController.LeftLegPartList : null;
+    public List<GameObject> RightArmPartList => _visualController != null ? _visualController.RightArmPartList : null;
+    public List<GameObject> RightLegPartList => _visualController != null ? _visualController.RightLegPartList : null;
 
     private Rigidbody2D _rigidbody2D;
     public Rigidbody2D Rigidbody2D => _rigidbody2D;
@@ -60,13 +52,8 @@ public class Player : MonoBehaviourPun, IDamagable
     public float GunPowderDecreaseTimer => _gunpowderController != null ? _gunpowderController.GunPowderDecreaseTimer : 0f;
     public float GunPowderDecreaseWithoutAttackTimer => _gunpowderController != null ? _gunpowderController.GunPowderDecreaseWithoutAttackTimer : 0f;
 
-    private Tween _preExplosionPulseTween;
-    private Vector3 _defaultLocalScale;
-    private Dictionary<SpriteRenderer, Color> _originalColorMap; // 게임 시작 시 저장되는 진짜 원본 색상
     private Dictionary<SpriteRenderer, int> _originalSortingOrderMap; // 스프라이트 렌더러의 원본 sortingOrder 저장
-    private bool _isColorRestored = true; // 색상이 원본 상태인지 추적
-    private readonly List<SpriteRenderer> _dieSpriteRendererList = new List<SpriteRenderer>();
-    public IReadOnlyList<SpriteRenderer> DieSpriteRendererList => _dieSpriteRendererList;
+    public IReadOnlyList<SpriteRenderer> DieSpriteRendererList => _visualController != null ? _visualController.DieSpriteRendererList : null;
 
     [Header("히트스탑")]
     [SerializeField]
@@ -105,20 +92,6 @@ public class Player : MonoBehaviourPun, IDamagable
     private const int RANDOM_SEED = 123456;
     private const string BASIC_BOMB_ID = "BO0001";
 
-    // 공격 없을 때 관련 상수
-    private const float COLOR_UPDATE_TICK_SECONDS = 0.5f;
-    private const float REDNESS_START_RATIO = 0.4f;
-    private const float WARNING_RATIO_THRESHOLD = 0.7f;
-    private const float MAX_RED_SATURATION = 0.6f;
-    private const float PULSE_SCALE_MULTIPLIER = 1.2f;
-    private const float PULSE_HALF_DURATION = 0.2f;
-    private const float WARNING_INTERVAL_MAX = 0.7f;
-    private const float WARNING_INTERVAL_MIN = 0.1f;
-    private const float WARNING_PITCH_MIN = 1.0f;
-    private const float WARNING_PITCH_MAX = 1.9f;
-    private const int NO_ATTACK_RELEASE_COUNT = 10;
-    private const float NO_ATTACK_RELEASE_SPREAD_ANGLE = 30f;
-    private const float NO_ATTACK_RELEASE_DISTANCE = 1.0f;
     public BombStat BasicBombStat;
     public BombStat SpecialBombStat;
 
@@ -134,6 +107,8 @@ public class Player : MonoBehaviourPun, IDamagable
     private PlayerMaterial _playerMaterial;
     private PlayerFSM _playerFSM;
     public PlayerFSM PlayerFSM => _playerFSM;
+    private PlayerVisualController _visualController;
+    public PlayerVisualController VisualController => _visualController;
     private PlayerDamageController _damageController;
     public PlayerDamageController DamageController => _damageController;
     private DamagePopup _damagePopup;
@@ -190,18 +165,6 @@ public class Player : MonoBehaviourPun, IDamagable
     public Vector3 PlayerHitVFXOffset => _playerHitVFXOffset;
     public float PlayerHitParticleOffset => PLAYER_HIT_PARTICLE_OFFSET;
 
-    // 폭발당 히트 파티클 수집용
-    private class PendingExplosionHit
-    {
-        public List<Vector3> victimPositions = new List<Vector3>();
-        public List<int> victimViewIds = new List<int>(); // 피격자 ViewID (FollowVFX용)
-        public List<bool> victimIsCrits = new List<bool>(); // 각 피격자의 크리티컬 여부 (개별 파티클용)
-        public bool hasCrit = false; // 폭발에 크리티컬이 하나라도 있는지 (공격자 이펙트/사운드용)
-    }
-
-    private PendingExplosionHit _currentExplosionHit;
-    private Coroutine _processHitCoroutine;
-
     private void Awake()
     {
         _playerStat = GetComponent<PlayerStat>();
@@ -209,6 +172,7 @@ public class Player : MonoBehaviourPun, IDamagable
         PhotonView = GetComponent<PhotonView>();
         _playerMaterial = GetComponent<PlayerMaterial>();
         _playerFSM = GetComponent<PlayerFSM>();
+        _visualController = GetComponent<PlayerVisualController>();
         _damageController = GetComponent<PlayerDamageController>();
         _damagePopup = GetComponent<DamagePopup>();
         _skinManager = GetComponent<PlayerSkinManager>();
@@ -241,22 +205,13 @@ public class Player : MonoBehaviourPun, IDamagable
 
         UnityEngine.Random.InitState(RANDOM_SEED);
 
-        InitializeBodyParts();
+        _visualController?.InitializeBodyParts();
     }
 
     private void OnDisable()
     {
-        // DOTween 정리 (Kill 시 OnKill 콜백에서 RestoreOriginalColors 자동 호출됨)
-        if (_preExplosionPulseTween != null)
-        {
-            _preExplosionPulseTween.Kill(false);
-            _preExplosionPulseTween = null;
-        }
-        else
-        {
-            // Tween이 없는 경우에만 직접 복원
-            RestoreOriginalColors();
-        }
+        // 시각 효과 정리
+        _visualController?.OnOwnerDisable();
     }
 
     private void OnDestroy()
@@ -274,115 +229,11 @@ public class Player : MonoBehaviourPun, IDamagable
             _playerStat.OnGunpowderIncreased -= HandleGunpowderIncreased;
         }
 
-        // DOTween 정리
-        if (_preExplosionPulseTween != null)
-        {
-            _preExplosionPulseTween.Kill(false);
-            _preExplosionPulseTween = null;
-        }
+        // 시각 효과 정리
+        _visualController?.OnOwnerDestroy();
     }
 
-    /// <summary>
-    /// 플레이어의 신체 부위별 GameObject를 초기화하고 분류하는 메서드
-    /// PlayerStat의 SpriteRenderer 리스트를 순회하며 BodyPartMarker 컴포넌트를 기반으로
-    /// 나중에 추가될 부분도 BodyPartMarker 컴포넌트를 추가해줘야 함
-    /// </summary>
-    private void InitializeBodyParts()
-    {
-        // 각 신체 부위별 GameObject 리스트를 초기화
-        _headPartList = new List<GameObject>();        // 머리 부위 리스트
-        _bodyPartList = new List<GameObject>();        // 몸통 부위 리스트
-        _leftArmPartList = new List<GameObject>();     // 왼팔 부위 리스트
-        _leftLegPartList = new List<GameObject>();     // 왼다리 부위 리스트
-        _rightArmPartList = new List<GameObject>();    // 오른팔 부위 리스트
-        _rightLegPartList = new List<GameObject>();    // 오른다리 부위 리스트
-
-        foreach (var part in _diePartList)
-        {
-            if (part == null) { continue; }  // null 체크
-
-            // 해당 SpriteRenderer가 속한 GameObject에서 BodyPartMarker 컴포넌트 검색
-            BodyPartMarker markerComp = part.GetComponent<BodyPartMarker>();
-            if (markerComp == null) { continue; }  // BodyPartMarker가 없으면 스킵
-
-            // 마커에서 정의된 신체 부위 타입 가져오기
-            BodyPartType partType = markerComp.PartType;
-
-            // 신체 부위 타입에 따라 해당하는 리스트에 GameObject 추가
-            switch (partType)
-            {
-                case BodyPartType.Head:     // 머리 부위
-                    _headPartList.Add(part);
-                    break;
-                case BodyPartType.Body:     // 몸통 부위
-                    _bodyPartList.Add(part);
-                    break;
-                case BodyPartType.LeftArm:  // 왼팔 부위
-                    _leftArmPartList.Add(part);
-                    break;
-                case BodyPartType.LeftLeg:  // 왼다리 부위
-                    _leftLegPartList.Add(part);
-                    break;
-                case BodyPartType.RightArm: // 오른팔 부위
-                    _rightArmPartList.Add(part);
-                    break;
-                case BodyPartType.RightLeg: // 오른다리 부위
-                    _rightLegPartList.Add(part);
-                    break;
-            }
-        }
-
-        // 모든 신체 부위 리스트가 비어있는 경우 경고 메시지 출력
-        if ((_headPartList.Count + _bodyPartList.Count + _leftArmPartList.Count + _leftLegPartList.Count + _rightArmPartList.Count + _rightLegPartList.Count) == 0)
-        {
-            Debug.LogWarning("BodyPartMarker를 찾지 못했습니다. PlayerSprites 루트에 마커를 추가해주세요.");
-        }
-
-        InitializeDieSpriteRenderers();
-    }
-
-    private void InitializeDieSpriteRenderers()
-    {
-        _dieSpriteRendererList.Clear();
-        foreach (var part in _diePartList)
-        {
-            if (part == null) continue;
-
-            SpriteRenderer[] spriteRenderers = part.GetComponentsInChildren<SpriteRenderer>(true);
-            foreach (var spriteRenderer in spriteRenderers)
-            {
-                RegisterDieSpriteRenderer(spriteRenderer);
-            }
-        }
-    }
-
-    public void RegisterDieSpriteRenderer(SpriteRenderer spriteRenderer)
-    {
-        if (spriteRenderer == null || _dieSpriteRendererList.Contains(spriteRenderer))
-        {
-            return;
-        }
-
-        _dieSpriteRendererList.Add(spriteRenderer);
-        RegisterOriginalColor(spriteRenderer);
-        RegisterOriginalSortingOrder(spriteRenderer);
-    }
-
-    public void UnregisterDieSpriteRenderer(SpriteRenderer spriteRenderer)
-    {
-        if (spriteRenderer == null)
-        {
-            return;
-        }
-
-        if (_dieSpriteRendererList.Contains(spriteRenderer))
-        {
-            _dieSpriteRendererList.Remove(spriteRenderer);
-        }
-
-        UnregisterOriginalColor(spriteRenderer);
-        UnregisterOriginalSortingOrder(spriteRenderer);
-    }
+    // 죽음 파츠 초기화 및 관리 로직은 PlayerVisualController로 이동
 
     [PunRPC]
     private void RPC_LoadItems()
@@ -516,7 +367,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private void Start()
     {
         // 기본 스프라이트 렌더러들의 원본 sortingOrder 저장
-        InitializeOriginalSortingOrders();
+        _visualController?.InitializeOriginalSortingOrders();
 
         LoadItems();
 
@@ -573,10 +424,8 @@ public class Player : MonoBehaviourPun, IDamagable
             //gameObject.layer = LayerMask.NameToLayer("Enemy");
         }
 
-        _defaultLocalScale = transform.localScale;
-
         // 원본 색상 저장 (게임 시작 시 한 번만)
-        InitializeOriginalColors();
+        _visualController?.InitializeOriginalColors();
 
         // 로컬 필드 팀을 항상 네트워크 프로퍼티와 동기화
         SyncTeamFromCustomProperties();
@@ -600,105 +449,27 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
     /// <summary>
-    /// 게임 시작 시 원본 색상을 저장합니다. (한 번만 실행)
-    /// 이 색상 정보는 절대 변경되지 않으며, 모든 색상 효과가 끝날 때 이 색상으로 복원됩니다.
-    /// </summary>
-    private void InitializeOriginalColors()
-    {
-        if (_originalColorMap == null)
-        {
-            _originalColorMap = new Dictionary<SpriteRenderer, Color>();
-        }
-
-        foreach (var renderer in _playerStat.MySpriteREndererList)
-        {
-            if (renderer != null && !_originalColorMap.ContainsKey(renderer))
-            {
-                // 원본 색상 저장 (이 값은 절대 변경되지 않음)
-                _originalColorMap[renderer] = renderer.color;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 스킨 동적 추가 시 색상 시스템에 편입
-    /// 주의: 스프라이트가 원본 색상 상태일 때 호출해야 합니다.
+    /// 스킨 동적 추가 시 색상 시스템에 편입 (PlayerSkinManager 등에서 사용)
     /// </summary>
     public void RegisterOriginalColor(SpriteRenderer renderer)
     {
-        if (renderer == null) { return; }
-        if (_originalColorMap == null)
-        {
-            _originalColorMap = new Dictionary<SpriteRenderer, Color>();
-        }
-        if (!_originalColorMap.ContainsKey(renderer))
-        {
-            // 현재 색상이 빨간색(경고 상태)인지 확인
-            Color currentColor = renderer.color;
-            Color.RGBToHSV(currentColor, out float h, out float s, out float v);
-
-            // H가 0이고 S가 높으면 빨간색으로 판단 -> 흰색으로 저장
-            bool isRedWarning = (h < 0.05f || h > 0.95f) && s > 0.3f;
-
-            if (isRedWarning)
-            {
-                // 빨간색 경고 상태이면 기본 색상(흰색)을 원본으로 저장
-                _originalColorMap[renderer] = Color.white;
-                // 실제 스프라이트도 흰색으로 즉시 변경
-                renderer.color = Color.white;
-            }
-            else
-            {
-                // 정상 색상이면 현재 색상을 원본으로 저장
-                _originalColorMap[renderer] = currentColor;
-            }
-        }
+        _visualController?.RegisterOriginalColor(renderer);
     }
 
     public void UnregisterOriginalColor(SpriteRenderer renderer)
     {
-        if (renderer == null || _originalColorMap == null) { return; }
-        if (_originalColorMap.ContainsKey(renderer))
-        {
-            _originalColorMap.Remove(renderer);
-        }
+        _visualController?.UnregisterOriginalColor(renderer);
     }
 
-    // 스킨 동적 추가 시 sortingOrder 시스템에 편입/해제
+    // 스킨 동적 추가 시 sortingOrder 시스템에 편입/해제 (PlayerSkinManager 등에서 사용)
     public void RegisterOriginalSortingOrder(SpriteRenderer renderer)
     {
-        if (renderer == null) { return; }
-        if (_originalSortingOrderMap == null)
-        {
-            _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
-        }
-        if (!_originalSortingOrderMap.ContainsKey(renderer))
-        {
-            _originalSortingOrderMap[renderer] = renderer.sortingOrder;
-        }
+        _visualController?.RegisterOriginalSortingOrder(renderer);
     }
 
     public void UnregisterOriginalSortingOrder(SpriteRenderer renderer)
     {
-        if (renderer == null || _originalSortingOrderMap == null) { return; }
-        if (_originalSortingOrderMap.ContainsKey(renderer))
-        {
-            _originalSortingOrderMap.Remove(renderer);
-        }
-    }
-
-    // 플레이어 시작 시 기본 스프라이트 렌더러들의 원본 sortingOrder 저장
-    private void InitializeOriginalSortingOrders()
-    {
-        if (_playerStat?.MySpriteREndererList == null) { return; }
-
-        foreach (var renderer in _playerStat.MySpriteREndererList)
-        {
-            if (renderer != null)
-            {
-                RegisterOriginalSortingOrder(renderer);
-            }
-        }
+        _visualController?.UnregisterOriginalSortingOrder(renderer);
     }
 
     public void ResurrectPlayer()
@@ -851,9 +622,11 @@ public class Player : MonoBehaviourPun, IDamagable
             return;
         }
         _playerMaterial.ApplyMaterialById(id, _playerStat.MySpriteREndererList);
-        if (_dieSpriteRendererList.Count > 0)
+        if (DieSpriteRendererList != null && DieSpriteRendererList.Count > 0)
         {
-            _playerMaterial.ApplyMaterialById(id, _dieSpriteRendererList);
+            // IReadOnlyList -> List로 변환해서 전달
+            List<SpriteRenderer> dieList = new List<SpriteRenderer>(DieSpriteRendererList);
+            _playerMaterial.ApplyMaterialById(id, dieList);
         }
     }
 
@@ -875,21 +648,6 @@ public class Player : MonoBehaviourPun, IDamagable
     }
     // 건파우더 감소 관련 메서드는 PlayerGunpowderController로 이동
 
-    private void SetSpriteRendererWhite()
-    {
-        foreach (var renderer in _playerStat.MySpriteREndererList)
-        {
-            if (renderer == null) { continue; }
-            renderer.color = Color.white;
-        }
-        foreach (var renderer in _dieSpriteRendererList)
-        {
-            if (renderer == null) { continue; }
-            renderer.color = Color.white;
-        }
-        _isColorRestored = false; // 색상이 변경됨
-    }
-
     // 경고음 관련 메서드는 PlayerGunpowderController로 이동
 
     /// <summary>
@@ -897,49 +655,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// </summary>
     public void PlayPreExplosionPulse()
     {
-        if (_preExplosionPulseTween != null && _preExplosionPulseTween.IsActive())
-        {
-            return;
-        }
-
-        float targetScaleMultiplier = PULSE_SCALE_MULTIPLIER;
-        float halfDuration = PULSE_HALF_DURATION; // 커졌다/작아졌다 왕복 0.4초
-        transform.localScale = _defaultLocalScale;
-
-        Sequence seq = DOTween.Sequence();
-        // 커질 때 빨강으로 (원본 색상 기반)
-        seq.AppendCallback(() =>
-        {
-            if (_originalColorMap != null)
-            {
-                foreach (var kv in _originalColorMap)
-                {
-                    if (kv.Key == null) { continue; }
-                    Color originalColor = kv.Value; // 원본 색상 참조 (읽기 전용)
-                    Color.RGBToHSV(originalColor, out float _, out float _, out float v);
-                    Color redCol = Color.HSVToRGB(0f, MAX_RED_SATURATION, v);
-                    redCol.a = originalColor.a;
-                    kv.Key.color = redCol; // 스프라이트 색상만 변경
-                }
-                _isColorRestored = false; // 색상이 변경됨
-            }
-        });
-        seq.Append(transform.DOScale(_defaultLocalScale * targetScaleMultiplier, halfDuration).SetEase(Ease.InOutSine));
-        // 작아질 때 원본 색으로 복구
-        seq.AppendCallback(() =>
-        {
-            RestoreOriginalColors();
-        });
-        seq.Append(transform.DOScale(_defaultLocalScale, halfDuration).SetEase(Ease.InOutSine));
-        seq.SetLoops(-1, LoopType.Restart);
-
-        // DOTween이 중단될 때도 색상 복원
-        seq.OnKill(() =>
-        {
-            RestoreOriginalColors();
-        });
-
-        _preExplosionPulseTween = seq;
+        _visualController?.PlayPreExplosionPulse();
     }
 
     /// <summary>
@@ -947,23 +663,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// </summary>
     public void StopPreExplosionPulse(bool resetScale)
     {
-        if (_preExplosionPulseTween != null)
-        {
-            _preExplosionPulseTween.Kill(false);
-            _preExplosionPulseTween = null;
-            // OnKill 콜백에서 이미 RestoreOriginalColors가 호출됨
-        }
-        else
-        {
-            // Tween이 없었다면 색상이 이미 복원된 상태거나 복원이 필요한 상태
-            // 안전을 위해 한 번 더 복원 (중복 호출이지만 한 번만 실행됨)
-            RestoreOriginalColors();
-        }
-
-        if (resetScale)
-        {
-            transform.localScale = _defaultLocalScale;
-        }
+        _visualController?.StopPreExplosionPulse(resetScale);
     }
 
     /// <summary>
@@ -972,34 +672,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// </summary>
     public void RestoreOriginalColors()
     {
-        // 이미 복원된 상태라면 중복 실행 방지
-        if (_isColorRestored)
-        {
-            return;
-        }
-
-        if (_originalColorMap != null && _originalColorMap.Count > 0)
-        {
-            int restoredCount = 0;
-            foreach (var kv in _originalColorMap)
-            {
-                if (kv.Key != null)
-                {
-                    // 원본 색상으로 복원
-                    kv.Key.color = kv.Value;
-                    restoredCount++;
-                }
-            }
-
-            _isColorRestored = true;
-        }
-        else
-        {
-            // 원본 색상 정보가 없는 경우 흰색으로 설정 (비상 조치)
-            Debug.LogWarning("[Player] 원본 색상 정보가 없습니다. 흰색으로 복원합니다.");
-            SetSpriteRendererWhite();
-            _isColorRestored = true;
-        }
+        _visualController?.RestoreOriginalColors();
     }
 
     public void RPC_PlayExplosionEffect()
@@ -1104,19 +777,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// </summary>
     public void UpdateWarningColor(float targetSaturation)
     {
-        if (_originalColorMap != null)
-        {
-            foreach (var kv in _originalColorMap)
-            {
-                if (kv.Key == null) { continue; }
-                Color originalColor = kv.Value; // 원본 색상 참조 (읽기 전용)
-                Color.RGBToHSV(originalColor, out float _, out float _, out float v);
-                Color newColor = Color.HSVToRGB(0f, targetSaturation, v);
-                newColor.a = originalColor.a;
-                kv.Key.color = newColor; // 스프라이트 색상만 변경
-            }
-            _isColorRestored = false; // 색상이 변경됨
-        }
+        _visualController?.UpdateWarningColor(targetSaturation);
     }
 
     /// <summary>
@@ -1124,7 +785,7 @@ public class Player : MonoBehaviourPun, IDamagable
     /// </summary>
     public bool IsPreExplosionPulseActive()
     {
-        return _preExplosionPulseTween != null && _preExplosionPulseTween.IsActive();
+        return _visualController != null && _visualController.IsPreExplosionPulseActive();
     }
 
     public void PlayerTeamCheck()
@@ -1344,7 +1005,9 @@ public class Player : MonoBehaviourPun, IDamagable
             }
         }
 
-        foreach (SpriteRenderer spriteRenderer in _dieSpriteRendererList)
+        if (DieSpriteRendererList == null) return;
+
+        foreach (SpriteRenderer spriteRenderer in DieSpriteRendererList)
         {
             if (_playerStat.FacingDirection == 1)
             {
