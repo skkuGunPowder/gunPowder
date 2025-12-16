@@ -5,18 +5,31 @@ using UnityEngine;
 public class RoomStatManager : Singleton<RoomStatManager>
 {
     // 스탯 뿌려주는 매니저 = 플레이어에게 뿌려줄 스탯을 찾아옴
+    /// <summary>
+    /// 플레이어 스탯 초기화
+    /// isMaual = true라면 수동으로 설정한 값을 따름
+    /// </summary>
+    
     public int PlayerLife;
     public int PlayerGunpowder;
     public int PlayerDecreaseTime;
     public EInGameTeam PlayerTeam;
-    public bool IsManual = false;
+    public bool CanUlti = true;
+    
+    [SerializeField] private bool _isManual = false;
+    [SerializeField] private bool _infiniteLife = false;
+
     
     protected override void Awake()
     {
         base.Awake();
 
-        if (IsManual)
+        if (_isManual)
         {
+            if (_infiniteLife)
+            {
+                PlayerLife = int.MaxValue;
+            }
             return;
         }
         

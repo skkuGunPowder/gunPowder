@@ -93,9 +93,6 @@ public class PlayerSettingManager : MonoBehaviour
             }
             Spawner.GeneratePlayers(i);
         }
-
-        GameManager.Instance.TimeScaleSetting();
-        DamageChecker.Instance.SetPlayerView();
     }
     
     

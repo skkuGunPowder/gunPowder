@@ -32,6 +32,7 @@ public class DamageChecker : Singleton<DamageChecker>
     {
         Init();
         EventManager.Instance.OnPlayerChanged += LeftPlayer;
+        EventManager.Instance.OnGameStart += SetPlayerView;
     }
     private void Init()
     {

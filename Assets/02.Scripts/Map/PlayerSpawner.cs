@@ -5,10 +5,22 @@ using UnityEngine;
 
 public class PlayerSpawner : MonoBehaviour
 {
-    public GameObject PlayerPrefab;
-    public List<Transform> SpawnPoints = new List<Transform>();
-    public List<RankSpawnPoint> RankSpawnPointList = new List<RankSpawnPoint>();
+    /// <summary>
+    /// 스폰 포인트 설정
+    /// 플레이어 소환
+    /// </summary>
+    [SerializeField] private GameObject PlayerPrefab;
+    [SerializeField] private List<Transform> SpawnPoints = new List<Transform>();
+    [SerializeField] private List<RankSpawnPoint> RankSpawnPointList = new List<RankSpawnPoint>();
     
+    /// <summary>
+    /// 플레이어 소환
+    /// 1. 순번에 따른 소환
+    /// 2. 순위에 따른 소환
+    /// 3. 팀별 소환
+    /// </summary>
+    
+    // 번호에 따른 소환
     public void GeneratePlayers(int count)
     {
         GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, SpawnPoints[count].position, Quaternion.identity, 0);
@@ -22,6 +34,7 @@ public class PlayerSpawner : MonoBehaviour
         }
     }
 
+    // 순위에 따른 소환
     public void GeneratePlayers(int rank, int spawnCount)
     {
         // 등수로 한번 구분
@@ -36,6 +49,5 @@ public class PlayerSpawner : MonoBehaviour
             Player player = playerInstance.GetComponent<Player>();
             break;
         }
-        
     }
 }

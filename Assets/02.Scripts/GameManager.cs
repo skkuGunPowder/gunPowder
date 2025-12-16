@@ -24,8 +24,8 @@ public class GameManager : PhotonSingleton<GameManager>
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
 
-    [Header("부활 지점")]
-    public Transform ResurrectPoint;  // 부활 지점
+    [Header("게임 모드")]
+    [SerializeField] private GameModeBase GameMode;  // 부활 지점
     
     private bool _lastPlayer = false; // 마지막 연출 실행 여부
     private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>(); // 살아 있는 팀원 수 : 팀 / 팀원 수
@@ -364,6 +364,11 @@ public class GameManager : PhotonSingleton<GameManager>
         return _teamCount[team] <= 0;
     }
 
+    public Transform GetResurrectPoint()
+    {
+        return GameMode.GetResurrectPoint();
+    }
+    
     /// <summary>
     /// 플레이어 죽음 상태 변경하기
     /// 막타 연출이 나와야 할 경우 LastDieState로 그게 아니라면 DieState 변경함

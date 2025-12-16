@@ -182,4 +182,25 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGameOver?.Invoke();
     }
+    
+    public event Action<EInGameTeam> OnScoreGoal;
+    
+    public void ScoreGoal(EInGameTeam team)
+    {
+        OnScoreGoal?.Invoke(team);
+    }
+    
+    public event Action<EInGameTeam, int> OnScoreUpdate;
+    
+    public void ScoreUpdate(EInGameTeam team, int score)
+    {
+        OnScoreUpdate?.Invoke(team, score);
+    }
+    
+    public event Action OnGameRespawn;
+
+    public void GameRespawn()
+    {
+        OnGameRespawn?.Invoke();
+    }
 }
