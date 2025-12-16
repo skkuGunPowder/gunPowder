@@ -143,13 +143,13 @@ public class Dummy : MonoBehaviourPun, IDamagable
             {
                 // 공격자가 Player인지 확인
                 Player attackerPlayer = attackerView.GetComponent<Player>();
-                if (attackerPlayer != null)
+                if (attackerPlayer != null && attackerPlayer.DamageController != null)
                 {
                     // 공격자의 Owner가 로컬 플레이어일 때만 RPC 호출 (중복 방지)
                     if (attackerView.Owner == PhotonNetwork.LocalPlayer)
                     {
                         bool isCrit = (damage == maxDamage);
-                        attackerView.RPC(nameof(Player.SpawnAttackerHitParticles), attackerView.Owner, transform.position, isCrit, photonView.ViewID);
+                        attackerView.RPC(nameof(attackerPlayer.DamageController.SpawnAttackerHitParticles), attackerView.Owner, transform.position, isCrit, photonView.ViewID);
                     }
                 }
             }
