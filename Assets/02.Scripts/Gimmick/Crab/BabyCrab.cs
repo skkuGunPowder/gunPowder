@@ -52,7 +52,8 @@ public class BabyCrab : Crab
         _rigidbody.simulated = false;
         // _changeDirectionInterval = Random.Range(1f, 4f);
         
-        player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerConfuseState));
+        // 새로운 통합 상태이상 시스템 사용
+        player.PhotonView.RPC(nameof(player.RPC_ChangeStatusState), RpcTarget.All, (int)StatusEffectType.Confuse);
 
         while (timer < _druation)
         {
