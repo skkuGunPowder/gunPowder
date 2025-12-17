@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Diagnostics;
+using Cysharp.Threading.Tasks;
 
 public class PunchingToy : Bomb, IBomb
 {
@@ -10,9 +11,8 @@ public class PunchingToy : Bomb, IBomb
     protected override void Init()
     {
         base.Init();
-        // TODO: 뒤끝 차트 추가되면 ID작성
-        // SetStat("");
-        // _explosionStat = ItemDatabase.Instance.GetStat<ExplosionStat>("");
+        SetStat("BO0020");
+        _explosionStat = ItemDatabase.Instance.GetStat<ExplosionStat>("EP0020");
         _animator = GetComponent<Animator>();
     }
 
@@ -26,26 +26,32 @@ public class PunchingToy : Bomb, IBomb
         // 폭발 처리 없음
     }
 
-    public void OnAnimationEnd()
+    public async UniTaskVoid OnAnimationEnd()
     {
         // TODO: 애니메이션 끝난 후 처리
-
+        // 애니메이션 대신 임시 딜레이 후 파괴 처리
+        await UniTask.WaitForSeconds(0.3f);
         _isDestroying = true;
         DestroyCollector.Instance.PhotonLazyDestory(gameObject, PhotonView);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if(_isDestroying)
         {
             return;
         }
 
-        Vector2 bounceDirection = collision.contacts[0].normal;
+        if(collision.gameObject == _ownerPhotonview.gameObject)
+        {
+            return;
+        }
+ 
+        Vector2 bounceDirection = (collision.transform.position - transform.position).normalized;
         if(collision.gameObject.CompareTag("Bomb"))
         {
             Rigidbody2D bombRB = collision.gameObject.GetComponent<Rigidbody2D>();
-            bombRB.AddForce(-bounceDirection * _explosionStat.ExplosivePower, ForceMode2D.Impulse);
+            bombRB.AddForce(bounceDirection * _explosionStat.ExplosivePower, ForceMode2D.Impulse);
             return;
         }
 
@@ -58,12 +64,11 @@ public class PunchingToy : Bomb, IBomb
             }
 
             Rigidbody2D playerRB = collision.gameObject.GetComponent<Rigidbody2D>();
-            playerRB.AddForce(-bounceDirection * _explosionStat.ExplosivePower, ForceMode2D.Impulse);
+            playerRB.AddForce(bounceDirection * _explosionStat.ExplosivePower, ForceMode2D.Impulse);
             damagableObject.TakeDamage(_explosionStat.AttackPower, _explosionStat.AttackPower, _explosionStat.HealPercent, transform.position, _ownerPhotonview.ViewID, _ownerPhotonview.OwnerActorNr);
             return;
         }
     }
-
 
     [PunRPC]
     public override void PlaceBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
@@ -74,14 +79,14 @@ public class PunchingToy : Bomb, IBomb
     [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
-        transform.parent = _ownerPhotonview.transform;
+        OnAnimationEnd();
         // TODO
     }
 
     [PunRPC]
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
-        transform.parent = _ownerPhotonview.transform;
+        OnAnimationEnd();
         // TODO
     }
 

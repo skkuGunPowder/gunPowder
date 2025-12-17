@@ -3,13 +3,12 @@ using UnityEngine;
 public class UltimatePunchingToy : Ultimate
 {
     // TODO: 뒤끝 차트 추가되면 ID작성
-    // private const string ID = "";
+    private const string ID = "BO0021";
 
     public override void Init()
     {
-        // TODO
-        // _ownerBombID = "";
-        // _bombStat = ItemDatabase.Instance.GetStat<BombStat>(ID);
+        _ownerBombID = "BO0020";
+        _bombStat = ItemDatabase.Instance.GetStat<BombStat>(ID);
     }
 
     public override void ExcuteUltimate()

@@ -10,8 +10,8 @@ public class ValleyBall : Bomb, IDamagable
 
     public int MaxHitCount = 10;
 
-    public Action OnRedTorched;
-    public Action OnBlueTorched;
+    public Action OnRedTouched;
+    public Action OnBlueTouched;
 
     private float _wobbleAmount = 0.6f;     // 출렁이는 크기 변화 비율
     private float _wobbleDuration = 0.1f;   // 출렁이는 애니메이션 시간
@@ -74,9 +74,9 @@ public class ValleyBall : Bomb, IDamagable
             return;
         }
 
-        if(collision.gameObject.CompareTag("RedTorch"))
+        if(collision.gameObject.CompareTag("RedTouch"))
         {
-            OnRedTorched?.Invoke();
+            OnRedTouched?.Invoke();
             if (PhotonNetwork.IsMasterClient)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
@@ -86,9 +86,9 @@ public class ValleyBall : Bomb, IDamagable
             return;
         }
 
-        if(collision.gameObject.CompareTag("BlueTorch"))
+        if(collision.gameObject.CompareTag("BlueTouch"))
         {
-            OnBlueTorched?.Invoke();
+            OnBlueTouched?.Invoke();
             if (PhotonNetwork.IsMasterClient)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
