@@ -156,7 +156,7 @@ public class CameraController : MonoBehaviour
         OnUIOnOff?.Invoke(false);
         
         foreach (Player p in _currentTargetList)
-        {
+        {   
             if (p == null)
             {
                 continue;

@@ -398,6 +398,6 @@ public class PlayerDieState : PlayerBaseState
     private void MoveToResurrectionPoint()
     {
         DOTween.Kill(_owner.transform);
-        _owner.transform.position = GameManager.Instance.ResurrectPoint.position;
+        _owner.transform.position = GameManager.Instance.GetResurrectPoint().position;
     }
 }
