@@ -66,31 +66,38 @@ public class PlayerBaseState : MonoState
 
     protected virtual void HandleHit()
     {
-        // 피가 50이하라면 히트스탑 상태로
+        // 피가 50이하라면 히트스탑 처리
         // 아니라면 Damage 상태로
         if(_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.PlayerStat.HitStopGunPowderCount)
         {
-            // 이미 히트스탑 상태라면 추가 히트 처리
-            if (_playerFSM.IsCurrentState<PlayerHitStopState>())
+            // 이미 DamagedState이고 히트스탑이 활성화되어 있으면 추가 히트 처리
+            if (_playerFSM.IsCurrentState<PlayerDamagedState>())
             {
-                PlayerHitStopState currentHitStopState = _playerFSM.GetCurrentState<PlayerHitStopState>();
-                if (currentHitStopState != null)
+                PlayerDamagedState currentDamagedState = _playerFSM.GetCurrentState<PlayerDamagedState>();
+                if (currentDamagedState != null && currentDamagedState.IsHitStopActive())
                 {
-                    currentHitStopState.OnAdditionalHit();
+                    currentDamagedState.OnAdditionalHit();
+                }
+                else
+                {
+                    // DamagedState에 있지만 히트스탑이 비활성화된 상태면 새로운 DamagedState로 전환 (히트스탑 활성화)
+                    PlayerDamagedState.SetPendingHitStop(true);
+                    SyncStateChange<PlayerDamagedState>();
                 }
             }
             else
             {
-                // 새로운 히트스탑 상태로 전환
-                SyncStateChange<PlayerHitStopState>();
+                // 다른 상태에서 피격 시 DamagedState로 전환 (히트스탑 활성화)
+                PlayerDamagedState.SetPendingHitStop(true);
+                SyncStateChange<PlayerDamagedState>();
             }
         }
         else
         {
+            // 피가 50 초과면 일반 DamagedState로 전환 (히트스탑 비활성화)
+            PlayerDamagedState.SetPendingHitStop(false);
             SyncStateChange<PlayerDamagedState>();
         }
-
-        
     }
 
     public virtual void MineUpdate()

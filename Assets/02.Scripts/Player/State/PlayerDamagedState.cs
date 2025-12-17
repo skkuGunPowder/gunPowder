@@ -10,12 +10,16 @@ using System.Collections;
 /// - 플레이어가 피격당했을 때의 상태 처리
 /// - 피격 시 무적 시간, 넉백 효과, 체력 비례 추가 힘 적용
 /// - 피격 애니메이션 및 이펙트 관리
+/// - 히트스탑 효과 통합 (건파우더 50 이하일 때)
 /// 
 /// 동작 방식:
-/// 1. 피격 시 무적 상태로 전환 및 태그 변경
-/// 2. 체력 비율에 따른 넉백 효과 적용
-/// 3. 히트 이펙트 활성화 및 방향 설정
-/// 4. 최소 피격 시간 후 바닥 착지 시 Idle 상태로 전환
+/// 1. 피격 시 히트스탑 조건 확인 (건파우더 50 이하)
+/// 2. 히트스탑이면 속도 저장 및 흔들림 효과 적용 후 Damaged 로직 진행
+/// 3. 히트스탑이 아니면 기존 Damaged 로직만 진행
+/// 4. 피격 시 무적 상태로 전환 및 태그 변경
+/// 5. 체력 비율에 따른 넉백 효과 적용
+/// 6. 히트 이펙트 활성화 및 방향 설정
+/// 7. 최소 피격 시간 후 바닥 착지 시 Idle 상태로 전환
 /// </summary>
 public class PlayerDamagedState : PlayerBaseState
 {
@@ -35,11 +39,48 @@ public class PlayerDamagedState : PlayerBaseState
     private const float HIT_EFFECT_DURATION = 0.5f;        // 히트 이펙트 지속 시간
     private const float DEFAULT_HIT_EFFECT_ANGLE = 90f;    // 기본 히트 이펙트 각도
     
+    // 히트스탑 관련 상수
+    private const float MIN_HIT_STOP_TIME = 0.4f;          // 최소 히트스탑 시간 (초)
+    private const float MAX_HIT_STOP_TIME = 0.7f;         // 최대 히트스탑 시간 (초)
+    private const float MIN_SHAKE_X = 1.5f;               // 최소 X축 흔들림 강도
+    private const float MAX_SHAKE_X = 2.5f;                // 최대 X축 흔들림 강도
+    private const float MIN_SHAKE_Y = 1f;                  // 최소 Y축 흔들림 강도
+    private const float MAX_SHAKE_Y = 1.5f;                // 최대 Y축 흔들림 강도
+    private const int SHAKE_VIBRATO_X = 20;                // X축 흔들림 진동 횟수
+    private const int SHAKE_VIBRATO_Y = 10;                // Y축 흔들림 진동 횟수
+    private const float SHAKE_RANDOMNESS = 90;              // 흔들림 무작위성 (도)
+    
     // 상태 변수들
     private float _damagedTimer = 0f;           // 피격 지속 시간 타이머
     private float _actualDamagedTime = 0f;      // 실제 피격 시간 (거리 기반으로 조정된 값)
     private float _originalLinearDamping;       // 원본 선형 감쇠값
     private Tween _knockbackTween;              // 넉백 효과 트윈
+    
+    // 히트스탑 관련 변수들
+    private bool _isHitStopActive = false;      // 히트스탑 활성화 여부
+    private float _hitStopTimer = 0f;           // 히트스탑 타이머
+    private float _currentHitStopDuration = 0f; // 현재 히트스탑 지속시간
+    private Sequence _shakeSequence;           // DOTween 흔들림 시퀀스
+    private float _originalYPosition;          // 히트스탑 시작 시 Y 위치
+    
+    // 히트스탑 여부를 전달하기 위한 static 변수
+    private static bool _pendingHitStop = false;
+
+    /// <summary>
+    /// 다음 상태 진입 시 히트스탑 여부 설정 (PlayerBaseState에서 호출)
+    /// </summary>
+    public static void SetPendingHitStop(bool shouldHitStop)
+    {
+        _pendingHitStop = shouldHitStop;
+    }
+
+    /// <summary>
+    /// 현재 히트스탑 활성화 여부 확인 (외부에서 호출)
+    /// </summary>
+    public bool IsHitStopActive()
+    {
+        return _isHitStopActive;
+    }
 
     /// <summary>
     /// 피격 상태 진입 시 초기화
@@ -49,7 +90,50 @@ public class PlayerDamagedState : PlayerBaseState
         base.OnEnter();
 
         _damagedTimer = 0f;
+        _hitStopTimer = 0f;
         
+        // PlayerBaseState에서 설정한 히트스탑 여부 사용
+        _isHitStopActive = _pendingHitStop;
+        _pendingHitStop = false; // 사용 후 리셋
+        
+        if (_isHitStopActive)
+        {
+            // 히트스탑 로직 실행
+            InitializeHitStop();
+        }
+        else
+        {
+            // 기존 Damaged 로직 실행
+            InitializeDamaged();
+        }
+    }
+    
+    /// <summary>
+    /// 히트스탑 초기화
+    /// </summary>
+    private void InitializeHitStop()
+    {
+        // 건파우더 비율에 따른 히트스탑 시간 계산
+        CalculateHitStopDuration();
+        
+        // 현재 속도 저장 및 정지
+        StoreCurrentVelocityAndFreeze();
+        
+        // Y 위치 저장 (흔들림 제한용)
+        _originalYPosition = _owner.transform.position.y;
+        
+        // 캐릭터 흔들림 효과 시작
+        StartScreenShakeEffect();
+        
+        // 히트 이펙트 활성화
+        ActivateHitEffect();
+    }
+    
+    /// <summary>
+    /// 기존 Damaged 로직 초기화
+    /// </summary>
+    private void InitializeDamaged()
+    {
         // 거리 기반 실제 피격 시간 계산
         CalculateActualDamagedTime();
         
@@ -79,6 +163,13 @@ public class PlayerDamagedState : PlayerBaseState
     {
         base.OnExit();
         
+        // 히트스탑 효과 정리
+        if (_isHitStopActive)
+        {
+            CleanupShakeEffect();
+            RestoreStoredVelocity();
+        }
+        
         // 애니메이션 정리 및 전환
         ResetAnimationsAndTriggerHit();
         
@@ -100,6 +191,26 @@ public class PlayerDamagedState : PlayerBaseState
     /// </summary>
     public override void MineUpdate()
     {
+        // 히트스탑이 활성화되어 있으면 히트스탑 타이머 업데이트
+        if (_isHitStopActive)
+        {
+            _hitStopTimer += Time.deltaTime;
+            
+            // 히트스탑 시간이 완료되면 Damaged 로직으로 전환
+            if (_hitStopTimer >= _currentHitStopDuration)
+            {
+                // 히트스탑 완료 후 Damaged 로직 시작
+                OnHitStopComplete();
+                _isHitStopActive = false;
+            }
+            else
+            {
+                // 히트스탑 중에는 다른 로직 실행 안 함
+                return;
+            }
+        }
+        
+        // Damaged 로직 진행
         _damagedTimer += Time.deltaTime;
 
         // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
@@ -118,6 +229,52 @@ public class PlayerDamagedState : PlayerBaseState
         {
             SyncStateChange<PlayerFallState>();
         }
+    }
+    
+    /// <summary>
+    /// 히트스탑 완료 후 Damaged 로직 시작
+    /// </summary>
+    private void OnHitStopComplete()
+    {
+        // 저장된 속도 복원
+        RestoreStoredVelocity();
+        
+        // 거리 기반 실제 피격 시간 계산
+        CalculateActualDamagedTime();
+        
+        _owner.RPC_SetAnimatorTrigger("HitLoop");
+        
+        // 무적 상태 설정 (히트스탑 완료 후 Damaged 로직으로 전환될 때 설정)
+        SetImmuneState(true);
+        
+        // 체력 비례 추가 힘 적용
+        ApplyHealthBasedForce();
+
+        // 체력 비율에 따른 넉백 효과 적용
+        float currentHealthRatio = CalculateCurrentHealthRatio();
+        ApplyKnockbackEffect(currentHealthRatio);
+    }
+    
+    /// <summary>
+    /// 추가 피격 처리 (히트스탑 중 또는 일반 피격 중)
+    /// </summary>
+    public void OnAdditionalHit()
+    {
+        // 히트스탑이 활성화되어 있으면 히트스탑 타이머 리셋
+        if (_isHitStopActive)
+        {
+            // 타이머 리셋 및 시간 재계산
+            _hitStopTimer = 0f;
+            CalculateHitStopDuration();
+            
+            // 새로운 속도로 업데이트
+            UpdateStoredVelocity();
+            
+            // 흔들림 효과 재시작
+            StartScreenShakeEffect();
+        }
+        // 히트스탑이 아니고 Damaged 로직 진행 중이면 새로운 DamagedState로 전환
+        // (PlayerBaseState에서 이미 처리됨)
     }
     
     /// <summary>
@@ -329,6 +486,153 @@ public class PlayerDamagedState : PlayerBaseState
             // 수평 및 수직 힘 적용
             _owner.Rigidbody2D.AddForce(additionalForce, ForceMode2D.Impulse);
             _owner.Rigidbody2D.AddForce(Vector2.up * UPWARD_FORCE, ForceMode2D.Impulse);
+        }
+    }
+    
+    // ====== 히트스탑 관련 메서드들 ======
+    
+    /// <summary>
+    /// 건파우더 비율에 따른 히트스탑 시간 계산
+    /// </summary>
+    private void CalculateHitStopDuration()
+    {
+        if (_owner == null || _owner.PlayerStat == null) return;
+        
+        float healthRatio = CalculateCurrentHealthRatio();
+        
+        // 건파우더가 적을수록 히트스탑 시간이 길어짐
+        float timeMultiplier = 1f - healthRatio;
+        _currentHitStopDuration = Mathf.Lerp(MIN_HIT_STOP_TIME, MAX_HIT_STOP_TIME, timeMultiplier);
+    }
+    
+    /// <summary>
+    /// 건파우더 비율에 따른 화면 흔들림 강도 계산
+    /// </summary>
+    private Vector2 CalculateShakeIntensity()
+    {
+        if (_owner == null || _owner.PlayerStat == null)
+            return new Vector2(MIN_SHAKE_X, MIN_SHAKE_Y);
+        
+        float healthRatio = CalculateCurrentHealthRatio();
+        
+        // 건파우더가 적을수록 흔들림이 강해짐
+        float intensityMultiplier = 1f - healthRatio;
+        
+        float shakeX = Mathf.Lerp(MIN_SHAKE_X, MAX_SHAKE_X, intensityMultiplier);
+        float shakeY = Mathf.Lerp(MIN_SHAKE_Y, MAX_SHAKE_Y, intensityMultiplier);
+        
+        return new Vector2(shakeX, shakeY);
+    }
+    
+    /// <summary>
+    /// 현재 속도 저장 및 움직임 정지
+    /// </summary>
+    private void StoreCurrentVelocityAndFreeze()
+    {
+        if (_owner.Rigidbody2D != null)
+        {
+            _owner.StoreVelocity();
+            _owner.Rigidbody2D.linearVelocity = Vector2.zero;
+        }
+    }
+    
+    /// <summary>
+    /// 저장된 속도 복원
+    /// </summary>
+    private void RestoreStoredVelocity()
+    {
+        if (_owner.HasStoredVelocity)
+        {
+            _owner.RestoreVelocity();
+        }
+    }
+    
+    /// <summary>
+    /// 저장된 속도 업데이트
+    /// </summary>
+    private void UpdateStoredVelocity()
+    {
+        if (_owner.Rigidbody2D != null)
+        {
+            _owner.StoreVelocity();
+            _owner.Rigidbody2D.linearVelocity = Vector2.zero;
+        }
+    }
+    
+    /// <summary>
+    /// 화면 흔들림 효과 시작
+    /// </summary>
+    private void StartScreenShakeEffect()
+    {
+        if (_owner == null) return;
+        
+        // 기존 흔들림 효과 정리
+        CleanupShakeEffect();
+        
+        // 건파우더 비율에 따른 흔들림 강도 계산
+        Vector2 shakeIntensity = CalculateShakeIntensity();
+        
+        // 흔들림 시퀀스 생성 및 실행
+        CreateShakeSequence(shakeIntensity);
+    }
+    
+    /// <summary>
+    /// 화면 흔들림 효과 정리
+    /// </summary>
+    private void CleanupShakeEffect()
+    {
+        if (_shakeSequence != null)
+        {
+            _shakeSequence.Kill();
+            _shakeSequence = null;
+        }
+    }
+    
+    /// <summary>
+    /// 흔들림 시퀀스 생성 및 실행
+    /// </summary>
+    private void CreateShakeSequence(Vector2 shakeIntensity)
+    {
+        _shakeSequence = DOTween.Sequence();
+        
+        // X축 흔들림 (좌우)
+        _shakeSequence.Join(_owner.transform.DOShakePosition(
+            _currentHitStopDuration, 
+            shakeIntensity.x, 
+            SHAKE_VIBRATO_X, 
+            SHAKE_RANDOMNESS, 
+            false, 
+            true
+        ));
+        
+        // Y축 흔들림 (상하) - Y 위치 제한 적용
+        _shakeSequence.Join(_owner.transform.DOShakePosition(
+            _currentHitStopDuration, 
+            shakeIntensity.y, 
+            SHAKE_VIBRATO_Y, 
+            SHAKE_RANDOMNESS, 
+            false, 
+            true
+        ).OnUpdate(() => {
+            ConstrainYPosition(_originalYPosition);
+        }));
+        
+        // 시퀀스 완료 시 정리
+        _shakeSequence.OnComplete(() => {
+            _shakeSequence = null;
+        });
+    }
+    
+    /// <summary>
+    /// Y 위치가 원본보다 아래로 내려가지 않도록 제한
+    /// </summary>
+    private void ConstrainYPosition(float originalY)
+    {
+        Vector3 currentPos = _owner.transform.position;
+        if (currentPos.y < originalY)
+        {
+            currentPos.y = originalY;
+            _owner.transform.position = currentPos;
         }
     }
 }

@@ -36,9 +36,7 @@ public class PlayerFSM : MonoFSM<Player>
         AddState<PlayerHitStopState>();
         AddState<PlayerFallState>();
         AddState<PlayerObserveState>();
-        AddState<PlayerConfuseState>();  // 하위 호환성을 위해 유지 (향후 제거 가능)
         AddState<PlayerLastDieState>();
-        AddState<PlayerCrabHoldedState>();  // 하위 호환성을 위해 유지 (향후 제거 가능)
         AddState<PlayerStatusState>();  // 통합 상태이상 상태
 
         // 초기 상태 설정

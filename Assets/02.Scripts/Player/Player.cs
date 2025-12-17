@@ -1088,14 +1088,8 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerObserveState":
                     playerFSM.ChangeState<PlayerObserveState>();
                     break;
-                case "PlayerConfuseState":
-                    playerFSM.ChangeState<PlayerConfuseState>();
-                    break;
                 case "PlayerLastDieState":
                     playerFSM.ChangeState<PlayerLastDieState>();
-                    break;
-                case "PlayerCrabHoldedState":
-                    playerFSM.ChangeState<PlayerCrabHoldedState>();
                     break;
                 case "PlayerStatusState":
                     playerFSM.ChangeState<PlayerStatusState>();
