@@ -7425,13 +7425,14 @@ GameObject:
   - component: {fileID: 3696417923763587152}
   - component: {fileID: 7043931046148973300}
   - component: {fileID: 1065353505640763161}
+  - component: {fileID: 2638687608855146964}
   m_Layer: 7
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5610588456184401135
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7522,7 +7523,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8921445600746061338}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e09f0c9fb0ee74946bb52b314d450a84, type: 3}
   m_Name: 
@@ -7543,10 +7544,24 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8921445600746061338}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &2638687608855146964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8921445600746061338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cb43c7b684347849982c0b01ad34ab4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _intensityBar: {fileID: 2272723030157075251}
+  _canvasGroup: {fileID: 1065353505640763161}
 --- !u!1 &8930653728303460364
 GameObject:
   m_ObjectHideFlags: 0
@@ -8320,6 +8335,14 @@ PrefabInstance:
     - target: {fileID: 6770988671081973103, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
       propertyPath: m_Color.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8611201056070623234, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
+      propertyPath: animations.Array.data[3].commands.Array.data[2].colorValue.b
+      value: 0.20784315
+      objectReference: {fileID: 0}
+    - target: {fileID: 8611201056070623234, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
+      propertyPath: animations.Array.data[3].commands.Array.data[2].colorValue.g
+      value: 0.20000002
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

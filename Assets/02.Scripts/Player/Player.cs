@@ -1097,6 +1097,9 @@ public class Player : MonoBehaviourPun, IDamagable
                 case "PlayerCrabHoldedState":
                     playerFSM.ChangeState<PlayerCrabHoldedState>();
                     break;
+                case "PlayerStatusState":
+                    playerFSM.ChangeState<PlayerStatusState>();
+                    break;
                 default:
                     break;
             }
@@ -1104,6 +1107,23 @@ public class Player : MonoBehaviourPun, IDamagable
         else
         {
             Debug.LogError("PlayerFSM 컴포넌트를 찾을 수 없습니다!");
+        }
+    }
+
+    /// <summary>
+    /// 상태이상 상태로 전환 (StatusEffectType 포함)
+    /// </summary>
+    [PunRPC]
+    public void RPC_ChangeStatusState(int statusEffectType)
+    {
+        // PlayerStatusState에 StatusEffectType을 먼저 설정
+        PlayerStatusState.SetPendingStatusType((StatusEffectType)statusEffectType);
+        
+        // 그 다음 상태 변경
+        PlayerFSM playerFSM = GetComponent<PlayerFSM>();
+        if (playerFSM != null)
+        {
+            playerFSM.ChangeState<PlayerStatusState>();
         }
     }
 
@@ -1265,7 +1285,11 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void Confuse()
     {
-        _playerFSM.ChangeState<PlayerConfuseState>();
+        // 새로운 통합 상태이상 시스템 사용
+        if (PhotonView.IsMine)
+        {
+            PhotonView.RPC(nameof(RPC_ChangeStatusState), RpcTarget.All, (int)StatusEffectType.Confuse);
+        }
     }
 
     public void SetPlayerWet()

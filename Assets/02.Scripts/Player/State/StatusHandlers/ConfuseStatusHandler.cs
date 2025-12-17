@@ -54,31 +54,38 @@ public class ConfuseStatusHandler : IStatusEffectHandler
     public event Action<DirectionKeyType> OnQTEBaseDirectionChanged;  // 기준 방향 변경
     public event Action OnQTEStarted;  // QTE 시작
     public event Action OnQTEEnded;   // QTE 종료 (성공)
-    
+
     public void OnEnter(Player owner)
     {
         if (owner.PhotonView.IsMine)
         {
             InputHandler.BlockInput = true;
+
+            // QTE 바 설정
+            PlayerConfuseQTEBar confuseBar = owner.GetComponentInChildren<PlayerConfuseQTEBar>(true);
+            if (confuseBar != null)
+            {
+                confuseBar.Bind(this, MAX_INTENSITY); // MAX_INTENSITY와 동일 값
+            }
         }
-        
+
         // 타이머 초기화
         InitializeTimers();
-        
+
         // 플레이어 상태 설정 (런 속도로 이동)
         SetupPlayerMovementState(owner);
-        
+
         // 현재 바라보는 방향을 기준으로 초기 방향 설정
         _currentDirection = owner.PlayerStat.FacingDirection >= 0 ? DIRECTION_RIGHT : DIRECTION_LEFT;
 
         // 애니메이션 설정
         owner.ResetAnimatorTrigger("Idle");
         owner.RPC_SetAnimatorTrigger("Confuse");
-        
+
         // QTE 시스템 초기화 및 시작
         InitializeQTE();
     }
-    
+
     public void OnExit(Player owner)
     {
         owner.RPC_ResetAnimatorTrigger("Confuse");
@@ -86,9 +93,16 @@ public class ConfuseStatusHandler : IStatusEffectHandler
         {
             InputHandler.BlockInput = false;
         }
-        
+
         // QTE 시스템 정리
         CleanupQTE();
+
+        //  혼란 QTE 바 언바인드
+        PlayerConfuseQTEBar confuseBar = owner.GetComponentInChildren<PlayerConfuseQTEBar>(true);
+        if (confuseBar != null)
+        {
+            confuseBar.Unbind(this);
+        }
     }
     
     public void Update(Player owner)
@@ -251,9 +265,7 @@ public class ConfuseStatusHandler : IStatusEffectHandler
         _currentScore = 0f;
         _currentBaseDirection = DirectionKeyType.None;
         _hasReceivedFirstInput = false;
-        
-        Debug.Log($"[QTE] 혼란 상태 QTE 시작! 목표 점수: {MAX_INTENSITY}점");
-        
+
         // QTE 시작 이벤트 발생
         OnQTEStarted?.Invoke();
     }
@@ -266,7 +278,6 @@ public class ConfuseStatusHandler : IStatusEffectHandler
         if (_isQTEActive)
         {
             _isQTEActive = false;
-            Debug.Log($"[QTE] QTE 종료 (시간 초과) - 최종 점수: {_currentScore:F1}/{MAX_INTENSITY}");
             OnQTEEnded?.Invoke();
         }
     }
@@ -304,34 +315,25 @@ public class ConfuseStatusHandler : IStatusEffectHandler
     /// </summary>
     private void ProcessQTEInputLogic(DirectionKeyType inputDirection)
     {
-        float scoreBefore = _currentScore;
-        string inputDirectionStr = inputDirection == DirectionKeyType.Left ? "← (왼쪽)" : "→ (오른쪽)";
-        
         if (!_hasReceivedFirstInput)
         {
             // 첫 입력: 1점을 주고 기준 방향 설정
             _currentScore += SCORE_FIRST_INPUT;
             _currentBaseDirection = inputDirection;
             _hasReceivedFirstInput = true;
-            
-            Debug.Log($"[QTE] 첫 입력: {inputDirectionStr} | 점수: {scoreBefore:F1} → {_currentScore:F1} (+{SCORE_FIRST_INPUT}) | 기준 방향: {inputDirectionStr}");
-            
+
             // 기준 방향 변경 이벤트 발생
             OnQTEBaseDirectionChanged?.Invoke(_currentBaseDirection);
         }
         else
         {
             // 두 번째 입력부터
-            string baseDirectionStr = _currentBaseDirection == DirectionKeyType.Left ? "← (왼쪽)" : "→ (오른쪽)";
-            
             if (inputDirection != _currentBaseDirection)
             {
                 // 반대 방향 입력: 1점을 주고 기준을 반대 방향으로 변경
                 _currentScore += SCORE_OPPOSITE_INPUT;
                 _currentBaseDirection = inputDirection;
-                
-                Debug.Log($"[QTE] 반대 방향 입력: {inputDirectionStr} (기준: {baseDirectionStr}) | 점수: {scoreBefore:F1} → {_currentScore:F1} (+{SCORE_OPPOSITE_INPUT}) | 기준 변경: {baseDirectionStr} → {inputDirectionStr}");
-                
+
                 // 기준 방향 변경 이벤트 발생
                 OnQTEBaseDirectionChanged?.Invoke(_currentBaseDirection);
             }
@@ -339,15 +341,9 @@ public class ConfuseStatusHandler : IStatusEffectHandler
             {
                 // 같은 방향 입력: 0.5점을 주고 기준 유지
                 _currentScore += SCORE_SAME_INPUT;
-                
-                Debug.Log($"[QTE] 같은 방향 입력: {inputDirectionStr} (기준: {baseDirectionStr}) | 점수: {scoreBefore:F1} → {_currentScore:F1} (+{SCORE_SAME_INPUT}) | 기준 유지");
             }
         }
-        
-        // 진행률 로그
-        float progress = (_currentScore / MAX_INTENSITY) * 100f;
-        Debug.Log($"[QTE] 진행률: {_currentScore:F1}/{MAX_INTENSITY} ({progress:F1}%)");
-        
+
         // 점수 변경 이벤트 발생 (UI 업데이트용)
         OnQTEProgressChanged?.Invoke(_currentScore, MAX_INTENSITY);
     }
@@ -359,9 +355,7 @@ public class ConfuseStatusHandler : IStatusEffectHandler
     {
         _isQTEActive = false;
         _isQTESuccess = true;
-        
-        Debug.Log($"[QTE] ★ QTE 성공! 혼란 상태 해제 ★ | 최종 점수: {_currentScore:F1}/{MAX_INTENSITY}");
-        
+
         OnQTEEnded?.Invoke();
     }
     
