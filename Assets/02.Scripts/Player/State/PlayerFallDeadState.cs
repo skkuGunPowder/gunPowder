@@ -479,13 +479,4 @@ public class PlayerFallDeadState : PlayerBaseState
 
         _owner.Rigidbody2D.linearVelocity = Vector2.zero;
     }
-
-    /// <summary>
-    /// 낙사 상태 중에는 피격에 의한 상태 전환을 막음
-    /// </summary>
-    protected override void HandleHit()
-    {
-        // 낙사 상태 중에는 피격 이벤트를 무시하여 상태 변경을 방지
-        // 아무것도 하지 않음 (상태 변경 방지)
-    }
 }

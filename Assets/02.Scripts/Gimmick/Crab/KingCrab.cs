@@ -53,8 +53,8 @@ public class KingCrab : Crab
         if (player.PhotonView.IsMine)
         {
             InputHandler.BlockInput = true;
-            //player.RPC_SetAnimatorTrigger("HitLoop");
-            player.PhotonView.RPC(nameof(player.RPC_ChangeState), RpcTarget.All, nameof(PlayerCrabHoldedState));
+            // 새로운 통합 상태이상 시스템 사용
+            player.PhotonView.RPC(nameof(player.RPC_ChangeStatusState), RpcTarget.All, (int)StatusEffectType.Crab);
         }
 
         float timer = 0f;

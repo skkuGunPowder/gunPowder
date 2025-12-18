@@ -165,7 +165,7 @@ public class PlayerCoolTime : MonoBehaviour
         if (shadowImage == _specialCoolTimeShadowImage && _specialCoolTimeEffectPrefab != null)
         {
             PlayCoolTimeEndVFX(_specialCoolTimeEffectPrefab);
-            SoundManager.Instance.PlayLocalSound(_specialCoolTimeEndAudio.name, _myPlayer.transform, 0, true);
+            SoundManager.Instance.PlayLocalSound(_specialCoolTimeEndAudio.name, _myPlayer.transform, 0, false);
         }
     }
     
@@ -201,7 +201,6 @@ public class PlayerCoolTime : MonoBehaviour
             {
                 if (_myPlayer != null && _myPlayer.gameObject.activeInHierarchy)
                 {
-                    Debug.Log("PlayCoolTimeEndVFX: " + _myPlayer.transform.position);
                     vfx.PlayAttached(_myPlayer.transform);
                 }
             }

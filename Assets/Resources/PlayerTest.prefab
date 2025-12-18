@@ -4329,6 +4329,10 @@ GameObject:
   - component: {fileID: 4940759914797866220}
   - component: {fileID: 2824176436178951148}
   - component: {fileID: 2410395664852380072}
+  - component: {fileID: 115014031193163826}
+  - component: {fileID: -8007391661386075954}
+  - component: {fileID: -1414300847274725604}
+  - component: {fileID: -4863702246898416452}
   - component: {fileID: 4024883436230281669}
   - component: {fileID: 3208017360404246875}
   - component: {fileID: 975501548764073768}
@@ -4455,15 +4459,6 @@ MonoBehaviour:
   - {fileID: 2297686660635884882}
   - {fileID: 6433354483379324661}
   - {fileID: 3088665711032286281}
-  _diePartList:
-  - {fileID: 954121986114294003}
-  - {fileID: 7541523809711689117}
-  - {fileID: 4373107127214203765}
-  - {fileID: 6883906685738839930}
-  - {fileID: 7764269824478446261}
-  - {fileID: 8789152129179738349}
-  - {fileID: 8723950012076221833}
-  - {fileID: 6903566443520954797}
   PhotonView: {fileID: 0}
   _bombSpawnPointList:
   - {fileID: 6130512474795203499}
@@ -4484,19 +4479,13 @@ MonoBehaviour:
   - {fileID: 7871627632937552931}
   - {fileID: 5196373830168965635}
   _dashBomb: {fileID: 3535361995329531145, guid: f1faae4f139fbdb45828139c6354ebd0, type: 3}
-  _attackTimer: 0
-  _gunPowderDecreaseTimer: 0
-  _gunPowderDecreaseWithoutAttackTimer: 0
-  _colorUpdateWithoutAttackTimer: 0
   _storedVelocity: {x: 0, y: 0}
   _hasStoredVelocity: 0
-  _gunPowderSpreadAngle: 90
   _groundRay2D: {fileID: 2224881741138849301}
   HeadBombPrefab: {fileID: 3001153516144104530, guid: 35563b84d4bb01a42aab623d2ecffda1, type: 3}
   GunPowderPrefab: {fileID: 2640530332653095854, guid: da5e567b315dd384cba2514563ec3da4, type: 3}
   DieExplosionPrefab: {fileID: 913711826124557560, guid: 804d65cb3af63d94f8021d7f15b82be5, type: 3}
   HitEffectPrefab: {fileID: 8841075394196172437}
-  UltimateEffectPrefab: {fileID: 1121568680264472322}
   ExplosionEffectPrefab: {fileID: 5682021106543877335, guid: e5f8e5526c3be7542b66d48b3c0ed76b, type: 3}
   FallDeadVFXPrefab: {fileID: 3011233550371498735, guid: 794e3e0914193c6458c4b710a6e3a79c, type: 3}
   IsSuperArmor: 0
@@ -4504,13 +4493,79 @@ MonoBehaviour:
   CrabHoldPoint: {fileID: 84351679138067317}
   LastDashTapTimeLeft: -999
   LastDashTapTimeRight: -999
-  _ultimateChanceTimer: 0
   _playerHitPrefab: {fileID: 2035258430509604298, guid: 41d74accc0c13ea49a73d4a8e72b6753, type: 3}
   _playerHitParticlePrefab: {fileID: 5165221273104778726, guid: 0671084d3f7c9ea4596f21e58a274a5a, type: 3}
   _playerCritHitPrefab: {fileID: 8239534582076007557, guid: 4071981ad495ce949b0be18381acbb03, type: 3}
   _playerCritHitParticlePrefab: {fileID: 5165221273104778726, guid: 47cee4349dbeaf249800924be5c06877, type: 3}
   _playerGunPowderUsePrefab: {fileID: 1784645803948900694, guid: c0766ff88c50cb047b0a1b6c9a82bef3, type: 3}
   _playerHitVFXOffset: {x: 0.5, y: 1.5, z: 0}
+--- !u!114 &115014031193163826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05f70ab8c5c93fc4783cb2bbed5cea3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerSFXAnimationEvent: {fileID: 8620183200267240798}
+  UltimateEffectPrefab: {fileID: 1121568680264472322}
+  _ultimateChanceTimer: 0
+--- !u!114 &-8007391661386075954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95eda26324cbd1b4893e7dc670eb8102, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerSFXAnimationEvent: {fileID: 8620183200267240798}
+  _attackTimer: 0
+  _gunPowderDecreaseTimer: 0
+  _gunPowderDecreaseWithoutAttackTimer: 0
+  _colorUpdateWithoutAttackTimer: 0
+--- !u!114 &-1414300847274725604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 069707908c48fda4bb9fc016ce7d3736, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _gunPowderSpreadAngle: 90
+  _playerSFXAnimationEvent: {fileID: 8620183200267240798}
+--- !u!114 &-4863702246898416452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871245214315820508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3a29150e88402a4a8c80e261260e69c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _diePartList:
+  - {fileID: 954121986114294003}
+  - {fileID: 7541523809711689117}
+  - {fileID: 4373107127214203765}
+  - {fileID: 6883906685738839930}
+  - {fileID: 7764269824478446261}
+  - {fileID: 8789152129179738349}
+  - {fileID: 8723950012076221833}
+  - {fileID: 6903566443520954797}
 --- !u!114 &4024883436230281669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7370,13 +7425,14 @@ GameObject:
   - component: {fileID: 3696417923763587152}
   - component: {fileID: 7043931046148973300}
   - component: {fileID: 1065353505640763161}
+  - component: {fileID: 2638687608855146964}
   m_Layer: 7
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5610588456184401135
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7467,7 +7523,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8921445600746061338}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e09f0c9fb0ee74946bb52b314d450a84, type: 3}
   m_Name: 
@@ -7488,10 +7544,24 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8921445600746061338}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &2638687608855146964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8921445600746061338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cb43c7b684347849982c0b01ad34ab4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _intensityBar: {fileID: 2272723030157075251}
+  _canvasGroup: {fileID: 1065353505640763161}
 --- !u!1 &8930653728303460364
 GameObject:
   m_ObjectHideFlags: 0
@@ -8265,6 +8335,14 @@ PrefabInstance:
     - target: {fileID: 6770988671081973103, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
       propertyPath: m_Color.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8611201056070623234, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
+      propertyPath: animations.Array.data[3].commands.Array.data[2].colorValue.b
+      value: 0.20784315
+      objectReference: {fileID: 0}
+    - target: {fileID: 8611201056070623234, guid: be4482b49a1ebc347a145ac90065f26d, type: 3}
+      propertyPath: animations.Array.data[3].commands.Array.data[2].colorValue.g
+      value: 0.20000002
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
