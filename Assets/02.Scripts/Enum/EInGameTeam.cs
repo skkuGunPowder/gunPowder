@@ -1,6 +1,6 @@
-public enum EInGameTeam
+public enum EInGameTeam : int
 {
-    Red,
+    Red = 0,
     Blue,
     Green,
     Yellow,

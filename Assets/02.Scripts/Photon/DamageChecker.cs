@@ -6,6 +6,10 @@ using UnityEngine;
 
 public class DamageChecker : Singleton<DamageChecker>
 {
+    /// <summary>
+    /// 플레이어 스탯 변경, UI변경
+    /// 
+    /// </summary>
     private PhotonView _photonView;
 
     private int _currentTopPlayer;                           
@@ -28,6 +32,7 @@ public class DamageChecker : Singleton<DamageChecker>
     {
         Init();
         EventManager.Instance.OnPlayerChanged += LeftPlayer;
+        EventManager.Instance.OnGameStart += SetPlayerView;
     }
     private void Init()
     {

@@ -21,7 +21,6 @@ public class PlayerSettingManager : MonoBehaviour
 
     private void Start()
     {
-        
         if (GameManager.Instance.CurrentGameState == EGameState.Tutorial)
         {
             Debug.Log("Tutorial");
@@ -94,9 +93,6 @@ public class PlayerSettingManager : MonoBehaviour
             }
             Spawner.GeneratePlayers(i);
         }
-
-        GameManager.Instance.TimeScaleSetting();
-        DamageChecker.Instance.SetPlayerView();
     }
     
     

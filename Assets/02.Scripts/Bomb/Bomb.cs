@@ -1,4 +1,3 @@
-using System.Collections;
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
@@ -140,10 +139,6 @@ public class Bomb : MonoBehaviourPun, IBomb
         }
         
         DestroyCollector.Instance.PhotonLazyDestory(gameObject, photonView);
-        // if (PhotonView.IsMine)
-        // {
-        //     PhotonNetwork.Destroy(gameObject);
-        // }
     }
 
     public BombStat GetBombStat()
