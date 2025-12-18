@@ -3,6 +3,8 @@ using UnityEngine;
 using DG.Tweening;
 using System.Collections;
 using Photon.Pun;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 
 public class FireTruck : MonoBehaviour
 {
@@ -33,7 +35,7 @@ public class FireTruck : MonoBehaviour
     private Animator _animator;
     private List<IDamagable> targetsInRange = new List<IDamagable>();
 
-    private Coroutine damageCoroutine;
+    private CancellationTokenSource _attackCancellationToken;
 
 
     private void Awake()
@@ -48,6 +50,13 @@ public class FireTruck : MonoBehaviour
         _cameraController = Camera.main.GetComponent<CameraController>();
         _spriteRenderer.color = new Color(1, 1, 1, 0);
         _damageCollider.enabled = false;
+    }
+
+    private void OnEnable()
+    {
+        if (_attackCancellationToken != null)
+            _attackCancellationToken.Dispose();
+        _attackCancellationToken = new();
     }
 
     [PunRPC]
@@ -83,15 +92,15 @@ public class FireTruck : MonoBehaviour
 
         seq.AppendCallback(() =>
         {
-            StartCoroutine(StartAttackCoroutine());
+            StartAttackUnitask().Forget();
         });
     }
 
     private void StopFireTruck()
     {
-        if (damageCoroutine != null)
+        if (_attackCancellationToken != null)
         {
-            StopCoroutine(damageCoroutine);
+            _attackCancellationToken.Cancel();
         }
 
         Destroy(_vfx.gameObject);
@@ -109,22 +118,18 @@ public class FireTruck : MonoBehaviour
         targetsInRange.Clear();
     }
     
-    private IEnumerator StartAttackCoroutine()
+    private async UniTaskVoid StartAttackUnitask()
     {
-        while (_animator.GetCurrentAnimatorStateInfo(0).IsName("FireTruckLanding") && _animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
-        {
-            yield return null;
-        }
-
+        await UniTask.WaitUntil(() => _animator.GetCurrentAnimatorStateInfo(0).IsName("FireTruckLanding") && _animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f);
         _vfx.Play();
         _damageCollider.enabled = true;
         _animator.SetBool("IsAttack", true);
         SoundManager.Instance.PlayLocalSound(FireAudio.name, transform, 0, true);
-        damageCoroutine = StartCoroutine(DamageOverTime());
+        DamageOverTimeUniTask().Forget();
         DOVirtual.DelayedCall(_duration, StopFireTruck);
     }
 
-    private IEnumerator DamageOverTime()
+    private async UniTaskVoid DamageOverTimeUniTask()
     {
         while (true)
         {
@@ -134,7 +139,7 @@ public class FireTruck : MonoBehaviour
             {
                 target.TakeDamage(_damageAmount, _damageAmount, _healPercent, transform.position, _owner.PhotonView.ViewID, _owner.PhotonView.OwnerActorNr);
             }
-            yield return new WaitForSeconds(_damageInterval);
+            await UniTask.WaitForSeconds(_damageInterval, cancellationToken: _attackCancellationToken.Token);
         }
     }
 
@@ -169,4 +174,17 @@ public class FireTruck : MonoBehaviour
             }
         }
     }
+
+    private void OnDisable()
+    {
+        _attackCancellationToken.Dispose();
+    }
+
+    private void OnDestroy()
+    {
+        _attackCancellationToken.Cancel();
+        _attackCancellationToken.Dispose();
+    }
+
+
 } 
