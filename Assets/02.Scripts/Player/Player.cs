@@ -102,6 +102,16 @@ public class Player : MonoBehaviourPun, IDamagable
     public float LastNormalBombTime => _lastNormalBombTime;
     public float LastSpecialBombTime => _lastSpecialBombTime;
 
+    // 공격 활성화/비활성화 설정
+    [Header("공격 활성화 설정")]
+    [SerializeField]
+    private bool _isNormalAttackEnabled = true;
+    public bool IsNormalAttackEnabled => _isNormalAttackEnabled;
+
+    [SerializeField]
+    private bool _isSpecialAttackEnabled = true;
+    public bool IsSpecialAttackEnabled => _isSpecialAttackEnabled;
+
     public Ultimate Ultimate => _ultimateController != null ? _ultimateController.Ultimate : null;
 
     private PlayerMaterial _playerMaterial;
@@ -571,17 +581,6 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Update()
     {
-        if (PhotonView.IsMine)
-        {
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                SetUltimateSystemEnabled(true);
-            }
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                SetUltimateSystemEnabled(false);
-            }
-        }
         // 건파우더 관련 로직은 PlayerGunpowderController에서 처리
             // 궁극기 타이머 업데이트
             if (PhotonView.IsMine && _ultimateController != null)
@@ -1160,11 +1159,21 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public bool CanNormalBomb()
     {
+        // 기본 공격이 비활성화되어 있으면 false 반환
+        if (!_isNormalAttackEnabled)
+        {
+            return false;
+        }
         return AttackTimer - _lastNormalBombTime >= BasicBombStat.CoolTime;
     }
 
     public bool CanSpecialBomb()
     {
+        // 특수 공격이 비활성화되어 있으면 false 반환
+        if (!_isSpecialAttackEnabled)
+        {
+            return false;
+        }
         return AttackTimer - _lastSpecialBombTime >= SpecialBombStat.CoolTime;
     }
 
@@ -1447,4 +1456,33 @@ public class Player : MonoBehaviourPun, IDamagable
     /// 궁극기 시스템이 활성화되어 있는지 확인
     /// </summary>
     public bool IsUltimateSystemEnabled => _ultimateController != null && _ultimateController.IsUltimateSystemEnabled;
+
+    /// <summary>
+    /// 기본 공격 활성화/비활성화 설정
+    /// </summary>
+    /// <param name="enabled">true: 기본 공격 활성화, false: 기본 공격 비활성화</param>
+    public void SetNormalAttackEnabled(bool enabled)
+    {
+        _isNormalAttackEnabled = enabled;
+    }
+
+    /// <summary>
+    /// 특수 공격 활성화/비활성화 설정
+    /// </summary>
+    /// <param name="enabled">true: 특수 공격 활성화, false: 특수 공격 비활성화</param>
+    public void SetSpecialAttackEnabled(bool enabled)
+    {
+        _isSpecialAttackEnabled = enabled;
+    }
+
+    /// <summary>
+    /// 모든 공격(기본, 특수, 궁극기) 활성화/비활성화 설정
+    /// </summary>
+    /// <param name="enabled">true: 모든 공격 활성화, false: 모든 공격 비활성화</param>
+    public void SetAllAttacksEnabled(bool enabled)
+    {
+        _isNormalAttackEnabled = enabled;
+        _isSpecialAttackEnabled = enabled;
+        SetUltimateSystemEnabled(enabled);
+    }
 }
