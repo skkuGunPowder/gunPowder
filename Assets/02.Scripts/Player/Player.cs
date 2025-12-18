@@ -571,12 +571,23 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Update()
     {
-        // 건파우더 관련 로직은 PlayerGunpowderController에서 처리
-        // 궁극기 타이머 업데이트
-        if (PhotonView.IsMine && _ultimateController != null)
+        if (PhotonView.IsMine)
         {
-            _ultimateController.UpdateUltimateChanceTimer();
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                SetUltimateSystemEnabled(true);
+            }
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                SetUltimateSystemEnabled(false);
+            }
         }
+        // 건파우더 관련 로직은 PlayerGunpowderController에서 처리
+            // 궁극기 타이머 업데이트
+            if (PhotonView.IsMine && _ultimateController != null)
+            {
+                _ultimateController.UpdateUltimateChanceTimer();
+            }
     }
 
     /// <summary>
@@ -1112,7 +1123,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         // PlayerStatusState에 StatusEffectType을 먼저 설정
         PlayerStatusState.SetPendingStatusType((StatusEffectType)statusEffectType);
-        
+
         // 그 다음 상태 변경
         PlayerFSM playerFSM = GetComponent<PlayerFSM>();
         if (playerFSM != null)
@@ -1355,6 +1366,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
+
     public void SetPausedNoAttack()
     {
         if (_gunpowderController != null)
@@ -1373,6 +1385,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     /// <summary>
     /// SuperArmor 활성화: 위치 고정 및 속도 0
+    /// 모든 적으로부터 슈퍼아머 효과 적용
     /// </summary>
     public void SetSuperArmor()
     {
@@ -1386,6 +1399,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     /// <summary>
     /// SuperArmor 비활성화: 원본 제약 조건 복원
+    /// 모든 적으로부터 슈퍼아머 효과 적용해제제
     /// </summary>
     public void ResetSuperArmor()
     {
@@ -1403,4 +1417,34 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         return _playerStat.FacingDirection == 1 ? 1 : -1;
     }
+    
+    /// <summary>
+    /// 궁극기 시스템 활성화/비활성화 설정
+    /// 특정 게임 모드에서 궁극기를 완전히 비활성화할 때 사용
+    /// </summary>
+    /// <param name="enabled">true: 궁극기 활성화, false: 궁극기 비활성화</param>
+    public void SetUltimateSystemEnabled(bool enabled)
+    {
+        if (_ultimateController != null)
+        {
+            _ultimateController.SetUltimateSystemEnabled(enabled);
+        }
+    }
+
+    /*
+    /// <summary>
+    /// 궁극기 시스템 활성화/비활성화 (네트워크 동기화)
+    /// </summary>
+    public void RPC_SetUltimateSystemEnabled(bool enabled)
+    {
+        if (_ultimateController != null)
+        {
+            _ultimateController.RPC_SetUltimateSystemEnabled(enabled);
+        }
+    }*/
+
+    /// <summary>
+    /// 궁극기 시스템이 활성화되어 있는지 확인
+    /// </summary>
+    public bool IsUltimateSystemEnabled => _ultimateController != null && _ultimateController.IsUltimateSystemEnabled;
 }

@@ -32,6 +32,14 @@ public class PlayerUltimateController : MonoBehaviour
     public event System.Action OnUltimateChanceActivated;
     public event System.Action OnUltimateChanceDeactivated;
 
+    /// <summary>
+    /// 궁극기 시스템 활성화 여부 (false면 모든 궁극기 관련 기능이 비활성화됨)
+    /// </summary>
+    [Header("궁극기 활성화 설정")]
+    [SerializeField]
+    private bool _isUltimateSystemEnabled = true;
+    public bool IsUltimateSystemEnabled => _isUltimateSystemEnabled;
+
     private void Awake()
     {
         _player = GetComponent<Player>();
@@ -61,6 +69,12 @@ public class PlayerUltimateController : MonoBehaviour
     /// </summary>
     public void UpdateUltimateChanceTimer()
     {
+        // 궁극기 시스템이 비활성화되어 있으면 동작하지 않음
+        if (!_isUltimateSystemEnabled)
+        {
+            return;
+        }
+
         // 궁극기 사용가능 상태
         if (_playerStat.HasUltimateChance)
         {
@@ -89,6 +103,12 @@ public class PlayerUltimateController : MonoBehaviour
     /// </summary>
     public void SetUltimateEffectState(bool isActive, bool invokeEvent = true)
     {
+        // 궁극기 시스템이 비활성화되어 있으면 활성화 요청 무시 (비활성화 요청은 정리를 위해 허용)
+        if (!_isUltimateSystemEnabled && isActive)
+        {
+            return;
+        }
+
         if (isActive)
         {
             // 궁극기 활성화 시 경고 상태 해제
@@ -210,6 +230,12 @@ public class PlayerUltimateController : MonoBehaviour
 
     public void ExecuteUltimate()
     {
+        // 궁극기 시스템이 비활성화되어 있으면 동작하지 않음
+        if (!_isUltimateSystemEnabled)
+        {
+            return;
+        }
+
         if (_playerStat.HasUltimateChance && !_playerStat.HasUsedUltimateThisLife)
         {
             if (_ultimate == null)
@@ -255,6 +281,12 @@ public class PlayerUltimateController : MonoBehaviour
     /// </summary>
     public void ForceUltimateChance()
     {
+        // 궁극기 시스템이 비활성화되어 있으면 동작하지 않음
+        if (!_isUltimateSystemEnabled)
+        {
+            return;
+        }
+
         _playerStat.HasUltimateChance = true;
         _playerStat.HasUsedUltimateThisLife = false;
         _ultimateChanceTimer = 0f;
@@ -277,5 +309,50 @@ public class PlayerUltimateController : MonoBehaviour
     public void ResetUltimateChanceTimer()
     {
         _ultimateChanceTimer = 0f;
+    }
+
+    /// <summary>
+    /// 궁극기 시스템 활성화/비활성화 설정
+    /// 특정 게임 모드에서 궁극기를 완전히 비활성화할 때 사용
+    /// </summary>
+    /// <param name="enabled">true: 궁극기 활성화, false: 궁극기 비활성화</param>
+    public void SetUltimateSystemEnabled(bool enabled)
+    {
+        _isUltimateSystemEnabled = enabled;
+
+        // 비활성화 시 현재 궁극기 상태도 정리
+        if (!enabled)
+        {
+            // 궁극기 관련 상태 초기화
+            if (_playerStat != null)
+            {
+                _playerStat.HasUltimateChance = false;
+            }
+            _ultimateChanceTimer = 0f;
+
+            // 궁극기 효과가 켜져있으면 끄기
+            if (_ultimateEffectOn)
+            {
+                SetUltimateEffectState(false, invokeEvent: false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 궁극기 시스템 활성화/비활성화 (네트워크 동기화)
+    /// </summary>
+    public void RPC_SetUltimateSystemEnabled(bool enabled)
+    {
+        if (_photonView == null || !_photonView.IsMine)
+        {
+            return;
+        }
+        _photonView.RPC(nameof(SetUltimateSystemEnabledRPC), RpcTarget.All, enabled);
+    }
+
+    [PunRPC]
+    private void SetUltimateSystemEnabledRPC(bool enabled)
+    {
+        SetUltimateSystemEnabled(enabled);
     }
 }
