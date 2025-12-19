@@ -108,11 +108,8 @@ public class VollyballMode : GameModeBase
             return;
         }
         
-        _teamScore[team]++;
-        EndCheck(team);
-        
         // RPC 보내기 위해 int 변환
-        _photonView.RPC(nameof(Rpc_ScoreGoal), RpcTarget.Others, (int)team);
+        _photonView.RPC(nameof(Rpc_ScoreGoal), RpcTarget.All, (int)team);
     }
 
     // 게임 종료 체크 : 5점 이상이라면 게임 종료 On
@@ -132,6 +129,11 @@ public class VollyballMode : GameModeBase
     {
         EInGameTeam inGameTeam = (EInGameTeam)team;
         _teamScore[inGameTeam]++;
+        
+        if (PhotonNetwork.IsMasterClient)
+        {
+            EndCheck(inGameTeam);
+        }
         
         EventManager.Instance.ScoreUpdate(inGameTeam, _teamScore[inGameTeam]);
     }
