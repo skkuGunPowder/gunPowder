@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BackndChat;
 using Photon.Pun;
 using UnityEngine;
@@ -33,7 +34,13 @@ public class UI_IngameChatPopup : UI_Popup
 
     private Action _closeCallback;
     // 인게임 채팅이 동작할 씬 목록
-    private readonly string[] _activeScenes = { "WaitingRoom", "Beach1", "Dock1", "Forest1" };
+    private static readonly string[] _activeScenes =
+        Enum.GetValues(typeof(EMap))
+            .Cast<EMap>()
+            .Where(m => m != EMap.Random && m != EMap.Count)
+            .Select(m => m.ToString())
+            .Prepend("WaitingRoom")
+            .ToArray();
 
     // 채팅 도배 방지 시스템
     private Queue<float> _recentChatTimes = new Queue<float>(); // 최근 채팅 시간 기록
