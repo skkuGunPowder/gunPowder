@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
@@ -66,7 +67,7 @@ public class UI_RoomSlot : MonoBehaviour
             return;
         }
         
-        StartCoroutine(OnClick_Coroutine());
+        Task_OnClick().Forget();
         
         // 잠겨있는 방인가?
         if(_isLocked)
@@ -88,17 +89,22 @@ public class UI_RoomSlot : MonoBehaviour
         PhotonNetwork.JoinRoom(_roomInfo.Name);
     }
 
-    private IEnumerator OnClick_Coroutine()
+    private async UniTaskVoid Task_OnClick()
     {
         _isClicked = true;
-        yield return new WaitForSeconds(ClickInterval);
+        await UniTask.Delay(TimeSpan.FromSeconds(ClickInterval));
+
+        var ct = this.GetCancellationTokenOnDestroy();
+
+        var canceled = await UniTask
+            .Delay(TimeSpan.FromSeconds(ClickInterval), cancellationToken: ct)
+            .SuppressCancellationThrow();
+
+        // Disable로 취소된 경우면 그냥 종료
+        if (canceled) return;
+        
         _isClicked = false;
-
     }
-
-    private void OnDisable()
-    {
-        StopCoroutine(OnClick_Coroutine());
-    }
+    
 }
 

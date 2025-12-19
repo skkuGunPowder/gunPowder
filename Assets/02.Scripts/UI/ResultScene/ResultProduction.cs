@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -85,24 +86,24 @@ public class ResultProduction : MonoBehaviour
         }
 
         _timer = 0;
-        StartCoroutine(Coroutine_FireWorks());
-
+        
+        Task_FireWorks().Forget();
     }
 
-    private IEnumerator Coroutine_FireWorks()
+    private async UniTaskVoid Task_FireWorks()
     {
         foreach (GameObject particle in FireWorksParticle)
         {
             int random = UnityEngine.Random.Range(0, FireWorksPercent);
-            
+
             if (random != 0)
             {
                 continue;
             }
             
             particle.SetActive(true);
-            
-            yield return new WaitForSeconds(FireWorksSpacingTime);
+
+            await UniTask.Delay(TimeSpan.FromSeconds(FireWorksSpacingTime));
         }
     }
 }
