@@ -46,7 +46,7 @@ public class PlayerSpawner : MonoBehaviour
             }
             
             GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, rankSpawnPoint.SpawnPointList[spawnCount].position, Quaternion.identity, 0);
-            Player player = playerInstance.GetComponent<Player>();
+            
             break;
         }
     }

@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
@@ -18,7 +20,7 @@ public class UI_QuickStart : MonoBehaviour
         
         _isClickInterval = true;
        
-        StartCoroutine(ClickInterval_Coroutine());
+        Task_ClickInterval().Forget();
 
         Hashtable hash = new Hashtable()
         {
@@ -34,14 +36,13 @@ public class UI_QuickStart : MonoBehaviour
         // LobbyManager의 party라는 변수가 null이 아니라면 이 함수를 호출한다.
         // 
     }
-    private IEnumerator ClickInterval_Coroutine()
-    {
-        yield return new WaitForSeconds(_clickInterval);
-        _isClickInterval = false;
-    }
 
-    private void OnDestroy()
+    private async UniTaskVoid Task_ClickInterval()
     {
-        StopCoroutine(ClickInterval_Coroutine());
+        var ct = this.GetCancellationTokenOnDestroy();
+        
+        await UniTask.Delay(TimeSpan.FromSeconds(_clickInterval), cancellationToken: ct).SuppressCancellationThrow();
+        
+        _isClickInterval = false;
     }
 }
