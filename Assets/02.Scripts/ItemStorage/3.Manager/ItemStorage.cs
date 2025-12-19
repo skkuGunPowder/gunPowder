@@ -260,6 +260,14 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         OnDataChanged?.Invoke(item.Item.ItemType);
     }
 
+    public void EquipItem(string itemID)
+    {
+        ItemDTO itemDTO = ItemDatabase.Instance.GetItem(itemID);
+        InventoryItem item = new InventoryItem(itemDTO);
+
+        this.EquipItem(item);
+    }
+
     public void UnEquipItem(InventoryItem item)
     {
         if (item == null)
@@ -287,6 +295,14 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
 
         SetPlayerCustomProperties();
         OnDataChanged?.Invoke(item.Item.ItemType);
+    }
+
+    public void UnEquipItem(string itemID)
+    {
+        ItemDTO itemDTO = ItemDatabase.Instance.GetItem(itemID);
+        InventoryItem item = new InventoryItem(itemDTO);
+
+        this.UnEquipItem(item);
     }
 
     public void SetPlayerCustomProperties()
