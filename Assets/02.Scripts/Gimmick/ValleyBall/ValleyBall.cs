@@ -20,12 +20,14 @@ public class ValleyBall : Bomb, IDamagable
 
     private int _hitCount;
     private SpriteRenderer _renderer;
+    private bool _isBurning = false;
 
     protected override void Init()
     {
         _renderer = GetComponent<SpriteRenderer>();
         _renderer.sprite = NormalSprite;
         _hitCount = 0;
+        _isBurning = false;
         _originalScale = transform.localScale;
     }
 
@@ -36,13 +38,17 @@ public class ValleyBall : Bomb, IDamagable
 
     public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut =false, bool isNormalAttack = false)
     {
+        if (_isBurning)
+        {
+            return;
+        }
+
         _hitCount++;
+        float ratio = (float)_hitCount / MaxHitCount;
+        _renderer.color = Color.Lerp(Color.white, Color.red, ratio);
         if(_hitCount >= MaxHitCount)
         {
-            if (PhotonNetwork.IsMasterClient)
-            {
-                photonView.RPC(nameof(Explode), RpcTarget.All);
-            }
+            _isBurning = true;
         }
     }
 
@@ -55,7 +61,8 @@ public class ValleyBall : Bomb, IDamagable
         }
         _isDestroying = true;
         transform.DOKill();
-
+        _renderer.color = Color.white;
+        
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;
@@ -69,14 +76,23 @@ public class ValleyBall : Bomb, IDamagable
             _wobbleTween.Kill();
         }
 
-        if(collision.gameObject.CompareTag("Bomb"))
+        if(collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
         {
-            return;
+            if(!_isBurning)
+            {
+                return;
+            }
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                photonView.RPC(nameof(Explode), RpcTarget.All);
+            }
+            _hitCount = 0;
         }
 
         if(collision.gameObject.CompareTag("RedTouch"))
         {
-            OnRedTouched?.Invoke();
+            EventManager.Instance.ScoreGoal(EInGameTeam.Red);
             if (PhotonNetwork.IsMasterClient)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
@@ -88,7 +104,7 @@ public class ValleyBall : Bomb, IDamagable
 
         if(collision.gameObject.CompareTag("BlueTouch"))
         {
-            OnBlueTouched?.Invoke();
+            EventManager.Instance.ScoreGoal(EInGameTeam.Blue);
             if (PhotonNetwork.IsMasterClient)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
@@ -117,8 +133,7 @@ public class ValleyBall : Bomb, IDamagable
         .SetEase(Ease.OutQuad)
         .OnComplete(() =>
         {
-            transform.DOScale(_originalScale, _wobbleDuration / 2f)
-                .SetEase(Ease.InQuad);
+            transform.DOScale(_originalScale, _wobbleDuration / 2f).SetEase(Ease.InQuad);
         });
     }
 }
