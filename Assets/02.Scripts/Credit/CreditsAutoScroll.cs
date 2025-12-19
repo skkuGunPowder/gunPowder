@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
@@ -136,7 +137,7 @@ public class CreditsAutoScroll : MonoBehaviour
             content.anchoredPosition = anchored;
 
             _isScrolling = false;
-            StartCoroutine(HoldAtEnd());
+            HoldAtEnd().Forget();
             return;
         }
 
@@ -145,21 +146,24 @@ public class CreditsAutoScroll : MonoBehaviour
         content.anchoredPosition = updated;
     }
 
-    private IEnumerator HoldAtEnd()
+    private async UniTaskVoid HoldAtEnd()
     {
         float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
         float t = 0f;
+
+        var ct = this.GetCancellationTokenOnDestroy();
+        
         while (t < endHoldTime)
         {
             t += dt;
-            yield return null;
+            await UniTask.Yield(cancellationToken: ct).SuppressCancellationThrow();
         }
+     
         OnScrollFinished();
     }
 
     private void OnScrollFinished()
     {
-        StopAllCoroutines();
         // TODO: 씬 전환/페이드 등
         PhotonNetwork.LoadLevel(ESceneList.Lobby.ToString());
     }

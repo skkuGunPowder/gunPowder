@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class UI_GameResult : MonoBehaviour
 {
     public List<UI_GameResultSlot> UI_GameResultSlotList = new List<UI_GameResultSlot>();
     public GameObject Header;
-    // public  List<GameResultData> dataList = new List<GameResultData>();
+    // public List<GameResultData> dataList = new List<GameResultData>();
     public float Timer = 0.4f;
     public float LoadTime = 4f;
 
@@ -16,11 +17,11 @@ public class UI_GameResult : MonoBehaviour
         EventManager.Instance.OnGameResult += Refresh;
     }
     
-    private void Refresh()
+    private async void Refresh()
     {
         Header.SetActive(true);
 
-        StartCoroutine(Coroutine_Refresh());
+        Task_Refresh().Forget();
     }
 
     private IEnumerator Coroutine_Refresh()
@@ -48,6 +49,29 @@ public class UI_GameResult : MonoBehaviour
         GameResultManager.Instance.LoadScene();
     }
 
+    private async UniTaskVoid Task_Refresh()
+    {
+        List<GameResultData> dataList = GameResultManager.Instance.ResultDataList;
+
+        for (int i = 0; i < UI_GameResultSlotList.Count; i++)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(Timer));
+
+            if (i < dataList.Count)
+            {
+                GameResultData data = dataList[i];
+                UI_GameResultSlotList[i].gameObject.SetActive(true);
+                UI_GameResultSlotList[i].Refresh(data.Player,data.Damage, data.Rank, data.SurviveTime, data.Kill,data.Team, data.Gold, data.EXP);
+            }
+            else
+            {
+                UI_GameResultSlotList[i].gameObject.SetActive(false);
+            }
+        }
+        
+        await UniTask.Delay(TimeSpan.FromSeconds(LoadTime));
+        GameResultManager.Instance.LoadScene();
+    }
     private void SlotOff()
     {
         foreach (UI_GameResultSlot slot  in  UI_GameResultSlotList)
