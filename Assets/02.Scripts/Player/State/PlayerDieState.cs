@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 플레이어 사망 상태 클래스
@@ -133,7 +134,7 @@ public class PlayerDieState : PlayerBaseState
         _owner.ResurrectPlayer();
         
         // 부활 후 무적 시간 시작
-        StartCoroutine(PostResurrectionImmuneCoroutine());
+        PostResurrectionImmuneCoroutine().Forget();
         
         // Idle 상태로 전환
         SyncStateChange<PlayerIdleState>();
@@ -142,19 +143,22 @@ public class PlayerDieState : PlayerBaseState
     /// <summary>
     /// 부활 후 무적 시간 관리
     /// </summary>
-    private IEnumerator PostResurrectionImmuneCoroutine()
+    private async UniTask PostResurrectionImmuneCoroutine()
     {
         // 안전성 검사
         if (!ValidateOwnerAndComponents())
         {
-            yield break;
+            return;
         }
 
         // 부활 후 무적 시간 대기
-        yield return new WaitForSeconds(IMMUNE_DURATION_AFTER_RESURRECTION);
+        await UniTask.WaitForSeconds(IMMUNE_DURATION_AFTER_RESURRECTION);
         
         // 무적 상태 해제
-        _owner.PlayerStat.IsImmune = false;
+        if (_owner != null && _owner.PlayerStat != null)
+        {
+            _owner.PlayerStat.IsImmune = false;
+        }
     }
 
     // /// <summary>

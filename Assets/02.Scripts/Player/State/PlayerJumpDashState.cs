@@ -1,6 +1,7 @@
 using UnityEngine;
 using RobustFSM.Base;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 
 public class PlayerJumpDashState : PlayerBaseState
 {
@@ -33,9 +34,9 @@ public class PlayerJumpDashState : PlayerBaseState
         CleanupOnExit();
     }
 
-    private IEnumerator JumpDashEffectOffCoroutine()
+    private async UniTask JumpDashEffectOffCoroutine()
     {
-        yield return new WaitForSeconds(_jumpDashEffectOffTime);
+        await UniTask.WaitForSeconds(_jumpDashEffectOffTime);
         _owner.RPC_SetGhostTrail(false);
     }
 
@@ -209,7 +210,7 @@ public class PlayerJumpDashState : PlayerBaseState
     {
         _owner.Rigidbody2D.gravityScale = _originalGravityScale;
         _owner.RPC_ResetAnimatorTrigger("JumpDash");
-        StartCoroutine(JumpDashEffectOffCoroutine());
+        JumpDashEffectOffCoroutine().Forget();
     }
     
     /// <summary>

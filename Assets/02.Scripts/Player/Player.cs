@@ -5,6 +5,7 @@ using RaycastPro.RaySensors2D;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 
 public class Player : MonoBehaviourPun, IDamagable
 {
@@ -1238,12 +1239,12 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             child.gameObject.layer = LayerMask.NameToLayer("DownJump");
         }
-        StartCoroutine(ResetDownJump());
+        ResetDownJump().Forget();
     }
 
-    public IEnumerator ResetDownJump()
+    public async UniTask ResetDownJump()
     {
-        yield return new WaitForSeconds(0.5f);
+        await UniTask.WaitForSeconds(0.5f);
         gameObject.layer = LayerMask.NameToLayer("Player");
         _playerStat.IsDownJump = false;
         foreach (Transform child in transform)
@@ -1264,10 +1265,10 @@ public class Player : MonoBehaviourPun, IDamagable
     [PunRPC]
     private void HeadSpriteOnOff()
     {
-        StartCoroutine(HeadSpriteOnOffCoroutine());
+        HeadSpriteOnOffCoroutine().Forget();
     }
 
-    private IEnumerator HeadSpriteOnOffCoroutine()
+    private async UniTask HeadSpriteOnOffCoroutine()
     {
         // 스킨 슬롯 부모 아래의 모든 스프라이트 렌더러를 끄고, 쿨타임 후 복구
         if (_skinManager is IPlayerSkinManager sm)
@@ -1277,7 +1278,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         _playerStat.MySpriteREndererList[3].enabled = false;
 
-        yield return new WaitForSeconds(BasicBombStat.CoolTime);
+        await UniTask.WaitForSeconds(BasicBombStat.CoolTime);
 
         if (_skinManager is IPlayerSkinManager sm2)
         {

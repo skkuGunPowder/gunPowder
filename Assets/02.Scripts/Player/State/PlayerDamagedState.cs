@@ -2,6 +2,7 @@ using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 플레이어 피격 상태 클래스
@@ -173,8 +174,8 @@ public class PlayerDamagedState : PlayerBaseState
         // 애니메이션 정리 및 전환
         ResetAnimationsAndTriggerHit();
         
-        // 히트 이펙트 비활성화 (코루틴으로 지연 처리)
-        _owner.StartCoroutine(DeactivateHitEffectWithDelay());
+        // 히트 이펙트 비활성화 (UniTask로 지연 처리)
+        DeactivateHitEffectWithDelay().Forget();
 
         // 무적 상태 해제
         SetImmuneState(false);
@@ -403,9 +404,9 @@ public class PlayerDamagedState : PlayerBaseState
     /// <summary>
     /// 지연 후 히트 이펙트 비활성화
     /// </summary>
-    private IEnumerator DeactivateHitEffectWithDelay()
+    private async UniTask DeactivateHitEffectWithDelay()
     {
-        yield return new WaitForSeconds(HIT_EFFECT_DURATION);
+        await UniTask.WaitForSeconds(HIT_EFFECT_DURATION);
         _owner.HitEffectPrefab.SetActive(false);
     }
 
