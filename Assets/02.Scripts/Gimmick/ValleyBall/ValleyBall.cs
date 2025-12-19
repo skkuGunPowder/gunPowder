@@ -29,6 +29,7 @@ public class ValleyBall : Bomb, IDamagable
         _hitCount = 0;
         _isBurning = false;
         _originalScale = transform.localScale;
+        photonView.RPC(nameof(SetOwner), RpcTarget.All, photonView.ViewID);
     }
 
     protected override void Update()
@@ -36,8 +37,14 @@ public class ValleyBall : Bomb, IDamagable
         // Update 처리 없음   
     }
 
+    [PunRPC]
     public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut =false, bool isNormalAttack = false)
     {
+        if(PhotonNetwork.GetPhotonView(attackerViewId).IsMine)
+        {
+            photonView.RPC(nameof(SetOwner), RpcTarget.All, attackerViewId);
+        }
+
         if (_isBurning)
         {
             return;
