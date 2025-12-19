@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -101,10 +102,28 @@ public class RoomManager : PhotonSingleton<RoomManager>
             int index = Random.Range(1, max);
             SelectedMap = (EMap)index;
         }
+
+        _photonView.RPC(nameof(RPC_MapCheck), RpcTarget.All, SelectedMap);
+
+        Delay();
         
+        
+    }
+
+    private async UniTaskVoid Delay()
+    {
+        await UniTask.WaitForSeconds(2f);
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
     }
     
+    [PunRPC]
+    private void RPC_MapCheck(EMap map)
+    {
+        if (map == EMap.VolleyBall1)
+        {
+            ItemStorage.Instance.EquipItem("BO0020");
+        }
+    }
     //현재 이 방에 있는 플레이어들의 계정 정보
     private void SetRoom()
     {
