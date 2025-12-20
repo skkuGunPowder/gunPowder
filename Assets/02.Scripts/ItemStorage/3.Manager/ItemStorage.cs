@@ -249,6 +249,11 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         }
 
         InventoryItem desiredItem = _storedItemDict[item.Item.ItemType].Find(x => x.ID == item.ID);
+        if(desiredItem == null)
+        {
+            Debug.LogError("장착하려는 아이템이 보관함에 없습니다!");
+            desiredItem = item;
+        }
         desiredItem.Equip();
 
         _equippedItemDict[item.Item.ItemType] = desiredItem;
@@ -286,7 +291,14 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         }
 
         InventoryItem desiredItem = _storedItemDict[item.Item.ItemType].Find(x => x.ID == item.ID);
-        desiredItem.UnEquip();
+        if(desiredItem == null)
+        {
+            Debug.LogError("해제하려는 아이템이 보관함에 없습니다!");
+        }
+        else
+        {
+            desiredItem.UnEquip();
+        }
 
         _equippedItemDict[item.Item.ItemType] = null;
 
