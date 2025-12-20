@@ -1,19 +1,18 @@
 using UnityEngine;
 using Photon.Pun;
-using System.Diagnostics;
 using Cysharp.Threading.Tasks;
 
 public class PunchingToy : Bomb, IBomb
 {
-    Animator _animator;
     ExplosionStat _explosionStat;
+    Collider2D _collider;
 
     protected override void Init()
     {
         base.Init();
         SetStat("BO0020");
         _explosionStat = ItemDatabase.Instance.GetStat<ExplosionStat>("EP0020");
-        _animator = GetComponent<Animator>();
+        _collider = GetComponent<Collider2D>();
     }
 
     protected override void Update()
@@ -26,13 +25,20 @@ public class PunchingToy : Bomb, IBomb
         // 폭발 처리 없음
     }
 
-    public async UniTaskVoid OnAnimationEnd()
+    public void OnAnimationEnd()
     {
-        // TODO: 애니메이션 끝난 후 처리
-        // 애니메이션 대신 임시 딜레이 후 파괴 처리
-        await UniTask.WaitForSeconds(0.3f);
         _isDestroying = true;
         DestroyCollector.Instance.PhotonLazyDestory(gameObject, PhotonView);
+    }
+
+    public void OnColliderOn()
+    {
+        _collider.enabled = true;
+    }
+
+    public void OnColliderOff()
+    {
+        _collider.enabled = false;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -79,15 +85,15 @@ public class PunchingToy : Bomb, IBomb
     [PunRPC]
     public override void ThrowBomb(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
-        OnAnimationEnd();
-        // TODO
+        transform.rotation = Quaternion.LookRotation(fireFowordDirection, fireUpDrection);
+        transform.parent = _ownerPhotonview.transform;
     }
 
     [PunRPC]
     public override void ThrowBombStraight(Vector3 fireRightDirection, Vector3 fireUpDrection, Vector3 fireFowordDirection)
     {
-        OnAnimationEnd();
-        // TODO
+        transform.rotation = Quaternion.LookRotation(fireFowordDirection, fireUpDrection);
+        transform.parent = _ownerPhotonview.transform;
     }
 
     [PunRPC]
