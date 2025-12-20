@@ -21,6 +21,7 @@ public class ValleyBall : Bomb, IDamagable
     private int _hitCount;
     private SpriteRenderer _renderer;
     private bool _isBurning = false;
+    private bool _isTourched = false;
 
     protected override void Init()
     {
@@ -73,11 +74,16 @@ public class ValleyBall : Bomb, IDamagable
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;
-        explosion.Explode(_stat.IsFallingOut, _ownerPhotonview);
+        explosion.Explode(false, _ownerPhotonview);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if(_isTourched)
+        {
+            return;
+        }
+
         if (_wobbleTween != null && _wobbleTween.IsActive())
         {
             _wobbleTween.Kill();
@@ -99,11 +105,14 @@ public class ValleyBall : Bomb, IDamagable
 
         if(collision.gameObject.CompareTag("RedTouch"))
         {
+            _isTourched = true;
             EventManager.Instance.ScoreGoal(EInGameTeam.Red);
+
             if (PhotonNetwork.IsMasterClient)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
             }
+
             _isDestroying = true;
             DestroyCollector.Instance.PhotonLazyDestory(gameObject, PhotonView);
             return;
@@ -111,11 +120,14 @@ public class ValleyBall : Bomb, IDamagable
 
         if(collision.gameObject.CompareTag("BlueTouch"))
         {
+            _isTourched = true;
             EventManager.Instance.ScoreGoal(EInGameTeam.Blue);
+
             if (PhotonNetwork.IsMasterClient)
             {
                 photonView.RPC(nameof(Explode), RpcTarget.All);
             }
+
             _isDestroying = true;
             DestroyCollector.Instance.PhotonLazyDestory(gameObject, PhotonView);
             return;
