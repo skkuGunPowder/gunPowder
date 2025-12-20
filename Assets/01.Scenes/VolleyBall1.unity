@@ -53782,6 +53782,72 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 13a77f5670baf1d439b1c76e88d513b8, type: 3}
+--- !u!1001 &356126825
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1933293652819940040, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_Name
+      value: VolleyballSpawnEffect
+      objectReference: {fileID: 0}
+    - target: {fileID: 1933293652819940040, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099040349819856825, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+--- !u!1 &356126826 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1933293652819940040, guid: b3eea900673b568488dcb9d4ffb58304, type: 3}
+  m_PrefabInstance: {fileID: 356126825}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &365837142
 GameObject:
   m_ObjectHideFlags: 0
@@ -143993,7 +144059,9 @@ MonoBehaviour:
   _resurrectPoint: {fileID: 782829284}
   _redResurrectPoint: {fileID: 1104448820}
   _blueResurrectPoint: {fileID: 1104448819}
+  _volleyballSpawnTime: 2
   _vollyballPrefab: {fileID: 3252803814624198255, guid: 952fbc5e600cfa64cad2a44e480867fe, type: 3}
+  _volleyballSpwanEffect: {fileID: 356126826}
   _vollyballSpawnPoint: {fileID: 1104448818}
   _maxRound: 5
 --- !u!114 &1104448817
@@ -250710,3 +250778,4 @@ SceneRoots:
   - {fileID: 4434419865720848909}
   - {fileID: 177262495}
   - {fileID: 464688246}
+  - {fileID: 356126825}
