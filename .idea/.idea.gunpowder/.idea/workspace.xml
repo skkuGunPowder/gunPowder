@@ -6,9 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="51befed9-6a45-41a0-b3d1-24732fa2673a" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.gunpowder/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.gunpowder/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01.Scenes/VolleyBall1.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01.Scenes/VolleyBall1.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/02.Scripts/Photon/LoadSceneChecker.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/02.Scripts/Photon/LoadSceneChecker.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/02.Scripts/Photon/WaitingRoom/RoomManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/02.Scripts/Photon/WaitingRoom/RoomManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01.Scenes/StartSequence.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01.Scenes/StartSequence.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/02.Scripts/GameMode/BattleMode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/02.Scripts/GameMode/BattleMode.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/02.Scripts/Photon/WaitingRoom/UI/UI_ReadyButton.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/02.Scripts/Photon/WaitingRoom/UI/UI_ReadyButton.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03.Prefabs/Skin/SkinPivot.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03.Prefabs/Skin/SkinPivot.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03.Prefabs/UI/BigProductionOutLine.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03.Prefabs/UI/BigProductionOutLine.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03.Prefabs/UI/WaitingHUD.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03.Prefabs/UI/WaitingHUD.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Photon/PhotonUnityNetworking/Resources/PhotonServerSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Photon/PhotonUnityNetworking/Resources/PhotonServerSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Player_Robo.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Player_Robo.prefab" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,24 +75,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "YSI__Unitask",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "CodeLensConfigurable",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;YSI__Unitask&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;CodeLensConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="독립실행형 플레이어.Unity 시작">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="C:\Users\양성일\Desktop\unity download\6000.0.63f1\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.63f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath C:\Users\skku14\Desktop\Unity\ADU1\gunpowder -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Users\skku14\Desktop\Unity\ADU1\gunpowder" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -95,6 +100,7 @@
       <option name="ENV_FILE_PATHS" value="" />
       <option name="REDIRECT_INPUT_PATH" value="" />
       <option name="PTY_MODE" value="Auto" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
       <method v="2" />
     </configuration>
     <configuration name="독립실행형 플레이어" type="RunUnityExe" factoryName="Unity Executable">
@@ -106,10 +112,11 @@
       <option name="ENV_FILE_PATHS" value="" />
       <option name="REDIRECT_INPUT_PATH" value="" />
       <option name="PTY_MODE" value="Auto" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
       <method v="2" />
     </configuration>
     <configuration name="Unity 시작" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="C:\Users\양성일\Desktop\unity download\6000.0.63f1\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.63f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-projectPath C:\Users\skku14\Desktop\Unity\ADU1\gunpowder -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Users\skku14\Desktop\Unity\ADU1\gunpowder" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -117,6 +124,7 @@
       <option name="ENV_FILE_PATHS" value="" />
       <option name="REDIRECT_INPUT_PATH" value="" />
       <option name="PTY_MODE" value="Auto" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
       <method v="2" />
     </configuration>
     <configuration name="Unity 에디터에 연결" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
@@ -252,6 +260,7 @@
       <workItem from="1765769257636" duration="10189000" />
       <workItem from="1765855320183" duration="25959000" />
       <workItem from="1766112529175" duration="15621000" />
+      <workItem from="1766200885599" duration="1803000" />
     </task>
     <servers />
   </component>
@@ -285,15 +294,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Assets/02.Scripts/Photon/WaitingRoom/RoomManager.cs</url>
-          <line>190</line>
-          <properties documentPath="C:\Users\seong\Documents\GitHub\gunPowder\Assets\02.Scripts\Photon\WaitingRoom\RoomManager.cs" containingFunctionPresentation="메서드 'OnPlayerPropertiesUpdate'">
-            <startOffsets>
-              <option value="5646" />
-            </startOffsets>
-            <endOffsets>
-              <option value="5686" />
-            </endOffsets>
-          </properties>
+          <line>209</line>
+          <properties documentPath="C:\Users\seong\Documents\GitHub\gunPowder\Assets\02.Scripts\Photon\WaitingRoom\RoomManager.cs" containingFunctionPresentation="메서드 'OnPlayerPropertiesUpdate'" />
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
