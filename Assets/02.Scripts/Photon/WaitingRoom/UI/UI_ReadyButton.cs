@@ -4,11 +4,12 @@ using ExitGames.Client.Photon;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_ReadyButton : MonoBehaviour
 {
     private bool _isReady = false;
-
+    [SerializeField] private Button _button;
     public TextMeshProUGUI ReadyTextUGUI;
 
     public string Ready = "준비 완료";
@@ -52,7 +53,8 @@ public class UI_ReadyButton : MonoBehaviour
             {
                 return;
             }
-            
+            // 버튼 잠금 : 더블 클릭 방지
+            _button.interactable = false;
             RoomManager.Instance.GameStart();
         }
         

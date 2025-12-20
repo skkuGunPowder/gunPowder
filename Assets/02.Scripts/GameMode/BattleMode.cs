@@ -13,11 +13,6 @@ public class BattleMode : GameModeBase
         if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)
         {
             int[] playerList = PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] as int[];
-
-            foreach (var VARIABLE in playerList)
-            {
-                Debug.Log(VARIABLE);
-            }
             SpawnPlayer(playerList);
         }
         else
