@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using Photon.Pun;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 플레이어 피격/데미지 처리 전담 컨트롤러
@@ -38,7 +40,7 @@ public class PlayerDamageController : MonoBehaviour
     }
 
     private PendingExplosionHit _currentExplosionHit;
-    private Coroutine _processHitCoroutine;
+    private CancellationTokenSource _processHitCancellationTokenSource;
 
     private void Awake()
     {
@@ -321,11 +323,13 @@ public class PlayerDamageController : MonoBehaviour
             _currentExplosionHit = new PendingExplosionHit();
 
             // 0.05초 후에 일괄 처리하기로 예약
-            if (_processHitCoroutine != null)
+            if (_processHitCancellationTokenSource != null)
             {
-                StopCoroutine(_processHitCoroutine);
+                _processHitCancellationTokenSource.Cancel();
+                _processHitCancellationTokenSource.Dispose();
             }
-            _processHitCoroutine = StartCoroutine(ProcessHitsDelayed());
+            _processHitCancellationTokenSource = new CancellationTokenSource();
+            ProcessHitsDelayed(_processHitCancellationTokenSource.Token).Forget();
         }
 
         // 2. 피격 정보 수집
@@ -341,15 +345,19 @@ public class PlayerDamageController : MonoBehaviour
     /// <summary>
     /// 0.05초 대기 후 수집된 히트 정보를 일괄 처리
     /// </summary>
-    private IEnumerator ProcessHitsDelayed()
+    private async UniTask ProcessHitsDelayed(CancellationToken cancellationToken)
     {
         // 같은 프레임의 모든 피격 정보를 수집하기 위해 대기
-        yield return new WaitForSeconds(0.05f);
+        await UniTask.WaitForSeconds(0.05f, cancellationToken: cancellationToken);
 
-        if (_currentExplosionHit == null)
+        if (_currentExplosionHit == null || cancellationToken.IsCancellationRequested)
         {
-            _processHitCoroutine = null;
-            yield break;
+            if (_processHitCancellationTokenSource != null)
+            {
+                _processHitCancellationTokenSource.Dispose();
+                _processHitCancellationTokenSource = null;
+            }
+            return;
         }
 
         bool explosionHasCrit = _currentExplosionHit.hasCrit; // 폭발에 크리티컬이 있는지 (공격자 이펙트/사운드용)
@@ -407,7 +415,11 @@ public class PlayerDamageController : MonoBehaviour
 
         // 정리
         _currentExplosionHit = null;
-        _processHitCoroutine = null;
+        if (_processHitCancellationTokenSource != null)
+        {
+            _processHitCancellationTokenSource.Dispose();
+            _processHitCancellationTokenSource = null;
+        }
     }
 }
 

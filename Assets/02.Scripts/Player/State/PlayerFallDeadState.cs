@@ -25,13 +25,13 @@ public class PlayerFallDeadState : PlayerBaseState
     private const float TOTAL_MOVE_DURATION = 3.0f;         // 전체 이동 시간 (초)
     private const float TO_START_MOVE_DURATION = 0.6f;      // 시작점까지 선행 이동 시간 (초)
     private const float WAIT_DURATION_AT_GOAL = 1.0f;       // 부활 지점 도착 후 대기 시간 (초)
-    
+
     // 효과 관련 상수
     private const float EFFECT_PLAY_INTERVAL = 0.5f;        // VFX 효과 재생 간격 (초)
-    
+
     // 물리 관련 상수
     private const float MAX_FALL_SPEED = -20f;               // 최대 낙하 속도 (음수)
-    
+
     // 데미지 관련 상수
     private const int FALL_DAMAGE_AMOUNT = 15;               // 낙사 시 받는 데미지
     private const int FALL_HEAL_PERCENT = 100;               // 낙사 시 받는 힐량
@@ -39,16 +39,16 @@ public class PlayerFallDeadState : PlayerBaseState
     private Vector3 _fallStartPoint;                         // 낙사 시작점
     private Vector3 _pathMiddlePoint;                        // 이동 경로 중간점
     private Vector3 _resurrectionEndPoint;                   // 부활 지점 (도착점)
-    
+
     // 상태 관리 변수들
     private bool _hasReachedGoal = false;                    // 목표 지점 도달 여부
     private bool _hasTriggeredDeathEvents = false;          // 사망 이벤트 발생 여부 (중복 방지용)
     private bool _isInitialized = false;                     // 초기화 완료 여부
-    
+
     // 타이머 변수들
     private float _waitTimer = 0f;                           // 대기 시간 측정용 타이머
     private float _effectTimer = 0f;                         // 효과 재생 간격 측정용 타이머
-    
+
     // DOTween 관리
     private Tween _movementTween;                            // 이동 트윈 저장용
 
@@ -100,7 +100,7 @@ public class PlayerFallDeadState : PlayerBaseState
             _hasTriggeredDeathEvents = true;
             ExecuteDeathEvents();
         }
-        
+
         base.OnExit();
 
         //
@@ -217,7 +217,7 @@ public class PlayerFallDeadState : PlayerBaseState
     private void SetImmuneState()
     {
         _owner.gameObject.tag = "Immune";
-        
+
         if (_owner.PhotonView.IsMine)
         {
             _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, true);
@@ -239,7 +239,7 @@ public class PlayerFallDeadState : PlayerBaseState
     private void SetMovementPoints()
     {
         FallDeadPathData fallDeadPathData = FallDeadPathManager.Instance.GetFallDeadPathData(_owner.transform.position.x);
-        
+
         _fallStartPoint = fallDeadPathData.FallDeadStartPoint.position;
         _pathMiddlePoint = fallDeadPathData.FallDeadPath.position;
         _resurrectionEndPoint = fallDeadPathData.FallDeadEntPoint.position;
@@ -372,7 +372,7 @@ public class PlayerFallDeadState : PlayerBaseState
         if (_hasTriggeredDeathEvents) return;
 
         _waitTimer += Time.deltaTime;
-        
+
         if (_waitTimer >= WAIT_DURATION_AT_GOAL)
         {
             _hasTriggeredDeathEvents = true;
@@ -386,7 +386,7 @@ public class PlayerFallDeadState : PlayerBaseState
     private void HandleFallingEffects()
     {
         _effectTimer += Time.deltaTime;
-        
+
         if (_effectTimer >= EFFECT_PLAY_INTERVAL)
         {
             _effectTimer = 0f;
@@ -448,22 +448,22 @@ public class PlayerFallDeadState : PlayerBaseState
     {
         // 무적 상태 해제
         _owner.PlayerStat.IsImmune = false;
-        
+
         if (_owner.PhotonView.IsMine)
         {
             // 네트워크 동기화로 무적 상태 해제
             _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
 
             EventManager.Instance.HitScreen();
-            
+
             // 낙사 데미지 적용
             _owner.TakeDamage(
-                FALL_DAMAGE_AMOUNT, 
-                FALL_DAMAGE_AMOUNT, 
+                FALL_DAMAGE_AMOUNT,
+                FALL_DAMAGE_AMOUNT,
                 FALL_HEAL_PERCENT,
-                _owner.transform.position, 
-                _owner.GetComponent<PhotonView>().ViewID, 
-                _owner.GetComponent<PhotonView>().OwnerActorNr, 
+                _owner.transform.position,
+                _owner.GetComponent<PhotonView>().ViewID,
+                _owner.GetComponent<PhotonView>().OwnerActorNr,
                 true,
                 true
             );
@@ -478,5 +478,46 @@ public class PlayerFallDeadState : PlayerBaseState
         if (_owner.Rigidbody2D == null) return;
 
         _owner.Rigidbody2D.linearVelocity = Vector2.zero;
+    }
+
+    /// <summary>
+    /// 낙사 상태에서의 피격 처리
+    /// 슈퍼아머 상태여도 데미지 상태로 전환하도록 오버라이드
+    /// </summary>
+    protected override void HandleHit()
+    {
+        // 낙사 상태에서는 슈퍼아머를 무시하고 데미지 상태로 전환
+        // 피가 50이하라면 히트스탑 처리
+        // 아니라면 Damage 상태로
+        if(_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.PlayerStat.HitStopGunPowderCount)
+        {
+            // 이미 DamagedState이고 히트스탑이 활성화되어 있으면 추가 히트 처리
+            if (_playerFSM.IsCurrentState<PlayerDamagedState>())
+            {
+                PlayerDamagedState currentDamagedState = _playerFSM.GetCurrentState<PlayerDamagedState>();
+                if (currentDamagedState != null && currentDamagedState.IsHitStopActive())
+                {
+                    currentDamagedState.OnAdditionalHit();
+                }
+                else
+                {
+                    // DamagedState에 있지만 히트스탑이 비활성화된 상태면 새로운 DamagedState로 전환 (히트스탑 활성화)
+                    PlayerDamagedState.SetPendingHitStop(true);
+                    SyncStateChange<PlayerDamagedState>();
+                }
+            }
+            else
+            {
+                // 다른 상태에서 피격 시 DamagedState로 전환 (히트스탑 활성화)
+                PlayerDamagedState.SetPendingHitStop(true);
+                SyncStateChange<PlayerDamagedState>();
+            }
+        }
+        else
+        {
+            // 피가 50 초과면 일반 DamagedState로 전환 (히트스탑 비활성화)
+            PlayerDamagedState.SetPendingHitStop(false);
+            SyncStateChange<PlayerDamagedState>();
+        }
     }
 }

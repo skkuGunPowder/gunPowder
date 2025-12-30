@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Threading;
 using TMPro;
+using Cysharp.Threading.Tasks;
 
 public class PlayerCoolTime : MonoBehaviour
 {
@@ -16,8 +18,8 @@ public class PlayerCoolTime : MonoBehaviour
     private Image _normalCoolTimeEndEffectImage;
     private Image _specialCoolTimeEndEffectImage;
 
-    private Coroutine _normalCoolTimeCoroutine;
-    private Coroutine _specialCoolTimeCoroutine;
+    private CancellationTokenSource _normalCoolTimeCancellationTokenSource;
+    private CancellationTokenSource _specialCoolTimeCancellationTokenSource;
     
     [Header("Special Cool Time")]
     [SerializeField] private GameObject _specialCoolTimeEffectPrefab;
@@ -95,11 +97,13 @@ public class PlayerCoolTime : MonoBehaviour
     {
         if (_normalCoolTimeShadowImage != null && _myPlayer.BasicBombStat != null)
         {
-            if (_normalCoolTimeCoroutine != null)
+            if (_normalCoolTimeCancellationTokenSource != null)
             {
-                StopCoroutine(_normalCoolTimeCoroutine);
+                _normalCoolTimeCancellationTokenSource.Cancel();
+                _normalCoolTimeCancellationTokenSource.Dispose();
             }
-            _normalCoolTimeCoroutine = StartCoroutine(CoolTimeCoroutine(_normalCoolTimeShadowImage, _normalCoolTimeText, _normalCoolTimeEndEffectImage, _myPlayer.BasicBombStat.CoolTime));
+            _normalCoolTimeCancellationTokenSource = new CancellationTokenSource();
+            CoolTimeCoroutine(_normalCoolTimeShadowImage, _normalCoolTimeText, _normalCoolTimeEndEffectImage, _myPlayer.BasicBombStat.CoolTime, _normalCoolTimeCancellationTokenSource.Token).Forget();
         }
     }
 
@@ -108,20 +112,22 @@ public class PlayerCoolTime : MonoBehaviour
         // UI가 있는 씬에서만 실행
         if (_specialCoolTimeShadowImage != null && _myPlayer.SpecialBombStat != null)
         {
-            if (_specialCoolTimeCoroutine != null)
+            if (_specialCoolTimeCancellationTokenSource != null)
             {
-                StopCoroutine(_specialCoolTimeCoroutine);
+                _specialCoolTimeCancellationTokenSource.Cancel();
+                _specialCoolTimeCancellationTokenSource.Dispose();
             }
-            _specialCoolTimeCoroutine = StartCoroutine(CoolTimeCoroutine(_specialCoolTimeShadowImage, _specialCoolTimeText, _specialCoolTimeEndEffectImage, _myPlayer.SpecialBombStat.CoolTime));
+            _specialCoolTimeCancellationTokenSource = new CancellationTokenSource();
+            CoolTimeCoroutine(_specialCoolTimeShadowImage, _specialCoolTimeText, _specialCoolTimeEndEffectImage, _myPlayer.SpecialBombStat.CoolTime, _specialCoolTimeCancellationTokenSource.Token).Forget();
         }
     }
 
-    private IEnumerator CoolTimeCoroutine(Image shadowImage, TextMeshProUGUI coolTimeText, Image endEffectImage, float coolTime)
+    private async UniTask CoolTimeCoroutine(Image shadowImage, TextMeshProUGUI coolTimeText, Image endEffectImage, float coolTime, CancellationToken cancellationToken)
     {
         float elapsed = 0f;
         shadowImage.fillAmount = 1f; // 쿨타임 시작 (가득 참)
 
-        while (elapsed < coolTime)
+        while (elapsed < coolTime && !cancellationToken.IsCancellationRequested)
         {
             elapsed += Time.deltaTime;
             float remainingTime = coolTime - elapsed;
@@ -144,32 +150,35 @@ public class PlayerCoolTime : MonoBehaviour
                 }
             }
             
-            yield return null;
+            await UniTask.Yield(cancellationToken: cancellationToken);
         }
 
-        shadowImage.fillAmount = 0f; // 쿨타임 완료
-        
-        // 쿨타임이 끝나면 텍스트 숨김
-        if (coolTimeText != null)
+        if (!cancellationToken.IsCancellationRequested)
         {
-            coolTimeText.text = "";
-        }
-        
-        // 쿨타임 종료 효과 이미지 페이드 아웃
-        if (endEffectImage != null)
-        {
-            StartCoroutine(FadeOutEffect(endEffectImage));
-        }
-        
-        // 스페셜 쿨타임 종료 시 VFX & SFX 프리팹 재생
-        if (shadowImage == _specialCoolTimeShadowImage && _specialCoolTimeEffectPrefab != null)
-        {
-            PlayCoolTimeEndVFX(_specialCoolTimeEffectPrefab);
-            SoundManager.Instance.PlayLocalSound(_specialCoolTimeEndAudio.name, _myPlayer.transform, 0, false);
+            shadowImage.fillAmount = 0f; // 쿨타임 완료
+            
+            // 쿨타임이 끝나면 텍스트 숨김
+            if (coolTimeText != null)
+            {
+                coolTimeText.text = "";
+            }
+            
+            // 쿨타임 종료 효과 이미지 페이드 아웃
+            if (endEffectImage != null)
+            {
+                FadeOutEffect(endEffectImage, cancellationToken).Forget();
+            }
+            
+            // 스페셜 쿨타임 종료 시 VFX & SFX 프리팹 재생
+            if (shadowImage == _specialCoolTimeShadowImage && _specialCoolTimeEffectPrefab != null)
+            {
+                PlayCoolTimeEndVFX(_specialCoolTimeEffectPrefab);
+                SoundManager.Instance.PlayLocalSound(_specialCoolTimeEndAudio.name, _myPlayer.transform, 0, false);
+            }
         }
     }
     
-    private IEnumerator FadeOutEffect(Image effectImage)
+    private async UniTask FadeOutEffect(Image effectImage, CancellationToken cancellationToken)
     {
         // 알파값 200/255 = 약 0.784로 설정
         Color color = effectImage.color;
@@ -179,17 +188,20 @@ public class PlayerCoolTime : MonoBehaviour
         float fadeTime = 0.3f;
         float elapsed = 0f;
         
-        while (elapsed < fadeTime)
+        while (elapsed < fadeTime && !cancellationToken.IsCancellationRequested)
         {
             elapsed += Time.deltaTime;
             color.a = Mathf.Lerp(200f / 255f, 0f, elapsed / fadeTime);
             effectImage.color = color;
-            yield return null;
+            await UniTask.Yield(cancellationToken: cancellationToken);
         }
         
-        // 완전히 투명하게
-        color.a = 0f;
-        effectImage.color = color;
+        if (!cancellationToken.IsCancellationRequested)
+        {
+            // 완전히 투명하게
+            color.a = 0f;
+            effectImage.color = color;
+        }
     }
     
     private void PlayCoolTimeEndVFX(GameObject vfxPrefab)
@@ -213,6 +225,20 @@ public class PlayerCoolTime : MonoBehaviour
         {
             _myPlayer.OnNormalAttack -= SetNormalAttackCoolTime;
             _myPlayer.OnSpecialAttack -= SetSpecialAttackCoolTime;
+        }
+
+        // CancellationTokenSource 정리
+        if (_normalCoolTimeCancellationTokenSource != null)
+        {
+            _normalCoolTimeCancellationTokenSource.Cancel();
+            _normalCoolTimeCancellationTokenSource.Dispose();
+            _normalCoolTimeCancellationTokenSource = null;
+        }
+        if (_specialCoolTimeCancellationTokenSource != null)
+        {
+            _specialCoolTimeCancellationTokenSource.Cancel();
+            _specialCoolTimeCancellationTokenSource.Dispose();
+            _specialCoolTimeCancellationTokenSource = null;
         }
     }
 }

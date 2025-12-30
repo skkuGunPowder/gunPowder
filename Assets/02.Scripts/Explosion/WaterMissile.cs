@@ -70,6 +70,13 @@ public class WaterMissile : MonoBehaviour
 
     public void AddExplosionForce2D(Rigidbody2D rb, float explosionForce, Vector2 explosionPosition, float explosionRadius)
     {
+        // 슈퍼아머가 활성화된 플레이어는 힘을 받지 않음
+        Player player = rb.GetComponent<Player>();
+        if (player != null && player.IsSuperArmorEnabled)
+        {
+            return;
+        }
+
         Vector2 direction = rb.position - explosionPosition;
         float distance = direction.magnitude;
 

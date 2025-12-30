@@ -2,6 +2,7 @@ using System;
 using Photon.Pun;
 using RobustFSM.Base;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 플레이어 점프 상태 클래스
@@ -528,6 +529,7 @@ public class PlayerJumpState : PlayerBaseState
     private void ExecuteBombDash()
     {
         _owner.PlayerStat.IncrementJumpCount();
+        _owner.SetAllowBombDashForce(true);
 
         Vector3 position = _owner.GetExplosionSpawnPoint().position;
         GameObject prefab = PhotonNetwork.Instantiate("BasicBomb", position, Quaternion.identity);
@@ -538,6 +540,20 @@ public class PlayerJumpState : PlayerBaseState
             bomb.PhotonView.RPC(nameof(bomb.Explode), RpcTarget.All);
             _explosionOverrideTimer = EXPLOSION_OVERRIDE_DURATION;
         }
+
+        RestoreSuperArmorConstraintsAfterBombDash().Forget();
+
+    }
+
+    /// <summary>
+    /// 폭탄 대시 후 슈퍼아머 constraints 복원 (무적 상태는 유지)
+    /// </summary>
+    private async UniTask RestoreSuperArmorConstraintsAfterBombDash()
+    {
+        // 폭발 힘 적용 시간을 기다림
+        await UniTask.WaitForSeconds(EXPLOSION_OVERRIDE_DURATION + 0.1f);
+        
+        _owner.SetAllowBombDashForce(false);
     }
 
     /// <summary>

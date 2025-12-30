@@ -69,7 +69,16 @@ public class PunchingToy : Bomb, IBomb
                 return;
             }
 
+            // 슈퍼아머가 활성화된 플레이어는 힘을 받지 않음
+            Player player = collision.gameObject.GetComponent<Player>();
             Rigidbody2D playerRB = collision.gameObject.GetComponent<Rigidbody2D>();
+            if (player != null && player.IsSuperArmorEnabled)
+            {
+                // 힘은 적용하지 않고 데미지만 적용
+                damagableObject.TakeDamage(_explosionStat.AttackPower, _explosionStat.AttackPower, _explosionStat.HealPercent, transform.position, _ownerPhotonview.ViewID, _ownerPhotonview.OwnerActorNr);
+                return;
+            }
+
             playerRB.AddForce(bounceDirection * _explosionStat.ExplosivePower, ForceMode2D.Impulse);
             damagableObject.TakeDamage(_explosionStat.AttackPower, _explosionStat.AttackPower, _explosionStat.HealPercent, transform.position, _ownerPhotonview.ViewID, _ownerPhotonview.OwnerActorNr);
             return;

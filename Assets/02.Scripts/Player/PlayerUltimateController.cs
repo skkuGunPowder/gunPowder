@@ -2,6 +2,8 @@ using UnityEngine;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
 using System.Collections;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 
 public class PlayerUltimateController : MonoBehaviour
 {
@@ -22,7 +24,7 @@ public class PlayerUltimateController : MonoBehaviour
     private GameObject UltimateEffectPrefab;
 
     private bool _ultimateEffectOn = false;
-    private Coroutine _ultimateEffectOffRoutine;
+    private CancellationTokenSource _ultimateEffectOffCancellationTokenSource;
 
     [SerializeField]
     private float _ultimateChanceTimer = 0f;
@@ -53,6 +55,14 @@ public class PlayerUltimateController : MonoBehaviour
         {
             UltimateManager.Instance.ReturnUltimate(_ultimate);
             _ultimate = null;
+        }
+
+        // CancellationTokenSource 정리
+        if (_ultimateEffectOffCancellationTokenSource != null)
+        {
+            _ultimateEffectOffCancellationTokenSource.Cancel();
+            _ultimateEffectOffCancellationTokenSource.Dispose();
+            _ultimateEffectOffCancellationTokenSource = null;
         }
     }
 
@@ -162,10 +172,11 @@ public class PlayerUltimateController : MonoBehaviour
             _player.RestoreOriginalColors();
 
             UltimateEffectPrefab.SetActive(true);
-            if (_ultimateEffectOffRoutine != null)
+            if (_ultimateEffectOffCancellationTokenSource != null)
             {
-                StopCoroutine(_ultimateEffectOffRoutine);
-                _ultimateEffectOffRoutine = null;
+                _ultimateEffectOffCancellationTokenSource.Cancel();
+                _ultimateEffectOffCancellationTokenSource.Dispose();
+                _ultimateEffectOffCancellationTokenSource = null;
             }
             UltimateEffectPrefab.SetActive(true);
             PlayParticleGroup(UltimateEffectPrefab);
@@ -175,11 +186,13 @@ public class PlayerUltimateController : MonoBehaviour
             // 궁극기 비활성화 시 색상 복원 (모든 클라이언트에서 실행)
             _player.RestoreOriginalColors();
 
-            if (_ultimateEffectOffRoutine != null)
+            if (_ultimateEffectOffCancellationTokenSource != null)
             {
-                StopCoroutine(_ultimateEffectOffRoutine);
+                _ultimateEffectOffCancellationTokenSource.Cancel();
+                _ultimateEffectOffCancellationTokenSource.Dispose();
             }
-            _ultimateEffectOffRoutine = StartCoroutine(StopParticleGroupThenDisable(UltimateEffectPrefab));
+            _ultimateEffectOffCancellationTokenSource = new CancellationTokenSource();
+            StopParticleGroupThenDisable(UltimateEffectPrefab, _ultimateEffectOffCancellationTokenSource.Token).Forget();
         }
     }
 
@@ -196,7 +209,7 @@ public class PlayerUltimateController : MonoBehaviour
         }
     }
 
-    private IEnumerator StopParticleGroupThenDisable(GameObject root)
+    private async UniTask StopParticleGroupThenDisable(GameObject root, CancellationToken cancellationToken)
     {
         var particleSystems = root.GetComponentsInChildren<ParticleSystem>(true);
         for (int i = 0; i < particleSystems.Length; i++)
@@ -209,7 +222,7 @@ public class PlayerUltimateController : MonoBehaviour
         }
 
         bool anyAlive = true;
-        while (anyAlive)
+        while (anyAlive && !cancellationToken.IsCancellationRequested)
         {
             anyAlive = false;
             for (int i = 0; i < particleSystems.Length; i++)
@@ -221,11 +234,19 @@ public class PlayerUltimateController : MonoBehaviour
                     break;
                 }
             }
-            yield return null;
+            await UniTask.Yield(cancellationToken: cancellationToken);
         }
 
-        root.SetActive(false);
-        _ultimateEffectOffRoutine = null;
+        if (!cancellationToken.IsCancellationRequested)
+        {
+            root.SetActive(false);
+        }
+
+        if (_ultimateEffectOffCancellationTokenSource != null)
+        {
+            _ultimateEffectOffCancellationTokenSource.Dispose();
+            _ultimateEffectOffCancellationTokenSource = null;
+        }
     }
 
     public void ExecuteUltimate()
