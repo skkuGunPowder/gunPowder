@@ -69,6 +69,14 @@ public class Explosion : MonoBehaviour
 
     public void AddExplosionForce2D(Rigidbody2D rb, float explosionForce, Vector2 explosionPosition, float explosionRadius)
     {
+        // 슈퍼아머가 활성화된 플레이어는 힘을 받지 않음
+        // 단, 폭탄 대시 중일 때는 예외적으로 힘을 허용
+        Player player = rb.GetComponent<Player>();
+        if (player != null && player.IsSuperArmorEnabled && !player.AllowBombDashForce)
+        {
+            return;
+        }
+
         Vector2 direction = rb.position - explosionPosition;
         float distance = direction.magnitude;
 

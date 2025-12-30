@@ -113,6 +113,18 @@ public class Player : MonoBehaviourPun, IDamagable
     private bool _isSpecialAttackEnabled = true;
     public bool IsSpecialAttackEnabled => _isSpecialAttackEnabled;
 
+    // 넉백 활성화/비활성화 설정
+    [Header("넉백 활성화 설정")]
+    [SerializeField]
+    private bool _isKnockbackEnabled = true;
+    public bool IsKnockbackEnabled => _isKnockbackEnabled;
+
+    // 슈퍼아머 설정 (데미지는 받지만 DamagedState로 들어가지 않음)
+    [Header("슈퍼아머 설정")]
+    [SerializeField]
+    private bool _isSuperArmorEnabled = false;
+    public bool IsSuperArmorEnabled => _isSuperArmorEnabled;
+
     public Ultimate Ultimate => _ultimateController != null ? _ultimateController.Ultimate : null;
 
     private PlayerMaterial _playerMaterial;
@@ -130,8 +142,12 @@ public class Player : MonoBehaviourPun, IDamagable
     private PlayerBuffHandler _playerBuffHandler;
     public PlayerBuffHandler PlayerBuffHandler => _playerBuffHandler;
 
-    public bool IsSuperArmor = false;
+    public bool IsPositionLocked = false;
     private RigidbodyConstraints2D _originalConstraints; // SuperArmor 적용 전 원본 제약 조건
+    
+    // 폭탄 대시 힘 허용 플래그 (슈퍼아머 상태에서도 폭탄 대시를 위해 사용)
+    private bool _allowBombDashForce = false;
+    public bool AllowBombDashForce => _allowBombDashForce;
 
 
     [SerializeField]
@@ -195,7 +211,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
 
         _playerBuffHandler = GetComponent<PlayerBuffHandler>();
-        IsSuperArmor = false;
+        IsPositionLocked = false;
 
         // 원본 Rigidbody constraints 저장
         if (_rigidbody2D != null)
@@ -582,12 +598,11 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void Update()
     {
-        // 건파우더 관련 로직은 PlayerGunpowderController에서 처리
-            // 궁극기 타이머 업데이트
-            if (PhotonView.IsMine && _ultimateController != null)
-            {
-                _ultimateController.UpdateUltimateChanceTimer();
-            }
+        // 궁극기 타이머 업데이트
+        if (PhotonView.IsMine && _ultimateController != null)
+        {
+            _ultimateController.UpdateUltimateChanceTimer();
+        }
     }
 
     /// <summary>
@@ -1394,28 +1409,27 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
     /// <summary>
-    /// SuperArmor 활성화: 위치 고정 및 속도 0
-    /// 모든 적으로부터 슈퍼아머 효과 적용
+    /// 위치 고정 활성화: 위치 고정 및 속도 0
+    /// 박격포처럼 위치 고정에서 사용용
     /// </summary>
-    public void SetSuperArmor()
+    public void SetPositionLock()
     {
         if (_rigidbody2D == null) return;
 
-        IsSuperArmor = true;
+        IsPositionLocked = true;
         _rigidbody2D.linearVelocity = Vector2.zero;
         _rigidbody2D.angularVelocity = 0f;
         _rigidbody2D.constraints = RigidbodyConstraints2D.FreezePosition | RigidbodyConstraints2D.FreezeRotation;
     }
 
     /// <summary>
-    /// SuperArmor 비활성화: 원본 제약 조건 복원
-    /// 모든 적으로부터 슈퍼아머 효과 적용해제제
+    /// 위치 고정 비활성화: 원본 제약 조건 복원
     /// </summary>
-    public void ResetSuperArmor()
+    public void ResetPositionLock()
     {
         if (_rigidbody2D == null) return;
 
-        IsSuperArmor = false;
+        IsPositionLocked = false;
         _rigidbody2D.constraints = _originalConstraints;
     }
 
@@ -1485,5 +1499,54 @@ public class Player : MonoBehaviourPun, IDamagable
         _isNormalAttackEnabled = enabled;
         _isSpecialAttackEnabled = enabled;
         SetUltimateSystemEnabled(enabled);
+    }
+
+    /// <summary>
+    /// 넉백 활성화/비활성화 설정
+    /// 넉백 효과만 제어한 상태
+    /// 데미지는 받고 애니메이션도 재생됨
+    /// </summary>
+    /// <param name="enabled">true: 넉백 활성화, false: 넉백 비활성화 (데미지는 받지만 넉백은 받지 않음)</param>
+    public void RPC_SetKnockbackEnabled(bool enabled)
+    {
+        if (!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(SetKnockbackEnabled), RpcTarget.All, enabled);
+    }
+
+    [PunRPC]
+    public void SetKnockbackEnabled(bool enabled)
+    {
+        _isKnockbackEnabled = enabled;
+    }
+
+    /// <summary>
+    /// 슈퍼아머 활성화/비활성화 설정
+    /// 슈퍼아머가 활성화되면 데미지는 받지만 DamagedState로 들어가지 않음 (넉백, 히트스탑, 애니메이션 재생 모두 무시)
+    /// </summary>
+    /// <param name="enabled">true: 슈퍼아머 활성화, false: 슈퍼아머 비활성화</param>
+    public void RPC_SetSuperArmorEnabled(bool enabled)
+    {
+        if (!PhotonView.IsMine)
+        {
+            return;
+        }
+        PhotonView.RPC(nameof(SetSuperArmorEnabled), RpcTarget.All, enabled);
+    }
+
+    [PunRPC]
+    public void SetSuperArmorEnabled(bool enabled)
+    {
+        _isSuperArmorEnabled = enabled;
+    }
+
+    /// <summary>
+    /// 폭탄 대시 힘 허용 설정 (슈퍼아머 상태에서도 폭탄 대시를 위해 사용)
+    /// </summary>
+    public void SetAllowBombDashForce(bool allow)
+    {
+        _allowBombDashForce = allow;
     }
 }

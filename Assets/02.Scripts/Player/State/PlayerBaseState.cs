@@ -4,6 +4,7 @@ using Photon.Pun;
 using RaycastPro.RaySensors2D;
 using RobustFSM.Base;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 public class PlayerBaseState : MonoState
 {
@@ -66,6 +67,15 @@ public class PlayerBaseState : MonoState
 
     protected virtual void HandleHit()
     {
+        // 슈퍼아머가 활성화되어 있으면 DamagedState로 들어가지 않음
+        if (_owner.IsSuperArmorEnabled)
+        {
+            // 슈퍼아머: 데미지는 받지만 DamagedState로 전환하지 않음
+            // 짧은 무적 시간만 설정하여 연속 피격 방지
+            SuperArmorImmuneCoroutine().Forget();
+            return;
+        }
+
         // 피가 50이하라면 히트스탑 처리
         // 아니라면 Damage 상태로
         if(_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.PlayerStat.HitStopGunPowderCount)
@@ -97,6 +107,33 @@ public class PlayerBaseState : MonoState
             // 피가 50 초과면 일반 DamagedState로 전환 (히트스탑 비활성화)
             PlayerDamagedState.SetPendingHitStop(false);
             SyncStateChange<PlayerDamagedState>();
+        }
+    }
+
+    /// <summary>
+    /// 슈퍼아머 상태에서 짧은 무적 시간 설정 (연속 피격 방지)
+    /// </summary>
+    private async Cysharp.Threading.Tasks.UniTask SuperArmorImmuneCoroutine()
+    {
+        // 무적 상태 설정 (짧은 시간만)
+        _owner.gameObject.tag = "Immune";
+        _owner.PlayerStat.IsImmune = true;
+        
+        if (_owner.PhotonView.IsMine)
+        {
+            _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, true);
+        }
+
+        // 0.1초 무적 시간 (연속 피격 방지용)
+        await Cysharp.Threading.Tasks.UniTask.WaitForSeconds(0.1f);
+
+        // 무적 상태 해제
+        _owner.gameObject.tag = _owner.PhotonView.IsMine ? "Player" : "Enemy";
+        _owner.PlayerStat.IsImmune = false;
+        
+        if (_owner.PhotonView.IsMine)
+        {
+            _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, false);
         }
     }
 
