@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Photon;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
@@ -20,7 +22,9 @@ public class VollyballMode : GameModeBase
     [SerializeField] private Transform _blueResurrectPoint;
     
     [Header("배구공")]
+    [SerializeField] private float _volleyballSpawnTime = 2f;
     [SerializeField] private GameObject _vollyballPrefab;
+    [SerializeField] private GameObject _volleyballSpwanEffect;
     [SerializeField] private Transform _vollyballSpawnPoint;
     
     [Header("설정")]
@@ -84,6 +88,7 @@ public class VollyballMode : GameModeBase
     // 배구공 소환
     private void InstantiateVolleyball()
     {
+        
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
@@ -96,8 +101,9 @@ public class VollyballMode : GameModeBase
             return;
         }
         
+        Debug.Log("Volleyball Spawn");
         // 방장이 소환
-        PhotonNetwork.Instantiate(_vollyballPrefab.name, _vollyballSpawnPoint.position, Quaternion.identity);
+        _photonView.RPC(nameof(RPC_SpawnVolleyball), RpcTarget.All);
     }
 
     //득점 점수 계산하기 : 플레이어 넘버를 가지고 팀 찾은 후, 그 팀에 점수 추가
@@ -136,6 +142,33 @@ public class VollyballMode : GameModeBase
         }
         
         EventManager.Instance.ScoreUpdate(inGameTeam, _teamScore[inGameTeam]);
+    }
+
+    [PunRPC]
+    private void RPC_SpawnVolleyball()
+    {
+        SpawnVolleyball();
+    }
+    
+    private async UniTaskVoid SpawnVolleyball()
+    {
+        await UniTask.WaitForSeconds(_volleyballSpawnTime);
+
+        _volleyballSpwanEffect.SetActive(true);
+        _volleyballSpwanEffect.transform.localScale = Vector3.one;
+        
+        await UniTask.WaitForSeconds(0.5f);
+
+        _volleyballSpwanEffect.transform.DOScale(0, 0.5f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+           
+            if (PhotonNetwork.IsMasterClient == false)
+            {
+                return;
+            }
+        
+            PhotonNetwork.Instantiate(_vollyballPrefab.name, _vollyballSpawnPoint.position, Quaternion.identity); 
+        });
     }
     
     private void OnDestroy()
