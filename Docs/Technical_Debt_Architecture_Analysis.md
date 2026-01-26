@@ -552,15 +552,7 @@ public class NetworkRetryHandler
 
 2. **UIChatManager 책임 과다**
    - 채널 관리 + 백엔드 SDK + UI 로직 혼재
-   - 1,168 라인으로 유지보수 어려움
-
-3. **채팅 시스템 버그**
-   ```csharp
-   // UI_IngameChat.cs:42
-   UIChatManager.Instance.SendMessage(text);  // ❌ 메서드가 존재하지 않음
-   ```
-   - 실제 메서드: `SendChatMessage(string text)`
-   - 런타임 오류 발생 가능
+    - 1,168 라인으로 유지보수 어려움
 
 #### 개선안
 ```csharp
@@ -617,8 +609,7 @@ public class UI_GunPowderStatus : MonoBehaviour
 }
 
 // 3. 버그 수정
-// UI_IngameChat.cs:42 수정
-UIChatManager.Instance.SendChatMessage(text);  // ✅ 올바른 메서드
+// UI_IngameChatPopup.cs:613은 이미 올바르게 구현됨
 ```
 
 ---
@@ -860,12 +851,12 @@ RoomManager → GameManager (게임 시작)
 
 **생성 흐름:**
 ```
-UI_IngameChat → UIChatManager → Backend Chat SDK
+UI_IngameChatPopup → UIChatManager → Backend Chat SDK
 ```
 
 **소비 흐름:**
 ```
-Backend Chat SDK → UIChatManager → UI_IngameChat (메시지 표시)
+Backend Chat SDK → UIChatManager → UI_IngameChatPopup (메시지 표시)
 ```
 
 **문제점:**
@@ -1285,15 +1276,13 @@ public class BuffRegistry
 ### Phase 1: 긴급 버그 수정 및 안전장치 (1-2주)
 
 **목표:**
-- UI_IngameChat.cs 메서드 이름 수정
 - `async void` → `async Task` 변경
 - 리스너 수명 주기 관리 추가
 
 **작업:**
-1. UI_IngameChat.cs: `SendMessage` → `SendChatMessage`
-2. AccountManager.DeleteAccount → `async Task`로 변경
-3. AccountRepository 리스너 `Dispose()` 패턴 추가
-4. RoomManager `UniTaskVoid` → `UniTask` 변경
+1. AccountManager.DeleteAccount → `async Task`로 변경
+2. AccountRepository 리스너 `Dispose()` 패턴 추가
+3. RoomManager `UniTaskVoid` → `UniTask` 변경
 
 ---
 
@@ -1394,9 +1383,8 @@ public class BuffRegistry
 ### 7.2 우선순위 기반 권장 사항
 
 **즉시 조치 (1-2주):**
-1. UI_IngameChat.cs 버그 수정
-2. `async void` → `async Task` 변경
-3. 리스너 수명 주기 관리 추가
+1. `async void` → `async Task` 변경
+2. 리스너 수명 주기 관리 추가
 
 **단기 개선 (1-2개월):**
 1. Player 모듈 리팩토링 (최우선)
@@ -1452,7 +1440,6 @@ public class BuffRegistry
 **Chat:**
 - `Assets/02.Scripts/Chat/UIChatManager.cs` (1,168 라인) 🔴
 - `Assets/02.Scripts/UI/KillLog/UI_IngameChatPopup.cs` (819 라인)
-- `Assets/02.Scripts/UI/Ingame/UI_IngameChat.cs` ⚠️ (버그)
 
 **Bomb:**
 - `Assets/02.Scripts/Bomb/Bomb.cs`
