@@ -27,9 +27,13 @@ public class GameManager : PhotonSingleton<GameManager>
     [Header("게임 모드")]
     [SerializeField] private GameModeBase GameMode;  // 부활 지점
     
+    [Header("게임매니저 컴포넌트")]
+    // 플레이어 인원수 체크 및 팀 체크
+    private TeamTracker _teamTracker;
+    // 라운드 
+    
     private bool _lastPlayer = false; // 마지막 연출 실행 여부
-    private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>(); // 살아 있는 팀원 수 : 팀 / 팀원 수
-
+    
     private GameObject _myPlayer;   // 내 로컬 플레이어 (게임 종료시 : 결과에 필요한 정보 수집을 위함)
 
     public event Action<PhotonPlayer> OnTimeCheck;  // 죽은 사람 시간 체크
@@ -101,7 +105,7 @@ public class GameManager : PhotonSingleton<GameManager>
             }
             
             EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-            _teamCount[team]--;
+            _teamTracker.SubPlayer(team);
         }
 
         if (PhotonNetwork.IsMasterClient == false)
@@ -158,14 +162,14 @@ public class GameManager : PhotonSingleton<GameManager>
         }
         
         // 나갔는데 살아있는 팀이 한팀 뿐일 때
-        if (LastTeamCheck() <= 1)
+        if (_teamTracker.LastTeamCheck() <= 1)
         {
             _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
             return;
         }
         
         // 팀이 2팀이 되었을 때 LastPlayer = true
-        if (_lastPlayer == false && LastTeamCheck() == 2)
+        if (_lastPlayer == false && _teamTracker.LastTeamCheck() == 2)
         {
             _lastPlayer = true;
             _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.Others);
@@ -191,7 +195,7 @@ public class GameManager : PhotonSingleton<GameManager>
         
         // 죽은 사람 팀원 수에서 빼기
         EInGameTeam team = (EInGameTeam)targetPlayer.CustomProperties[EProperties.Team.ToString()];
-        _teamCount[team]--;
+        _teamTracker.SubPlayer(team);
         
         // 게임오버 체크
         if (PhotonNetwork.IsMasterClient == false)
@@ -207,14 +211,14 @@ public class GameManager : PhotonSingleton<GameManager>
 
         if (_lastPlayer)
         {
-            if (LastTeamCheck() < 1)    // 팀원이 살아있는 팀이 1개 이상인지
+            if (_teamTracker.LastTeamCheck() < 1)    // 팀원이 살아있는 팀이 1개 이상인지
             {
                 return;
             }
             
             bool end;
             
-            if (LastAttackCheck(team) == false)     //죽은 플레이어가 그 팀의 마지막인가? 
+            if (_teamTracker.LastAttackCheck(team) == false)     //죽은 플레이어가 그 팀의 마지막인가? 
             {
                 end = false;
             }
@@ -253,7 +257,7 @@ public class GameManager : PhotonSingleton<GameManager>
             }
         }
         
-        if (_lastPlayer == false && LastTeamCheck() == 2) // LastPlayer가 아닌데 팀이 2팀일 때 => 정상적 플레이
+        if (_lastPlayer == false && _teamTracker.LastTeamCheck() == 2) // LastPlayer가 아닌데 팀이 2팀일 때 => 정상적 플레이
         {
             _lastPlayer = true;
             _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.Others);
@@ -313,57 +317,8 @@ public class GameManager : PhotonSingleton<GameManager>
             Time.timeScale = 1;
         }
     }
-
-    /// <summary>
-    /// 팀마다 플레이어가 몇명 존재하는지 설정
-    /// </summary>
-    private void TeamSetting()
-    {
-        PhotonPlayer[] players = PhotonNetwork.PlayerList;
-
-        foreach (PhotonPlayer player in players)
-        {
-            EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-
-            if (_teamCount.ContainsKey(team))
-            {
-                _teamCount[team]++;
-            }
-            else
-            {
-                _teamCount.Add(team, 1);
-            }
-        }
-    }
     
-    /// <summary>
-    /// 게임 종료 체크를 위한 함수들
-    /// 팀 개수 체크, 막타 체크
-    /// </summary>
-   
-    // return 살아있는 팀원이 있는 팀 개수
-    private int LastTeamCheck()
-    {
-        int count = 0;
-     
-        // 살아있는 팀원이 있는가?
-        foreach (int value in _teamCount.Values)
-        {
-            if(value > 0) 
-            {
-                count++; // ( value > 0)
-            }
-        }
-        
-        return count;
-    }
     
-    // return 내 팀에 남아있는 팀원이 있는가?
-    private bool LastAttackCheck(EInGameTeam team)
-    {
-        return _teamCount[team] <= 0;
-    }
-
     public Transform GetResurrectPoint()
     {
         return GameMode.GetResurrectPoint();
@@ -394,7 +349,7 @@ public class GameManager : PhotonSingleton<GameManager>
     {
         EventManager.Instance.GameStart(); // 게임 시작 321
         EventManager.Instance.ProfileInit(); // 프로필 리프레시
-        TeamSetting(); // 팀개수 팀원 수 체크
+        _teamTracker.Init();
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString()); // 연출씬 제거
     }
 
