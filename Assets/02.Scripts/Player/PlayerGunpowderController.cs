@@ -129,7 +129,8 @@ public class PlayerGunpowderController : MonoBehaviour
                 _player.RPC_PlayExplosionEffect();
             }
 
-            if (_playerFSM != null)
+            // 슈퍼아머 상태가 아닐 때만 DamagedState로 전환
+            if (_playerFSM != null && !_player.IsSuperArmorEnabled)
             {
                 _playerFSM.SyncStateChange<PlayerDamagedState>();
             }

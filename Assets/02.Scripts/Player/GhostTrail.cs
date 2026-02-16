@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Collections;
+using System.Threading;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 public class GhostTrail : MonoBehaviour
 {
@@ -60,7 +62,7 @@ public class GhostTrail : MonoBehaviour
     private int _historyCapacity = 32;   // 고스트 수로부터 계산됨
 
     private PlayerStat _playerStat; // flipX를 위해 SpriteRenderer 목록을 읽는 데 사용
-    private Coroutine _turnOffCoroutine;
+    private CancellationTokenSource _turnOffCancellationTokenSource;
 
     private void Awake()
     {
@@ -159,10 +161,11 @@ public class GhostTrail : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_turnOffCoroutine != null)
+        if (_turnOffCancellationTokenSource != null)
         {
-            StopCoroutine(_turnOffCoroutine);
-            _turnOffCoroutine = null;
+            _turnOffCancellationTokenSource.Cancel();
+            _turnOffCancellationTokenSource.Dispose();
+            _turnOffCancellationTokenSource = null;
         }
         BuildGhostLists();
         RecomputeTimingsAndCapacity();
@@ -177,10 +180,11 @@ public class GhostTrail : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_turnOffCoroutine != null)
+        if (_turnOffCancellationTokenSource != null)
         {
-            StopCoroutine(_turnOffCoroutine);
-            _turnOffCoroutine = null;
+            _turnOffCancellationTokenSource.Cancel();
+            _turnOffCancellationTokenSource.Dispose();
+            _turnOffCancellationTokenSource = null;
         }
         SetZeroAlpha();
         if (toggleGhostObjectsActive)
@@ -203,14 +207,16 @@ public class GhostTrail : MonoBehaviour
             ClearHistory();
             return;
         }
-        if (_turnOffCoroutine != null)
+        if (_turnOffCancellationTokenSource != null)
         {
-            StopCoroutine(_turnOffCoroutine);
+            _turnOffCancellationTokenSource.Cancel();
+            _turnOffCancellationTokenSource.Dispose();
         }
-        _turnOffCoroutine = StartCoroutine(TurnOffSequenceThenDisable());
+        _turnOffCancellationTokenSource = new CancellationTokenSource();
+        TurnOffSequenceThenDisable(_turnOffCancellationTokenSource.Token).Forget();
     }
 
-    private IEnumerator TurnOffSequenceThenDisable()
+    private async UniTask TurnOffSequenceThenDisable(CancellationToken cancellationToken)
     {
         if (_ghostSpriteRendererGroups.Count == 0)
         {
@@ -219,13 +225,22 @@ public class GhostTrail : MonoBehaviour
                 SetGhostGroupsActive(false);
             }
             ClearHistory();
-            _turnOffCoroutine = null;
+            if (_turnOffCancellationTokenSource != null)
+            {
+                _turnOffCancellationTokenSource.Dispose();
+                _turnOffCancellationTokenSource = null;
+            }
             enabled = false;
-            yield break;
+            return;
         }
 
         for (int i = _ghostSpriteRendererGroups.Count - 1; i >= 0; i--)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             SpriteRenderer[] renderers = _ghostSpriteRendererGroups[i];
             for (int r = 0; r < renderers.Length; r++)
             {
@@ -246,17 +261,25 @@ public class GhostTrail : MonoBehaviour
 
             if (turnOffDelayPerGhostSeconds > 0f)
             {
-                yield return new WaitForSeconds(turnOffDelayPerGhostSeconds);
+                await UniTask.WaitForSeconds(turnOffDelayPerGhostSeconds, cancellationToken: cancellationToken);
             }
             else
             {
-                yield return null;
+                await UniTask.Yield(cancellationToken: cancellationToken);
             }
         }
 
-        ClearHistory();
-        _turnOffCoroutine = null;
-        enabled = false;
+        if (!cancellationToken.IsCancellationRequested)
+        {
+            ClearHistory();
+            enabled = false;
+        }
+
+        if (_turnOffCancellationTokenSource != null)
+        {
+            _turnOffCancellationTokenSource.Dispose();
+            _turnOffCancellationTokenSource = null;
+        }
     }
 
     private void RecordSnapshot()

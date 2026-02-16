@@ -2,6 +2,7 @@ using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 플레이어 피격 상태 클래스
@@ -145,12 +146,24 @@ public class PlayerDamagedState : PlayerBaseState
         // 저장된 속도 복원 (히트스탑에서 온 경우)
         RestoreStoredVelocityIfExists();
 
-        // 체력 비례 추가 힘 적용
-        ApplyHealthBasedForce();
+        // 넉백이 활성화되어 있을 때만 넉백 효과 적용
+        if (_owner.IsKnockbackEnabled)
+        {
+            // 체력 비례 추가 힘 적용
+            ApplyHealthBasedForce();
 
-        // 체력 비율에 따른 넉백 효과 적용
-        float currentHealthRatio = CalculateCurrentHealthRatio();
-        ApplyKnockbackEffect(currentHealthRatio);
+            // 체력 비율에 따른 넉백 효과 적용
+            float currentHealthRatio = CalculateCurrentHealthRatio();
+            ApplyKnockbackEffect(currentHealthRatio);
+        }
+        else
+        {
+            // 넉백 비활성화: Explosion에서 받은 힘을 0으로 만들어 넉백 효과 제거
+            if (_owner.Rigidbody2D != null)
+            {
+                _owner.Rigidbody2D.linearVelocity = Vector2.zero;
+            }
+        }
 
         // 히트 이펙트 활성화
         ActivateHitEffect();
@@ -173,8 +186,8 @@ public class PlayerDamagedState : PlayerBaseState
         // 애니메이션 정리 및 전환
         ResetAnimationsAndTriggerHit();
         
-        // 히트 이펙트 비활성화 (코루틴으로 지연 처리)
-        _owner.StartCoroutine(DeactivateHitEffectWithDelay());
+        // 히트 이펙트 비활성화 (UniTask로 지연 처리)
+        DeactivateHitEffectWithDelay().Forget();
 
         // 무적 상태 해제
         SetImmuneState(false);
@@ -247,12 +260,24 @@ public class PlayerDamagedState : PlayerBaseState
         // 무적 상태 설정 (히트스탑 완료 후 Damaged 로직으로 전환될 때 설정)
         SetImmuneState(true);
         
-        // 체력 비례 추가 힘 적용
-        ApplyHealthBasedForce();
+        // 넉백이 활성화되어 있을 때만 넉백 효과 적용
+        if (_owner.IsKnockbackEnabled)
+        {
+            // 체력 비례 추가 힘 적용
+            ApplyHealthBasedForce();
 
-        // 체력 비율에 따른 넉백 효과 적용
-        float currentHealthRatio = CalculateCurrentHealthRatio();
-        ApplyKnockbackEffect(currentHealthRatio);
+            // 체력 비율에 따른 넉백 효과 적용
+            float currentHealthRatio = CalculateCurrentHealthRatio();
+            ApplyKnockbackEffect(currentHealthRatio);
+        }
+        else
+        {
+            // 넉백 비활성화: Explosion에서 받은 힘을 0으로 만들어 넉백 효과 제거
+            if (_owner.Rigidbody2D != null)
+            {
+                _owner.Rigidbody2D.linearVelocity = Vector2.zero;
+            }
+        }
     }
     
     /// <summary>
@@ -403,9 +428,9 @@ public class PlayerDamagedState : PlayerBaseState
     /// <summary>
     /// 지연 후 히트 이펙트 비활성화
     /// </summary>
-    private IEnumerator DeactivateHitEffectWithDelay()
+    private async UniTask DeactivateHitEffectWithDelay()
     {
-        yield return new WaitForSeconds(HIT_EFFECT_DURATION);
+        await UniTask.WaitForSeconds(HIT_EFFECT_DURATION);
         _owner.HitEffectPrefab.SetActive(false);
     }
 
