@@ -4,7 +4,6 @@ public enum EMap
     Forest1,
     Dock1,
     Beach1,
-    VolleyBall1,
     
     Count
 }
