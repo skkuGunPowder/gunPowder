@@ -3,6 +3,7 @@ using BackndChat;
 using Photon.Pun;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -49,6 +50,13 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         new Dictionary<string, Dictionary<string, Dictionary<UInt64, ChannelInfo>>>();
 
     private bool _isChatClientInitialized = false;
+    
+    // 인게임 채널 생성 재시도
+    private const int INGAME_CREATE_RETRY_MAX = 3;
+    private int _ingameCreateRetryCount = 0;
+
+    // 코루틴 중복 실행 방지
+    private bool _retryJoinInGameScheduled = false;
 
     // ★ [추가] 메시지 Index별 옷 정보 저장 (UI에서 ProfileSkin 표시용)
     private Dictionary<ulong, List<string>> _messageOutfits = new Dictionary<ulong, List<string>>();
@@ -250,6 +258,10 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             _currentChannelGroup = channelInfo.ChannelGroup;
             _currentChannelName = channelInfo.ChannelName;
             _currentChannelNumber = channelInfo.ChannelNumber;
+            
+            // ★ 성공했으면 재시도 카운터 리셋
+            _ingameCreateRetryCount = 0;
+            
             Debug.Log($"[UIChatManager] 현재 채널 설정 완료: Group={_currentChannelGroup}, Name={_currentChannelName}, Number={_currentChannelNumber}");
         }
         // 인게임 채널이 아니고, 현재 채널이 설정되지 않은 경우 (첫 입장)
@@ -645,9 +657,38 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
             // 채널 이름 필터링 에러 - 사용자 친화적 메시지
             messageInfo.Message = "채팅 채널 연결에 실패했습니다. 잠시 후 다시 시도해주세요.";
-            Debug.LogWarning($"[UIChatManager] 채널 이름 필터링 감지: {errorMessageChannelParam.ChannelGroup} / {errorMessageChannelParam.ChannelName}");
+            Debug.LogWarning($"[UIChatManager] 채널 이름/그룹 필터링 감지: {errorMessageChannelParam.ChannelGroup} / {errorMessageChannelParam.ChannelName}");
 
-            // 자동 재시도는 하지 않음 (무한 루프 방지)
+            // 인게임 채널 생성 실패 시, 방장만 제한 횟수로 자동 재시도
+            if (PhotonNetwork.InRoom &&
+                PhotonNetwork.IsMasterClient &&
+                errorMessageChannelParam.ChannelGroup.Equals("ingamechat", StringComparison.OrdinalIgnoreCase))
+            {
+                if (_ingameCreateRetryCount < INGAME_CREATE_RETRY_MAX)
+                {
+                    _ingameCreateRetryCount++;
+
+                    Debug.LogWarning(
+                        $"[UIChatManager] (방장) 인게임 채널 생성 실패 → 재시도({_ingameCreateRetryCount}/{INGAME_CREATE_RETRY_MAX})");
+
+                    // 실패한 채널 정보를 RoomProperties에서 삭제해서,
+                    // 다음 JoinInGameChannel에서 새 채널명/번호를 다시 생성하게 만듦
+                    var clear = new ExitGames.Client.Photon.Hashtable();
+                    clear[ERoomProperties.ChatChannelGroup.ToString()] = null;
+                    clear[ERoomProperties.ChatChannelId.ToString()] = null;
+                    clear[ERoomProperties.ChatChannelNumber.ToString()] = null;
+                    PhotonNetwork.CurrentRoom.SetCustomProperties(clear);
+
+                    StartCoroutine(CoRetryJoinInGameChannel());
+
+                    return; // 재시도 예약했으니 여기서 종료(로그/메시지 중복 방지)
+                }
+                else
+                {
+                    Debug.LogError("[UIChatManager] (방장) 인게임 채널 생성 재시도 횟수 초과. 이번 방에서는 채팅이 비활성화될 수 있습니다.");
+                    _ingameCreateRetryCount = 0;
+                }
+            }
         }
         else if (error == ERROR_MESSAGE.CHANNEL_FULL ||
             error == ERROR_MESSAGE.INVALID_PASSWORD ||
@@ -839,9 +880,14 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         }
     }
     // [추가] 재시도 코루틴
-    private System.Collections.IEnumerator CoRetryJoinInGameChannel()
+    private IEnumerator CoRetryJoinInGameChannel()
     {
+        if (_retryJoinInGameScheduled) yield break;   // ★ 중복 방지
+        _retryJoinInGameScheduled = true;
+
         yield return new WaitForSeconds(0.5f);
+
+        _retryJoinInGameScheduled = false;
         JoinInGameChannel();
     }
     /// <summary>
