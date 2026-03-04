@@ -323,7 +323,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     private void SetPlayerOrderInLayer()
     {
-        int playerOrderInLayerPlus = PhotonView.OwnerActorNr;
+        int playerOrderInLayerPlus = GetPlayerSlotIndex() + 1;
         foreach (var item in _playerStat.MySpriteREndererList)
         {
             if (item != null)
@@ -338,6 +338,26 @@ public class Player : MonoBehaviourPun, IDamagable
                 item.sortingOrder = _originalSortingOrderMap[item] + playerOrderInLayerPlus * 100;
             }
         }
+    }
+
+    private int GetPlayerSlotIndex()
+    {
+        if (PhotonNetwork.CurrentRoom == null) { return PhotonView.OwnerActorNr - 1; }
+
+        var props = PhotonNetwork.CurrentRoom.CustomProperties;
+        string key = EProperties.PlayerList.ToString();
+        if (!props.ContainsKey(key)) { return PhotonView.OwnerActorNr - 1; }
+
+        int[] slotList = props[key] as int[];
+        if (slotList == null) { return PhotonView.OwnerActorNr - 1; }
+
+        int actorNr = PhotonView.OwnerActorNr;
+        for (int i = 0; i < slotList.Length; i++)
+        {
+            if (slotList[i] == actorNr) { return i; }
+        }
+
+        return PhotonView.OwnerActorNr - 1;
     }
 
     public void LoadItems()
@@ -492,6 +512,12 @@ public class Player : MonoBehaviourPun, IDamagable
     public void RegisterOriginalSortingOrder(SpriteRenderer renderer)
     {
         _visualController?.RegisterOriginalSortingOrder(renderer);
+    }
+
+    public int GetOriginalSortingOrder(SpriteRenderer renderer)
+    {
+        if (_visualController != null) { return _visualController.GetOriginalSortingOrder(renderer); }
+        return renderer != null ? renderer.sortingOrder : 0;
     }
 
     public void UnregisterOriginalSortingOrder(SpriteRenderer renderer)
@@ -1248,11 +1274,11 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void SetDownJump()
     {
-        gameObject.layer = LayerMask.NameToLayer("DownJump");
-        // 하위 오브젝트 들도 모드 변경
-        foreach (Transform child in transform)
+        int downJumpLayer = LayerMask.NameToLayer("DownJump");
+        gameObject.layer = downJumpLayer;
+        foreach (Transform child in GetComponentsInChildren<Transform>(true))
         {
-            child.gameObject.layer = LayerMask.NameToLayer("DownJump");
+            child.gameObject.layer = downJumpLayer;
         }
         ResetDownJump().Forget();
     }
@@ -1260,11 +1286,12 @@ public class Player : MonoBehaviourPun, IDamagable
     public async UniTask ResetDownJump()
     {
         await UniTask.WaitForSeconds(0.5f);
-        gameObject.layer = LayerMask.NameToLayer("Player");
+        int playerLayer = LayerMask.NameToLayer("Player");
+        gameObject.layer = playerLayer;
         _playerStat.IsDownJump = false;
-        foreach (Transform child in transform)
+        foreach (Transform child in GetComponentsInChildren<Transform>(true))
         {
-            child.gameObject.layer = LayerMask.NameToLayer("Player");
+            child.gameObject.layer = playerLayer;
         }
     }
 

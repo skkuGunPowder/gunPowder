@@ -106,6 +106,12 @@ public class HeadBomb : MonoBehaviour
 		instance.transform.localRotation = localRot;
 		instance.transform.localScale = localScale;
 
+		if (originalObject != null)
+		{
+			SetLayerRecursive(instance, originalObject.layer);
+			CopySortingLayer(originalObject, instance);
+		}
+
 		return instance;
 	}
 
@@ -118,6 +124,28 @@ public class HeadBomb : MonoBehaviour
 		return null;
 	}
 
+
+	private void SetLayerRecursive(GameObject obj, int layer)
+	{
+		if (obj == null) { return; }
+		obj.layer = layer;
+		foreach (Transform child in obj.GetComponentsInChildren<Transform>(true))
+		{
+			child.gameObject.layer = layer;
+		}
+	}
+
+	private void CopySortingLayer(GameObject source, GameObject target)
+	{
+		if (source == null || target == null) { return; }
+		SpriteRenderer srcSr = source.GetComponent<SpriteRenderer>();
+		if (srcSr == null) { return; }
+		int sortingLayerID = srcSr.sortingLayerID;
+		foreach (SpriteRenderer sr in target.GetComponentsInChildren<SpriteRenderer>(true))
+		{
+			sr.sortingLayerID = sortingLayerID;
+		}
+	}
 
 	private void OnDestroy()
 	{
