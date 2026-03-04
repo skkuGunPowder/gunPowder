@@ -41,6 +41,28 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 		_playerStat = GetComponent<PlayerStat>();
 	}
 
+	private void SetLayerRecursive(GameObject obj, int layer)
+	{
+		if (obj == null) { return; }
+		obj.layer = layer;
+		foreach (Transform child in obj.GetComponentsInChildren<Transform>(true))
+		{
+			child.gameObject.layer = layer;
+		}
+	}
+
+	private void CopySortingLayer(GameObject source, GameObject target)
+	{
+		if (source == null || target == null) { return; }
+		SpriteRenderer srcSr = source.GetComponent<SpriteRenderer>();
+		if (srcSr == null) { return; }
+		int sortingLayerID = srcSr.sortingLayerID;
+		foreach (SpriteRenderer sr in target.GetComponentsInChildren<SpriteRenderer>(true))
+		{
+			sr.sortingLayerID = sortingLayerID;
+		}
+	}
+
 	public void ApplyHead(ItemDTO item)
 	{
 		if (item == null || item.Prefab == null) { return; }
@@ -118,13 +140,13 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 		instance.transform.localRotation = localRot;
 		instance.transform.localScale = localScale;
 
-		instance.layer = originalObject.layer;
+		SetLayerRecursive(instance, originalObject.layer);
+		CopySortingLayer(originalObject, instance);
 		SpriteRenderer srcSr = originalObject.GetComponent<SpriteRenderer>();
 		SpriteRenderer dstSr = instance.GetComponent<SpriteRenderer>();
 		if (srcSr != null && dstSr != null)
 		{
-			dstSr.sortingLayerID = srcSr.sortingLayerID;
-			dstSr.sortingOrder = srcSr.sortingOrder;
+			dstSr.sortingOrder = _player != null ? _player.GetOriginalSortingOrder(srcSr) : srcSr.sortingOrder;
 		}
 
 		AddInstanceComponentsToLists(instance);
@@ -168,6 +190,8 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 		instance.transform.localPosition = Vector3.zero;
 		instance.transform.localRotation = Quaternion.identity;
 		instance.transform.localScale = Vector3.one;
+		SetLayerRecursive(instance, slotParent.gameObject.layer);
+		CopySortingLayer(slotParent.gameObject, instance);
 		if (manageLists) { AddInstanceComponentsToLists(instance); }
 		return instance;
 	}
@@ -203,6 +227,9 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 		instance.transform.localRotation = localRot;
 		instance.transform.localScale = localScale;
 
+		SetLayerRecursive(instance, originalObject.layer);
+		CopySortingLayer(originalObject, instance);
+
 		SetDieOriginalVisibility(originalObject, false);
 		AddDieInstanceComponentsToLists(instance);
 		return instance;
@@ -235,8 +262,10 @@ public class PlayerSkinManager : MonoBehaviour, IPlayerSkinManager
 		instance.transform.localRotation = Quaternion.identity;
 		instance.transform.localScale = Vector3.one;
 
+		SetLayerRecursive(instance, slotParent.gameObject.layer);
 		if (originalObject != null)
 		{
+			CopySortingLayer(originalObject, instance);
 			SetDieOriginalVisibility(originalObject, false);
 		}
 

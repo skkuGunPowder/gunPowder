@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using Photon.Pun;
 
 /// <summary>
 /// Player의 시각 효과 / 색상 / 정렬 관련 로직을 담당하는 컨트롤러.
@@ -246,6 +247,15 @@ public class PlayerVisualController : MonoBehaviour
         }
     }
 
+    public int GetOriginalSortingOrder(SpriteRenderer renderer)
+    {
+        if (renderer != null && _originalSortingOrderMap != null && _originalSortingOrderMap.ContainsKey(renderer))
+        {
+            return _originalSortingOrderMap[renderer];
+        }
+        return renderer != null ? renderer.sortingOrder : 0;
+    }
+
     public void UnregisterOriginalSortingOrder(SpriteRenderer renderer)
     {
         if (renderer == null || _originalSortingOrderMap == null) { return; }
@@ -282,7 +292,7 @@ public class PlayerVisualController : MonoBehaviour
             _originalSortingOrderMap = new Dictionary<SpriteRenderer, int>();
         }
 
-        int playerOrderInLayerPlus = _player.PhotonView.OwnerActorNr;
+        int playerOrderInLayerPlus = GetPlayerSlotIndex() + 1;
         foreach (var item in _playerStat.MySpriteREndererList)
         {
             if (item != null)
@@ -297,6 +307,27 @@ public class PlayerVisualController : MonoBehaviour
                 item.sortingOrder = _originalSortingOrderMap[item] + playerOrderInLayerPlus * 100;
             }
         }
+    }
+
+    private int GetPlayerSlotIndex()
+    {
+        if (_player == null || _player.PhotonView == null) { return 0; }
+        if (PhotonNetwork.CurrentRoom == null) { return _player.PhotonView.OwnerActorNr - 1; }
+
+        var props = PhotonNetwork.CurrentRoom.CustomProperties;
+        string key = EProperties.PlayerList.ToString();
+        if (!props.ContainsKey(key)) { return _player.PhotonView.OwnerActorNr - 1; }
+
+        int[] slotList = props[key] as int[];
+        if (slotList == null) { return _player.PhotonView.OwnerActorNr - 1; }
+
+        int actorNr = _player.PhotonView.OwnerActorNr;
+        for (int i = 0; i < slotList.Length; i++)
+        {
+            if (slotList[i] == actorNr) { return i; }
+        }
+
+        return _player.PhotonView.OwnerActorNr - 1;
     }
 
     #endregion
