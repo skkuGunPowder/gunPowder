@@ -17,7 +17,7 @@ public class BombStat : IStat
     public BombStat(JsonData json)
     {
         Priority = int.Parse(json["Priority"].ToString());
-        Cost = int.Parse(json["Cost"].ToString());
+        Cost = 0;
         CoolTime = float.Parse(json["CoolTime"].ToString());
         Speed = float.Parse(json["ThrowingSpeed"].ToString());
         RecoilAmount = float.Parse(json["RecoilAmount"].ToString());
