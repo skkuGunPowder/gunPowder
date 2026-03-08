@@ -25,7 +25,7 @@ public class FireTruck : MonoBehaviour
     [SerializeField] private float _startOffsetDistance = 5f;
     [SerializeField] private float _rayDistance = 20f;
     [SerializeField] private LayerMask _groundLayer;
-    [SerializeField] private int _healPercent = 33;
+    [SerializeField] private int _stealPercent = 33;
 
     private PhotonView _photonView;
     public PhotonView PhotonView => _photonView;
@@ -137,7 +137,7 @@ public class FireTruck : MonoBehaviour
 
             foreach (var target in targetsInRange)
             {
-                target.TakeDamage(_damageAmount, _damageAmount, _healPercent, transform.position, _owner.PhotonView.ViewID, _owner.PhotonView.OwnerActorNr);
+                target.TakeDamage(_damageAmount, _damageAmount, _stealPercent, transform.position, _owner.PhotonView.ViewID, _owner.PhotonView.OwnerActorNr);
             }
             await UniTask.WaitForSeconds(_damageInterval, cancellationToken: _attackCancellationToken.Token);
         }

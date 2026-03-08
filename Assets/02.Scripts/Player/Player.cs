@@ -845,11 +845,11 @@ public class Player : MonoBehaviourPun, IDamagable
 
     }
 
-    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
+    public void TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
     {
         if (_damageController != null)
         {
-            _damageController.TakeDamage(damage, maxDamage, HealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
+            _damageController.TakeDamage(damage, maxDamage, StealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
         }
     }
 

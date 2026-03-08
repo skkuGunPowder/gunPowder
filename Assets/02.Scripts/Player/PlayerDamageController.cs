@@ -59,7 +59,7 @@ public class PlayerDamageController : MonoBehaviour
     /// <summary>
     /// 외부에서 호출하는 데미지 진입 메서드
     /// </summary>
-    public void TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb,
+    public void TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb,
         int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
     {
         if (_photonView == null || !_photonView.IsMine)
@@ -70,7 +70,7 @@ public class PlayerDamageController : MonoBehaviour
         EventManager.Instance.HitScreen();
         // 모든 클라이언트에서 VFX와 데미지 처리를 동기화
         _photonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All,
-            damage, maxDamage, HealPercent, attackerBomb, attackerViewId,
+            damage, maxDamage, StealPercent, attackerBomb, attackerViewId,
             attackerActorNumber, isFallingOut, isNormalAttack);
     }
 
@@ -117,7 +117,7 @@ public class PlayerDamageController : MonoBehaviour
     /// 실제 데미지 계산/적용 및 네트워크 동기화
     /// </summary>
     [PunRPC]
-    public void RPC_TakeDamage(int damage, int maxDamage, int HealPercent, Vector3 attackerBomb,
+    public void RPC_TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb,
         int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack,
         PhotonMessageInfo info)
     {
@@ -154,8 +154,8 @@ public class PlayerDamageController : MonoBehaviour
             _playerStat.IncreseDamagedCount();
 
             // 건파우더 드랍량 계산 (힐량 계산)
-            float healPercent = HealPercent / 100f;
-            int gunPowderCount = Mathf.CeilToInt(maxDamage * healPercent);
+            float stealPercent = StealPercent / 100f;
+            int gunPowderCount = Mathf.CeilToInt(maxDamage * stealPercent);
 
             // 플레이어가 맞은 횟수에 비례해서 데미지 증가
             int increaseDamagePerDamagedCount = _playerStat.CurrentPlayerDamagedCount / 15;
