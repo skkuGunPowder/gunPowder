@@ -51,9 +51,14 @@ public class PlayerDamagedState : PlayerBaseState
     private const int SHAKE_VIBRATO_Y = 10;                // Y축 흔들림 진동 횟수
     private const float SHAKE_RANDOMNESS = 90;              // 흔들림 무작위성 (도)
     
+    // 무적 시간 관련 상수
+    private const float IMMUNE_TIME_RATIO = 0.25f;  // 피격 시간의 25%만 무적
+
     // 상태 변수들
     private float _damagedTimer = 0f;           // 피격 지속 시간 타이머
     private float _actualDamagedTime = 0f;      // 실제 피격 시간 (거리 기반으로 조정된 값)
+    private float _immuneTime = 0f;             // 무적 지속 시간
+    private bool _isImmuneActive = false;       // 무적 상태 활성 여부
     private float _originalLinearDamping;       // 원본 선형 감쇠값
     private Tween _knockbackTween;              // 넉백 효과 트윈
     
@@ -137,11 +142,13 @@ public class PlayerDamagedState : PlayerBaseState
     {
         // 거리 기반 실제 피격 시간 계산
         CalculateActualDamagedTime();
-        
+
         _owner.RPC_SetAnimatorTrigger("HitLoop");
-        
-        // 무적 상태 설정
+
+        // 무적 상태 설정 (피격 시간의 25%만 무적)
         SetImmuneState(true);
+        _isImmuneActive = true;
+        _immuneTime = _actualDamagedTime * IMMUNE_TIME_RATIO;
 
         // 저장된 속도 복원 (히트스탑에서 온 경우)
         RestoreStoredVelocityIfExists();
@@ -189,9 +196,10 @@ public class PlayerDamagedState : PlayerBaseState
         // 히트 이펙트 비활성화 (UniTask로 지연 처리)
         DeactivateHitEffectWithDelay().Forget();
 
-        // 무적 상태 해제
+        // 무적 상태 해제 (안전장치)
         SetImmuneState(false);
-        
+        _isImmuneActive = false;
+
         // 저장된 속도 상태 초기화
         _owner.ClearStoredVelocity();
         
@@ -226,6 +234,13 @@ public class PlayerDamagedState : PlayerBaseState
         // Damaged 로직 진행
         _damagedTimer += Time.deltaTime;
 
+        // 무적 시간 체크: 25% 경과 후 무적 해제
+        if (_isImmuneActive && _damagedTimer >= _immuneTime)
+        {
+            SetImmuneState(false);
+            _isImmuneActive = false;
+        }
+
         // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
         if (!IsMinimumDamagedTimeElapsed())
         {
@@ -257,9 +272,11 @@ public class PlayerDamagedState : PlayerBaseState
         
         _owner.RPC_SetAnimatorTrigger("HitLoop");
         
-        // 무적 상태 설정 (히트스탑 완료 후 Damaged 로직으로 전환될 때 설정)
+        // 무적 상태 설정 (피격 시간의 25%만 무적)
         SetImmuneState(true);
-        
+        _isImmuneActive = true;
+        _immuneTime = _actualDamagedTime * IMMUNE_TIME_RATIO;
+
         // 넉백이 활성화되어 있을 때만 넉백 효과 적용
         if (_owner.IsKnockbackEnabled)
         {
@@ -449,10 +466,10 @@ public class PlayerDamagedState : PlayerBaseState
     private void CalculateActualDamagedTime()
     {
         float damageRatio = _owner.LastDamageRatio; // 거리 기반 데미지 비율
-        float baseDamagedTime = _owner.PlayerStat.DamagedTime;
+        float baseDamagedTime = _owner.LastMaxStunTime; // 폭발별 MaxStunTime 사용
 
         // damageRatio = 1.0 (가까이) -> 100% 시간 (baseDamagedTime)
-        // damageRatio = 0.0 (멀리) -> 30% 시간 (baseDamagedTime * 0.5)
+        // damageRatio = 0.0 (멀리) -> 30% 시간 (baseDamagedTime * 0.3)
         _actualDamagedTime = Mathf.Lerp(baseDamagedTime * 0.3f, baseDamagedTime, damageRatio);
     }
 

@@ -174,6 +174,10 @@ public class Player : MonoBehaviourPun, IDamagable
     private float _lastDamageRatio = 1f; // damage / maxDamage 비율
     public float LastDamageRatio => _lastDamageRatio;
 
+    // 최근 폭발의 MaxStunTime (폭발별 피격 시간 계산용)
+    private float _lastMaxStunTime = 0f;
+    public float LastMaxStunTime => _lastMaxStunTime;
+
     // 부활 후 첫 공격 여부 (HP bar 최대값 리셋용)
     private bool _isAfterResurrect = false;
 
@@ -845,11 +849,11 @@ public class Player : MonoBehaviourPun, IDamagable
 
     }
 
-    public void TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
+    public void TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, float maxStunTime = 0f, bool isFallingOut = false, bool isNormalAttack = false)
     {
         if (_damageController != null)
         {
-            _damageController.TakeDamage(damage, maxDamage, StealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
+            _damageController.TakeDamage(damage, maxDamage, StealPercent, attackerBomb, attackerViewId, attackerActorNumber, maxStunTime, isFallingOut, isNormalAttack);
         }
     }
 
@@ -1192,9 +1196,10 @@ public class Player : MonoBehaviourPun, IDamagable
     /// 피격 시 마지막 데미지 비율을 기록하고 피격 이벤트를 발생시킨다.
     /// (PlayerDamageController에서 호출)
     /// </summary>
-    public void RegisterHitDamage(int damage, int maxDamage)
+    public void RegisterHitDamage(int damage, int maxDamage, float maxStunTime)
     {
         _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
+        _lastMaxStunTime = maxStunTime;
         OnHit?.Invoke();
     }
 

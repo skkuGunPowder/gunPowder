@@ -90,13 +90,10 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private int _currentPlayerLife;
     [SerializeField] private int _initGunpowderCount;
     [SerializeField] private float _gunPowderDecreaseTime;
-    [SerializeField] private int _currentPlayerDamagedCount;
-    
     public int CurrentPlayerGunPowderCount => _currentPlayerGunPowderCount;
     public int CurrentPlayerLife => _currentPlayerLife;
     public int InitGunpowderCount => _initGunpowderCount;
     public float GunPowderDecreaseTime { get => _gunPowderDecreaseTime; set => _gunPowderDecreaseTime = value; }
-    public int CurrentPlayerDamagedCount => _currentPlayerDamagedCount;
 
     [Header("공격 설정")]
     [SerializeField] private int _attackPenaltyTime;
@@ -213,8 +210,6 @@ public class PlayerStat : MonoBehaviour
             _initGunpowderCount = RoomStatManager.Instance.PlayerGunpowder;
             _currentPlayerLife = RoomStatManager.Instance.PlayerLife;
             _gunPowderDecreaseTime = RoomStatManager.Instance.PlayerDecreaseTime;
-            
-            _currentPlayerDamagedCount = 0;
         }
     }
 
@@ -406,16 +401,6 @@ public class PlayerStat : MonoBehaviour
     }
 
     // 데미지 & 통계 관리 메서드
-    public void IncreseDamagedCount()
-    {
-        _currentPlayerDamagedCount++;
-    }
-
-    public void ResetDamagedCount()
-    {
-        _currentPlayerDamagedCount = 0;
-    }
-
     public void IncreaseTotalDamage(float damage)
     {
         _totalDamage += damage;

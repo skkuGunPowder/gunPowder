@@ -60,7 +60,7 @@ public class PlayerDamageController : MonoBehaviour
     /// 외부에서 호출하는 데미지 진입 메서드
     /// </summary>
     public void TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb,
-        int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
+        int attackerViewId, int attackerActorNumber, float maxStunTime, bool isFallingOut, bool isNormalAttack)
     {
         if (_photonView == null || !_photonView.IsMine)
         {
@@ -71,7 +71,7 @@ public class PlayerDamageController : MonoBehaviour
         // 모든 클라이언트에서 VFX와 데미지 처리를 동기화
         _photonView.RPC(nameof(RPC_TakeDamage), RpcTarget.All,
             damage, maxDamage, StealPercent, attackerBomb, attackerViewId,
-            attackerActorNumber, isFallingOut, isNormalAttack);
+            attackerActorNumber, maxStunTime, isFallingOut, isNormalAttack);
     }
 
     /// <summary>
@@ -118,7 +118,7 @@ public class PlayerDamageController : MonoBehaviour
     /// </summary>
     [PunRPC]
     public void RPC_TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb,
-        int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack,
+        int attackerViewId, int attackerActorNumber, float maxStunTime, bool isFallingOut, bool isNormalAttack,
         PhotonMessageInfo info)
     {
         if (_playerStat == null || _playerStat.IsImmune)
@@ -150,17 +150,9 @@ public class PlayerDamageController : MonoBehaviour
         // 같은 팀이 아닐 때만 데미지 적용
         if (!isSameTeam)
         {
-            // 피격 횟수 증가
-            _playerStat.IncreseDamagedCount();
-
             // 건파우더 드랍량 계산 (힐량 계산)
             float stealPercent = StealPercent / 100f;
             int gunPowderCount = Mathf.CeilToInt(maxDamage * stealPercent);
-
-            // 플레이어가 맞은 횟수에 비례해서 데미지 증가
-            int increaseDamagePerDamagedCount = _playerStat.CurrentPlayerDamagedCount / 15;
-            damage += increaseDamagePerDamagedCount;
-            maxDamage += increaseDamagePerDamagedCount;
 
             // 체력 감소
             bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber, isNormalAttack);
@@ -198,7 +190,7 @@ public class PlayerDamageController : MonoBehaviour
         }
 
         // 거리 기반 데미지 비율 저장 및 피격 이벤트 발생
-        _player.RegisterHitDamage(damage, maxDamage);
+        _player.RegisterHitDamage(damage, maxDamage, maxStunTime);
 
         // 데미지 팝업 & VFX/사운드: 중복 호출 방지
         // 오직 RPC_TakeDamage를 원래 보낸 클라이언트(피격자 Owner)에서만 RPC를 전송한다
