@@ -12,6 +12,9 @@ GameObject:
   - component: {fileID: 3570492691703544958}
   - component: {fileID: 9135146056783026098}
   - component: {fileID: 8192998866502710399}
+  - component: {fileID: 6798247650792327545}
+  - component: {fileID: 7858638530058087704}
+  - component: {fileID: 2378972428517735097}
   m_Layer: 0
   m_Name: ModeNSpawner
   m_TagString: Untagged
@@ -92,6 +95,47 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resurrectPoint: {fileID: 0}
+  WinningTeam: 0
+  MyPlayer: {fileID: 0}
+--- !u!114 &6798247650792327545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035945805825258251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 574451056826336478f3c46729a3b376, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  State: 1
+--- !u!114 &7858638530058087704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035945805825258251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad4ced4660d95ce43bb6635f8f61a301, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  State: 3
+--- !u!114 &2378972428517735097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035945805825258251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb6e70a9019658449830e441cff60f7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  State: 2
 --- !u!1 &3019794214641518552
 GameObject:
   m_ObjectHideFlags: 0

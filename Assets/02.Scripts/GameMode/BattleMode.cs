@@ -10,38 +10,25 @@ public class BattleMode : GameModeBase
     
     protected override void Start()
     {
-        if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)
-        {
-            int[] playerList = PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] as int[];
-            SpawnPlayer(playerList);
-        }
-        else
-        {
-            PhotonPlayer[] players = PhotonNetwork.PlayerList;
-            
-            int[] playerList = new int[players.Length];
-            
-            for (int i = 0; i < players.Length; i++)
-            {
-                playerList[i] = players[i].ActorNumber;
-            }
-            
-            SpawnPlayer(playerList);
-            
-        }
+        base.Start();
+        SetState();
     }
-    
-    private void SpawnPlayer(int[] playerList)
+
+    private void SetState()
     {
-        for (int i = 0; i < playerList.Length; i++)
+        GameModeStateBase[] stateBases = this.GetComponents<GameModeStateBase>();
+
+        foreach(GameModeStateBase mode in stateBases)
         {
-            if (playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
-            {
-                continue;
-            }
-            
-            _playerSpawner.GeneratePlayers(i);
+            mode.Initialize(this);
+            _stateDictionary.TryAdd(mode.State, mode);
         }
     }
     
+    public override void GameStart()
+    {
+        Debug.Log($"GameStart - Mode : Spawn");
+        CheckState(EModeState.Spawn);
+    }
+
 }
