@@ -203,4 +203,18 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGameRespawn?.Invoke();
     }
+    
+    public event Action<PhotonPlayer> OnTimeCheck;
+    public void TimeCheck(PhotonPlayer player)
+    {
+        OnTimeCheck?.Invoke(player);
+    }
+    
+    public event Action OnLastDieComplete;
+
+    public void LastDieComplete()
+    {
+        OnLastDieComplete?.Invoke();   
+    }
+
 }

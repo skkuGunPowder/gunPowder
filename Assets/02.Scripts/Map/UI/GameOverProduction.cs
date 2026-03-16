@@ -96,7 +96,6 @@ public class GameOverProduction : MonoBehaviour
         sequence.AppendCallback(CameraButtonDown);
         sequence.AppendInterval(BlackOutTime);
         sequence.AppendCallback(CameraOff);
-        sequence.AppendCallback(GameManager.Instance.GameResultCheck);
         sequence.AppendInterval(NextSceneTime);
         sequence.OnComplete(() =>
         {

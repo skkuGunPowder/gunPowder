@@ -18,8 +18,6 @@ public class GameManager : PhotonSingleton<GameManager>
     /// 3. 죽음에 대한 함수
     /// 4. RPC
     /// </summary>
-    private PhotonView _photonView;
-    
     [Header("현재 게임 상태")]
     [SerializeField] private EGameState _currentGameState;
     public EGameState CurrentGameState => _currentGameState;
@@ -27,12 +25,8 @@ public class GameManager : PhotonSingleton<GameManager>
     [Header("게임 모드")]
     [SerializeField] private GameModeBase GameMode;  // 부활 지점
     
-    private bool _lastPlayer = false; // 마지막 연출 실행 여부
-    private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>(); // 살아 있는 팀원 수 : 팀 / 팀원 수
+    private PhotonView _photonView;
 
-    private GameObject _myPlayer;   // 내 로컬 플레이어 (게임 종료시 : 결과에 필요한 정보 수집을 위함)
-
-    public event Action<PhotonPlayer> OnTimeCheck;  // 죽은 사람 시간 체크
 
     protected override void Awake()
     {
@@ -49,12 +43,11 @@ public class GameManager : PhotonSingleton<GameManager>
 
         TimeScaleSetting();
         EventManager.Instance.OnLoadFinished += RequestGameStart;
-        // EventManager.Instance.OnPlayerLeft += PlayerLeft;
     }
 
     // 게임 시작 (모든 플레이어들이 로드가 끝났을 때 : OnLoadFinished)
-    private void RequestGameStart()
-    {
+    public void RequestGameStart()
+    {                     
         // 방장만 게임을 시작할 수 있음
         if (PhotonNetwork.IsMasterClient == false)
         {
@@ -70,8 +63,6 @@ public class GameManager : PhotonSingleton<GameManager>
         EventManager.Instance.PlayerListUp();
         // 카메라 컨트롤러 : 관전을 위해 모든 플레이어 찾기
         EventManager.Instance.TargetChanged(); 
-        // PlayerLeft();   // 게임 시작 플레이어 체크
-        _myPlayer = GameObject.FindGameObjectWithTag("Player");  // 내 로컬 플레이어 찾기
     }
     
     // 게임 종료
@@ -96,44 +87,13 @@ public class GameManager : PhotonSingleton<GameManager>
             return;
         }
         
-        // 게임오버 체크
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-        
         if ((bool)changedProps[EProperties.IsDead.ToString()])
         {
             // 죽은 사람 죽은 시간 체크 후 저장
-            OnTimeCheck?.Invoke(targetPlayer);
+            EventManager.Instance.TimeCheck(targetPlayer);
         }
     }
     
-    // 타임 오버가 되었을 때 로컬 플레이어가 살아있는 경우 나의 프로퍼티를 보낸다.
-    public void GameResultCheck()
-    {
-        PhotonPlayer player = PhotonNetwork.LocalPlayer;
-        if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
-        {
-            return;
-        }
-        
-        PlayerStat stat = _myPlayer.GetComponent<PlayerStat>();
-        
-        Hashtable properties = new Hashtable()
-        {
-            {EProperties.IsDead.ToString(), true},
-            {EProperties.Kill.ToString(), stat.TotalKillCount},
-            {EProperties.Damage.ToString(), stat.TotalDamage}
-        };
-
-        if (PhotonNetwork.IsMasterClient)
-        {
-            OnTimeCheck?.Invoke(player);
-        }
-        
-        player.SetCustomProperties(properties);
-    }
     
     //게임 상태 변경, 게임 상태에 따라 타임 스케일 조정
     public void GameStateChange(EGameState state)
@@ -169,7 +129,6 @@ public class GameManager : PhotonSingleton<GameManager>
     private void RPC_GameOver()
     {
         GameStateChange(EGameState.Result);
-        // EventManager.Instance.OnPlayerLeft -= PlayerLeft;
         EventManager.Instance.GameOver();
     }
     

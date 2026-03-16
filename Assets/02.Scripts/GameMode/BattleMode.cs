@@ -1,7 +1,5 @@
-using System.Collections.Generic;
-using Photon.Pun;
 using UnityEngine;
-using PhotonPlayer = Photon.Realtime.Player;
+
 public class BattleMode : GameModeBase
 {
     /// <summary>

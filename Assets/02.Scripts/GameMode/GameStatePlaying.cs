@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
 using UnityEngine;
@@ -10,6 +11,8 @@ public class GameStatePlaying : GameModeStateBase
     // lastpalyer체크, 현재 팀에 남아있는 인원 체크
     private bool _lastPlayer = false; 
     private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>(); // 살아 있는 팀원 수 : 팀 / 팀원 수
+    private int _count = 0; // 모든 플레이어의 정보가 모였는지 확인
+    private int _MaxCount = 0;
     
     private void Init()
     { 
@@ -29,15 +32,19 @@ public class GameStatePlaying : GameModeStateBase
             _teamCount.TryAdd(team, 0);
             _teamCount[team]++;
         }
-
+        
+        _MaxCount = players.Length;
+        Debug.Log($"team Count : {_teamCount.Count}");
     }
 
     public override void Enter()
     {
         Init();
         
-        GameManager.Instance.OnTimeCheck += OnPlayerDead;
+        Debug.Log("Change State : GameStatePlaying");
+        EventManager.Instance.OnTimeCheck += OnPlayerDead;
         EventManager.Instance.OnPlayerLeft += OnPlayerLeft;
+        EventManager.Instance.OnLastDieComplete += GameResultCheck;
         OnPlayerLeft(); // 플레이어가 게임 시작 전에 나간경우를 체크하기 위함
     }
 
@@ -57,6 +64,7 @@ public class GameStatePlaying : GameModeStateBase
             
             EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
             _teamCount[team]--;
+            _count++;
         }
 
         if (PhotonNetwork.IsMasterClient == false)
@@ -70,6 +78,20 @@ public class GameStatePlaying : GameModeStateBase
 
     private void OnPlayerDead(PhotonPlayer player)
     {
+        _count++;
+        
+        // 게임오버 체크
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+
+        if (_count >= _MaxCount)
+        {
+            RequestStateChange();
+            return;
+        }
+        
         EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
         _teamCount[team]--;
         
@@ -150,6 +172,12 @@ public class GameStatePlaying : GameModeStateBase
             _gameMode.GameOver();
             return;
         }
+
+        if (RoomTeamCheck(players))
+        {
+            _gameMode.GameOver();
+            return;
+        }
         
         foreach (PhotonPlayer p in players)
         {
@@ -164,27 +192,27 @@ public class GameStatePlaying : GameModeStateBase
         
         if (notDead == 0)   // 나가서 살아있는 사람이 없을 때
         {
-            _gameMode.GameOver();
+            _gameMode.CheckState(EModeState.Round);
             return;
         }
         
         // 2명 이상인데 살아있는 사람이 1명일 때
         if (_lastPlayer == false && notDead == 1)
         {
-            _gameMode.GameOver();
+            _gameMode.CheckState(EModeState.Round);
             return;
         }
 
         if (_lastPlayer && notDead == 1)
         {
-            _gameMode.GameOver();
+            _gameMode.CheckState(EModeState.Round);
             return;
         }
         
         // 나갔는데 살아있는 팀이 한팀 뿐일 때
         if (LastTeamCheck() <= 1)
         {
-            _gameMode.GameOver();
+            _gameMode.CheckState(EModeState.Round);
             return;
         }
         
@@ -195,6 +223,23 @@ public class GameStatePlaying : GameModeStateBase
             _photonView.RPC(nameof(RPC_LastPlayer), RpcTarget.Others);
         }
         
+    }
+
+    private bool RoomTeamCheck(PhotonPlayer[] players)
+    {
+        EInGameTeam team = (EInGameTeam)players[0].CustomProperties[EProperties.Team.ToString()];
+
+        for (int i = 1; i < players.Length; i++)
+        {
+            EInGameTeam other = (EInGameTeam)players[i].CustomProperties[EProperties.Team.ToString()];
+            
+            if (team != other)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
     
         
@@ -252,6 +297,38 @@ public class GameStatePlaying : GameModeStateBase
         }
     }
     
+    // 타임 오버가 되었을 때 로컬 플레이어가 살아있는 경우 나의 프로퍼티를 보낸다.
+    public void GameResultCheck()
+    {
+        PhotonPlayer player = PhotonNetwork.LocalPlayer;
+        if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
+        {
+            return;
+        }
+        
+        PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
+        
+        Hashtable properties = new Hashtable()
+        {
+            {EProperties.IsDead.ToString(), true},
+            {EProperties.Kill.ToString(), stat.TotalKillCount},
+            {EProperties.Damage.ToString(), stat.TotalDamage}
+        };
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            EventManager.Instance.TimeCheck(player);
+        }
+        
+        player.SetCustomProperties(properties);
+    }
+    
+    // LastDie로 죽었을 때 변화
+    private void RequestStateChange()
+    {
+        _gameMode.RequestStateChange(EModeState.Round);
+    }
+    
     public override void Tick() { }
 
     public override void Exit()
@@ -260,7 +337,10 @@ public class GameStatePlaying : GameModeStateBase
         _lastPlayer = false;
         // 팀별 살아있는 인원 초기화
         _teamCount.Clear();
+        
+        EventManager.Instance.OnLastDieComplete -= GameResultCheck;
         EventManager.Instance.OnPlayerLeft -= OnPlayerLeft;
-        GameManager.Instance.OnTimeCheck -= OnPlayerDead;
+        EventManager.Instance.OnTimeCheck -= OnPlayerDead;
+
     }
 }

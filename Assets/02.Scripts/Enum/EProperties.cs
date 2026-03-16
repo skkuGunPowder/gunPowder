@@ -11,5 +11,9 @@ public enum EProperties
     Emotion,
     RoomInitial, // 방에 처음 들어왔는지 안들어왔는지
     
+    TotalDamage,
+    TotalKill,
+    TotalSurvivorTime,
+    
     Count
 }

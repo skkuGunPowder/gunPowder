@@ -18,8 +18,6 @@ public class GameModeBase : MonoBehaviour
     protected GameModeStateBase _currentState;
     protected EModeState _nextState; // 모든 유저가 준비가 되었을 때 이동
     
-    
-    public EInGameTeam WinningTeam;
     public GameObject MyPlayer;
     
     protected PlayerSpawner _playerSpawner;
@@ -41,6 +39,17 @@ public class GameModeBase : MonoBehaviour
         {
             _photonView = GetComponent<PhotonView>();
         }
+        
+        // 디버그 확인
+        if (_photonView == null)
+        {
+            Debug.LogError("PhotonView가 GameModeBase에 없습니다!");
+        }
+        else
+        {
+            Debug.Log($"GameModeBase PhotonView ID: {_photonView.ViewID}");
+        }
+
     }
     
     protected virtual void Start()
@@ -72,6 +81,19 @@ public class GameModeBase : MonoBehaviour
         // 첫 상태 정해주기
     }
 
+    public void RequestStateChange(EModeState state)
+    {
+        Debug.Log("Change State");
+        int stateInt = (int)state;
+        _photonView.RPC(nameof(RPC_RequestChange), RpcTarget.All, stateInt);
+    }
+    [PunRPC]
+    public void RPC_RequestChange(int state)
+    {
+        EModeState modeState = (EModeState)state;
+        CheckState(modeState);
+    }
+    
     public void CheckState(EModeState state)
     {
         _nextState = state;

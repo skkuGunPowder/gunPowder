@@ -50,8 +50,10 @@ public class PlayerLastDieState : PlayerBaseState
     private void ExecuteDeath()
     {
         ExecuteDeathEffects();
-        GameManager.Instance.RequestGameOver();
+        // GameManager.Instance.RequestGameOver();
+        EventManager.Instance.LastDieComplete();
         SyncStateChange<PlayerObserveState>();
+        
     }
     private void SetImmuneState()
     {

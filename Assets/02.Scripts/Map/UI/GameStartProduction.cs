@@ -34,7 +34,7 @@ public class GameStartProduction : MonoBehaviour
     public AudioClip GameStartBell_1;
     private void Awake()
     {
-        EventManager.Instance.OnLoadFinished += Play;
+        // EventManager.Instance.OnLoadFinished += Play;
         InputHandler.BlockInput = true;
     }
 
@@ -46,13 +46,13 @@ public class GameStartProduction : MonoBehaviour
     {
         DOTween.To(() => TopPivot.offsetMax, x => TopPivot.offsetMax = x, new Vector2(TopPivot.offsetMax.x, TopPivotY),
             DotweenDuration).SetEase(TimerEase).SetUpdate(true);
-        // TopPivot.do(TimerEndPosition, DotweenDuration).SetEase(TimerEase).SetUpdate(true);
         Profile.DOAnchorPos(ProfileEndPosition, DotweenDuration).SetEase(ProfileEase).SetUpdate(true);
     }
 
     public void GameStart()
     {
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
+        sequence.AppendCallback(Play);
         sequence.Append(GameStartCountText3.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
             .SetEase(GameStartTextEase));
         sequence.AppendInterval(GameStartTextInterval);
@@ -74,10 +74,10 @@ public class GameStartProduction : MonoBehaviour
         sequence.AppendInterval(GameStartTextInterval);
         sequence.Append(GameStartText.transform.DOScale(GameStartTextScaleOrigin, GameStartTextSpeed)
             .SetEase(GameStartTextEase));
-        sequence.OnComplete(() =>
-        {
-            EventManager.Instance.OnGameStart -= GameStart;
-        });
+        // sequence.OnComplete(() =>
+        // {
+        //     EventManager.Instance.OnGameStart -= GameStart;
+        // });
     }
     
     private void SoundStart()
@@ -91,6 +91,7 @@ public class GameStartProduction : MonoBehaviour
         TopPivot.offsetMax = TimerOriginPosition;
         Profile.anchoredPosition = ProfileOriginPosition;
         
-        EventManager.Instance.OnLoadFinished -= Play;
+        EventManager.Instance.OnGameStart -= GameStart;
+        // EventManager.Instance.OnLoadFinished -= Play;
     }
 }
