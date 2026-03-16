@@ -121,16 +121,18 @@ public class PlayerDamagedState : PlayerBaseState
     {
         // 건파우더 비율에 따른 히트스탑 시간 계산
         CalculateHitStopDuration();
-        
-        // 현재 속도 저장 및 정지
-        StoreCurrentVelocityAndFreeze();
-        
+
+        Debug.Log($"[피격시스템] InitializeHitStop: 히트스탑 시간={_currentHitStopDuration:F2}s, 체력비율={CalculateCurrentHealthRatio():F2}");
+
+        // 플레이어 정지 (폭발 정보는 Player에 별도 저장됨)
+        FreezePlayer();
+
         // Y 위치 저장 (흔들림 제한용)
         _originalYPosition = _owner.transform.position.y;
-        
+
         // 캐릭터 흔들림 효과 시작
         StartScreenShakeEffect();
-        
+
         // 히트 이펙트 활성화
         ActivateHitEffect();
     }
@@ -150,8 +152,7 @@ public class PlayerDamagedState : PlayerBaseState
         _isImmuneActive = true;
         _immuneTime = _actualDamagedTime * IMMUNE_TIME_RATIO;
 
-        // 저장된 속도 복원 (히트스탑에서 온 경우)
-        RestoreStoredVelocityIfExists();
+        Debug.Log($"[피격시스템] InitializeDamaged: 피격시간={_actualDamagedTime:F2}s (MaxStunTime={_owner.LastMaxStunTime:F2}s × damageRatio={_owner.LastDamageRatio:F2}), 무적시간={_immuneTime:F2}s (25%)");
 
         // 넉백이 활성화되어 있을 때만 넉백 효과 적용
         if (_owner.IsKnockbackEnabled)
@@ -182,17 +183,16 @@ public class PlayerDamagedState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
-        
+
         // 히트스탑 효과 정리
         if (_isHitStopActive)
         {
             CleanupShakeEffect();
-            RestoreStoredVelocity();
         }
-        
+
         // 애니메이션 정리 및 전환
         ResetAnimationsAndTriggerHit();
-        
+
         // 히트 이펙트 비활성화 (UniTask로 지연 처리)
         DeactivateHitEffectWithDelay().Forget();
 
@@ -200,9 +200,9 @@ public class PlayerDamagedState : PlayerBaseState
         SetImmuneState(false);
         _isImmuneActive = false;
 
-        // 저장된 속도 상태 초기화
-        _owner.ClearStoredVelocity();
-        
+        // 폭발 정보 초기화 (안전장치)
+        _owner.ClearLastExplosionInfo();
+
         // 넉백 효과 정리
         CleanupKnockbackEffect();
     }
@@ -239,6 +239,7 @@ public class PlayerDamagedState : PlayerBaseState
         {
             SetImmuneState(false);
             _isImmuneActive = false;
+            Debug.Log($"[피격시스템] 무적 해제: {_damagedTimer:F2}s 경과 (무적시간={_immuneTime:F2}s, 피격시간={_actualDamagedTime:F2}s)");
         }
 
         // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
@@ -251,10 +252,12 @@ public class PlayerDamagedState : PlayerBaseState
         // 공중에 있을 시 Fall 상태로 전환
         if (IsGrounded2D())
         {
+            Debug.Log($"[피격시스템] 피격 종료 → Idle (피격시간={_actualDamagedTime:F2}s 완료)");
             SyncStateChange<PlayerIdleState>();
         }
         else
         {
+            Debug.Log($"[피격시스템] 피격 종료 → Fall (피격시간={_actualDamagedTime:F2}s 완료, 공중)");
             SyncStateChange<PlayerFallState>();
         }
     }
@@ -264,9 +267,11 @@ public class PlayerDamagedState : PlayerBaseState
     /// </summary>
     private void OnHitStopComplete()
     {
-        // 저장된 속도 복원
-        RestoreStoredVelocity();
-        
+        Debug.Log($"[피격시스템] 히트스탑 완료 → 마지막 폭발 넉백 적용 (hasExplosionInfo={_owner.HasLastExplosionInfo})");
+
+        // 마지막 폭발 정보로 넉백 적용
+        _owner.ApplyLastExplosionForce();
+
         // 거리 기반 실제 피격 시간 계산
         CalculateActualDamagedTime();
         
@@ -305,13 +310,15 @@ public class PlayerDamagedState : PlayerBaseState
         // 히트스탑이 활성화되어 있으면 히트스탑 타이머 리셋
         if (_isHitStopActive)
         {
+            Debug.Log($"[피격시스템] 히트스탑 중 추가 피격! 타이머 리셋 (새 폭발정보로 덮어씀)");
+
             // 타이머 리셋 및 시간 재계산
             _hitStopTimer = 0f;
             CalculateHitStopDuration();
-            
-            // 새로운 속도로 업데이트
-            UpdateStoredVelocity();
-            
+
+            // 플레이어 정지 (새 폭발 정보는 Explosion에서 이미 Player에 저장됨)
+            FreezePlayer();
+
             // 흔들림 효과 재시작
             StartScreenShakeEffect();
         }
@@ -396,17 +403,6 @@ public class PlayerDamagedState : PlayerBaseState
         if (_owner.PhotonView.IsMine)
         {
             _owner.PhotonView.RPC(nameof(_owner.RPC_SetIsImmune), RpcTarget.All, isImmune);
-        }
-    }
-
-    /// <summary>
-    /// 저장된 속도가 있다면 복원
-    /// </summary>
-    private void RestoreStoredVelocityIfExists()
-    {
-        if (_owner.HasStoredVelocity)
-        {
-            _owner.RestoreVelocity();
         }
     }
 
@@ -567,36 +563,13 @@ public class PlayerDamagedState : PlayerBaseState
     }
     
     /// <summary>
-    /// 현재 속도 저장 및 움직임 정지
+    /// 플레이어 움직임 정지 (히트스탑 중 사용)
+    /// 폭발 정보는 Explosion에서 Player에 별도 저장되므로 속도 저장 불필요
     /// </summary>
-    private void StoreCurrentVelocityAndFreeze()
+    private void FreezePlayer()
     {
         if (_owner.Rigidbody2D != null)
         {
-            _owner.StoreVelocity();
-            _owner.Rigidbody2D.linearVelocity = Vector2.zero;
-        }
-    }
-    
-    /// <summary>
-    /// 저장된 속도 복원
-    /// </summary>
-    private void RestoreStoredVelocity()
-    {
-        if (_owner.HasStoredVelocity)
-        {
-            _owner.RestoreVelocity();
-        }
-    }
-    
-    /// <summary>
-    /// 저장된 속도 업데이트
-    /// </summary>
-    private void UpdateStoredVelocity()
-    {
-        if (_owner.Rigidbody2D != null)
-        {
-            _owner.StoreVelocity();
             _owner.Rigidbody2D.linearVelocity = Vector2.zero;
         }
     }

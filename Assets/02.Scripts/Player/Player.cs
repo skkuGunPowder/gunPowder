@@ -178,6 +178,13 @@ public class Player : MonoBehaviourPun, IDamagable
     private float _lastMaxStunTime = 0f;
     public float LastMaxStunTime => _lastMaxStunTime;
 
+    // 마지막 폭발 정보 (히트스탑 중 넉백용)
+    private float _lastExplosionForce = 0f;
+    private Vector3 _lastExplosionPosition = Vector3.zero;
+    private float _lastExplosionRadius = 0f;
+    private bool _hasLastExplosionInfo = false;
+    public bool HasLastExplosionInfo => _hasLastExplosionInfo;
+
     // 부활 후 첫 공격 여부 (HP bar 최대값 리셋용)
     private bool _isAfterResurrect = false;
 
@@ -1200,6 +1207,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
         _lastMaxStunTime = maxStunTime;
+        Debug.Log($"[피격시스템] RegisterHitDamage: damage={damage}, maxDamage={maxDamage}, damageRatio={_lastDamageRatio:F2}, maxStunTime={maxStunTime:F2}s");
         OnHit?.Invoke();
     }
 
@@ -1269,7 +1277,54 @@ public class Player : MonoBehaviourPun, IDamagable
         _storedVelocity = Vector2.zero;
     }
 
+    /// <summary>
+    /// 마지막 폭발 정보 저장 (히트스탑 중 넉백용)
+    /// </summary>
+    public void StoreLastExplosionInfo(float force, Vector3 position, float radius)
+    {
+        _lastExplosionForce = force;
+        _lastExplosionPosition = position;
+        _lastExplosionRadius = radius;
+        _hasLastExplosionInfo = true;
+        Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
+    }
 
+    /// <summary>
+    /// 저장된 마지막 폭발 정보로 넉백 힘 적용
+    /// </summary>
+    public void ApplyLastExplosionForce()
+    {
+        if (!_hasLastExplosionInfo || _rigidbody2D == null)
+        {
+            Debug.Log($"[피격시스템] ApplyLastExplosionForce: 폭발정보 없음 (hasInfo={_hasLastExplosionInfo})");
+            return;
+        }
+
+        Vector2 direction = _rigidbody2D.position - (Vector2)_lastExplosionPosition;
+        float distance = direction.magnitude;
+
+        if (distance <= _lastExplosionRadius)
+        {
+            float forceMagnitude = _lastExplosionForce * (1 - (distance / _lastExplosionRadius));
+            direction.Normalize();
+            direction.y += 0.3f;
+            _rigidbody2D.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
+            Debug.Log($"[피격시스템] 히트스탑 후 폭발넉백 적용: forceMag={forceMagnitude:F1}, dir={direction}, distance={distance:F1}");
+        }
+
+        ClearLastExplosionInfo();
+    }
+
+    /// <summary>
+    /// 마지막 폭발 정보 초기화
+    /// </summary>
+    public void ClearLastExplosionInfo()
+    {
+        _hasLastExplosionInfo = false;
+        _lastExplosionForce = 0f;
+        _lastExplosionPosition = Vector3.zero;
+        _lastExplosionRadius = 0f;
+    }
 
     [PunRPC]
     public void RPC_SetIsImmune(bool isImmune)
