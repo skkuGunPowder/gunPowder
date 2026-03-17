@@ -9,6 +9,7 @@ public class BombStat : IStat
     public readonly int Cost;
     public readonly float CoolTime;
     public readonly float Speed;
+    public readonly float RecoilAmount;
     public readonly float FuzeTime;
     public readonly bool IsFallingOut;
     public readonly string ExplosionID;
@@ -16,9 +17,10 @@ public class BombStat : IStat
     public BombStat(JsonData json)
     {
         Priority = int.Parse(json["Priority"].ToString());
-        Cost = int.Parse(json["Cost"].ToString());
+        Cost = 0;
         CoolTime = float.Parse(json["CoolTime"].ToString());
         Speed = float.Parse(json["ThrowingSpeed"].ToString());
+        RecoilAmount = float.Parse(json["RecoilAmount"].ToString());
         FuzeTime = float.Parse(json["AutoExplodeDelay"].ToString());
         IsFallingOut = bool.Parse(json["IsFallingOut"].ToString());
         ExplosionID = json["ExplosionID"].ToString();

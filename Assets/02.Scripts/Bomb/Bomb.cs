@@ -82,7 +82,7 @@ public class Bomb : MonoBehaviourPun, IBomb
     [PunRPC]
     public void SetOwner(int ownerViewId)
     {
-        Debug.LogError($"SetOwner 호출 ID: {ownerViewId}");
+        // Debug.LogError($"SetOwner 호출 ID: {ownerViewId}");
         PhotonView ownerPhotonView = PhotonView.Find(ownerViewId);
         if (ownerPhotonView != null)
         {
