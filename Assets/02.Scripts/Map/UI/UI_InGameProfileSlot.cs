@@ -10,7 +10,8 @@ public class UI_InGameProfileSlot : MonoBehaviour
     // public int PlayerActorNumber { get; private set; }
     [SerializeField] private Vector2 _gunpowderTextOriginalRectTransform;
     public TextMeshProUGUI NicknameTextUGUI;
-    public TextMeshProUGUI GunpowderTextUGUI;
+    public TextMeshProUGUI HPTextUGUI;
+    public TextMeshProUGUI GPTextUGUI;
     public GameObject FirstPlace;
     
     public Image ProfileImage;
@@ -21,9 +22,9 @@ public class UI_InGameProfileSlot : MonoBehaviour
     
     public List<GameObject> LifeList;
    
-    [Header("Color")] 
-    public int GunpowderMiddle = 50;
-    public int GunpowderLow = 20;
+    [Header("Color")]
+    public int HPMiddle = 75;
+    public int HPLow = 30;
     public Color32 LeftoverColor;
     
     [Header("Shaker")]
@@ -35,27 +36,35 @@ public class UI_InGameProfileSlot : MonoBehaviour
    
     public ChatBubbleListener ChatListener;
     
-    public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player, int gunpowder, int life)
+    public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player, int hp, int life, int gp)
     {
-        // PlayerActorNumber = player.ActorNumber;
         NicknameTextUGUI.text = player.NickName;
         BombImage.sprite = bombImage;
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
-        GunpowderTextUGUI.text = gunpowder.ToString();
+        HPTextUGUI.text = hp.ToString();
+        ColorSet(hp);
+        if (GPTextUGUI != null)
+            GPTextUGUI.text = gp.ToString();
         LifeRefresh(life);
-        if(ChatListener == null) 
+        if(ChatListener == null)
             ChatListener = GetComponent<ChatBubbleListener>();
-        if (ChatListener != null) 
+        if (ChatListener != null)
             ChatListener.SetOwner(player.NickName);
     }
-    public void Refresh(int gunpowder, int life, int attacker)
-    {
-        ColorSet(gunpowder);
-        Shake(attacker);
-        GunpowderTextUGUI.text = gunpowder.ToString();
-        LifeRefresh(life);
 
+    public void Refresh(int hp, int life, int attacker)
+    {
+        ColorSet(hp);
+        Shake(attacker);
+        HPTextUGUI.text = hp.ToString();
+        LifeRefresh(life);
+    }
+
+    public void RefreshGP(int gp)
+    {
+        if (GPTextUGUI != null)
+            GPTextUGUI.text = gp.ToString();
     }
 
     private void LifeRefresh(int life)
@@ -76,23 +85,28 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public void LeftOverRefresh()
     {
         PlayerProfileSkin.PlayerLeft();
-        GunpowderTextUGUI.text = "0";
-        GunpowderTextUGUI.color = LeftoverColor;
+        HPTextUGUI.text = "0";
+        HPTextUGUI.color = LeftoverColor;
+        if (GPTextUGUI != null)
+        {
+            GPTextUGUI.text = "0";
+            GPTextUGUI.color = LeftoverColor;
+        }
         LifeRefresh(0);
     }
-    private void ColorSet(int gunpowder)
+    private void ColorSet(int hp)
     {
-        if (gunpowder >= GunpowderMiddle)
+        if (hp >= HPMiddle)
         {
-            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
+            HPTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthDefault];
         }
-        else if (gunpowder > GunpowderLow)
+        else if (hp > HPLow)
         {
-            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthMiddle];
+            HPTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthMiddle];
         }
         else
         {
-            GunpowderTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthLow];
+            HPTextUGUI.color = ColorPalette.ColorDictionary[EColorType.HealthLow];
         }
     }
 
@@ -122,13 +136,13 @@ public class UI_InGameProfileSlot : MonoBehaviour
         
         DOTween.Kill(this);
         
-        GunpowderTextUGUI.rectTransform.DOScale(ScaleStrength, Duration).SetEase(Ease.OutCubic).OnComplete(() =>
+        HPTextUGUI.rectTransform.DOScale(ScaleStrength, Duration).SetEase(Ease.OutCubic).OnComplete(() =>
         {
-            GunpowderTextUGUI.rectTransform.DOScale(1f, Duration).SetEase(Ease.InCubic);
+            HPTextUGUI.rectTransform.DOScale(1f, Duration).SetEase(Ease.InCubic);
         });
-        GunpowderTextUGUI.rectTransform.DOShakeAnchorPos(Duration, Strength, Vibrato).SetEase(EaseType).OnComplete(() =>
+        HPTextUGUI.rectTransform.DOShakeAnchorPos(Duration, Strength, Vibrato).SetEase(EaseType).OnComplete(() =>
         {
-            GunpowderTextUGUI.rectTransform.DOAnchorPos(_gunpowderTextOriginalRectTransform, Duration).SetEase(EaseType);
+            HPTextUGUI.rectTransform.DOAnchorPos(_gunpowderTextOriginalRectTransform, Duration).SetEase(EaseType);
         });
     }
     public void SetTop(bool isTop)

@@ -263,8 +263,8 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         if (_playerStat != null)
         {
-            _playerStat.OnGunPowderEmpty -= HandleGunPowderEmpty;
-            _playerStat.OnGunpowderIncreased -= HandleGunpowderIncreased;
+            _playerStat.OnHPEmpty -= HandleHPEmpty;
+            _playerStat.OnHPIncreased -= HandleHPIncreased;
         }
 
         // 시각 효과 정리
@@ -430,8 +430,8 @@ public class Player : MonoBehaviourPun, IDamagable
         LoadItems();
 
         // 1. 이벤트 핸들러 등록
-        _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
-        _playerStat.OnGunpowderIncreased += HandleGunpowderIncreased;
+        _playerStat.OnHPEmpty += HandleHPEmpty;
+        _playerStat.OnHPIncreased += HandleHPIncreased;
         EventManager.Instance.OnPlayerItemChanged += LoadItems;
 
         // 궁극기 컨트롤러 이벤트 연결
@@ -569,7 +569,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _isAfterResurrect = true;
     }
 
-    private void HandleGunpowderIncreased(int amount)
+    private void HandleHPIncreased(int amount)
     {
         if (_playerSFXAnimationEvent != null)
         {
@@ -577,7 +577,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    private void HandleGunPowderEmpty()
+    private void HandleHPEmpty()
     {
         // 죽을 때 모든 효과 초기화 (경고 + 궁극기)
         // 순서: 깜박임 해제 → 궁극기 해제 → 색상 복원

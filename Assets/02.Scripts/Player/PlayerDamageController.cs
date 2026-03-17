@@ -150,12 +150,15 @@ public class PlayerDamageController : MonoBehaviour
         // 같은 팀이 아닐 때만 데미지 적용
         if (!isSameTeam)
         {
-            // 건파우더 드랍량 계산 (힐량 계산)
+            // GP 낙출량 계산
             float stealPercent = StealPercent / 100f;
-            int gunPowderCount = Mathf.CeilToInt(maxDamage * stealPercent);
+            int gpDrop = Mathf.FloorToInt(maxDamage * stealPercent);
 
-            // 체력 감소
-            bool isDead = _playerStat.DecreaseGunPowderCount(damage, attackerActorNumber, isNormalAttack);
+            // HP 감소
+            bool isDead = _playerStat.DecreaseHP(damage, attackerActorNumber, isNormalAttack);
+
+            // GP 감소 (음수 허용)
+            _playerStat.DecreaseGP(gpDrop);
 
             // 날 때린 사람 딜량 증가 (자기 자신일 경우 제외)
             if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
@@ -164,20 +167,11 @@ public class PlayerDamageController : MonoBehaviour
                 if (attackerStat != null && attackerView != _photonView)
                 {
                     attackerStat.IncreaseTotalDamage(damage);
-                    /*
-                    if (isDead)
-                    {
-                        // 킬 카운트는 공격자 본인의 클라이언트에서만 증가시키도록 RPC 호출
-                        if (attackerView.Owner != null)
-                        {
-                            attackerView.RPC(nameof(PlayerStat.RPC_IncreaseTotalKillCount), attackerView.Owner);
-                        }
-                    }*/
                 }
             }
 
-            // Gunpowder 낙출
-            ReleaseGunPowder(attackerBomb, attackerViewId, gunPowderCount,
+            // GP 오브젝트 낙출
+            ReleaseGunPowder(attackerBomb, attackerViewId, gpDrop,
                 _gunPowderSpreadAngle, _gunPowderSpreadDistance, isFallingOut);
         }   
         else

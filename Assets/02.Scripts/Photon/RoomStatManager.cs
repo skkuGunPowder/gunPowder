@@ -11,10 +11,11 @@ public class RoomStatManager : Singleton<RoomStatManager>
     /// </summary>
     
     public int PlayerLife;
-    public int PlayerGunpowder;
+    public int PlayerGunpowder; // GP 초기값 (재화)
     public int PlayerDecreaseTime;
     public EInGameTeam PlayerTeam;
     public bool CanUlti = true;
+    public const int PlayerHP = 150; // HP 고정값
     
     [SerializeField] private bool _isManual = false;
     [SerializeField] private bool _infiniteLife = false;

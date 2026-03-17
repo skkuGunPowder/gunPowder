@@ -74,10 +74,10 @@ public class UI_GunPowderStatus : MonoBehaviour
                 if (playerStat != null)
                 {
                     // 건파우더 변경 이벤트 구독
-                    playerStat.OnGunPowderChanged += OnGunPowderChanged;
+                    playerStat.OnHPChanged += OnGunPowderChanged;
                     
                     // 초기 상태 설정
-                    OnGunPowderChanged(playerStat.CurrentPlayerGunPowderCount);
+                    OnGunPowderChanged(playerStat.CurrentHP);
                 }
                 else
                 {
@@ -281,7 +281,7 @@ public class UI_GunPowderStatus : MonoBehaviour
             PlayerStat playerStat = _player.GetComponent<PlayerStat>();
             if (playerStat != null)
             {
-                playerStat.OnGunPowderChanged -= OnGunPowderChanged;
+                playerStat.OnHPChanged -= OnGunPowderChanged;
             }
         }
     }

@@ -265,8 +265,8 @@ public class PlayerUltimateController : MonoBehaviour
                 return;
             }
 
-            // 피가 부족하면 궁극기 사용 불가
-            if (_playerStat.CurrentPlayerGunPowderCount <= _ultimate.GetCost())
+            // HP가 부족하면 궁극기 사용 불가
+            if (_playerStat.CurrentHP <= _ultimate.GetCost())
             {
                 return;
             }
@@ -276,7 +276,7 @@ public class PlayerUltimateController : MonoBehaviour
             _playerStat.HasUltimateChance = false;
             _ultimateChanceTimer = 0f;
             int ultimateCost = _ultimate.GetCost();
-            _playerStat.DecreaseGunPowderCount(ultimateCost, _photonView.OwnerActorNr);
+            _playerStat.DecreaseHP(ultimateCost, _photonView.OwnerActorNr);
 
             // 궁극기 효과 비활성화 (내부에서 경고도 자동으로 해제됨)
             SetUltimateEffectState(false);

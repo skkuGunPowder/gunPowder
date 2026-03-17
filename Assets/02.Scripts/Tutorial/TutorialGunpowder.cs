@@ -155,7 +155,7 @@ public class TutorialGunpowder : MonoBehaviour
 
         if(Vector2.Distance(transform.position, _target.position) < 0.1f)
         {
-            _target.GetComponent<Player>().PlayerStat.IncreaseGunPowderCount(1);
+            _target.GetComponent<Player>().PlayerStat.IncreaseHP(1);
             Destroy(gameObject);
         }
     }

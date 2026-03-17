@@ -58,7 +58,7 @@ public class PlayerHealthBar : MonoBehaviour
         // MicroBar 초기화
         if (healthBar != null)
         {
-            maxHP = playerStat.InitGunpowderCount;
+            maxHP = playerStat.InitHP;
             healthBar.Initialize(maxHP);
             isInitialized = true;
 
@@ -74,7 +74,7 @@ public class PlayerHealthBar : MonoBehaviour
         }
 
         // 건파우더 변경 이벤트 구독
-        playerStat.OnGunPowderChanged += OnGunPowderChanged;
+        playerStat.OnHPChanged += OnHPChanged;
 
         // 처음에는 숨김
         canvasGroup.alpha = 0f;
@@ -85,7 +85,7 @@ public class PlayerHealthBar : MonoBehaviour
         // 이벤트 구독 해제
         if (playerStat != null)
         {
-            playerStat.OnGunPowderChanged -= OnGunPowderChanged;
+            playerStat.OnHPChanged -= OnHPChanged;
         }
     }
 
@@ -108,7 +108,7 @@ public class PlayerHealthBar : MonoBehaviour
     /// <summary>
     /// 건파우더가 변경될 때 호출되는 메서드
     /// </summary>
-    private void OnGunPowderChanged(int newGunPowder)
+    private void OnHPChanged(int newGunPowder)
     {
         if (!isInitialized || healthBar == null)
         {
@@ -171,11 +171,11 @@ public class PlayerHealthBar : MonoBehaviour
         }
 
         // maxHP를 초기값으로 리셋
-        maxHP = playerStat.InitGunpowderCount;
+        maxHP = playerStat.InitHP;
         healthBar.SetNewMaxHP(maxHP, skipAnimation: true);
-        
+
         // 현재 HP도 초기값으로 설정
-        int currentHP = playerStat.CurrentPlayerGunPowderCount;
+        int currentHP = playerStat.CurrentHP;
         healthBar.UpdateBar(currentHP, skipAnimation: true);
         
         // HP bar 숨김
