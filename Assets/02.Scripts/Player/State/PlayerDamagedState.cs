@@ -51,9 +51,14 @@ public class PlayerDamagedState : PlayerBaseState
     private const int SHAKE_VIBRATO_Y = 10;                // Y축 흔들림 진동 횟수
     private const float SHAKE_RANDOMNESS = 90;              // 흔들림 무작위성 (도)
     
+    // 무적 시간 관련 상수
+    private const float IMMUNE_TIME_RATIO = 0.25f;  // 피격 시간의 25%만 무적
+
     // 상태 변수들
     private float _damagedTimer = 0f;           // 피격 지속 시간 타이머
     private float _actualDamagedTime = 0f;      // 실제 피격 시간 (거리 기반으로 조정된 값)
+    private float _immuneTime = 0f;             // 무적 지속 시간
+    private bool _isImmuneActive = false;       // 무적 상태 활성 여부
     private float _originalLinearDamping;       // 원본 선형 감쇠값
     private Tween _knockbackTween;              // 넉백 효과 트윈
     
@@ -116,16 +121,18 @@ public class PlayerDamagedState : PlayerBaseState
     {
         // 건파우더 비율에 따른 히트스탑 시간 계산
         CalculateHitStopDuration();
-        
-        // 현재 속도 저장 및 정지
-        StoreCurrentVelocityAndFreeze();
-        
+
+        Debug.Log($"[피격시스템] InitializeHitStop: 히트스탑 시간={_currentHitStopDuration:F2}s, 체력비율={CalculateCurrentHealthRatio():F2}");
+
+        // 플레이어 정지 (폭발 정보는 Player에 별도 저장됨)
+        FreezePlayer();
+
         // Y 위치 저장 (흔들림 제한용)
         _originalYPosition = _owner.transform.position.y;
-        
+
         // 캐릭터 흔들림 효과 시작
         StartScreenShakeEffect();
-        
+
         // 히트 이펙트 활성화
         ActivateHitEffect();
     }
@@ -137,14 +144,15 @@ public class PlayerDamagedState : PlayerBaseState
     {
         // 거리 기반 실제 피격 시간 계산
         CalculateActualDamagedTime();
-        
-        _owner.RPC_SetAnimatorTrigger("HitLoop");
-        
-        // 무적 상태 설정
-        SetImmuneState(true);
 
-        // 저장된 속도 복원 (히트스탑에서 온 경우)
-        RestoreStoredVelocityIfExists();
+        _owner.RPC_SetAnimatorTrigger("HitLoop");
+
+        // 무적 상태 설정 (피격 시간의 25%만 무적)
+        SetImmuneState(true);
+        _isImmuneActive = true;
+        _immuneTime = _actualDamagedTime * IMMUNE_TIME_RATIO;
+
+        Debug.Log($"[피격시스템] InitializeDamaged: 피격시간={_actualDamagedTime:F2}s (MaxStunTime={_owner.LastMaxStunTime:F2}s × damageRatio={_owner.LastDamageRatio:F2}), 무적시간={_immuneTime:F2}s (25%)");
 
         // 넉백이 활성화되어 있을 때만 넉백 효과 적용
         if (_owner.IsKnockbackEnabled)
@@ -175,26 +183,26 @@ public class PlayerDamagedState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
-        
+
         // 히트스탑 효과 정리
         if (_isHitStopActive)
         {
             CleanupShakeEffect();
-            RestoreStoredVelocity();
         }
-        
+
         // 애니메이션 정리 및 전환
         ResetAnimationsAndTriggerHit();
-        
+
         // 히트 이펙트 비활성화 (UniTask로 지연 처리)
         DeactivateHitEffectWithDelay().Forget();
 
-        // 무적 상태 해제
+        // 무적 상태 해제 (안전장치)
         SetImmuneState(false);
-        
-        // 저장된 속도 상태 초기화
-        _owner.ClearStoredVelocity();
-        
+        _isImmuneActive = false;
+
+        // 폭발 정보 초기화 (안전장치)
+        _owner.ClearLastExplosionInfo();
+
         // 넉백 효과 정리
         CleanupKnockbackEffect();
     }
@@ -226,6 +234,14 @@ public class PlayerDamagedState : PlayerBaseState
         // Damaged 로직 진행
         _damagedTimer += Time.deltaTime;
 
+        // 무적 시간 체크: 25% 경과 후 무적 해제
+        if (_isImmuneActive && _damagedTimer >= _immuneTime)
+        {
+            SetImmuneState(false);
+            _isImmuneActive = false;
+            Debug.Log($"[피격시스템] 무적 해제: {_damagedTimer:F2}s 경과 (무적시간={_immuneTime:F2}s, 피격시간={_actualDamagedTime:F2}s)");
+        }
+
         // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
         if (!IsMinimumDamagedTimeElapsed())
         {
@@ -236,10 +252,12 @@ public class PlayerDamagedState : PlayerBaseState
         // 공중에 있을 시 Fall 상태로 전환
         if (IsGrounded2D())
         {
+            Debug.Log($"[피격시스템] 피격 종료 → Idle (피격시간={_actualDamagedTime:F2}s 완료)");
             SyncStateChange<PlayerIdleState>();
         }
         else
         {
+            Debug.Log($"[피격시스템] 피격 종료 → Fall (피격시간={_actualDamagedTime:F2}s 완료, 공중)");
             SyncStateChange<PlayerFallState>();
         }
     }
@@ -249,17 +267,21 @@ public class PlayerDamagedState : PlayerBaseState
     /// </summary>
     private void OnHitStopComplete()
     {
-        // 저장된 속도 복원
-        RestoreStoredVelocity();
-        
+        Debug.Log($"[피격시스템] 히트스탑 완료 → 마지막 폭발 넉백 적용 (hasExplosionInfo={_owner.HasLastExplosionInfo})");
+
+        // 마지막 폭발 정보로 넉백 적용
+        _owner.ApplyLastExplosionForce();
+
         // 거리 기반 실제 피격 시간 계산
         CalculateActualDamagedTime();
         
         _owner.RPC_SetAnimatorTrigger("HitLoop");
         
-        // 무적 상태 설정 (히트스탑 완료 후 Damaged 로직으로 전환될 때 설정)
+        // 무적 상태 설정 (피격 시간의 25%만 무적)
         SetImmuneState(true);
-        
+        _isImmuneActive = true;
+        _immuneTime = _actualDamagedTime * IMMUNE_TIME_RATIO;
+
         // 넉백이 활성화되어 있을 때만 넉백 효과 적용
         if (_owner.IsKnockbackEnabled)
         {
@@ -288,13 +310,15 @@ public class PlayerDamagedState : PlayerBaseState
         // 히트스탑이 활성화되어 있으면 히트스탑 타이머 리셋
         if (_isHitStopActive)
         {
+            Debug.Log($"[피격시스템] 히트스탑 중 추가 피격! 타이머 리셋 (새 폭발정보로 덮어씀)");
+
             // 타이머 리셋 및 시간 재계산
             _hitStopTimer = 0f;
             CalculateHitStopDuration();
-            
-            // 새로운 속도로 업데이트
-            UpdateStoredVelocity();
-            
+
+            // 플레이어 정지 (새 폭발 정보는 Explosion에서 이미 Player에 저장됨)
+            FreezePlayer();
+
             // 흔들림 효과 재시작
             StartScreenShakeEffect();
         }
@@ -383,22 +407,11 @@ public class PlayerDamagedState : PlayerBaseState
     }
 
     /// <summary>
-    /// 저장된 속도가 있다면 복원
-    /// </summary>
-    private void RestoreStoredVelocityIfExists()
-    {
-        if (_owner.HasStoredVelocity)
-        {
-            _owner.RestoreVelocity();
-        }
-    }
-
-    /// <summary>
     /// 현재 체력 비율 계산 (0~1 범위)
     /// </summary>
     private float CalculateCurrentHealthRatio()
     {
-        return Mathf.Clamp01((float)_owner.PlayerStat.CurrentPlayerGunPowderCount / _owner.PlayerStat.InitGunpowderCount);
+        return Mathf.Clamp01((float)_owner.PlayerStat.CurrentHP / _owner.PlayerStat.InitHP);
     }
 
     /// <summary>
@@ -449,10 +462,10 @@ public class PlayerDamagedState : PlayerBaseState
     private void CalculateActualDamagedTime()
     {
         float damageRatio = _owner.LastDamageRatio; // 거리 기반 데미지 비율
-        float baseDamagedTime = _owner.PlayerStat.DamagedTime;
+        float baseDamagedTime = _owner.LastMaxStunTime; // 폭발별 MaxStunTime 사용
 
         // damageRatio = 1.0 (가까이) -> 100% 시간 (baseDamagedTime)
-        // damageRatio = 0.0 (멀리) -> 30% 시간 (baseDamagedTime * 0.5)
+        // damageRatio = 0.0 (멀리) -> 30% 시간 (baseDamagedTime * 0.3)
         _actualDamagedTime = Mathf.Lerp(baseDamagedTime * 0.3f, baseDamagedTime, damageRatio);
     }
 
@@ -550,36 +563,13 @@ public class PlayerDamagedState : PlayerBaseState
     }
     
     /// <summary>
-    /// 현재 속도 저장 및 움직임 정지
+    /// 플레이어 움직임 정지 (히트스탑 중 사용)
+    /// 폭발 정보는 Explosion에서 Player에 별도 저장되므로 속도 저장 불필요
     /// </summary>
-    private void StoreCurrentVelocityAndFreeze()
+    private void FreezePlayer()
     {
         if (_owner.Rigidbody2D != null)
         {
-            _owner.StoreVelocity();
-            _owner.Rigidbody2D.linearVelocity = Vector2.zero;
-        }
-    }
-    
-    /// <summary>
-    /// 저장된 속도 복원
-    /// </summary>
-    private void RestoreStoredVelocity()
-    {
-        if (_owner.HasStoredVelocity)
-        {
-            _owner.RestoreVelocity();
-        }
-    }
-    
-    /// <summary>
-    /// 저장된 속도 업데이트
-    /// </summary>
-    private void UpdateStoredVelocity()
-    {
-        if (_owner.Rigidbody2D != null)
-        {
-            _owner.StoreVelocity();
             _owner.Rigidbody2D.linearVelocity = Vector2.zero;
         }
     }

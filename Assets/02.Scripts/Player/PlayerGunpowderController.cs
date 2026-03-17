@@ -118,7 +118,10 @@ public class PlayerGunpowderController : MonoBehaviour
                 return;
             }
 
-            _playerStat.DecreaseGunPowderCount(_playerStat.AttackPenaltyAmount, _photonView.OwnerActorNr, isNormalAttack: true, ignoreImmune: true);
+            _playerStat.DecreaseHP(_playerStat.AttackPenaltyAmount, _photonView.OwnerActorNr, isNormalAttack: true, ignoreImmune: true);
+
+            // GP 감소 (음수 허용)
+            _playerStat.DecreaseGP(NO_ATTACK_RELEASE_COUNT);
 
             // 히트스크린 추가
             EventManager.Instance.HitScreen();

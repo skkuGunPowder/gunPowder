@@ -78,7 +78,7 @@ public class PlayerBaseState : MonoState
 
         // 피가 50이하라면 히트스탑 처리
         // 아니라면 Damage 상태로
-        if(_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.PlayerStat.HitStopGunPowderCount)
+        if(_owner.PlayerStat.CurrentHP <= _owner.PlayerStat.HitStopGunPowderCount)
         {
             // 이미 DamagedState이고 히트스탑이 활성화되어 있으면 추가 히트 처리
             if (_playerFSM.IsCurrentState<PlayerDamagedState>())
@@ -262,7 +262,7 @@ public class PlayerBaseState : MonoState
         }
         
         // 건파우더가 특수 폭탄 코스트보다 적은지 체크
-        if (_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.SpecialBombStat.Cost)
+        if (_owner.PlayerStat.CurrentHP <= _owner.SpecialBombStat.Cost)
         {
             return false;
         }
@@ -320,13 +320,13 @@ public class PlayerBaseState : MonoState
             if (!isHeadBomb)
             {
                 // 건파우더가 부족한 경우 폭탄 생성 중단
-                if (_owner.PlayerStat.CurrentPlayerGunPowderCount <= _owner.SpecialBombStat.Cost)
+                if (_owner.PlayerStat.CurrentHP <= _owner.SpecialBombStat.Cost)
                 {
                     return;
                 }
                 
                 int cost = _owner.SpecialBombStat.Cost;
-                _owner.PlayerStat.DecreaseGunPowderCount(cost, _owner.PhotonView.Owner.ActorNumber);
+                _owner.PlayerStat.DecreaseHP(cost, _owner.PhotonView.Owner.ActorNumber);
                 
                 // 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
                 _owner.RPC_SpawnGunPowderUseParticle();

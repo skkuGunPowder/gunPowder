@@ -75,12 +75,12 @@ public class PunchingToy : Bomb, IBomb
             if (player != null && player.IsSuperArmorEnabled)
             {
                 // 힘은 적용하지 않고 데미지만 적용
-                damagableObject.TakeDamage(_explosionStat.AttackPower, _explosionStat.AttackPower, _explosionStat.StealPercent, transform.position, _ownerPhotonview.ViewID, _ownerPhotonview.OwnerActorNr);
+                damagableObject.TakeDamage(_explosionStat.AttackPower, _explosionStat.AttackPower, _explosionStat.StealPercent, transform.position, _ownerPhotonview.ViewID, _ownerPhotonview.OwnerActorNr, _explosionStat.MaxStunTime);
                 return;
             }
 
             playerRB.AddForce(bounceDirection * _explosionStat.ExplosivePower, ForceMode2D.Impulse);
-            damagableObject.TakeDamage(_explosionStat.AttackPower, _explosionStat.AttackPower, _explosionStat.StealPercent, transform.position, _ownerPhotonview.ViewID, _ownerPhotonview.OwnerActorNr);
+            damagableObject.TakeDamage(_explosionStat.AttackPower, _explosionStat.AttackPower, _explosionStat.StealPercent, transform.position, _ownerPhotonview.ViewID, _ownerPhotonview.OwnerActorNr, _explosionStat.MaxStunTime);
             return;
         }
     }

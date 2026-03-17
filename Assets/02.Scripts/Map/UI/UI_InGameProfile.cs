@@ -62,7 +62,7 @@ public class UI_InGameProfile : MonoBehaviour
                 
                 UI_InGameProfileSlotList[i].gameObject.SetActive(true);
                 // 후에 수정
-                UI_InGameProfileSlotList[i].Init(bomb, team, reorderedPlayers[i],RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife);
+                UI_InGameProfileSlotList[i].Init(bomb, team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, RoomStatManager.Instance.PlayerGunpowder);
                 _playerActorNumberList.Add(reorderedPlayers[i].ActorNumber);
             }
             else
@@ -91,16 +91,26 @@ public class UI_InGameProfile : MonoBehaviour
         }
     }
     
-    private void Refresh(int playerNumber, int gunpowder, int life, int attacker)
+    private void Refresh(int playerNumber, int hp, int life, int attacker)
     {
         for (int i = 0; i < _playerActorNumberList.Count; i++)
         {
             if (_playerActorNumberList[i] == playerNumber)
             {
-                UI_InGameProfileSlotList[i].Refresh(gunpowder,life,attacker);
+                UI_InGameProfileSlotList[i].Refresh(hp,life,attacker);
             }
         }
+    }
 
+    private void RefreshGP(int playerNumber, int gp)
+    {
+        for (int i = 0; i < _playerActorNumberList.Count; i++)
+        {
+            if (_playerActorNumberList[i] == playerNumber)
+            {
+                UI_InGameProfileSlotList[i].RefreshGP(gp);
+            }
+        }
     }
 
     public void PlayEmotion(string emotionName, int playerNumber)
@@ -139,6 +149,7 @@ public class UI_InGameProfile : MonoBehaviour
         {
             EventManager.Instance.OnPlayEmotion += PlayEmotion;
             EventManager.Instance.OnDataChanged += Refresh;
+            EventManager.Instance.OnGPDataChanged += RefreshGP;
             EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
             EventManager.Instance.OnProfileInit += Init;   
             EventManager.Instance.OnPlayerLeft += PlayerLeftRefresh;
@@ -151,6 +162,7 @@ public class UI_InGameProfile : MonoBehaviour
         if (EventManager.Instance != null)
         {
             EventManager.Instance.OnDataChanged -= Refresh;
+            EventManager.Instance.OnGPDataChanged -= RefreshGP;
             EventManager.Instance.OnTopPlayerChanged -= SetTopPlayer;
             EventManager.Instance.OnPlayEmotion -= PlayEmotion;
             EventManager.Instance.OnPlayerLeft -= PlayerLeftRefresh;

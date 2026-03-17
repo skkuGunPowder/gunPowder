@@ -464,6 +464,7 @@ public class PlayerFallDeadState : PlayerBaseState
                 _owner.transform.position,
                 _owner.GetComponent<PhotonView>().ViewID,
                 _owner.GetComponent<PhotonView>().OwnerActorNr,
+                0f,
                 true,
                 true
             );

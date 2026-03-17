@@ -49,7 +49,7 @@ public class DamageChecker : Singleton<DamageChecker>
         foreach (var player in playerlist)
         {
             _playerList.Add(player.ActorNumber);
-            _playerScoreDictionary.Add(player.ActorNumber, RoomStatManager.Instance.PlayerLife * RoomStatManager.Instance.PlayerGunpowder);
+            _playerScoreDictionary.Add(player.ActorNumber, RoomStatManager.Instance.PlayerLife * 150);
         }
 
         _currentTopPlayer = -1;
@@ -107,50 +107,49 @@ public class DamageChecker : Singleton<DamageChecker>
         EventManager.Instance.OnUpdateLog(killer, isNormal, death);
     }
     
-    public void RPC_RequestDamage(int gunpowder, int life, int attacker, int player)
+    public void RPC_RequestDamage(int hp, int life, int attacker, int player)
     {
-        
+
         if (GameManager.Instance.CurrentGameState != EGameState.Playing)
         {
             return;
         }
-        
-        PlayerDataChange(gunpowder, life, player, attacker);
-        
+
+        PlayerDataChange(hp, life, player, attacker);
+
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
-        
-        CalculateScore(gunpowder, life, player);
+
+        CalculateScore(hp, life, player);
     }
-    
-    private void PlayerDataChange(int gunpowder, int life, int playerNumber, int attacker)
+
+    private void PlayerDataChange(int hp, int life, int playerNumber, int attacker)
     {
         foreach (PhotonView view in _playerPhotonViewList)
         {
             if (view != null && view.OwnerActorNr == playerNumber)
             {
                 PlayerStat playerStat = view.GetComponent<PlayerStat>();
-                // 해당 플레이어의 스탯 업데이트
-                playerStat.SetPlayerGunPowderCountAndLife(gunpowder, life);
+                playerStat.SetPlayerHPAndLife(hp, life);
                 break;
             }
         }
-        
-        EventManager.Instance.PlayerDataChange(gunpowder, life, playerNumber,attacker);
+
+        EventManager.Instance.PlayerDataChange(hp, life, playerNumber, attacker);
     }
-    
-    private void CalculateScore(int gunpowder, int life, int playerNumber)
+
+    private void CalculateScore(int hp, int life, int playerNumber)
     {
         if (life == 0)
         {
             _playerScoreDictionary[playerNumber] = 0;
             return;
         }
-        
-        int score = (life * RoomStatManager.Instance.PlayerGunpowder) + gunpowder; // 처음 세팅 * 생명 + 현재 건파우더
-        
+
+        int score = (life * 150) + hp; // HP 고정 150 * 생명 + 현재 HP
+
         _playerScoreDictionary[playerNumber] = score;
         CheckTopPlayer(playerNumber);
     }
