@@ -264,7 +264,7 @@ public class GunPowderBezierCurve : MonoBehaviour
                     var targetView = player.GetComponent<PhotonView>();
                     if (targetView != null && targetView.gameObject.activeInHierarchy && targetView.Owner != null)
                     {
-                        targetView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGunPowder), targetView.Owner, 1);
+                        targetView.RPC(nameof(PlayerStat.RPC_RequestIncreaseGP), targetView.Owner, 1);
                         // PhotonNetwork.Destroy(gameObject);
 
                         // if(_photonView != null && _photonView.IsMine)

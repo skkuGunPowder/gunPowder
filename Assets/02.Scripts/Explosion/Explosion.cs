@@ -61,7 +61,7 @@ public class Explosion : MonoBehaviour
                     continue;
                 }
                 int damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
-                damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.StealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut, isNormalAttack);
+                damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.StealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, _stat.MaxStunTime, isFallingOut, isNormalAttack);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());
@@ -94,6 +94,12 @@ public class Explosion : MonoBehaviour
         direction.y += 0.3f;
 
         rb.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
+
+        // 히트스탑 중 마지막 폭발 넉백을 위해 폭발 정보 저장
+        if (player != null)
+        {
+            player.StoreLastExplosionInfo(explosionForce, explosionPosition, explosionRadius);
+        }
     }
     
     // 거리별 데미지 계산: 폭발 중심에서 콜라이더 표면까지의 최단거리 사용

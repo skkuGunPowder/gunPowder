@@ -53,7 +53,7 @@ public class SuicideUltiExplosion : Explosion
                     continue;
                 }
                 int damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
-                damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.StealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, isFallingOut, isNormalAttack);
+                damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.StealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, _stat.MaxStunTime, isFallingOut, isNormalAttack);
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());

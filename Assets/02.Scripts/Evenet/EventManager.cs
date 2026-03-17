@@ -8,10 +8,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnTopPlayerChanged?.Invoke(topActor);
     }
-    public event Action<int, int, int,int> OnDataChanged;    // 체력 감소할 때
-    public void PlayerDataChange(int gunpowder, int life, int playerNumber,int attacker)
+    public event Action<int, int, int,int> OnDataChanged;    // HP 변경 시 (playerNumber, hp, life, attacker)
+    public void PlayerDataChange(int hp, int life, int playerNumber,int attacker)
     {
-        OnDataChanged?.Invoke(playerNumber, gunpowder, life,attacker);
+        OnDataChanged?.Invoke(playerNumber, hp, life,attacker);
     }
     public event Action<EMap> OnMapChanged;    // UI 변경 => 방장이 맵을 변경했을 때
 
@@ -217,4 +217,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
         OnLastDieComplete?.Invoke();   
     }
 
+
+    public event Action<int, int> OnGPDataChanged;    // GP 변경 시 (playerNumber, gp)
+    public void PlayerGPChange(int playerNumber, int gp)
+    {
+        OnGPDataChanged?.Invoke(playerNumber, gp);
+    }
 }

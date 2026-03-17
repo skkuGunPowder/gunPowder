@@ -174,6 +174,17 @@ public class Player : MonoBehaviourPun, IDamagable
     private float _lastDamageRatio = 1f; // damage / maxDamage 비율
     public float LastDamageRatio => _lastDamageRatio;
 
+    // 최근 폭발의 MaxStunTime (폭발별 피격 시간 계산용)
+    private float _lastMaxStunTime = 0f;
+    public float LastMaxStunTime => _lastMaxStunTime;
+
+    // 마지막 폭발 정보 (히트스탑 중 넉백용)
+    private float _lastExplosionForce = 0f;
+    private Vector3 _lastExplosionPosition = Vector3.zero;
+    private float _lastExplosionRadius = 0f;
+    private bool _hasLastExplosionInfo = false;
+    public bool HasLastExplosionInfo => _hasLastExplosionInfo;
+
     // 부활 후 첫 공격 여부 (HP bar 최대값 리셋용)
     private bool _isAfterResurrect = false;
 
@@ -252,8 +263,8 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         if (_playerStat != null)
         {
-            _playerStat.OnGunPowderEmpty -= HandleGunPowderEmpty;
-            _playerStat.OnGunpowderIncreased -= HandleGunpowderIncreased;
+            _playerStat.OnHPEmpty -= HandleHPEmpty;
+            _playerStat.OnHPIncreased -= HandleHPIncreased;
         }
 
         // 시각 효과 정리
@@ -419,8 +430,8 @@ public class Player : MonoBehaviourPun, IDamagable
         LoadItems();
 
         // 1. 이벤트 핸들러 등록
-        _playerStat.OnGunPowderEmpty += HandleGunPowderEmpty;
-        _playerStat.OnGunpowderIncreased += HandleGunpowderIncreased;
+        _playerStat.OnHPEmpty += HandleHPEmpty;
+        _playerStat.OnHPIncreased += HandleHPIncreased;
         EventManager.Instance.OnPlayerItemChanged += LoadItems;
 
         // 궁극기 컨트롤러 이벤트 연결
@@ -558,7 +569,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _isAfterResurrect = true;
     }
 
-    private void HandleGunpowderIncreased(int amount)
+    private void HandleHPIncreased(int amount)
     {
         if (_playerSFXAnimationEvent != null)
         {
@@ -566,7 +577,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    private void HandleGunPowderEmpty()
+    private void HandleHPEmpty()
     {
         // 죽을 때 모든 효과 초기화 (경고 + 궁극기)
         // 순서: 깜박임 해제 → 궁극기 해제 → 색상 복원
@@ -845,11 +856,11 @@ public class Player : MonoBehaviourPun, IDamagable
 
     }
 
-    public void TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, bool isFallingOut, bool isNormalAttack)
+    public void TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, float maxStunTime = 0f, bool isFallingOut = false, bool isNormalAttack = false)
     {
         if (_damageController != null)
         {
-            _damageController.TakeDamage(damage, maxDamage, StealPercent, attackerBomb, attackerViewId, attackerActorNumber, isFallingOut, isNormalAttack);
+            _damageController.TakeDamage(damage, maxDamage, StealPercent, attackerBomb, attackerViewId, attackerActorNumber, maxStunTime, isFallingOut, isNormalAttack);
         }
     }
 
@@ -1192,9 +1203,11 @@ public class Player : MonoBehaviourPun, IDamagable
     /// 피격 시 마지막 데미지 비율을 기록하고 피격 이벤트를 발생시킨다.
     /// (PlayerDamageController에서 호출)
     /// </summary>
-    public void RegisterHitDamage(int damage, int maxDamage)
+    public void RegisterHitDamage(int damage, int maxDamage, float maxStunTime)
     {
         _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
+        _lastMaxStunTime = maxStunTime;
+        Debug.Log($"[피격시스템] RegisterHitDamage: damage={damage}, maxDamage={maxDamage}, damageRatio={_lastDamageRatio:F2}, maxStunTime={maxStunTime:F2}s");
         OnHit?.Invoke();
     }
 
@@ -1264,7 +1277,54 @@ public class Player : MonoBehaviourPun, IDamagable
         _storedVelocity = Vector2.zero;
     }
 
+    /// <summary>
+    /// 마지막 폭발 정보 저장 (히트스탑 중 넉백용)
+    /// </summary>
+    public void StoreLastExplosionInfo(float force, Vector3 position, float radius)
+    {
+        _lastExplosionForce = force;
+        _lastExplosionPosition = position;
+        _lastExplosionRadius = radius;
+        _hasLastExplosionInfo = true;
+        Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
+    }
 
+    /// <summary>
+    /// 저장된 마지막 폭발 정보로 넉백 힘 적용
+    /// </summary>
+    public void ApplyLastExplosionForce()
+    {
+        if (!_hasLastExplosionInfo || _rigidbody2D == null)
+        {
+            Debug.Log($"[피격시스템] ApplyLastExplosionForce: 폭발정보 없음 (hasInfo={_hasLastExplosionInfo})");
+            return;
+        }
+
+        Vector2 direction = _rigidbody2D.position - (Vector2)_lastExplosionPosition;
+        float distance = direction.magnitude;
+
+        if (distance <= _lastExplosionRadius)
+        {
+            float forceMagnitude = _lastExplosionForce * (1 - (distance / _lastExplosionRadius));
+            direction.Normalize();
+            direction.y += 0.3f;
+            _rigidbody2D.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
+            Debug.Log($"[피격시스템] 히트스탑 후 폭발넉백 적용: forceMag={forceMagnitude:F1}, dir={direction}, distance={distance:F1}");
+        }
+
+        ClearLastExplosionInfo();
+    }
+
+    /// <summary>
+    /// 마지막 폭발 정보 초기화
+    /// </summary>
+    public void ClearLastExplosionInfo()
+    {
+        _hasLastExplosionInfo = false;
+        _lastExplosionForce = 0f;
+        _lastExplosionPosition = Vector3.zero;
+        _lastExplosionRadius = 0f;
+    }
 
     [PunRPC]
     public void RPC_SetIsImmune(bool isImmune)

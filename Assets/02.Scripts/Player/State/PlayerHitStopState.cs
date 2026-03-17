@@ -172,7 +172,7 @@ public class PlayerHitStopState : PlayerBaseState
     /// </summary>
     private float GetCurrentHealthRatio()
     {
-        return Mathf.Clamp01((float)_owner.PlayerStat.CurrentPlayerGunPowderCount / _owner.PlayerStat.InitGunpowderCount);
+        return Mathf.Clamp01((float)_owner.PlayerStat.CurrentHP / _owner.PlayerStat.InitHP);
     }
 
     /// <summary>

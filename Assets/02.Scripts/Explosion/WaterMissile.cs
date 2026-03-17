@@ -59,7 +59,7 @@ public class WaterMissile : MonoBehaviour
 
             if (other.TryGetComponent(out IDamagable damagableObject))
             {
-                damagableObject.TakeDamage(_stat.AttackPower, _stat.AttackPower, _stat.StealPercent, transform.position, _attackerPhotonView.ViewID, _attackerPhotonView.OwnerActorNr);
+                damagableObject.TakeDamage(_stat.AttackPower, _stat.AttackPower, _stat.StealPercent, transform.position, _attackerPhotonView.ViewID, _attackerPhotonView.OwnerActorNr, _stat.MaxStunTime);
                 if (other.TryGetComponent(out Rigidbody2D otherRigidBody))
                 {
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
@@ -91,5 +91,11 @@ public class WaterMissile : MonoBehaviour
         direction.Normalize();
 
         rb.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
+
+        // 히트스탑 중 마지막 폭발 넉백을 위해 폭발 정보 저장
+        if (player != null)
+        {
+            player.StoreLastExplosionInfo(explosionForce, explosionPosition, explosionRadius);
+        }
     }
 }
