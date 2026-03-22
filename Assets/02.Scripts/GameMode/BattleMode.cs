@@ -1,4 +1,6 @@
+using Photon.Pun;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BattleMode : GameModeBase
 {
@@ -26,7 +28,12 @@ public class BattleMode : GameModeBase
     public override void GameStart()
     {
         Debug.Log($"GameStart - Mode : Spawn");
-        CheckState(EModeState.Spawn);
+        SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString()); // 연출씬 제거
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            RequestStateChange(EModeState.Spawn);   
+        }
     }
 
 }

@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using PhotonPlayer = Photon.Realtime.Player;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 [RequireComponent(typeof(PhotonView))]
-public class GameModeBase : MonoBehaviour
+public class GameModeBase : MonoBehaviourPunCallbacks
 {
     /// <summary>
     /// 게임 모드 모두가 사용할 공통 함수
@@ -24,6 +27,9 @@ public class GameModeBase : MonoBehaviour
     protected PhotonView _photonView;
     
     private int _playerCount;
+    
+    // 동일 룸 프로퍼티 재설정 시 이벤트 누락 방지용 카운터
+    private int _stateChangeId = 0;
     
     /// <summary>
     /// 스폰 포인트 설정하기
@@ -63,17 +69,60 @@ public class GameModeBase : MonoBehaviour
     }
     
     // 플레이어 소환
-    public virtual void SpawnPlayer(int[] playerList)
+    public virtual void SpawnPlayer(int[] playerList, Action onComplete = null)
     {
         for (int i = 0; i < playerList.Length; i++)
         {
             if (playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
-            {
                 continue;
-            }
-            
+ 
             MyPlayer = _playerSpawner.GeneratePlayers(i);
+            break;
         }
+ 
+        // GeneratePlayers가 동기 함수라면 바로 콜백 호출
+        // 비동기(코루틴)라면 아래 대신 PlayerSpawner에서 완료 시 콜백 호출해야 함
+        onComplete?.Invoke();
+    }
+
+    /// <summary>
+    /// 프로퍼티가 바뀌었을 때 호출되는 함수
+    /// 플레이어가 죽을 때마다 죽은 플레이어들 체크하기
+    /// </summary>
+    public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
+    {
+        if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
+        {
+            return;
+        }
+        
+        // 죽음 처리
+        if (!changedProps.ContainsKey(EProperties.IsDead.ToString()) || changedProps[EProperties.IsDead.ToString()] == null)
+        {
+            return;
+        }
+        
+        if ((bool)changedProps[EProperties.IsDead.ToString()])
+        {
+            // 죽은 사람 죽은 시간 체크 후 저장
+            EventManager.Instance.TimeCheck(targetPlayer);
+        }
+    }
+
+    // 게임의 상태가 변경될때 룸 프로퍼티로 전달
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {        
+        // 상태 동기화 처리
+        if (!propertiesThatChanged.ContainsKey(ERoomProperties.StateChange.ToString()))
+        {
+            return;
+        }
+        
+        Debug.Log("Room Properties Update - StateChange");
+        int state = (int)propertiesThatChanged[ERoomProperties.StateChange.ToString()];
+        EModeState modeState = (EModeState)state;
+        CheckChangeComplete(modeState);
+        
     }
 
     public virtual void GameStart()
@@ -83,26 +132,45 @@ public class GameModeBase : MonoBehaviour
 
     public void RequestStateChange(EModeState state)
     {
-        Debug.Log("Change State");
+        Debug.LogError($"Request State Change : {state}");
+       
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+        
+        if (state == EModeState.None)
+        {
+            return;
+        }
+
         int stateInt = (int)state;
-        _photonView.RPC(nameof(RPC_RequestChange), RpcTarget.All, stateInt);
+        _stateChangeId++;
+        
+        Hashtable properties = new Hashtable
+        {
+            { ERoomProperties.StateChange.ToString(), stateInt },
+            { ERoomProperties.StateChangeId.ToString(), _stateChangeId }    // 룸프로퍼티 업데이트 콜백 함수가 언제나 호출될 수 있도록 
+        };
+        
+        PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
     }
-    [PunRPC]
-    public void RPC_RequestChange(int state)
-    {
-        EModeState modeState = (EModeState)state;
-        CheckState(modeState);
-    }
-    
-    public void CheckState(EModeState state)
+
+    public void CheckChangeComplete(EModeState state)
     {
         _nextState = state;
         _photonView.RPC(nameof(RPC_CheckState), RpcTarget.MasterClient);
     }
     
-    // 현재 방 유저들 모두 스테이트를 변경했는지 체크 >> 방장이 체크 후 RPC 전달
     [PunRPC]
-    public void RPC_CheckState()
+    public void RPC_CheckState(PhotonMessageInfo info)
+    {
+        Debug.Log($"RPC::: Check State Sender : {info.Sender.NickName}");
+        CheckState();
+    }
+    
+    
+    public void CheckState()
     {
         _playerCount += 1;
 
@@ -111,8 +179,11 @@ public class GameModeBase : MonoBehaviour
             return;
         }
         
+        Debug.Log("Player Count : " + _playerCount);
+        
         if (_playerCount == PhotonNetwork.PlayerList.Length)
         {
+            _playerCount = 0;
             _photonView.RPC(nameof(RPC_ChangeState), RpcTarget.All);
         }
     }
@@ -120,6 +191,7 @@ public class GameModeBase : MonoBehaviour
     [PunRPC]
     public void RPC_ChangeState()
     {
+        Debug.Log("RPC::: Change State");
         _playerCount = 0;
         ChangeState(_nextState);
     }

@@ -698,7 +698,7 @@ public class PlayerBaseState : MonoState
         SetSpriteRenderersVisibility(false);
 
         // 사망 사운드 재생
-        PlayDeathSound();
+        // PlayDeathSound();
         
     }
     

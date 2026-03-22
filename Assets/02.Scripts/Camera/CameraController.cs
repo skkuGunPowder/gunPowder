@@ -159,6 +159,11 @@ public class CameraController : MonoBehaviour
         }
     }
     
+    private void ZoomOut()
+    {
+        _proCamera.Zoom(-TargetZoomAmount, TargetZoomDuration);
+    }
+    
     private void Update()
     {
         if (_isObserving == false)

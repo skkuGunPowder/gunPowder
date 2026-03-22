@@ -27,10 +27,6 @@ public class PlayerLastDieState : PlayerBaseState
     public override void OnExit()
     {
         base.OnExit();
-        if (EventManager.Instance != null)
-        {
-            EventManager.Instance.OnGameSet -= LastDiePlay;
-        }
     }
     
     public override void MineUpdate()

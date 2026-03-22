@@ -19,7 +19,6 @@ public class GameStatePlaying : GameModeStateBase
         EventManager.Instance.GameStart(); // 게임 시작 321
         EventManager.Instance.ProfileInit(); // 프로필 리프레시
         // TeamSetting(); // 팀개수 팀원 수 체크
-        SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString()); // 연출씬 제거
         
         // 팀원 추가
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
@@ -41,7 +40,7 @@ public class GameStatePlaying : GameModeStateBase
     {
         Init();
         
-        Debug.Log("Change State : GameStatePlaying");
+        Debug.LogWarning("Enter State : GameStatePlaying");
         EventManager.Instance.OnTimeCheck += OnPlayerDead;
         EventManager.Instance.OnPlayerLeft += OnPlayerLeft;
         EventManager.Instance.OnLastDieComplete += GameResultCheck;
@@ -64,7 +63,7 @@ public class GameStatePlaying : GameModeStateBase
             
             EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
             _teamCount[team]--;
-            _count++;
+            _count++;   // 플레이어가 죽지 않았는데 나갔다면 죽은 카운트 ++
         }
 
         if (PhotonNetwork.IsMasterClient == false)
@@ -79,6 +78,7 @@ public class GameStatePlaying : GameModeStateBase
     private void OnPlayerDead(PhotonPlayer player)
     {
         _count++;
+        Debug.Log($"Death Count {_count} / {_MaxCount}   ::: DIE : {player.NickName}");
         
         // 게임오버 체크
         if (PhotonNetwork.IsMasterClient == false)
@@ -88,6 +88,7 @@ public class GameStatePlaying : GameModeStateBase
 
         if (_count >= _MaxCount)
         {
+            Debug.Log($"Request Death count End ::: {_count} / {_MaxCount}");
             RequestStateChange();
             return;
         }
@@ -192,27 +193,27 @@ public class GameStatePlaying : GameModeStateBase
         
         if (notDead == 0)   // 나가서 살아있는 사람이 없을 때
         {
-            _gameMode.CheckState(EModeState.Round);
+            _gameMode.RequestStateChange(EModeState.Round);
             return;
         }
         
         // 2명 이상인데 살아있는 사람이 1명일 때
         if (_lastPlayer == false && notDead == 1)
         {
-            _gameMode.CheckState(EModeState.Round);
+            _gameMode.RequestStateChange(EModeState.Round);
             return;
         }
 
         if (_lastPlayer && notDead == 1)
         {
-            _gameMode.CheckState(EModeState.Round);
+            _gameMode.RequestStateChange(EModeState.Round);
             return;
         }
         
         // 나갔는데 살아있는 팀이 한팀 뿐일 때
         if (LastTeamCheck() <= 1)
         {
-            _gameMode.CheckState(EModeState.Round);
+            _gameMode.RequestStateChange(EModeState.Round);
             return;
         }
         
@@ -303,8 +304,11 @@ public class GameStatePlaying : GameModeStateBase
         PhotonPlayer player = PhotonNetwork.LocalPlayer;
         if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
         {
+            Debug.LogError("GameResultCheck :: MyPlayer Dead");
             return;
         }
+        
+        Debug.LogError("GameResultCheck :: MyPlayer Alive");
         
         PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
         
@@ -315,10 +319,10 @@ public class GameStatePlaying : GameModeStateBase
             {EProperties.Damage.ToString(), stat.TotalDamage}
         };
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            EventManager.Instance.TimeCheck(player);
-        }
+        // if (PhotonNetwork.IsMasterClient)
+        // {
+        //     EventManager.Instance.TimeCheck(player);
+        // }
         
         player.SetCustomProperties(properties);
     }
@@ -337,7 +341,8 @@ public class GameStatePlaying : GameModeStateBase
         _lastPlayer = false;
         // 팀별 살아있는 인원 초기화
         _teamCount.Clear();
-        
+        _count = 0;
+        Debug.Log("Exit State : GameStatePlaying");
         EventManager.Instance.OnLastDieComplete -= GameResultCheck;
         EventManager.Instance.OnPlayerLeft -= OnPlayerLeft;
         EventManager.Instance.OnTimeCheck -= OnPlayerDead;

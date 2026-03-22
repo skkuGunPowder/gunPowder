@@ -3,5 +3,7 @@ public enum EModeState
     None,
     Playing,
     Spawn,
-    Round
+    Round,
+    Cartirdge,
+    
 }

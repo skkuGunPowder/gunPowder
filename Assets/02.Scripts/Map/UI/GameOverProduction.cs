@@ -64,7 +64,8 @@ public class GameOverProduction : MonoBehaviour
 
     private void Start()
     {
-        EventManager.Instance.OnGameOver += Play;
+        EventManager.Instance.OnGameOver += GameOverPlay;
+        EventManager.Instance.OnLastDieComplete += GameSetPlay;
     }
     // private void OnEnable()
     // {
@@ -78,13 +79,14 @@ public class GameOverProduction : MonoBehaviour
     //     Play();
     // }
 
-    public void Play()
+    public void GameOverPlay()
     {
+        EventManager.Instance.OnLastDieComplete -= GameSetPlay;
         SoundManager.Instance.PlayLocalSound(nameof(GameEndBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
         
         GameOverProductionPanel.gameObject.SetActive(true);
         
-        EventManager.Instance.OnGameOver -= Play;
+        EventManager.Instance.OnGameOver -= GameOverPlay;
         
         Sequence sequence = DOTween.Sequence();
         sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
@@ -113,7 +115,13 @@ public class GameOverProduction : MonoBehaviour
 
             PhotonNetwork.LoadLevel(ESceneList.ResultScene.ToString());
         });
+    }
 
+    private void GameSetPlay()
+    {
+        Sequence sequence = DOTween.Sequence();
+        sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
+        sequence.Join(_camera.DOOrthoSize(CameraZoomOutAmount, CameraZoomOutTime).SetEase(CameraZoomOutEase));
     }
 
     private void TimerOff()

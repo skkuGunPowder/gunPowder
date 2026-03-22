@@ -16,9 +16,8 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         EventManager.Instance.OnPlayerChanged += PlayerLoadCheck;
     }
 
-    private void Update()
+    public void Update()
     {
-        PhotonNetwork.NetworkingClient.Service();
     }
 
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)

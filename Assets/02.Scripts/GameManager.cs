@@ -71,30 +71,6 @@ public class GameManager : PhotonSingleton<GameManager>
         _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
     }
     
-    /// <summary>
-    /// 프로퍼티가 바뀌었을 때 호출되는 함수
-    /// 플레이어가 죽을 때마다 죽은 플레이어들 체크하기
-    /// </summary>
-    public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
-    {
-        if (_currentGameState == EGameState.Waiting || _currentGameState == EGameState.GameOver)
-        {
-            return;
-        }
-
-        if (!changedProps.ContainsKey(EProperties.IsDead.ToString()) || changedProps[EProperties.IsDead.ToString()] == null)
-        {
-            return;
-        }
-        
-        if ((bool)changedProps[EProperties.IsDead.ToString()])
-        {
-            // 죽은 사람 죽은 시간 체크 후 저장
-            EventManager.Instance.TimeCheck(targetPlayer);
-        }
-    }
-    
-    
     //게임 상태 변경, 게임 상태에 따라 타임 스케일 조정
     public void GameStateChange(EGameState state)
     {
@@ -136,6 +112,14 @@ public class GameManager : PhotonSingleton<GameManager>
     { 
         base.OnDisable();
         EventManager.Instance.OnLoadFinished -= RequestGameStart;
+    }
+
+    private void Update()
+    {
+        if (_currentGameState == EGameState.Ready || _currentGameState == EGameState.Ultimate)
+        {
+            PhotonNetwork.NetworkingClient.Service();   
+        }
     }
 }
 

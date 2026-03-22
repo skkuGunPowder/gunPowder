@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6798247650792327545}
   - component: {fileID: 7858638530058087704}
   - component: {fileID: 2378972428517735097}
+  - component: {fileID: 6308915137378322986}
   m_Layer: 0
   m_Name: ModeNSpawner
   m_TagString: Untagged
@@ -95,7 +96,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resurrectPoint: {fileID: 0}
-  WinningTeam: 0
   MyPlayer: {fileID: 0}
 --- !u!114 &6798247650792327545
 MonoBehaviour:
@@ -123,6 +123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   State: 3
+  _winningTeam: 0
 --- !u!114 &2378972428517735097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,6 +137,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   State: 2
+--- !u!114 &6308915137378322986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035945805825258251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cae1a38227faebf4bb3969622737a983, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  State: 4
 --- !u!1 &3019794214641518552
 GameObject:
   m_ObjectHideFlags: 0

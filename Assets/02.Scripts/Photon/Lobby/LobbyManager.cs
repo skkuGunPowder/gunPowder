@@ -47,7 +47,8 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
             {ERoomProperties.GameMode.ToString(), (int)EGameMode.Deathmatch},       
             {ERoomProperties.ChatChannelGroup.ToString(), chatChannelGroup},
             {ERoomProperties.ChatChannelId.ToString(), chatChannelId},
-            {ERoomProperties.ChatChannelNumber.ToString(), chatChannelNumber}
+            {ERoomProperties.ChatChannelNumber.ToString(), chatChannelNumber},
+            {ERoomProperties.StateChange.ToString(), (int)EModeState.None}
         };
         
         RoomOptions roomOptions = new RoomOptions();

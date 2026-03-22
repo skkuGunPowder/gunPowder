@@ -1207,7 +1207,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
         _lastMaxStunTime = maxStunTime;
-        Debug.Log($"[피격시스템] RegisterHitDamage: damage={damage}, maxDamage={maxDamage}, damageRatio={_lastDamageRatio:F2}, maxStunTime={maxStunTime:F2}s");
+        // Debug.Log($"[피격시스템] RegisterHitDamage: damage={damage}, maxDamage={maxDamage}, damageRatio={_lastDamageRatio:F2}, maxStunTime={maxStunTime:F2}s");
         OnHit?.Invoke();
     }
 
@@ -1286,7 +1286,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _lastExplosionPosition = position;
         _lastExplosionRadius = radius;
         _hasLastExplosionInfo = true;
-        Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
+        // Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
     }
 
     /// <summary>
@@ -1296,7 +1296,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         if (!_hasLastExplosionInfo || _rigidbody2D == null)
         {
-            Debug.Log($"[피격시스템] ApplyLastExplosionForce: 폭발정보 없음 (hasInfo={_hasLastExplosionInfo})");
+            // Debug.Log($"[피격시스템] ApplyLastExplosionForce: 폭발정보 없음 (hasInfo={_hasLastExplosionInfo})");
             return;
         }
 
@@ -1309,7 +1309,7 @@ public class Player : MonoBehaviourPun, IDamagable
             direction.Normalize();
             direction.y += 0.3f;
             _rigidbody2D.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
-            Debug.Log($"[피격시스템] 히트스탑 후 폭발넉백 적용: forceMag={forceMagnitude:F1}, dir={direction}, distance={distance:F1}");
+            // Debug.Log($"[피격시스템] 히트스탑 후 폭발넉백 적용: forceMag={forceMagnitude:F1}, dir={direction}, distance={distance:F1}");
         }
 
         ClearLastExplosionInfo();

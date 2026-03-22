@@ -57,10 +57,18 @@ public class GameStateRound : GameModeStateBase
     
     public override void Enter()
     {
-        Debug.Log("Change State : GameStateRound");
+        Debug.LogWarning("Eneter State : GameStateRound");
+        Init();
         RequestMyPlayerHealth();
     }
     
+    // 초기화
+    private void Init()
+    {
+        _maxHealth = -1;
+        _damage = 0;
+        _playerCount = 0;
+    }
     // 우승팀 체크 >> 방장이 체크 후 플레이어들에게 전달
     private void CheckWinningTeam(int health, PhotonPlayer player)
     {
@@ -73,7 +81,6 @@ public class GameStateRound : GameModeStateBase
             _gameMode.GameOver();   // 플레이어가 한명이라면 바로 종료
             return;
         }
-        
         
         float damage = (float)player.CustomProperties[EProperties.Damage.ToString()];
         
@@ -90,7 +97,6 @@ public class GameStateRound : GameModeStateBase
 
         if (players.Length == _playerCount)
         {
-            ProduceScore();
             SetWinningTeam(_winningTeam);
         }
     }
@@ -116,7 +122,6 @@ public class GameStateRound : GameModeStateBase
     private void AddScore(EInGameTeam team)
     {
         _roundTeamCount[team].AddScore();
-        EndCheck(team);
     }
     
     private void EndCheck(EInGameTeam team)
@@ -129,7 +134,7 @@ public class GameStateRound : GameModeStateBase
             _gameMode.GameOver();   
         }
         
-        _gameMode.CheckState(EModeState.Spawn);
+        _gameMode.RequestStateChange(EModeState.Cartirdge);
     }
 
     // 점수 연출
@@ -139,6 +144,12 @@ public class GameStateRound : GameModeStateBase
         
         // 연출
         Debug.Log($"Round Score : {_winningTeam} : {_roundTeamCount[_winningTeam].score}");
+
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        
         EndCheck(_winningTeam);
          
     }
@@ -146,6 +157,7 @@ public class GameStateRound : GameModeStateBase
     public void SetWinningTeam(EInGameTeam team)
     {
         _winningTeam = team;
+        ProduceScore();
         
         if (PhotonNetwork.IsMasterClient == false)
         {
@@ -159,6 +171,7 @@ public class GameStateRound : GameModeStateBase
     public void RPC_WinningTeam(EInGameTeam team)
     {
         _winningTeam = team;
+        ProduceScore();
     }
     
     public override void Tick()
@@ -188,14 +201,16 @@ public class GameStateRound : GameModeStateBase
         _myDamage += totalDamage;
         _myKill += killCount;
         _mySurvivorTime += time;
-
+        
+        // 상태 초기화 
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
         {
             { EProperties.IsDead.ToString(), false },
-            { EProperties.Kill.ToString(), _myKill },
-            { EProperties.Damage.ToString(), _myDamage },
-            { EProperties.SurvivorTime.ToString(), _mySurvivorTime }
+            { EProperties.Kill.ToString(), 0 },
+            { EProperties.Damage.ToString(), 0 },
+            { EProperties.SurvivorTime.ToString(), 0 }
         });
+        
     }
     
 }
