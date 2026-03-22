@@ -1,4 +1,5 @@
 using System;
+using Com.LuisPedroFonseca.ProCamera2D;
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class GameOverProduction : MonoBehaviour
 {
     public Animator MyAnimator;
     private Camera _camera;
+    private ProCamera2D _proCamera;
     public bool Test;
     [Header("위치 액션")] 
     public RectTransform GameOverProductionPanel;
@@ -60,6 +62,7 @@ public class GameOverProduction : MonoBehaviour
     private void Awake()
     {
         _camera = Camera.main;
+        _proCamera = _camera.GetComponent<ProCamera2D>();
     }
 
     private void Start()
@@ -121,7 +124,7 @@ public class GameOverProduction : MonoBehaviour
     {
         Sequence sequence = DOTween.Sequence();
         sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
-        sequence.Join(_camera.DOOrthoSize(CameraZoomOutAmount, CameraZoomOutTime).SetEase(CameraZoomOutEase));
+        sequence.JoinCallback(()=> _proCamera.Zoom(+4,CameraZoomOutTime));
     }
 
     private void TimerOff()

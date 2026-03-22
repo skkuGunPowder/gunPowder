@@ -22,6 +22,8 @@ public class CameraController : MonoBehaviour
     public float TargetZoomDuration = 1.5f;
     public float TargetZoomAmount = 1.5f;
     
+    private float _InitialZoom;
+    
     public event Action<bool> OnUIOnOff;                 // UI On/Off
     public event Action<string> OnNicknameChanged; // 타겟 이름 전달
 
@@ -32,6 +34,7 @@ public class CameraController : MonoBehaviour
     
     private void Start()
     {
+        
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting)
         {
             return;
@@ -161,7 +164,7 @@ public class CameraController : MonoBehaviour
     
     private void ZoomOut()
     {
-        _proCamera.Zoom(-TargetZoomAmount, TargetZoomDuration);
+        _proCamera.Zoom(+TargetZoomAmount, TargetZoomDuration);
     }
     
     private void Update()
