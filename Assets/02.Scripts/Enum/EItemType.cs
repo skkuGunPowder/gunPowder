@@ -15,5 +15,6 @@ public enum EItemType
     DiamondPowder,
     Event,
     EventShop,
+    SubBomb,
     Count
 }

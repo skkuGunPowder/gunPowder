@@ -23,7 +23,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
     }
 
     // 방에 보내기
-    public void MakeRoom(string roomName, int maxPlayers, int playTime, int life, int gunpowder, int decline, bool isLocked, string password = null)
+    public void MakeRoom(string roomName, int maxPlayers, int playTime, int life, int gunpowder, bool isLocked, string password = null)
     {
         // 채팅 채널 정보 생성 (Backend Chat SDK 길이 제한: 2~20자)
         // GUID 8자만 사용 (충분한 고유성 보장)
@@ -41,7 +41,6 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
             {ERoomProperties.PlayTime.ToString(), playTime},
             {ERoomProperties.Life.ToString(), life},
             {ERoomProperties.Gunpowder.ToString(), gunpowder},
-            {ERoomProperties.DeclinePowder.ToString(), decline},
             {ERoomProperties.IsLocked.ToString(),isLocked },
             {ERoomProperties.Password.ToString(), password},
             {ERoomProperties.GameMode.ToString(), (int)EGameMode.Deathmatch},       
