@@ -633,6 +633,7 @@ public class PlayerBaseState : MonoState
         }
     }
 
+    
     // 폭탄 반동 적용 함수
     protected virtual void ApplyRecoil(Transform bombSpawnPoint, float recoilPower = 5f, float upPower = 1f)
     {
