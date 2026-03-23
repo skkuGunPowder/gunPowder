@@ -14,8 +14,6 @@ public class PlayerBaseState : MonoState
     protected BoxRay2D _groundRay2D;
 
     // 반동 관련 상수
-    protected const float NORMAL_RECOIL_FORCE = 10f;
-    protected const float STRONG_RECOIL_FORCE = 20f;
     protected const float Y_RECOIL_FORCE = 5f;
     
     // 프리팹 이름 상수
@@ -396,7 +394,7 @@ public class PlayerBaseState : MonoState
         string prefabName = GetNormalBombPrefabName(action, finalSpawnPoint);
         
         // 폭탄 생성 및 실행
-        ExecuteBombAction(prefabName, bombSpawnPoint, action);
+        ExecuteBombAction(prefabName, bombSpawnPoint, action, _owner.BasicBombStat);
 
         // 후처리
         ResetGunPowderDecreaseWithoutAttackTimer();
@@ -456,7 +454,7 @@ public class PlayerBaseState : MonoState
         (Transform bombSpawnPoint, EBombSpawnPoint finalSpawnPoint) = GetBombSpawnPointInfo(spawnPoint);
         
         // 폭탄 생성 및 실행
-        ExecuteBombAction(prefabName, bombSpawnPoint, action);
+        ExecuteBombAction(prefabName, bombSpawnPoint, action, _owner.SpecialBombStat);
 
         // 후처리
         ResetGunPowderDecreaseWithoutAttackTimer();
@@ -562,10 +560,10 @@ public class PlayerBaseState : MonoState
     /// <summary>
     /// 폭탄 액션 실행 (생성, RPC 호출, 애니메이션)
     /// </summary>
-    protected virtual void ExecuteBombAction(string prefabName, Transform bombSpawnPoint, BombActionType action)
+    protected virtual void ExecuteBombAction(string prefabName, Transform bombSpawnPoint, BombActionType action, BombStat bombStat)
     {
         string methodName = GetBombMethodName(action);
-        
+
         SpawnAndRpcBomb(
             prefabName,
             bombSpawnPoint,
@@ -573,7 +571,7 @@ public class PlayerBaseState : MonoState
             new object[] { bombSpawnPoint.right, bombSpawnPoint.up, bombSpawnPoint.forward }
         );
 
-        PlayBombAnimation(action, bombSpawnPoint);
+        PlayBombAnimation(action, bombSpawnPoint, bombStat);
     }
 
     /// <summary>
@@ -600,7 +598,7 @@ public class PlayerBaseState : MonoState
     /// <summary>
     /// 폭탄 액션에 따른 애니메이션 및 반동 처리
     /// </summary>
-    protected virtual void PlayBombAnimation(BombActionType action, Transform bombSpawnPoint)
+    protected virtual void PlayBombAnimation(BombActionType action, Transform bombSpawnPoint, BombStat bombStat)
     {
         switch (action)
         {
@@ -609,14 +607,14 @@ public class PlayerBaseState : MonoState
                     _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "JumpUpStrongAttack" : "JumpStrongAttack");
                 else
                     _owner.RPC_SetAnimatorTrigger(InputHandler.GetKey(KeyCode.UpArrow) ? "UpStrongAttack" : "StrongAttack");
-                ApplyRecoil(bombSpawnPoint, STRONG_RECOIL_FORCE, Y_RECOIL_FORCE);
+                ApplyRecoil(bombSpawnPoint, bombStat.RecoilAmount, Y_RECOIL_FORCE);
                 break;
             case BombActionType.Throw:
                 if (_owner.PlayerStat.IsJumping)
                     _owner.RPC_SetAnimatorTrigger("JumpAttack");
                 else
                     _owner.RPC_SetAnimatorTrigger("Attack");
-                ApplyRecoil(bombSpawnPoint, NORMAL_RECOIL_FORCE, Y_RECOIL_FORCE);
+                ApplyRecoil(bombSpawnPoint, bombStat.RecoilAmount, Y_RECOIL_FORCE);
                 break;
             case BombActionType.Place:
                 if (_owner.PlayerStat.IsJumping)
