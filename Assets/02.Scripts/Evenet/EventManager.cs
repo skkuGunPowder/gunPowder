@@ -209,4 +209,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGPDataChanged?.Invoke(playerNumber, gp);
     }
+
+    public event Action<float, float> OnUltimateGaugeChanged;  // 궁극기 게이지 변경 시 (current, max)
+    public void UltimateGaugeChanged(float current, float max)
+    {
+        OnUltimateGaugeChanged?.Invoke(current, max);
+    }
 }

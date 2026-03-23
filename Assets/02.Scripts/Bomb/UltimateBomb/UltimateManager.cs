@@ -35,6 +35,7 @@ public class UltimateManager : Singleton<UltimateManager>
         _player = player;
     }
 
+    // TODO: [궁극기 슬롯 전환] Z슬롯 폭탄 교체 구현 후, 호출부에서 Z슬롯 bombID를 전달하도록 변경
     public Ultimate GetUltimate(string bombID, Player player)
     {
         if (_ultimateDict.TryGetValue(bombID, out Ultimate ultimate))

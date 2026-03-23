@@ -126,16 +126,16 @@ public class PlayerStat : MonoBehaviour
     public float TotalDamage => _totalDamage;
     public float TotalKillCount => _totalKillCount;
 
-    [Header("궁극기 시스템")]
-    [SerializeField] private bool _hasUltimateChance = false;
-    [SerializeField] private bool _hasUsedUltimateThisLife = false;
-    [SerializeField] private float _ultimateChanceDuration = 10f;
-    [SerializeField] private int _ultimateTriggerThreshold = 30; // HP가 이 값 이하가 되면 기회 발생
+    [Header("궁극기 게이지 시스템")]
+    [SerializeField] private float _currentUltimateGauge = 0f;
+    [SerializeField] private float _maxUltimateGauge = 100f;
+    private const float ULTIMATE_GAUGE_RATE_ON_GP_GAIN = 0.3f;  // 획득 GP의 30%
+    private const float ULTIMATE_GAUGE_RATE_ON_GP_LOSS = 0.5f;  // 잃은 GP의 50%
 
-    public bool HasUltimateChance { get => _hasUltimateChance; set => _hasUltimateChance = value; }
-    public bool HasUsedUltimateThisLife { get => _hasUsedUltimateThisLife; set => _hasUsedUltimateThisLife = value; }
-    public float UltimateChanceDuration { get => _ultimateChanceDuration; set => _ultimateChanceDuration = value; }
-    public int UltimateTriggerThreshold { get => _ultimateTriggerThreshold; set => _ultimateTriggerThreshold = value; }
+    public float CurrentUltimateGauge => _currentUltimateGauge;
+    public float MaxUltimateGauge => _maxUltimateGauge;
+    public bool IsUltimateReady => _currentUltimateGauge >= _maxUltimateGauge;
+    public event Action<float, float> OnUltimateGaugeChanged;
 
     [Header("최근 공격자 추적")]
     [SerializeField] private int _lastAttackerActorNumber = -1;
@@ -291,6 +291,10 @@ public class PlayerStat : MonoBehaviour
         }
 
         _currentHP += amount;
+
+        // GP 획득에 의한 궁극기 게이지 충전 (획득량의 30%)
+        ChargeUltimateOnGPGain(amount);
+
         _photonView.RPC(nameof(RPC_ChangeHP), RpcTarget.All, _currentHP,
             _currentPlayerLife, 0);
         OnHPIncreased?.Invoke(amount);
@@ -382,12 +386,8 @@ public class PlayerStat : MonoBehaviour
         // 공격자 기록
         RecordLastAttacker(attacker);
 
-        // 궁극기 기회 발생 조건 확인 (HP 기준)
-        if (_currentHP <= _ultimateTriggerThreshold &&
-            !_hasUltimateChance && !_hasUsedUltimateThisLife)
-        {
-            _hasUltimateChance = true;
-        }
+        // GP 손실에 의한 궁극기 게이지 충전 (손실량의 50%)
+        ChargeUltimateOnGPLoss(amount);
 
         if (_currentHP <= 0)
         {
@@ -562,6 +562,48 @@ public class PlayerStat : MonoBehaviour
         return _lastAttackerActorNumber;
     }
 
+    // ===== 궁극기 게이지 관리 메서드 =====
+
+    public void IncreaseUltimateGauge(float amount)
+    {
+        if (amount <= 0f) return;
+        if (_currentUltimateGauge >= _maxUltimateGauge) return;
+
+        _currentUltimateGauge = Mathf.Min(_currentUltimateGauge + amount, _maxUltimateGauge);
+        OnUltimateGaugeChanged?.Invoke(_currentUltimateGauge, _maxUltimateGauge);
+    }
+
+    public void ResetUltimateGauge()
+    {
+        _currentUltimateGauge = 0f;
+        OnUltimateGaugeChanged?.Invoke(_currentUltimateGauge, _maxUltimateGauge);
+    }
+
+    public void SetMaxUltimateGauge(float max)
+    {
+        _maxUltimateGauge = Mathf.Max(1f, max);
+        _currentUltimateGauge = Mathf.Min(_currentUltimateGauge, _maxUltimateGauge);
+        OnUltimateGaugeChanged?.Invoke(_currentUltimateGauge, _maxUltimateGauge);
+    }
+
+    /// <summary>
+    /// GP 획득 시 궁극기 게이지 충전 (획득량의 30%)
+    /// </summary>
+    public void ChargeUltimateOnGPGain(int gpAmount)
+    {
+        if (gpAmount <= 0) return;
+        IncreaseUltimateGauge(gpAmount * ULTIMATE_GAUGE_RATE_ON_GP_GAIN);
+    }
+
+    /// <summary>
+    /// GP 손실 시 궁극기 게이지 충전 (손실량의 50%)
+    /// </summary>
+    public void ChargeUltimateOnGPLoss(int gpAmount)
+    {
+        if (gpAmount <= 0) return;
+        IncreaseUltimateGauge(gpAmount * ULTIMATE_GAUGE_RATE_ON_GP_LOSS);
+    }
+
     // 플레이어 상태 관리 메서드
     public void ResurrectPlayerStat()
     {
@@ -580,8 +622,6 @@ public class PlayerStat : MonoBehaviour
         _jumpCount = 0;
         _facingDirection = 1;
         _isFallingDead = false;
-        _hasUsedUltimateThisLife = false;
-        _hasUltimateChance = false;
 
         // 최근 공격자 정보 초기화
         _lastAttackerActorNumber = -1;
