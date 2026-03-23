@@ -26,9 +26,15 @@ public class PlayerUltimateController : MonoBehaviour
     private bool _ultimateEffectOn = false;
     private CancellationTokenSource _ultimateEffectOffCancellationTokenSource;
 
+    // 사용 후 10초 카운트다운
     [SerializeField]
-    private float _ultimateChanceTimer = 0f;
-    public float UltimateChanceTimer { get => _ultimateChanceTimer; set => _ultimateChanceTimer = value; }
+    private float _postUltimateTimer = 0f;
+    [SerializeField]
+    private bool _isPostUltimateCooldown = false;
+    private const float POST_ULTIMATE_RESET_DELAY = 10f;
+
+    // 게이지 만충 이펙트 활성화 상태 추적
+    private bool _wasUltimateReady = false;
 
     // Player의 이벤트에 접근하기 위한 참조
     public event System.Action OnUltimateChanceActivated;
@@ -75,7 +81,7 @@ public class PlayerUltimateController : MonoBehaviour
     }
 
     /// <summary>
-    /// 궁극기 사용 가능 상태 타이머 업데이트 (Update에서 호출)
+    /// 궁극기 게이지 및 사용 후 카운트다운 업데이트 (Update에서 호출)
     /// </summary>
     public void UpdateUltimateChanceTimer()
     {
@@ -85,26 +91,29 @@ public class PlayerUltimateController : MonoBehaviour
             return;
         }
 
-        // 궁극기 사용가능 상태
-        if (_playerStat.HasUltimateChance)
+        // 사용 후 10초 카운트다운 처리
+        if (_isPostUltimateCooldown)
         {
-            if (!_ultimateEffectOn)
+            _postUltimateTimer += Time.deltaTime;
+            if (_postUltimateTimer >= POST_ULTIMATE_RESET_DELAY)
             {
-                if (UltimateEffectPrefab != null && !UltimateEffectPrefab.activeSelf)
-                {
-                    SetUltimateEffectState(true);
-                }
+                _isPostUltimateCooldown = false;
+                _postUltimateTimer = 0f;
+                _playerStat.ResetUltimateGauge();
             }
+            return;
+        }
 
-            _ultimateChanceTimer += Time.deltaTime;
-            if (_ultimateChanceTimer >= _playerStat.UltimateChanceDuration)
-            {
-                _playerStat.HasUltimateChance = false;
-                _playerStat.HasUsedUltimateThisLife = true;
-                _ultimateChanceTimer = 0f;
-
-                SetUltimateEffectState(false);
-            }
+        // 게이지 만충 시 이펙트 활성화
+        if (_playerStat.IsUltimateReady && !_wasUltimateReady)
+        {
+            _wasUltimateReady = true;
+            SetUltimateEffectState(true);
+        }
+        else if (!_playerStat.IsUltimateReady && _wasUltimateReady)
+        {
+            _wasUltimateReady = false;
+            SetUltimateEffectState(false);
         }
     }
 
@@ -257,7 +266,8 @@ public class PlayerUltimateController : MonoBehaviour
             return;
         }
 
-        if (_playerStat.HasUltimateChance && !_playerStat.HasUsedUltimateThisLife)
+        // 게이지 만충 + 사용 후 쿨다운 중이 아닐 때만 사용 가능
+        if (_playerStat.IsUltimateReady && !_isPostUltimateCooldown)
         {
             if (_ultimate == null)
             {
@@ -272,9 +282,12 @@ public class PlayerUltimateController : MonoBehaviour
             }
 
             _ultimate.ExcuteUltimate();
-            _playerStat.HasUsedUltimateThisLife = true;
-            _playerStat.HasUltimateChance = false;
-            _ultimateChanceTimer = 0f;
+
+            // 사용 후 10초 카운트다운 시작
+            _isPostUltimateCooldown = true;
+            _postUltimateTimer = 0f;
+            _wasUltimateReady = false;
+
             int ultimateCost = _ultimate.GetCost();
             _playerStat.DecreaseHP(ultimateCost, _photonView.OwnerActorNr);
 
@@ -297,8 +310,8 @@ public class PlayerUltimateController : MonoBehaviour
     }
 
     /// <summary>
-    /// 강제로 궁극기 사용가능상태 만들기
-    /// 이때는 궁극기 사용가능 시간이 무제한이다.
+    /// 강제로 궁극기 사용가능상태 만들기 (디버그/튜토리얼용)
+    /// 게이지를 최대치로 설정하여 즉시 사용 가능 상태로 만듦
     /// </summary>
     public void ForceUltimateChance()
     {
@@ -308,12 +321,9 @@ public class PlayerUltimateController : MonoBehaviour
             return;
         }
 
-        _playerStat.HasUltimateChance = true;
-        _playerStat.HasUsedUltimateThisLife = false;
-        _ultimateChanceTimer = 0f;
-        _playerStat.UltimateChanceDuration = 999999999f;
-
-        SetUltimateEffectState(true);
+        _isPostUltimateCooldown = false;
+        _postUltimateTimer = 0f;
+        _playerStat.IncreaseUltimateGauge(_playerStat.MaxUltimateGauge);
     }
 
     /// <summary>
@@ -329,7 +339,19 @@ public class PlayerUltimateController : MonoBehaviour
     /// </summary>
     public void ResetUltimateChanceTimer()
     {
-        _ultimateChanceTimer = 0f;
+        _postUltimateTimer = 0f;
+        // 부활 시에는 쿨다운 상태도 초기화
+        _isPostUltimateCooldown = false;
+        _wasUltimateReady = false;
+    }
+
+    /// <summary>
+    /// 라운드 종료 시 10초 카운트다운 초기화 (게이지는 유지)
+    /// </summary>
+    public void OnRoundEnd()
+    {
+        _isPostUltimateCooldown = false;
+        _postUltimateTimer = 0f;
     }
 
     /// <summary>
@@ -344,12 +366,9 @@ public class PlayerUltimateController : MonoBehaviour
         // 비활성화 시 현재 궁극기 상태도 정리
         if (!enabled)
         {
-            // 궁극기 관련 상태 초기화
-            if (_playerStat != null)
-            {
-                _playerStat.HasUltimateChance = false;
-            }
-            _ultimateChanceTimer = 0f;
+            _isPostUltimateCooldown = false;
+            _postUltimateTimer = 0f;
+            _wasUltimateReady = false;
 
             // 궁극기 효과가 켜져있으면 끄기
             if (_ultimateEffectOn)

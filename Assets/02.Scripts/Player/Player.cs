@@ -91,6 +91,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
     private const int RANDOM_SEED = 123456;
+    // TODO: [궁극기 슬롯 전환] Z슬롯 폭탄 교체 구현 시, 이 고정값 대신 교체 가능한 Z슬롯 아이템으로 변경
     private const string BASIC_BOMB_ID = "BO0001";
 
     public BombStat BasicBombStat;
@@ -166,7 +167,10 @@ public class Player : MonoBehaviourPun, IDamagable
     public float LastDashTapTimeLeft = -999f;
     public float LastDashTapTimeRight = -999f;
 
-    public float UltimateChanceTimer { get => _ultimateController != null ? _ultimateController.UltimateChanceTimer : 0f; set { if (_ultimateController != null) _ultimateController.UltimateChanceTimer = value; } }
+    // 궁극기 게이지 프로퍼티 (외부 참조용)
+    public float CurrentUltimateGauge => _playerStat != null ? _playerStat.CurrentUltimateGauge : 0f;
+    public float MaxUltimateGauge => _playerStat != null ? _playerStat.MaxUltimateGauge : 100f;
+    public bool IsUltimateReady => _playerStat != null && _playerStat.IsUltimateReady;
 
     // 공격 없을 때 경고 상태는 PlayerGunpowderController로 이동
 
@@ -260,6 +264,7 @@ public class Player : MonoBehaviourPun, IDamagable
         if (EventManager.Instance != null)
         {
             EventManager.Instance.OnPlayerItemChanged -= LoadItems;
+            EventManager.Instance.OnGameOver -= HandleGameOver;
         }
         if (_playerStat != null)
         {
@@ -323,6 +328,7 @@ public class Player : MonoBehaviourPun, IDamagable
         SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
 
         // 궁극기 설정
+        // TODO: [궁극기 슬롯 전환] Z슬롯 폭탄 교체 구현 후, EquipedItemDict[EItemType.Bomb].ID 대신 Z슬롯 아이템 ID 기반으로 변경
         if (UltimateManager.Instance != null && _ultimateController != null)
         {
             Ultimate ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
@@ -440,6 +446,9 @@ public class Player : MonoBehaviourPun, IDamagable
             _ultimateController.OnUltimateChanceActivated += () => OnUltimateChanceActivated?.Invoke();
             _ultimateController.OnUltimateChanceDeactivated += () => OnUltimateChanceDeactivated?.Invoke();
         }
+
+        // 라운드 종료 시 궁극기 카운트다운 초기화
+        EventManager.Instance.OnGameOver += HandleGameOver;
 
         // 2. Rigidbody2D 최적화된 초기화
         if (photonView.IsMine)
@@ -577,6 +586,15 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
+    private void HandleGameOver()
+    {
+        // 라운드 종료 시 궁극기 10초 카운트다운 초기화 (게이지는 유지)
+        if (_ultimateController != null)
+        {
+            _ultimateController.OnRoundEnd();
+        }
+    }
+
     private void HandleHPEmpty()
     {
         // 죽을 때 모든 효과 초기화 (경고 + 궁극기)
@@ -592,7 +610,6 @@ public class Player : MonoBehaviourPun, IDamagable
             ClearNoAttackWarning();
         }
 
-        _playerStat.HasUltimateChance = false;
         if (_ultimateController != null)
         {
             _ultimateController.ResetUltimateChanceTimer();

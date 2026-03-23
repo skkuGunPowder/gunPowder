@@ -7,13 +7,16 @@ public class UI_Ultimate : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private GameObject _pressCButtonUI;
     [SerializeField] private Image _pressCButtonImage;
-    
+
     [SerializeField] private Image _targetUIImage; // 색상을 변경할 UI 이미지
     [SerializeField] private Image _targetOutLineUIImage; // 색상을 변경할 UI 이미지
     [SerializeField] private Image _targetUIImage2; // 색상을 변경할 UI 이미지
     [SerializeField] private Image _targetOutLineUIImage2; // 색상을 변경할 UI 이미지
     [SerializeField] private Image _fuseImage; // Fuse 오브젝트의 이미지
-    
+
+    // 게이지 바는 UI_InGameProfileSlot(0번 슬롯)에서 런타임에 가져옴
+    private Image _gaugeBarFill;
+
     [Header("Image Sprites")]
     [SerializeField] private Sprite _pressCRed;
     [SerializeField] private Sprite _pressCYellow;
@@ -75,6 +78,24 @@ public class UI_Ultimate : MonoBehaviour
                 // 궁극기 이벤트 구독
                 _player.OnUltimateChanceActivated += OnUltimateActivated;
                 _player.OnUltimateChanceDeactivated += OnUltimateDeactivated;
+
+                // 궁극기 게이지 변경 이벤트 구독
+                PlayerStat playerStat = _player.GetComponent<PlayerStat>();
+                if (playerStat != null)
+                {
+                    playerStat.OnUltimateGaugeChanged += OnUltimateGaugeChanged;
+                }
+
+                // UI_InGameProfileSlot(0번 = 로컬 플레이어)에서 게이지 바 참조 가져오기
+                UI_InGameProfile inGameProfile = FindAnyObjectByType<UI_InGameProfile>();
+                if (inGameProfile != null && inGameProfile.LocalPlayerSlot != null)
+                {
+                    _gaugeBarFill = inGameProfile.LocalPlayerSlot.UltimateGaugeBarFill;
+                    if (_gaugeBarFill != null)
+                    {
+                        _gaugeBarFill.fillAmount = 0f;
+                    }
+                }
             }
             else
             {
@@ -101,6 +122,23 @@ public class UI_Ultimate : MonoBehaviour
     private void OnUltimateDeactivated()
     {
         DeactivateUltimateUI();
+    }
+
+    /// <summary>
+    /// 궁극기 게이지 변경 이벤트 핸들러
+    /// </summary>
+    private void OnUltimateGaugeChanged(float current, float max)
+    {
+        if (_gaugeBarFill != null)
+        {
+            _gaugeBarFill.fillAmount = max > 0f ? current / max : 0f;
+        }
+
+        // EventManager로도 전파 (다른 UI에서 참조 가능)
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.UltimateGaugeChanged(current, max);
+        }
     }
     
     /// <summary>
@@ -288,6 +326,12 @@ public class UI_Ultimate : MonoBehaviour
         {
             _player.OnUltimateChanceActivated -= OnUltimateActivated;
             _player.OnUltimateChanceDeactivated -= OnUltimateDeactivated;
+
+            PlayerStat playerStat = _player.GetComponent<PlayerStat>();
+            if (playerStat != null)
+            {
+                playerStat.OnUltimateGaugeChanged -= OnUltimateGaugeChanged;
+            }
         }
         
         // 코루틴 정리
