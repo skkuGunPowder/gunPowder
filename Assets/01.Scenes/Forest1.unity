@@ -41015,7 +41015,7 @@ Tilemap:
       - {fileID: 21300000, guid: 1ed132bee07d7e14aa2ce96bf45b0086, type: 3}
       - {fileID: 21300000, guid: 46a60ba57d9f48f45a6ad16c17de59bb, type: 3}
       - {fileID: 21300000, guid: 6576e3b8fe9fe28419c0343a63ef6133, type: 3}
-      m_AnimationSpeed: 10.000001
+      m_AnimationSpeed: 10
       m_AnimationTimeOffset: 0
       m_Flags: 0
   m_TileAssetArray:
@@ -51651,6 +51651,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7002655204383373226, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
+      propertyPath: PopupList.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7002655204383373226, guid: cf994b76db2bb554881bcc0f78e9cfc6, type: 3}
+      propertyPath: 'PopupList.Array.data[5]'
+      value: 
+      objectReference: {fileID: 869314668}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -72687,6 +72695,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5137534363134298632, guid: 2b79e85a690d92d41a2448fe5825999c, type: 3}
   m_PrefabInstance: {fileID: 869314666}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &869314668 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1895526354956625740, guid: 2b79e85a690d92d41a2448fe5825999c, type: 3}
+  m_PrefabInstance: {fileID: 869314666}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e3333ef81af88c4aaacea959d516b4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &894982767
 GameObject:
   m_ObjectHideFlags: 0

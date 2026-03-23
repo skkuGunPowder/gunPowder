@@ -27,6 +27,10 @@ public class UI_PopupTween : MonoBehaviour
     CanvasGroup canvasGroup;
     RectTransform rectTransform;
     public SlideDirection slideDirection = SlideDirection.FromBottom; // 기본값은 아래에서
+    
+    [Header("타임스케일 영향 안받기")]
+    [SerializeField] private bool useUnscaledTime = true;
+    
     void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
@@ -60,11 +64,11 @@ public class UI_PopupTween : MonoBehaviour
         {
         case PopupEffectType.Scale:
             transform.localScale = Vector3.zero;
-            transform.DOScale(Vector3.one, duration).SetEase(ease);
+            transform.DOScale(Vector3.one, duration).SetEase(ease).SetUpdate(useUnscaledTime);
             break;
         case PopupEffectType.Fade:
             canvasGroup.alpha = 0;
-            canvasGroup.DOFade(1, duration).SetEase(Ease.Linear);
+            canvasGroup.DOFade(1, duration).SetEase(Ease.Linear).SetUpdate(useUnscaledTime);
             break;
         case PopupEffectType.Slide:
             Vector2 startPos = Vector2.zero;
@@ -84,12 +88,12 @@ public class UI_PopupTween : MonoBehaviour
                     break;
             }
             rectTransform.anchoredPosition = startPos;
-            rectTransform.DOAnchorPos(Vector2.zero, duration).SetEase(Ease.OutCubic);
+            rectTransform.DOAnchorPos(Vector2.zero, duration).SetEase(Ease.OutCubic).SetUpdate(useUnscaledTime);
             break;
         case PopupEffectType.ScaleAndFade:
             transform.localScale = Vector3.zero;
             canvasGroup.alpha = 0;
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetUpdate(useUnscaledTime);
             seq.Append(transform.DOScale(Vector3.one, duration).SetEase(ease));
             seq.Join(canvasGroup.DOFade(1, duration * 0.8f));
             break;

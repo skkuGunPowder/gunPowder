@@ -6,6 +6,7 @@ public class UI_ItemStorage : UI_Popup
 {
     public TextMeshProUGUI ItemNameText;
     public UI_EquipmentSlot EquipmentSlot;
+    public UI_EquipmentSlot SubEquipmentSlot;
     public UI_Category UI_Category;
 
     [SerializeField] private List<UI_ItemSlot> _itemSlotList;
@@ -64,6 +65,13 @@ public class UI_ItemStorage : UI_Popup
         // 장착 슬롯 업데이트
         InventoryItem EquippedItem = _itemStorage.GetEquppedItem(currentCategory);
         EquipmentSlot.Refresh(EquippedItem);
+        // SubEquipmentSlot: Bomb 카테고리일 때만 활성화 및 갱신
+        SubEquipmentSlot.gameObject.SetActive(currentCategory == EItemType.Bomb);
+        if (currentCategory == EItemType.Bomb)
+        { 
+            SubEquipmentSlot.Refresh(_itemStorage.GetEquippedSubBomb());   
+        }
+        
         if (_selectedSlot == null || !_selectedSlot.Item.IsEquipped)
         {
             EquipmentSlot.Deselect();

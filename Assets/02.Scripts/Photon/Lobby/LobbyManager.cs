@@ -39,7 +39,7 @@ public class LobbyManager : PhotonSingleton<LobbyManager>
             {ERoomProperties.RoomName.ToString(), roomName},
             {ERoomProperties.MapSelected.ToString(), (int)InitialMap},
             {ERoomProperties.PlayTime.ToString(), playTime},
-            {ERoomProperties.Life.ToString(), life},
+            {ERoomProperties.Life.ToString(), 1},
             {ERoomProperties.Gunpowder.ToString(), gunpowder},
             {ERoomProperties.IsLocked.ToString(),isLocked },
             {ERoomProperties.Password.ToString(), password},

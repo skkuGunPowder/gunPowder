@@ -175,6 +175,13 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGameStart?.Invoke();
     }
+
+    public event Action OnBombSelectPhaseStart;
+
+    public void BombSelectPhaseStart()
+    {
+        OnBombSelectPhaseStart?.Invoke();
+    }
     
     public event Action OnGameOver;
     

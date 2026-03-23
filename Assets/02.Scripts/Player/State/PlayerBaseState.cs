@@ -436,8 +436,10 @@ public class PlayerBaseState : MonoState
             return;
         }
 
-        // 특수 폭탄 프리팹 이름 가져오기
-        string prefabName = _owner.EquipedItemDict[EItemType.Bomb].Prefab.name;
+        // SubBomb 장착 시 SubBomb 사용, 없으면 메인 폭탄으로 대체
+        string prefabName = _owner.EquipedItemDict.TryGetValue(EItemType.SubBomb, out ItemDTO subBomb) && subBomb?.Prefab != null
+            ? subBomb.Prefab.name
+            : _owner.EquipedItemDict[EItemType.Bomb].Prefab.name;
         
         // 박격포는 지상에서만 사용 가능
         if (IsMortarBomb(prefabName) && !CanUseMortarInCurrentState())
@@ -548,14 +550,19 @@ public class PlayerBaseState : MonoState
     /// </summary>
     protected virtual string GetNormalBombPrefabName(BombActionType action, EBombSpawnPoint spawnPoint)
     {
-        string prefabName = BASIC_BOMB_PREFAB;
-        
+        // 머리 위로 던지기: 헤드봄
         if(spawnPoint == EBombSpawnPoint.Up && action == BombActionType.ThrowStraight)
         {
-            prefabName = _owner.HeadBombPrefab.name;
             _owner.RPC_HeadSpriteOnOff();
+            return _owner.HeadBombPrefab.name;
         }
-        
+
+        // 장착된 메인 폭탄 반환 (없으면 BasicBomb 폴백)
+        if (_owner.EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO bomb) && bomb?.Prefab != null)
+            return bomb.Prefab.name;
+
+        string prefabName = BASIC_BOMB_PREFAB;
+
         return prefabName;
     }
 

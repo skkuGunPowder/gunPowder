@@ -20,7 +20,14 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     protected Dictionary<EModeState,GameModeStateBase> _stateDictionary = new Dictionary<EModeState, GameModeStateBase>();
     protected GameModeStateBase _currentState;
     protected EModeState _nextState; // 모든 유저가 준비가 되었을 때 이동
-    
+
+    public bool IsFirstSpawn { get; private set; } = true; // 첫 번째 스폰 여부
+
+    public void SetFirstSpawnComplete()
+    {
+        IsFirstSpawn = false;
+    }
+
     public GameObject MyPlayer;
     
     protected PlayerSpawner _playerSpawner;

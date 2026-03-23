@@ -5,5 +5,6 @@ public enum EModeState
     Spawn,
     Round,
     Cartirdge,
-    
+    BombSelect,
+
 }

@@ -10,6 +10,7 @@ public class GameStatePlaying : GameModeStateBase
     // 게임이 진행되는 동안 벌어지는 일들을 정리
     // lastpalyer체크, 현재 팀에 남아있는 인원 체크
     private bool _lastPlayer = false; 
+    private bool _gameSet = false; // 동시 죽음 없애기 위함
     private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>(); // 살아 있는 팀원 수 : 팀 / 팀원 수
     private int _count = 0; // 모든 플레이어의 정보가 모였는지 확인
     private int _MaxCount = 0;
@@ -39,7 +40,8 @@ public class GameStatePlaying : GameModeStateBase
     public override void Enter()
     {
         Init();
-        
+        GameManager.Instance.GameStateChange(EGameState.Waiting); // 카운트다운 중 Waiting 유지
+        InputHandler.BlockInput = true;
         Debug.LogWarning("Enter State : GameStatePlaying");
         EventManager.Instance.OnTimeCheck += OnPlayerDead;
         EventManager.Instance.OnPlayerLeft += OnPlayerLeft;
@@ -95,6 +97,12 @@ public class GameStatePlaying : GameModeStateBase
         
         EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
         _teamCount[team]--;
+
+
+        if (_gameSet) // 게임이 끝났다면 플레이어를 죽음 상태로 보내지 않음
+        {
+            return;
+        }
         
         if (_lastPlayer)
         {
@@ -113,8 +121,11 @@ public class GameStatePlaying : GameModeStateBase
             {
                 end = true;
             }
-        
+            
+            _gameSet = true;
+            
             // 플레이어 상태 변경
+            GameManager.Instance.GameStateChange(EGameState.Result);
             _photonView.RPC(nameof(RPC_RequestPlayerDie), player, end);
             return;
         }
@@ -337,15 +348,14 @@ public class GameStatePlaying : GameModeStateBase
 
     public override void Exit()
     {
-        // lastplayer초기화
+        GameManager.Instance.GameStateChange(EGameState.Waiting); // Waiting 상태로 복귀
         _lastPlayer = false;
-        // 팀별 살아있는 인원 초기화
+        _gameSet = false;
         _teamCount.Clear();
         _count = 0;
         Debug.Log("Exit State : GameStatePlaying");
         EventManager.Instance.OnLastDieComplete -= GameResultCheck;
         EventManager.Instance.OnPlayerLeft -= OnPlayerLeft;
         EventManager.Instance.OnTimeCheck -= OnPlayerDead;
-
     }
 }
