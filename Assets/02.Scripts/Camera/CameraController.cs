@@ -142,7 +142,6 @@ public class CameraController : MonoBehaviour
 
     private void LastAttack(int actorNumber)
     {
-        Debug.Log($"player die ZOOOOOOOOOOOOOOM IN {actorNumber}");
         if (_isLastDiePlaying)
         {
             return;

@@ -8,7 +8,7 @@ public class TeamScore
     public EInGameTeam team;
     public int score;
     
-    public TeamScore(EInGameTeam team, int score)
+    public TeamScore(EInGameTeam team)
     {
         this.team = team;
         this.score = 0;
@@ -49,7 +49,7 @@ public class GameStateRound : GameModeStateBase
         foreach (PhotonPlayer player in players)
         {
             EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-            _roundTeamCount.TryAdd(team, new TeamScore(team, 0));
+            _roundTeamCount.TryAdd(team, new TeamScore(team));
         }
         
     }
