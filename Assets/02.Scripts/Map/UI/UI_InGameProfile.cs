@@ -6,7 +6,9 @@ using UnityEngine.UI;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UI_InGameProfile : MonoBehaviour
 {
-    public Image MyBomb;
+    [SerializeField] private Image _mainBomb;
+    [SerializeField] private Image _subBomb;
+    
     [SerializeField]
     private List<UI_InGameProfileSlot> UI_InGameProfileSlotList = new List<UI_InGameProfileSlot>();
     private List<int> _playerActorNumberList = new List<int>();
@@ -19,15 +21,6 @@ public class UI_InGameProfile : MonoBehaviour
             ? UI_InGameProfileSlotList[0]
             : null;
 
-    private void Awake()
-    {
-        ItemDTO item = ItemDatabase.Instance.GetItem(PhotonNetwork.LocalPlayer.CustomProperties[EItemType.Bomb.ToString()].ToString());
-        Sprite bomb = item.Image;
-
-        MyBomb.sprite = bomb;
- 
-    }
-
     private void OnEnable()
     {
         SubscribeEvents();
@@ -35,6 +28,7 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void Init()
     {
+        _playerActorNumberList.Clear();
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
         PhotonPlayer[] reorderedPlayers = new PhotonPlayer[players.Length];
         
@@ -65,11 +59,23 @@ public class UI_InGameProfile : MonoBehaviour
             if (i < reorderedPlayers.Length)
             {
                 ItemDTO item = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
+                ItemDTO sub = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.SubBomb.ToString()]
+                        .ToString());
+
                 Sprite bomb = item.Image;
+                Sprite subImage = sub.Image;
+                
+                if (reorderedPlayers[i].ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    _mainBomb.sprite = bomb;
+                    _subBomb.sprite = subImage;
+                }
+                
                 EInGameTeam team = (EInGameTeam)reorderedPlayers[i].CustomProperties[EProperties.Team.ToString()];
                 
                 UI_InGameProfileSlotList[i].gameObject.SetActive(true);
-                UI_InGameProfileSlotList[i].Init(bomb, team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, RoomStatManager.Instance.PlayerGunpowder);
+                // 후에 수정
+                UI_InGameProfileSlotList[i].Init(bomb, subImage,team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, RoomStatManager.Instance.PlayerGunpowder);
                 _playerActorNumberList.Add(reorderedPlayers[i].ActorNumber);
 
                 // 궁극기 게이지 바: 로컬 플레이어(index 0)만 활성화
@@ -83,8 +89,6 @@ public class UI_InGameProfile : MonoBehaviour
                 UI_InGameProfileSlotList[i].gameObject.SetActive(false);    
             }
         }
-        
-        EventManager.Instance.OnProfileInit -= Init;
     }
     
     private void SetTopPlayer(int playerNumber)
@@ -148,8 +152,29 @@ public class UI_InGameProfile : MonoBehaviour
                 break;
             }
         }
+    }
+
+    private void PlayerBombChange(PhotonPlayer changedPlayer)
+    {
         
+        ItemDTO item = ItemDatabase.Instance.GetItem(changedPlayer.CustomProperties[EItemType.Bomb.ToString()].ToString());
+        ItemDTO sub = ItemDatabase.Instance.GetItem(changedPlayer.CustomProperties[EItemType.SubBomb.ToString()]
+            .ToString());
         
+        if (changedPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+        {
+            _mainBomb.sprite = item.Image;
+            _subBomb.sprite = sub.Image;
+        }
+        
+        for (int i = 0; i < _playerActorNumberList.Count; i++)
+        {
+            if (_playerActorNumberList[i] == changedPlayer.ActorNumber)
+            {
+                UI_InGameProfileSlotList[i].RefreshBomb(item.Image, sub.Image);
+                break;
+            }
+        }
     }
     private void OnDisable()
     {
@@ -166,6 +191,7 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
             EventManager.Instance.OnProfileInit += Init;   
             EventManager.Instance.OnPlayerLeft += PlayerLeftRefresh;
+            EventManager.Instance.OnReadyChanged += PlayerBombChange;
             Debug.Log("SubscribeEvents");       
         }
     }
@@ -179,6 +205,8 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnTopPlayerChanged -= SetTopPlayer;
             EventManager.Instance.OnPlayEmotion -= PlayEmotion;
             EventManager.Instance.OnPlayerLeft -= PlayerLeftRefresh;
+            EventManager.Instance.OnProfileInit -= Init;
+            EventManager.Instance.OnReadyChanged -= PlayerBombChange;
             Debug.Log("UnsubscribeEvents");
         }
     }

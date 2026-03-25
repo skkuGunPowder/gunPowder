@@ -1,4 +1,5 @@
 using System;
+using Com.LuisPedroFonseca.ProCamera2D;
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class GameOverProduction : MonoBehaviour
 {
     public Animator MyAnimator;
     private Camera _camera;
+    private ProCamera2D _proCamera;
     public bool Test;
     [Header("위치 액션")] 
     public RectTransform GameOverProductionPanel;
@@ -60,11 +62,13 @@ public class GameOverProduction : MonoBehaviour
     private void Awake()
     {
         _camera = Camera.main;
+        _proCamera = _camera.GetComponent<ProCamera2D>();
     }
 
     private void Start()
     {
-        EventManager.Instance.OnGameOver += Play;
+        EventManager.Instance.OnGameOver += GameOverPlay;
+        EventManager.Instance.OnLastDieComplete += GameSetPlay;
     }
     // private void OnEnable()
     // {
@@ -78,13 +82,14 @@ public class GameOverProduction : MonoBehaviour
     //     Play();
     // }
 
-    public void Play()
+    public void GameOverPlay()
     {
+        EventManager.Instance.OnLastDieComplete -= GameSetPlay;
         SoundManager.Instance.PlayLocalSound(nameof(GameEndBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
         
         GameOverProductionPanel.gameObject.SetActive(true);
         
-        EventManager.Instance.OnGameOver -= Play;
+        EventManager.Instance.OnGameOver -= GameOverPlay;
         
         Sequence sequence = DOTween.Sequence();
         sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
@@ -96,7 +101,6 @@ public class GameOverProduction : MonoBehaviour
         sequence.AppendCallback(CameraButtonDown);
         sequence.AppendInterval(BlackOutTime);
         sequence.AppendCallback(CameraOff);
-        sequence.AppendCallback(GameManager.Instance.GameResultCheck);
         sequence.AppendInterval(NextSceneTime);
         sequence.OnComplete(() =>
         {
@@ -114,7 +118,13 @@ public class GameOverProduction : MonoBehaviour
 
             PhotonNetwork.LoadLevel(ESceneList.ResultScene.ToString());
         });
+    }
 
+    private void GameSetPlay()
+    {
+        Sequence sequence = DOTween.Sequence();
+        sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
+        sequence.JoinCallback(()=> _proCamera.Zoom(+4,CameraZoomOutTime));
     }
 
     private void TimerOff()

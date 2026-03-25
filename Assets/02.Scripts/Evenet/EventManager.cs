@@ -175,6 +175,13 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGameStart?.Invoke();
     }
+
+    public event Action OnBombSelectPhaseStart;
+
+    public void BombSelectPhaseStart()
+    {
+        OnBombSelectPhaseStart?.Invoke();
+    }
     
     public event Action OnGameOver;
     
@@ -203,7 +210,26 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGameRespawn?.Invoke();
     }
+    
+    public event Action<PhotonPlayer> OnTimeCheck;
+    public void TimeCheck(PhotonPlayer player)
+    {
+        OnTimeCheck?.Invoke(player);
+    }
+    
+    public event Action OnLastDieComplete;
 
+    public void LastDieComplete()
+    {
+        OnLastDieComplete?.Invoke();   
+    }
+    
+    public event Action OnGameStateChangeCheck;
+    public void GameStateChangeCheck()
+    {
+        OnGameStateChangeCheck?.Invoke();
+    }
+    
     public event Action<int, int> OnGPDataChanged;    // GP 변경 시 (playerNumber, gp)
     public void PlayerGPChange(int playerNumber, int gp)
     {

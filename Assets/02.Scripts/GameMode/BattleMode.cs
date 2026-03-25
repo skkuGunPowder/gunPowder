@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
-using PhotonPlayer = Photon.Realtime.Player;
+using UnityEngine.SceneManagement;
+
 public class BattleMode : GameModeBase
 {
     /// <summary>
@@ -10,38 +10,29 @@ public class BattleMode : GameModeBase
     
     protected override void Start()
     {
-        if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)
-        {
-            int[] playerList = PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] as int[];
-            SpawnPlayer(playerList);
-        }
-        else
-        {
-            PhotonPlayer[] players = PhotonNetwork.PlayerList;
-            
-            int[] playerList = new int[players.Length];
-            
-            for (int i = 0; i < players.Length; i++)
-            {
-                playerList[i] = players[i].ActorNumber;
-            }
-            
-            SpawnPlayer(playerList);
-            
-        }
+        base.Start();
+        SetState();
     }
-    
-    private void SpawnPlayer(int[] playerList)
+
+    private void SetState()
     {
-        for (int i = 0; i < playerList.Length; i++)
+        GameModeStateBase[] stateBases = this.GetComponents<GameModeStateBase>();
+
+        foreach(GameModeStateBase mode in stateBases)
         {
-            if (playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
-            {
-                continue;
-            }
-            
-            _playerSpawner.GeneratePlayers(i);
+            mode.Initialize(this);
+            _stateDictionary.TryAdd(mode.State, mode);
         }
     }
     
+    public override void GameStart()
+    {
+        SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString()); // 연출씬 제거
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            RequestStateChange(EModeState.Spawn);   
+        }
+    }
+
 }

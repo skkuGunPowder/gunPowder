@@ -11,8 +11,7 @@ public class UI_VollyballProduction : MonoBehaviour
     // 점수 득점 시 켜질 백그라운드 필요
     [SerializeField] private Image _backgroundImage;
     [SerializeField] private RectTransform _textPivot;
-    [SerializeField] private UI_TextSlot _textSlot;
-    [SerializeField] private UI_TextSlot _textSlot2;
+    [SerializeField] private List<UI_TextSlot> _textSlotList;
     
     [Header("연출에 필요한 정보")]
     [SerializeField] private float _scaleTime = 0.5f;
@@ -33,37 +32,28 @@ public class UI_VollyballProduction : MonoBehaviour
     private void Start()
     {
         Init();
-        _backgroundImage.gameObject.SetActive(false);
     }
     private void Init()
     {
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
 
-        int index = 0;
-        
-        //현재 존재하는 팀만 설정하도록
-        foreach (Photon.Realtime.Player player in players)
+        for (int i = 0; i < _textSlotList.Count; i++)
         {
-            EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-
-            if (_teamScoreDict.ContainsKey(team))
+            if (players.Length > i)
             {
-                return;
-            }
-
-            if (index == 0)
-            {
-                _teamScoreDict.Add(team,_textSlot);
+                EInGameTeam team = (EInGameTeam)players[i].CustomProperties[EProperties.Team.ToString()];   
+                _teamScoreDict.Add(team, _textSlotList[i]);
+                _teamScoreDict[team].BackgroundRefresh(ColorSet(team));
                 _teamScoreDict[team].TextRefresh(0);
-                index++; 
             }
             else
-            { 
-                _teamScoreDict.Add(team,_textSlot2);
-                _teamScoreDict[team].TextRefresh(0);
+            {
+                _textSlotList[i].gameObject.SetActive(false);
             }
-            
         }
+        
+        
+        _backgroundImage.gameObject.SetActive(false);
     }
     
     private Color32 ColorSet(EInGameTeam team)
@@ -85,7 +75,6 @@ public class UI_VollyballProduction : MonoBehaviour
         _backgroundImage.gameObject.SetActive(true);
         
         Sequence sequence = DOTween.Sequence();
-        sequence.Append(_textPivot.DOScale(1, _scaleTime).SetEase(_ease));
         sequence.AppendInterval(_intervalTime);
         sequence.Append(rectTransform.DOShakeAnchorPos(_shakeDuration, _shakeStrength, _vibrato,90f, false,true,ShakeRandomnessMode.Harmonic));
         sequence.AppendCallback(()=>
@@ -93,11 +82,9 @@ public class UI_VollyballProduction : MonoBehaviour
             _teamScoreDict[team].TextRefresh(score);
         });
         sequence.AppendInterval(_fadeTime);
-        sequence.Append(_textPivot.DOScale(0, _scaleTime).SetEase(_ease));
         sequence.OnComplete(()=>
         {
             _backgroundImage.gameObject.SetActive(false);
-            EventManager.Instance.GameRespawn();
         });
     }
 

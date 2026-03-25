@@ -14,6 +14,7 @@ public class CameraController : MonoBehaviour
     private Player _target;
     
     private bool _isObserving = false;
+    private bool _isLastDiePlaying = false;
     private List<Player> _currentTargetList = new List<Player>();
     private int _currentTargetIndex = 0;
     
@@ -21,6 +22,8 @@ public class CameraController : MonoBehaviour
     [Tooltip("시간 고치면 플레이어 라스트 다이 시간도 고쳐야함")]
     public float TargetZoomDuration = 1.5f;
     public float TargetZoomAmount = 1.5f;
+    
+    private float _InitialZoom;
     
     public event Action<bool> OnUIOnOff;                 // UI On/Off
     public event Action<string> OnNicknameChanged; // 타겟 이름 전달
@@ -32,6 +35,7 @@ public class CameraController : MonoBehaviour
     
     private void Start()
     {
+        
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting)
         {
             return;
@@ -39,6 +43,7 @@ public class CameraController : MonoBehaviour
         EventManager.Instance.OnTargetChanged += SetObserveTarget;
         EventManager.Instance.OnLastAttack += LastAttack;
         EventManager.Instance.OnPlayObserve += PlayObservingMode;
+        EventManager.Instance.OnLastDieComplete += ZoomOut;
     }
 
     private void Init()
@@ -132,39 +137,29 @@ public class CameraController : MonoBehaviour
         
         _isObserving = true;
         OnUIOnOff?.Invoke(true);
-        
-        // foreach (var player in _currentTargetList)
-        // {
-        //     if (player.gameObject.activeSelf == false)
-        //     {
-        //         // activefalse가 자기 자신이면 오저버모드
-        //         if (player.GetComponent<PhotonView>().Owner.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
-        //         {
-        //             if (_isObserving)
-        //             {
-        //                 continue;
-        //             }
-        //         }
-        //     }
-        // }
-
         _currentTargetIndex = 0;
     }
 
     private void LastAttack(int actorNumber)
     {
+        if (_isLastDiePlaying)
+        {
+            return;
+        }
+
         OnUIOnOff?.Invoke(false);
-        
+
         foreach (Player p in _currentTargetList)
-        {   
+        {
             if (p == null)
             {
                 continue;
             }
-            
+
             PhotonPlayer photonPlayer = p.GetComponent<PhotonView>().Owner;
             if (photonPlayer.ActorNumber == actorNumber)
             {
+                _isLastDiePlaying = true;
                 _proCamera.RemoveAllCameraTargets();
                 _proCamera.AddCameraTarget(p.transform);
                 _proCamera.Zoom(-TargetZoomAmount, TargetZoomDuration);
@@ -173,6 +168,12 @@ public class CameraController : MonoBehaviour
                 return;
             }
         }
+    }
+
+    private void ZoomOut()
+    {
+        _isLastDiePlaying = false;
+        _proCamera.Zoom(+TargetZoomAmount, TargetZoomDuration);
     }
     
     private void Update()
@@ -265,5 +266,6 @@ public class CameraController : MonoBehaviour
         EventManager.Instance.OnLastAttack -= LastAttack;
         EventManager.Instance.OnTargetChanged -= SetObserveTarget;
         EventManager.Instance.OnPlayObserve -= PlayObservingMode;
+        EventManager.Instance.OnLastDieComplete -= ZoomOut;
     }
 }

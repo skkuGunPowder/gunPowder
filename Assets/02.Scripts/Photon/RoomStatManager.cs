@@ -15,7 +15,7 @@ public class RoomStatManager : Singleton<RoomStatManager>
     public int PlayerDecreaseTime;
     public EInGameTeam PlayerTeam;
     public bool CanUlti = true;
-    public const int PlayerHP = 150; // HP 고정값
+    public const int PlayerHP = 1; // HP 고정값
     
     [SerializeField] private bool _isManual = false;
     [SerializeField] private bool _infiniteLife = false;
@@ -36,7 +36,6 @@ public class RoomStatManager : Singleton<RoomStatManager>
         
         PlayerLife = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.Life.ToString()]);
         PlayerGunpowder = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.Gunpowder.ToString()]); 
-        PlayerDecreaseTime = (int)(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.DeclinePowder.ToString()]);
         
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.Team.ToString()) == false)
         {

@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UI_ItemSlot : MonoBehaviour, ISelectable
+public class UI_ItemSlot : MonoBehaviour, ISelectable, IPointerClickHandler
 {
     public InventoryItem Item;
-    
+
     public Image ItemIcon;
     public Image SelectedIcon;
 
@@ -50,10 +51,9 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable
         {
             throw new System.Exception("아이템이 슬롯에 할당되지 않았습니다.");
         }
-
+        
         ItemStorage.Instance.SelectItem(Item);
 
-        // 더블클릭 시 장착
         _clickCount++;
         if (_clickCount == 1)
         {
@@ -69,6 +69,35 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable
             _clickCount = 1;
             _clickTimer = Time.time;
         }
+    }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (Item == null) 
+        {
+            return;
+            
+        }
+
+        if (Item.Item.ItemType != EItemType.Bomb)
+        {
+            return;
+        }
+
+        if (eventData.button != PointerEventData.InputButton.Right)
+        {
+            return;
+        }
+
+        // 우클릭: SubBomb 착용/해제 토글
+        InventoryItem currentSubBomb = ItemStorage.Instance.GetEquippedSubBomb();
+        if (currentSubBomb != null && currentSubBomb.ID == Item.ID)
+        {
+            ItemStorage.Instance.UnEquipSubBomb();   
+        }
+        else
+        {
+            ItemStorage.Instance.EquipAsSubBomb(Item);   
+        }
     }
 }

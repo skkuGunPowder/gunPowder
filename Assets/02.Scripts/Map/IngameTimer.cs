@@ -15,6 +15,7 @@ public class IngameTimer : MonoBehaviour
     public float AirDropTime = 30f;
     private float _airDropTimer;
     [SerializeField] private GameObject _airDropJetPrefab;
+    
     private void Start()
     {
         _initTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
@@ -22,7 +23,7 @@ public class IngameTimer : MonoBehaviour
         _previousTime = _initTime;
         UI_Timer.TextRefresh(ConvertTime(_initTime));
         _isGameOver = false;
-        GameManager.Instance.OnTimeCheck += TimeCheck;
+        EventManager.Instance.OnTimeCheck += TimeCheck;
     }
     
     private void Update()
@@ -94,6 +95,11 @@ public class IngameTimer : MonoBehaviour
 
     private void TimeCheck(PhotonPlayer targetPlayer)
     {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+     
         int playtime = (int)Mathf.Abs(_timer - _initTime);
         Hashtable hash = new Hashtable() 
         {
@@ -105,6 +111,6 @@ public class IngameTimer : MonoBehaviour
 
     private void OnDisable()
     {
-        GameManager.Instance.OnTimeCheck -= TimeCheck;
+        EventManager.Instance.OnTimeCheck -= TimeCheck;
     }
 }

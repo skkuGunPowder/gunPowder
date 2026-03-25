@@ -306,6 +306,12 @@ public class Player : MonoBehaviourPun, IDamagable
             }
         }
 
+        // SubBomb은 EItemType.None 이후에 위치하므로 별도 처리
+        if (photonPlayer.CustomProperties.TryGetValue(EItemType.SubBomb.ToString(), out object subBombID) && subBombID != null)
+            EquipedItemDict[EItemType.SubBomb] = ItemDatabase.Instance.GetItem((string)subBombID);
+        else
+            EquipedItemDict.Remove(EItemType.SubBomb);
+
         // [스킨] 단순 존재 여부 기반 적용/해제: 장착되었으면 적용, 없으면 해제
         ItemDTO headItem = null;
         ItemDTO faceItem = null;
@@ -324,8 +330,15 @@ public class Player : MonoBehaviourPun, IDamagable
 
         SpriteFlipx();
 
-        // 특수폭탄 정보 받아오기                
-        SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
+        // 서브폭탄이 있으면 서브폭탄 스탯, 없으면 메인폭탄 스탯으로 대체
+        if (EquipedItemDict.TryGetValue(EItemType.SubBomb, out ItemDTO subBomb) && subBomb != null)
+            SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(subBomb.ID);
+        else
+            SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
+
+        // 메인 폭탄 쿨타임 스탯 업데이트 (Z키 쿨타임)
+        if (EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO mainBomb) && mainBomb != null)
+            BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(mainBomb.ID);
 
         // 궁극기 설정
         // TODO: [궁극기 슬롯 전환] Z슬롯 폭탄 교체 구현 후, EquipedItemDict[EItemType.Bomb].ID 대신 Z슬롯 아이템 ID 기반으로 변경
@@ -640,12 +653,12 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             return;
         }
-
+        
+        
+        
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
         {
-            {EProperties.IsDead.ToString(), true},
-            {EProperties.Kill.ToString(), PlayerStat.TotalKillCount},
-            {EProperties.Damage.ToString(), PlayerStat.TotalDamage}
+            {EProperties.DeadCheck.ToString(), true},
         });
 
     }
@@ -875,6 +888,11 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void TakeDamage(int damage, int maxDamage, int StealPercent, Vector3 attackerBomb, int attackerViewId, int attackerActorNumber, float maxStunTime = 0f, bool isFallingOut = false, bool isNormalAttack = false)
     {
+        if (_playerStat.CurrentPlayerLife <= 0)
+        {
+            return;
+        }
+        
         if (_damageController != null)
         {
             _damageController.TakeDamage(damage, maxDamage, StealPercent, attackerBomb, attackerViewId, attackerActorNumber, maxStunTime, isFallingOut, isNormalAttack);
@@ -1224,7 +1242,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
         _lastMaxStunTime = maxStunTime;
-        Debug.Log($"[피격시스템] RegisterHitDamage: damage={damage}, maxDamage={maxDamage}, damageRatio={_lastDamageRatio:F2}, maxStunTime={maxStunTime:F2}s");
+        // Debug.Log($"[피격시스템] RegisterHitDamage: damage={damage}, maxDamage={maxDamage}, damageRatio={_lastDamageRatio:F2}, maxStunTime={maxStunTime:F2}s");
         OnHit?.Invoke();
     }
 
@@ -1303,7 +1321,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _lastExplosionPosition = position;
         _lastExplosionRadius = radius;
         _hasLastExplosionInfo = true;
-        Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
+        // Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
     }
 
     /// <summary>
@@ -1313,7 +1331,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         if (!_hasLastExplosionInfo || _rigidbody2D == null)
         {
-            Debug.Log($"[피격시스템] ApplyLastExplosionForce: 폭발정보 없음 (hasInfo={_hasLastExplosionInfo})");
+            // Debug.Log($"[피격시스템] ApplyLastExplosionForce: 폭발정보 없음 (hasInfo={_hasLastExplosionInfo})");
             return;
         }
 
@@ -1326,7 +1344,7 @@ public class Player : MonoBehaviourPun, IDamagable
             direction.Normalize();
             direction.y += 0.3f;
             _rigidbody2D.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
-            Debug.Log($"[피격시스템] 히트스탑 후 폭발넉백 적용: forceMag={forceMagnitude:F1}, dir={direction}, distance={distance:F1}");
+            // Debug.Log($"[피격시스템] 히트스탑 후 폭발넉백 적용: forceMag={forceMagnitude:F1}, dir={direction}, distance={distance:F1}");
         }
 
         ClearLastExplosionInfo();

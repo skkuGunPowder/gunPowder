@@ -14,7 +14,6 @@ public class UI_RoomMakerPopup : UI_Popup
     public UI_RoomSetupButton PlayTime;
     public UI_RoomSetupButton Life;
     public UI_RoomSetupButton Gunpowder;
-    public UI_RoomSetupButton Decline;
 
     private void Start()
     {
@@ -26,7 +25,6 @@ public class UI_RoomMakerPopup : UI_Popup
         PlayTime.Init();
         Life.Init();
         Gunpowder.Init();
-        Decline.Init();
     }
 
     public void OnclickCreateRoom()
@@ -51,7 +49,7 @@ public class UI_RoomMakerPopup : UI_Popup
         }
         
         LobbyManager.Instance.MakeRoom(roomName, MaxPlayerCount, PlayTime.CurrentValue(), Life.CurrentValue(),
-            Gunpowder.CurrentValue(), Decline.CurrentValue(), IsLocked.isOn, RoomPassword.text);
+            Gunpowder.CurrentValue(), IsLocked.isOn, RoomPassword.text);
         
         Close();
     }

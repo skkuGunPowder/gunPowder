@@ -21,7 +21,7 @@ public class PlayerSpawner : MonoBehaviour
     /// </summary>
     
     // 번호에 따른 소환
-    public void GeneratePlayers(int count)
+    public GameObject GeneratePlayers(int count)
     {
         GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, SpawnPoints[count].position, Quaternion.identity, 0);
         Player player = playerInstance.GetComponent<Player>();
@@ -32,6 +32,8 @@ public class PlayerSpawner : MonoBehaviour
             proCamera.SetTarget(player);
             UltimateManager.Instance.SetPlayer(player);
         }
+        
+        return playerInstance;
     }
 
     // 순위에 따른 소환

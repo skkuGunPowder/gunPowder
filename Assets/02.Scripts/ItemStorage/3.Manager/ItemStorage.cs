@@ -317,6 +317,31 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         this.UnEquipItem(item);
     }
 
+    // SubBomb 슬롯에 폭탄 아이템 장착 (IsEquipped 플래그 변경 없이 슬롯만 지정)
+    public void EquipAsSubBomb(InventoryItem bombItem)
+    {
+        _equippedItemDict[EItemType.SubBomb] = bombItem;
+        _repo.SaveInventory(_equippedItemDict);
+        SetPlayerCustomProperties();
+        OnDataChanged?.Invoke(EItemType.Bomb);
+    }
+
+    // SubBomb 슬롯 해제
+    public void UnEquipSubBomb()
+    {
+        _equippedItemDict[EItemType.SubBomb] = null;
+        _repo.SaveInventory(_equippedItemDict);
+        SetPlayerCustomProperties();
+        OnDataChanged?.Invoke(EItemType.Bomb);
+    }
+
+    // 현재 SubBomb 슬롯 아이템 반환
+    public InventoryItem GetEquippedSubBomb()
+    {
+        _equippedItemDict.TryGetValue(EItemType.SubBomb, out InventoryItem item);
+        return item;
+    }
+
     public void SetPlayerCustomProperties()
     {
         Hashtable equipedItems = new Hashtable();

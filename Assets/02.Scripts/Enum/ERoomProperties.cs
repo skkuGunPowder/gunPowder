@@ -12,5 +12,8 @@ public enum ERoomProperties
     ChatChannelGroup,
     ChatChannelId,
     ChatChannelNumber,
+    StateChange,
+    StateChangeId,
+    
     Count
 }

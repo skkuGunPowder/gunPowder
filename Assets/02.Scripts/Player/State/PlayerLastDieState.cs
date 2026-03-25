@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using Photon.Pun;
 
 public class PlayerLastDieState : PlayerBaseState
 {
@@ -16,21 +17,11 @@ public class PlayerLastDieState : PlayerBaseState
         EventManager.Instance.OnGameSet += LastDiePlay;
         SetImmuneState();
         EventManager.Instance.LastAttack(_owner.PhotonView.OwnerActorNr);
-
-        if (_owner.photonView.IsMine)
-        {
-            Debug.Log("LastDie Start");
-        }
-
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        if (EventManager.Instance != null)
-        {
-            EventManager.Instance.OnGameSet -= LastDiePlay;
-        }
     }
     
     public override void MineUpdate()
@@ -50,8 +41,10 @@ public class PlayerLastDieState : PlayerBaseState
     private void ExecuteDeath()
     {
         ExecuteDeathEffects();
-        GameManager.Instance.RequestGameOver();
+        // GameManager.Instance.RequestGameOver();
+        EventManager.Instance.LastDieComplete();
         SyncStateChange<PlayerObserveState>();
+        
     }
     private void SetImmuneState()
     {

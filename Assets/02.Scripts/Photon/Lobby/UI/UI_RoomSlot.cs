@@ -18,7 +18,7 @@ public class UI_RoomSlot : MonoBehaviour
     
     [Header("하단 정보")]
     public TextMeshProUGUI GunpowderAmount;
-    public TextMeshProUGUI DeclineAmount;
+    // public TextMeshProUGUI DeclineAmount;
     public TextMeshProUGUI LifeAmount;
     public TextMeshProUGUI PlayTime;
     
@@ -43,7 +43,6 @@ public class UI_RoomSlot : MonoBehaviour
         // 커스텀 프로퍼티가 필요한 요소
         IsRocked(ERoomProperties.IsLocked);
         GunpowderAmount.text = GetRoomProperties(ERoomProperties.Gunpowder);
-        DeclineAmount.text = GetRoomProperties(ERoomProperties.DeclinePowder);
         LifeAmount.text = GetRoomProperties(ERoomProperties.Life);
         PlayTime.text = GetRoomProperties(ERoomProperties.PlayTime);
         

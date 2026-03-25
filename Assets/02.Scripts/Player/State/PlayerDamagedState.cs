@@ -152,7 +152,7 @@ public class PlayerDamagedState : PlayerBaseState
         _isImmuneActive = true;
         _immuneTime = _actualDamagedTime * IMMUNE_TIME_RATIO;
 
-        Debug.Log($"[피격시스템] InitializeDamaged: 피격시간={_actualDamagedTime:F2}s (MaxStunTime={_owner.LastMaxStunTime:F2}s × damageRatio={_owner.LastDamageRatio:F2}), 무적시간={_immuneTime:F2}s (25%)");
+        // Debug.Log($"[피격시스템] InitializeDamaged: 피격시간={_actualDamagedTime:F2}s (MaxStunTime={_owner.LastMaxStunTime:F2}s × damageRatio={_owner.LastDamageRatio:F2}), 무적시간={_immuneTime:F2}s (25%)");
 
         // 넉백이 활성화되어 있을 때만 넉백 효과 적용
         if (_owner.IsKnockbackEnabled)
@@ -239,7 +239,7 @@ public class PlayerDamagedState : PlayerBaseState
         {
             SetImmuneState(false);
             _isImmuneActive = false;
-            Debug.Log($"[피격시스템] 무적 해제: {_damagedTimer:F2}s 경과 (무적시간={_immuneTime:F2}s, 피격시간={_actualDamagedTime:F2}s)");
+            // Debug.Log($"[피격시스템] 무적 해제: {_damagedTimer:F2}s 경과 (무적시간={_immuneTime:F2}s, 피격시간={_actualDamagedTime:F2}s)");
         }
 
         // 최소 피격 시간이 지나지 않았으면 상태 전환하지 않음
@@ -252,12 +252,12 @@ public class PlayerDamagedState : PlayerBaseState
         // 공중에 있을 시 Fall 상태로 전환
         if (IsGrounded2D())
         {
-            Debug.Log($"[피격시스템] 피격 종료 → Idle (피격시간={_actualDamagedTime:F2}s 완료)");
+            // Debug.Log($"[피격시스템] 피격 종료 → Idle (피격시간={_actualDamagedTime:F2}s 완료)");
             SyncStateChange<PlayerIdleState>();
         }
         else
         {
-            Debug.Log($"[피격시스템] 피격 종료 → Fall (피격시간={_actualDamagedTime:F2}s 완료, 공중)");
+            // Debug.Log($"[피격시스템] 피격 종료 → Fall (피격시간={_actualDamagedTime:F2}s 완료, 공중)");
             SyncStateChange<PlayerFallState>();
         }
     }
@@ -267,7 +267,7 @@ public class PlayerDamagedState : PlayerBaseState
     /// </summary>
     private void OnHitStopComplete()
     {
-        Debug.Log($"[피격시스템] 히트스탑 완료 → 마지막 폭발 넉백 적용 (hasExplosionInfo={_owner.HasLastExplosionInfo})");
+        // Debug.Log($"[피격시스템] 히트스탑 완료 → 마지막 폭발 넉백 적용 (hasExplosionInfo={_owner.HasLastExplosionInfo})");
 
         // 마지막 폭발 정보로 넉백 적용
         _owner.ApplyLastExplosionForce();
@@ -310,7 +310,7 @@ public class PlayerDamagedState : PlayerBaseState
         // 히트스탑이 활성화되어 있으면 히트스탑 타이머 리셋
         if (_isHitStopActive)
         {
-            Debug.Log($"[피격시스템] 히트스탑 중 추가 피격! 타이머 리셋 (새 폭발정보로 덮어씀)");
+            // Debug.Log($"[피격시스템] 히트스탑 중 추가 피격! 타이머 리셋 (새 폭발정보로 덮어씀)");
 
             // 타이머 리셋 및 시간 재계산
             _hitStopTimer = 0f;
