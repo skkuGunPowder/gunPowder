@@ -88,7 +88,7 @@ public class PlayerStat : MonoBehaviour
     [Header("HP (체력)")]
     [SerializeField] private int _currentHP;
     [SerializeField] private int _currentPlayerLife;
-    private const int INIT_HP = 1;
+    private const int INIT_HP = 150;
     [SerializeField] private float _gunPowderDecreaseTime;
     public int CurrentHP => _currentHP;
     public int CurrentPlayerLife => _currentPlayerLife;
