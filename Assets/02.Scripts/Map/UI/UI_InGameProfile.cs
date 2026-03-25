@@ -13,6 +13,14 @@ public class UI_InGameProfile : MonoBehaviour
     private List<UI_InGameProfileSlot> UI_InGameProfileSlotList = new List<UI_InGameProfileSlot>();
     private List<int> _playerActorNumberList = new List<int>();
 
+    /// <summary>
+    /// 로컬 플레이어의 프로필 슬롯 (index 0)
+    /// </summary>
+    public UI_InGameProfileSlot LocalPlayerSlot =>
+        UI_InGameProfileSlotList != null && UI_InGameProfileSlotList.Count > 0
+            ? UI_InGameProfileSlotList[0]
+            : null;
+
     private void OnEnable()
     {
         SubscribeEvents();
@@ -69,6 +77,12 @@ public class UI_InGameProfile : MonoBehaviour
                 // 후에 수정
                 UI_InGameProfileSlotList[i].Init(bomb, subImage,team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, RoomStatManager.Instance.PlayerGunpowder);
                 _playerActorNumberList.Add(reorderedPlayers[i].ActorNumber);
+
+                // 궁극기 게이지 바: 로컬 플레이어(index 0)만 활성화
+                if (UI_InGameProfileSlotList[i].UltimateGaugeBarFill != null)
+                {
+                    UI_InGameProfileSlotList[i].UltimateGaugeBarFill.gameObject.SetActive(i == 0);
+                }
             }
             else
             {

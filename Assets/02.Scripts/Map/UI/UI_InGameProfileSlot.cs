@@ -36,6 +36,10 @@ public class UI_InGameProfileSlot : MonoBehaviour
     public float ScaleStrength = 1.2f;
    
     public ChatBubbleListener ChatListener;
+
+    [Header("궁극기 게이지")]
+    [SerializeField] private Image _ultimateGaugeBarFill; // 궁극기 게이지 바 Fill 이미지 (Image Type: Filled)
+    public Image UltimateGaugeBarFill => _ultimateGaugeBarFill;
     
     public void Init(Sprite bombImage,Sprite subImage, EInGameTeam taem, PhotonPlayer player, int hp, int life, int gp)
     {
