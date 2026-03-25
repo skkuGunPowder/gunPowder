@@ -641,9 +641,7 @@ public class Player : MonoBehaviourPun, IDamagable
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
         {
-            {EProperties.IsDead.ToString(), true},
-            {EProperties.Kill.ToString(), PlayerStat.TotalKillCount},
-            {EProperties.Damage.ToString(), PlayerStat.TotalDamage}
+            {EProperties.DeadCheck.ToString(), true},
         });
 
     }

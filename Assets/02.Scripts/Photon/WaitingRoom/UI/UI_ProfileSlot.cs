@@ -15,6 +15,7 @@ public class UI_ProfileSlot : MonoBehaviour
     public GameObject Lives;
     public List<GameObject> LifeList = new List<GameObject>();
     public Image BombImage;
+    public Image SubBombImage;
     public Image ProfileOutline;
     
     public ProfileSkin PlayerProfileSkin;
@@ -47,6 +48,8 @@ public class UI_ProfileSlot : MonoBehaviour
         LifeSet();
         // bomb
         ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
+        ItemDTO sub = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.SubBomb.ToString()].ToString());
+        SubBombImage.sprite = sub.Image;
         BombImage.sprite = item.Image;
         
         if (ChatListener != null) 

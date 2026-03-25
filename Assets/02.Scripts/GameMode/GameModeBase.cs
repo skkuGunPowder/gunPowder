@@ -22,12 +22,6 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     protected EModeState _nextState; // 모든 유저가 준비가 되었을 때 이동
 
     public bool IsFirstSpawn { get; private set; } = true; // 첫 번째 스폰 여부
-
-    public void SetFirstSpawnComplete()
-    {
-        IsFirstSpawn = false;
-    }
-
     public GameObject MyPlayer;
     
     protected PlayerSpawner _playerSpawner;
@@ -52,17 +46,6 @@ public class GameModeBase : MonoBehaviourPunCallbacks
         {
             _photonView = GetComponent<PhotonView>();
         }
-        
-        // 디버그 확인
-        if (_photonView == null)
-        {
-            Debug.LogError("PhotonView가 GameModeBase에 없습니다!");
-        }
-        else
-        {
-            Debug.Log($"GameModeBase PhotonView ID: {_photonView.ViewID}");
-        }
-
     }
     
     protected virtual void Start()
@@ -75,6 +58,12 @@ public class GameModeBase : MonoBehaviourPunCallbacks
         _currentState?.Tick();
     }
     
+    
+    public void SetFirstSpawnComplete()
+    {
+        IsFirstSpawn = false;
+    }
+
     // 플레이어 소환
     public virtual void SpawnPlayer(int[] playerList, Action onComplete = null)
     {
@@ -103,17 +92,40 @@ public class GameModeBase : MonoBehaviourPunCallbacks
             return;
         }
         
-        // 죽음 처리
-        if (!changedProps.ContainsKey(EProperties.IsDead.ToString()) || changedProps[EProperties.IsDead.ToString()] == null)
+        if (changedProps.ContainsKey(EItemType.Bomb.ToString()) || changedProps.ContainsKey(EItemType.SubBomb.ToString()))
+        {
+            EventManager.Instance.ReadyChange(targetPlayer);
+            
+            // 처음 폭탄 선택에서 발생 예정
+            if (targetPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+            {
+                EventManager.Instance.PlayerItemChanged();
+            }
+        }
+
+        if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
         
-        if ((bool)changedProps[EProperties.IsDead.ToString()])
+        // 죽음 처리
+        if (changedProps.ContainsKey(EProperties.DeadCheck.ToString()) || changedProps[EProperties.DeadCheck.ToString()] != null)
         {
-            // 죽은 사람 죽은 시간 체크 후 저장
-            EventManager.Instance.TimeCheck(targetPlayer);
+            if ((bool)changedProps[EProperties.DeadCheck.ToString()])
+            {
+                EventManager.Instance.TimeCheck(targetPlayer);
+            }
         }
+        
+        if (changedProps.ContainsKey(EProperties.IsDead.ToString()) || changedProps[EProperties.IsDead.ToString()] != null)
+        {
+            if ((bool)changedProps[EProperties.IsDead.ToString()])
+            {
+                // 죽은 사람 죽은 시간 체크 후 저장
+                EventManager.Instance.GameStateChangeCheck();
+            }
+        }
+        
     }
 
     // 게임의 상태가 변경될때 룸 프로퍼티로 전달
@@ -125,7 +137,6 @@ public class GameModeBase : MonoBehaviourPunCallbacks
             return;
         }
         
-        Debug.Log("Room Properties Update - StateChange");
         int state = (int)propertiesThatChanged[ERoomProperties.StateChange.ToString()];
         EModeState modeState = (EModeState)state;
         CheckChangeComplete(modeState);
@@ -139,8 +150,6 @@ public class GameModeBase : MonoBehaviourPunCallbacks
 
     public void RequestStateChange(EModeState state)
     {
-        Debug.LogError($"Request State Change : {state}");
-       
         if (!PhotonNetwork.IsMasterClient)
         {
             return;
@@ -172,7 +181,6 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_CheckState(PhotonMessageInfo info)
     {
-        Debug.Log($"RPC::: Check State Sender : {info.Sender.NickName}");
         CheckState();
     }
     
@@ -186,8 +194,6 @@ public class GameModeBase : MonoBehaviourPunCallbacks
             return;
         }
         
-        Debug.Log("Player Count : " + _playerCount);
-        
         if (_playerCount == PhotonNetwork.PlayerList.Length)
         {
             _playerCount = 0;
@@ -198,7 +204,6 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_ChangeState()
     {
-        Debug.Log("RPC::: Change State");
         _playerCount = 0;
         ChangeState(_nextState);
     }

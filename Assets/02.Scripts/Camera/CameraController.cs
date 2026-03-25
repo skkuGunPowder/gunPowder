@@ -14,6 +14,7 @@ public class CameraController : MonoBehaviour
     private Player _target;
     
     private bool _isObserving = false;
+    private bool _isLastDiePlaying = false;
     private List<Player> _currentTargetList = new List<Player>();
     private int _currentTargetIndex = 0;
     
@@ -42,6 +43,7 @@ public class CameraController : MonoBehaviour
         EventManager.Instance.OnTargetChanged += SetObserveTarget;
         EventManager.Instance.OnLastAttack += LastAttack;
         EventManager.Instance.OnPlayObserve += PlayObservingMode;
+        EventManager.Instance.OnLastDieComplete += ZoomOut;
     }
 
     private void Init()
@@ -140,18 +142,25 @@ public class CameraController : MonoBehaviour
 
     private void LastAttack(int actorNumber)
     {
+        Debug.Log($"player die ZOOOOOOOOOOOOOOM IN {actorNumber}");
+        if (_isLastDiePlaying)
+        {
+            return;
+        }
+
         OnUIOnOff?.Invoke(false);
-        
+
         foreach (Player p in _currentTargetList)
-        {   
+        {
             if (p == null)
             {
                 continue;
             }
-            
+
             PhotonPlayer photonPlayer = p.GetComponent<PhotonView>().Owner;
             if (photonPlayer.ActorNumber == actorNumber)
             {
+                _isLastDiePlaying = true;
                 _proCamera.RemoveAllCameraTargets();
                 _proCamera.AddCameraTarget(p.transform);
                 _proCamera.Zoom(-TargetZoomAmount, TargetZoomDuration);
@@ -161,9 +170,10 @@ public class CameraController : MonoBehaviour
             }
         }
     }
-    
+
     private void ZoomOut()
     {
+        _isLastDiePlaying = false;
         _proCamera.Zoom(+TargetZoomAmount, TargetZoomDuration);
     }
     
@@ -257,5 +267,6 @@ public class CameraController : MonoBehaviour
         EventManager.Instance.OnLastAttack -= LastAttack;
         EventManager.Instance.OnTargetChanged -= SetObserveTarget;
         EventManager.Instance.OnPlayObserve -= PlayObservingMode;
+        EventManager.Instance.OnLastDieComplete -= ZoomOut;
     }
 }

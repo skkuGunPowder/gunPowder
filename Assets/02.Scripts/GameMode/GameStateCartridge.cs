@@ -5,8 +5,6 @@ public class GameStateCartridge : GameModeStateBase
 {
     public override void Enter()
     {
-        Debug.LogWarning("Enter State : GameStateCartridge");
-        
         Test();
     }
     

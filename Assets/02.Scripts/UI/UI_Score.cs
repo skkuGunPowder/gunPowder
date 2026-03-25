@@ -41,7 +41,6 @@ public class UI_Score : MonoBehaviour
                 _teamScoreDict.Add(team, _scoreTextList[index]);
                 _teamScoreDict[team].TextRefresh(0);
                 _teamScoreDict[team].BackgroundRefresh(ColorSet(team));
-                Debug.LogWarning($"팀 딕셔너리 : {team}");
                 index++;
             }
         }

@@ -7,8 +7,6 @@ public class GameStateSpawn : GameModeStateBase
 
     public override void Enter()
     {
-        Debug.LogWarning("Enter State : GameStateSpawn");
-
         int[] playerList;
 
         if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)

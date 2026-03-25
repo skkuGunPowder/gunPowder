@@ -27,7 +27,6 @@ public class BattleMode : GameModeBase
     
     public override void GameStart()
     {
-        Debug.Log($"GameStart - Mode : Spawn");
         SceneManager.UnloadSceneAsync(ESceneList.StartSequence.ToString()); // 연출씬 제거
 
         if (PhotonNetwork.IsMasterClient)

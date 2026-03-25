@@ -10,7 +10,7 @@ public enum EProperties
     Team,
     Emotion,
     RoomInitial, // 방에 처음 들어왔는지 안들어왔는지
-    
+    DeadCheck,
     TotalDamage,
     TotalKill,
     TotalSurvivorTime,

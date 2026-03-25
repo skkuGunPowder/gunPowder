@@ -27,6 +27,7 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void Init()
     {
+        _playerActorNumberList.Clear();
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
         PhotonPlayer[] reorderedPlayers = new PhotonPlayer[players.Length];
         
@@ -57,12 +58,16 @@ public class UI_InGameProfile : MonoBehaviour
             if (i < reorderedPlayers.Length)
             {
                 ItemDTO item = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
+                ItemDTO sub = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.SubBomb.ToString()]
+                        .ToString());
+                
                 Sprite bomb = item.Image;
+                Sprite subImage = sub.Image;
                 EInGameTeam team = (EInGameTeam)reorderedPlayers[i].CustomProperties[EProperties.Team.ToString()];
                 
                 UI_InGameProfileSlotList[i].gameObject.SetActive(true);
                 // 후에 수정
-                UI_InGameProfileSlotList[i].Init(bomb, team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, RoomStatManager.Instance.PlayerGunpowder);
+                UI_InGameProfileSlotList[i].Init(bomb, subImage,team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, RoomStatManager.Instance.PlayerGunpowder);
                 _playerActorNumberList.Add(reorderedPlayers[i].ActorNumber);
             }
             else
@@ -70,8 +75,6 @@ public class UI_InGameProfile : MonoBehaviour
                 UI_InGameProfileSlotList[i].gameObject.SetActive(false);    
             }
         }
-        
-        EventManager.Instance.OnProfileInit -= Init;
     }
     
     private void SetTopPlayer(int playerNumber)
@@ -135,8 +138,23 @@ public class UI_InGameProfile : MonoBehaviour
                 break;
             }
         }
+    }
+
+    private void PlayerBombChange(PhotonPlayer changedPlayer)
+    {
         
+        ItemDTO item = ItemDatabase.Instance.GetItem(changedPlayer.CustomProperties[EItemType.Bomb.ToString()].ToString());
+        ItemDTO sub = ItemDatabase.Instance.GetItem(changedPlayer.CustomProperties[EItemType.SubBomb.ToString()]
+            .ToString());
         
+        for (int i = 0; i < _playerActorNumberList.Count; i++)
+        {
+            if (_playerActorNumberList[i] == changedPlayer.ActorNumber)
+            {
+                UI_InGameProfileSlotList[i].RefreshBomb(item.Image, sub.Image);
+                break;
+            }
+        }
     }
     private void OnDisable()
     {
@@ -153,6 +171,7 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
             EventManager.Instance.OnProfileInit += Init;   
             EventManager.Instance.OnPlayerLeft += PlayerLeftRefresh;
+            EventManager.Instance.OnReadyChanged += PlayerBombChange;
             Debug.Log("SubscribeEvents");       
         }
     }
@@ -166,6 +185,8 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnTopPlayerChanged -= SetTopPlayer;
             EventManager.Instance.OnPlayEmotion -= PlayEmotion;
             EventManager.Instance.OnPlayerLeft -= PlayerLeftRefresh;
+            EventManager.Instance.OnProfileInit -= Init;
+            EventManager.Instance.OnReadyChanged -= PlayerBombChange;
             Debug.Log("UnsubscribeEvents");
         }
     }

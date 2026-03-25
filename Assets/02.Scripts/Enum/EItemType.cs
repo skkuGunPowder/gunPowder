@@ -8,6 +8,7 @@ public enum EItemType
     BombSkin,
     BombVFX,
     BonusCard,
+    SubBomb,
     None,
     LastBomb,
     Player,
@@ -15,6 +16,5 @@ public enum EItemType
     DiamondPowder,
     Event,
     EventShop,
-    SubBomb,
     Count
 }

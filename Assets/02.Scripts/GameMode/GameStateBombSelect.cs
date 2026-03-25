@@ -13,7 +13,6 @@ public class GameStateBombSelect : GameModeStateBase
 
     public override void Enter()
     {
-        Debug.LogWarning("Enter State : GameStateBombSelect");
         IsActive = true;
         _phaseStarted = false;
         _stateChangeRequested = false;

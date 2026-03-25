@@ -16,6 +16,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
     
     public Image ProfileImage;
     public Image BombImage;
+    public Image SubBombImage;
     
     public ProfileSkin PlayerProfileSkin;
     public UI_EmotionSlot Emotion;
@@ -36,10 +37,11 @@ public class UI_InGameProfileSlot : MonoBehaviour
    
     public ChatBubbleListener ChatListener;
     
-    public void Init(Sprite bombImage, EInGameTeam taem, PhotonPlayer player, int hp, int life, int gp)
+    public void Init(Sprite bombImage,Sprite subImage, EInGameTeam taem, PhotonPlayer player, int hp, int life, int gp)
     {
         NicknameTextUGUI.text = player.NickName;
         BombImage.sprite = bombImage;
+        SubBombImage.sprite = subImage;
         ProfileImage.color = TeamColorSet(taem);
         PlayerProfileSkin.Init(player);
         HPTextUGUI.text = hp.ToString();
@@ -59,6 +61,12 @@ public class UI_InGameProfileSlot : MonoBehaviour
         Shake(attacker);
         HPTextUGUI.text = hp.ToString();
         LifeRefresh(life);
+    }
+
+    public void RefreshBomb(Sprite main, Sprite sub)
+    {
+        BombImage.sprite = main;
+        SubBombImage.sprite = sub;
     }
 
     public void RefreshGP(int gp)

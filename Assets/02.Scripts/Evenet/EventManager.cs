@@ -223,8 +223,13 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnLastDieComplete?.Invoke();   
     }
-
-
+    
+    public event Action OnGameStateChangeCheck;
+    public void GameStateChangeCheck()
+    {
+        OnGameStateChangeCheck?.Invoke();
+    }
+    
     public event Action<int, int> OnGPDataChanged;    // GP 변경 시 (playerNumber, gp)
     public void PlayerGPChange(int playerNumber, int gp)
     {

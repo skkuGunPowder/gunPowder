@@ -34,7 +34,6 @@ public class GameStatePlaying : GameModeStateBase
         }
         
         _MaxCount = players.Length;
-        Debug.Log($"team Count : {_teamCount.Count}");
     }
 
     public override void Enter()
@@ -42,10 +41,10 @@ public class GameStatePlaying : GameModeStateBase
         Init();
         GameManager.Instance.GameStateChange(EGameState.Waiting); // 카운트다운 중 Waiting 유지
         InputHandler.BlockInput = true;
-        Debug.LogWarning("Enter State : GameStatePlaying");
         EventManager.Instance.OnTimeCheck += OnPlayerDead;
         EventManager.Instance.OnPlayerLeft += OnPlayerLeft;
         EventManager.Instance.OnLastDieComplete += GameResultCheck;
+        EventManager.Instance.OnGameStateChangeCheck += GameStateChangeCheck;
         OnPlayerLeft(); // 플레이어가 게임 시작 전에 나간경우를 체크하기 위함
     }
 
@@ -79,41 +78,30 @@ public class GameStatePlaying : GameModeStateBase
 
     private void OnPlayerDead(PhotonPlayer player)
     {
-        _count++;
-        Debug.Log($"Death Count {_count} / {_MaxCount}   ::: DIE : {player.NickName}");
+        if (_gameSet) // 게임이 끝났다면 플레이어를 죽음 상태로 보내지 않음
+        {
+            return;
+        }
         
         // 게임오버 체크
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
-
-        if (_count >= _MaxCount)
-        {
-            Debug.Log($"Request Death count End ::: {_count} / {_MaxCount}");
-            RequestStateChange();
-            return;
-        }
         
         EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
         _teamCount[team]--;
 
-
-        if (_gameSet) // 게임이 끝났다면 플레이어를 죽음 상태로 보내지 않음
-        {
-            return;
-        }
-        
         if (_lastPlayer)
         {
             if (LastTeamCheck() < 1)    // 팀원이 살아있는 팀이 1개 이상인지
             {
                 return;
             }
-            
+
             bool end;
-            
-            if (LastAttackCheck(team) == false)     //죽은 플레이어가 그 팀의 마지막인가? 
+
+            if (LastAttackCheck(team) == false)     //죽은 플레이어가 그 팀의 마지막인가?
             {
                 end = false;
             }
@@ -122,20 +110,31 @@ public class GameStatePlaying : GameModeStateBase
                 end = true;
             }
             
-            _gameSet = true;
-            
+            SetGameSet();
+
             // 플레이어 상태 변경
             GameManager.Instance.GameStateChange(EGameState.Result);
             _photonView.RPC(nameof(RPC_RequestPlayerDie), player, end);
+            
             return;
         }
+        
         
         // 플레이어 상태 변경
         _photonView.RPC(nameof(RPC_RequestPlayerDie), player, false);
         
         PlayerDeadCheck();
     }
-    
+
+    private void GameStateChangeCheck()
+    {
+        _count++;
+        
+        if (_count >= _MaxCount)
+        {
+            RequestStateChange();
+        }
+    }
     // 막타 가능 상태 체크
     private void PlayerDeadCheck()
     {
@@ -298,7 +297,8 @@ public class GameStatePlaying : GameModeStateBase
     private void RPC_RequestPlayerDie(bool isLastPlayer)
     {
         PlayerFSM fsm = _gameMode.MyPlayer.GetComponent<PlayerFSM>();
-
+        PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
+        
         if (isLastPlayer)
         {
             fsm.SyncStateChange<PlayerLastDieState>();
@@ -307,6 +307,13 @@ public class GameStatePlaying : GameModeStateBase
         {
             fsm.SyncStateChange<PlayerDieState>();
         }
+        
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+        {
+            { EProperties.IsDead.ToString(), true },
+            { EProperties.Kill.ToString(), stat.TotalKillCount },
+            { EProperties.Damage.ToString(),stat.TotalDamage } 
+        });
     }
     
     // 타임 오버가 되었을 때 로컬 플레이어가 살아있는 경우 나의 프로퍼티를 보낸다.
@@ -315,14 +322,11 @@ public class GameStatePlaying : GameModeStateBase
         PhotonPlayer player = PhotonNetwork.LocalPlayer;
         if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
         {
-            Debug.LogError("GameResultCheck :: MyPlayer Dead");
             return;
         }
-        
-        Debug.LogError("GameResultCheck :: MyPlayer Alive");
-        
+
         PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
-        
+
         Hashtable properties = new Hashtable()
         {
             {EProperties.IsDead.ToString(), true},
@@ -330,20 +334,37 @@ public class GameStatePlaying : GameModeStateBase
             {EProperties.Damage.ToString(), stat.TotalDamage}
         };
 
-        // if (PhotonNetwork.IsMasterClient)
-        // {
-        //     EventManager.Instance.TimeCheck(player);
-        // }
-        
+        // 방장의 타이머 기준으로 SurvivorTime 설정 요청 (방장/비방장 공통)
+        _photonView.RPC(nameof(RPC_RequestSurvivorTime), RpcTarget.MasterClient);
+
         player.SetCustomProperties(properties);
+    }
+
+    [PunRPC]
+    private void RPC_RequestSurvivorTime(PhotonMessageInfo info)
+    {
+        // 방장의 타이머로 요청한 플레이어의 SurvivorTime 설정
+        EventManager.Instance.TimeCheck(info.Sender);
     }
     
     // LastDie로 죽었을 때 변화
     private void RequestStateChange()
     {
         _gameMode.RequestStateChange(EModeState.Round);
-    }
+     }
     
+    private void SetGameSet()
+    {
+        _gameSet = true;
+        _photonView.RPC(nameof(RPC_SetGameSet), RpcTarget.Others);
+    }
+
+    [PunRPC]
+    private void RPC_SetGameSet()
+    {
+        _gameSet = true;
+    }
+
     public override void Tick() { }
 
     public override void Exit()
@@ -353,9 +374,9 @@ public class GameStatePlaying : GameModeStateBase
         _gameSet = false;
         _teamCount.Clear();
         _count = 0;
-        Debug.Log("Exit State : GameStatePlaying");
         EventManager.Instance.OnLastDieComplete -= GameResultCheck;
         EventManager.Instance.OnPlayerLeft -= OnPlayerLeft;
         EventManager.Instance.OnTimeCheck -= OnPlayerDead;
+        EventManager.Instance.OnGameStateChangeCheck -= GameStateChangeCheck;
     }
 }

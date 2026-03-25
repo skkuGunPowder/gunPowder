@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using Photon.Pun;
 
 public class PlayerLastDieState : PlayerBaseState
 {
@@ -17,11 +18,12 @@ public class PlayerLastDieState : PlayerBaseState
         SetImmuneState();
         EventManager.Instance.LastAttack(_owner.PhotonView.OwnerActorNr);
 
+        Debug.Log($"{_owner.photonView.OwnerActorNr} : LastDie");
+
         if (_owner.photonView.IsMine)
         {
-            Debug.Log("LastDie Start");
+            Debug.Log("My LastDie Start");
         }
-
     }
 
     public override void OnExit()

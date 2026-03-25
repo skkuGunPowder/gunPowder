@@ -21,6 +21,7 @@ public class RoomInitializer
         {
             { EProperties.IsReady.ToString(), false },
             { EProperties.IsDead.ToString(), false },
+            { EProperties.DeadCheck.ToString(), false},
             { EProperties.IsLoad.ToString(), false}
         };
         
