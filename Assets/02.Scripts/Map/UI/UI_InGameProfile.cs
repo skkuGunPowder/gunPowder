@@ -6,19 +6,12 @@ using UnityEngine.UI;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UI_InGameProfile : MonoBehaviour
 {
-    public Image MyBomb;
+    [SerializeField] private Image _mainBomb;
+    [SerializeField] private Image _subBomb;
+    
     [SerializeField]
     private List<UI_InGameProfileSlot> UI_InGameProfileSlotList = new List<UI_InGameProfileSlot>();
     private List<int> _playerActorNumberList = new List<int>();
-
-    private void Awake()
-    {
-        ItemDTO item = ItemDatabase.Instance.GetItem(PhotonNetwork.LocalPlayer.CustomProperties[EItemType.Bomb.ToString()].ToString());
-        Sprite bomb = item.Image;
-
-        MyBomb.sprite = bomb;
- 
-    }
 
     private void OnEnable()
     {
@@ -60,9 +53,16 @@ public class UI_InGameProfile : MonoBehaviour
                 ItemDTO item = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
                 ItemDTO sub = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.SubBomb.ToString()]
                         .ToString());
-                
+
                 Sprite bomb = item.Image;
                 Sprite subImage = sub.Image;
+                
+                if (reorderedPlayers[i].ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    _mainBomb.sprite = bomb;
+                    _subBomb.sprite = subImage;
+                }
+                
                 EInGameTeam team = (EInGameTeam)reorderedPlayers[i].CustomProperties[EProperties.Team.ToString()];
                 
                 UI_InGameProfileSlotList[i].gameObject.SetActive(true);
@@ -146,6 +146,12 @@ public class UI_InGameProfile : MonoBehaviour
         ItemDTO item = ItemDatabase.Instance.GetItem(changedPlayer.CustomProperties[EItemType.Bomb.ToString()].ToString());
         ItemDTO sub = ItemDatabase.Instance.GetItem(changedPlayer.CustomProperties[EItemType.SubBomb.ToString()]
             .ToString());
+        
+        if (changedPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+        {
+            _mainBomb.sprite = item.Image;
+            _subBomb.sprite = sub.Image;
+        }
         
         for (int i = 0; i < _playerActorNumberList.Count; i++)
         {
