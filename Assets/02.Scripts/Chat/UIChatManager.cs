@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.IChatClientListener
 {
-    // 메시지와 데이터 구분자
+    // (하위 호환용) 기존 메시지 구분자 — JSON 파싱 실패 시 fallback
     public const string SPLIT_TAG = "$$DATA$$";
     
     // 인게임 채팅 채널 설정
@@ -192,15 +192,26 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
                 message += whisper[i] + " ";
             }
 
+            // 귓속말도 JSON 포맷으로 전송
+            ChatMessageData whisperData = new ChatMessageData
+            {
+                type = "whisper",
+                content = message
+            };
             Debug.Log($"[UIChatManager] 귓속말 전송: To={whisper[1]}, Msg={message}");
-            _chatClient.SendWhisperMessage(whisper[1], message);
+            _chatClient.SendWhisperMessage(whisper[1], JsonUtility.ToJson(whisperData));
             return;
         }
 
-        // ★ [수정] 내 옷 정보를 가져와서 메시지 뒤에 숨김
-        string myOutfit = ItemStorage.Instance.GetMyOutfitString();
-        string finalMessage = $"{text}{SPLIT_TAG}{myOutfit}";
-        
+        // JSON 포맷으로 메시지 + 아웃핏 정보 직렬화
+        ChatMessageData chatData = new ChatMessageData
+        {
+            type = "chat",
+            content = text,
+            outfit = ItemStorage.Instance.GetMyOutfitString()
+        };
+        string finalMessage = JsonUtility.ToJson(chatData);
+
         // 일반 채팅 메시지 전송
         Debug.Log($"[UIChatManager] 채팅 메시지 전송: Group={channelInfo.ChannelGroup}, Name={channelInfo.ChannelName}, Number={channelInfo.ChannelNumber}, Msg={text}");
         _chatClient.SendChatMessage(channelInfo.ChannelGroup, channelInfo.ChannelName, channelInfo.ChannelNumber, finalMessage);
@@ -428,22 +439,40 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             return;
         }
 
-        // ★ [추가] 메시지 파싱: $$DATA$$ 이후 내용 제거 (중앙 집중식 처리)
-        if (messageInfo.Message.Contains(SPLIT_TAG))
+        // JSON 포맷 메시지 파싱 (중앙 집중식 처리)
+        try
         {
-            string[] parts = messageInfo.Message.Split(new string[] { SPLIT_TAG }, System.StringSplitOptions.None);
-            messageInfo.Message = parts[0]; // 실제 메시지만 남김 ("안녕하세요")
+            ChatMessageData data = JsonUtility.FromJson<ChatMessageData>(messageInfo.Message);
+            if (data != null && !string.IsNullOrEmpty(data.type))
+            {
+                messageInfo.Message = data.content;
 
-            // 옷 정보 파싱 및 저장
-            if (parts.Length > 1 && !string.IsNullOrEmpty(parts[1]))
-            {
-                List<string> outfitList = new List<string>(parts[1].Split(','));
-                _messageOutfits[messageInfo.Index] = outfitList;
-                Debug.Log($"[UIChatManager] 메시지 파싱 완료 - 메시지: {messageInfo.Message}, 옷 정보: {parts[1]}");
+                if (!string.IsNullOrEmpty(data.outfit))
+                {
+                    List<string> outfitList = new List<string>(data.outfit.Split(','));
+                    _messageOutfits[messageInfo.Index] = outfitList;
+                    Debug.Log($"[UIChatManager] JSON 메시지 파싱 완료 - 메시지: {data.content}, 옷 정보: {data.outfit}");
+                }
+                else
+                {
+                    Debug.Log($"[UIChatManager] JSON 메시지 파싱 완료: {data.content}");
+                }
             }
-            else
+        }
+        catch (System.Exception)
+        {
+            // JSON 파싱 실패 시 기존 $$DATA$$ 포맷으로 fallback (하위 호환)
+            if (messageInfo.Message.Contains(SPLIT_TAG))
             {
-                Debug.Log($"[UIChatManager] 메시지 파싱 완료: {messageInfo.Message}");
+                string[] parts = messageInfo.Message.Split(new string[] { SPLIT_TAG }, System.StringSplitOptions.None);
+                messageInfo.Message = parts[0];
+
+                if (parts.Length > 1 && !string.IsNullOrEmpty(parts[1]))
+                {
+                    List<string> outfitList = new List<string>(parts[1].Split(','));
+                    _messageOutfits[messageInfo.Index] = outfitList;
+                    Debug.Log($"[UIChatManager] fallback 파싱 완료 - 메시지: {messageInfo.Message}, 옷 정보: {parts[1]}");
+                }
             }
         }
 
@@ -481,13 +510,34 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
 
     public void OnWhisperMessage(WhisperMessageInfo messageInfo)
     {
-        // 파티 초대 메시지 처리
-        if (messageInfo.Message.StartsWith("!partyinvite "))
+        // JSON 파싱 시도
+        string whisperText = messageInfo.Message;
+        try
         {
-            string partyId = messageInfo.Message.Substring(13).Trim();
-            Debug.Log($"[UIChatManager] 파티 초대 수신: {messageInfo.FromGamerName} → {partyId}");
-            OnPartyInviteReceived?.Invoke(messageInfo.FromGamerName, partyId);
-            return;
+            ChatMessageData data = JsonUtility.FromJson<ChatMessageData>(messageInfo.Message);
+            if (data != null && !string.IsNullOrEmpty(data.type))
+            {
+                // 파티 초대 메시지 처리
+                if (data.type == "invite")
+                {
+                    Debug.Log($"[UIChatManager] 파티 초대 수신: {messageInfo.FromGamerName} → {data.content}");
+                    OnPartyInviteReceived?.Invoke(messageInfo.FromGamerName, data.content);
+                    return;
+                }
+
+                whisperText = data.content;
+            }
+        }
+        catch (System.Exception)
+        {
+            // JSON 파싱 실패 시 기존 방식 fallback (하위 호환)
+            if (messageInfo.Message.StartsWith("!partyinvite "))
+            {
+                string partyId = messageInfo.Message.Substring(13).Trim();
+                Debug.Log($"[UIChatManager] 파티 초대 수신 (fallback): {messageInfo.FromGamerName} → {partyId}");
+                OnPartyInviteReceived?.Invoke(messageInfo.FromGamerName, partyId);
+                return;
+            }
         }
 
         // 일반 귓속말 처리 (인게임 채팅에만 표시)
@@ -508,7 +558,7 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             Index = messageInfo.Index,
             GamerName = messageInfo.FromGamerName,
             Avatar = messageInfo.FromAvatar,
-            Message = "[귓속말] " + messageInfo.Message,
+            Message = "[귓속말] " + whisperText,
             Time = messageInfo.Time,
             Tag = messageInfo.Tag
         };
@@ -1081,8 +1131,12 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
             return;
         }
 
-        string message = $"!partyinvite {partyId}";
-        _chatClient.SendWhisperMessage(friendNickname, message);
+        ChatMessageData inviteData = new ChatMessageData
+        {
+            type = "invite",
+            content = partyId
+        };
+        _chatClient.SendWhisperMessage(friendNickname, JsonUtility.ToJson(inviteData));
         Debug.Log($"[UIChatManager] 파티 초대 전송: {friendNickname} → {partyId}");
     }
 
@@ -1102,7 +1156,14 @@ public class UIChatManager : DontDestroySingleton<UIChatManager>, BackndChat.ICh
         ChannelInfo channelInfo = _channelList[channelGroup][channelName][channelNumber];
         if (channelInfo == null) return;
 
-        _chatClient.SendChatMessage(channelGroup, channelName, channelNumber, text);
+        // JSON 포맷으로 메시지 직렬화
+        ChatMessageData chatData = new ChatMessageData
+        {
+            type = "chat",
+            content = text,
+            outfit = ItemStorage.Instance.GetMyOutfitString()
+        };
+        _chatClient.SendChatMessage(channelGroup, channelName, channelNumber, JsonUtility.ToJson(chatData));
     }
 
     /// <summary>
