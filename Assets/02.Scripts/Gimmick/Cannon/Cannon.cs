@@ -3,7 +3,7 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 
-public class Cannon : MonoBehaviour
+public class Cannon : MonoBehaviour, IGimmick
 {
     [SerializeField] private GameObject _barrel;
 
@@ -16,8 +16,40 @@ public class Cannon : MonoBehaviour
     private Rigidbody2D _firedProjectile;
     bool _isLoaded = false;
 
+    private bool _isGimmickActive = false;
+
+    public GimmickType Type => GimmickType.Cannon;
+    public GimmickGroupType GroupType => GimmickGroupType.Start;
+    public bool IsActive => _isGimmickActive;
+
+    public void Activate()
+    {
+        _isGimmickActive = true;
+    }
+
+    public void Deactivate()
+    {
+        _isGimmickActive = false;
+        _isLoaded = false;
+        StopAllCoroutines();
+    }
+
+    private void Start()
+    {
+        if (GimmickManager.Instance != null)
+            GimmickManager.Instance.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        if (GimmickManager.Instance != null)
+            GimmickManager.Instance.Unregister(this);
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!_isGimmickActive) return;
+
         if (_isLoaded)
         {
             return;
@@ -49,7 +81,7 @@ public class Cannon : MonoBehaviour
 
         if (target.CompareTag("Bomb"))
         {
-            GetComponent<Bomb>().ResetFuze();
+            target.GetComponent<Bomb>().ResetFuze();
         }
 
         _isLoaded = true;

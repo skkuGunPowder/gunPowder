@@ -23,13 +23,12 @@ public class PhotonSingleton<T> : MonoBehaviourPunCallbacks where T : MonoBehavi
     }
     protected virtual void Awake()
     {
-        if (instance == null)
+        if (instance == null || instance == this)
         {
             instance = this as T;
-            
         }
         else
-        { 
+        {
             Destroy(gameObject);
         }
     }

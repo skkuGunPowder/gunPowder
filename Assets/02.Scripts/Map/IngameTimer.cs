@@ -10,11 +10,9 @@ public class IngameTimer : MonoBehaviour
     private float _timer;
     private int _previousTime;
     private bool _isGameOver;
-    
-    [Header("드랍 떨어지는 시간")] 
-    public float AirDropTime = 30f;
-    private float _airDropTimer;
-    [SerializeField] private GameObject _airDropJetPrefab;
+
+    private const float HURRY_UP_TIME = 30f;
+    private bool _isHurryUp = false;
     
     private void Start()
     {
@@ -44,8 +42,13 @@ public class IngameTimer : MonoBehaviour
     private void GameTimer()
     {
         _timer -= Time.deltaTime;
-        _airDropTimer += Time.deltaTime;
-    
+
+        if (!_isHurryUp && _timer <= HURRY_UP_TIME && _timer > 0)
+        {
+            _isHurryUp = true;
+            EventManager.Instance.HurryUp();
+        }
+
         if (_timer <= 0)
         {
             if (_isGameOver == true)
@@ -57,29 +60,12 @@ public class IngameTimer : MonoBehaviour
         }
 
         int currentTime = Mathf.FloorToInt(_timer);
-        
-        // 정수 값이 변경되었을 때만 UI 갱신
+
         if (_previousTime != currentTime)
         {
             _previousTime = currentTime;
             UI_Timer.TextRefresh(ConvertTime(currentTime));
         }
-    
-        if (PhotonNetwork.IsMasterClient == false)
-        {
-            return;
-        }
-    
-        if (_airDropTimer > AirDropTime)
-        {
-            _airDropTimer = 0f;
-        
-            if (UnityEngine.Random.Range(0f, 1.0f) <= 0.1f)
-            {
-                PhotonNetwork.Instantiate(_airDropJetPrefab.name, transform.position, Quaternion.identity);
-            }
-        }
-
     }
 
     public void GameOver()

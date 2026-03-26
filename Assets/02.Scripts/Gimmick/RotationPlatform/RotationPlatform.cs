@@ -2,12 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RotationPlatform : MonoBehaviour
+public class RotationPlatform : MonoBehaviour, IGimmick
 {
     public List<SidePlatform> SidePlatforms;
     private float _rotation;
     private bool _isRotate = false;
     public bool IsRotate => _isRotate;
+
+    private bool _isGimmickActive = false;
+
+    public GimmickType Type => GimmickType.RotationPlatform;
+    public GimmickGroupType GroupType => GimmickGroupType.Start;
+    public bool IsActive => _isGimmickActive;
+
+    public void Activate()
+    {
+        _isGimmickActive = true;
+    }
+
+    public void Deactivate()
+    {
+        _isGimmickActive = false;
+    }
 
     private Rigidbody2D _rigdbody;
 
@@ -19,10 +35,21 @@ public class RotationPlatform : MonoBehaviour
         {
             sidePlatform.Init(this);
         }
+
+        if (GimmickManager.Instance != null)
+            GimmickManager.Instance.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        if (GimmickManager.Instance != null)
+            GimmickManager.Instance.Unregister(this);
     }
 
     public void Rotate(bool isClockWise)
     {
+        if (!_isGimmickActive) return;
+
         if (_isRotate)
         {
             return;

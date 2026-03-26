@@ -4517,7 +4517,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerSFXAnimationEvent: {fileID: 8620183200267240798}
   UltimateEffectPrefab: {fileID: 1121568680264472322}
-  _ultimateChanceTimer: 0
+  _postUltimateTimer: 0
+  _isPostUltimateCooldown: 0
   _isUltimateSystemEnabled: 1
 --- !u!114 &-8007391661386075954
 MonoBehaviour:
@@ -4635,10 +4636,8 @@ MonoBehaviour:
   _dieExplosionForce: 0
   _totalDamage: 0
   _totalKillCount: 0
-  _hasUltimateChance: 0
-  _hasUsedUltimateThisLife: 0
-  _ultimateChanceDuration: 30
-  _ultimateTriggerThreshold: 30
+  _currentUltimateGauge: 0
+  _maxUltimateGauge: 100
   _lastAttackerActorNumber: -1
   _lastAttackTime: 0
   _attackTrackingDuration: 10
