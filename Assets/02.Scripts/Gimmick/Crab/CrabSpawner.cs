@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
-public class CrabSpawner : MonoBehaviour
+public class CrabSpawner : MonoBehaviour, IGimmick
 {
     [Header("References")]
     [SerializeField] private GameObject _crabPrefab;
@@ -14,20 +14,63 @@ public class CrabSpawner : MonoBehaviour
     private List<GameObject> _spawnedCrabs;
     private float _timer;
 
+    private bool _isGimmickActive = false;
+
+    public GimmickType Type => GimmickType.CrabSpawner;
+    public GimmickGroupType GroupType => GimmickGroupType.During;
+    public bool IsActive => _isGimmickActive;
+
+    public void Activate()
+    {
+        _isGimmickActive = true;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            SpawnCrabs();
+        }
+    }
+
+    public void Deactivate()
+    {
+        _isGimmickActive = false;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            DestroyAllCrabs();
+        }
+    }
+
+    private void DestroyAllCrabs()
+    {
+        foreach (GameObject crab in _spawnedCrabs)
+        {
+            if (crab != null)
+            {
+                PhotonNetwork.Destroy(crab);
+            }
+        }
+        _spawnedCrabs.Clear();
+    }
+
     private void Awake()
     {
         _spawnedCrabs = new List<GameObject>();
+    }
 
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            return;
-        }
-        
-        SpawnCrabs();
+    private void Start()
+    {
+        if (GimmickManager.Instance != null)
+            GimmickManager.Instance.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        if (GimmickManager.Instance != null)
+            GimmickManager.Instance.Unregister(this);
     }
 
     private void Update()
     {
+        if (!_isGimmickActive) return;
+
         if (!PhotonNetwork.IsMasterClient)
         {
             return;

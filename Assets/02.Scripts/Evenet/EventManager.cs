@@ -241,4 +241,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnUltimateGaugeChanged?.Invoke(current, max);
     }
+
+    public event Action OnHurryUp;
+    public void HurryUp()
+    {
+        OnHurryUp?.Invoke();
+    }
 }

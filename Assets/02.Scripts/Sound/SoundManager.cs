@@ -145,4 +145,23 @@ public class SoundManager : DontDestroySingleton<SoundManager>
 
         Debug.LogWarning($"{name}:'{clipName}' 루프 사운드를 찾을 수 없습니다.");
     }
+
+    public void PauseBGM()
+    {
+        if (_currentBGM != null)
+        {
+            _currentBGM.GetAudioSource().Pause();
+        }
+    }
+
+    public void ReplayBGMWithPitch(float pitch)
+    {
+        if (_currentBGM != null)
+        {
+            AudioSource source = _currentBGM.GetAudioSource();
+            source.pitch = pitch;
+            source.time = 0f;
+            source.Play();
+        }
+    }
 }

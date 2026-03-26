@@ -3,7 +3,7 @@ using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
 
-public class ValleyBall : Bomb, IDamagable
+public class ValleyBall : Bomb, IDamagable, IGimmick
 {
     public Sprite NormalSprite;
     public Sprite BurningSprite;
@@ -23,6 +23,29 @@ public class ValleyBall : Bomb, IDamagable
     private bool _isBurning = false;
     private bool _isTourched = false;
 
+    private bool _isGimmickActive = false;
+
+    public GimmickType Type => GimmickType.ValleyBall;
+    public GimmickGroupType GroupType => GimmickGroupType.Start;
+    public bool IsActive => _isGimmickActive;
+
+    public void Activate()
+    {
+        _isGimmickActive = true;
+    }
+
+    public void Deactivate()
+    {
+        _isGimmickActive = false;
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        if (GimmickManager.Instance != null)
+            GimmickManager.Instance.Unregister(this);
+    }
+
     protected override void Init()
     {
         _renderer = GetComponent<SpriteRenderer>();
@@ -31,6 +54,9 @@ public class ValleyBall : Bomb, IDamagable
         _isBurning = false;
         _originalScale = transform.localScale;
         photonView.RPC(nameof(SetOwner), RpcTarget.All, photonView.ViewID);
+
+        if (GimmickManager.Instance != null)
+            GimmickManager.Instance.Register(this);
     }
 
     protected override void Update()
