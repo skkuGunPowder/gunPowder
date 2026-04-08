@@ -1,5 +1,4 @@
-using UnityEngine;
-using System.Collections;
+using System.Globalization;
 using System.Collections.Generic;
 using LitJson;
 
@@ -7,7 +6,8 @@ public enum CartridgeRarity
 {
     Common,
     Rare,
-    Epic
+    Epic,
+    Ultimate
 }
 
 public class CartridgeData
@@ -19,16 +19,64 @@ public class CartridgeData
     public readonly List<float> GimmickValues;
 
 
-    CartridgeData(JsonData json)
+    public CartridgeData(JsonData json)
     {
-        ID = json["ID"].ToString();
+        ID = json["CartridgeID"].ToString();
         Rarity = (CartridgeRarity)System.Enum.Parse(typeof(CartridgeRarity), json["Rarity"].ToString());
         Durability = int.Parse(json["Durability"].ToString());
         Explanation = json["Explanation"].ToString();
-        GimmickValues = new List<float>(json["GimmickValues"].Count);
-        for (int i = 0; i < json["GimmickValues"].Count; i++)
+        GimmickValues = ParseValue(json);
+    }
+
+    private static List<float> ParseValue(JsonData json)
+    {
+        List<float> values = new List<float>();
+
+        if (!json.Keys.Contains("Value"))
         {
-            GimmickValues.Add(float.Parse(json["GimmickValues"][i].ToString()));
+            return values;
         }
+
+        JsonData valueData = json["Value"];
+        if (valueData == null)
+        {
+            return values;
+        }
+
+        if (valueData.IsArray)
+        {
+            for (int i = 0; i < valueData.Count; i++)
+            {
+                if (TryParseFloat(valueData[i].ToString(), out float parsed))
+                {
+                    values.Add(parsed);
+                }
+            }
+
+            return values;
+        }
+
+        string rawValue = valueData.ToString();
+        if (string.IsNullOrWhiteSpace(rawValue))
+        {
+            return values;
+        }
+
+        string[] tokens = rawValue.Split(',');
+        for (int i = 0; i < tokens.Length; i++)
+        {
+            if (TryParseFloat(tokens[i].Trim(), out float parsed))
+            {
+                values.Add(parsed);
+            }
+        }
+
+        return values;
+    }
+
+    private static bool TryParseFloat(string input, out float parsed)
+    {
+        return float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out parsed)
+            || float.TryParse(input, NumberStyles.Float, CultureInfo.CurrentCulture, out parsed);
     }
 }
