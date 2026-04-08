@@ -12,7 +12,7 @@ public class AirDropSpawner : MonoBehaviour, IGimmick
     private bool _isGimmickActive = false;
 
     public GimmickType Type => GimmickType.AirDropSpawner;
-    public GimmickGroupType GroupType => GimmickGroupType.During;
+    public GimmickGroupType GroupType => GimmickGroupType.Start;
     public bool IsActive => _isGimmickActive;
 
     public void Activate()

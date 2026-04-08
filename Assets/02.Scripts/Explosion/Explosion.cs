@@ -62,6 +62,21 @@ public class Explosion : MonoBehaviour
                 }
                 int damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
                 damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.StealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, _stat.MaxStunTime, isFallingOut, isNormalAttack);
+
+                // 공격 적중 이벤트 발행 (공격자 로컬에서만)
+                if (attackerPhotonView.IsMine)
+                {
+                    Player victim = other.GetComponent<Player>();
+                    int victimActorNr = victim != null ? victim.ActorNumber : -1;
+                    PlayerEventManager.Instance.GetEvents(attackerPhotonView.OwnerActorNr).InvokeOnAttackHit(new AttackHitContext
+                    {
+                        VictimActorNumber = victimActorNr,
+                        Damage = damage,
+                        MaxDamage = _stat.AttackPower,
+                        IsCritical = damage == _stat.AttackPower,
+                        VictimPosition = other.transform.position
+                    });
+                }
             }
         }
         ExplosionPool.Instance.Return(gameObject.name, gameObject.GetComponent<Explosion>());

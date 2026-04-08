@@ -17,11 +17,9 @@ public class GimmickManager : PhotonSingleton<GimmickManager>
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        // Start 그룹: 게임 시작 시 전부 활성화
+        // Start 그룹만 게임 시작 시 전부 활성화
+        // During 그룹은 외부에서 수동 호출해야 활성화됨
         ActivateAllByGroup(GimmickGroupType.Start);
-
-        // During 그룹: 기존 동작 유지 (게임 시작 시 활성화)
-        ActivateAllByGroup(GimmickGroupType.During);
     }
 
     public void ActivateAllByGroup(GimmickGroupType group)
