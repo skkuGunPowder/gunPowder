@@ -17,7 +17,7 @@ public class SuperAmorBuff : Buff
 
         _currentHitCount = 0;
 
-        _owner.OnHit += OnPlayerHit;
+        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).OnHit += OnPlayerHit;
 
         // 플레이어 위치 고정 활성화 (넉백 무효화 및 위치 고정)
         _owner.SetPositionLock();
@@ -26,7 +26,7 @@ public class SuperAmorBuff : Buff
 
     public override void EndBuff()
     {
-        _owner.OnHit -= OnPlayerHit;
+        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).OnHit -= OnPlayerHit;
 
         // 플레이어 위치 고정 비활성화 (원래 상태로 복원)
         _owner.ResetPositionLock();

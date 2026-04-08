@@ -89,8 +89,8 @@ public class PlayerCoolTime : MonoBehaviour
 
     private void Start()
     {
-        _myPlayer.OnNormalAttack += SetNormalAttackCoolTime;
-        _myPlayer.OnSpecialAttack += SetSpecialAttackCoolTime;
+        PlayerEventManager.Instance.GetEvents(_myPlayer.ActorNumber).OnNormalAttack += SetNormalAttackCoolTime;
+        PlayerEventManager.Instance.GetEvents(_myPlayer.ActorNumber).OnSpecialAttack += SetSpecialAttackCoolTime;
     }
 
     private void SetNormalAttackCoolTime()
@@ -223,8 +223,8 @@ public class PlayerCoolTime : MonoBehaviour
     {
         if (_myPlayer != null)
         {
-            _myPlayer.OnNormalAttack -= SetNormalAttackCoolTime;
-            _myPlayer.OnSpecialAttack -= SetSpecialAttackCoolTime;
+            PlayerEventManager.Instance.GetEvents(_myPlayer.ActorNumber).OnNormalAttack -= SetNormalAttackCoolTime;
+            PlayerEventManager.Instance.GetEvents(_myPlayer.ActorNumber).OnSpecialAttack -= SetSpecialAttackCoolTime;
         }
 
         // CancellationTokenSource 정리

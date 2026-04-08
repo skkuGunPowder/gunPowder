@@ -69,13 +69,15 @@ public class CameraController : MonoBehaviour
     {
         if (_target != null)
         {
-            _target.OnHit -= HitShake; 
-            _target.OnAttack += GunShotShake;
+            var oldEvents = PlayerEventManager.Instance.GetEvents(_target.ActorNumber);
+            oldEvents.OnHit -= HitShake;
+            oldEvents.OnAttack -= GunShotShake;
         }
-        
+
         _target = player;
-        _target.OnHit += HitShake;
-        _target.OnAttack += GunShotShake;
+        var newEvents = PlayerEventManager.Instance.GetEvents(player.ActorNumber);
+        newEvents.OnHit += HitShake;
+        newEvents.OnAttack += GunShotShake;
 
         _proCamera.RemoveAllCameraTargets();
         _proCamera.AddCameraTarget(player.transform);
@@ -254,8 +256,9 @@ public class CameraController : MonoBehaviour
     {
         if (_target != null)
         {
-            _target.OnHit -= HitShake;
-            _target.OnAttack -= GunShotShake;
+            var events = PlayerEventManager.Instance.GetEvents(_target.ActorNumber);
+            events.OnHit -= HitShake;
+            events.OnAttack -= GunShotShake;
             _target = null;
         }
 
