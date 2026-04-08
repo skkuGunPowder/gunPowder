@@ -56,6 +56,7 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
                 // 스타터 아이템 지급(미사일)
                 if ((EItemType)i == EItemType.Bomb)
                 {
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0001")));
                     _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0005")));
                     CurrencyManager.Instance.AddCurrency(ECurrencyType.Gold, 1000); // 시작 골드 지급
                     CurrencyManager.Instance.AddCurrency(ECurrencyType.Diamond, 50); // 시작 다이아 지급
@@ -79,7 +80,12 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
         // 스타터 아이템 장착(미사일)
         if (_equippedItemDict[EItemType.Bomb] == null)
         {
-            EquipItem(_storedItemDict[EItemType.Bomb][0]);
+            EquipItem(_storedItemDict[EItemType.Bomb][1]);
+        }
+
+        if (_equippedItemDict[EItemType.SubBomb] == null)
+        {
+            EquipAsSubBomb(_storedItemDict[EItemType.Bomb][0]);
         }
 
         SetPlayerCustomProperties();

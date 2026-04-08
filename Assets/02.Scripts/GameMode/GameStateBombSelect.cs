@@ -6,6 +6,7 @@ public class GameStateBombSelect : GameModeStateBase
     [SerializeField] private float _bombSelectDuration = 10f;
 
     private float _timer;
+    private int _lastTickedSecond;
     private bool _phaseStarted;
     private bool _stateChangeRequested;
 
@@ -26,7 +27,9 @@ public class GameStateBombSelect : GameModeStateBase
     private void OnPhaseStart()
     {
         _timer = _bombSelectDuration;
+        _lastTickedSecond = Mathf.CeilToInt(_timer);
         _phaseStarted = true;
+        EventManager.Instance.BombSelectTimerTick(_lastTickedSecond);
     }
 
     public override void Tick()
@@ -34,6 +37,13 @@ public class GameStateBombSelect : GameModeStateBase
         if (!_phaseStarted || _stateChangeRequested) return;
 
         _timer -= Time.unscaledDeltaTime;
+
+        int currentSecond = Mathf.CeilToInt(_timer);
+        if (currentSecond != _lastTickedSecond)
+        {
+            _lastTickedSecond = currentSecond;
+            EventManager.Instance.BombSelectTimerTick(currentSecond);
+        }
 
         if (_timer <= 0f && PhotonNetwork.IsMasterClient)
         {

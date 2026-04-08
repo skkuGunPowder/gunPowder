@@ -105,18 +105,13 @@ public class RoomManager : PhotonSingleton<RoomManager>
         
         PhotonNetwork.LoadLevel(SelectedMap.ToString());
     }
-
-    private async UniTaskVoid Delay()
-    {
-        await UniTask.WaitForSeconds(2f);
-    }
     
     //현재 이 방에 있는 플레이어들의 계정 정보
     private void SetRoom()
     {
         InputHandler.BlockInput = false;
         int[] playerList = new int[MaxPlayerCount];
-        // if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.RoomInitial.ToString()) == false)
+        
         if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(EProperties.PlayerList.ToString()) == false ||
            PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] == null)
         {
@@ -192,31 +187,13 @@ public class RoomManager : PhotonSingleton<RoomManager>
     {
         EventManager.Instance.PlayerItemChanged();
         
-        // if (PhotonNetwork.IsMasterClient == false)
-        // {
-        //     return;
-        // }
-
         PlayerList.AddPlayerPlacement(newPlayer); // 마스터가 가지고 있는 리스트 업데이트 해주고
         EventManager.Instance.RoomDataChanged();
-        // _photonView.RPC(nameof(Rpc_UpdateSlots), RpcTarget.All, PlayerList.PlayerSlotList.ToArray()); // 전달
     }
     
     public void PlayerLeft(PhotonPlayer player)
     {
-        // if (PhotonNetwork.IsMasterClient == false)
-        // {
-        //     return;
-        // }
-        //
         PlayerList.SubPlayerPlacement(player);
-        EventManager.Instance.RoomDataChanged();
-    }
-    
-    [PunRPC]
-    public void Rpc_UpdateSlots(int[] actorNumbers)
-    {
-        PlayerList.GetPlayerList(actorNumbers);
         EventManager.Instance.RoomDataChanged();
     }
     
@@ -230,13 +207,7 @@ public class RoomManager : PhotonSingleton<RoomManager>
             EventManager.Instance.MapChanged(SelectedMap);
             MapDataManager.Instance.LoadMapData();
         }
-
-        if (propertiesThatChanged.ContainsKey(ERoomProperties.Life.ToString()) &&
-            propertiesThatChanged[ERoomProperties.Life.ToString()] != null)
-        {
-            EventManager.Instance.RoomDataChanged();
-        }
-
+        
         if (propertiesThatChanged.ContainsKey(ERoomProperties.GameMode.ToString()))
         {
             Debug.Log("GameModechange " + propertiesThatChanged[ERoomProperties.GameMode.ToString()]);

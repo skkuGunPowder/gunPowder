@@ -10,13 +10,14 @@ public class UI_ItemStorage : UI_Popup
     public UI_Category UI_Category;
 
     [SerializeField] private List<UI_ItemSlot> _itemSlotList;
-
+    [SerializeField] private bool _isFixed; // 카테고리 고정
+    [SerializeField] private EMainCategory _fixedMainCategory;
+    [SerializeField] private EItemType _fixedItemType;
 
     private ItemStorage _itemStorage;
-
     private UI_ItemSlot _selectedSlot;
 
-
+    
     private void Start()
     {
         _itemStorage = ItemStorage.Instance;
@@ -29,9 +30,15 @@ public class UI_ItemStorage : UI_Popup
         // 아이템 목록 업데이트
         List<InventoryItem> itemList = _itemStorage.GetStoredItemList(currentCategory);
 
-        // 아이템 카테고리 업데이트
-        UI_Category.Refresh(currentCategory, _itemStorage.CurrentMainCategory);
-
+        if (_isFixed)
+        {
+            UI_Category.Refresh(_fixedItemType, _fixedMainCategory);
+        }
+        else
+        {
+            // 아이템 카테고리 업데이트
+            UI_Category.Refresh(currentCategory, _itemStorage.CurrentMainCategory);
+        }
         // 아이템 슬롯 업데이트
         for (int i = 0; i < _itemSlotList.Count; i++)
         {

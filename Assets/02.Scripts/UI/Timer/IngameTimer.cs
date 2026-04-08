@@ -3,10 +3,8 @@ using ExitGames.Client.Photon;
 using UnityEngine;
 using Photon.Pun;
 using PhotonPlayer = Photon.Realtime.Player;
-public class IngameTimer : MonoBehaviour
+public class IngameTimer : TimerBase
 {
-    public UI_TextSlot UI_Timer;
-    private int _initTime;
     private float _timer;
     private int _previousTime;
     private bool _isGameOver;
@@ -16,59 +14,45 @@ public class IngameTimer : MonoBehaviour
     
     private void Start()
     {
-        _initTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
-        _timer = _initTime;
-        _previousTime = _initTime;
-        UI_Timer.TextRefresh(ConvertTime(_initTime));
+        int time = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
+        SetTime(time, 0);
+        _timer = time;
+        UI_Timer.TextRefresh(ConvertTime(time));
         _isGameOver = false;
-        EventManager.Instance.OnTimeCheck += TimeCheck;
-    }
-    
-    private void Update()
-    {
-        if (GameManager.Instance.CurrentGameState == EGameState.Playing || GameManager.Instance.CurrentGameState == EGameState.Result)
-        {
-            GameTimer();
-        }
     }
 
-    private string ConvertTime(int time)
+    // 타이머용 text에 표시될 내용
+    protected override string ConvertTime(int time)
     {
         string timeText = TimeSpan.FromSeconds(time).ToString(@"mm\:ss");
         
         return timeText;
     }
 
-    private void GameTimer()
+    protected override void TimeChange(int time)
     {
-        _timer -= Time.deltaTime;
-
-        if (!_isHurryUp && _timer <= HURRY_UP_TIME && _timer > 0)
+        if (!_isHurryUp && time <= HURRY_UP_TIME && time > 0)
         {
             _isHurryUp = true;
             EventManager.Instance.HurryUp();
         }
 
-        if (_timer <= 0)
+        if (time <= 0)
         {
             if (_isGameOver == true)
             {
                 return;
             }
-            GameOver();
+            
+            EndTimeAction();
             UI_Timer.TextRefresh(ConvertTime(0));
         }
 
-        int currentTime = Mathf.FloorToInt(_timer);
 
-        if (_previousTime != currentTime)
-        {
-            _previousTime = currentTime;
-            UI_Timer.TextRefresh(ConvertTime(currentTime));
-        }
+        UI_Timer.TextRefresh(ConvertTime(time));
     }
 
-    public void GameOver()
+    protected override void EndTimeAction()
     {
         _isGameOver = true;
         if (PhotonNetwork.IsMasterClient == false)
@@ -76,7 +60,7 @@ public class IngameTimer : MonoBehaviour
             return;
         }
         
-        GameManager.Instance.RequestGameOver();
+        EventManager.Instance.TimerEnded();
     }
 
     private void TimeCheck(PhotonPlayer targetPlayer)
@@ -95,8 +79,15 @@ public class IngameTimer : MonoBehaviour
         targetPlayer.SetCustomProperties(hash);
     }
 
-    private void OnDisable()
+    protected override void UnSubScribe()
     {
+        base.UnSubScribe();
         EventManager.Instance.OnTimeCheck -= TimeCheck;
+    }
+    
+    protected override void SubScribe()
+    {
+        base.SubScribe();
+        EventManager.Instance.OnTimeCheck += TimeCheck;
     }
 }

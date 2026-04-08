@@ -14,6 +14,8 @@ public class GameStatePlaying : GameModeStateBase
     private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>(); // 살아 있는 팀원 수 : 팀 / 팀원 수
     private int _count = 0; // 모든 플레이어의 정보가 모였는지 확인
     private int _MaxCount = 0;
+
+    private SecondTimer _timer; 
     
     private void Init()
     { 
@@ -312,7 +314,7 @@ public class GameStatePlaying : GameModeStateBase
         {
             { EProperties.IsDead.ToString(), true },
             { EProperties.Kill.ToString(), stat.TotalKillCount },
-            { EProperties.Damage.ToString(),stat.TotalDamage } 
+            { EProperties.Damage.ToString(),stat.TotalDamage }
         });
     }
     
@@ -365,7 +367,11 @@ public class GameStatePlaying : GameModeStateBase
         _gameSet = true;
     }
 
-    public override void Tick() { }
+    public override void Tick()
+    {
+        // 타이머 
+        _timer?.Tick(Time.deltaTime);   
+    }
 
     public override void Exit()
     {

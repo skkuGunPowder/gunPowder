@@ -11,7 +11,7 @@ public class UI_Category : MonoBehaviour
 {
     public GameObject CharacterCategoryTab;
     public GameObject BombCategoryTab;
-
+    [SerializeField] private EMainCategory _startCategory;
     [SerializeField] private List<UI_MainCategorySlot> _mainCategorieList;
     [SerializeField] private List<UI_CategorySlot> _subCategorieList;
 
