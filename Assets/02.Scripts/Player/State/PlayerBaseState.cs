@@ -53,14 +53,14 @@ public class PlayerBaseState : MonoState
             return;
         }
         
-        _owner.OnHit += HandleHit;
+        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).OnHit += HandleHit;
     }
 
     public override void OnExit()
     {
         base.OnExit();
 
-        _owner.OnHit -= HandleHit;
+        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).OnHit -= HandleHit;
     }
 
     protected virtual void HandleHit()

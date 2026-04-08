@@ -121,6 +121,10 @@ public class PlayerJumpDashState : PlayerBaseState
             if (_landingCheckTimer >= LANDING_CHECK_DELAY && isGroundedNow)
             {
                 _landingConfirmed = true;
+                if (_owner.PhotonView.IsMine)
+                {
+                    PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).InvokeOnLanded();
+                }
             }
         }
 

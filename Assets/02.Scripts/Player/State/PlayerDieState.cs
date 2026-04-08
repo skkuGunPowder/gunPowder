@@ -65,8 +65,17 @@ public class PlayerDieState : PlayerBaseState
         {
             ExecuteDeath();
         }
+
+        // 사망 이벤트 발행
+        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).InvokeOnDeath(new DeathContext
+        {
+            KillerActorNumber = _owner.PlayerStat.GetValidLastAttacker(),
+            IsLastKill = HasNoMoreLives(),
+            IsNormalAttack = _owner.PlayerStat.LastIsNormalAttack
+        });
+
         // 히트 이벤트 해제 (사망 중 추가 피격 방지)
-        _owner.OnHit -= HandleHit;
+        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).OnHit -= HandleHit;
         
     }
 
@@ -132,7 +141,10 @@ public class PlayerDieState : PlayerBaseState
         
         // 플레이어 상태 부활
         _owner.ResurrectPlayer();
-        
+
+        // 부활 이벤트 발행
+        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).InvokeOnResurrected();
+
         // 부활 후 무적 시간 시작
         PostResurrectionImmuneCoroutine().Forget();
         
@@ -320,12 +332,15 @@ public class PlayerDieState : PlayerBaseState
         // 중복 처리 방지
         if (_hasRequestedDestroy) return;
        _hasRequestedDestroy = true;
-       
-       // 죽었음을 먼저 알려주기 
+
+       // 디스폰 이벤트 발행
+       PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).InvokeOnDespawned();
+
+       // 죽었음을 먼저 알려주기
        if (_owner.photonView.IsMine)
        {
            TransitionToObserveState();
-           EventManager.Instance.PlayObserve();   
+           EventManager.Instance.PlayObserve();
        }
     }
 

@@ -12,7 +12,7 @@ public class UI_MyProfilePanel : MonoBehaviour
     public TextMeshProUGUI MyNameText;
     public TextMeshProUGUI MyLevelText;
     public TextMeshProUGUI FriendCountText;
-    public Image MyProfileImage;
+    public ProfileSkin MyProfileImage;
 
     private void OnEnable()
     {

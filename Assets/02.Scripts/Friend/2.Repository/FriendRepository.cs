@@ -1,81 +1,163 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Firebase.Firestore;
-using UnityEngine;
+using BackEnd;
+using LitJson;
 
+// Backend.Friend API를 래핑하여 도메인 객체(Friend)로 변환하는 Repository.
+// Raw 데이터의 저장/불러오기를 담당한다. 비동기 콜백 패턴 사용.
 public class FriendRepository
 {
-    private const string COLLECTION_NAME = "UserAccount";
-    private const string FRIEND_REQUESTS = "FriendRequests";
-    private const string FRIENDS = "Friends";
-    private CollectionReference _userCollection => FirebaseManager.Instance.DB.Collection(COLLECTION_NAME);
+    // ===== 쓰기 (Command) =====
 
-    // 친구요청 목록 가져오기
-    public async Task<List<string>> GetFriendRequestsAsync(string userUid)
+    // 닉네임 → inDate 조회 → gamerIndate 기반 친구 요청
+    public void RequestFriendByNickname(string nickname, Action<bool, string> callback)
     {
-        var doc = await _userCollection.Document(userUid).GetSnapshotAsync();
-        return doc.TryGetValue(FRIEND_REQUESTS, out List<string> list) ? list : new List<string>();
-    }
-
-    // 친구요청 보내기
-    public async Task AddFriendRequestAsync(string recipientUid, string senderUid)
-    {
-        await _userCollection.Document(recipientUid)
-            .UpdateAsync(FRIEND_REQUESTS, FieldValue.ArrayUnion(senderUid));
-    }
-
-    // 친구요청 삭제
-    public async Task RemoveFriendRequestAsync(string recipientUid, string senderUid)
-    {
-        await _userCollection.Document(recipientUid)
-            .UpdateAsync(FRIEND_REQUESTS, FieldValue.ArrayRemove(senderUid));
-    }
-
-    // 친구 목록 가져오기
-    public async Task<List<string>> GetFriendsAsync(string userUid)
-    {
-        var doc = await _userCollection.Document(userUid).GetSnapshotAsync();
-        return doc.TryGetValue(FRIENDS, out List<string> list) ? list : new List<string>();
-    }
-
-    // 친구 추가
-    public async Task AddFriendAsync(string userUid, string friendUid)
-    {
-        WriteBatch batch = FirebaseManager.Instance.DB.StartBatch();
-        var userDoc = _userCollection.Document(userUid);
-        var friendDoc = _userCollection.Document(friendUid);
-
-        batch.Update(userDoc, new Dictionary<string, object>
+        Backend.Social.GetUserInfoByNickNameV2(nickname, bro =>
         {
-            { FRIENDS, FieldValue.ArrayUnion(friendUid) }
+            if (bro.IsSuccess())
+            {
+                JsonData inDateNode = bro.GetReturnValuetoJSON()["row"]["inDate"];
+                // GetUserInfoByNickNameV2 응답은 plain string 또는 {"S":"..."} 형태일 수 있음
+                string inDate = inDateNode.IsObject && ((IDictionary<string, JsonData>)inDateNode).ContainsKey("S")
+                    ? inDateNode["S"].ToString()
+                    : inDateNode.ToString();
+                RequestFriend(inDate, callback);
+            }
+            else
+            {
+                callback?.Invoke(false, $"유저 정보 조회 실패: {bro.GetMessage()}");
+            }
         });
-
-        batch.Update(friendDoc, new Dictionary<string, object>
-        {
-            { FRIENDS, FieldValue.ArrayUnion(userUid) }
-        });
-
-        await batch.CommitAsync();
     }
 
-    // 친구 삭제
-    public async Task RemoveFriendAsync(string userUid, string friendUid)
+    // gamerIndate 기반 친구 요청
+    public void RequestFriend(string gamerIndate, Action<bool, string> callback)
     {
-        WriteBatch batch = FirebaseManager.Instance.DB.StartBatch();
-        var userDoc = _userCollection.Document(userUid);
-        var friendDoc = _userCollection.Document(friendUid);
-
-        batch.Update(userDoc, new Dictionary<string, object>
+        Backend.Friend.RequestFriend(gamerIndate, bro =>
         {
-            { FRIENDS, FieldValue.ArrayRemove(friendUid) }
+            if (bro.IsSuccess())
+                callback?.Invoke(true, "친구 요청을 보냈습니다.");
+            else
+                callback?.Invoke(false, ParseError(bro));
         });
+    }
 
-        batch.Update(friendDoc, new Dictionary<string, object>
+    public void AcceptFriend(string gamerIndate, Action<bool, string> callback)
+    {
+        Backend.Friend.AcceptFriend(gamerIndate, bro =>
         {
-            { FRIENDS, FieldValue.ArrayRemove(userUid) }
+            if (bro.IsSuccess())
+                callback?.Invoke(true, "친구 요청을 수락했습니다.");
+            else
+                callback?.Invoke(false, ParseError(bro));
         });
+    }
 
-        await batch.CommitAsync();
+    public void RejectFriend(string gamerIndate, Action<bool, string> callback)
+    {
+        Backend.Friend.RejectFriend(gamerIndate, bro =>
+        {
+            if (bro.IsSuccess())
+                callback?.Invoke(true, "친구 요청을 거절했습니다.");
+            else
+                callback?.Invoke(false, ParseError(bro));
+        });
+    }
+
+    public void RevokeSentRequest(string gamerIndate, Action<bool, string> callback)
+    {
+        Backend.Friend.RevokeSentRequest(gamerIndate, bro =>
+        {
+            if (bro.IsSuccess())
+                callback?.Invoke(true, "친구 요청을 취소했습니다.");
+            else
+                callback?.Invoke(false, ParseError(bro));
+        });
+    }
+
+    public void BreakFriend(string gamerIndate, Action<bool, string> callback)
+    {
+        Backend.Friend.BreakFriend(gamerIndate, bro =>
+        {
+            if (bro.IsSuccess())
+                callback?.Invoke(true, "친구를 삭제했습니다.");
+            else
+                callback?.Invoke(false, ParseError(bro));
+        });
+    }
+
+    // ===== 읽기 (Query) → Friend 도메인 객체로 변환하여 반환 =====
+
+    public void GetFriendList(int limit, int offset, Action<bool, List<Friend>> callback)
+    {
+        Backend.Friend.GetFriendList(limit, offset, bro =>
+        {
+            if (bro.IsSuccess())
+                callback?.Invoke(true, ParseRows(bro));
+            else
+                callback?.Invoke(false, null);
+        });
+    }
+
+    public void GetReceivedRequestList(int limit, int offset, Action<bool, List<Friend>> callback)
+    {
+        Backend.Friend.GetReceivedRequestList(limit, offset, bro =>
+        {
+            if (bro.IsSuccess())
+                callback?.Invoke(true, ParseRows(bro));
+            else
+                callback?.Invoke(false, null);
+        });
+    }
+
+    public void GetSentRequestList(int limit, int offset, Action<bool, List<Friend>> callback)
+    {
+        Backend.Friend.GetSentRequestList(limit, offset, bro =>
+        {
+            if (bro.IsSuccess())
+                callback?.Invoke(true, ParseRows(bro));
+            else
+                callback?.Invoke(false, null);
+        });
+    }
+
+    // ===== Raw 데이터 파싱 =====
+
+    private List<Friend> ParseRows(BackendReturnObject bro)
+    {
+        List<Friend> list = new List<Friend>();
+        JsonData rows = bro.GetReturnValuetoJSON()["rows"];
+
+        if (rows == null || rows.Count == 0)
+            return list;
+
+        for (int i = 0; i < rows.Count; i++)
+        {
+            JsonData row = rows[i];
+            string nickname = row.ContainsKey("nickname") ? row["nickname"]["S"].ToString() : "";
+            string inDate   = row.ContainsKey("inDate")   ? row["inDate"]["S"].ToString()   : "";
+            string createdAt = row.ContainsKey("createdAt") ? row["createdAt"]["S"].ToString() : "";
+            string lastLogin = row.ContainsKey("lastLogin") ? row["lastLogin"]["S"].ToString() : "";
+
+            list.Add(new Friend(nickname, inDate, createdAt, lastLogin));
+        }
+
+        return list;
+    }
+
+    private string ParseError(BackendReturnObject bro)
+    {
+        int statusCode = int.Parse(bro.GetStatusCode());
+
+        if (statusCode == 412)
+        {
+            string errorCode = bro.GetErrorCode();
+            if (errorCode.Contains("maxRequestedGamerFriend"))
+                return "상대방의 친구가 최대 인원수에 도달하였습니다.";
+            if (errorCode.Contains("maxGamerFriend"))
+                return "친구가 최대 인원수에 도달하였습니다.";
+        }
+
+        return $"오류 발생: {bro.GetMessage()}";
     }
 }

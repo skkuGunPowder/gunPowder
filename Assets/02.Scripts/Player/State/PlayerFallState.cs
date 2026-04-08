@@ -73,7 +73,13 @@ public class PlayerFallState : PlayerBaseState
         HandleJumpCountIncrement();
 
         _owner.PlayerStat.IsJumping = true;
-        
+
+        // 공중 전환 이벤트 발행
+        if (_owner.PhotonView.IsMine)
+        {
+            PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).InvokeOnAirborne();
+        }
+
         // 착지 감지 초기화
         InitializeLandingDetection();
 
@@ -149,7 +155,12 @@ public class PlayerFallState : PlayerBaseState
         
         // 착지 확인 (일정 시간 동안 지속적으로 땅에 닿아있어야 함)
         bool isLandingConfirmed = ConfirmLanding(isGroundedNow);
-        
+
+        if (isLandingConfirmed && _owner.PhotonView.IsMine)
+        {
+            PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).InvokeOnLanded();
+        }
+
         _wasGroundedLastFrame = isGroundedNow;
         return isLandingConfirmed;
     }

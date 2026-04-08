@@ -120,6 +120,9 @@ public class PlayerGunpowderController : MonoBehaviour
 
             _playerStat.DecreaseHP(_playerStat.AttackPenaltyAmount, _photonView.OwnerActorNr, isNormalAttack: true, ignoreImmune: true);
 
+            // 패널티 발동 이벤트
+            PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnNoAttackPenaltyTriggered();
+
             // GP 감소 (음수 허용)
             _playerStat.DecreaseGP(NO_ATTACK_RELEASE_COUNT);
 
@@ -147,6 +150,7 @@ public class PlayerGunpowderController : MonoBehaviour
             if (ratio >= REDNESS_START_RATIO && !_isNoAttackWarningActive)
             {
                 RPC_SetNoAttackWarningState(true, (float)PhotonNetwork.Time);
+                PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnNoAttackPenaltyStart();
             }
             // 경고 종료 (ratio가 0.4 미만일 때)
             else if (ratio < REDNESS_START_RATIO && _isNoAttackWarningActive)
@@ -290,6 +294,7 @@ public class PlayerGunpowderController : MonoBehaviour
         if (_photonView != null && _photonView.IsMine)
         {
             RPC_SetNoAttackWarningState(false, 0f);
+            PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnNoAttackPenaltyReset();
         }
         ResetColorAndEffects();
     }
