@@ -77,11 +77,34 @@ public class PopupManager : Singleton<PopupManager>
             if (popup.name == popupName)
             {
                 popup.Open(closeCallback);
-                _popupStack.Push(popup);
+
+                if (popup.CanCloseESC)
+                {
+                    _popupStack.Push(popup);   
+                }
+                
                 return popup;
             }
         }
         Debug.LogError($"[PopupManager] 팝업을 찾을 수 없습니다: {popupName}");
+        return null;
+    }
+
+    // 팝업 체크할 때 가져오기
+    public UI_Popup GetPopup(EPopupType popupType)
+    {
+        foreach (UI_Popup popup in PopupList)
+        {
+            if (popup.name != popupType.ToString())
+            {
+                continue;
+            }
+            
+            return popup;
+        }
+        
+        
+        Debug.LogError($"[PopupManager] 팝업을 찾을 수 없습니다: {popupType.ToString()}");
         return null;
     }
 

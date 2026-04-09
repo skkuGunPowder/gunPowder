@@ -6,6 +6,7 @@ public class GameStartProduction : MonoBehaviour
 {
     public RectTransform TopPivot;
     public RectTransform Profile;
+    public GameObject Timer;
     [Header("게임 시작 텍스트")]
     public GameObject GameStartCountText1;
     public GameObject GameStartText;
@@ -35,7 +36,6 @@ public class GameStartProduction : MonoBehaviour
     private void Awake()
     {
         // EventManager.Instance.OnLoadFinished += Play;
-        InputHandler.BlockInput = true;
     }
 
     private void Start()
@@ -44,6 +44,7 @@ public class GameStartProduction : MonoBehaviour
     }
     public void Play()
     {
+        Timer.gameObject.SetActive(true);
         DOTween.To(() => TopPivot.offsetMax, x => TopPivot.offsetMax = x, new Vector2(TopPivot.offsetMax.x, TopPivotY),
             DotweenDuration).SetEase(TimerEase).SetUpdate(true);
         Profile.DOAnchorPos(ProfileEndPosition, DotweenDuration).SetEase(ProfileEase).SetUpdate(true);
@@ -51,6 +52,8 @@ public class GameStartProduction : MonoBehaviour
 
     public void GameStart()
     {
+        InputHandler.BlockInput = true;
+        
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.AppendCallback(Play);
         sequence.Append(GameStartCountText3.transform.DOScale(GameStartTextScale, GameStartTextSpeed)
@@ -84,8 +87,24 @@ public class GameStartProduction : MonoBehaviour
     {
         GameManager.Instance.GameStartSetting();
         SoundManager.Instance.PlayLocalSound(nameof(GameStartBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
-        InputHandler.BlockInput = false;
+        PopupCloseCheck();
+        // InputHandler.BlockInput = false;
         // BombSelect 상태일 때만 폭탄 선택 단계 시작 (Playing 상태에서는 미발동)
+    }
+    
+    // 팝업창이 여전히 열려있는지 체크
+    private void PopupCloseCheck()
+    {
+        UI_TempStorage popup = (UI_TempStorage)PopupManager.Instance.GetPopup(EPopupType.UI_TempStorage);
+
+        if (popup.gameObject.activeSelf)
+        {
+            InputHandler.BlockInput = true;
+        }
+        else
+        {
+            InputHandler.BlockInput = false;
+        }
     }
     private void OnDisable()
     {

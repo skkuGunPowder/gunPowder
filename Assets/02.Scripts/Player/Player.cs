@@ -326,10 +326,11 @@ public class Player : MonoBehaviourPun, IDamagable
         SpriteFlipx();
 
         // 서브폭탄이 있으면 서브폭탄 스탯, 없으면 메인폭탄 스탯으로 대체
+        EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO mainBombForSpecial);
         if (EquipedItemDict.TryGetValue(EItemType.SubBomb, out ItemDTO subBomb) && subBomb != null)
             SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(subBomb.ID);
-        else
-            SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(EquipedItemDict[EItemType.Bomb].ID);
+        else if (mainBombForSpecial != null)
+            SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(mainBombForSpecial.ID);
 
         // 메인 폭탄 쿨타임 스탯 업데이트 (Z키 쿨타임)
         if (EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO mainBomb) && mainBomb != null)
@@ -337,9 +338,10 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 궁극기 설정
         // TODO: [궁극기 슬롯 전환] Z슬롯 폭탄 교체 구현 후, EquipedItemDict[EItemType.Bomb].ID 대신 Z슬롯 아이템 ID 기반으로 변경
-        if (UltimateManager.Instance != null && _ultimateController != null)
+        if (UltimateManager.Instance != null && _ultimateController != null
+            && EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO bombForUlt) && bombForUlt != null)
         {
-            Ultimate ultimate = UltimateManager.Instance.GetUltimate(EquipedItemDict[EItemType.Bomb].ID, this);
+            Ultimate ultimate = UltimateManager.Instance.GetUltimate(bombForUlt.ID, this);
             _ultimateController.SetUltimate(ultimate);
         }
 

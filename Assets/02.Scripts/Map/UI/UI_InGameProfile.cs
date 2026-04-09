@@ -58,10 +58,21 @@ public class UI_InGameProfile : MonoBehaviour
         {
             if (i < reorderedPlayers.Length)
             {
-                ItemDTO item = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.Bomb.ToString()].ToString());
-                ItemDTO sub = ItemDatabase.Instance.GetItem(reorderedPlayers[i].CustomProperties[EItemType.SubBomb.ToString()]
-                        .ToString());
+                PhotonPlayer player = reorderedPlayers[i];
+                string bombKey = EItemType.Bomb.ToString();
+                string subBombKey = EItemType.SubBomb.ToString();
 
+                string bombId = (player.CustomProperties.ContainsKey(bombKey) && player.CustomProperties[bombKey] != null)
+                    ? player.CustomProperties[bombKey].ToString()
+                    : "BO0001";
+
+                string subBombId = (player.CustomProperties.ContainsKey(subBombKey) && player.CustomProperties[subBombKey] != null)
+                    ? player.CustomProperties[subBombKey].ToString()
+                    : "BO0005";
+                
+                ItemDTO item = ItemDatabase.Instance.GetItem(bombId);
+                ItemDTO sub = ItemDatabase.Instance.GetItem(subBombId);
+                
                 Sprite bomb = item.Image;
                 Sprite subImage = sub.Image;
                 
@@ -156,10 +167,19 @@ public class UI_InGameProfile : MonoBehaviour
 
     private void PlayerBombChange(PhotonPlayer changedPlayer)
     {
-        
-        ItemDTO item = ItemDatabase.Instance.GetItem(changedPlayer.CustomProperties[EItemType.Bomb.ToString()].ToString());
-        ItemDTO sub = ItemDatabase.Instance.GetItem(changedPlayer.CustomProperties[EItemType.SubBomb.ToString()]
-            .ToString());
+        string bombKey = EItemType.Bomb.ToString();
+        string subBombKey = EItemType.SubBomb.ToString();
+
+        string bombId = (changedPlayer.CustomProperties.ContainsKey(bombKey) && changedPlayer.CustomProperties[bombKey] != null)
+            ? changedPlayer.CustomProperties[bombKey].ToString()
+            : "BO0001";
+
+        string subBombId = (changedPlayer.CustomProperties.ContainsKey(subBombKey) && changedPlayer.CustomProperties[subBombKey] != null)
+            ? changedPlayer.CustomProperties[subBombKey].ToString()
+            : "BO0005";
+
+        ItemDTO item = ItemDatabase.Instance.GetItem(bombId);
+        ItemDTO sub = ItemDatabase.Instance.GetItem(subBombId);
         
         if (changedPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {

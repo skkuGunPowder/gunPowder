@@ -3,11 +3,12 @@ using UnityEngine;
 
 public class GameStateBombSelect : GameModeStateBase
 {
-    [SerializeField] private float _bombSelectDuration = 10f;
-
-    private float _timer;
+    [SerializeField] private int _bombSelectDuration = 10;
+    
     private bool _phaseStarted;
     private bool _stateChangeRequested;
+    
+    private SecondTimer _secondTimer;
 
     public static bool IsActive { get; private set; } // 현재 BombSelect 상태인지 여부
 
@@ -20,26 +21,36 @@ public class GameStateBombSelect : GameModeStateBase
         OnPhaseStart();
         
         // 아이템 보관함 열기 (닫을 때 인풋 해제)
-        PopupManager.Instance.Open(EPopupType.UI_ItemStorage, () => InputHandler.BlockInput = false);
+        PopupManager.Instance.Open(EPopupType.UI_TempStorage, () => InputHandler.BlockInput = false);
+        
+        // 시간 설정
+        int second = _bombSelectDuration;
+        
+        _secondTimer = new SecondTimer(second,OnTimeOver,
+            (sec) => EventManager.Instance.TimerUpdate(sec)
+        );
     }
 
     private void OnPhaseStart()
     {
-        _timer = _bombSelectDuration;
+        InputHandler.BlockInput = true;
         _phaseStarted = true;
     }
 
     public override void Tick()
     {
-        if (!_phaseStarted || _stateChangeRequested) return;
+        _secondTimer?.Tick(Time.unscaledDeltaTime);
+    }
 
-        _timer -= Time.unscaledDeltaTime;
-
-        if (_timer <= 0f && PhotonNetwork.IsMasterClient)
+    private void OnTimeOver()
+    {
+        if (PhotonNetwork.IsMasterClient == false)
         {
-            _stateChangeRequested = true;
-            _gameMode.RequestStateChange(EModeState.Playing);
+            return;
         }
+        
+        _stateChangeRequested = true;
+        _gameMode.RequestStateChange(EModeState.Playing);
     }
 
     public override void Exit()

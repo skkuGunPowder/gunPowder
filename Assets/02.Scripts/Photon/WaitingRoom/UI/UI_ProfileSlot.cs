@@ -46,11 +46,23 @@ public class UI_ProfileSlot : MonoBehaviour
         
         // life
         LifeSet();
-        // bomb
-        ItemDTO item = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.Bomb.ToString()].ToString());
-        ItemDTO sub = ItemDatabase.Instance.GetItem(player.CustomProperties[EItemType.SubBomb.ToString()].ToString());
-        SubBombImage.sprite = sub.Image;
+        // bomb null 체크
+        
+        string bombKey = EItemType.Bomb.ToString();
+        string subBombKey = EItemType.SubBomb.ToString();
+
+        string bombId = (player.CustomProperties.ContainsKey(bombKey) && player.CustomProperties[bombKey] != null)
+            ? player.CustomProperties[bombKey].ToString()
+            : "BO0001";
+
+        string subBombId = (player.CustomProperties.ContainsKey(subBombKey) && player.CustomProperties[subBombKey] != null)
+            ? player.CustomProperties[subBombKey].ToString()
+            : "BO0005";
+
+        ItemDTO item = ItemDatabase.Instance.GetItem(bombId);
+        ItemDTO sub = ItemDatabase.Instance.GetItem(subBombId);
         BombImage.sprite = item.Image;
+        SubBombImage.sprite = sub.Image;
         
         if (ChatListener != null) 
             ChatListener.SetOwner(player.NickName);

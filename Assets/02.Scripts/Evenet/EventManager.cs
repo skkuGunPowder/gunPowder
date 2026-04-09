@@ -247,4 +247,19 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnHurryUp?.Invoke();
     }
+
+    public event Action<int> OnTimerUpdate; // GameModeState.Tick() → 타이머 구동 (per-frame)
+
+    public void TimerUpdate(int time)
+    {
+        OnTimerUpdate?.Invoke(time);
+    }
+        
+
+    public event Action OnTimerEnd; // BombSelectTimer 종료 → 상태 전환용
+
+    public void TimerEnded()
+    {
+        OnTimerEnd?.Invoke();
+    }
 }
