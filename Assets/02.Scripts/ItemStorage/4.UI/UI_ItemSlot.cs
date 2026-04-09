@@ -25,13 +25,16 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable, IPointerClickHandler
         Item = item;
         ItemIcon.sprite = Item.Image;
 
-        if (Item.IsEquipped)
+        InventoryItem subBomb = ItemStorage.Instance.GetEquippedSubBomb();
+        bool isSubBombSlot = subBomb != null && subBomb.ID == Item.ID;
+
+        if (Item.IsEquipped || isSubBombSlot)
         {
             gameObject.SetActive(false);
         }
         else
         {
-           gameObject.SetActive(true);
+            gameObject.SetActive(true);
         }
     }
 

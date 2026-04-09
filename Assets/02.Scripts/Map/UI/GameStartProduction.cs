@@ -84,7 +84,7 @@ public class GameStartProduction : MonoBehaviour
     {
         GameManager.Instance.GameStartSetting();
         SoundManager.Instance.PlayLocalSound(nameof(GameStartBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
-        InputHandler.BlockInput = false;
+        // InputHandler.BlockInput = false;
         // BombSelect 상태일 때만 폭탄 선택 단계 시작 (Playing 상태에서는 미발동)
     }
     private void OnDisable()

@@ -10,7 +10,7 @@ public class UI_EquipmentSlot : MonoBehaviour, ISelectable
     public Image SelectedIcon;
 
 
-    public void Refresh(InventoryItem item)
+    public virtual void Refresh(InventoryItem item)
     {
         if (item == null)
         {
@@ -25,14 +25,22 @@ public class UI_EquipmentSlot : MonoBehaviour, ISelectable
 
     public void Select()
     {
-        SelectedIcon.gameObject.SetActive(true);
+        SelectAction();
     }
 
     public void Deselect()
     {
-        SelectedIcon.gameObject.SetActive(false);
+        DeSelectAction();
     }
 
+    protected virtual void SelectAction()
+    {
+        SelectedIcon.gameObject.SetActive(true);
+    }
+    protected virtual void DeSelectAction()
+    {
+        SelectedIcon.gameObject.SetActive(false);   
+    }
     public void OnClick()
     {
         if (Item == null)

@@ -6,7 +6,6 @@ public class UI_ItemStorage : UI_Popup
 {
     public TextMeshProUGUI ItemNameText;
     public UI_EquipmentSlot EquipmentSlot;
-    public UI_EquipmentSlot SubEquipmentSlot;
     public UI_Category UI_Category;
 
     [SerializeField] private List<UI_ItemSlot> _itemSlotList;
@@ -14,7 +13,7 @@ public class UI_ItemStorage : UI_Popup
     [SerializeField] private EMainCategory _fixedMainCategory;
     [SerializeField] private EItemType _fixedItemType;
 
-    private ItemStorage _itemStorage;
+    protected ItemStorage _itemStorage;
     private UI_ItemSlot _selectedSlot;
 
     
@@ -25,7 +24,7 @@ public class UI_ItemStorage : UI_Popup
         Refresh(_itemStorage.CurrentCategory);
     }
 
-    private void Refresh(EItemType currentCategory)
+    protected virtual void Refresh(EItemType currentCategory)
     {
         // 아이템 목록 업데이트
         List<InventoryItem> itemList = _itemStorage.GetStoredItemList(currentCategory);
@@ -70,14 +69,7 @@ public class UI_ItemStorage : UI_Popup
         }
 
         // 장착 슬롯 업데이트
-        InventoryItem EquippedItem = _itemStorage.GetEquppedItem(currentCategory);
-        EquipmentSlot.Refresh(EquippedItem);
-        // SubEquipmentSlot: Bomb 카테고리일 때만 활성화 및 갱신
-        SubEquipmentSlot.gameObject.SetActive(currentCategory == EItemType.Bomb);
-        if (currentCategory == EItemType.Bomb)
-        { 
-            SubEquipmentSlot.Refresh(_itemStorage.GetEquippedSubBomb());   
-        }
+        EquipmentSlotRefresh(currentCategory);
         
         if (_selectedSlot == null || !_selectedSlot.Item.IsEquipped)
         {
@@ -97,6 +89,12 @@ public class UI_ItemStorage : UI_Popup
         {
             ItemNameText.text = _selectedSlot.Item.Item.Name;
         }
+    }
+
+    protected virtual void EquipmentSlotRefresh(EItemType currentCategory)
+    {
+        InventoryItem EquippedItem = _itemStorage.GetEquppedItem(currentCategory);
+        EquipmentSlot.Refresh(EquippedItem);
     }
 
     public void Confirm()

@@ -291,10 +291,10 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
             throw new Exception("해제하려는 아이템이 없습니다!");
         }
 
-        if(item.Item.ItemType == EItemType.Bomb)
-        {
-            return;
-        }
+        // if(item.Item.ItemType == EItemType.Bomb)
+        // {
+        //     return;
+        // }
 
         InventoryItem desiredItem = _storedItemDict[item.Item.ItemType].Find(x => x.ID == item.ID);
         if(desiredItem == null)

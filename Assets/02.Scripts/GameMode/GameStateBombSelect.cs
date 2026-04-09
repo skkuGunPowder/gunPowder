@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class GameStateBombSelect : GameModeStateBase
 {
-    [SerializeField] private float _bombSelectDuration = 10f;
-
-    private float _timer;
-    private int _lastTickedSecond;
+    [SerializeField] private int _bombSelectDuration = 10;
+    
     private bool _phaseStarted;
     private bool _stateChangeRequested;
+    
+    private SecondTimer _secondTimer;
 
     public static bool IsActive { get; private set; } // 현재 BombSelect 상태인지 여부
 
@@ -21,35 +21,35 @@ public class GameStateBombSelect : GameModeStateBase
         OnPhaseStart();
         
         // 아이템 보관함 열기 (닫을 때 인풋 해제)
-        PopupManager.Instance.Open(EPopupType.UI_ItemStorage, () => InputHandler.BlockInput = false);
+        PopupManager.Instance.Open(EPopupType.UI_TempStorage, () => InputHandler.BlockInput = false);
+        
+        // 시간 설정
+        int second = _bombSelectDuration;
+        
+        _secondTimer = new SecondTimer(second,OnTimeOver,
+            (sec) => EventManager.Instance.TimerUpdate(sec)
+        );
     }
 
     private void OnPhaseStart()
     {
-        _timer = _bombSelectDuration;
-        _lastTickedSecond = Mathf.CeilToInt(_timer);
         _phaseStarted = true;
-        EventManager.Instance.BombSelectTimerTick(_lastTickedSecond);
     }
 
     public override void Tick()
     {
-        if (!_phaseStarted || _stateChangeRequested) return;
+        _secondTimer?.Tick(Time.unscaledDeltaTime);
+    }
 
-        _timer -= Time.unscaledDeltaTime;
-
-        int currentSecond = Mathf.CeilToInt(_timer);
-        if (currentSecond != _lastTickedSecond)
+    private void OnTimeOver()
+    {
+        if (PhotonNetwork.IsMasterClient == false)
         {
-            _lastTickedSecond = currentSecond;
-            EventManager.Instance.BombSelectTimerTick(currentSecond);
+            return;
         }
-
-        if (_timer <= 0f && PhotonNetwork.IsMasterClient)
-        {
-            _stateChangeRequested = true;
-            _gameMode.RequestStateChange(EModeState.Playing);
-        }
+        
+        _stateChangeRequested = true;
+        _gameMode.RequestStateChange(EModeState.Playing);
     }
 
     public override void Exit()

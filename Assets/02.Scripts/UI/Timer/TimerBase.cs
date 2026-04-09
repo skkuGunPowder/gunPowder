@@ -14,7 +14,6 @@ public class TimerBase : MonoBehaviour
 
     private void OnDisable()
     {
-        UnSubScribe();
     }
 
     // 시작 시간 정하기
@@ -38,6 +37,7 @@ public class TimerBase : MonoBehaviour
     protected virtual void EndTimeAction()
     {
         // 시간이 끝났을 때 해야할 행동
+        UnSubScribe();
     }
 
     protected virtual void SubScribe()

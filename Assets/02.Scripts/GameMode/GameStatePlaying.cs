@@ -21,7 +21,8 @@ public class GameStatePlaying : GameModeStateBase
     { 
         EventManager.Instance.GameStart(); // 게임 시작 321
         EventManager.Instance.ProfileInit(); // 프로필 리프레시
-        // TeamSetting(); // 팀개수 팀원 수 체크
+        
+        // 시간 초
         
         // 팀원 추가
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
@@ -36,6 +37,13 @@ public class GameStatePlaying : GameModeStateBase
         }
         
         _MaxCount = players.Length;
+        
+        // 시간 설정
+        int playTime = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
+        
+        _timer = new SecondTimer(playTime, () => { if(PhotonNetwork.IsMasterClient) OnTimeOver(); },
+            (sec) => EventManager.Instance.TimerUpdate(sec)
+        );
     }
 
     public override void Enter()
@@ -47,6 +55,7 @@ public class GameStatePlaying : GameModeStateBase
         EventManager.Instance.OnPlayerLeft += OnPlayerLeft;
         EventManager.Instance.OnLastDieComplete += GameResultCheck;
         EventManager.Instance.OnGameStateChangeCheck += GameStateChangeCheck;
+
         OnPlayerLeft(); // 플레이어가 게임 시작 전에 나간경우를 체크하기 위함
     }
 
@@ -131,6 +140,7 @@ public class GameStatePlaying : GameModeStateBase
     private void GameStateChangeCheck()
     {
         _count++;
+        _timer.Destroy();
         
         if (_count >= _MaxCount)
         {
@@ -310,6 +320,9 @@ public class GameStatePlaying : GameModeStateBase
             fsm.SyncStateChange<PlayerDieState>();
         }
         
+        // 방장에게 시간 체크
+        _photonView.RPC(nameof(RPC_RequestSurvivorTime), RpcTarget.MasterClient);
+        
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
         {
             { EProperties.IsDead.ToString(), true },
@@ -318,6 +331,19 @@ public class GameStatePlaying : GameModeStateBase
         });
     }
     
+    private void OnTimeOver()
+    {
+        _photonView.RPC(nameof(RPC_TimeOver), RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_TimeOver()
+    {
+        GameManager.Instance.GameStateChange(EGameState.Result);
+        SetGameSet();
+        GameResultCheck();
+    }
+
     // 타임 오버가 되었을 때 로컬 플레이어가 살아있는 경우 나의 프로퍼티를 보낸다.
     public void GameResultCheck()
     {
@@ -345,8 +371,24 @@ public class GameStatePlaying : GameModeStateBase
     [PunRPC]
     private void RPC_RequestSurvivorTime(PhotonMessageInfo info)
     {
-        // 방장의 타이머로 요청한 플레이어의 SurvivorTime 설정
-        EventManager.Instance.TimeCheck(info.Sender);
+        SurvivorTimeCheck(info.Sender);
+    }
+
+    private void SurvivorTimeCheck(PhotonPlayer player)
+    {
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+
+        int playtime = _timer.GetSurviveTime();
+        
+        Hashtable hash = new Hashtable() 
+        {
+            {EProperties.SurvivorTime.ToString(), playtime} 
+        };
+            
+        player.SetCustomProperties(hash);
     }
     
     // LastDie로 죽었을 때 변화

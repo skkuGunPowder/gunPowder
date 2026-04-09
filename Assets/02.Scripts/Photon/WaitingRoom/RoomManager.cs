@@ -73,7 +73,11 @@ public class RoomManager : PhotonSingleton<RoomManager>
         _initialized = true;
         SetRoom();
         Initializer.Init(this);
-
+        
+        // 인풋 막기
+        InputHandler.BlockInput = true;
+        PopupManager.Instance.Open(EPopupType.UI_TempStorage, () => InputHandler.BlockInput = false);
+        
         // 인게임 채팅 채널 자동 참가
         if (UIChatManager.Instance != null)
         {
@@ -252,6 +256,13 @@ public class RoomManager : PhotonSingleton<RoomManager>
         EventManager.Instance.OnPlayerLeft -= PlayerLeft;
     }
 
+    private void Update()
+    {
+        if (InputHandler.GetKeyDown(KeyCode.A))
+        {
+            PopupManager.Instance.Open(EPopupType.UI_TempStorage);
+        }
+    }
 }
     
     
