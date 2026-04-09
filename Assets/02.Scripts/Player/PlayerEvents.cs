@@ -68,64 +68,64 @@ public class PlayerEvents
     // Invoke 래퍼 메서드
 
     // 스폰됨 (첫 스폰)
-    public void InvokeOnSpawned() { Debug.Log("[PlayerEvents] 스폰됨"); OnSpawned?.Invoke(); }
+    public void InvokeOnSpawned() { OnSpawned?.Invoke(); }
     // 부활 (카트리지로 인한 부활)
-    public void InvokeOnResurrected() { Debug.Log("[PlayerEvents] 부활"); OnResurrected?.Invoke(); }
+    public void InvokeOnResurrected() { OnResurrected?.Invoke(); }
     // 사망
-    public void InvokeOnDeath(DeathContext ctx) { Debug.Log($"[PlayerEvents] 사망 (킬러: {ctx.KillerActorNumber}, 마지막킬: {ctx.IsLastKill}, 일반공격: {ctx.IsNormalAttack})"); OnDeath?.Invoke(ctx); }
+    public void InvokeOnDeath(DeathContext ctx) { OnDeath?.Invoke(ctx); }
     // 디스폰됨
-    public void InvokeOnDespawned() { Debug.Log("[PlayerEvents] 디스폰됨"); OnDespawned?.Invoke(); }
+    public void InvokeOnDespawned() { OnDespawned?.Invoke(); }
 
     // 공격 입력 (반동 등을 위해)
-    public void InvokeOnAttack() { Debug.Log("[PlayerEvents] 공격 입력"); OnAttack?.Invoke(); }
+    public void InvokeOnAttack() { OnAttack?.Invoke(); }
     // Z 공격
-    public void InvokeOnNormalAttack() { Debug.Log("[PlayerEvents] Z 공격"); OnNormalAttack?.Invoke(); }
+    public void InvokeOnNormalAttack() { OnNormalAttack?.Invoke(); }
     // X 공격
-    public void InvokeOnSpecialAttack() { Debug.Log("[PlayerEvents] X 공격"); OnSpecialAttack?.Invoke(); }
+    public void InvokeOnSpecialAttack() { OnSpecialAttack?.Invoke(); }
     // 공격 적중
-    public void InvokeOnAttackHit(AttackHitContext ctx) { Debug.Log($"[PlayerEvents] 공격 적중 (피격자: {ctx.VictimActorNumber}, 데미지: {ctx.Damage}, 크리티컬: {ctx.IsCritical})"); OnAttackHit?.Invoke(ctx); }
+    public void InvokeOnAttackHit(AttackHitContext ctx) { OnAttackHit?.Invoke(ctx); }
     // 처치 성공
-    public void InvokeOnKillConfirmed(KillContext ctx) { Debug.Log($"[PlayerEvents] 처치 성공 (피격자: {ctx.VictimActorNumber}, 마지막킬: {ctx.IsLastKill}, 일반공격: {ctx.IsNormalAttack})"); OnKillConfirmed?.Invoke(ctx); }
+    public void InvokeOnKillConfirmed(KillContext ctx) { OnKillConfirmed?.Invoke(ctx); }
 
     // 피격
-    public void InvokeOnHit() { Debug.Log("[PlayerEvents] 피격"); OnHit?.Invoke(); }
+    public void InvokeOnHit() { OnHit?.Invoke(); }
     // 공격 받음
-    public void InvokeOnDamaged(DamagedContext ctx) { Debug.Log($"[PlayerEvents] 공격 받음 (데미지: {ctx.Damage}, 공격자: {ctx.AttackerActorNumber}, 낙사: {ctx.IsFallingOut})"); OnDamaged?.Invoke(ctx); }
+    public void InvokeOnDamaged(DamagedContext ctx) { OnDamaged?.Invoke(ctx); }
 
     // 궁극기 게이지 충전
-    public void InvokeOnUltimateChanceActivated() { Debug.Log("[PlayerEvents] 궁극기 게이지 충전"); OnUltimateChanceActivated?.Invoke(); }
+    public void InvokeOnUltimateChanceActivated() { OnUltimateChanceActivated?.Invoke(); }
     // 궁극기 게이지 미충전
-    public void InvokeOnUltimateChanceDeactivated() { Debug.Log("[PlayerEvents] 궁극기 게이지 미충전"); OnUltimateChanceDeactivated?.Invoke(); }
+    public void InvokeOnUltimateChanceDeactivated() { OnUltimateChanceDeactivated?.Invoke(); }
     // 궁극기 사용
-    public void InvokeOnUltimateUsed() { Debug.Log("[PlayerEvents] 궁극기 사용"); OnUltimateUsed?.Invoke(); }
+    public void InvokeOnUltimateUsed() { OnUltimateUsed?.Invoke(); }
 
     // 공격 정체 패널티 카운트 시작
-    public void InvokeOnNoAttackPenaltyStart() { Debug.Log("[PlayerEvents] 공격 정체 패널티 카운트 시작"); OnNoAttackPenaltyStart?.Invoke(); }
+    public void InvokeOnNoAttackPenaltyStart() { OnNoAttackPenaltyStart?.Invoke(); }
     // 공격 정체 패널티 카운트 발동
-    public void InvokeOnNoAttackPenaltyTriggered() { Debug.Log("[PlayerEvents] 공격 정체 패널티 카운트 발동"); OnNoAttackPenaltyTriggered?.Invoke(); }
+    public void InvokeOnNoAttackPenaltyTriggered() { OnNoAttackPenaltyTriggered?.Invoke(); }
     // 공격 정체 패널티 카운트 종료
-    public void InvokeOnNoAttackPenaltyReset() { Debug.Log("[PlayerEvents] 공격 정체 패널티 카운트 종료"); OnNoAttackPenaltyReset?.Invoke(); }
+    public void InvokeOnNoAttackPenaltyReset() { OnNoAttackPenaltyReset?.Invoke(); }
 
     // 공중 진입
-    public void InvokeOnAirborne() { Debug.Log("[PlayerEvents] 공중 진입"); OnAirborne?.Invoke(); }
+    public void InvokeOnAirborne() { OnAirborne?.Invoke(); }
     // 착지
-    public void InvokeOnLanded() { Debug.Log("[PlayerEvents] 착지"); OnLanded?.Invoke(); }
+    public void InvokeOnLanded() { OnLanded?.Invoke(); }
     // 다른 플레이어와의 스침
-    public void InvokeOnPlayerContact(int actorNumber) { Debug.Log($"[PlayerEvents] 플레이어 스침 (상대: {actorNumber})"); OnPlayerContact?.Invoke(actorNumber); }
+    public void InvokeOnPlayerContact(int actorNumber) { OnPlayerContact?.Invoke(actorNumber); }
     // 다른 오브젝트와의 스침
-    public void InvokeOnObjectContact(Collider2D collider) { Debug.Log($"[PlayerEvents] 오브젝트 스침 ({collider.gameObject.name})"); OnObjectContact?.Invoke(collider); }
+    public void InvokeOnObjectContact(Collider2D collider) { OnObjectContact?.Invoke(collider); }
 
     // GP 변경
-    public void InvokeOnGPSet(int value) { Debug.Log($"[PlayerEvents] GP 변경 (값: {value})"); OnGPSet?.Invoke(value); }
+    public void InvokeOnGPSet(int value) { OnGPSet?.Invoke(value); }
     // GP 획득
-    public void InvokeOnGPGained(int amount) { Debug.Log($"[PlayerEvents] GP 획득 (+{amount})"); OnGPGained?.Invoke(amount); }
+    public void InvokeOnGPGained(int amount) { OnGPGained?.Invoke(amount); }
     // GP 손실
-    public void InvokeOnGPLost(int amount) { Debug.Log($"[PlayerEvents] GP 손실 (-{amount})"); OnGPLost?.Invoke(amount); }
+    public void InvokeOnGPLost(int amount) { OnGPLost?.Invoke(amount); }
 
     // 아이템 획득
-    public void InvokeOnItemPickedUp(string itemId) { Debug.Log($"[PlayerEvents] 아이템 획득 ({itemId})"); OnItemPickedUp?.Invoke(itemId); }
+    public void InvokeOnItemPickedUp(string itemId) { OnItemPickedUp?.Invoke(itemId); }
     // 아이템 사용
-    public void InvokeOnItemUsed(string itemId) { Debug.Log($"[PlayerEvents] 아이템 사용 ({itemId})"); OnItemUsed?.Invoke(itemId); }
+    public void InvokeOnItemUsed(string itemId) { OnItemUsed?.Invoke(itemId); }
 
     // 모든 이벤트 구독 해제
     public void Clear()
