@@ -141,10 +141,12 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private int _lastAttackerActorNumber = -1;
     [SerializeField] private float _lastAttackTime = 0f;
     [SerializeField] private float _attackTrackingDuration = 10f;
+    private bool _lastIsNormalAttack = true;
 
     public int LastAttackerActorNumber => _lastAttackerActorNumber;
     public float LastAttackTime => _lastAttackTime;
     public float AttackTrackingDuration => _attackTrackingDuration;
+    public bool LastIsNormalAttack => _lastIsNormalAttack;
 
     [Header("팀 & 이벤트")]
     [SerializeField] private List<SpriteRenderer> _mySpriteRendererList;
@@ -316,6 +318,7 @@ public class PlayerStat : MonoBehaviour
         _currentGP -= amount; // 음수 허용
         _photonView.RPC(nameof(RPC_ChangeGP), RpcTarget.All, _currentGP);
         OnGPChanged?.Invoke(_currentGP);
+        PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnGPLost(amount);
     }
 
     public void IncreaseGP(int amount)
@@ -325,6 +328,7 @@ public class PlayerStat : MonoBehaviour
         _currentGP += amount;
         _photonView.RPC(nameof(RPC_ChangeGP), RpcTarget.All, _currentGP);
         OnGPChanged?.Invoke(_currentGP);
+        PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnGPGained(amount);
     }
 
     [PunRPC]
@@ -332,6 +336,7 @@ public class PlayerStat : MonoBehaviour
     {
         _currentGP = gp;
         OnGPChanged?.Invoke(_currentGP);
+        PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnGPSet(_currentGP);
         if (EventManager.Instance != null)
         {
             EventManager.Instance.PlayerGPChange(info.Sender.ActorNumber, _currentGP);
@@ -385,6 +390,7 @@ public class PlayerStat : MonoBehaviour
 
         // 공격자 기록
         RecordLastAttacker(attacker);
+        _lastIsNormalAttack = isNormalAttack;
 
         // GP 손실에 의한 궁극기 게이지 충전 (손실량의 50%)
         ChargeUltimateOnGPLoss(amount);
@@ -414,7 +420,8 @@ public class PlayerStat : MonoBehaviour
 
                     if (attackerView != null && attackerView.Owner != null)
                     {
-                        attackerView.RPC(nameof(RPC_IncreaseTotalKillCount), attackerView.Owner);
+                        attackerView.RPC(nameof(RPC_IncreaseTotalKillCount), attackerView.Owner,
+                            _photonView.OwnerActorNr, _currentPlayerLife <= 0, isNormalAttack);
                     }
                 }
             }
@@ -505,11 +512,18 @@ public class PlayerStat : MonoBehaviour
     }
 
     [PunRPC]
-    public void RPC_IncreaseTotalKillCount()
+    public void RPC_IncreaseTotalKillCount(int victimActorNumber, bool isLastKill, bool isNormalAttack)
     {
         if (_photonView.IsMine)
         {
             _totalKillCount++;
+
+            PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnKillConfirmed(new KillContext
+            {
+                VictimActorNumber = victimActorNumber,
+                IsLastKill = isLastKill,
+                IsNormalAttack = isNormalAttack
+            });
         }
     }
 

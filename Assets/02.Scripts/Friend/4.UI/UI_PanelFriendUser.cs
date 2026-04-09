@@ -6,18 +6,20 @@ public class UI_PanelFriendUser : MonoBehaviour
     public TextMeshProUGUI NicknameText;
     public TextMeshProUGUI UidText;
     private string _nickname;
+    private string _uid;
 
-    public void Refresh(string nickname, string uid)
+    public void Refresh(string displayName, string uid)
     {
-        NicknameText.text = nickname;
+        NicknameText.text = displayName;
         UidText.text = uid;
-        _nickname = nickname;
+        _nickname = displayName;
+        _uid = uid;
     }
 
     // 친구 요청 보내기 버튼 (닉네임 기반)
     public void OnRequestFriendSendButtonClicked()
     {
-        FriendManagerLegacy.Instance.SendFriendRequest(_nickname, (success, message) =>
+        FriendManager.Instance.RequestFriendByNickname(_nickname, (success, message) =>
         {
             if (success)
             {

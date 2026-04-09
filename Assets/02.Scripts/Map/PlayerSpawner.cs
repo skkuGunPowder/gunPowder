@@ -26,6 +26,8 @@ public class PlayerSpawner : MonoBehaviour
         GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, SpawnPoints[count].position, Quaternion.identity, 0);
         Player player = playerInstance.GetComponent<Player>();
 
+        PlayerEventManager.Instance.GetEvents(player.ActorNumber).InvokeOnSpawned();
+
         if (player.PhotonView.IsMine)
         {
             CameraController proCamera = Camera.main.GetComponent<CameraController>();
@@ -48,7 +50,12 @@ public class PlayerSpawner : MonoBehaviour
             }
             
             GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, rankSpawnPoint.SpawnPointList[spawnCount].position, Quaternion.identity, 0);
-            
+            Player player = playerInstance.GetComponent<Player>();
+            if (player != null)
+            {
+                PlayerEventManager.Instance.GetEvents(player.ActorNumber).InvokeOnSpawned();
+            }
+
             break;
         }
     }

@@ -76,8 +76,8 @@ public class UI_Ultimate : MonoBehaviour
             if (_player != null)
             {
                 // 궁극기 이벤트 구독
-                _player.OnUltimateChanceActivated += OnUltimateActivated;
-                _player.OnUltimateChanceDeactivated += OnUltimateDeactivated;
+                PlayerEventManager.Instance.GetEvents(_player.ActorNumber).OnUltimateChanceActivated += OnUltimateActivated;
+                PlayerEventManager.Instance.GetEvents(_player.ActorNumber).OnUltimateChanceDeactivated += OnUltimateDeactivated;
 
                 // 궁극기 게이지 변경 이벤트 구독
                 PlayerStat playerStat = _player.GetComponent<PlayerStat>();
@@ -324,8 +324,8 @@ public class UI_Ultimate : MonoBehaviour
         // Player 이벤트 구독 해제
         if (_player != null)
         {
-            _player.OnUltimateChanceActivated -= OnUltimateActivated;
-            _player.OnUltimateChanceDeactivated -= OnUltimateDeactivated;
+            PlayerEventManager.Instance.GetEvents(_player.ActorNumber).OnUltimateChanceActivated -= OnUltimateActivated;
+            PlayerEventManager.Instance.GetEvents(_player.ActorNumber).OnUltimateChanceDeactivated -= OnUltimateDeactivated;
 
             PlayerStat playerStat = _player.GetComponent<PlayerStat>();
             if (playerStat != null)

@@ -283,6 +283,9 @@ public class PlayerUltimateController : MonoBehaviour
 
             _ultimate.ExcuteUltimate();
 
+            // 궁극기 사용 이벤트 발행
+            PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnUltimateUsed();
+
             // 사용 후 10초 카운트다운 시작
             _isPostUltimateCooldown = true;
             _postUltimateTimer = 0f;

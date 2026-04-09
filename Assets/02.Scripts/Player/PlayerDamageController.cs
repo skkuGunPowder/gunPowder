@@ -183,6 +183,19 @@ public class PlayerDamageController : MonoBehaviour
             }
         }
 
+        // 피격 상세 이벤트 발행
+        PlayerEventManager.Instance.GetEvents(_photonView.OwnerActorNr).InvokeOnDamaged(new DamagedContext
+        {
+            Damage = damage,
+            MaxDamage = maxDamage,
+            AttackerActorNumber = attackerActorNumber,
+            AttackerViewId = attackerViewId,
+            AttackerBombPosition = attackerBomb,
+            StealPercent = StealPercent,
+            IsFallingOut = isFallingOut,
+            IsNormalAttack = isNormalAttack
+        });
+
         // 거리 기반 데미지 비율 저장 및 피격 이벤트 발생
         _player.RegisterHitDamage(damage, maxDamage, maxStunTime);
 

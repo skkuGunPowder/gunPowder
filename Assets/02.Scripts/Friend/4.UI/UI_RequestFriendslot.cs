@@ -7,7 +7,7 @@ public class UI_RequestFriendslot : MonoBehaviour
     public TextMeshProUGUI SenderNickname;
     public Button AcceptButton;
     public Button DenyButton;
-    private string _inDate; // UID 대신 inDate 사용
+    private string _inDate;
 
     public void Refresh(string nickname, string inDate)
     {
@@ -18,7 +18,7 @@ public class UI_RequestFriendslot : MonoBehaviour
     // 친구 요청 수락 (inDate 기반)
     public void OnClickAccept()
     {
-        FriendManagerLegacy.Instance.AcceptFriendRequest(_inDate, (success, message) =>
+        FriendManager.Instance.AcceptFriend(_inDate, (success, message) =>
         {
             if (success)
             {
@@ -35,7 +35,7 @@ public class UI_RequestFriendslot : MonoBehaviour
     // 친구 요청 거절 (inDate 기반)
     public void OnClickDecline()
     {
-        FriendManagerLegacy.Instance.DeclineFriendRequest(_inDate, (success, message) =>
+        FriendManager.Instance.RejectFriend(_inDate, (success, message) =>
         {
             if (success)
             {

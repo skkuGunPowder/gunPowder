@@ -1,41 +1,96 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 
 public class CartridgeFactory : DontDestroySingleton<CartridgeFactory>
 {
-    [SerializeField] private GameObject[] _cartridgePrefabs;
+    [Serializable]
+    private class CartridgePrefabEntry
+    {
+        public string ID;
+        public Cartridge Prefab;
+    }
 
+    [SerializeField] private CartridgePrefabEntry[] _cartridgePrefabEntries;
+
+    private CartridgeRepository _cartridgeRepository;
     private Dictionary<string, CartridgeData> _cartridgeDataDict = new Dictionary<string, CartridgeData>();
     private Dictionary<string, Cartridge> _cartridgeDict = new Dictionary<string, Cartridge>();
 
     protected override void Awake()
     {
         base.Awake();
-        // TODO: 뒤끝으로부터 카트리지 데이터 로드
-        Init();
+
+        if (Instance != this)
+        {
+            return;
+        }
+
+        _cartridgeRepository = new CartridgeRepository();
+        InitializeAsync();
     }
 
-    private void Init()
+    private async Task InitializeAsync()
     {
-        // TODO: 카트리지 데이터 로드
-        // _cartridgeDataDict.Add("cartridge_001", new CartridgeData());
-        // _cartridgeDataDict.Add("cartridge_002", new CartridgeData());
-
-        int index = 0;
-        foreach (var cartridgeData in _cartridgeDataDict.Values)
+        try
         {
-            if(index >= _cartridgePrefabs.Length)
+            Dictionary<string, CartridgeData> loadedData = await _cartridgeRepository.LoadCartridgeDataAsync();
+            _cartridgeDataDict = loadedData ?? new Dictionary<string, CartridgeData>();
+            _cartridgeDict.Clear();
+            Dictionary<string, Cartridge> prefabDictById = BuildPrefabDictionary();
+
+            foreach (var cartridgeData in _cartridgeDataDict.Values)
             {
-                Debug.LogWarning("카트리지 프리팹이 로드한 카트리지 데이터보다 적습니다.");
-                break;
+                if (!prefabDictById.TryGetValue(cartridgeData.ID, out Cartridge prefabCartridge))
+                {
+                    Debug.LogWarning($"카트리지 ID에 해당하는 프리팹 매핑이 없습니다. (ID: {cartridgeData.ID})");
+                    continue;
+                }
+
+                _cartridgeDict[cartridgeData.ID] = prefabCartridge;
+                Cartridge cartridge = _cartridgeDict[cartridgeData.ID];
+                cartridge.gameObject.SetActive(false);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"카트리지 초기화 실패: {e.Message}");
+        }
+    }
+
+    private Dictionary<string, Cartridge> BuildPrefabDictionary()
+    {
+        Dictionary<string, Cartridge> prefabById = new Dictionary<string, Cartridge>();
+
+        if (_cartridgePrefabEntries == null)
+        {
+            return prefabById;
+        }
+
+        foreach (CartridgePrefabEntry entry in _cartridgePrefabEntries)
+        {
+            if (entry == null || string.IsNullOrWhiteSpace(entry.ID))
+            {
+                Debug.LogWarning("카트리지 프리팹 매핑에 비어있는 ID 항목이 있습니다.");
+                continue;
             }
 
-            _cartridgeDict.Add(cartridgeData.ID, _cartridgePrefabs[index].GetComponent<Cartridge>());
-            Cartridge cartridge = _cartridgeDict[cartridgeData.ID];
-            cartridge.gameObject.SetActive(false);
+            if (entry.Prefab == null)
+            {
+                Debug.LogError($"카트리지 프리팹 매핑에 프리팹이 비어있습니다. (ID: {entry.ID})");
+                continue;
+            }
 
-            index++;
+            if (prefabById.ContainsKey(entry.ID))
+            {
+                Debug.LogWarning($"중복된 카트리지 프리팹 매핑 ID가 있습니다. 마지막 항목으로 덮어씁니다. (ID: {entry.ID})");
+            }
+
+            prefabById[entry.ID] = entry.Prefab;
         }
+
+        return prefabById;
     }
 
     public Cartridge GetCartridge(string id)

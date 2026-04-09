@@ -64,12 +64,7 @@ public class Player : MonoBehaviourPun, IDamagable
     private bool _hasStoredVelocity = false;
     public bool HasStoredVelocity => _hasStoredVelocity;
 
-    public event Action OnAttack;
-    public event Action OnHit;
-    public event Action OnNormalAttack;
-    public event Action OnSpecialAttack;
-    public event Action OnUltimateChanceActivated;   // 궁극기 사용 가능 상태 활성화
-    public event Action OnUltimateChanceDeactivated; // 궁극기 사용 가능 상태 비활성화
+    public int ActorNumber => PhotonView.OwnerActorNr;
 
     private PlayerUltimateController _ultimateController;
     public PlayerUltimateController UltimateController => _ultimateController;
@@ -456,8 +451,10 @@ public class Player : MonoBehaviourPun, IDamagable
         // 궁극기 컨트롤러 이벤트 연결
         if (_ultimateController != null)
         {
-            _ultimateController.OnUltimateChanceActivated += () => OnUltimateChanceActivated?.Invoke();
-            _ultimateController.OnUltimateChanceDeactivated += () => OnUltimateChanceDeactivated?.Invoke();
+            _ultimateController.OnUltimateChanceActivated += () =>
+                PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnUltimateChanceActivated();
+            _ultimateController.OnUltimateChanceDeactivated += () =>
+                PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnUltimateChanceDeactivated();
         }
 
         // 라운드 종료 시 궁극기 카운트다운 초기화
@@ -1221,17 +1218,17 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void InvokeAttack()
     {
-        OnAttack?.Invoke();
+        PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnAttack();
     }
 
     public void InvokeNormalAttack()
     {
-        OnNormalAttack?.Invoke();  // 일반 공격 전용 이벤트
+        PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnNormalAttack();
     }
 
     public void InvokeSpecialAttack()
     {
-        OnSpecialAttack?.Invoke(); // 특수 공격 전용 이벤트
+        PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnSpecialAttack();
     }
 
     /// <summary>
@@ -1243,7 +1240,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
         _lastMaxStunTime = maxStunTime;
         // Debug.Log($"[피격시스템] RegisterHitDamage: damage={damage}, maxDamage={maxDamage}, damageRatio={_lastDamageRatio:F2}, maxStunTime={maxStunTime:F2}s");
-        OnHit?.Invoke();
+        PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnHit();
     }
 
 
@@ -1670,5 +1667,40 @@ public class Player : MonoBehaviourPun, IDamagable
     public void SetAllowBombDashForce(bool allow)
     {
         _allowBombDashForce = allow;
+    }
+
+    // 플레이어/오브젝트 접촉 이벤트 발행
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!PhotonView.IsMine) return;
+
+        Player otherPlayer = collision.gameObject.GetComponent<Player>();
+        if (otherPlayer != null)
+        {
+            PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnPlayerContact(otherPlayer.ActorNumber);
+        }
+        else
+        {
+            Collider2D col = collision.collider;
+            if (col != null)
+            {
+                PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnObjectContact(col);
+            }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!PhotonView.IsMine) return;
+
+        Player otherPlayer = other.GetComponent<Player>();
+        if (otherPlayer != null)
+        {
+            PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnPlayerContact(otherPlayer.ActorNumber);
+        }
+        else
+        {
+            PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnObjectContact(other);
+        }
     }
 }
