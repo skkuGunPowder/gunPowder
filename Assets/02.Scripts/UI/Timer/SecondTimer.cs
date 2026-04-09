@@ -25,8 +25,6 @@ public class SecondTimer
     {
         if (!_isRunning) return;
         _currentTime -= deltaTime;
-        
-        Debug.Log($"Second TimerTick{_currentTime}");
 
         int currentSecond = Mathf.CeilToInt(_currentTime);
 

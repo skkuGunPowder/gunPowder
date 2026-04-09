@@ -28,7 +28,8 @@ public class GameStateRound : GameModeStateBase
     
     // 우승자 확인용 변수
     private int _maxTime = int.MinValue;
-    private float _damage = int.MinValue;
+    private float _damage = float.MinValue;
+    private int _maxHp = int.MinValue;
     private int _playerCount = 0;
     
     // 자신의 결과 저장
@@ -65,11 +66,12 @@ public class GameStateRound : GameModeStateBase
     private void Init()
     {
         _maxTime = int.MinValue;
-        _damage = int.MinValue;
+        _damage = float.MinValue;
+        _maxHp = int.MinValue;
         _playerCount = 0;
     }
     // 우승팀 체크 >> 방장이 체크 후 플레이어들에게 전달
-    private void CheckWinningTeam( PhotonPlayer player)
+    private void CheckWinningTeam(int hp, PhotonPlayer player)
     {
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
         
@@ -80,21 +82,24 @@ public class GameStateRound : GameModeStateBase
             _gameMode.GameOver();   // 플레이어가 한명이라면 바로 종료
             return;
         }
+        
         int time = (int)player.CustomProperties[EProperties.SurvivorTime.ToString()];
-        Debug.Log(player.NickName + $":: {time}");
         
         float damage = (float)player.CustomProperties[EProperties.Damage.ToString()];
         
         // 현재 플레이어가 더 우세한지 체크
-        bool isBetterHealth = time > _maxTime;
-        bool isSameHealthButLessDamage = time == _maxTime && damage < _damage;
-        
-        if (isBetterHealth || isSameHealthButLessDamage)
+        bool isBetterHP = _maxHp > hp;
+        bool isBetterTime = _maxHp == hp && time > _maxTime;
+        bool isSameHealthButMoreDamage = _maxHp == hp && time == _maxTime && damage > _damage;
+
+        if (isBetterHP || isBetterTime || isSameHealthButMoreDamage)
         {
+            _maxHp = hp;
             _maxTime = time;
             _damage = damage;
             _winningTeam = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
         }
+        
 
         if (players.Length == _playerCount)
         {
@@ -108,15 +113,15 @@ public class GameStateRound : GameModeStateBase
         PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
 
         int hp = stat.CurrentPlayerGunPowderCount;
-        _photonView.RPC(nameof(RPC_RequestMyPlayerHealth), RpcTarget.MasterClient);
+        _photonView.RPC(nameof(RPC_RequestMyPlayerHealth), RpcTarget.MasterClient, hp);
     }
     
     [PunRPC]
-    private void RPC_RequestMyPlayerHealth(PhotonMessageInfo info)
+    private void RPC_RequestMyPlayerHealth(int hp,PhotonMessageInfo info)
     {
         PhotonPlayer sender = info.Sender;
         
-        CheckWinningTeam(sender);
+        CheckWinningTeam(hp, sender);
     }
     
     // 우승팀 점수 올리기 >> 라운드 종료 체크

@@ -33,6 +33,7 @@ public class GameStateBombSelect : GameModeStateBase
 
     private void OnPhaseStart()
     {
+        InputHandler.BlockInput = true;
         _phaseStarted = true;
     }
 

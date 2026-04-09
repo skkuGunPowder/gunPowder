@@ -248,12 +248,6 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
         OnHurryUp?.Invoke();
     }
 
-    public event Action<int> OnBombSelectTimerTick; // 폭탄 선택 타이머 1초마다 (남은 초)
-    public void BombSelectTimerTick(int remainSeconds)
-    {
-        OnBombSelectTimerTick?.Invoke(remainSeconds);
-    }
-
     public event Action<int> OnTimerUpdate; // GameModeState.Tick() → 타이머 구동 (per-frame)
 
     public void TimerUpdate(int time)

@@ -50,7 +50,7 @@ public class GameStatePlaying : GameModeStateBase
     {
         Init();
         GameManager.Instance.GameStateChange(EGameState.Waiting); // 카운트다운 중 Waiting 유지
-        InputHandler.BlockInput = true;
+        
         EventManager.Instance.OnTimeCheck += OnPlayerDead;
         EventManager.Instance.OnPlayerLeft += OnPlayerLeft;
         EventManager.Instance.OnLastDieComplete += GameResultCheck;
@@ -140,10 +140,10 @@ public class GameStatePlaying : GameModeStateBase
     private void GameStateChangeCheck()
     {
         _count++;
-        _timer.Destroy();
-        
+
         if (_count >= _MaxCount)
         {
+            _timer.Destroy();
             RequestStateChange();
         }
     }
@@ -387,7 +387,8 @@ public class GameStatePlaying : GameModeStateBase
         {
             {EProperties.SurvivorTime.ToString(), playtime} 
         };
-            
+        
+        Debug.LogError($"{player.NickName} : {playtime}");
         player.SetCustomProperties(hash);
     }
     

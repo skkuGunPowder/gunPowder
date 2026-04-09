@@ -10,9 +10,11 @@ public class IngameTimer : TimerBase
 
     private const float HURRY_UP_TIME = 30f;
     private bool _isHurryUp = false;
-    
-    private void Start()
+
+    protected override void OnEnable()
     {
+        base.OnEnable();
+        
         int time = int.Parse(PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.PlayTime.ToString()].ToString()) * 60;
         SetTime(time, 0);
         UI_Timer.TextRefresh(ConvertTime(time));
@@ -53,6 +55,19 @@ public class IngameTimer : TimerBase
     protected override void EndTimeAction()
     {
         _isGameOver = true;
+        gameObject.SetActive(false);        
         UnSubScribe();
+    }
+
+    protected override void UnSubScribe()
+    {
+        base.UnSubScribe();
+        EventManager.Instance.OnLastDieComplete -= EndTimeAction;
+    }
+
+    protected override void SubScribe()
+    {
+        base.SubScribe();
+        EventManager.Instance.OnLastDieComplete += EndTimeAction;
     }
 }

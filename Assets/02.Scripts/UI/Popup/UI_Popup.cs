@@ -3,6 +3,7 @@ using UnityEngine;
 
 public abstract class UI_Popup : MonoBehaviour
 {
+    public bool CanCloseESC = true;
     private Action _closeCallback;
 
     public void Open(Action closeCallback = null)

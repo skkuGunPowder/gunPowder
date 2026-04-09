@@ -6,7 +6,7 @@ public class TimerBase : MonoBehaviour
     [SerializeField] protected UI_TextSlot UI_Timer;
     protected int _initTime; 
     protected int _endTime;
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         // 타이머용 이벤트
         SubScribe();

@@ -1,15 +1,5 @@
 public class BombSelectTimer : TimerBase
 {
-    protected override void SubScribe()
-    {
-        EventManager.Instance.OnBombSelectTimerTick += TimeChange;
-    }
-
-    protected override void UnSubScribe()
-    {
-        EventManager.Instance.OnBombSelectTimerTick -= TimeChange;
-    }
-
     protected override void TimeChange(int time)
     {
         if (time <= 0)
