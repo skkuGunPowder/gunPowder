@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UI_ItemSlot : MonoBehaviour, ISelectable, IPointerClickHandler
+public class UI_ItemSlot : MonoBehaviour, ISelectable
 {
     public InventoryItem Item;
 
@@ -13,7 +13,7 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable, IPointerClickHandler
     private float _clickTimer = 0f;
 
 
-    public void Refresh(InventoryItem item)
+    public virtual void Refresh(InventoryItem item)
     {
         if (item == null)
         {
@@ -25,16 +25,13 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable, IPointerClickHandler
         Item = item;
         ItemIcon.sprite = Item.Image;
 
-        InventoryItem subBomb = ItemStorage.Instance.GetEquippedSubBomb();
-        bool isSubBombSlot = subBomb != null && subBomb.ID == Item.ID;
-
-        if (Item.IsEquipped || isSubBombSlot)
+        if (Item.IsEquipped)
         {
-            gameObject.SetActive(false);
+            EquipAction();
         }
         else
         {
-            gameObject.SetActive(true);
+            UnEquipAction();
         }
     }
 
@@ -49,6 +46,11 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable, IPointerClickHandler
     }
 
     public void OnClick()
+    {
+        ClickAction();
+    }
+
+    protected virtual void ClickAction()
     {
         if (Item == null)
         {
@@ -71,36 +73,16 @@ public class UI_ItemSlot : MonoBehaviour, ISelectable, IPointerClickHandler
         {
             _clickCount = 1;
             _clickTimer = Time.time;
-        }
+        }   
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    protected virtual void EquipAction()
     {
-        if (Item == null) 
-        {
-            return;
-            
-        }
-
-        if (Item.Item.ItemType != EItemType.Bomb)
-        {
-            return;
-        }
-
-        if (eventData.button != PointerEventData.InputButton.Right)
-        {
-            return;
-        }
-
-        // 우클릭: SubBomb 착용/해제 토글
-        InventoryItem currentSubBomb = ItemStorage.Instance.GetEquippedSubBomb();
-        if (currentSubBomb != null && currentSubBomb.ID == Item.ID)
-        {
-            ItemStorage.Instance.UnEquipSubBomb();   
-        }
-        else
-        {
-            ItemStorage.Instance.EquipAsSubBomb(Item);   
-        }
+        gameObject.SetActive(false);
+    }
+    
+    protected virtual void UnEquipAction()
+    {
+        gameObject.SetActive(true);
     }
 }
