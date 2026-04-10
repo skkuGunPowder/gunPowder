@@ -194,13 +194,13 @@ public class PlayerJumpState : PlayerBaseState
     private void ProcessJumpAttack()
     {
         // 일반 폭탄 공격
-        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanZSlotBomb())
         {
             HandleNormalBombAttack();
         }
         
         // 특수 폭탄 공격
-        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanXSlotBomb())
         {
             HandleSpecialBombAttack();
         }

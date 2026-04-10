@@ -86,28 +86,48 @@ public class Player : MonoBehaviourPun, IDamagable
 
 
     private const int RANDOM_SEED = 123456;
-    // TODO: [궁극기 슬롯 전환] Z슬롯 폭탄 교체 구현 시, 이 고정값 대신 교체 가능한 Z슬롯 아이템으로 변경
     private const string BASIC_BOMB_ID = "BO0001";
 
-    public BombStat BasicBombStat;
-    public BombStat SpecialBombStat;
+    public BombStat ZSlotBombStat;
+    public BombStat XSlotBombStat;
+
+    // 폭탄 쿨타임 감소
+    private List<(float value, OperationType type)> _zBombCooldownModifiers = new();
+    private List<(float value, OperationType type)> _xBombCooldownModifiers = new();
+
+    public float ZSlotBombCoolTime => CalculateCooldown(ZSlotBombStat.CoolTime, _zBombCooldownModifiers);
+    public float XSlotBombCoolTime => CalculateCooldown(XSlotBombStat.CoolTime, _xBombCooldownModifiers);
+
+    private float CalculateCooldown(float baseValue, List<(float value, OperationType type)> modifiers)
+    {
+        float additiveSum = 0f;
+        float multiplicativeProduct = 1f;
+        foreach (var mod in modifiers)
+        {
+            if (mod.type == OperationType.Additive)
+                additiveSum += mod.value;
+            else
+                multiplicativeProduct *= (1f - mod.value / 100f);
+        }
+        return Mathf.Max(0f, (baseValue + additiveSum) * multiplicativeProduct);
+    }
 
     // 쿨타임 체크용 변수
-    private float _lastNormalBombTime = -999f;
-    private float _lastSpecialBombTime = -999f;
+    private float _lastZSlotBombTime = -999f;
+    private float _lastXSlotBombTime = -999f;
 
-    public float LastNormalBombTime => _lastNormalBombTime;
-    public float LastSpecialBombTime => _lastSpecialBombTime;
+    public float LastZSlotBombTime => _lastZSlotBombTime;
+    public float LastXSlotBombTime => _lastXSlotBombTime;
 
     // 공격 활성화/비활성화 설정
     [Header("공격 활성화 설정")]
     [SerializeField]
-    private bool _isNormalAttackEnabled = true;
-    public bool IsNormalAttackEnabled => _isNormalAttackEnabled;
+    private bool _isZSlotAttackEnabled = true;
+    public bool IsZSlotAttackEnabled => _isZSlotAttackEnabled;
 
     [SerializeField]
-    private bool _isSpecialAttackEnabled = true;
-    public bool IsSpecialAttackEnabled => _isSpecialAttackEnabled;
+    private bool _isXSlotAttackEnabled = true;
+    public bool IsXSlotAttackEnabled => _isXSlotAttackEnabled;
 
     // 넉백 활성화/비활성화 설정
     [Header("넉백 활성화 설정")]
@@ -233,7 +253,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // 기본 폭탄 정보 가져오기
         GameObject basicBomb = ItemDatabase.Instance.GetItem(BASIC_BOMB_ID).Prefab;
         _normalBomb = basicBomb.GetComponent<Bomb>();
-        BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
+        ZSlotBombStat = ItemDatabase.Instance.GetStat<BombStat>(BASIC_BOMB_ID);
 
         if (UI_PingBase.Instance != null)
         {
@@ -325,25 +345,19 @@ public class Player : MonoBehaviourPun, IDamagable
 
         SpriteFlipx();
 
-        // 서브폭탄이 있으면 서브폭탄 스탯, 없으면 메인폭탄 스탯으로 대체
-        EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO mainBombForSpecial);
+        // X슬롯: 서브폭탄이 있으면 서브폭탄 스탯, 없으면 메인폭탄 스탯으로 대체
+        EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO mainBombForXSlot);
         if (EquipedItemDict.TryGetValue(EItemType.SubBomb, out ItemDTO subBomb) && subBomb != null)
-            SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(subBomb.ID);
-        else if (mainBombForSpecial != null)
-            SpecialBombStat = ItemDatabase.Instance.GetStat<BombStat>(mainBombForSpecial.ID);
+            XSlotBombStat = ItemDatabase.Instance.GetStat<BombStat>(subBomb.ID);
+        else if (mainBombForXSlot != null)
+            XSlotBombStat = ItemDatabase.Instance.GetStat<BombStat>(mainBombForXSlot.ID);
 
-        // 메인 폭탄 쿨타임 스탯 업데이트 (Z키 쿨타임)
+        // Z슬롯: 메인 폭탄 쿨타임 스탯 업데이트
         if (EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO mainBomb) && mainBomb != null)
-            BasicBombStat = ItemDatabase.Instance.GetStat<BombStat>(mainBomb.ID);
+            ZSlotBombStat = ItemDatabase.Instance.GetStat<BombStat>(mainBomb.ID);
 
-        // 궁극기 설정
-        // TODO: [궁극기 슬롯 전환] Z슬롯 폭탄 교체 구현 후, EquipedItemDict[EItemType.Bomb].ID 대신 Z슬롯 아이템 ID 기반으로 변경
-        if (UltimateManager.Instance != null && _ultimateController != null
-            && EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO bombForUlt) && bombForUlt != null)
-        {
-            Ultimate ultimate = UltimateManager.Instance.GetUltimate(bombForUlt.ID, this);
-            _ultimateController.SetUltimate(ultimate);
-        }
+        // 궁극기 설정 (기본: Z슬롯 폭탄 기준)
+        SetUltimateBySlot();
 
         SetPlayerOrderInLayer();
     }
@@ -397,10 +411,7 @@ public class Player : MonoBehaviourPun, IDamagable
         PhotonView.RPC(nameof(RPC_LoadItems), RpcTarget.All);
     }
 
-    /// <summary>
-    /// 스킨 적용/해제 핸들러
-    /// </summary>
-    /// <param name="item"></param>
+    // 스킨 적용/해제 핸들러
     private void ApplyHeadSkin(ItemDTO item)
     {
         if (_skinManager != null) { _skinManager.ApplyHead(item); }
@@ -527,9 +538,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // SyncTeamFromCustomProperties();
     }
 
-    /// <summary>
-    /// 스킨 동적 추가 시 색상 시스템에 편입 (PlayerSkinManager 등에서 사용)
-    /// </summary>
+    // 스킨 동적 추가 시 색상 시스템에 편입 (PlayerSkinManager 등에서 사용)
     public void RegisterOriginalColor(SpriteRenderer renderer)
     {
         _visualController?.RegisterOriginalColor(renderer);
@@ -564,8 +573,8 @@ public class Player : MonoBehaviourPun, IDamagable
         {
             _gunpowderController.ResetTimers();
         }
-        _lastNormalBombTime = 0f;
-        _lastSpecialBombTime = 0f;
+        _lastZSlotBombTime = 0f;
+        _lastXSlotBombTime = 0f;
         if (_ultimateController != null)
         {
             _ultimateController.ResetUltimateChanceTimer();
@@ -671,10 +680,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 대쉬시 잔상 토글
-    /// </summary>
-    /// <param name="isOn"></param>
+    // 대쉬시 잔상 토글
     public void RPC_SetGhostTrail(bool isOn)
     {
         if (!PhotonView.IsMine)
@@ -731,6 +737,7 @@ public class Player : MonoBehaviourPun, IDamagable
         PhotonView.RPC(nameof(SetMaterial), RpcTarget.All, id);
     }
 
+    // 궁극기 실행
     public void ExecuteUltimate()
     {
         if (_ultimateController != null)
@@ -738,30 +745,36 @@ public class Player : MonoBehaviourPun, IDamagable
             _ultimateController.ExecuteUltimate();
         }
     }
+
+    // 슬롯 기준으로 궁극기 설정 (기본: Z슬롯)
+    public void SetUltimateBySlot(BombSlot slot = BombSlot.ZSlot)
+    {
+        if (UltimateManager.Instance == null || _ultimateController == null) return;
+
+        EItemType itemType = slot == BombSlot.ZSlot ? EItemType.Bomb : EItemType.SubBomb;
+        if (EquipedItemDict.TryGetValue(itemType, out ItemDTO bombItem) && bombItem != null)
+        {
+            Ultimate ultimate = UltimateManager.Instance.GetUltimate(bombItem.ID, this);
+            _ultimateController.SetUltimate(ultimate);
+        }
+    }
     // 건파우더 감소 관련 메서드는 PlayerGunpowderController로 이동
 
     // 경고음 관련 메서드는 PlayerGunpowderController로 이동
 
-    /// <summary>
-    /// 경고 펄스 효과 재생 (PlayerGunpowderController에서 호출)
-    /// </summary>
+    // 경고 펄스 효과 재생 (PlayerGunpowderController에서 호출)
     public void PlayPreExplosionPulse()
     {
         _visualController?.PlayPreExplosionPulse();
     }
 
-    /// <summary>
-    /// 경고 펄스 효과 중단 (PlayerGunpowderController에서 호출)
-    /// </summary>
+    // 경고 펄스 효과 중단 (PlayerGunpowderController에서 호출)
     public void StopPreExplosionPulse(bool resetScale)
     {
         _visualController?.StopPreExplosionPulse(resetScale);
     }
 
-    /// <summary>
-    /// 저장된 원본 색상으로 스프라이트를 복구합니다.
-    /// 모든 색상 효과가 끝날 때 반드시 이 메서드를 호출하여 원본 색상으로 돌아갑니다.
-    /// </summary>
+    // 저장된 원본 색상으로 스프라이트를 복구합니다. 모든 색상 효과가 끝날 때 반드시 이 메서드를 호출하여 원본 색상으로 돌아갑니다.
     public void RestoreOriginalColors()
     {
         _visualController?.RestoreOriginalColors();
@@ -842,9 +855,7 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
 
-    /// <summary>
-    /// 공격 없음 경고를 완전히 해제 (PlayerGunpowderController로 위임)
-    /// </summary>
+    // 공격 없음 경고를 완전히 해제 (PlayerGunpowderController로 위임)
     public void ClearNoAttackWarning()
     {
         if (_gunpowderController != null)
@@ -853,9 +864,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 공격을 하면 타이머 초기화 (PlayerGunpowderController로 위임)
-    /// </summary>
+    // 공격을 하면 타이머 초기화 (PlayerGunpowderController로 위임)
     public void ResetGunPowderDecreaseWithoutAttackTimer()
     {
         if (_gunpowderController != null)
@@ -864,17 +873,13 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 경고 색상 업데이트 (PlayerGunpowderController에서 호출)
-    /// </summary>
+    // 경고 색상 업데이트 (PlayerGunpowderController에서 호출)
     public void UpdateWarningColor(float targetSaturation)
     {
         _visualController?.UpdateWarningColor(targetSaturation);
     }
 
-    /// <summary>
-    /// 펄스 효과가 활성화되어 있는지 확인
-    /// </summary>
+    // 펄스 효과가 활성화되어 있는지 확인
     public bool IsPreExplosionPulseActive()
     {
         return _visualController != null && _visualController.IsPreExplosionPulseActive();
@@ -898,9 +903,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 자신의 팀을 CustomProperties에서 동기화
-    /// </summary>
+    // 자신의 팀을 CustomProperties에서 동기화
     private void SyncTeamFromCustomProperties()
     {
         if (PhotonView.Owner != null && PhotonView.Owner.CustomProperties.ContainsKey(EProperties.Team.ToString()))
@@ -909,9 +912,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 모든 플레이어의 팀을 CustomProperties에서 동기화
-    /// </summary>
+    // 모든 플레이어의 팀을 CustomProperties에서 동기화
     private void SyncAllPlayersTeam()
     {
         foreach (var player in PhotonNetwork.PlayerList)
@@ -955,11 +956,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 키보드 입력에 따라 폭탄 스폰 위치 반환
-    /// 8방향으로 나누어져 있다.
-    /// </summary>
-    /// <returns></returns>
+    // 키보드 입력에 따라 폭탄 스폰 위치 반환 8방향으로 나누어져 있다.
     public (Transform transform, EBombSpawnPoint point) GetBombSpawnInfo()
     {
         float h = Input.GetAxisRaw("Horizontal");
@@ -1201,9 +1198,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 상태이상 상태로 전환 (StatusEffectType 포함)
-    /// </summary>
+    // 상태이상 상태로 전환 (StatusEffectType 포함)
     [PunRPC]
     public void RPC_ChangeStatusState(int statusEffectType)
     {
@@ -1233,10 +1228,7 @@ public class Player : MonoBehaviourPun, IDamagable
         PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnSpecialAttack();
     }
 
-    /// <summary>
-    /// 피격 시 마지막 데미지 비율을 기록하고 피격 이벤트를 발생시킨다.
-    /// (PlayerDamageController에서 호출)
-    /// </summary>
+    // 피격 시 마지막 데미지 비율을 기록하고 피격 이벤트를 발생시킨다. (PlayerDamageController에서 호출)
     public void RegisterHitDamage(int damage, int maxDamage, float maxStunTime)
     {
         _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
@@ -1246,39 +1238,58 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
 
-    public bool CanNormalBomb()
+    public bool CanZSlotBomb()
     {
-        // 기본 공격이 비활성화되어 있으면 false 반환
-        if (!_isNormalAttackEnabled)
+        if (!_isZSlotAttackEnabled)
         {
             return false;
         }
-        return AttackTimer - _lastNormalBombTime >= BasicBombStat.CoolTime;
+        return AttackTimer - _lastZSlotBombTime >= ZSlotBombCoolTime;
     }
 
-    public bool CanSpecialBomb()
+    public bool CanXSlotBomb()
     {
-        // 특수 공격이 비활성화되어 있으면 false 반환
-        if (!_isSpecialAttackEnabled)
+        if (!_isXSlotAttackEnabled)
         {
             return false;
         }
-        return AttackTimer - _lastSpecialBombTime >= SpecialBombStat.CoolTime;
+        return AttackTimer - _lastXSlotBombTime >= XSlotBombCoolTime;
     }
 
-    public void SetLastNormalBombTime()
+    public void SetLastZSlotBombTime()
     {
-        _lastNormalBombTime = AttackTimer;
+        _lastZSlotBombTime = AttackTimer;
     }
 
-    public void SetLastSpecialBombTime()
+    public void SetLastXSlotBombTime()
     {
-        _lastSpecialBombTime = AttackTimer;
+        _lastXSlotBombTime = AttackTimer;
     }
 
-    /// <summary>
-    /// 히트스탑 중에 받은 속도를 저장
-    /// </summary>
+    public void BombCooldownReduction(BombSlot slot, float value, OperationType type)
+    {
+        switch (slot)
+        {
+            case BombSlot.ZSlot:
+                _zBombCooldownModifiers.Add((value, type));
+                break;
+            case BombSlot.XSlot:
+                _xBombCooldownModifiers.Add((value, type));
+                break;
+            default:
+                Debug.Log("[Player BombCooldownReduction] 해당 슬롯이 없습니다");
+                break;
+        }
+    }
+
+    // 폭탄 쿨타임 감소 비율을 초기화합니다.
+    public void ResetBombCooldown()
+    {
+        _zBombCooldownModifiers.Clear();
+        _xBombCooldownModifiers.Clear();
+    }
+
+    // 히트스탑 중에 받은 속도를 저장
     public void StoreVelocity()
     {
         if (_rigidbody2D != null)
@@ -1288,9 +1299,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 저장된 속도를 복원하고 저장 상태 초기화
-    /// </summary>
+    // 저장된 속도를 복원하고 저장 상태 초기화
     public void RestoreVelocity()
     {
         if (_hasStoredVelocity && _rigidbody2D != null)
@@ -1302,18 +1311,14 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 저장된 속도 상태 초기화
-    /// </summary>
+    // 저장된 속도 상태 초기화
     public void ClearStoredVelocity()
     {
         _hasStoredVelocity = false;
         _storedVelocity = Vector2.zero;
     }
 
-    /// <summary>
-    /// 마지막 폭발 정보 저장 (히트스탑 중 넉백용)
-    /// </summary>
+    // 마지막 폭발 정보 저장 (히트스탑 중 넉백용)
     public void StoreLastExplosionInfo(float force, Vector3 position, float radius)
     {
         _lastExplosionForce = force;
@@ -1323,9 +1328,7 @@ public class Player : MonoBehaviourPun, IDamagable
         // Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
     }
 
-    /// <summary>
-    /// 저장된 마지막 폭발 정보로 넉백 힘 적용
-    /// </summary>
+    // 저장된 마지막 폭발 정보로 넉백 힘 적용
     public void ApplyLastExplosionForce()
     {
         if (!_hasLastExplosionInfo || _rigidbody2D == null)
@@ -1349,9 +1352,7 @@ public class Player : MonoBehaviourPun, IDamagable
         ClearLastExplosionInfo();
     }
 
-    /// <summary>
-    /// 마지막 폭발 정보 초기화
-    /// </summary>
+    // 마지막 폭발 정보 초기화
     public void ClearLastExplosionInfo()
     {
         _hasLastExplosionInfo = false;
@@ -1414,7 +1415,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         _playerStat.MySpriteREndererList[3].enabled = false;
 
-        await UniTask.WaitForSeconds(BasicBombStat.CoolTime);
+        await UniTask.WaitForSeconds(ZSlotBombCoolTime);
 
         if (_skinManager is IPlayerSkinManager sm2)
         {
@@ -1464,10 +1465,7 @@ public class Player : MonoBehaviourPun, IDamagable
     //     }
     // }
 
-    /// <summary>
-    /// 특수 폭탄 사용 시 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
-    /// </summary>
-    /// <param name="amount">소모한 건파우더 양 (파티클 개수)</param>
+    // 특수 폭탄 사용 시 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
     public void RPC_SpawnGunPowderUseParticle()
     {
         if (!PhotonView.IsMine)
@@ -1500,16 +1498,12 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 강제로 궁극기 사용가능상태 만들기
-    /// 이때는 궁극기 사용가능 시간이 무제한이다.
-    /// </summary>
-    public void ForceUltimateChance()
+    // 강제로 궁극기 사용가능상태 만들기 (무제한 시간, 기본: Z슬롯)
+    public void ForceUltimateChance(BombSlot slot = BombSlot.ZSlot)
     {
-        if (_ultimateController != null)
-        {
-            _ultimateController.ForceUltimateChance();
-        }
+        if (_ultimateController == null) return;
+        SetUltimateBySlot(slot);
+        _ultimateController.ForceUltimateChance();
     }
 
 
@@ -1529,10 +1523,7 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }
 
-    /// <summary>
-    /// 위치 고정 활성화: 위치 고정 및 속도 0
-    /// 박격포처럼 위치 고정에서 사용용
-    /// </summary>
+    // 위치 고정 활성화: 위치 고정 및 속도 0 박격포처럼 위치 고정에서 사용용
     public void SetPositionLock()
     {
         if (_rigidbody2D == null) return;
@@ -1543,9 +1534,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _rigidbody2D.constraints = RigidbodyConstraints2D.FreezePosition | RigidbodyConstraints2D.FreezeRotation;
     }
 
-    /// <summary>
-    /// 위치 고정 비활성화: 원본 제약 조건 복원
-    /// </summary>
+    // 위치 고정 비활성화: 원본 제약 조건 복원
     public void ResetPositionLock()
     {
         if (_rigidbody2D == null) return;
@@ -1554,20 +1543,13 @@ public class Player : MonoBehaviourPun, IDamagable
         _rigidbody2D.constraints = _originalConstraints;
     }
 
-    /// <summary>
-    /// 현재 플레이어의 바라보는 방향을 반환
-    /// </summary>
-    /// <returns>바라보는 방향 (1: 오른쪽, -1: 왼쪽)</returns>
+    // 현재 플레이어의 바라보는 방향을 반환
     public int GetFacingDirection()
     {
         return _playerStat.FacingDirection == 1 ? 1 : -1;
     }
     
-    /// <summary>
-    /// 궁극기 시스템 활성화/비활성화 설정
-    /// 특정 게임 모드에서 궁극기를 완전히 비활성화할 때 사용
-    /// </summary>
-    /// <param name="enabled">true: 궁극기 활성화, false: 궁극기 비활성화</param>
+    // 궁극기 시스템 활성화/비활성화 설정 특정 게임 모드에서 궁극기를 완전히 비활성화할 때 사용
     public void SetUltimateSystemEnabled(bool enabled)
     {
         if (_ultimateController != null)
@@ -1577,9 +1559,7 @@ public class Player : MonoBehaviourPun, IDamagable
     }
 
     /*
-    /// <summary>
-    /// 궁극기 시스템 활성화/비활성화 (네트워크 동기화)
-    /// </summary>
+    // 궁극기 시스템 활성화/비활성화 (네트워크 동기화)
     public void RPC_SetUltimateSystemEnabled(bool enabled)
     {
         if (_ultimateController != null)
@@ -1588,46 +1568,28 @@ public class Player : MonoBehaviourPun, IDamagable
         }
     }*/
 
-    /// <summary>
-    /// 궁극기 시스템이 활성화되어 있는지 확인
-    /// </summary>
+    // 궁극기 시스템이 활성화되어 있는지 확인
     public bool IsUltimateSystemEnabled => _ultimateController != null && _ultimateController.IsUltimateSystemEnabled;
 
-    /// <summary>
-    /// 기본 공격 활성화/비활성화 설정
-    /// </summary>
-    /// <param name="enabled">true: 기본 공격 활성화, false: 기본 공격 비활성화</param>
-    public void SetNormalAttackEnabled(bool enabled)
+    // 기본 공격 활성화/비활성화 설정
+    public void SetZSlotAttackEnabled(bool enabled)
     {
-        _isNormalAttackEnabled = enabled;
+        _isZSlotAttackEnabled = enabled;
     }
 
-    /// <summary>
-    /// 특수 공격 활성화/비활성화 설정
-    /// </summary>
-    /// <param name="enabled">true: 특수 공격 활성화, false: 특수 공격 비활성화</param>
-    public void SetSpecialAttackEnabled(bool enabled)
+    public void SetXSlotAttackEnabled(bool enabled)
     {
-        _isSpecialAttackEnabled = enabled;
+        _isXSlotAttackEnabled = enabled;
     }
 
-    /// <summary>
-    /// 모든 공격(기본, 특수, 궁극기) 활성화/비활성화 설정
-    /// </summary>
-    /// <param name="enabled">true: 모든 공격 활성화, false: 모든 공격 비활성화</param>
     public void SetAllAttacksEnabled(bool enabled)
     {
-        _isNormalAttackEnabled = enabled;
-        _isSpecialAttackEnabled = enabled;
+        _isZSlotAttackEnabled = enabled;
+        _isXSlotAttackEnabled = enabled;
         SetUltimateSystemEnabled(enabled);
     }
 
-    /// <summary>
-    /// 넉백 활성화/비활성화 설정
-    /// 넉백 효과만 제어한 상태
-    /// 데미지는 받고 애니메이션도 재생됨
-    /// </summary>
-    /// <param name="enabled">true: 넉백 활성화, false: 넉백 비활성화 (데미지는 받지만 넉백은 받지 않음)</param>
+    // 넉백 활성화/비활성화 설정 넉백 효과만 제어한 상태 데미지는 받고 애니메이션도 재생됨
     public void RPC_SetKnockbackEnabled(bool enabled)
     {
         if (!PhotonView.IsMine)
@@ -1643,11 +1605,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _isKnockbackEnabled = enabled;
     }
 
-    /// <summary>
-    /// 슈퍼아머 활성화/비활성화 설정
-    /// 슈퍼아머가 활성화되면 데미지는 받지만 DamagedState로 들어가지 않음 (넉백, 히트스탑, 애니메이션 재생 모두 무시)
-    /// </summary>
-    /// <param name="enabled">true: 슈퍼아머 활성화, false: 슈퍼아머 비활성화</param>
+    // 슈퍼아머 활성화/비활성화 설정 슈퍼아머가 활성화되면 데미지는 받지만 DamagedState로 들어가지 않음 (넉백, 히트스탑, 애니메이션 재생 모두 무시)
     public void RPC_SetSuperArmorEnabled(bool enabled)
     {
         if (!PhotonView.IsMine)
@@ -1663,9 +1621,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _isSuperArmorEnabled = enabled;
     }
 
-    /// <summary>
-    /// 폭탄 대시 힘 허용 설정 (슈퍼아머 상태에서도 폭탄 대시를 위해 사용)
-    /// </summary>
+    // 폭탄 대시 힘 허용 설정 (슈퍼아머 상태에서도 폭탄 대시를 위해 사용)
     public void SetAllowBombDashForce(bool allow)
     {
         _allowBombDashForce = allow;

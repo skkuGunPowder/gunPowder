@@ -388,7 +388,6 @@ public class GameStatePlaying : GameModeStateBase
             {EProperties.SurvivorTime.ToString(), playtime} 
         };
         
-        Debug.LogError($"{player.NickName} : {playtime}");
         player.SetCustomProperties(hash);
     }
     
