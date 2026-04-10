@@ -246,36 +246,34 @@ public class PlayerBaseState : MonoState
         return isGrounded;
     }
 
-    protected virtual bool CanNormalBomb()
+    protected virtual bool CanZSlotBomb()
     {
-        return _owner.CanNormalBomb();
+        return _owner.CanZSlotBomb();
     }
 
-    protected virtual bool CanSpecialBomb()
+    protected virtual bool CanXSlotBomb()
     {
-        // 쿨타임 체크
-        if (!_owner.CanSpecialBomb())
+        if (!_owner.CanXSlotBomb())
         {
             return false;
         }
-        
-        // 건파우더가 특수 폭탄 코스트보다 적은지 체크
-        if (_owner.PlayerStat.CurrentHP <= _owner.SpecialBombStat.Cost)
+
+        if (_owner.PlayerStat.CurrentHP <= _owner.XSlotBombStat.Cost)
         {
             return false;
         }
-        
+
         return true;
     }
 
-    protected virtual void SetLastNormalBombTime()
+    protected virtual void SetLastZSlotBombTime()
     {
-        _owner.SetLastNormalBombTime();
+        _owner.SetLastZSlotBombTime();
     }
 
-    protected virtual void SetLastSpecialBombTime()
+    protected virtual void SetLastXSlotBombTime()
     {
-        _owner.SetLastSpecialBombTime();
+        _owner.SetLastXSlotBombTime();
     }
 
     protected virtual void ResetGunPowderDecreaseWithoutAttackTimer()
@@ -318,12 +316,12 @@ public class PlayerBaseState : MonoState
             if (!isHeadBomb)
             {
                 // 건파우더가 부족한 경우 폭탄 생성 중단
-                if (_owner.PlayerStat.CurrentHP <= _owner.SpecialBombStat.Cost)
+                if (_owner.PlayerStat.CurrentHP <= _owner.XSlotBombStat.Cost)
                 {
                     return;
                 }
                 
-                int cost = _owner.SpecialBombStat.Cost;
+                int cost = _owner.XSlotBombStat.Cost;
                 _owner.PlayerStat.DecreaseHP(cost, _owner.PhotonView.Owner.ActorNumber);
                 
                 // 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
@@ -394,11 +392,11 @@ public class PlayerBaseState : MonoState
         string prefabName = GetNormalBombPrefabName(action, finalSpawnPoint);
         
         // 폭탄 생성 및 실행
-        ExecuteBombAction(prefabName, bombSpawnPoint, action, _owner.BasicBombStat);
+        ExecuteBombAction(prefabName, bombSpawnPoint, action, _owner.ZSlotBombStat);
 
         // 후처리
         ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastNormalBombTime();
+        SetLastZSlotBombTime();
     }
 
     /// <summary>
@@ -429,7 +427,7 @@ public class PlayerBaseState : MonoState
         // }
 
         // 특수 폭탄 사용 가능 여부 체크
-        if (!CanSpecialBomb())
+        if (!CanXSlotBomb())
         {
             return;
         }
@@ -456,11 +454,11 @@ public class PlayerBaseState : MonoState
         (Transform bombSpawnPoint, EBombSpawnPoint finalSpawnPoint) = GetBombSpawnPointInfo(spawnPoint);
         
         // 폭탄 생성 및 실행
-        ExecuteBombAction(prefabName, bombSpawnPoint, action, _owner.SpecialBombStat);
+        ExecuteBombAction(prefabName, bombSpawnPoint, action, _owner.XSlotBombStat);
 
         // 후처리
         ResetGunPowderDecreaseWithoutAttackTimer();
-        SetLastSpecialBombTime();
+        SetLastXSlotBombTime();
     }
 
     protected virtual void PlaceNormalBomb(EBombSpawnPoint? spawnPoint = null)

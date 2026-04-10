@@ -92,7 +92,7 @@ public class CartridgeFactory : DontDestroySingleton<CartridgeFactory>
 
         return prefabById;
     }
-
+    
     public Cartridge GetCartridge(string id)
     {
         if (!_cartridgeDataDict.TryGetValue(id, out CartridgeData cartridgeData))
@@ -112,4 +112,36 @@ public class CartridgeFactory : DontDestroySingleton<CartridgeFactory>
         newCartridge.Init(cartridgeData);
         return newCartridge;
     }
+
+    #region 테스트용
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F1)) TestCartridge("CT0001");
+        if (Input.GetKeyDown(KeyCode.F2)) TestCartridge("CT0011");
+        if (Input.GetKeyDown(KeyCode.F3)) TestCartridge("CT0014");
+    }
+
+    private void TestCartridge(string id)
+    {
+        Player owner = FindLocalPlayer();
+        if (owner == null) { Debug.LogWarning("[CartridgeTest] 로컬 플레이어를 찾을 수 없습니다."); return; }
+
+        Cartridge cartridge = GetCartridge(id);
+        if (cartridge == null) return;
+
+        cartridge.ExcuteGimmick(owner);
+        Debug.Log($"[CartridgeTest] {id} 실행 (Rarity: {_cartridgeDataDict[id].Rarity}, Values: [{string.Join(", ", _cartridgeDataDict[id].GimmickValues)}])");
+        Destroy(cartridge.gameObject);
+    }
+
+    private Player FindLocalPlayer()
+    {
+        foreach (var p in FindObjectsByType<Player>(FindObjectsSortMode.None))
+        {
+            if (p.PhotonView != null && p.PhotonView.IsMine) return p;
+        }
+        return null;
+    }
+    #endregion
+
 }

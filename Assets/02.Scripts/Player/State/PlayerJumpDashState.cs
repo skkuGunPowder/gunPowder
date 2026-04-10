@@ -222,13 +222,13 @@ public class PlayerJumpDashState : PlayerBaseState
     /// </summary>
     private void HandleJumpDashAttack()
     {
-        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanZSlotBomb())
         {
             ThrowStraightNormalBomb();
             _playerFSM.ChangeState<PlayerRecoilState>();
             return;
         }
-        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanXSlotBomb())
         {
             ThrowStraightSpecialBomb();
             _playerFSM.ChangeState<PlayerRecoilState>();

@@ -95,7 +95,7 @@ public class PlayerCoolTime : MonoBehaviour
 
     private void SetNormalAttackCoolTime()
     {
-        if (_normalCoolTimeShadowImage != null && _myPlayer.BasicBombStat != null)
+        if (_normalCoolTimeShadowImage != null && _myPlayer.ZSlotBombStat != null)
         {
             if (_normalCoolTimeCancellationTokenSource != null)
             {
@@ -103,14 +103,14 @@ public class PlayerCoolTime : MonoBehaviour
                 _normalCoolTimeCancellationTokenSource.Dispose();
             }
             _normalCoolTimeCancellationTokenSource = new CancellationTokenSource();
-            CoolTimeCoroutine(_normalCoolTimeShadowImage, _normalCoolTimeText, _normalCoolTimeEndEffectImage, _myPlayer.BasicBombStat.CoolTime, _normalCoolTimeCancellationTokenSource.Token).Forget();
+            CoolTimeCoroutine(_normalCoolTimeShadowImage, _normalCoolTimeText, _normalCoolTimeEndEffectImage, _myPlayer.ZSlotBombCoolTime, _normalCoolTimeCancellationTokenSource.Token).Forget();
         }
     }
 
     private void SetSpecialAttackCoolTime()
     {
         // UI가 있는 씬에서만 실행
-        if (_specialCoolTimeShadowImage != null && _myPlayer.SpecialBombStat != null)
+        if (_specialCoolTimeShadowImage != null && _myPlayer.XSlotBombStat != null)
         {
             if (_specialCoolTimeCancellationTokenSource != null)
             {
@@ -118,7 +118,7 @@ public class PlayerCoolTime : MonoBehaviour
                 _specialCoolTimeCancellationTokenSource.Dispose();
             }
             _specialCoolTimeCancellationTokenSource = new CancellationTokenSource();
-            CoolTimeCoroutine(_specialCoolTimeShadowImage, _specialCoolTimeText, _specialCoolTimeEndEffectImage, _myPlayer.SpecialBombStat.CoolTime, _specialCoolTimeCancellationTokenSource.Token).Forget();
+            CoolTimeCoroutine(_specialCoolTimeShadowImage, _specialCoolTimeText, _specialCoolTimeEndEffectImage, _myPlayer.XSlotBombCoolTime, _specialCoolTimeCancellationTokenSource.Token).Forget();
         }
     }
 
