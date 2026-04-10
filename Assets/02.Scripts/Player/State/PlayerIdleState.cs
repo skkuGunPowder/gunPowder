@@ -118,18 +118,18 @@ public class PlayerIdleState : PlayerBaseState
 
     private void IdleNormalAttack()
     {
-        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanZSlotBomb())
         {
             if (InputHandler.GetKey(KeyCode.UpArrow))
             {
-                if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+                if (InputHandler.GetKeyDown(KeyCode.Z) && CanZSlotBomb())
                 {
                     ThrowNormalBomb(EBombSpawnPoint.Up);
                 }
             }
             else if (InputHandler.GetKey(KeyCode.DownArrow))
             {
-                if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+                if (InputHandler.GetKeyDown(KeyCode.Z) && CanZSlotBomb())
                 {
                     ThrowNormalBomb(EBombSpawnPoint.Down);
                 }
@@ -151,18 +151,18 @@ public class PlayerIdleState : PlayerBaseState
 
     private void IdleSpecialAttack()
     {
-        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanXSlotBomb())
         {
             if (InputHandler.GetKey(KeyCode.UpArrow))
             {
-                if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+                if (InputHandler.GetKeyDown(KeyCode.X) && CanXSlotBomb())
                 {
                     ThrowSpecialBomb(EBombSpawnPoint.Up);
                 }
             }
             else if (InputHandler.GetKey(KeyCode.DownArrow))
             {
-                if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+                if (InputHandler.GetKeyDown(KeyCode.X) && CanXSlotBomb())
                 {
                     ThrowSpecialBomb(EBombSpawnPoint.Down);
                 }

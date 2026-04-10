@@ -241,13 +241,13 @@ public class PlayerWalkState : PlayerBaseState
     /// </summary>
     private void WalkAttack()
     {
-        if (InputHandler.GetKeyDown(KeyCode.Z) && CanNormalBomb())
+        if (InputHandler.GetKeyDown(KeyCode.Z) && CanZSlotBomb())
         {
             ThrowNormalBomb();
             _playerFSM.ChangeState<PlayerNormalRecoilState>();
             return;
         }
-        if (InputHandler.GetKeyDown(KeyCode.X) && CanSpecialBomb())
+        if (InputHandler.GetKeyDown(KeyCode.X) && CanXSlotBomb())
         {
             ThrowSpecialBomb();
             _playerFSM.ChangeState<PlayerNormalRecoilState>();
