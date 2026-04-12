@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Collections.Generic;
 using LitJson;
+using UnityEngine.AddressableAssets;
+using UnityEngine;
 
 public enum CartridgeRarity
 {
@@ -13,6 +15,9 @@ public enum CartridgeRarity
 public class CartridgeData
 {
     public readonly string ID;
+    public readonly string ImageAddress;
+    public readonly Sprite ImageSprite;
+    public readonly string Name;
     public readonly CartridgeRarity Rarity;
     public readonly int Durability;
     public readonly string Explanation;
@@ -22,6 +27,9 @@ public class CartridgeData
     public CartridgeData(JsonData json)
     {
         ID = json["CartridgeID"].ToString();
+        ImageAddress = json["ImageAddress"].ToString();
+        // ImageSprite = Addressables.LoadAssetAsync<Sprite>(ImageAddress).WaitForCompletion(); // TODO: 아직 어드레서블 이미지 없음
+        Name = json["Name"].ToString();
         Rarity = (CartridgeRarity)System.Enum.Parse(typeof(CartridgeRarity), json["Rarity"].ToString());
         Durability = int.Parse(json["Durability"].ToString());
         Explanation = json["Explanation"].ToString();
