@@ -179,13 +179,11 @@ public class VollyballMode : GameModeBase
     private void SubScribe()
     {
         EventManager.Instance.OnScoreGoal += RequestScoreGoal;
-        EventManager.Instance.OnGameRespawn += InstantiateVolleyball;
     }
-    
+
     private void UnSubScribe()
     {
         EventManager.Instance.OnScoreGoal -= RequestScoreGoal;
-        EventManager.Instance.OnGameRespawn -= InstantiateVolleyball;
     }
-    
+
 }

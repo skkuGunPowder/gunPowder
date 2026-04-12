@@ -27,10 +27,11 @@ public class PlayerSpawner : MonoBehaviour
         Player player = playerInstance.GetComponent<Player>();
 
         PlayerEventManager.Instance.GetEvents(player.ActorNumber).InvokeOnSpawned();
-
+        
         if (player.PhotonView.IsMine)
         {
             CameraController proCamera = Camera.main.GetComponent<CameraController>();
+            EventManager.Instance.FindPlayer(playerInstance);
             proCamera.SetTarget(player);
             UltimateManager.Instance.SetPlayer(player);
         }

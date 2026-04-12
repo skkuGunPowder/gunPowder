@@ -7,6 +7,7 @@ public class GameStateSpawn : GameModeStateBase
 
     public override void Enter()
     {
+        Debug.Log("spawn enter");
         int[] playerList;
 
         if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)
@@ -33,7 +34,14 @@ public class GameStateSpawn : GameModeStateBase
             (playerList[i], playerList[j]) = (playerList[j], playerList[i]);
         }
 
-        _gameMode.SpawnPlayer(playerList, OnSpawnComplete);
+        for (int i = 0; i < playerList.Length; i++)
+        {
+            if (playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber) { continue; }
+            _gameMode.MyPlayer = _gameMode.PlayerSpawner.GeneratePlayers(i);
+            break;
+        }
+
+        OnSpawnComplete();
     }
 
     // 스폰 완료 후 첫 라운드면 BombSelect, 이후는 Playing으로 전환

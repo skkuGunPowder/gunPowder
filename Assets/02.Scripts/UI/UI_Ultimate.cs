@@ -52,26 +52,17 @@ public class UI_Ultimate : MonoBehaviour
         }
         
         // EventManager의 PlayerListUp 이벤트 구독
-        EventManager.Instance.OnPlayerListUp += OnPlayerListUp;
-    }
-    
-    /// <summary>
-    /// 플레이어 리스트 업데이트 이벤트 핸들러 (플레이어 생성 후 호출됨)
-    /// </summary>
-    private void OnPlayerListUp()
-    {
-        FindAndSubscribeToPlayer();
+        EventManager.Instance.OnFindPlayer += FindAndSubscribeToPlayer;
     }
     
     /// <summary>
     /// 로컬 플레이어 찾기 및 궁극기 이벤트 구독
     /// </summary>
-    private void FindAndSubscribeToPlayer()
+    private void FindAndSubscribeToPlayer(GameObject player)
     {
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject != null)
+        if (player != null)
         {
-            _player = playerObject.GetComponent<Player>();
+            _player = player.GetComponent<Player>();
             
             if (_player != null)
             {
@@ -318,7 +309,7 @@ public class UI_Ultimate : MonoBehaviour
         // EventManager 이벤트 구독 해제
         if (EventManager.Instance != null)
         {
-            EventManager.Instance.OnPlayerListUp -= OnPlayerListUp;
+            EventManager.Instance.OnFindPlayer -= FindAndSubscribeToPlayer;
         }
         
         // Player 이벤트 구독 해제

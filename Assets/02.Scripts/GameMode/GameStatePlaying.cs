@@ -15,8 +15,15 @@ public class GameStatePlaying : GameModeStateBase
     private int _count = 0; // 모든 플레이어의 정보가 모였는지 확인
     private int _MaxCount = 0;
 
-    private SecondTimer _timer; 
-    
+    private SecondTimer _timer;
+
+    public override void Initialize(GameModeBase gameMode)
+    {
+        base.Initialize(gameMode);
+        _teamCount = new Dictionary<EInGameTeam, int>();
+        _teamCount.Clear();
+    }
+
     private void Init()
     { 
         EventManager.Instance.GameStart(); // 게임 시작 321
@@ -49,6 +56,7 @@ public class GameStatePlaying : GameModeStateBase
     public override void Enter()
     {
         Init();
+        Debug.Log("playing enter");
         GameManager.Instance.GameStateChange(EGameState.Waiting); // 카운트다운 중 Waiting 유지
         
         EventManager.Instance.OnTimeCheck += OnPlayerDead;
@@ -110,23 +118,16 @@ public class GameStatePlaying : GameModeStateBase
                 return;
             }
 
-            bool end;
+            if (LastAttackCheck(team) == false)     // 팀원이 살아있음 - 일반 사망 처리만
+            {
+                _photonView.RPC(nameof(RPC_RequestPlayerDie), player, false);
+                return;
+            }
 
-            if (LastAttackCheck(team) == false)     //죽은 플레이어가 그 팀의 마지막인가?
-            {
-                end = false;
-            }
-            else
-            {
-                end = true;
-            }
-            
+            // 팀의 마지막 플레이어 - 게임 종료
             SetGameSet();
-
-            // 플레이어 상태 변경
             GameManager.Instance.GameStateChange(EGameState.Result);
-            _photonView.RPC(nameof(RPC_RequestPlayerDie), player, end);
-            
+            _photonView.RPC(nameof(RPC_RequestPlayerDie), player, true);
             return;
         }
         

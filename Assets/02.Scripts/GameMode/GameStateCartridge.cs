@@ -6,6 +6,7 @@ public class GameStateCartridge : GameModeStateBase
     public override void Enter()
     {
         Test();
+        Debug.Log("cartiridge enter");
     }
     
     private void Test()
@@ -16,7 +17,7 @@ public class GameStateCartridge : GameModeStateBase
 
     private async UniTaskVoid TestAsync()
     {
-        await UniTask.WaitForSeconds(4f);
+        await UniTask.WaitForSeconds(1f);
         
         _gameMode.RequestStateChange(EModeState.Spawn);
     }

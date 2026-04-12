@@ -47,6 +47,8 @@ public class GameStateRound : GameModeStateBase
 
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
         
+        _roundTeamCount.Clear();
+        
         foreach (PhotonPlayer player in players)
         {
             EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
@@ -59,6 +61,8 @@ public class GameStateRound : GameModeStateBase
     public override void Enter()
     {
         Init();
+        EventManager.Instance.OnRoundEnd += EndCheck;
+        Debug.Log("round enter");
         RequestMyPlayerHealth();
     }
     
@@ -131,17 +135,22 @@ public class GameStateRound : GameModeStateBase
         EventManager.Instance.ScoreUpdate(team, _roundTeamCount[team].score);
     }
     
-    private void EndCheck(EInGameTeam team)
+    private void EndCheck()
     {
-        int score = _roundTeamCount[team].score;
-
-        if (score >= ROUND_SCORE_LIMIT)
+        if (PhotonNetwork.IsMasterClient == false)
         {
-            // 게임 종료
-            _gameMode.GameOver();   
             return;
         }
-        
+
+        foreach (TeamScore teamScore in _roundTeamCount.Values)
+        {
+            if (teamScore.score >= ROUND_SCORE_LIMIT)
+            {
+                _gameMode.GameOver();
+                return;
+            }
+        }
+
         _gameMode.RequestStateChange(EModeState.Cartirdge);
     }
 
@@ -156,7 +165,7 @@ public class GameStateRound : GameModeStateBase
             return;
         }
         
-        EndCheck(_winningTeam);
+        PhotonNetwork.DestroyAll();
          
     }
     
@@ -188,11 +197,7 @@ public class GameStateRound : GameModeStateBase
     public override void Exit()
     {
         SummarizeResult();
-        
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.DestroyAll();
-        }
+        EventManager.Instance.OnRoundEnd -= EndCheck;
     }
     
     // 결과 합산하기

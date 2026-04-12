@@ -175,14 +175,6 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGameStart?.Invoke();
     }
-
-    public event Action OnBombSelectPhaseStart;
-
-    public void BombSelectPhaseStart()
-    {
-        OnBombSelectPhaseStart?.Invoke();
-    }
-    
     public event Action OnGameOver;
     
     public void GameOver()
@@ -202,13 +194,6 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     public void ScoreUpdate(EInGameTeam team, int score)
     {
         OnScoreUpdate?.Invoke(team, score);
-    }
-    
-    public event Action OnGameRespawn;
-
-    public void GameRespawn()
-    {
-        OnGameRespawn?.Invoke();
     }
     
     public event Action<PhotonPlayer> OnTimeCheck;
@@ -254,12 +239,18 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnTimerUpdate?.Invoke(time);
     }
-        
+    
+    public event Action<GameObject> OnFindPlayer;
 
-    public event Action OnTimerEnd; // BombSelectTimer 종료 → 상태 전환용
-
-    public void TimerEnded()
+    public void FindPlayer(GameObject player)
     {
-        OnTimerEnd?.Invoke();
+        OnFindPlayer?.Invoke(player);
+    }
+
+    public event Action OnRoundEnd;
+
+    public void RoundEnd()
+    {
+        OnRoundEnd?.Invoke();
     }
 }
