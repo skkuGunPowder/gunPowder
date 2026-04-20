@@ -51,7 +51,7 @@ public class ItemDatabaseRepo
             foreach (JsonData chart in result.FlattenRows())
             {
                 // 아이템 데이터 파싱
-                if(chart["chartName"].ToString() == "Bomb" || chart["chartName"].ToString() == "Skin")
+                if(chart["chartName"].ToString() == "Bomb_DEV" || chart["chartName"].ToString() == "Skin_DEV")
                 {
                     var itemResult = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
                     if (!itemResult.IsSuccess())
@@ -77,7 +77,7 @@ public class ItemDatabaseRepo
                 _isItemLoadDone = true;
 
                 // 폭발 데이터 파싱
-                if (chart["chartName"].ToString() == "Explosion")
+                if (chart["chartName"].ToString() == "Explosion_DEV")
                 {
                     var chartContents = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
                     if (!chartContents.IsSuccess())

@@ -34,7 +34,7 @@ public class BuffRepository
             
             foreach (JsonData chart in result.FlattenRows())
             {
-                if (chart["chartName"].ToString() != "Buff")
+                if (chart["chartName"].ToString() != "Buff_DEV")
                 {
                     continue;
                 }
