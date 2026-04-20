@@ -30,7 +30,7 @@ public class CartridgeRepository
 
             foreach (JsonData chart in result.FlattenRows())
             {
-                if (chart["chartName"].ToString() != "Cartridge")
+                if (chart["chartName"].ToString() != "Cartridge_DEV")
                 {
                     continue;
                 }
