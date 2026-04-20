@@ -7,7 +7,13 @@ using UnityEngine;
 
 public class ItemDatabaseRepo
 {
-    private const int ITEM_DATA_FOLDER_ID = 2594;
+#if DEV_MODE
+    //Dev 폴더
+    private const int ITEM_DATA_FOLDER_ID = 3124;
+#else
+    //Build 폴더
+    private const int ITEM_DATA_FOLDER_ID = 3125;
+#endif
 
     public event Action<Dictionary<string, Item>, Dictionary<string, IStat>> OnitemDataLoaded;
 
@@ -38,81 +44,58 @@ public class ItemDatabaseRepo
         {
             if (!result.IsSuccess())
             {
-                Debug.LogError($"아이템 데이터 불러오기 실패: {result.GetMessage()}");
+                Debug.LogError($"차트 데이터 불러오기 실패: {result.GetMessage()}");
                 return;
             }
 
             foreach (JsonData chart in result.FlattenRows())
             {
-                var itemResult = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
-                if (!itemResult.IsSuccess())
+                // 아이템 데이터 파싱
+                if(chart["chartName"].ToString() == "Bomb" || chart["chartName"].ToString() == "Skin")
                 {
-                    Debug.LogError($"아이템 데이터 불러오기 실패: {itemResult.GetMessage()}");
-                    continue;
-                }
-
-                foreach (JsonData iteminfo in itemResult.FlattenRows())
-                {
-                    Item item = new Item(iteminfo);
-                    itemDataDict.Add(item.ID, item);
-                    string prefix = item.ID.Substring(0, 2);
-
-                    if (item.ItemType == EItemType.Bomb)
+                    var itemResult = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
+                    if (!itemResult.IsSuccess())
                     {
-                        BombStat bombStat = new BombStat(iteminfo);
-                        statDataDict.Add(item.ID, bombStat);
+                        Debug.LogError($"아이템 데이터 불러오기 실패: {itemResult.GetMessage()}");
                         continue;
                     }
 
-                    if (item.ItemType == EItemType.BonusCard)
+                    foreach (JsonData iteminfo in itemResult.FlattenRows())
                     {
-                        BonusCardStat bonusCardStat = new BonusCardStat(iteminfo);
-                        statDataDict.Add(item.ID, bonusCardStat);
+                        Item item = new Item(iteminfo);
+                        itemDataDict.Add(item.ID, item);
+                        string prefix = item.ID.Substring(0, 2);
+
+                        if (item.ItemType == EItemType.Bomb)
+                        {
+                            BombStat bombStat = new BombStat(iteminfo);
+                            statDataDict.Add(item.ID, bombStat);
+                            continue;
+                        }
+                    }
+                }
+                _isItemLoadDone = true;
+
+                // 폭발 데이터 파싱
+                if (chart["chartName"].ToString() == "Explosion")
+                {
+                    var chartContents = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
+                    if (!chartContents.IsSuccess())
+                    {
+                        Debug.LogError($"폭발 데이터 불러오기 실패: {chartContents.GetMessage()}");
                         continue;
                     }
 
-                    if (prefix == "CP")
+                    foreach (JsonData explosioninfo in chartContents.FlattenRows())
                     {
-                        CurrencyPackageStat currencyPackageStat = new CurrencyPackageStat(iteminfo);
-                        statDataDict.Add(item.ID, currencyPackageStat);
-                        continue;
+                        ExplosionStat explosionStat = new ExplosionStat(explosioninfo);
+                        statDataDict.Add((string)explosioninfo["ItemID"], explosionStat);
                     }
-                }
-            }
-            _isItemLoadDone = true;
-            CheckComplete(itemDataDict, statDataDict);
-        });
-
-        Backend.Chart.GetChartListV2(result =>
-        {
-            if (!result.IsSuccess())
-            {
-                Debug.LogError($"폭발 데이터 불러오기 실패: {result.GetMessage()}");
-                return;
-            }
-
-            foreach (JsonData chart in result.FlattenRows())
-            {
-                if (chart["chartName"].ToString() != "Explosion")
-                {
-                    continue;
-                }
-
-                var chartContents = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
-                if (!chartContents.IsSuccess())
-                {
-                    Debug.LogError($"폭발 데이터 불러오기 실패: {chartContents.GetMessage()}");
-                    continue;
-                }
-
-                foreach (JsonData explosioninfo in chartContents.FlattenRows())
-                {
-                    ExplosionStat explosionStat = new ExplosionStat(explosioninfo);
-                    statDataDict.Add((string)explosioninfo["ItemID"], explosionStat);
                 }
             }
             _isExplosionLoadDone = true;
+
             CheckComplete(itemDataDict, statDataDict);
-        });  
+        });
     }
 }
