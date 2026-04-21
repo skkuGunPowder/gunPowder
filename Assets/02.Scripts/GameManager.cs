@@ -68,6 +68,7 @@ public class GameManager : PhotonSingleton<GameManager>
     // 게임 종료
     public void RequestGameOver()
     {
+        Debug.Log("GameOver Request");
         _photonView.RPC(nameof(RPC_GameOver), RpcTarget.All);
     }
     

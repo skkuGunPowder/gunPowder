@@ -467,6 +467,7 @@ GameObject:
   - component: {fileID: 7394149299305542313}
   - component: {fileID: 3903767612053890276}
   - component: {fileID: 2603796562398666966}
+  - component: {fileID: 873304073010255849}
   m_Layer: 5
   m_Name: TeamScore
   m_TagString: Untagged
@@ -516,7 +517,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.007843138}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -549,8 +550,25 @@ MonoBehaviour:
   _palyerPivot: {fileID: 0}
   _playerList: []
   _fallInterval: 0.2
+  _slotRectTransform: {fileID: 6183783120514285371}
   _textSlot: {fileID: 1006731772613890637}
   _shakeDuration: 1
   _scale: 2
   _scaleDuration: 0.5
   _interval: 1
+  _duration: 0
+  _easeType: 0
+  _backGroundRectTransform: {fileID: 4185541629244208240}
+--- !u!114 &873304073010255849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7753350039578994030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1

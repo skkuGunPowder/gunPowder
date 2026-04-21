@@ -46,9 +46,9 @@ public class CharacterExplosionProduction : MonoBehaviour
             _rectTransform = GetComponent<RectTransform>();
         }
 
-        // _down = _rectTransform.rect.y;
-        // _rectTransform.position = new Vector2(_rectTransform.rect.x, _rectTransform.rect.y + _height);
-        // Debug.Log("current rectTransform" + _rectTransform.position);
+        _down = _rectTransform.rect.y;
+        _rectTransform.position = new Vector2(_rectTransform.rect.x, _rectTransform.rect.y + _height);
+        Debug.Log("current rectTransform" + _rectTransform.position);
     }
     
     
@@ -56,15 +56,15 @@ public class CharacterExplosionProduction : MonoBehaviour
     {
         Init();
         Sequence seq = DOTween.Sequence();
-        seq.AppendInterval(_fallSpeed);
-        seq.OnComplete(() =>
-        {
-            OnFallEnd?.Invoke();
-        });
-        // _rectTransform.DOLocalMove(new Vector2(_rectTransform.rect.x , _down), _fallSpeed).SetEase(_fallEase).OnComplete(() =>
+        // seq.AppendInterval(_fallSpeed);
+        // seq.OnComplete(() =>
         // {
         //     OnFallEnd?.Invoke();
         // });
+        _rectTransform.DOLocalMove(new Vector2(_rectTransform.rect.x , _down), _fallSpeed).SetEase(_fallEase).OnComplete(() =>
+        {
+            OnFallEnd?.Invoke();
+        });
     }
 
     public void PlayExplosion()

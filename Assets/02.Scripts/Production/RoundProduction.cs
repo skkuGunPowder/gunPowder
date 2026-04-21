@@ -25,6 +25,11 @@ public class RoundProduction : MonoBehaviour
     [SerializeField] private float _interval;
     [SerializeField] private Ease _ease;
     
+    [Header("테스트용")]
+    [SerializeField] private bool _isTest = false;
+    [SerializeField] private int _people = 0;
+    [SerializeField] private GameObject _playerPrefab;
+    
     private int _index = 0;
     private int _teamCount = 0;
     
@@ -36,23 +41,65 @@ public class RoundProduction : MonoBehaviour
 
     private void Start()
     {
-        Init();
+        if (_isTest)
+        {
+            ColorPalette.Init();
+            TestInit();
+        }
+        else
+        {
+            Init();
+        }
     }
-    
+
+    private async UniTask TestInit()
+    {
+        await UniTask.Yield();
+        
+        for (int i = 0; i < _textSlotList.Count; i++)
+        {
+            bool neg = i % 2 == 0;
+            
+            if (_people > i)
+            {
+                EInGameTeam team = (EInGameTeam)i;
+                if (!_teamScoreDict.ContainsKey(team))
+                {
+                    _teamScoreDict.Add(team, _textSlotList[i]);
+                    _teamScoreDict[team].Init(ColorSet(team), i, neg);
+                }
+                else
+                {
+                    _teamScoreDict[team].SetTeamCount(i);
+                    _textSlotList[i].gameObject.SetActive(false);
+                    _playerSlotList[i].SetActive(false);
+                }
+            }
+            else
+            {
+                _textSlotList[i].gameObject.SetActive(false);
+                _playerSlotList[i].SetActive(false);
+            }
+        }
+    }
     // 팀 개수, 
     private void Init()
     {
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
 
+        _horizontalLayoutGroup.childControlHeight = false; // DOTWEEN을 위한 해제
+        
         for (int i = 0; i < _textSlotList.Count; i++)
         {
+            bool neg = i % 2 == 0;
+            
             if (players.Length > i)
             {
                 EInGameTeam team = (EInGameTeam)players[i].CustomProperties[EProperties.Team.ToString()];   
                 if (!_teamScoreDict.ContainsKey(team))
                 {
                     _teamScoreDict.Add(team, _textSlotList[i]);
-                    _teamScoreDict[team].Init(ColorSet(team),i);
+                    _teamScoreDict[team].Init(ColorSet(team), i, neg);
                 }
                 else
                 {
@@ -70,7 +117,7 @@ public class RoundProduction : MonoBehaviour
         }
         
         
-        _backgroundImage.gameObject.SetActive(false);
+        // _backgroundImage.gameObject.SetActive(false);
     }
     
     // 팀에 맞는 배경 색 제공
@@ -87,14 +134,36 @@ public class RoundProduction : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (!_isTest) { return; }
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            _playerPrefab.SetActive(true);
+            List<EInGameTeam> teams = new List<EInGameTeam>(_teamScoreDict.Keys);
+            EInGameTeam randomTeam = teams[UnityEngine.Random.Range(0, teams.Count)];
+            Play(randomTeam, 1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            _horizontalLayoutGroup.childControlHeight = false;
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            Stop();
+        }
+    }
+
     private void Play(EInGameTeam team, int score)
     {
         _backgroundImage.gameObject.SetActive(true);
         _initialized = false;
-        foreach (var skin in _skinPlayer.StartSkinList)
-        {
-            skin.gameObject.SetActive(true);
-        }
+        // foreach (var skin in _skinPlayer.StartSkinList)
+        // {
+        //     skin.gameObject.SetActive(true);
+        // }
         
         TaskPlay(team, score);
     }
@@ -112,14 +181,21 @@ public class RoundProduction : MonoBehaviour
                 pair.Value.ScoreChange(score);
             }
             
+            await UniTask.WaitForSeconds(_interval);
+        }
+        
+        foreach (var pair in _teamScoreDict)
+        {
             // ✅ 마지막인지 체크
             bool isLast = (index == count - 1);
 
             if (isLast)
             {
-                pair.Value.PlayStart(_duration, _ease, ScoreChange);
+                pair.Value.PlayFall(ScoreChange);
                 _teamCount = pair.Value.GetTeamCount();
             }
+
+            pair.Value.PlayFall();
 
             index++;
             await UniTask.WaitForSeconds(_interval);
@@ -144,10 +220,10 @@ public class RoundProduction : MonoBehaviour
 
     private void Stop()
     {
-        foreach (var skin in _skinPlayer.StartSkinList)
-        {
-            skin.gameObject.SetActive(false);
-        }
+        // foreach (var skin in _skinPlayer.StartSkinList)
+        // {
+        //     skin.gameObject.SetActive(false);
+        // }
 
         foreach (var pair in _teamScoreDict)
         {

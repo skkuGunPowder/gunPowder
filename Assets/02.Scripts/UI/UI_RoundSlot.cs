@@ -14,6 +14,7 @@ public class UI_RoundSlot : MonoBehaviour
     [SerializeField] private float _fallInterval;
     
     [Header("텍스트 슬롯")]
+    [SerializeField] private RectTransform _slotRectTransform;
     [SerializeField] private UI_TextSlot _textSlot;
     [SerializeField] private float _shakeDuration;
     [SerializeField] private float _scale;
@@ -22,10 +23,11 @@ public class UI_RoundSlot : MonoBehaviour
     [SerializeField] private float _duration;
     [SerializeField] private Ease _easeType;
 
+    [SerializeField] private RectTransform _backGroundRectTransform;
+    [SerializeField] private bool _isNegative = false;
     private List<CharacterExplosionProduction> _activeList = new List<CharacterExplosionProduction>();
     private RectTransform _rectTransform;
-    private RectTransform _slotRectTransform;
-    private float _startHeight;
+    private float _startHeight = 0;
     private bool _scoreChange = false;
     private int _score = 0;
     private int _teamCount = 0;
@@ -33,14 +35,35 @@ public class UI_RoundSlot : MonoBehaviour
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
-        _startHeight = _rectTransform.rect.height;
+
     }
     
-    public void Init(Color32 color, int i)
+    public void Init(Color32 color, int i, bool negative)
     {
-        _textSlot.gameObject.SetActive(true);
+        // 비활성 오브젝트는 null 체크 후 초기화
+        if (_rectTransform == null)
+        {
+            _rectTransform = GetComponent<RectTransform>();
+        }
+        
+        _isNegative = negative;
+        
+        if (_isNegative)
+        {
+            _startHeight = - _rectTransform.rect.height;   
+        }
+        else
+        {
+            _startHeight = _rectTransform.rect.height;
+        }
+        
+        Debug.Log($"height amount : " + _rectTransform.rect.height);
+        
+        // 초기화
+        _backGroundRectTransform.anchoredPosition = new Vector2(0, _startHeight);
         
         // 뒷배경 바꾸기
+        _textSlot.gameObject.SetActive(true);
         _textSlot.BackgroundRefresh(color);
         TextRefresh(0);
         _playerList[i].gameObject.SetActive(true);
@@ -83,15 +106,11 @@ public class UI_RoundSlot : MonoBehaviour
         _duration = duration;
         _easeType = ease;
         Sequence seq = DOTween.Sequence();
-        seq.Append(_rectTransform.DOSizeDelta(new Vector2(_rectTransform.sizeDelta.x, _startHeight), duration).SetEase(ease));
+        seq.Append(_backGroundRectTransform.DOAnchorPos(new Vector2(0, 0), duration).SetEase(ease));
         seq.AppendCallback(() => _textSlot.gameObject.SetActive(true));
-        seq.OnComplete(() =>
-        {
-            PlayFall(endCallback);
-        });
     }
 
-    private void PlayFall(Action endCallback = null)
+    public void PlayFall(Action endCallback = null)
     {
         _palyerPivot.SetActive(true);
         SetComplete();
@@ -130,6 +149,8 @@ public class UI_RoundSlot : MonoBehaviour
             return;
         }
         
+        _slotRectTransform = _textSlot.GetComponent<RectTransform>();
+        
         Sequence  mySequence = DOTween.Sequence();
         mySequence.Append(_slotRectTransform.DOShakeAnchorPos(_shakeDuration)); // 쉐이크
         mySequence.Append(_slotRectTransform.DOScale(_scale,_scaleDuration));
@@ -145,13 +166,13 @@ public class UI_RoundSlot : MonoBehaviour
     {
         Sequence mySequence = DOTween.Sequence();
         mySequence.AppendCallback(()=> _textSlot.gameObject.SetActive(false));
-        mySequence.Append(_rectTransform.DOSizeDelta(new Vector2(_rectTransform.sizeDelta.x, 0f), _duration).SetEase(_easeType));
+        mySequence.Append(_backGroundRectTransform.DOAnchorPos(new Vector2(0, _startHeight), _duration).SetEase(_easeType));
         mySequence.AppendCallback(()=> endCallback?.Invoke());
     }
 
     private void OnDisable()
     {
-        _rectTransform.sizeDelta = new Vector2(_rectTransform.sizeDelta.x, 0f);
+        // _rectTransform.sizeDelta = new Vector2(_rectTransform.sizeDelta.x, 0f);
         _textSlot.gameObject.SetActive(false);
     }
 }
