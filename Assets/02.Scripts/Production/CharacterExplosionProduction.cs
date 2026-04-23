@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class CharacterExplosionProduction : MonoBehaviour
 {
-    private RectTransform _rectTransform;
+    [SerializeField] private RectTransform _rectTransform; // 플레이어 아이콘
  
     // 현재 위치 첫 위치에 떨어지기
     [SerializeField] private float _fallSpeed;
@@ -35,7 +35,7 @@ public class CharacterExplosionProduction : MonoBehaviour
     {
         if (_rectTransform == null)
         {
-            _rectTransform = GetComponent<RectTransform>();
+            _rectTransform = GetComponentInChildren<RectTransform>();
         }
     }
 
@@ -43,49 +43,53 @@ public class CharacterExplosionProduction : MonoBehaviour
     {
         if (_rectTransform == null)
         {
-            _rectTransform = GetComponent<RectTransform>();
+            _rectTransform = GetComponentInChildren<RectTransform>();
         }
 
-        _down = _rectTransform.rect.y;
-        _rectTransform.position = new Vector2(_rectTransform.rect.x, _rectTransform.rect.y + _height);
-        Debug.Log("current rectTransform" + _rectTransform.position);
+        _rectTransform.anchoredPosition = new Vector2(0, _height);
     }
     
     
     public void PlayFall()
     {
-        Init();
-        Sequence seq = DOTween.Sequence();
-        // seq.AppendInterval(_fallSpeed);
-        // seq.OnComplete(() =>
-        // {
-        //     OnFallEnd?.Invoke();
-        // });
-        _rectTransform.DOLocalMove(new Vector2(_rectTransform.rect.x , _down), _fallSpeed).SetEase(_fallEase).OnComplete(() =>
+        _rectTransform.gameObject.SetActive(true);
+        _rectTransform.DOAnchorPos(new Vector2(0 , _down), _fallSpeed).SetEase(_fallEase).OnComplete(() =>
         {
             OnFallEnd?.Invoke();
         });
     }
 
-    public void PlayExplosion()
+    public void PlayExplosion(bool winner)
     {
-        
+        if (winner)
+        {
+            ExplosionBackward();
+        }
+        else
+        {
+            ExplosionForward();
+        }
     }
     
     // 뒤로 날아가기 (scale --)
     public void ExplosionBackward()
     {
+        Debug.Log("backward");
+        _rectTransform.gameObject.SetActive(false);
     }
 
     // 앞으로 날아가기 (scale ++)
     public void ExplosionForward()
     {
-        
+        Debug.Log("forward");
+        _rectTransform.gameObject.SetActive(false);
     }
 
     private void OnDisable()
     {
         // 초기화 (scale 초기화)
+        OnFallEnd = null;
+        _rectTransform.gameObject.SetActive(false);
         _rectTransform.localScale = new Vector3(1f,1f,1f);
     }
 }

@@ -14,11 +14,14 @@ public class UI_RoundSlot : MonoBehaviour
     [SerializeField] private float _fallInterval;
     
     [Header("텍스트 슬롯")]
+    [SerializeField] private ShakePower _shakePower = new ShakePower();
     [SerializeField] private RectTransform _slotRectTransform;
     [SerializeField] private UI_TextSlot _textSlot;
+    [SerializeField] private float _shakeInterval;
     [SerializeField] private float _shakeDuration;
     [SerializeField] private float _scale;
     [SerializeField] private float _scaleDuration;
+    [SerializeField] private float _scaleoffDuration;
     [SerializeField] private float _interval;
     [SerializeField] private float _duration;
     [SerializeField] private Ease _easeType;
@@ -32,10 +35,19 @@ public class UI_RoundSlot : MonoBehaviour
     private int _score = 0;
     private int _teamCount = 0;
     
+    public int GetTeamCount()
+    {
+        return _teamCount;
+    }
+    
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
 
+        if (_slotRectTransform == null)
+        {
+            _slotRectTransform = _textSlot.GetComponent<RectTransform>();
+        }
     }
     
     public void Init(Color32 color, int i, bool negative)
@@ -57,8 +69,6 @@ public class UI_RoundSlot : MonoBehaviour
             _startHeight = _rectTransform.rect.height;
         }
         
-        Debug.Log($"height amount : " + _rectTransform.rect.height);
-        
         // 초기화
         _backGroundRectTransform.anchoredPosition = new Vector2(0, _startHeight);
         
@@ -71,11 +81,6 @@ public class UI_RoundSlot : MonoBehaviour
 
     public void SetComplete()
     {
-        _playerHorizontalLayoutGroup.enabled = true;
-        Debug.Log("horizon : on");
-        _playerHorizontalLayoutGroup.enabled = false;
-        Debug.Log("horizon : off");
-        
         foreach (CharacterExplosionProduction player in _playerList)
         {
             if (player.gameObject.activeSelf)
@@ -90,11 +95,6 @@ public class UI_RoundSlot : MonoBehaviour
         _playerList[playerNumber].gameObject.SetActive(true);
         _teamCount += 1;
     }
-    public int GetTeamCount()
-    {
-        return _teamCount;
-    }
-    
     public void TextRefresh(int text)
     {
         _textSlot.TextRefresh(text);
@@ -105,13 +105,15 @@ public class UI_RoundSlot : MonoBehaviour
     {
         _duration = duration;
         _easeType = ease;
+        _textSlot.gameObject.SetActive(true);
         Sequence seq = DOTween.Sequence();
         seq.Append(_backGroundRectTransform.DOAnchorPos(new Vector2(0, 0), duration).SetEase(ease));
-        seq.AppendCallback(() => _textSlot.gameObject.SetActive(true));
+        seq.AppendCallback(() => PlayFall(endCallback));
     }
 
     public void PlayFall(Action endCallback = null)
     {
+        _textSlot.gameObject.SetActive(true);
         _palyerPivot.SetActive(true);
         SetComplete();
         PlayPlayerFall(endCallback);
@@ -119,21 +121,35 @@ public class UI_RoundSlot : MonoBehaviour
     
     private async UniTaskVoid PlayPlayerFall(Action endCallback = null)
     {
+        // 콜백을 마지막 활성 플레이어에게만 등록하기 위해 미리 탐색
+        int lastActiveIndex = -1;
+        if (endCallback != null)
+        {
+            for (int i = 0; i < _playerList.Count; i++)
+            {
+                if (_playerList[i].gameObject.activeSelf)
+                {
+                    lastActiveIndex = i;
+                }
+            }
+        }
+
+        // 떨어지기 플레이
         for (int i = 0; i < _playerList.Count; i++)
         {
             if (_playerList[i].gameObject.activeSelf)
             {
-                if (endCallback != null)
+                if (i == lastActiveIndex)
                 {
-                    _playerList[i].OnFallEnd += endCallback; 
+                    _playerList[i].OnFallEnd += endCallback;
                 }
-                
+
                 _playerList[i].PlayFall();
             }
-            
+
             await UniTask.WaitForSeconds(_fallInterval);
         }
-        
+
     }
 
     public void ScoreChange(int text)
@@ -141,31 +157,55 @@ public class UI_RoundSlot : MonoBehaviour
         _scoreChange =  true;
         _score = text;
     }
+    
     // 점수 변경용 애니메이션
     public void ScorePlay(Action endCallback = null)
     {
+     
+        Vector2 origin = _slotRectTransform.anchoredPosition;
+
         if (_scoreChange == false)
         {
+            // 우승이 아닌팀은 대기
+            Debug.Log("defeat");
+            float waitTime = _shakeInterval + _shakeDuration + _scaleoffDuration + _scaleDuration + _interval;
+            Sequence seq = DOTween.Sequence();
+            seq.AppendInterval(waitTime);
+            seq.AppendCallback(() => Explosion(_scoreChange));
             return;
         }
         
-        _slotRectTransform = _textSlot.GetComponent<RectTransform>();
-        
+        Debug.Log("winner");
+        // 우승팀은 점수 변경
         Sequence  mySequence = DOTween.Sequence();
-        mySequence.Append(_slotRectTransform.DOShakeAnchorPos(_shakeDuration)); // 쉐이크
-        mySequence.Append(_slotRectTransform.DOScale(_scale,_scaleDuration));
+        mySequence.AppendInterval(_shakeInterval);
+        mySequence.Append(_slotRectTransform.DOShakeAnchorPos(_shakeDuration, strength: _shakePower.VibratePower, vibrato:_shakePower.Vibrato )).SetEase(_shakePower.ShakeEase); // 쉐이크
+        mySequence.Join(_slotRectTransform.DOScale(_scale,_scaleDuration));
+        // mySequence.Join(_slotRectTransform.DOAnchorPos(origin, _scaleDuration));
         mySequence.JoinCallback(() => TextRefresh(_score));
         mySequence.AppendInterval(_interval);
-        mySequence.Append(_slotRectTransform.DOScale(1,_scaleDuration)).OnComplete(() =>
+        mySequence.Append(_slotRectTransform.DOScale(1, _scaleoffDuration)).OnComplete(() =>
         {
+            Explosion(_scoreChange);
             endCallback?.Invoke();
         });
+    }
+
+    private void Explosion(bool isWinner)
+    {
+        foreach (CharacterExplosionProduction player in _playerList)
+        {
+            if (player.gameObject.activeSelf)
+            {
+                player.PlayExplosion(isWinner);
+            }
+        }
     }
 
     public void ScoreStop(Action  endCallback = null)
     {
         Sequence mySequence = DOTween.Sequence();
-        mySequence.AppendCallback(()=> _textSlot.gameObject.SetActive(false));
+        // mySequence.AppendCallback(()=> _textSlot.gameObject.SetActive(false));
         mySequence.Append(_backGroundRectTransform.DOAnchorPos(new Vector2(0, _startHeight), _duration).SetEase(_easeType));
         mySequence.AppendCallback(()=> endCallback?.Invoke());
     }
@@ -173,6 +213,7 @@ public class UI_RoundSlot : MonoBehaviour
     private void OnDisable()
     {
         // _rectTransform.sizeDelta = new Vector2(_rectTransform.sizeDelta.x, 0f);
+        _scoreChange =  false;
         _textSlot.gameObject.SetActive(false);
     }
 }

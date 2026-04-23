@@ -30,20 +30,18 @@ public class RoundProduction : MonoBehaviour
     [SerializeField] private int _people = 0;
     [SerializeField] private GameObject _playerPrefab;
     
-    private int _index = 0;
-    private int _teamCount = 0;
     
     private bool _initialized = false;
     private void Awake()
     {
         EventManager.Instance.OnScoreUpdate += Play;
+        ColorPalette.Init();
     }
 
     private void Start()
     {
         if (_isTest)
         {
-            ColorPalette.Init();
             TestInit();
         }
         else
@@ -164,38 +162,26 @@ public class RoundProduction : MonoBehaviour
         // {
         //     skin.gameObject.SetActive(true);
         // }
-        
-        TaskPlay(team, score);
+        _teamScoreDict[team].ScoreChange(score);
+        TaskPlay();
     }
     
-    private async UniTaskVoid TaskPlay(EInGameTeam team, int score)
+    private async UniTaskVoid TaskPlay()
     {
-        int index  = 0;
+        int index = 0;
         int count = _teamScoreDict.Count;
         foreach (var pair in _teamScoreDict)
         {
-            pair.Value.PlayStart(_duration, _ease);
-
-            if (pair.Key == team)
-            {
-                pair.Value.ScoreChange(score);
-            }
-            
-            await UniTask.WaitForSeconds(_interval);
-        }
-        
-        foreach (var pair in _teamScoreDict)
-        {
-            // ✅ 마지막인지 체크
             bool isLast = (index == count - 1);
 
             if (isLast)
             {
-                pair.Value.PlayFall(ScoreChange);
-                _teamCount = pair.Value.GetTeamCount();
+                pair.Value.PlayStart(_duration, _ease, ScoreChange);
             }
-
-            pair.Value.PlayFall();
+            else
+            {
+                pair.Value.PlayStart(_duration, _ease);
+            }
 
             index++;
             await UniTask.WaitForSeconds(_interval);
@@ -204,13 +190,6 @@ public class RoundProduction : MonoBehaviour
 
     private void ScoreChange()
     {
-        _index += 1;
-
-        if (_index < _teamCount)
-        {
-            return;
-        }
-        
         foreach (var pair in _teamScoreDict)
         {
             pair.Value.ScorePlay(Stop);
