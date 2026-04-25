@@ -36,7 +36,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 52}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8751477010597508652
@@ -550,11 +550,18 @@ MonoBehaviour:
   _palyerPivot: {fileID: 0}
   _playerList: []
   _fallInterval: 0.2
+  _shakePower:
+    VibrateDuration: 1
+    VibratePower: 0.65
+    Vibrato: 110
+    ShakeEase: 1
   _slotRectTransform: {fileID: 6183783120514285371}
   _textSlot: {fileID: 1006731772613890637}
+  _shakeInterval: 0
   _shakeDuration: 1
   _scale: 2
   _scaleDuration: 0.5
+  _scaleoffDuration: 0
   _interval: 1
   _duration: 0
   _easeType: 0

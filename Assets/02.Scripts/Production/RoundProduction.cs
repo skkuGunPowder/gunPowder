@@ -121,15 +121,7 @@ public class RoundProduction : MonoBehaviour
     // 팀에 맞는 배경 색 제공
     private Color32 ColorSet(EInGameTeam team)
     {
-        switch (team)
-        {
-            case EInGameTeam.Red : return ColorPalette.ColorDictionary[EColorType.Red];
-            case EInGameTeam.Blue : return ColorPalette.ColorDictionary[EColorType.Blue];
-            case EInGameTeam.Green : return ColorPalette.ColorDictionary[EColorType.Green];
-            case EInGameTeam.Yellow : return ColorPalette.ColorDictionary[EColorType.Yellow];
-       
-            default : return Color.white;
-        }
+        return ColorPalette.GetTeamColor(team);
     }
 
     private void Update()

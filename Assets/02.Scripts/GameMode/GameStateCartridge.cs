@@ -1,26 +1,47 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using PhotonPlayer = Photon.Realtime.Player;
 
 public class GameStateCartridge : GameModeStateBase
 {
     public override void Enter()
     {
-        Test();
-        Debug.Log("cartiridge enter");
+        EventManager.Instance.OnScreenClick += ProductionStart;
+        EventManager.Instance.CartridgeStateEnter();
     }
     
     private void Test()
     {
-        // 테스트 용
-        TestAsync();
+        
+    }
+    private void ProductionStart()  // OnScreenClick 구독 함수
+    {
+        if (_gameMode is BattleMode battleMode)
+        {
+            if (battleMode.DeathOrderQueue.Count > 0)
+            {
+                PhotonPlayer player = battleMode.DeathOrderQueue.Dequeue();
+                EventManager.Instance.CartridgeStart(player);
+            }
+        }
     }
 
-    private async UniTaskVoid TestAsync()
+    public override void Tick()
     {
-        await UniTask.WaitForSeconds(1f);
-        
-        _gameMode.RequestStateChange(EModeState.Spawn);
+#if UNITY_EDITOR
+        if (InputHandler.GetKeyDown(KeyCode.Space))
+        {
+            ProductionStart();
+        }
+#endif
     }
-    public override void Tick() { }
-    public override void Exit() { }
+
+    public override void Exit()
+    {
+        EventManager.Instance.OnScreenClick -= ProductionStart;
+        if (_gameMode is BattleMode battleMode)
+        {
+            battleMode.DeathOrderQueue.Clear();
+        }
+    }
 }

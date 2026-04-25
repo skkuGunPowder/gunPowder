@@ -108,8 +108,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
         {
             if ((bool)changedProps[EProperties.IsDead.ToString()])
             {
-                // 죽은 사람 죽은 시간 체크 후 저장
-                EventManager.Instance.GameStateChangeCheck();
+                EventManager.Instance.GameStateChangeCheck(targetPlayer);
             }
         }
         

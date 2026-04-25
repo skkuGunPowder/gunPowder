@@ -1,6 +1,6 @@
 public enum EColorType
 {
-    Red,
+    Red = 0,
     Blue,
     Green,
     Yellow,

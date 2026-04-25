@@ -1,9 +1,13 @@
+using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using PhotonPlayer = Photon.Realtime.Player;
 
 public class BattleMode : GameModeBase
 {
+    public Queue<PhotonPlayer> DeathOrderQueue = new Queue<PhotonPlayer>();
+
     /// <summary>
     /// 1. 플레이어 리스트 받아와서 소환하기
     /// </summary>

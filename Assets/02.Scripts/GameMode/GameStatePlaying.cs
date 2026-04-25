@@ -138,9 +138,13 @@ public class GameStatePlaying : GameModeStateBase
         PlayerDeadCheck();
     }
 
-    private void GameStateChangeCheck()
+    private void GameStateChangeCheck(PhotonPlayer player)
     {
         _count++;
+        if (_gameMode is BattleMode battleMode)
+        {
+            battleMode.DeathOrderQueue.Enqueue(player);
+        }
 
         if (_count >= _MaxCount)
         {

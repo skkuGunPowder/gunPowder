@@ -209,10 +209,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
         OnLastDieComplete?.Invoke();   
     }
     
-    public event Action OnGameStateChangeCheck;
-    public void GameStateChangeCheck()
+    public event Action<PhotonPlayer> OnGameStateChangeCheck;
+    public void GameStateChangeCheck(PhotonPlayer player)
     {
-        OnGameStateChangeCheck?.Invoke();
+        OnGameStateChangeCheck?.Invoke(player);
     }
     
     public event Action<int, int> OnGPDataChanged;    // GP 변경 시 (playerNumber, gp)
@@ -252,5 +252,26 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     public void RoundEnd()
     {
         OnRoundEnd?.Invoke();
+    }
+    
+    public event Action<PhotonPlayer> OnCartridgeStart;
+
+    public void CartridgeStart(PhotonPlayer player)
+    {
+        OnCartridgeStart?.Invoke(player);
+    }
+
+    public event Action OnCartridgeStateEnter;
+
+    public void CartridgeStateEnter()
+    {
+        OnCartridgeStateEnter?.Invoke();
+    }
+
+    public event Action OnScreenClick;
+
+    public void ScreenClick()
+    {
+        OnScreenClick?.Invoke();
     }
 }
