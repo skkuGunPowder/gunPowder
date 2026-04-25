@@ -151,7 +151,7 @@ public class PlayerDamagedState : PlayerBaseState
         SetImmuneState(true);
         _isImmuneActive = true;
         _immuneTime = _actualDamagedTime * IMMUNE_TIME_RATIO;
-
+        Debug.Log($"[immuneTime] : {_immuneTime}");
         // Debug.Log($"[피격시스템] InitializeDamaged: 피격시간={_actualDamagedTime:F2}s (MaxStunTime={_owner.LastMaxStunTime:F2}s × damageRatio={_owner.LastDamageRatio:F2}), 무적시간={_immuneTime:F2}s (25%)");
 
         // 넉백이 활성화되어 있을 때만 넉백 효과 적용
@@ -270,7 +270,7 @@ public class PlayerDamagedState : PlayerBaseState
         // Debug.Log($"[피격시스템] 히트스탑 완료 → 마지막 폭발 넉백 적용 (hasExplosionInfo={_owner.HasLastExplosionInfo})");
 
         // 마지막 폭발 정보로 넉백 적용
-        _owner.ApplyLastExplosionForce();
+        //_owner.ApplyLastExplosionForce();
 
         // 거리 기반 실제 피격 시간 계산
         CalculateActualDamagedTime();

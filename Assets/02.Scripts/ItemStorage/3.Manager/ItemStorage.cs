@@ -61,11 +61,12 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
                     CurrencyManager.Instance.AddCurrency(ECurrencyType.Gold, 1000); // 시작 골드 지급
                     CurrencyManager.Instance.AddCurrency(ECurrencyType.Diamond, 50); // 시작 다이아 지급
                 }
+                
             }
 
             _repo.SaveItemStorage(_storedItemDict);
         }
-
+ 
         // 저장된 데이터 없을 시 인벤토리 초기화
         if (_equippedItemDict == null)
         {

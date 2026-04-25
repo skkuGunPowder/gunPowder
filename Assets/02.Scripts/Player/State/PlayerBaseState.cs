@@ -18,6 +18,7 @@ public class PlayerBaseState : MonoState
     
     // 프리팹 이름 상수
     protected const string BASIC_BOMB_PREFAB = "BasicBomb";
+    protected const string BASIC_BOMB_ID = "BO0001";
 
     // 폭탄 액션 타입 열거형
     protected enum BombActionType
@@ -452,7 +453,13 @@ public class PlayerBaseState : MonoState
         
         // 스폰 포인트 설정
         (Transform bombSpawnPoint, EBombSpawnPoint finalSpawnPoint) = GetBombSpawnPointInfo(spawnPoint);
-        
+        // 기본폭탄(BO0001) + Up + ThrowStraight 조합일 때만 머리폭탄으로 치환
+        if (prefabName == BASIC_BOMB_PREFAB && finalSpawnPoint == EBombSpawnPoint.Up && action == BombActionType.ThrowStraight)
+        {
+            _owner.RPC_HeadSpriteOnOff();
+            prefabName = _owner.HeadBombPrefab.name;
+        }
+
         // 폭탄 생성 및 실행
         ExecuteBombAction(prefabName, bombSpawnPoint, action, _owner.XSlotBombStat);
 
@@ -546,20 +553,32 @@ public class PlayerBaseState : MonoState
     /// </summary>
     protected virtual string GetNormalBombPrefabName(BombActionType action, EBombSpawnPoint spawnPoint)
     {
-        // 머리 위로 던지기: 헤드봄
-        if(spawnPoint == EBombSpawnPoint.Up && action == BombActionType.ThrowStraight)
+        // Z슬롯 장착 폭탄 결정
+        ItemDTO bomb = _owner.EquipedItemDict[EItemType.Bomb];
+
+        // 기본폭탄(BO0001) + Up + ThrowStraight 조합일 때만 머리폭탄으로 치환
+        if (bomb.ID == BASIC_BOMB_ID && spawnPoint == EBombSpawnPoint.Up && action == BombActionType.ThrowStraight)
         {
             _owner.RPC_HeadSpriteOnOff();
             return _owner.HeadBombPrefab.name;
         }
 
-        // 장착된 메인 폭탄 반환 (없으면 BasicBomb 폴백)
-        if (_owner.EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO bomb) && bomb?.Prefab != null)
-            return bomb.Prefab.name;
+        return bomb.Prefab.name;
 
-        string prefabName = BASIC_BOMB_PREFAB;
-
-        return prefabName;
+        // // 머리 위로 던지기: 헤드봄
+        // if(spawnPoint == EBombSpawnPoint.Up && action == BombActionType.ThrowStraight)
+        // {
+        //     _owner.RPC_HeadSpriteOnOff();
+        //     return _owner.HeadBombPrefab.name;
+        // }
+        //
+        // // 장착된 메인 폭탄 반환 (없으면 BasicBomb 폴백)
+        // if (_owner.EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO bomb) && bomb?.Prefab != null)
+        //     return bomb.Prefab.name;
+        //
+        // string prefabName = BASIC_BOMB_PREFAB;
+        //
+        // return prefabName;
     }
 
     /// <summary>
