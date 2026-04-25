@@ -1325,7 +1325,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _lastExplosionPosition = position;
         _lastExplosionRadius = radius;
         _hasLastExplosionInfo = true;
-        // Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
+        Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
     }
 
     // 저장된 마지막 폭발 정보로 넉백 힘 적용
