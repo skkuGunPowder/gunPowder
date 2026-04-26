@@ -19,6 +19,7 @@ public class IngameTimer : TimerBase
         SetTime(time, 0);
         UI_Timer.TextRefresh(ConvertTime(time));
         _isGameOver = false;
+        SoundManager.Instance.ResetBGMPitch();
     }
 
     // 타이머용 text에 표시될 내용
