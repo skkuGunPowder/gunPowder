@@ -164,4 +164,20 @@ public class SoundManager : DontDestroySingleton<SoundManager>
             source.Play();
         }
     }
+    public void ResetBGMPitch()
+    {
+        if (_currentBGM != null)
+        {
+            _currentBGM.GetAudioSource().pitch = 1f;
+        }
+    }
+
+    public void ResumeBGM()
+    {
+        if (_currentBGM != null)
+        {
+            _currentBGM.GetAudioSource().UnPause();
+        }
+    }
+
 }

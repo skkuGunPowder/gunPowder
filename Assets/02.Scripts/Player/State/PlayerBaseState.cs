@@ -5,6 +5,7 @@ using RaycastPro.RaySensors2D;
 using RobustFSM.Base;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 
 public class PlayerBaseState : MonoState
 {
@@ -316,17 +317,18 @@ public class PlayerBaseState : MonoState
             
             if (!isHeadBomb)
             {
-                // 건파우더가 부족한 경우 폭탄 생성 중단
-                if (_owner.PlayerStat.CurrentHP <= _owner.XSlotBombStat.Cost)
-                {
-                    return;
-                }
+                // 건파우더가 부족한 경우 폭탄 생성 중단(legacy 코드)
+                // if (_owner.PlayerStat.CurrentHP <= _owner.XSlotBombStat.Cost)
+                // {
+                //     return;
+                // }
                 
-                int cost = _owner.XSlotBombStat.Cost;
-                _owner.PlayerStat.DecreaseHP(cost, _owner.PhotonView.Owner.ActorNumber);
+                // 특수폭탄 쓰면서 hp 소모하던 legacy 코드
+                //int cost = _owner.XSlotBombStat.Cost;
+                //_owner.PlayerStat.DecreaseHP(cost, _owner.PhotonView.Owner.ActorNumber);
                 
                 // 건파우더 소모 파티클 생성 (모든 클라이언트에게 표시)
-                _owner.RPC_SpawnGunPowderUseParticle();
+                //_owner.RPC_SpawnGunPowderUseParticle();
             }
         }
 
@@ -624,6 +626,8 @@ public class PlayerBaseState : MonoState
     /// </summary>
     protected virtual void PlayBombAnimation(BombActionType action, Transform bombSpawnPoint, BombStat bombStat)
     {
+        Debug.Log($"[CurrentAction] : {action.ToString()}");   
+        Debug.Log($"[반동정보] - Spawn : {bombSpawnPoint}, Recoil :{bombStat.RecoilAmount}");   
         switch (action)
         {
             case BombActionType.ThrowStraight:
@@ -645,6 +649,7 @@ public class PlayerBaseState : MonoState
                     _owner.RPC_SetAnimatorTrigger("JumpDropAttack");
                 else
                     _owner.RPC_SetAnimatorTrigger("PlaceAttack");
+                ApplyRecoil(bombSpawnPoint, bombStat.RecoilAmount, Y_RECOIL_FORCE);
                 break;
             case BombActionType.Boost:
                 _owner.RPC_SetAnimatorTrigger("PlaceAttack");
@@ -660,11 +665,14 @@ public class PlayerBaseState : MonoState
     protected virtual void ApplyRecoil(Transform bombSpawnPoint, float recoilPower = 5f, float upPower = 1f)
     {
         if (_owner.Rigidbody2D == null) return;
+        Debug.Log($"[반동적용전] {_owner.Rigidbody2D.linearVelocity}");
+        
         // 폭탄 스폰 위치에서 플레이어까지의 방향 (x축 반대, y축 위)
         Vector2 dir = (_owner.transform.position - bombSpawnPoint.position).normalized;
         Vector2 recoil = new Vector2(dir.x, dir.y).normalized * recoilPower;
         recoil.y += upPower;
         _owner.Rigidbody2D.AddForce(recoil, ForceMode2D.Impulse);
+        Debug.Log($"[반동적용후] {_owner.Rigidbody2D.linearVelocity}, 방향 {dir}, 반동수치 : {recoil}");
     }
     
     /// <summary>
