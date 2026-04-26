@@ -66,7 +66,6 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
 
             _repo.SaveItemStorage(_storedItemDict);
         }
- 
         // 저장된 데이터 없을 시 인벤토리 초기화
         if (_equippedItemDict == null)
         {
