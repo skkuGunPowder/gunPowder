@@ -16,6 +16,7 @@ public enum EProperties
     TotalSurvivorTime,
     
     StateChange,
+    Cartridges,
     
     Count
 }
