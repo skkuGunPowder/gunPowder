@@ -267,12 +267,35 @@ public class Player : MonoBehaviourPun, IDamagable
         UnityEngine.Random.InitState(RANDOM_SEED);
 
         _visualController?.InitializeBodyParts();
+        
+        PlayerEventManager.Instance.GetEvents(ActorNumber).OnSpawned += ApplyEquippedCartridges;
     }
 
+    public void ApplyEquippedCartridges()
+    {
+        Debug.Log($"[Cartridge] ApplyEquipped called. ActorNum={ActorNumber}, IsMine={PhotonView.IsMine}");
+        if (!PhotonView.IsMine) return;
+
+        var ids = CartridgeInventoryManager.Instance.GetActiveCartridgeIds();
+        Debug.Log($"[Cartridge] active ids count = {ids.Count}");
+
+        foreach (string id in ids) {
+            Cartridge cartridge = CartridgeFactory.Instance.GetCartridge(id);
+            Debug.Log($"[Cartridge] id={id}, instance={(cartridge == null ? "NULL" : cartridge.name)}");
+            if (cartridge == null) continue;
+            cartridge.transform.SetParent(this.transform);
+            cartridge.ExcuteGimmick(this);
+            Debug.Log($"[Cartridge] ExcuteGimmick fired for {id}");
+        }
+        CartridgeInventoryManager.Instance.ConsumeAll();
+
+    }
     private void OnDisable()
     {
         // 시각 효과 정리
         _visualController?.OnOwnerDisable();
+        PlayerEventManager.Instance.GetEvents(ActorNumber).OnSpawned -= ApplyEquippedCartridges;
+        
     }
 
     private void OnDestroy()

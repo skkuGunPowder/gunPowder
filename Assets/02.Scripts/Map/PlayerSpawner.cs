@@ -26,6 +26,7 @@ public class PlayerSpawner : MonoBehaviour
         GameObject playerInstance = PhotonNetwork.Instantiate(PlayerPrefab.name, SpawnPoints[count].position, Quaternion.identity, 0);
         Player player = playerInstance.GetComponent<Player>();
 
+        Debug.Log($"[Cartridge] PlayerSpawner before InvokeOnSpawned. player.ActorNumber={player.ActorNumber}, LocalPlayer.ActorNumber={PhotonNetwork.LocalPlayer.ActorNumber}");
         PlayerEventManager.Instance.GetEvents(player.ActorNumber).InvokeOnSpawned();
 
         if (player.PhotonView.IsMine)

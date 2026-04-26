@@ -19,6 +19,7 @@ public class IngameTimer : TimerBase
         SetTime(time, 0);
         UI_Timer.TextRefresh(ConvertTime(time));
         _isGameOver = false;
+        _isHurryUp = false;
         SoundManager.Instance.ResetBGMPitch();
     }
 
