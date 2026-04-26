@@ -11,16 +11,4 @@ public class LightweightCartridge : Cartridge
         
         owner.BombCooldownReduction(BombSlot.ZSlot,_data.GimmickValues[0], OperationType.Multiplicative);
     }
-
-    /*
-        Player 쪽에 쿨타임 조정하는 메서드 추가 필요해용
-        (예시)
-        BombCooldownReduction(BombSlot slot, float value, OperationType type)
-        {
-            if(type == OperationType.Additive)
-                _zBombCooldownTime += value;
-            else if(type == OperationType.Multiplicative)
-                _zBombCooldownTime *= (1 - value);
-        }
-    */
 }

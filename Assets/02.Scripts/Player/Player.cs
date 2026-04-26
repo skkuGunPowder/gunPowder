@@ -141,6 +141,10 @@ public class Player : MonoBehaviourPun, IDamagable
     private bool _isSuperArmorEnabled = false;
     public bool IsSuperArmorEnabled => _isSuperArmorEnabled;
 
+    [Header("항상 치명타 설정")]
+    private bool _isAlwaysMaxDamage = false;
+    public bool IsAlwaysMaxDamage => _isAlwaysMaxDamage;
+
     public Ultimate Ultimate => _ultimateController != null ? _ultimateController.Ultimate : null;
 
     private PlayerMaterial _playerMaterial;
@@ -1619,6 +1623,12 @@ public class Player : MonoBehaviourPun, IDamagable
     public void SetSuperArmorEnabled(bool enabled)
     {
         _isSuperArmorEnabled = enabled;
+    }
+
+    // 항상 치명타 적용 설정 (지금은 카트리지에서만 사용 중이지만, 아마 나중에 버프쪽에서도 사용가능하지 않을까?)
+    public void SetAlwaysMaxDamage(bool enabled)
+    {
+        _isAlwaysMaxDamage = enabled;
     }
 
     // 폭탄 대시 힘 허용 설정 (슈퍼아머 상태에서도 폭탄 대시를 위해 사용)

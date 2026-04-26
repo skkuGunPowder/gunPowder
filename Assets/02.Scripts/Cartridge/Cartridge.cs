@@ -25,4 +25,14 @@ public abstract class Cartridge : MonoBehaviour, ICartridge
         }
         _currentDurability--;
     }
+
+    public int GetMaxDurability()
+    {
+        return _data.Durability;
+    }
+
+    public int GetCurrentDurability()
+    {
+        return _currentDurability;
+    }
 }
