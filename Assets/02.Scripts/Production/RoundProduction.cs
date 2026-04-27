@@ -32,16 +32,17 @@ public class RoundProduction : MonoBehaviour
     
     
     private bool _initialized = false;
+
     private void Awake()
     {
         EventManager.Instance.OnScoreUpdate += Play;
-        ColorPalette.Init();
     }
-
+    
     private void Start()
     {
         if (_isTest)
         {
+            ColorPalette.Init();
             TestInit();
         }
         else
@@ -50,10 +51,8 @@ public class RoundProduction : MonoBehaviour
         }
     }
 
-    private async UniTask TestInit()
+    private void TestInit()
     {
-        await UniTask.Yield();
-        
         for (int i = 0; i < _textSlotList.Count; i++)
         {
             bool neg = i % 2 == 0;
@@ -84,8 +83,6 @@ public class RoundProduction : MonoBehaviour
     private void Init()
     {
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
-
-        _horizontalLayoutGroup.childControlHeight = false; // DOTWEEN을 위한 해제
         
         for (int i = 0; i < _textSlotList.Count; i++)
         {
@@ -113,15 +110,6 @@ public class RoundProduction : MonoBehaviour
                 _playerSlotList[i].SetActive(false);
             }
         }
-        
-        
-        // _backgroundImage.gameObject.SetActive(false);
-    }
-    
-    // 팀에 맞는 배경 색 제공
-    private Color32 ColorSet(EInGameTeam team)
-    {
-        return ColorPalette.GetTeamColor(team);
     }
 
     private void Update()
@@ -134,26 +122,21 @@ public class RoundProduction : MonoBehaviour
             EInGameTeam randomTeam = teams[UnityEngine.Random.Range(0, teams.Count)];
             Play(randomTeam, 1);
         }
-
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            _horizontalLayoutGroup.childControlHeight = false;
-        }
-        
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            Stop();
-        }
     }
 
-    private void Play(EInGameTeam team, int score)
+    // 팀에 맞는 배경 색 제공
+    private Color32 ColorSet(EInGameTeam team)
     {
+        return ColorPalette.GetTeamColor(team);
+    }
+
+    public void Play(EInGameTeam team, int score)
+    {
+        
+        Debug.Log($"round play");
         _backgroundImage.gameObject.SetActive(true);
         _initialized = false;
-        // foreach (var skin in _skinPlayer.StartSkinList)
-        // {
-        //     skin.gameObject.SetActive(true);
-        // }
+        
         _teamScoreDict[team].ScoreChange(score);
         TaskPlay();
     }
@@ -217,9 +200,8 @@ public class RoundProduction : MonoBehaviour
         {
             EventManager.Instance.RoundEnd();
         }
-    }
-
-    private void OnDisable()
+    } 
+    private void OnDestroy()
     {
         EventManager.Instance.OnScoreUpdate -= Play;
     }

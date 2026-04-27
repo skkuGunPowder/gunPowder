@@ -17,6 +17,6 @@ public enum EPopupType
     UI_ItemStorage,
     UI_IngameChatPopup,
     UI_TempStorage,
-    
+    UI_CartridgeShopPopup,
     Count
 }

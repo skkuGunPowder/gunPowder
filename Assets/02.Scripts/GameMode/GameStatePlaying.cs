@@ -148,8 +148,8 @@ public class GameStatePlaying : GameModeStateBase
 
         if (_count >= _MaxCount)
         {
-            _timer.Destroy();
             RequestStateChange();
+            _timer.Destroy();
         }
     }
     // 막타 가능 상태 체크
@@ -220,27 +220,27 @@ public class GameStatePlaying : GameModeStateBase
         
         if (notDead == 0)   // 나가서 살아있는 사람이 없을 때
         {
-            _gameMode.RequestStateChange(EModeState.Round);
+            GameResultCheck();
             return;
         }
         
         // 2명 이상인데 살아있는 사람이 1명일 때
         if (_lastPlayer == false && notDead == 1)
         {
-            _gameMode.RequestStateChange(EModeState.Round);
+            GameResultCheck();
             return;
         }
 
         if (_lastPlayer && notDead == 1)
         {
-            _gameMode.RequestStateChange(EModeState.Round);
+            GameResultCheck();
             return;
         }
         
         // 나갔는데 살아있는 팀이 한팀 뿐일 때
         if (LastTeamCheck() <= 1)
         {
-            _gameMode.RequestStateChange(EModeState.Round);
+            GameResultCheck();
             return;
         }
         
@@ -399,8 +399,36 @@ public class GameStatePlaying : GameModeStateBase
     // LastDie로 죽었을 때 변화
     private void RequestStateChange()
     {
+        if (PhotonNetwork.IsMasterClient && _gameMode is BattleMode battleMode)
+        {
+            int[] actorNumbers = new int[battleMode.DeathOrderQueue.Count];
+            int index = 0;
+            foreach (PhotonPlayer player in battleMode.DeathOrderQueue)
+            {
+                actorNumbers[index++] = player.ActorNumber;
+            }
+            _photonView.RPC(nameof(RPC_SyncDeathOrder), RpcTarget.Others, actorNumbers);
+        }
         _gameMode.RequestStateChange(EModeState.Round);
-     }
+    }
+
+    [PunRPC]
+    private void RPC_SyncDeathOrder(int[] actorNumbers)
+    {
+        if (_gameMode is BattleMode battleMode)
+        {
+            battleMode.DeathOrderQueue.Clear();
+            
+            foreach (int actorNumber in actorNumbers)
+            {
+                PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
+                if (player != null)
+                {
+                    battleMode.DeathOrderQueue.Enqueue(player);
+                }
+            }
+        }
+    }
     
     private void SetGameSet()
     {

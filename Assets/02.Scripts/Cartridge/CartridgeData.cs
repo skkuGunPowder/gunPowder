@@ -87,4 +87,19 @@ public class CartridgeData
         return float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out parsed)
             || float.TryParse(input, NumberStyles.Float, CultureInfo.CurrentCulture, out parsed);
     }
+
+    public int GetPrice()
+    {
+        switch (Rarity)
+        {
+            case CartridgeRarity.Common : 
+                return 20;
+            case CartridgeRarity.Rare:
+                return 30;
+            case CartridgeRarity.Epic:
+                return 45;
+        }
+        
+        return 0;
+    }
 }

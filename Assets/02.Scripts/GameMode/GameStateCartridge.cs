@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Photon.Pun;
 using UnityEngine;
 using PhotonPlayer = Photon.Realtime.Player;
 
@@ -7,7 +8,10 @@ public class GameStateCartridge : GameModeStateBase
     public override void Enter()
     {
         EventManager.Instance.OnScreenClick += ProductionStart;
+        
+        PopupManager.Instance.Open(EPopupType.UI_CartridgeShopPopup);
         EventManager.Instance.CartridgeStateEnter();
+        ProductionStart();
     }
     
     private void Test()
@@ -22,7 +26,20 @@ public class GameStateCartridge : GameModeStateBase
             {
                 PhotonPlayer player = battleMode.DeathOrderQueue.Dequeue();
                 EventManager.Instance.CartridgeStart(player);
+                return;
             }
+
+            // 모든 선택 완료
+            UI_CartridgeShopPopup popup = (UI_CartridgeShopPopup)PopupManager.Instance.GetPopup(EPopupType.UI_CartridgeShopPopup);
+            popup.Close();
+
+            if (PhotonNetwork.IsMasterClient == false)
+            {
+                return;
+            }
+            
+            // 방장 : 스테이트 변경
+            _gameMode.RequestStateChange(EModeState.Spawn);
         }
     }
 

@@ -1,16 +1,16 @@
-using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening;
 public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    // 마우스 포인터가 enter, exit, 
+    // 마우스 포인터가 enter, exit,
     // 클릭의 경우 off되도록
-    
+
     [SerializeField] private RectTransform _rectTransform;
+    private UI_CartridgeShopPopup _shopPopup;
     
     [Header("Hit Action")]
-    [SerializeField] private int _slotNumber;
+    [SerializeField] private int _slotCount;
     [SerializeField] private int _rotateAmount;
     [SerializeField] private float _sideMoveAmount;
     [SerializeField] private float _sideDuration;
@@ -41,23 +41,29 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private Ease _fallEase;
 
     private bool _selected = false;
+    private int _slotNumber;
     private void Awake()
     {
         if (_rectTransform == null)
         {
             _rectTransform = GetComponent<RectTransform>();
         }
-        
+
+        _shopPopup = GetComponentInParent<UI_CartridgeShopPopup>();
     }
 
+    public void SetSlotNumber(int number)
+    {
+        _slotNumber = number;
+    }
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (_selected)
         {
             return;
         }
-        
-        _rectTransform.DOScale(_EnterScale, _EnterScaleTime).SetEase(_EnterScaleEase);
+
+        _shopPopup.RequestHoverCartridge(_slotNumber, true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -67,21 +73,45 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
             return;
         }
 
+        _shopPopup.RequestHoverCartridge(_slotNumber, false);
+    }
+
+    public void PlayEnterAnimation()
+    {
+        _rectTransform.DOScale(_EnterScale, _EnterScaleTime).SetEase(_EnterScaleEase);
+    }
+
+    public void PlayExitAnimation()
+    {
         _rectTransform.DOScale(_originScale, _originScaleTime).SetEase(_originScaleEase);
     }
 
     public void OnClickButton()
     {
+        if (_selected)
+        {
+            return;
+        }
+
+        _shopPopup.RequestSelectCartridge(_slotNumber);
+    }
+
+    public void PlaySelectAnimation()
+    {
+        _shopPopup.SetClickLock(false); // 중복 클릭 방지
+
         _selected = true;
         _rectTransform.localScale = new Vector3(_EnterScale, _EnterScale, _EnterScale);
-        
+
         Sequence seq = DOTween.Sequence();
         seq.Append(_rectTransform.DOAnchorPosY(_moveHeight, _moveDuration).SetEase(_moveEase));
         seq.Append(_rectTransform.DOAnchorPosY(_fallHeight, _fallDuration).SetEase(_fallEase));
-        seq.Join(_rectTransform.DOAnchorPosX(_sideMoveAmount * _slotNumber, _sideDuration).SetEase(_sideMoveEase));
-        seq.Join(_rectTransform.DOScale(_scaleVector,  _scaleDuration).SetEase(_scaleEase));
-        seq.JoinCallback(TurnCartridge);
-        
+        seq.Join(_rectTransform.DOAnchorPosX(_sideMoveAmount * _slotCount, _sideDuration).SetEase(_sideMoveEase));
+        seq.Join(_rectTransform.DOScale(_scaleVector, _scaleDuration).SetEase(_scaleEase));
+        seq.JoinCallback(TurnCartridge).OnComplete(() =>
+        {
+            EventManager.Instance.ScreenClick();
+        });
     }
 
     private void TurnCartridge()
@@ -93,6 +123,7 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
     private void OnDisable()
     {
         _selected = false;
+        DOTween.Kill(_rectTransform);
         _rectTransform.transform.localPosition = new Vector3(0, 0, 0);
         _rectTransform.localEulerAngles = new Vector3(0, 0, 0);
         _rectTransform.localScale = new Vector3(_originScale,_originScale,_originScale);

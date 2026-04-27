@@ -68,7 +68,7 @@ public class UI_RoundSlot : MonoBehaviour
         {
             _startHeight = _rectTransform.rect.height;
         }
-        
+        Debug.Log($"{_startHeight} is StartHeight");
         // 초기화
         _backGroundRectTransform.anchoredPosition = new Vector2(0, _startHeight);
         
