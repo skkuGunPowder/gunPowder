@@ -199,12 +199,39 @@ public class CartridgeFactory : DontDestroySingleton<CartridgeFactory>
         return newCartridge;
     }
 
+    public int GetMaxDurability(string id)
+    {
+        if (!_cartridgeDataDict.TryGetValue(id, out CartridgeData cartridgeData))
+        {
+            Debug.LogError($"카트리지를 찾지 못했습니다.(ID: {id})");
+            return 0;
+        }
+
+        return cartridgeData.Durability;
+    }
+
     #region 테스트용
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F1)) TestCartridge("CT0001");
-        if (Input.GetKeyDown(KeyCode.F2)) TestCartridge("CT0011");
-        if (Input.GetKeyDown(KeyCode.F3)) TestCartridge("CT0014");
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            string id = "CT0001";
+            //TestCartridge("CT0001");
+            CartridgeInventoryManager.Instance.AddCartridge(id);
+        }
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            string id = "CT0011";
+            //TestCartridge("CT0011");
+            CartridgeInventoryManager.Instance.AddCartridge(id);
+        }
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            string id = "CT0014";
+            //TestCartridge("CT0014");
+            CartridgeInventoryManager.Instance.AddCartridge(id);
+            
+        }
     }
 
     private void TestCartridge(string id)

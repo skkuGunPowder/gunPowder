@@ -72,7 +72,15 @@ public class HurryUpProduction : MonoBehaviour
         if (EventManager.Instance != null)
             EventManager.Instance.OnHurryUp -= PlayHurryUp;
 
+        bool wasSequenceAlive = _sequence != null && _sequence.IsActive();
+
         _sequence?.Kill();
         _hurryUpText.gameObject.SetActive(false);
+        if (wasSequenceAlive && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.ResumeBGM();
+            SoundManager.Instance.ResetBGMPitch();
+        }
+
     }
 }

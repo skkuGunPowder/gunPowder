@@ -24,6 +24,8 @@ public class Explosion : MonoBehaviour
     {
         
         VFXPool.Instance.Play(VFXPrefab.name, transform.position);
+        
+        Player attackerPlayer = attackerPhotonView.GetComponent<Player>();
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _stat.ExplosionRadius);
         var processedRBs = new System.Collections.Generic.HashSet<Rigidbody2D>();
@@ -60,7 +62,12 @@ public class Explosion : MonoBehaviour
                 {
                     continue;
                 }
-                int damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
+                
+                int damage = _stat.AttackPower;
+                if(!attackerPlayer.IsAlwaysMaxDamage)
+                {
+                    damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
+                }
                 damagableObject.TakeDamage(damage, _stat.AttackPower, _stat.StealPercent, transform.position, attackerPhotonView.ViewID, attackerPhotonView.OwnerActorNr, _stat.MaxStunTime, isFallingOut, isNormalAttack);
 
                 // 공격 적중 이벤트 발행 (공격자 로컬에서만)

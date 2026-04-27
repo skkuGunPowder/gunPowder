@@ -141,6 +141,10 @@ public class Player : MonoBehaviourPun, IDamagable
     private bool _isSuperArmorEnabled = false;
     public bool IsSuperArmorEnabled => _isSuperArmorEnabled;
 
+    [Header("항상 치명타 설정")]
+    private bool _isAlwaysMaxDamage = false;
+    public bool IsAlwaysMaxDamage => _isAlwaysMaxDamage;
+
     public Ultimate Ultimate => _ultimateController != null ? _ultimateController.Ultimate : null;
 
     private PlayerMaterial _playerMaterial;
@@ -263,12 +267,35 @@ public class Player : MonoBehaviourPun, IDamagable
         UnityEngine.Random.InitState(RANDOM_SEED);
 
         _visualController?.InitializeBodyParts();
+        
+        PlayerEventManager.Instance.GetEvents(ActorNumber).OnSpawned += ApplyEquippedCartridges;
     }
 
+    public void ApplyEquippedCartridges()
+    {
+        Debug.Log($"[Cartridge] ApplyEquipped called. ActorNum={ActorNumber}, IsMine={PhotonView.IsMine}");
+        if (!PhotonView.IsMine) return;
+
+        var ids = CartridgeInventoryManager.Instance.GetActiveCartridgeIds();
+        Debug.Log($"[Cartridge] active ids count = {ids.Count}");
+
+        foreach (string id in ids) {
+            Cartridge cartridge = CartridgeFactory.Instance.GetCartridge(id);
+            Debug.Log($"[Cartridge] id={id}, instance={(cartridge == null ? "NULL" : cartridge.name)}");
+            if (cartridge == null) continue;
+            cartridge.transform.SetParent(this.transform);
+            cartridge.ExcuteGimmick(this);
+            Debug.Log($"[Cartridge] ExcuteGimmick fired for {id}");
+        }
+        CartridgeInventoryManager.Instance.ConsumeAll();
+
+    }
     private void OnDisable()
     {
         // 시각 효과 정리
         _visualController?.OnOwnerDisable();
+        PlayerEventManager.Instance.GetEvents(ActorNumber).OnSpawned -= ApplyEquippedCartridges;
+        
     }
 
     private void OnDestroy()
@@ -1325,7 +1352,7 @@ public class Player : MonoBehaviourPun, IDamagable
         _lastExplosionPosition = position;
         _lastExplosionRadius = radius;
         _hasLastExplosionInfo = true;
-        // Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
+        Debug.Log($"[피격시스템] 폭발정보 저장: force={force:F1}, pos={position}, radius={radius:F1}");
     }
 
     // 저장된 마지막 폭발 정보로 넉백 힘 적용
@@ -1619,6 +1646,12 @@ public class Player : MonoBehaviourPun, IDamagable
     public void SetSuperArmorEnabled(bool enabled)
     {
         _isSuperArmorEnabled = enabled;
+    }
+
+    // 항상 치명타 적용 설정 (지금은 카트리지에서만 사용 중이지만, 아마 나중에 버프쪽에서도 사용가능하지 않을까?)
+    public void SetAlwaysMaxDamage(bool enabled)
+    {
+        _isAlwaysMaxDamage = enabled;
     }
 
     // 폭탄 대시 힘 허용 설정 (슈퍼아머 상태에서도 폭탄 대시를 위해 사용)
