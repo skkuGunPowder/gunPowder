@@ -46,6 +46,7 @@ public class Explosion : MonoBehaviour
                     {
                         continue;
                     }
+                    Debug.Log($"[넉백 로그] AddExplosionForce2D 진입 전 ExplodePower : {_stat.ExplosivePower}, Radius : {_stat.ExplosionRadius}");
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
                 }
                 else
@@ -83,6 +84,31 @@ public class Explosion : MonoBehaviour
                         IsCritical = damage == _stat.AttackPower,
                         VictimPosition = other.transform.position
                     });
+                    // 공격자측 적중 파티클을 로컬에서 즉시 트리거 (client-side prediction).
+                    // 기존 경로는 victim의 RPC_TakeDamage가 attacker.RPC(SpawnAttackerHitParticles)를 호출해
+                    // 풀 RTT만큼 지연됐음 → 이제 풀 RTT 회피.
+                    // 데미지 권위 처리 자체는 그대로 RPC_TakeDamage에서 진행됨.
+                    if (victim != null && victim.PhotonView != null
+                        && other.gameObject != attackerPhotonView.gameObject)
+                    {
+                        PlayerStat attackerStat = attackerPlayer != null ? attackerPlayer.GetComponent<PlayerStat>() : null;
+                        PlayerStat victimStat = victim.GetComponent<PlayerStat>();
+                        bool isSameTeam = attackerStat != null && victimStat != null
+                            && attackerStat.Team == victimStat.Team
+                            && attackerPhotonView.OwnerActorNr != victim.ActorNumber;
+                        if (!isSameTeam)
+                        {
+                            PlayerDamageController dmgController = attackerPhotonView.GetComponent<PlayerDamageController>();
+                            if (dmgController != null)
+                            {
+                                bool isCrit = (damage == _stat.AttackPower);
+                                dmgController.SpawnAttackerHitParticles(
+                                    other.transform.position,
+                                    isCrit,
+                                    victim.PhotonView.ViewID);
+                            }
+                        }
+                    }
                 }
             }
         }

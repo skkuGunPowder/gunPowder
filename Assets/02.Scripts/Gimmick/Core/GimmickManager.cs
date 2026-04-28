@@ -10,6 +10,8 @@ public class GimmickManager : PhotonSingleton<GimmickManager>
 
     private void Start()
     {
+        // 중복 구독 방어
+        EventManager.Instance.OnGameStart -= OnGameStart;
         EventManager.Instance.OnGameStart += OnGameStart;
     }
 

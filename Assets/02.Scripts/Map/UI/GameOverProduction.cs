@@ -67,7 +67,10 @@ public class GameOverProduction : MonoBehaviour
 
     private void Start()
     {
+        // 중복 구독 방어
+        EventManager.Instance.OnGameOver -= GameOverPlay;
         EventManager.Instance.OnGameOver += GameOverPlay;
+        EventManager.Instance.OnLastDieComplete -= GameSetPlay;
         EventManager.Instance.OnLastDieComplete += GameSetPlay;
     }
     // private void OnEnable()
@@ -164,5 +167,16 @@ public class GameOverProduction : MonoBehaviour
         ProfileSlot.localScale = new Vector3(1,1,1);
         TopPivot.offsetMax = TimerOriginPosition;
         DOTween.Kill(this);
+    }
+
+    // 방어 코드: GameOverPlay 핸들러가 한 번도 실행되지 않은 채 오브젝트가 파괴되는 경로(씬 전환 등)에서
+    // OnGameOver/OnLastDieComplete 구독이 stale로 남는 것을 막기 위한 안전망.
+    private void OnDestroy()
+    {
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnGameOver -= GameOverPlay;
+            EventManager.Instance.OnLastDieComplete -= GameSetPlay;
+        }
     }
 }

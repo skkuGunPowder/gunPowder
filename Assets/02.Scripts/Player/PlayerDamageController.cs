@@ -129,6 +129,12 @@ public class PlayerDamageController : MonoBehaviour
         // 공격자 정보 가져오기
         PhotonView attackerView = PhotonView.Find(attackerViewId);
 
+        // 공격자 클라에서만 RPC 도착 시점 로그 (지연 측정용)
+        if (attackerView != null && attackerView.IsMine)
+        {
+            HitLatencyDebug.LogStage(attackerViewId, "RPC_TakeDamage arrived");
+        }
+
         // 같은 팀 체크
         bool isSameTeam = false;
         if (attackerView != null && attackerView.gameObject != null && attackerView.gameObject.activeInHierarchy)
@@ -224,13 +230,8 @@ public class PlayerDamageController : MonoBehaviour
                     _photonView.RPC(nameof(ShowDamagePopup), attackerView.Owner, damage, maxDamage);
                 }
 
-                // 공격자에게 히트 파티클 생성 요청 (로컬에서만 실행)
-                if (!isSameTeam)
-                {
-                    bool isCrit = (damage == maxDamage);
-                    attackerView.RPC(nameof(SpawnAttackerHitParticles), attackerView.Owner,
-                        transform.position, isCrit, _photonView.ViewID);
-                }
+                // 공격자측 히트 파티클은 이제 Explosion.Explode에서 로컬 즉시 트리거됨
+                // (client-side prediction). RTT 라운드트립 회피를 위해 RPC 디스패치 제거.
             }
         }
     }
@@ -310,6 +311,9 @@ public class PlayerDamageController : MonoBehaviour
     [PunRPC]
     public void SpawnAttackerHitParticles(Vector3 victimPosition, bool isCrit, int victimViewId)
     {
+        // 이 RPC는 공격자 본인에게만 호출되므로 _photonView.ViewID == attackerViewId
+        HitLatencyDebug.LogStage(_photonView.ViewID, "SpawnAttackerHitParticles arrived");
+
         if (VFXPool.Instance == null)
         {
             Debug.LogWarning("[PlayerDamageController] VFXPool.Instance is null. Cannot spawn hit particles.");
@@ -346,8 +350,12 @@ public class PlayerDamageController : MonoBehaviour
     /// </summary>
     private async UniTask ProcessHitsDelayed(CancellationToken cancellationToken)
     {
-        // 같은 프레임의 모든 피격 정보를 수집하기 위해 대기
-        await UniTask.WaitForSeconds(0.05f, cancellationToken: cancellationToken);
+        // 같은 프레임의 모든 피격 정보를 수집하기 위해 한 프레임만 yield
+        // (이전엔 0.05s 하드 대기로 전체 적중 피드백이 50ms 늦었음)
+        await UniTask.NextFrame(cancellationToken);
+
+        // 공격자에게 적중 파티클이 실제로 표시되는 시점 (지연 측정용)
+        HitLatencyDebug.LogStage(_photonView.ViewID, "Hit FX visible to attacker");
 
         if (_currentExplosionHit == null || cancellationToken.IsCancellationRequested)
         {

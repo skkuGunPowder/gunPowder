@@ -193,43 +193,18 @@ public class GunPowder : MonoBehaviourPun, IPunInstantiateMagicCallback
     {
         if (_spriteRenderer == null) return;
 
-        // 현재 로컬 플레이어의 PhotonView 찾기
-        Player localPlayer = FindLocalPlayer();
-        if (localPlayer != null)
+        // 발사자 PhotonView를 ID로 직접 조회(O(1)) 후 IsMine으로 소유 판별
+        PhotonView sourceView = PhotonView.Find(_sourceViewId);
+        if (sourceView != null && sourceView.IsMine)
         {
-            // 자신이 생성한 건파우더인지 확인
-            if (_sourceViewId == localPlayer.PhotonView.ViewID)
-            {
-                _spriteRenderer.sprite = _mySprite;
-                _spriteTrail.SetTrailPreset(MyTrailPreset);
-            }
-            else
-            {
-                _spriteRenderer.sprite = _enemySprite;
-                _spriteTrail.SetTrailPreset(EnemyTrailPreset);
-            }
+            _spriteRenderer.sprite = _mySprite;
+            _spriteTrail.SetTrailPreset(MyTrailPreset);
         }
         else
         {
-            // 로컬 플레이어를 찾을 수 없는 경우 기본적으로 적 스프라이트 사용
             _spriteRenderer.sprite = _enemySprite;
+            _spriteTrail.SetTrailPreset(EnemyTrailPreset);
         }
-    }
-
-    /// <summary>
-    /// 현재 로컬 플레이어 찾기
-    /// </summary>
-    private Player FindLocalPlayer()
-    {
-        Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
-        foreach (Player player in players)
-        {
-            if (player.PhotonView.IsMine)
-            {
-                return player;
-            }
-        }
-        return null;
     }
 
     [PunRPC]

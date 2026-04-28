@@ -12,7 +12,7 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     // 게임이 시작 될 때 연결되는 포톤 서버 매니저
 
     [Header("DataFrameRate")]
-    [SerializeField] private int _sendRate = 30;
+    [SerializeField] private int _sendRate = 60;
     [SerializeField] private int _serializationRate = 30;
 
     [Header("GameVersion")]

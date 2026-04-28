@@ -40,7 +40,9 @@ public class GameStartProduction : MonoBehaviour
 
     private void Start()
     {
-        EventManager.Instance.OnGameStart += GameStart;    
+        // 중복 구독 방어
+        EventManager.Instance.OnGameStart -= GameStart;
+        EventManager.Instance.OnGameStart += GameStart;
     }
     public void Play()
     {

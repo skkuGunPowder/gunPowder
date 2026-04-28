@@ -129,6 +129,12 @@ public class Bomb : MonoBehaviourPun, IBomb
         transform.DOKill();
         StopAllCoroutines();
 
+        // 공격자 클라에서만 T0 마킹 (지연 측정용)
+        if (_ownerPhotonview != null && _ownerPhotonview.IsMine)
+        {
+            HitLatencyDebug.MarkExplode(_ownerPhotonview.ViewID);
+        }
+
         Explosion explosion = ExplosionPool.Instance.Get(ExplosionPrefab.name);
         explosion.transform.position = transform.position;
         explosion.transform.rotation = Quaternion.identity;

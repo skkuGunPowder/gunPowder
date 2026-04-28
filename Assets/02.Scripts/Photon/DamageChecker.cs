@@ -31,7 +31,10 @@ public class DamageChecker : Singleton<DamageChecker>
     private void Start()
     {
         Init();
+        // 중복 구독 방어
+        EventManager.Instance.OnPlayerChanged -= LeftPlayer;
         EventManager.Instance.OnPlayerChanged += LeftPlayer;
+        EventManager.Instance.OnGameStart -= SetPlayerView;
         EventManager.Instance.OnGameStart += SetPlayerView;
     }
     private void Init()
@@ -190,6 +193,10 @@ public class DamageChecker : Singleton<DamageChecker>
     
     private void OnDisable()
     {
-        EventManager.Instance.OnPlayerChanged -= LeftPlayer;
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnPlayerChanged -= LeftPlayer;
+            EventManager.Instance.OnGameStart -= SetPlayerView;
+        }
     }
 }

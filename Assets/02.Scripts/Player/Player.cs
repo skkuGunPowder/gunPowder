@@ -203,6 +203,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     // 마지막 폭발 정보 (히트스탑 중 넉백용)
     private float _lastExplosionForce = 0f;
+    public Vector3 LastExplosionPosition => _lastExplosionPosition;
     private Vector3 _lastExplosionPosition = Vector3.zero;
     private float _lastExplosionRadius = 0f;
     private bool _hasLastExplosionInfo = false;
@@ -267,7 +268,9 @@ public class Player : MonoBehaviourPun, IDamagable
         UnityEngine.Random.InitState(RANDOM_SEED);
 
         _visualController?.InitializeBodyParts();
-        
+
+        // 중복 구독 방어
+        PlayerEventManager.Instance.GetEvents(ActorNumber).OnSpawned -= ApplyEquippedCartridges;
         PlayerEventManager.Instance.GetEvents(ActorNumber).OnSpawned += ApplyEquippedCartridges;
     }
 
@@ -483,9 +486,12 @@ public class Player : MonoBehaviourPun, IDamagable
 
         LoadItems();
 
-        // 1. 이벤트 핸들러 등록
+        // 1. 이벤트 핸들러 등록 (중복 구독 방어를 위해 -= 후 += 패턴 사용)
+        _playerStat.OnHPEmpty -= HandleHPEmpty;
         _playerStat.OnHPEmpty += HandleHPEmpty;
+        _playerStat.OnHPIncreased -= HandleHPIncreased;
         _playerStat.OnHPIncreased += HandleHPIncreased;
+        EventManager.Instance.OnPlayerItemChanged -= LoadItems;
         EventManager.Instance.OnPlayerItemChanged += LoadItems;
 
         // 궁극기 컨트롤러 이벤트 연결
@@ -497,7 +503,8 @@ public class Player : MonoBehaviourPun, IDamagable
                 PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnUltimateChanceDeactivated();
         }
 
-        // 라운드 종료 시 궁극기 카운트다운 초기화
+        // 라운드 종료 시 궁극기 카운트다운 초기화 (중복 구독 방어)
+        EventManager.Instance.OnGameOver -= HandleGameOver;
         EventManager.Instance.OnGameOver += HandleGameOver;
 
         // 2. Rigidbody2D 최적화된 초기화
@@ -1260,7 +1267,6 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _lastDamageRatio = maxDamage > 0 ? Mathf.Clamp01((float)damage / maxDamage) : 1f;
         _lastMaxStunTime = maxStunTime;
-        // Debug.Log($"[피격시스템] RegisterHitDamage: damage={damage}, maxDamage={maxDamage}, damageRatio={_lastDamageRatio:F2}, maxStunTime={maxStunTime:F2}s");
         PlayerEventManager.Instance.GetEvents(ActorNumber).InvokeOnHit();
     }
 
@@ -1360,7 +1366,7 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         if (!_hasLastExplosionInfo || _rigidbody2D == null)
         {
-            // Debug.Log($"[피격시스템] ApplyLastExplosionForce: 폭발정보 없음 (hasInfo={_hasLastExplosionInfo})");
+            Debug.Log($"[피격시스템] ApplyLastExplosionForce: 폭발정보 없음 (hasInfo={_hasLastExplosionInfo})");
             return;
         }
 
@@ -1373,7 +1379,7 @@ public class Player : MonoBehaviourPun, IDamagable
             direction.Normalize();
             direction.y += 0.3f;
             _rigidbody2D.AddForce(direction * forceMagnitude, ForceMode2D.Impulse);
-            // Debug.Log($"[피격시스템] 히트스탑 후 폭발넉백 적용: forceMag={forceMagnitude:F1}, dir={direction}, distance={distance:F1}");
+            Debug.Log($"[피격시스템] 히트스탑 후 폭발넉백 적용: forceMag={forceMagnitude:F1}, dir={direction}, distance={distance:F1}");
         }
 
         ClearLastExplosionInfo();
