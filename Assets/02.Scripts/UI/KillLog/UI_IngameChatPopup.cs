@@ -115,11 +115,14 @@ public class UI_IngameChatPopup : UI_Popup
 
     
         // ★ 팀 컬러 변경 이벤트 구독 추가 (여기서 해도 되고 Start에서 해도 됨)
+        // 중복 구독 방어: Popup이 SetActive 토글로 재사용되는 경우 Start가 다시 호출될 가능성에 대비.
         if (EventManager.Instance != null)
         {
+            EventManager.Instance.OnPlayerColorChanged -= OnPlayerColorChangedWrapper;
             EventManager.Instance.OnPlayerColorChanged += OnPlayerColorChangedWrapper;
-            // [추가] 게임 오버 이벤트 연결
+            EventManager.Instance.OnGameStart -= OnGameStartWrapper;
             EventManager.Instance.OnGameStart += OnGameStartWrapper;
+            EventManager.Instance.OnGameOver -= OnGameOverWrapper;
             EventManager.Instance.OnGameOver += OnGameOverWrapper;
         }
             // 기존 메시지 복원

@@ -36,6 +36,8 @@ public class UI_Ultimate : MonoBehaviour
     [SerializeField] private int _lowThreshold = 30;    // 이 값 이하면 Low 상태
     
     private Player _player;
+    // 마지막에 PlayerEventManager에 구독한 actorNumber. _player가 Unity-null이어도 안전하게 해제 가능.
+    private int _subscribedActorNumber = -1;
     private Coroutine _blinkCoroutine;
     
     private void Start()
@@ -68,21 +70,32 @@ public class UI_Ultimate : MonoBehaviour
     /// </summary>
     private void FindAndSubscribeToPlayer()
     {
+        // 이전 구독을 캐시된 actorNumber로 안전하게 해제 (OnPlayerListUp이 라운드마다 호출되면서 누적 방지)
+        if (_subscribedActorNumber != -1)
+        {
+            var oldEvents = PlayerEventManager.Instance.GetEvents(_subscribedActorNumber);
+            oldEvents.OnUltimateChanceActivated -= OnUltimateActivated;
+            oldEvents.OnUltimateChanceDeactivated -= OnUltimateDeactivated;
+            _subscribedActorNumber = -1;
+        }
+
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
         {
             _player = playerObject.GetComponent<Player>();
-            
+
             if (_player != null)
             {
+                _subscribedActorNumber = _player.ActorNumber;
                 // 궁극기 이벤트 구독
-                PlayerEventManager.Instance.GetEvents(_player.ActorNumber).OnUltimateChanceActivated += OnUltimateActivated;
-                PlayerEventManager.Instance.GetEvents(_player.ActorNumber).OnUltimateChanceDeactivated += OnUltimateDeactivated;
+                PlayerEventManager.Instance.GetEvents(_subscribedActorNumber).OnUltimateChanceActivated += OnUltimateActivated;
+                PlayerEventManager.Instance.GetEvents(_subscribedActorNumber).OnUltimateChanceDeactivated += OnUltimateDeactivated;
 
-                // 궁극기 게이지 변경 이벤트 구독
+                // 궁극기 게이지 변경 이벤트 구독 (중복 방지)
                 PlayerStat playerStat = _player.GetComponent<PlayerStat>();
                 if (playerStat != null)
                 {
+                    playerStat.OnUltimateGaugeChanged -= OnUltimateGaugeChanged;
                     playerStat.OnUltimateGaugeChanged += OnUltimateGaugeChanged;
                 }
 
@@ -321,12 +334,16 @@ public class UI_Ultimate : MonoBehaviour
             EventManager.Instance.OnPlayerListUp -= OnPlayerListUp;
         }
         
-        // Player 이벤트 구독 해제
+        // Player 이벤트 구독 해제 - _player가 Unity-null이어도 캐시된 actorNumber로 안전하게 해제
+        if (_subscribedActorNumber != -1 && PlayerEventManager.Instance != null)
+        {
+            var events = PlayerEventManager.Instance.GetEvents(_subscribedActorNumber);
+            events.OnUltimateChanceActivated -= OnUltimateActivated;
+            events.OnUltimateChanceDeactivated -= OnUltimateDeactivated;
+            _subscribedActorNumber = -1;
+        }
         if (_player != null)
         {
-            PlayerEventManager.Instance.GetEvents(_player.ActorNumber).OnUltimateChanceActivated -= OnUltimateActivated;
-            PlayerEventManager.Instance.GetEvents(_player.ActorNumber).OnUltimateChanceDeactivated -= OnUltimateDeactivated;
-
             PlayerStat playerStat = _player.GetComponent<PlayerStat>();
             if (playerStat != null)
             {

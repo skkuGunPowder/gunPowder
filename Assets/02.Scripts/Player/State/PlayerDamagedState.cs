@@ -270,7 +270,7 @@ public class PlayerDamagedState : PlayerBaseState
         // Debug.Log($"[피격시스템] 히트스탑 완료 → 마지막 폭발 넉백 적용 (hasExplosionInfo={_owner.HasLastExplosionInfo})");
 
         // 마지막 폭발 정보로 넉백 적용
-        //_owner.ApplyLastExplosionForce();
+        _owner.ApplyLastExplosionForce();
 
         // 거리 기반 실제 피격 시간 계산
         CalculateActualDamagedTime();
@@ -491,7 +491,7 @@ public class PlayerDamagedState : PlayerBaseState
         // 거리 기반 감쇠값 조정: 
         // damageRatio = 1.0 (가까이) -> dampingMultiplier = 1.0 (100% 날아감)
         // damageRatio = 0.0 (멀리) -> dampingMultiplier = 2.0 (50% 날아감, 감쇠값 2배로 빠르게 멈춤)
-        damageRatio = 1.0f;
+        //damageRatio = 1.0f;
         float dampingMultiplier = Mathf.Lerp(1.0f / MIN_KNOCKBACK_RATIO, 1.0f, damageRatio);
         return baseDamping * dampingMultiplier;
     }
@@ -506,7 +506,7 @@ public class PlayerDamagedState : PlayerBaseState
             x => _owner.Rigidbody2D.linearDamping = x, 
             MAX_LINEAR_DAMPING, 
             _actualDamagedTime)
-            .SetEase(Ease.InOutBack);
+            .SetEase(Ease.Linear);
     }
 
     /// <summary>
@@ -514,14 +514,19 @@ public class PlayerDamagedState : PlayerBaseState
     /// </summary>
     private void ApplyForceBasedOnVelocity(float forceMagnitude)
     {
-        Vector2 currentVelocity = _owner.Rigidbody2D.linearVelocity;
+
+        Vector2 direction = _owner.Rigidbody2D.position - (Vector2)_owner.LastExplosionPosition;
+        float distance = direction.magnitude;
         
-        if (currentVelocity.magnitude > MIN_VELOCITY_THRESHOLD)
+        if (distance > 0.0001f)
         {
-            Vector2 velocityDirection = currentVelocity.normalized;
-            Vector2 additionalForce = velocityDirection * forceMagnitude;
-            
-            // 수평 및 수직 힘 적용
+            direction /= distance;
+
+            // 추가 넉백도 폭발 넉백과 비슷하게 살짝 위로 띄우고 싶으면 유지
+            direction = (direction + Vector2.up * 0.3f).normalized;
+
+            Vector2 additionalForce = direction * forceMagnitude;
+            Debug.Log($"[넉백] addForce{additionalForce}");
             _owner.Rigidbody2D.AddForce(additionalForce, ForceMode2D.Impulse);
             _owner.Rigidbody2D.AddForce(Vector2.up * UPWARD_FORCE, ForceMode2D.Impulse);
         }
