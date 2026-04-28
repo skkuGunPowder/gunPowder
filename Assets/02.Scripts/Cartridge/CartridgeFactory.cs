@@ -130,20 +130,20 @@ public class CartridgeFactory : DontDestroySingleton<CartridgeFactory>
         if (Input.GetKeyDown(KeyCode.F1))
         {
             string id = "CT0001";
-            //TestCartridge("CT0001");
-            CartridgeInventoryManager.Instance.AddCartridge(id);
+            TestCartridge("CT0001");
+            //CartridgeInventoryManager.Instance.AddCartridge(id);
         }
         if (Input.GetKeyDown(KeyCode.F2))
         {
             string id = "CT0011";
-            //TestCartridge("CT0011");
-            CartridgeInventoryManager.Instance.AddCartridge(id);
+            TestCartridge("CT0011");
+            //CartridgeInventoryManager.Instance.AddCartridge(id);
         }
         if (Input.GetKeyDown(KeyCode.F3))
         {
             string id = "CT0014";
-            //TestCartridge("CT0014");
-            CartridgeInventoryManager.Instance.AddCartridge(id);
+            TestCartridge("CT0014");
+            //CartridgeInventoryManager.Instance.AddCartridge(id);
             
         }
     }

@@ -12,7 +12,9 @@ public class CameraController : MonoBehaviour
     [SerializeField] private ProCamera2D _proCamera;
 
     private Player _target;
-    
+    // PlayerEventManager에 구독한 actorNumber 캐시. _target이 Unity-null이어도 해제 가능하게 함.
+    private int _subscribedActorNumber = -1;
+
     private bool _isObserving = false;
     private bool _isLastDiePlaying = false;
     private List<Player> _currentTargetList = new List<Player>();
@@ -67,20 +69,27 @@ public class CameraController : MonoBehaviour
 
     public void SetTarget(Player player)
     {
-        if (_target != null)
+        // 이전 Player 객체가 이미 파괴되어 _target이 Unity-null로 평가되더라도
+        // 캐시된 actorNumber로 안전하게 해제해야 PlayerEventManager에 구독이 누적되지 않는다.
+        if (_subscribedActorNumber != -1)
         {
-            var oldEvents = PlayerEventManager.Instance.GetEvents(_target.ActorNumber);
+            var oldEvents = PlayerEventManager.Instance.GetEvents(_subscribedActorNumber);
             oldEvents.OnHit -= HitShake;
             oldEvents.OnAttack -= GunShotShake;
+            _subscribedActorNumber = -1;
         }
 
         _target = player;
-        var newEvents = PlayerEventManager.Instance.GetEvents(player.ActorNumber);
-        newEvents.OnHit += HitShake;
-        newEvents.OnAttack += GunShotShake;
+        if (player != null)
+        {
+            _subscribedActorNumber = player.ActorNumber;
+            var newEvents = PlayerEventManager.Instance.GetEvents(_subscribedActorNumber);
+            newEvents.OnHit += HitShake;
+            newEvents.OnAttack += GunShotShake;
 
-        _proCamera.RemoveAllCameraTargets();
-        _proCamera.AddCameraTarget(player.transform);
+            _proCamera.RemoveAllCameraTargets();
+            _proCamera.AddCameraTarget(player.transform);
+        }
     }
 
     private void HitShake()
@@ -254,13 +263,14 @@ public class CameraController : MonoBehaviour
     
     private void OnDisable()
     {
-        if (_target != null)
+        if (_subscribedActorNumber != -1)
         {
-            var events = PlayerEventManager.Instance.GetEvents(_target.ActorNumber);
+            var events = PlayerEventManager.Instance.GetEvents(_subscribedActorNumber);
             events.OnHit -= HitShake;
             events.OnAttack -= GunShotShake;
-            _target = null;
+            _subscribedActorNumber = -1;
         }
+        _target = null;
 
         if (_proCamera != null)
         {

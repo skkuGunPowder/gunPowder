@@ -35,7 +35,7 @@ public class PlayerSpawner : MonoBehaviour
             proCamera.SetTarget(player);
             UltimateManager.Instance.SetPlayer(player);
         }
-        
+
         return playerInstance;
     }
 

@@ -14,6 +14,11 @@ public class PlayerBaseState : MonoState
     protected CameraController _cameraController;
     protected BoxRay2D _groundRay2D;
 
+    // PlayerEventManager.OnHit에 구독 중인지/어떤 actorNumber로 구독했는지 추적.
+    // OnExit가 누락되거나 GameObject가 Destroy 되어도 안전하게 해제하기 위함.
+    private int _subscribedActorNumber = -1;
+    private bool _isHitSubscribed = false;
+
     // 반동 관련 상수
     protected const float Y_RECOIL_FORCE = 5f;
     
@@ -54,15 +59,37 @@ public class PlayerBaseState : MonoState
         {
             return;
         }
-        
-        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).OnHit += HandleHit;
+
+        // 중복 구독 방어: 이전 OnEnter에서 OnExit가 누락된 경우라도 동일 핸들러가 두 번 등록되지 않게 한다.
+        UnsubscribeHit();
+        _subscribedActorNumber = _owner.ActorNumber;
+        PlayerEventManager.Instance.GetEvents(_subscribedActorNumber).OnHit += HandleHit;
+        _isHitSubscribed = true;
     }
 
     public override void OnExit()
     {
         base.OnExit();
 
-        PlayerEventManager.Instance.GetEvents(_owner.ActorNumber).OnHit -= HandleHit;
+        UnsubscribeHit();
+    }
+
+    // GameObject Destroy 시 RobustFSM이 OnExit를 호출해 준다는 보장이 없으므로,
+    // OnDestroy를 안전망으로 두어 PlayerEventManager에 stale handler가 남지 않게 한다.
+    protected virtual void OnDestroy()
+    {
+        UnsubscribeHit();
+    }
+
+    private void UnsubscribeHit()
+    {
+        if (!_isHitSubscribed) return;
+        if (_subscribedActorNumber != -1 && PlayerEventManager.Instance != null)
+        {
+            PlayerEventManager.Instance.GetEvents(_subscribedActorNumber).OnHit -= HandleHit;
+        }
+        _isHitSubscribed = false;
+        _subscribedActorNumber = -1;
     }
 
     protected virtual void HandleHit()
