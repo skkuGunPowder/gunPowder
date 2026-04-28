@@ -1129,6 +1129,7 @@ GameObject:
   - component: {fileID: 8613667901490780428}
   - component: {fileID: 6935532653452677779}
   - component: {fileID: 3201448611350912182}
+  - component: {fileID: 3992164608850723299}
   m_Layer: 5
   m_Name: UI_CartridgeShopPopup
   m_TagString: Untagged
@@ -1235,6 +1236,21 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &3992164608850723299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1090758588931849315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21bc7940d0a03b349b40922e687de8f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _background: {fileID: 7188579127730132231}
+  _colorChangeTime: 0.5
+  _colorChangeEase: 1
 --- !u!1 &1267774404852552850
 GameObject:
   m_ObjectHideFlags: 0
@@ -7965,7 +7981,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 111.6175, y: -30}
-  m_SizeDelta: {x: 0, y: 40}
+  m_SizeDelta: {x: 65.53, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7723222261408429702
 CanvasRenderer:

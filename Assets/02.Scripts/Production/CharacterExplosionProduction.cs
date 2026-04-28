@@ -75,14 +75,14 @@ public class CharacterExplosionProduction : MonoBehaviour
     public void ExplosionBackward()
     {
         Debug.Log("backward");
-        _rectTransform.gameObject.SetActive(false);
+        // _rectTransform.gameObject.SetActive(false);
     }
 
     // 앞으로 날아가기 (scale ++)
     public void ExplosionForward()
     {
         Debug.Log("forward");
-        _rectTransform.gameObject.SetActive(false);
+        // _rectTransform.gameObject.SetActive(false);
     }
 
     private void OnDisable()

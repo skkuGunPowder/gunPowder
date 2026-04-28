@@ -43,6 +43,17 @@ public class UI_BombSlot : UI_ItemSlot, IPointerClickHandler
         {
             throw new System.Exception("아이템이 슬롯에 할당되지 않았습니다.");
         }
+
+        if (_subOutline.activeSelf)
+        {
+            return;
+        }
+        
+        if (_mainOutline.activeSelf)
+        {
+            ItemStorage.Instance.UnEquipItem(Item);
+            return;
+        }
         
         ItemStorage.Instance.EquipItem(Item);
     }
@@ -89,6 +100,10 @@ public class UI_BombSlot : UI_ItemSlot, IPointerClickHandler
             return;
         }
 
+        if (_mainOutline.activeSelf)
+        {
+            return;
+        }
         // 우클릭: SubBomb 착용/해제 토글
         InventoryItem currentSubBomb = ItemStorage.Instance.GetEquippedSubBomb();
         if (currentSubBomb != null && currentSubBomb.ID == Item.ID)

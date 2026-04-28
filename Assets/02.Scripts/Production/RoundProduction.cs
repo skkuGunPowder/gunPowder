@@ -36,19 +36,24 @@ public class RoundProduction : MonoBehaviour
     private void Awake()
     {
         EventManager.Instance.OnScoreUpdate += Play;
+        EventManager.Instance.OnLoadEnd += Init;
+        if (_skinPlayer == null)
+        {
+           _skinPlayer = FindAnyObjectByType<SkinSettingForUlti>();
+        }
     }
     
     private void Start()
     {
-        if (_isTest)
-        {
-            ColorPalette.Init();
-            TestInit();
-        }
-        else
-        {
-            Init();
-        }
+        // if (_isTest)
+        // {
+        //     ColorPalette.Init();
+        //     TestInit();
+        // }
+        // else
+        // {
+        //     Init();
+        // }
     }
 
     private void TestInit()
@@ -135,6 +140,7 @@ public class RoundProduction : MonoBehaviour
         
         Debug.Log($"round play");
         _backgroundImage.gameObject.SetActive(true);
+        _skinPlayer.AllActive(true);
         _initialized = false;
         
         _teamScoreDict[team].ScoreChange(score);
@@ -187,8 +193,9 @@ public class RoundProduction : MonoBehaviour
 
     private void RoundEnd()
     {
+        _skinPlayer.AllActive(false);
         _backgroundImage.gameObject.SetActive(false);
-
+        
         if (_initialized)
         {
             return;
@@ -204,5 +211,6 @@ public class RoundProduction : MonoBehaviour
     private void OnDestroy()
     {
         EventManager.Instance.OnScoreUpdate -= Play;
+        EventManager.Instance.OnLoadEnd -= Init;
     }
 }

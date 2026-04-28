@@ -92,7 +92,7 @@ public class GameStateRound : GameModeStateBase
         float damage = (float)player.CustomProperties[EProperties.Damage.ToString()];
         
         // 현재 플레이어가 더 우세한지 체크
-        bool isBetterHP = _maxHp > hp;
+        bool isBetterHP = hp > _maxHp;
         bool isBetterTime = _maxHp == hp && time > _maxTime;
         bool isSameHealthButMoreDamage = _maxHp == hp && time == _maxTime && damage > _damage;
 
