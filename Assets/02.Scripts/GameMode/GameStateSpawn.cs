@@ -9,7 +9,7 @@ public class GameStateSpawn : GameModeStateBase
     {
         Debug.Log("spawn enter");
         int[] playerList;
-
+        
         if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)
         {
             playerList = PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] as int[];

@@ -43,9 +43,10 @@ public class BattleMode : GameModeBase
     {
         base.OnPlayerPropertiesUpdate(targetPlayer, changedProps);
         
-        if(changedProps.ContainsKey(EProperties.GP.ToString()) || changedProps[EProperties.DeadCheck.ToString()] != null)
+        if(changedProps.ContainsKey(EProperties.GP.ToString()) || changedProps[EProperties.GP.ToString()] != null)
         {
-            EventManager.Instance.PlayerGPChange(targetPlayer.ActorNumber, (int)changedProps[EProperties.GP.ToString()]);
+            int gp = (int)changedProps[EProperties.GP.ToString()];
+            EventManager.Instance.PlayerGPChange(targetPlayer.ActorNumber, gp);
         }
     }
 

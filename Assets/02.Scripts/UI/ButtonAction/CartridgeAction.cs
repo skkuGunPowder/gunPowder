@@ -42,6 +42,7 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private Ease _fallEase;
 
     private bool _selected = false;
+    public bool Selected => _selected;
     private int _slotNumber;
     private void Awake()
     {
@@ -104,9 +105,11 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         if (_cartridgeGoods.CanBuy() == false)
         {
+            Debug.Log("Can't buy");
             return;
         }
 
+        Debug.Log("buy");
         _shopPopup.RequestSelectCartridge(_slotNumber);
     }
 

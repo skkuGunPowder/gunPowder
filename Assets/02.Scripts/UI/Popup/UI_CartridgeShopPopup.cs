@@ -66,6 +66,18 @@ public class UI_CartridgeShopPopup : UI_Popup
     {
         
         bool myTurn = player.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+        
+        // 원상태 복구 
+        foreach (CartridgeAction action in  _cartridgeActionList)
+        {
+            if (action.Selected)
+            {
+                continue;
+            }
+
+            action.PlayExitAnimation();
+        }
+        
         SetClickLock(myTurn);
     }
 

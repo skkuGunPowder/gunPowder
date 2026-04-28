@@ -27,7 +27,7 @@ public class CartridgeGoods : MonoBehaviour
         int currentGP = RoomStatManager.Instance.PlayerGunpowder;
         int price = _cartridgeData.GetPrice();
         
-        if (price < currentGP)
+        if (price > currentGP)
         {
             return false;
         }
