@@ -80,6 +80,12 @@ public class CameraController : MonoBehaviour
         }
 
         _target = player;
+        
+        if (PhotonNetwork.LocalPlayer.ActorNumber == player.ActorNumber)
+        {
+            _isObserving = false;
+        }
+        
         if (player != null)
         {
             _subscribedActorNumber = player.ActorNumber;

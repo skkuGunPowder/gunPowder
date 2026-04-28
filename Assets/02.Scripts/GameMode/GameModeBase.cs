@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
@@ -25,6 +24,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     public GameObject MyPlayer;
     
     protected PlayerSpawner _playerSpawner;
+    public PlayerSpawner PlayerSpawner => _playerSpawner;
     protected PhotonView _photonView;
     
     private int _playerCount;
@@ -50,7 +50,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     
     protected virtual void Start()
     {
-        
+        EventManager.Instance.OnFindPlayer += SetMyPlayer;
     }
     
     protected virtual void Update()
@@ -64,23 +64,10 @@ public class GameModeBase : MonoBehaviourPunCallbacks
         IsFirstSpawn = false;
     }
 
-    // 플레이어 소환
-    public virtual void SpawnPlayer(int[] playerList, Action onComplete = null)
+    private void SetMyPlayer(GameObject player)
     {
-        for (int i = 0; i < playerList.Length; i++)
-        {
-            if (playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
-                continue;
- 
-            MyPlayer = _playerSpawner.GeneratePlayers(i);
-            break;
-        }
- 
-        // GeneratePlayers가 동기 함수라면 바로 콜백 호출
-        // 비동기(코루틴)라면 아래 대신 PlayerSpawner에서 완료 시 콜백 호출해야 함
-        onComplete?.Invoke();
+        MyPlayer = player;
     }
-
     /// <summary>
     /// 프로퍼티가 바뀌었을 때 호출되는 함수
     /// 플레이어가 죽을 때마다 죽은 플레이어들 체크하기
@@ -121,8 +108,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
         {
             if ((bool)changedProps[EProperties.IsDead.ToString()])
             {
-                // 죽은 사람 죽은 시간 체크 후 저장
-                EventManager.Instance.GameStateChangeCheck();
+                EventManager.Instance.GameStateChangeCheck(targetPlayer);
             }
         }
         
@@ -239,6 +225,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     public virtual void GameOver()
     { 
         // 연출 종료
+        EventManager.Instance.OnFindPlayer -= SetMyPlayer;
         GameManager.Instance.RequestGameOver();
     }    
 }

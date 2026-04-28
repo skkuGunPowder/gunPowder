@@ -14,6 +14,7 @@ public class TimerBase : MonoBehaviour
 
     private void OnDisable()
     {
+        
     }
 
     // 시작 시간 정하기
@@ -48,5 +49,10 @@ public class TimerBase : MonoBehaviour
     protected virtual void UnSubScribe()
     {
         EventManager.Instance.OnTimerUpdate -= TimeChange;
+    }
+
+    protected virtual void OnDestroy()
+    {
+        UnSubScribe();
     }
 }

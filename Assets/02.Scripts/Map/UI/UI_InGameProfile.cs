@@ -62,13 +62,10 @@ public class UI_InGameProfile : MonoBehaviour
                 string bombKey = EItemType.Bomb.ToString();
                 string subBombKey = EItemType.SubBomb.ToString();
 
-                string bombId = (player.CustomProperties.ContainsKey(bombKey) && player.CustomProperties[bombKey] != null)
-                    ? player.CustomProperties[bombKey].ToString()
-                    : "BO0001";
-
-                string subBombId = (player.CustomProperties.ContainsKey(subBombKey) && player.CustomProperties[subBombKey] != null)
-                    ? player.CustomProperties[subBombKey].ToString()
-                    : "BO0005";
+                string bombId = player.GetCustomProperty<string>(bombKey, "BO0001");
+                string subBombId = player.GetCustomProperty<string>(subBombKey, "BO0005");
+                // 플레이어의 gp
+                int gp = player.GetCustomProperty<int>(EProperties.GP.ToString(), RoomStatManager.Instance.InitGunpowder);
                 
                 ItemDTO item = ItemDatabase.Instance.GetItem(bombId);
                 ItemDTO sub = ItemDatabase.Instance.GetItem(subBombId);
@@ -82,11 +79,11 @@ public class UI_InGameProfile : MonoBehaviour
                     _subBomb.sprite = subImage;
                 }
                 
-                EInGameTeam team = (EInGameTeam)reorderedPlayers[i].CustomProperties[EProperties.Team.ToString()];
+                EInGameTeam team = reorderedPlayers[i].GetCustomProperty<EInGameTeam>(EProperties.Team);
                 
                 UI_InGameProfileSlotList[i].gameObject.SetActive(true);
                 // 후에 수정
-                UI_InGameProfileSlotList[i].Init(bomb, subImage,team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, RoomStatManager.Instance.PlayerGunpowder);
+                UI_InGameProfileSlotList[i].Init(bomb, subImage,team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, gp);
                 _playerActorNumberList.Add(reorderedPlayers[i].ActorNumber);
 
                 // 궁극기 게이지 바: 로컬 플레이어(index 0)만 활성화
@@ -101,6 +98,7 @@ public class UI_InGameProfile : MonoBehaviour
             }
         }
     }
+    
     
     private void SetTopPlayer(int playerNumber)
     {
@@ -170,13 +168,8 @@ public class UI_InGameProfile : MonoBehaviour
         string bombKey = EItemType.Bomb.ToString();
         string subBombKey = EItemType.SubBomb.ToString();
 
-        string bombId = (changedPlayer.CustomProperties.ContainsKey(bombKey) && changedPlayer.CustomProperties[bombKey] != null)
-            ? changedPlayer.CustomProperties[bombKey].ToString()
-            : "BO0001";
-
-        string subBombId = (changedPlayer.CustomProperties.ContainsKey(subBombKey) && changedPlayer.CustomProperties[subBombKey] != null)
-            ? changedPlayer.CustomProperties[subBombKey].ToString()
-            : "BO0005";
+        string bombId = changedPlayer.GetCustomProperty<string>(bombKey, "BO0001");
+        string subBombId = changedPlayer.GetCustomProperty<string>(subBombKey, "BO0005");
 
         ItemDTO item = ItemDatabase.Instance.GetItem(bombId);
         ItemDTO sub = ItemDatabase.Instance.GetItem(subBombId);

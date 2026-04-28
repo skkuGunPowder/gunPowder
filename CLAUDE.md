@@ -109,6 +109,35 @@ DDD 패턴 적용:
 - `ExplosionPool`, `VFXPool` — 폭발/VFX 효과
 - `InstantiateDestroyManager` — 일반 오브젝트 풀
 
+### 타입 선언
+
+`var` 키워드를 사용하지 말고 타입을 명시적으로 선언할 것:
+
+```csharp
+// 금지
+var list = new List<string>();
+var dict = new Dictionary<string, int>();
+
+// 사용
+List<string> list = new List<string>();
+Dictionary<string, int> dict = new Dictionary<string, int>();
+```
+
+### 캐스팅 패턴
+
+`as` + `?.` 조합 대신 `is` 패턴 매칭으로 명시적으로 작성할 것:
+
+```csharp
+// 금지
+(_gameMode as BattleMode)?.DeathOrderList.Clear();
+
+// 사용
+if (_gameMode is BattleMode battleMode)
+{
+    battleMode.DeathOrderList.Clear();
+}
+```
+
 ## 주요 알려진 이슈
 
 - `UI_IngameChat.cs:42` — `UIChatManager.Instance.SendMessage(text)` 는 잘못된 호출. `SendChatMessage(text)` 를 사용해야 함

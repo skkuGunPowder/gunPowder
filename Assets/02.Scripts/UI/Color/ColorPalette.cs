@@ -19,4 +19,10 @@ public class ColorPalette
             ColorDictionary.Add(entry.ColorType, entry.Color);
         }
     }
+
+    public static Color32 GetTeamColor(EInGameTeam team)
+    {
+        EColorType color = (EColorType)(int)team;
+        return ColorDictionary[color];
+    }
 }

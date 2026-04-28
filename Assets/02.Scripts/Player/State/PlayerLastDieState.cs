@@ -4,7 +4,6 @@ using Photon.Pun;
 
 public class PlayerLastDieState : PlayerBaseState
 {
-    
     public float VibrateDuration = 1f;
     public float IntervalTime = 1.5f;
     public float VibratePower = 0.65f;

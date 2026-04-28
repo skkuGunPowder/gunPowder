@@ -175,14 +175,6 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnGameStart?.Invoke();
     }
-
-    public event Action OnBombSelectPhaseStart;
-
-    public void BombSelectPhaseStart()
-    {
-        OnBombSelectPhaseStart?.Invoke();
-    }
-    
     public event Action OnGameOver;
     
     public void GameOver()
@@ -204,13 +196,6 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
         OnScoreUpdate?.Invoke(team, score);
     }
     
-    public event Action OnGameRespawn;
-
-    public void GameRespawn()
-    {
-        OnGameRespawn?.Invoke();
-    }
-    
     public event Action<PhotonPlayer> OnTimeCheck;
     public void TimeCheck(PhotonPlayer player)
     {
@@ -224,10 +209,10 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
         OnLastDieComplete?.Invoke();   
     }
     
-    public event Action OnGameStateChangeCheck;
-    public void GameStateChangeCheck()
+    public event Action<PhotonPlayer> OnGameStateChangeCheck;
+    public void GameStateChangeCheck(PhotonPlayer player)
     {
-        OnGameStateChangeCheck?.Invoke();
+        OnGameStateChangeCheck?.Invoke(player);
     }
     
     public event Action<int, int> OnGPDataChanged;    // GP 변경 시 (playerNumber, gp)
@@ -254,12 +239,45 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnTimerUpdate?.Invoke(time);
     }
-        
+    
+    public event Action<int> OnTimeSet;
 
-    public event Action OnTimerEnd; // BombSelectTimer 종료 → 상태 전환용
-
-    public void TimerEnded()
+    public void TimeSet(int time)
     {
-        OnTimerEnd?.Invoke();
+        OnTimeSet?.Invoke(time);
+    }
+    public event Action<GameObject> OnFindPlayer;
+
+    public void FindPlayer(GameObject player)
+    {
+        OnFindPlayer?.Invoke(player);
+    }
+
+    public event Action OnRoundEnd;
+
+    public void RoundEnd()
+    {
+        OnRoundEnd?.Invoke();
+    }
+    
+    public event Action<PhotonPlayer> OnCartridgeStart;
+
+    public void CartridgeStart(PhotonPlayer player)
+    {
+        OnCartridgeStart?.Invoke(player);
+    }
+
+    public event Action OnCartridgeStateEnter;
+
+    public void CartridgeStateEnter()
+    {
+        OnCartridgeStateEnter?.Invoke();
+    }
+
+    public event Action OnScreenClick;
+
+    public void ScreenClick()
+    {
+        OnScreenClick?.Invoke();
     }
 }

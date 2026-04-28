@@ -65,10 +65,20 @@ public class DamageChecker : Singleton<DamageChecker>
         {
             return;
         }
-        
+
+        if (leftPlayer == null || _playerScoreDictionary == null)
+        {
+            return;
+        }
+
         _playerScoreDictionary[leftPlayer.ActorNumber] = -1;
-        
+
         int topActor = _currentTopPlayer;
+        if (!_playerScoreDictionary.ContainsKey(topActor))
+        {
+            return;
+        }
+
         int topScore = _playerScoreDictionary[topActor];
 
         foreach (var kvp in _playerScoreDictionary)
@@ -177,6 +187,7 @@ public class DamageChecker : Singleton<DamageChecker>
     [PunRPC]
     private void RPC_RequestTopPlayer(int topActor)
     {
+        
         EventManager.Instance.SetTopPlayer(topActor);
     }
     

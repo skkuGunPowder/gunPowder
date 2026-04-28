@@ -78,6 +78,14 @@ public class RoomManager : PhotonSingleton<RoomManager>
         InputHandler.BlockInput = true;
         PopupManager.Instance.Open(EPopupType.UI_TempStorage, () => InputHandler.BlockInput = false);
         
+        Hashtable properties = new Hashtable
+        {
+            { ERoomProperties.StateChange.ToString(), null },
+            { ERoomProperties.StateChangeId.ToString(), null }    // 룸프로퍼티 업데이트 콜백 함수가 언제나 호출될 수 있도록 
+        };
+        
+        PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
+        
         // 인게임 채팅 채널 자동 참가
         if (UIChatManager.Instance != null)
         {

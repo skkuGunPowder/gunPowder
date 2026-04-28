@@ -1,9 +1,13 @@
+using System.Collections.Generic;
 using Photon.Pun;
-using UnityEngine;
 using UnityEngine.SceneManagement;
+using PhotonPlayer = Photon.Realtime.Player;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class BattleMode : GameModeBase
 {
+    public Queue<PhotonPlayer> DeathOrderQueue = new Queue<PhotonPlayer>();
+
     /// <summary>
     /// 1. 플레이어 리스트 받아와서 소환하기
     /// </summary>
@@ -32,6 +36,17 @@ public class BattleMode : GameModeBase
         if (PhotonNetwork.IsMasterClient)
         {
             RequestStateChange(EModeState.Spawn);   
+        }
+    }
+
+    public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer, Hashtable changedProps)
+    {
+        base.OnPlayerPropertiesUpdate(targetPlayer, changedProps);
+        
+        if(changedProps.ContainsKey(EProperties.GP.ToString()) || changedProps[EProperties.GP.ToString()] != null)
+        {
+            int gp = (int)changedProps[EProperties.GP.ToString()];
+            EventManager.Instance.PlayerGPChange(targetPlayer.ActorNumber, gp);
         }
     }
 

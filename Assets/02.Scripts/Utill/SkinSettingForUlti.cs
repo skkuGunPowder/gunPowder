@@ -28,4 +28,12 @@ public class SkinSettingForUlti : MonoBehaviour
             }
         }
     }
+
+    public void AllActive(bool active)
+    {
+        foreach (PlayerStartSkin controller in StartSkinList)
+        {
+            controller.gameObject.SetActive(active);
+        }
+    }
 }

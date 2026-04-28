@@ -17,6 +17,7 @@ public enum EProperties
     
     StateChange,
     Cartridges,
-    
+    GP,
+
     Count
 }

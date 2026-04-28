@@ -28,10 +28,11 @@ public class PlayerSpawner : MonoBehaviour
 
         Debug.Log($"[Cartridge] PlayerSpawner before InvokeOnSpawned. player.ActorNumber={player.ActorNumber}, LocalPlayer.ActorNumber={PhotonNetwork.LocalPlayer.ActorNumber}");
         PlayerEventManager.Instance.GetEvents(player.ActorNumber).InvokeOnSpawned();
-
+        
         if (player.PhotonView.IsMine)
         {
             CameraController proCamera = Camera.main.GetComponent<CameraController>();
+            EventManager.Instance.FindPlayer(playerInstance);
             proCamera.SetTarget(player);
             UltimateManager.Instance.SetPlayer(player);
         }

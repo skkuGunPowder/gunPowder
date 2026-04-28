@@ -167,7 +167,7 @@ public class PlayerStat : MonoBehaviour
             return;
         }
 
-        SetPlayer(RoomStatManager.Instance.PlayerGunpowder, RoomStatManager.Instance.PlayerLife,
+        SetPlayer(RoomStatManager.Instance.GetGunpowder(), RoomStatManager.Instance.PlayerLife,
                  RoomStatManager.Instance.PlayerDecreaseTime);
     }
 

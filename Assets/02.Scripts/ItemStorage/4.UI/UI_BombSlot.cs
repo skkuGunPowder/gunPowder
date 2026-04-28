@@ -43,6 +43,20 @@ public class UI_BombSlot : UI_ItemSlot, IPointerClickHandler
         {
             throw new System.Exception("아이템이 슬롯에 할당되지 않았습니다.");
         }
+
+        if (_subOutline.activeSelf)
+        {
+            ItemStorage.Instance.UnEquipSubBomb();
+            ItemStorage.Instance.EquipItem(Item);
+            
+            return;
+        }
+        
+        if (_mainOutline.activeSelf)
+        {
+            ItemStorage.Instance.UnEquipItem(Item);
+            return;
+        }
         
         ItemStorage.Instance.EquipItem(Item);
     }
@@ -52,15 +66,15 @@ public class UI_BombSlot : UI_ItemSlot, IPointerClickHandler
         _subOutline.SetActive(true);
         _mainOutline.SetActive(false);
         SelectedIcon.gameObject.SetActive(true);
-        _button.interactable = false;
+        _button.interactable = true;
     }
 
     protected override void EquipAction()
     {
-        _mainOutline.SetActive(true);   
+        _mainOutline.SetActive(true);
         SelectedIcon.gameObject.SetActive(true);
         _subOutline.SetActive(false);
-        _button.interactable = false;
+        _button.interactable = true;
     }
 
     protected override void UnEquipAction()
@@ -73,31 +87,38 @@ public class UI_BombSlot : UI_ItemSlot, IPointerClickHandler
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (Item == null) 
+        if (Item == null)
         {
             return;
-            
         }
 
         if (Item.Item.ItemType != EItemType.Bomb)
         {
             return;
         }
-
+        
         if (eventData.button != PointerEventData.InputButton.Right)
         {
             return;
         }
 
-        // 우클릭: SubBomb 착용/해제 토글
+        // 메인 장착 상태에서 우클릭: 메인 해제 후 서브로 변경
+        if (_mainOutline.activeSelf)
+        {
+            ItemStorage.Instance.UnEquipItem(Item);
+            ItemStorage.Instance.EquipAsSubBomb(Item);
+            return;
+        }
+
+        // 미장착 상태에서 우클릭: 서브 착용/해제 토글
         InventoryItem currentSubBomb = ItemStorage.Instance.GetEquippedSubBomb();
         if (currentSubBomb != null && currentSubBomb.ID == Item.ID)
         {
-            ItemStorage.Instance.UnEquipSubBomb();   
+            ItemStorage.Instance.UnEquipSubBomb();
         }
         else
         {
-            ItemStorage.Instance.EquipAsSubBomb(Item);   
+            ItemStorage.Instance.EquipAsSubBomb(Item);
         }
     }
 }
