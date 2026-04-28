@@ -64,17 +64,23 @@ public class UI_CartridgeShopPopup : UI_Popup
 
     public void SetMyTurn(PhotonPlayer player)
     {
-        // 현재 내 차례인가?
+        
         bool myTurn = player.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
         SetClickLock(myTurn);
-
     }
 
+    // 턴 넘기기
+    public void OnclickPassTurn()
+    {
+        EventManager.Instance.ScreenClick();
+    }
+    
     public void SetClickLock(bool myTurn)
     {
         // 즉시 잠금
         _isMyTurn = myTurn;
     }
+    
     public void RequestSelectCartridge(int index)
     {
         if (!_isMyTurn)

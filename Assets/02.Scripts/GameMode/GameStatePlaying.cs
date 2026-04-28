@@ -12,6 +12,7 @@ public class GameStatePlaying : GameModeStateBase
     private bool _lastPlayer = false; 
     private bool _gameSet = false; // 동시 죽음 없애기 위함
     private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>(); // 살아 있는 팀원 수 : 팀 / 팀원 수
+    private Dictionary<EInGameTeam, int> _initialTeamCount = new Dictionary<EInGameTeam, int>(); // 게임 시작 시 팀 초기 인원 수
     private int _count = 0; // 모든 플레이어의 정보가 모였는지 확인
     private int _MaxCount = 0;
 
@@ -36,11 +37,12 @@ public class GameStatePlaying : GameModeStateBase
         
         foreach (PhotonPlayer player in players)
         {
-            
             EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-            
+
             _teamCount.TryAdd(team, 0);
             _teamCount[team]++;
+            _initialTeamCount.TryAdd(team, 0);
+            _initialTeamCount[team]++;
         }
         
         _MaxCount = players.Length;
@@ -401,11 +403,68 @@ public class GameStatePlaying : GameModeStateBase
     {
         if (PhotonNetwork.IsMasterClient && _gameMode is BattleMode battleMode)
         {
-            int[] actorNumbers = new int[battleMode.DeathOrderQueue.Count];
-            int index = 0;
-            foreach (PhotonPlayer player in battleMode.DeathOrderQueue)
+            List<PhotonPlayer> deathOrderList = new List<PhotonPlayer>(battleMode.DeathOrderQueue);
+
+            // 팀원 전원 생존한 팀 탐색 (2인 이상)
+            bool foundSurvivingTeam = false;
+            EInGameTeam allSurvivedTeam = EInGameTeam.Default;
+            foreach (KeyValuePair<EInGameTeam, int> kv in _teamCount)
             {
-                actorNumbers[index++] = player.ActorNumber;
+                if (kv.Value >= 2 && _initialTeamCount.ContainsKey(kv.Key) && kv.Value == _initialTeamCount[kv.Key])
+                {
+                    allSurvivedTeam = kv.Key;
+                    foundSurvivingTeam = true;
+                    break;
+                }
+            }
+
+            // 전원 생존 팀이 있으면 해당 팀원을 기준에 따라 정렬
+            if (foundSurvivingTeam)
+            {
+                List<PhotonPlayer> survivors = new List<PhotonPlayer>();
+                List<PhotonPlayer> others = new List<PhotonPlayer>();
+
+                foreach (PhotonPlayer player in deathOrderList)
+                {
+                    EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+                    if (team == allSurvivedTeam)
+                    {
+                        survivors.Add(player);
+                    }
+                    else
+                    {
+                        others.Add(player);
+                    }
+                }
+
+                // 킬 수 오름차순 → 딜량 오름차순 → 액터 번호 오름차순
+                survivors.Sort((a, b) =>
+                {
+                    float killA = (float)a.CustomProperties[EProperties.Kill.ToString()];
+                    float killB = (float)b.CustomProperties[EProperties.Kill.ToString()];
+                    if (killA != killB)
+                    {
+                        return killA.CompareTo(killB);
+                    }
+
+                    float damageA = (float)a.CustomProperties[EProperties.Damage.ToString()];
+                    float damageB = (float)b.CustomProperties[EProperties.Damage.ToString()];
+                    if (damageA != damageB)
+                    {
+                        return damageA.CompareTo(damageB);
+                    }
+
+                    return a.ActorNumber.CompareTo(b.ActorNumber);
+                });
+
+                deathOrderList = others;
+                deathOrderList.AddRange(survivors);
+            }
+
+            int[] actorNumbers = new int[deathOrderList.Count];
+            for (int i = 0; i < deathOrderList.Count; i++)
+            {
+                actorNumbers[i] = deathOrderList[i].ActorNumber;
             }
             _photonView.RPC(nameof(RPC_SyncDeathOrder), RpcTarget.Others, actorNumbers);
         }
@@ -450,10 +509,15 @@ public class GameStatePlaying : GameModeStateBase
 
     public override void Exit()
     {
+        // 플레이어 GP를 RoomStatManager에 저장
+        PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
+        RoomStatManager.Instance.SetGunpowder(stat.CurrentGP);
+
         GameManager.Instance.GameStateChange(EGameState.Waiting); // Waiting 상태로 복귀
         _lastPlayer = false;
         _gameSet = false;
         _teamCount.Clear();
+        _initialTeamCount.Clear();
         _count = 0;
         EventManager.Instance.OnLastDieComplete -= GameResultCheck;
         EventManager.Instance.OnPlayerLeft -= OnPlayerLeft;

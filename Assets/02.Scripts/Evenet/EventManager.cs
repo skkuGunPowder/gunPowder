@@ -240,6 +240,12 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
         OnTimerUpdate?.Invoke(time);
     }
     
+    public event Action<int> OnTimeSet;
+
+    public void TimeSet(int time)
+    {
+        OnTimeSet?.Invoke(time);
+    }
     public event Action<GameObject> OnFindPlayer;
 
     public void FindPlayer(GameObject player)

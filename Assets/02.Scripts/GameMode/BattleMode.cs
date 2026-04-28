@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Photon.Pun;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using PhotonPlayer = Photon.Realtime.Player;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class BattleMode : GameModeBase
 {
@@ -36,6 +36,16 @@ public class BattleMode : GameModeBase
         if (PhotonNetwork.IsMasterClient)
         {
             RequestStateChange(EModeState.Spawn);   
+        }
+    }
+
+    public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer, Hashtable changedProps)
+    {
+        base.OnPlayerPropertiesUpdate(targetPlayer, changedProps);
+        
+        if(changedProps.ContainsKey(EProperties.GP.ToString()) || changedProps[EProperties.DeadCheck.ToString()] != null)
+        {
+            EventManager.Instance.PlayerGPChange(targetPlayer.ActorNumber, (int)changedProps[EProperties.GP.ToString()]);
         }
     }
 
