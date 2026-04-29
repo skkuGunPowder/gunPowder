@@ -2,9 +2,13 @@ using UnityEngine;
 
 public class WeakpointCartridge : Cartridge
 {
-    public override void ExcuteGimmick(Player owner)
+    public override bool ExcuteGimmick(Player owner)
     {
-        base.ExcuteGimmick(owner);
+        if(!base.ExcuteGimmick(owner))
+        {
+            return false;
+        }
         owner.SetAlwaysMaxDamage(true);
+        return true;
     }
 }

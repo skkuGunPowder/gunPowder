@@ -55,7 +55,13 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         if(_permanentCartridges.TryGetValue(id, out Cartridge existingPermanent))
         {
             Debug.Log($"이미 보유 중인 영구형 카트리지{id} 수리 시도.");
-            return existingPermanent.Repair();
+            return Repair(existingPermanent.Data.ID);
+        }
+
+        if(_consumableCartridges.ContainsKey(id))
+        {
+            Debug.LogWarning($"이미 보유 중인 소모형 카트리지{id}입니다.");
+            return false;
         }
 
         Cartridge newCartridge = CartridgeFactory.Instance.GetCartridge(id);
