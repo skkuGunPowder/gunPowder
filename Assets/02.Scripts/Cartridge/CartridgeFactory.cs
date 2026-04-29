@@ -199,16 +199,16 @@ public class CartridgeFactory : DontDestroySingleton<CartridgeFactory>
         return newCartridge;
     }
 
-    public int GetMaxDurability(string id)
-    {
-        if (!_cartridgeDataDict.TryGetValue(id, out CartridgeData cartridgeData))
-        {
-            Debug.LogError($"카트리지를 찾지 못했습니다.(ID: {id})");
-            return 0;
-        }
+    // public int GetMaxDurability(string id)
+    // {
+    //     if (!_cartridgeDataDict.TryGetValue(id, out CartridgeData cartridgeData))
+    //     {
+    //         Debug.LogError($"카트리지를 찾지 못했습니다.(ID: {id})");
+    //         return 0;
+    //     }
 
-        return cartridgeData.Durability;
-    }
+    //     return cartridgeData.Durability;
+    // }
 
     #region 테스트용
     private void Update()
