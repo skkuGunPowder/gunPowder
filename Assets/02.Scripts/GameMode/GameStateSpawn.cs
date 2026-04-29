@@ -23,6 +23,16 @@ public class GameStateSpawn : GameModeStateBase
                 playerList[i] = players[i].ActorNumber;
             }
         }
+        
+        PhotonPlayer[] testplayers = PhotonNetwork.PlayerList;
+
+        for(int i = 0; i < testplayers.Length; i++)
+        {
+         
+            Debug.Log($"{testplayers[i].ActorNumber} = players");
+            Debug.Log($"{playerList[i]} = custom players");
+   
+        }
 
         // 모든 클라이언트가 동일한 결과를 내도록 ActorNumber 합산을 seed로 사용
         int seed = 0;

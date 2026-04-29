@@ -13,6 +13,11 @@ public class CartridgeGoods : MonoBehaviour
      
     public void Refresh(CartridgeData data)
     {
+        if (data == null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
         _cartridgeData = data;
         
         // 카트리지 인벤토리에서 체크해서 할인
@@ -31,7 +36,9 @@ public class CartridgeGoods : MonoBehaviour
         {
             return false;
         }
-
+        
+        // 카트리지 적용
+        CartridgeInventoryManager.Instance.AddCartridge(_cartridgeData.ID);
         RoomStatManager.Instance.ChangeGunpowder(-price);
         return true;
     }
