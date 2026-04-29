@@ -41,6 +41,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             return;
         }
 
+        ClearAll();
         int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
         PlayerEventManager.Instance.GetEvents(actorNumber).OnSpawned -= LoadFromCustomProperties;
     }
@@ -197,11 +198,22 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         PhotonNetwork.LocalPlayer.SetCustomProperties(props);
     }
 
-    public bool Repair(Cartridge cartridge)
+    public bool Repair(string id)
     {
-        if(!cartridge.Repair()) return false;
-        SyncToCustomProperties();
-        return true;
+        if (_consumableCartridges.ContainsKey(id))
+        {
+            Debug.LogError($"소모형 카트리지{id}는 수리가 불가능합니다.");
+            return false;
+        }
+
+        if (_permanentCartridges.TryGetValue(id, out Cartridge permanent))
+        {
+            if(!permanent.Repair()) return false;
+            SyncToCustomProperties();
+            return true;
+        }
+
+        return false;
     }
 
     private void SyncToCustomProperties()
