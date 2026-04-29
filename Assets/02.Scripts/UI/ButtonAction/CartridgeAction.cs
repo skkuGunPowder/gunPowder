@@ -105,11 +105,9 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         if (_cartridgeGoods.CanBuy() == false)
         {
-            Debug.Log("Can't buy");
             return;
         }
 
-        Debug.Log("buy");
         _shopPopup.RequestSelectCartridge(_slotNumber);
     }
 
