@@ -8,13 +8,17 @@ public class SelfRepairCartridge : Cartridge
     
     private Coroutine _healCoroutine;
 
-    public override void ExcuteGimmick(Player owner)
+    public override bool ExcuteGimmick(Player owner)
     {
-        base.ExcuteGimmick(owner);
+        if(!base.ExcuteGimmick(owner))
+        {
+            return false;
+        }
 
-        if (_healCoroutine != null) return;
+        if (_healCoroutine != null) return true;
 
         _healCoroutine = StartCoroutine(HealRoutine(owner));
+        return true;
     }
 
     private IEnumerator HealRoutine(Player owner)

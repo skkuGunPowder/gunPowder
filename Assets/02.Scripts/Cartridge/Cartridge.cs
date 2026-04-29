@@ -23,14 +23,27 @@ public abstract class Cartridge : MonoBehaviour, ICartridge
         return true;
     }
 
-    public virtual void ExcuteGimmick(Player owner)
+    public virtual bool ExcuteGimmick(Player owner)
     {
-        if(_currentDurability <= 0)
+        if(_data.Durability == 0)
         {
-            Debug.LogWarning("카트리지의 내구도가 부족합니다.");
-            return;
+            if(_currentDurability < 0)
+            {
+                Debug.LogWarning("카트리지의 내구도가 부족합니다.");
+                return false;
+            }
         }
+        else
+        {
+            if(_currentDurability <= 0)
+            {
+                Debug.LogWarning("카트리지의 내구도가 부족합니다.");
+                return false;
+            }
+        }
+        
         _currentDurability--;
+        return true;
     }
 
     public int GetMaxDurability()
