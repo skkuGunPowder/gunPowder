@@ -61,7 +61,6 @@ public class UI_Observing : MonoBehaviour
         NicknameText.DOFade(value, FadeDuration);
         UpButton.image.DOFade(value, FadeDuration);
         BackButton.image.DOFade(value, FadeDuration);
-        Debug.Log("ObjectActive");
     }
 
     private void ObjectActive()

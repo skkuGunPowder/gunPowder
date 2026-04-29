@@ -140,10 +140,9 @@ public class GameStateCartridge : GameModeStateBase
         EventManager.Instance.OnScreenClick -= OnTurnAction;
         _timer?.Destroy();
         _timer = null;
-
-        UI_CartridgeShopPopup popup = (UI_CartridgeShopPopup)PopupManager.Instance.GetPopup(EPopupType.UI_CartridgeShopPopup);
-        popup?.Close();
-
+        
+        EventManager.Instance.CartridgeEnd();
+        
         if (_gameMode is BattleMode battleMode)
         {
             battleMode.DeathOrderQueue.Clear();

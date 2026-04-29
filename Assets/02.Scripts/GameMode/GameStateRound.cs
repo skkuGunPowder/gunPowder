@@ -199,6 +199,7 @@ public class GameStateRound : GameModeStateBase
     {
         SummarizeResult();
         EventManager.Instance.OnRoundEnd -= EndCheck;
+        EventManager.Instance.RoundStateExit();
     }
     
     // 결과 합산하기

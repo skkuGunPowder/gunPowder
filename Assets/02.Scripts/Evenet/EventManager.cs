@@ -259,6 +259,13 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnRoundEnd?.Invoke();
     }
+
+    public event Action OnRoundStateExit;
+
+    public void RoundStateExit()
+    {
+        OnRoundStateExit?.Invoke();
+    }
     
     public event Action<PhotonPlayer> OnCartridgeStart;
 
@@ -279,5 +286,12 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     public void ScreenClick()
     {
         OnScreenClick?.Invoke();
+    }
+
+    public event Action OnCartridgeEnd;
+
+    public void CartridgeEnd()
+    {
+        OnCartridgeEnd?.Invoke();
     }
 }

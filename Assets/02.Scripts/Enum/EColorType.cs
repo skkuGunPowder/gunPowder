@@ -18,4 +18,12 @@ public enum EColorType
     SelectedButton,
     UnSelectedButton,
     
+    //밑으로는 그라데이션 컬러
+    
+    Common = 100,
+    Common2,
+    Rare = 150,
+    Rare2,
+    Epic = 200,
+    Epic2,
 }

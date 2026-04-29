@@ -37,6 +37,7 @@ public class RoundProduction : MonoBehaviour
     {
         EventManager.Instance.OnScoreUpdate += Play;
         EventManager.Instance.OnLoadEnd += Init;
+        EventManager.Instance.OnRoundStateExit += HideBackground;
         if (_skinPlayer == null)
         {
            _skinPlayer = FindAnyObjectByType<SkinSettingForUlti>();
@@ -193,9 +194,6 @@ public class RoundProduction : MonoBehaviour
 
     private void RoundEnd()
     {
-        _skinPlayer.AllActive(false);
-        _backgroundImage.gameObject.SetActive(false);
-        
         if (_initialized)
         {
             return;
@@ -208,9 +206,16 @@ public class RoundProduction : MonoBehaviour
             EventManager.Instance.RoundEnd();
         }
     } 
+    private void HideBackground()
+    {
+        _skinPlayer.AllActive(false);
+        _backgroundImage.gameObject.SetActive(false);
+    }
+
     private void OnDestroy()
     {
         EventManager.Instance.OnScoreUpdate -= Play;
         EventManager.Instance.OnLoadEnd -= Init;
+        EventManager.Instance.OnRoundStateExit -= HideBackground;
     }
 }
