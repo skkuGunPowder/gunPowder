@@ -8,7 +8,7 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     [SerializeField] private RectTransform _rectTransform;
     private UI_CartridgeShopPopup _shopPopup;
-    private CartridgeGoods _cartridgeGoods;
+    private UI_CartridgeGoods uiCartridgeGoods;
     
     [Header("Hit Action")]
     [SerializeField] private int _slotCount;
@@ -56,9 +56,9 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
             _shopPopup = (UI_CartridgeShopPopup)PopupManager.Instance.GetPopup(EPopupType.UI_CartridgeShopPopup);
         }
 
-        if (_cartridgeGoods == null)
+        if (uiCartridgeGoods == null)
         {
-            _cartridgeGoods = GetComponentInParent<CartridgeGoods>();
+            uiCartridgeGoods = GetComponentInParent<UI_CartridgeGoods>();
         }
     }
 
@@ -103,7 +103,7 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
             return;
         }
 
-        if (_cartridgeGoods.CanBuy() == false)
+        if (uiCartridgeGoods.CanBuy() == false)
         {
             return;
         }

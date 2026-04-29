@@ -20,8 +20,10 @@ public class UI_InGameProfileSlot : MonoBehaviour
     
     public ProfileSkin PlayerProfileSkin;
     public UI_EmotionSlot Emotion;
-    
-    public List<GameObject> LifeList;
+
+    [Header("Life")]
+    public GameObject LifePivot;
+    public TextMeshProUGUI LifeText;
    
     [Header("Color")]
     public int HPMiddle = 75;
@@ -81,17 +83,12 @@ public class UI_InGameProfileSlot : MonoBehaviour
 
     private void LifeRefresh(int life)
     {
-        for (int i = 0; i < LifeList.Count; i++)
+        if (life < 1)
         {
-            if(i < life)
-            {
-                LifeList[i].SetActive(true); 
-            }
-            else
-            {
-                LifeList[i].SetActive(false);
-            }
+            LifePivot.SetActive(false);
         }
+        
+        LifeText.text = life.ToString();
     }
    
     public void LeftOverRefresh()

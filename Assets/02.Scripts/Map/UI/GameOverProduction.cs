@@ -73,20 +73,10 @@ public class GameOverProduction : MonoBehaviour
         EventManager.Instance.OnLastDieComplete -= GameSetPlay;
         EventManager.Instance.OnLastDieComplete += GameSetPlay;
     }
-    // private void OnEnable()
-    // {
-    //     _camera = Camera.main;
-    //     
-    //     if (!Test)
-    //     {
-    //         return;
-    //     }
-    //     
-    //     Play();
-    // }
 
     public void GameOverPlay()
     {
+        Debug.Log("gameover");
         EventManager.Instance.OnLastDieComplete -= GameSetPlay;
         SoundManager.Instance.PlayLocalSound(nameof(GameEndBell_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
         
@@ -125,6 +115,8 @@ public class GameOverProduction : MonoBehaviour
 
     private void GameSetPlay()
     {
+        
+        Debug.Log("gameset");
         Sequence sequence = DOTween.Sequence();
         sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
         sequence.JoinCallback(()=> _proCamera.Zoom(+4,CameraZoomOutTime));

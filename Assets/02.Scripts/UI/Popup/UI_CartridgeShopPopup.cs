@@ -2,16 +2,17 @@ using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.UI;
 using PhotonPlayer = Photon.Realtime.Player;
 public class UI_CartridgeShopPopup : UI_Popup
 {
     [SerializeField] private int _cartridgeCount = 4;
-    [SerializeField] private List<CartridgeGoods>  _cartridgeGoodList = new List<CartridgeGoods>();
-    
+    [SerializeField] private List<UI_CartridgeGoods>  _cartridgeGoodList = new List<UI_CartridgeGoods>();
+    [SerializeField] private Button _turnPassButton;
     private PhotonView _photonView;
     private List<CartridgeAction> _cartridgeActionList = new List<CartridgeAction>();
     private bool _isMyTurn = false;
-
+    
     private void Awake()
     {
         if (_photonView == null)
@@ -84,6 +85,8 @@ public class UI_CartridgeShopPopup : UI_Popup
     // 턴 넘기기
     public void OnclickPassTurn()
     {
+        _turnPassButton.interactable = false;
+        _isMyTurn = false;
         EventManager.Instance.ScreenClick();
     }
     
@@ -91,6 +94,7 @@ public class UI_CartridgeShopPopup : UI_Popup
     {
         // 즉시 잠금
         _isMyTurn = myTurn;
+        _turnPassButton.interactable = _isMyTurn;
     }
     
     public void RequestSelectCartridge(int index)

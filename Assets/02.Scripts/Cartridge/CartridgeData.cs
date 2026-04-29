@@ -80,7 +80,7 @@ public class CartridgeData
         }
 
         return values;
-    }
+    }   
 
     private static bool TryParseFloat(string input, out float parsed)
     {
