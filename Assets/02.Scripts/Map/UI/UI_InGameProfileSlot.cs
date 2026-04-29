@@ -83,11 +83,7 @@ public class UI_InGameProfileSlot : MonoBehaviour
 
     private void LifeRefresh(int life)
     {
-        if (life < 1)
-        {
-            LifePivot.SetActive(false);
-        }
-        
+        LifePivot.SetActive(life >= 1);
         LifeText.text = life.ToString();
     }
    
