@@ -117,12 +117,14 @@ public class PhotonServerManager : MonoBehaviourPunCallbacks
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
-        popup.Init("찾을 수 있는 방이 없습니다. 방을 만드시겠습니까?", true, MakeRandomRoom);
+        //popup.Init("찾을 수 있는 방이 없습니다. 방을 만드시겠습니까?", true, MakeRandomRoom);
+        popup.Init("参加できるルームがありません。ルームを作成しますか？", true, MakeRandomRoom);
     }
 
     private void MakeRandomRoom() // 랜덤매칭으로 방을 찾을 수 없을 때.
     {
-        LobbyManager.Instance.MakeRoom("즐거운 게임해요.",4, 5,2, 75,false);
+        //LobbyManager.Instance.MakeRoom("즐거운 게임해요.",4, 5,2, 75,false);
+        LobbyManager.Instance.MakeRoom("楽しく遊びましょう！",4, 5,2, 75,false);
     }
 
     public override void OnJoinedRoom()
