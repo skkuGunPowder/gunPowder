@@ -123,6 +123,7 @@ public class UI_ProfileSlot : MonoBehaviour
         ProfileOutline.color = TeamColorSet(EInGameTeam.Default);
         PlayerProfileSkin.gameObject.SetActive(false);
         BombImage.sprite = EmptyImage;
+        SubBombImage.sprite = EmptyImage;
         if (ChatListener != null) 
             ChatListener.SetOwner("");
     }

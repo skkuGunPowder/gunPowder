@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
@@ -20,6 +21,8 @@ public class UltimateEffectLocal : MonoBehaviour
     private List<PhotonView> _playerList = new List<PhotonView>();
     [Header("사운드")]
     public AudioClip UltParticle_1;
+    
+    private CancellationTokenAwaitable _token;
     private void Awake()
     {
         EventManager.Instance.OnUltimate += PlayEffect;
@@ -41,7 +44,7 @@ public class UltimateEffectLocal : MonoBehaviour
         }
 
         UltimateOn();
-        StartCoroutine(BackGroundColorChange());
+        BackGroundColorChange();
 
     }
 
@@ -99,18 +102,19 @@ public class UltimateEffectLocal : MonoBehaviour
             PhotonView view = player.GetComponent<PhotonView>();
             _playerList.Add(view);
         }
-        
-        EventManager.Instance.OnPlayerListUp -= PlayerListUp;
     }
 
-    private IEnumerator BackGroundColorChange()
+    private async UniTaskVoid BackGroundColorChange()
     {
+        
+        var ct = this.GetCancellationTokenOnDestroy();
+        
         float time = 0;
         UltimateBackGround.SetActive(true);
         while (time < ColorChangeTime)
         {
             time += Time.unscaledDeltaTime;
-            yield return null;
+            await UniTask.Yield(ct);
         }
         
         _ultiBackGround.color = ColorPalette.ColorDictionary[EColorType.UltiBack];
@@ -121,11 +125,12 @@ public class UltimateEffectLocal : MonoBehaviour
         {
             UltimateBackGround.SetActive(false);
             _ultiBackGround.color = Color.white; 
-        });
+        }).SetUpdate(true);
     }
 
     private void OnDestroy()
     {
         EventManager.Instance.OnUltimate -= PlayEffect;
+        EventManager.Instance.OnPlayerListUp -= PlayerListUp;
     }
 }

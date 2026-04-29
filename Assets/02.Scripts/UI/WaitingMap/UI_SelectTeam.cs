@@ -16,7 +16,6 @@ public class UI_SelectTeam : MonoBehaviour
     {
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(EProperties.Team.ToString()) == false)
         {
-            Debug.Log("Team is not set");
             return;
         }
         
