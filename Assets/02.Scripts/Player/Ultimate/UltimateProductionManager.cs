@@ -16,7 +16,7 @@ public class UltimateProductionManager : MonoBehaviour
 
     private void Start()
     {
-        _myTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.CustomProperties[EProperties.Team.ToString()];
+        _myTeam = (EInGameTeam)PhotonNetwork.LocalPlayer.GetCustomProperty<int>(EProperties.Team.ToString());
         SkinSettingForUlti.Init();
         Init();
     }

@@ -36,7 +36,7 @@ public class RoundProduction : MonoBehaviour
     private void Awake()
     {
         EventManager.Instance.OnScoreUpdate += Play;
-        EventManager.Instance.OnLoadFinished += Init;
+        EventManager.Instance.OnLoadEnd += Init;
         if (_skinPlayer == null)
         {
            _skinPlayer = FindAnyObjectByType<SkinSettingForUlti>();

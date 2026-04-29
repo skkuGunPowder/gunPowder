@@ -7,7 +7,6 @@ public class GameStateSpawn : GameModeStateBase
 
     public override void Enter()
     {
-        Debug.Log("spawn enter");
         int[] playerList;
         
         if (PhotonNetwork.CurrentRoom.CustomProperties[EProperties.PlayerList.ToString()] != null)
@@ -38,6 +37,7 @@ public class GameStateSpawn : GameModeStateBase
         int seed = 0;
         foreach (PhotonPlayer p in PhotonNetwork.PlayerList) seed += p.ActorNumber;
         System.Random rng = new System.Random(seed);
+        
         for (int i = playerList.Length - 1; i > 0; i--)
         {
             int j = rng.Next(i + 1);
@@ -46,7 +46,11 @@ public class GameStateSpawn : GameModeStateBase
 
         for (int i = 0; i < playerList.Length; i++)
         {
-            if (playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber) { continue; }
+            if (playerList[i] != PhotonNetwork.LocalPlayer.ActorNumber)
+            {
+                continue;
+            }
+            
             _gameMode.MyPlayer = _gameMode.PlayerSpawner.GeneratePlayers(i);
             break;
         }

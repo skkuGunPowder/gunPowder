@@ -54,7 +54,7 @@ public class TilemapFadeController : MonoBehaviour
     }
     private void FadeOut()
     {
-        DOTween.To(() => Tilemap.color, x => Tilemap.color = x, ColorPalette.ColorDictionary[EColorType.FadeOut], _fadeSpeed);
+        DOTween.To(() => Tilemap.color, x => Tilemap.color = x, ColorPalette.ColorDictionary[EColorType.FadeOut], _fadeSpeed).SetUpdate(true);
     }
 
     private void FadeOut_Group()
@@ -62,7 +62,7 @@ public class TilemapFadeController : MonoBehaviour
                 
         foreach (Tilemap tile in TilemapList)
         {
-            DOTween.To(() => tile.color, x => tile.color = x, ColorPalette.ColorDictionary[EColorType.FadeOut], _fadeSpeed);
+            DOTween.To(() => tile.color, x => tile.color = x, ColorPalette.ColorDictionary[EColorType.FadeOut], _fadeSpeed).SetUpdate(true);
         }
     }
     

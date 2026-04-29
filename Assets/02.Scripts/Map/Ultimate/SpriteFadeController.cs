@@ -52,7 +52,7 @@ public class SpriteFadeController : MonoBehaviour
     }
     private void FadeOut()
     {
-        DOTween.To(() => MapSpriteRenderer.color, x => MapSpriteRenderer.color = x, ColorPalette.ColorDictionary[EColorType.FadeOut], _fadeSpeed);
+        DOTween.To(() => MapSpriteRenderer.color, x => MapSpriteRenderer.color = x, ColorPalette.ColorDictionary[EColorType.FadeOut], _fadeSpeed).SetUpdate(true);
     }
 
     private void FadeOut_Group()
@@ -60,7 +60,7 @@ public class SpriteFadeController : MonoBehaviour
                 
         foreach (SpriteRenderer tile in MapSpriteRendererList)
         {
-            DOTween.To(() => tile.color, x => tile.color = x, ColorPalette.ColorDictionary[EColorType.FadeOut], _fadeSpeed);
+            DOTween.To(() => tile.color, x => tile.color = x, ColorPalette.ColorDictionary[EColorType.FadeOut], _fadeSpeed).SetUpdate(true);
         }
     }
     
