@@ -56,8 +56,11 @@ public class UI_CartridgeGoods : MonoBehaviour
         }
         
         // 카트리지 적용
-        CartridgeInventoryManager.Instance.AddCartridge(_cartridgeData.ID);
-        RoomStatManager.Instance.ChangeGunpowder(-price);
-        return true;
+        if(CartridgeInventoryManager.Instance.AddCartridge(_cartridgeData.ID))
+        {
+            RoomStatManager.Instance.ChangeGunpowder(-price);
+            return true;
+        }
+        return false;
     }
 }

@@ -44,12 +44,18 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         PlayerEventManager.Instance.GetEvents(actorNumber).OnSpawned -= LoadFromCustomProperties;
     }
 
-    public void AddCartridge(string id)
+    public bool AddCartridge(string id)
     {
         if (string.IsNullOrEmpty(id))
         {
             Debug.LogError("카트리지 ID가 Null 혹은 비어있습니다.");
-            return;
+            return false;
+        }
+
+        if(_permanentCartridges.TryGetValue(id, out Cartridge existingPermanent))
+        {
+            Debug.Log($"이미 보유 중인 영구형 카트리지{id} 수리 시도.");
+            return existingPermanent.Repair();
         }
 
         Cartridge newCartridge = CartridgeFactory.Instance.GetCartridge(id);
@@ -65,6 +71,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         }
 
         SyncToCustomProperties();
+        return true;
     }
 
     public void RemoveCartridge(string id)
