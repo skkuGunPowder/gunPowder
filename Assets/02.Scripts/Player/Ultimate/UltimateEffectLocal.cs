@@ -32,7 +32,6 @@ public class UltimateEffectLocal : MonoBehaviour
     private void PlayEffect(string bomb, PhotonPlayer player)
     {
         DOTween.Kill(this);
-        StopAllCoroutines();
         
         foreach (PhotonView view in _playerList)
         {
@@ -65,19 +64,21 @@ public class UltimateEffectLocal : MonoBehaviour
     {
         SoundManager.Instance.PlayLocalSound(nameof(UltParticle_1), transform, 0f, false, SoundType.SFX, true, 0.5f, 0.5f);
 
-        StartCoroutine(TimeSlow());
+        TimeSlow();
     }
     
-    private IEnumerator TimeSlow()
+    private async UniTaskVoid TimeSlow()
     {
+        var ct = this.GetCancellationTokenOnDestroy();
         float time = 0;
+        
         EGameState state = GameManager.Instance.CurrentGameState;
         GameManager.Instance.GameStateChange(EGameState.Ultimate);
         
         while (time < UltiTime)
         {
             time += Time.unscaledDeltaTime;
-            yield return null;
+            await UniTask.Yield(ct);
         }
 
         if (state == EGameState.Tutorial)
