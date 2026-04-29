@@ -3,6 +3,7 @@ using UnityEngine;
 public abstract class Cartridge : MonoBehaviour, ICartridge
 {
     protected CartridgeData _data;
+    public CartridgeData Data => _data;
     protected int _currentDurability;
 
     public void Init(CartridgeData data)
@@ -11,9 +12,15 @@ public abstract class Cartridge : MonoBehaviour, ICartridge
         _currentDurability = _data.Durability;
     }
 
-    public void Repair()
+    public bool Repair()
     {
-        _currentDurability = _data.Durability;
+        if(_currentDurability >= _data.Durability)
+        {
+            Debug.LogWarning("카트리지의 내구도가 이미 최대입니다.");
+            return false;
+        }
+        _currentDurability ++;
+        return true;
     }
 
     public virtual void ExcuteGimmick(Player owner)
@@ -34,5 +41,10 @@ public abstract class Cartridge : MonoBehaviour, ICartridge
     public int GetCurrentDurability()
     {
         return _currentDurability;
+    }
+
+    public void SetCurrentDurability(int durability)
+    {
+        _currentDurability = durability;
     }
 }
