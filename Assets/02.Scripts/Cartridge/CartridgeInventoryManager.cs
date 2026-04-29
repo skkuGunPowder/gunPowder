@@ -6,11 +6,9 @@ using UnityEngine;
 public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManager>
 {
     // CartridgeData.Durability == 0 (슬롯 제한 X, 같은 ID 중복 구매로 count 누적)
-    // private readonly Dictionary<string, int> _consumableCartridges = new Dictionary<string, int>();
     private Dictionary<string, Cartridge> _consumableCartridges = new Dictionary<string, Cartridge>();
 
     // CartridgeData.Durability >= 1 (슬롯 제한 O, 구매 시 max로 충전)
-    // private readonly Dictionary<string, int> _permanentCartridges = new Dictionary<string, int>();
     private Dictionary<string, Cartridge> _permanentCartridges = new Dictionary<string, Cartridge>();
 
     private const string ConsumablePrefix = "C";
@@ -88,35 +86,6 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         }
     }
 
-    // 라운드 시작 시 효과를 받아야 할 카트리지 ID 목록 (count > 0)
-    // public IReadOnlyList<string> GetActiveCartridgeIds()
-    // {
-    //     if (!_loaded)
-    //     {
-    //         LoadFromCustomProperties();
-    //     }
-
-    //     List<string> ids = new List<string>();
-
-    //     foreach (KeyValuePair<string, int> kvp in _consumableCartridges)
-    //     {
-    //         if (kvp.Value > 0)
-    //         {
-    //             ids.Add(kvp.Key);
-    //         }
-    //     }
-
-    //     foreach (KeyValuePair<string, int> kvp in _permanentCartridges)
-    //     {
-    //         if (kvp.Value > 0)
-    //         {
-    //             ids.Add(kvp.Key);
-    //         }
-    //     }
-
-    //     return ids;
-    // }
-
     public int GetCount(string id)
     {
         if (_consumableCartridges.TryGetValue(id, out Cartridge consumable))
@@ -166,13 +135,15 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
     // 라운드 시작 시 한 번에 모든 카트리지 count -1 (한 번만 동기화)
     public void ConsumeAll(Player owner)
     {
-        foreach (Cartridge consumable in _consumableCartridges.Values)
+        List<Cartridge> consumables = new List<Cartridge>(_consumableCartridges.Values);
+        List<Cartridge> permanents = new List<Cartridge>(_permanentCartridges.Values);
+        foreach (Cartridge consumable in consumables)
         {
             if(!CheckCartridgeUsable(consumable)) continue;
             consumable.ExcuteGimmick(owner);
         }
 
-        foreach (Cartridge permanent in _permanentCartridges.Values)
+        foreach (Cartridge permanent in permanents)
         {
             if(!CheckCartridgeUsable(permanent)) continue;
             permanent.ExcuteGimmick(owner);
