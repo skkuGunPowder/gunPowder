@@ -27,13 +27,10 @@ public class CartridgeData
     public CartridgeData(JsonData json)
     {
         ID = json["CartridgeID"].ToString();
-        Debug.Log($"CARTRIDGE ID : {ID}");
         ImageAddress = json["ImageAddress"].ToString();
         ImageSprite = Addressables.LoadAssetAsync<Sprite>(ImageAddress).WaitForCompletion(); // TODO: 아직 어드레서블 이미지 없음
         Name = json["Name"].ToString();
-        Debug.Log($"CARTRIDGE Rarity : {Name}");
         Rarity = (CartridgeRarity)System.Enum.Parse(typeof(CartridgeRarity), json["Rarity"].ToString());
-        Debug.Log($"CARTRIDGE Rarity : {Rarity}");
         Durability = int.Parse(json["Durability"].ToString());
         Explanation = json["Explanation"].ToString();
         GimmickValues = ParseValue(json);
