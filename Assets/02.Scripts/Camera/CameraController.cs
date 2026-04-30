@@ -266,6 +266,12 @@ public class CameraController : MonoBehaviour
         
         SetTarget(player);
     }
+
+    public void CancelObserve()
+    {
+        _isObserving = false;
+        OnUIOnOff?.Invoke(false);
+    }
     
     private void OnDisable()
     {

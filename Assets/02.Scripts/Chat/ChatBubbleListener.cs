@@ -44,6 +44,11 @@ public class ChatBubbleListener : MonoBehaviour
 
     private void ShowBubble(string message)
     {
+        if (this.gameObject.activeSelf == false)
+        {
+            return;
+        }
+        
         // 이전 말풍선 삭제 (새 대사로 교체)
         if (_currentBubble != null) Destroy(_currentBubble);
 
