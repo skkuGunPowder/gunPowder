@@ -45,7 +45,7 @@ public class UI_RepairSlot : MonoBehaviour
         // 이미 수리했거나, 내구도가 최대이거나, 빚 상태면 버튼 비활성화
         bool canRepair = !_cartridge.IsRepairedThisTurn()
                          && currentDurability < maxDurability
-                         && RoomStatManager.Instance.CanChangeGP(0);
+                         && RoomStatManager.Instance.CanChangeGP(-repairCost);
         
         _repairButton.interactable = canRepair;
     }

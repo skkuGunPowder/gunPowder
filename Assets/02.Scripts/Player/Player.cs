@@ -91,14 +91,15 @@ public class Player : MonoBehaviourPun, IDamagable
     public BombStat ZSlotBombStat;
     public BombStat XSlotBombStat;
 
-    // 폭탄 쿨타임 감소
-    private List<(float value, OperationType type)> _zBombCooldownModifiers = new();
-    private List<(float value, OperationType type)> _xBombCooldownModifiers = new();
+    // 폭탄 쿨타임 감소 (id, value, type) — id는 시간제한 버프를 정확히 제거하기 위한 토큰
+    private List<(int id, float value, OperationType type)> _zBombCooldownModifiers = new();
+    private List<(int id, float value, OperationType type)> _xBombCooldownModifiers = new();
+    private int _nextCooldownModifierId = 1;
 
     public float ZSlotBombCoolTime => CalculateCooldown(ZSlotBombStat.CoolTime, _zBombCooldownModifiers);
     public float XSlotBombCoolTime => CalculateCooldown(XSlotBombStat.CoolTime, _xBombCooldownModifiers);
 
-    private float CalculateCooldown(float baseValue, List<(float value, OperationType type)> modifiers)
+    private float CalculateCooldown(float baseValue, List<(int id, float value, OperationType type)> modifiers)
     {
         float additiveSum = 0f;
         float multiplicativeProduct = 1f;
@@ -111,6 +112,9 @@ public class Player : MonoBehaviourPun, IDamagable
         }
         return Mathf.Max(0f, (baseValue + additiveSum) * multiplicativeProduct);
     }
+
+    // 기본폭탄 궁극기 버프 만료용 취소 토큰
+    private System.Threading.CancellationTokenSource _basicBombBuffCts;
 
     // 쿨타임 체크용 변수
     private float _lastZSlotBombTime = -999f;
@@ -307,6 +311,14 @@ public class Player : MonoBehaviourPun, IDamagable
 
         // 시각 효과 정리
         _visualController?.OnOwnerDestroy();
+
+        // 기본폭탄 궁극기 버프 타이머 정리
+        if (_basicBombBuffCts != null)
+        {
+            _basicBombBuffCts.Cancel();
+            _basicBombBuffCts.Dispose();
+            _basicBombBuffCts = null;
+        }
     }
 
     // 죽음 파츠 초기화 및 관리 로직은 PlayerVisualController로 이동
@@ -1287,19 +1299,35 @@ public class Player : MonoBehaviourPun, IDamagable
         _lastXSlotBombTime = AttackTimer;
     }
 
-    public void BombCooldownReduction(BombSlot slot, float value, OperationType type)
+    public int BombCooldownReduction(BombSlot slot, float value, OperationType type)
     {
+        int id = _nextCooldownModifierId++;
         switch (slot)
         {
             case BombSlot.ZSlot:
-                _zBombCooldownModifiers.Add((value, type));
+                _zBombCooldownModifiers.Add((id, value, type));
                 break;
             case BombSlot.XSlot:
-                _xBombCooldownModifiers.Add((value, type));
+                _xBombCooldownModifiers.Add((id, value, type));
                 break;
             default:
                 Debug.Log("[Player BombCooldownReduction] 해당 슬롯이 없습니다");
+                return -1;
+        }
+        return id;
+    }
+
+    public void RemoveBombCooldownModifier(BombSlot slot, int id)
+    {
+        if (id < 0) return;
+        List<(int id, float value, OperationType type)> list = slot == BombSlot.ZSlot ? _zBombCooldownModifiers : _xBombCooldownModifiers;
+        for (int i = list.Count - 1; i >= 0; i--)
+        {
+            if (list[i].id == id)
+            {
+                list.RemoveAt(i);
                 break;
+            }
         }
     }
 
@@ -1308,6 +1336,50 @@ public class Player : MonoBehaviourPun, IDamagable
     {
         _zBombCooldownModifiers.Clear();
         _xBombCooldownModifiers.Clear();
+    }
+
+    // 기본폭탄(BO0001) 궁극기 효과: 기본폭탄이 든 슬롯에만 쿨타임 감소를 일정 시간 적용
+    public void ApplyBasicBombCooldownBuff(float value, OperationType type, float duration)
+    {
+        bool zIsBasic = EquipedItemDict.TryGetValue(EItemType.Bomb, out ItemDTO z) && z != null && z.ID == BASIC_BOMB_ID;
+
+        bool xIsBasic;
+        if (EquipedItemDict.TryGetValue(EItemType.SubBomb, out ItemDTO sub) && sub != null)
+        {
+            xIsBasic = sub.ID == BASIC_BOMB_ID;
+        }
+        else
+        {
+            // SubBomb 미장착 시 X슬롯은 메인폭탄으로 fallback (Player.cs LoadItems 규칙)
+            xIsBasic = zIsBasic;
+        }
+
+        int zId = zIsBasic ? BombCooldownReduction(BombSlot.ZSlot, value, type) : -1;
+        int xId = xIsBasic ? BombCooldownReduction(BombSlot.XSlot, value, type) : -1;
+
+        if (zId == -1 && xId == -1) return;
+
+        if (_basicBombBuffCts != null)
+        {
+            _basicBombBuffCts.Cancel();
+            _basicBombBuffCts.Dispose();
+        }
+        _basicBombBuffCts = new System.Threading.CancellationTokenSource();
+        RemoveBasicBombCooldownBuffAfter(zId, xId, duration, _basicBombBuffCts.Token).Forget();
+    }
+
+    private async UniTask RemoveBasicBombCooldownBuffAfter(int zId, int xId, float duration, System.Threading.CancellationToken ct)
+    {
+        try
+        {
+            await UniTask.Delay(System.TimeSpan.FromSeconds(duration), cancellationToken: ct);
+        }
+        catch (System.OperationCanceledException)
+        {
+            return;
+        }
+        if (zId != -1) RemoveBombCooldownModifier(BombSlot.ZSlot, zId);
+        if (xId != -1) RemoveBombCooldownModifier(BombSlot.XSlot, xId);
     }
 
     // 히트스탑 중에 받은 속도를 저장
