@@ -1,5 +1,9 @@
+using UnityEngine;
+
 public class BombSelectTimer : TimerBase
 {
+    [SerializeField] private string _remainTime;
+    
     protected override void TimeChange(int time)
     {
         if (time <= 0)
@@ -14,7 +18,6 @@ public class BombSelectTimer : TimerBase
     
     protected override string ConvertTime(int time)
     {
-        string remain = $"폭탄 선택까지 {time}초 남았습니다.";
-        return remain;
+        return string.Format(_remainTime, time);
     }
 }

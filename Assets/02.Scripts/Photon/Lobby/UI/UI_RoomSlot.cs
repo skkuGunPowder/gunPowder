@@ -80,7 +80,8 @@ public class UI_RoomSlot : MonoBehaviour
         if (_roomInfo.PlayerCount >= _roomInfo.MaxPlayers)
         {
             UI_MessagePopup message = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
-            message.Init("방이 가득 찼습니다", false);
+            //message.Init("방이 가득 찼습니다", false);
+            message.Init("ルームが満員です。", false);
             return;
         }
         
