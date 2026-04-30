@@ -58,6 +58,9 @@ public class ItemStorage : DontDestroySingleton<ItemStorage>
                 {
                     _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0001")));
                     _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0005")));
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0007")));
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0011")));
+                    _storedItemDict[EItemType.Bomb].Add(new InventoryItem(ItemDatabase.Instance.GetItem("BO0018")));
                     CurrencyManager.Instance.AddCurrency(ECurrencyType.Gold, 1000); // 시작 골드 지급
                     CurrencyManager.Instance.AddCurrency(ECurrencyType.Diamond, 50); // 시작 다이아 지급
                 }

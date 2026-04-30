@@ -108,6 +108,7 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
             return;
         }
 
+        _selected = true; // 구매 직후 즉시 잠금
         _shopPopup.RequestSelectCartridge(_slotNumber);
     }
 

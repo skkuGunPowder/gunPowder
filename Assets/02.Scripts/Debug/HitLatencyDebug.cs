@@ -21,7 +21,7 @@ public static class HitLatencyDebug
     {
         if (!Enabled) return;
         _attackerExplodeTime[attackerViewId] = Time.realtimeSinceStartupAsDouble;
-        Debug.Log($"[HitLatency] T0 Bomb.Explode (attacker {attackerViewId})");
+        // Debug.Log($"[HitLatency] T0 Bomb.Explode (attacker {attackerViewId})");
     }
 
     public static void LogStage(int attackerViewId, string stage)
@@ -30,7 +30,7 @@ public static class HitLatencyDebug
         if (_attackerExplodeTime.TryGetValue(attackerViewId, out double t0))
         {
             double dtMs = (Time.realtimeSinceStartupAsDouble - t0) * 1000.0;
-            Debug.Log($"[HitLatency] +{dtMs:F1}ms {stage} (attacker {attackerViewId})");
+            // Debug.Log($"[HitLatency] +{dtMs:F1}ms {stage} (attacker {attackerViewId})");
         }
     }
 }

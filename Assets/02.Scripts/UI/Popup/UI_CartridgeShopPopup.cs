@@ -52,7 +52,7 @@ public class UI_CartridgeShopPopup : UI_Popup
     {
         for (int i = 0; i < ids.Length; i++)
         {
-            Debug.Log("cartridge id" + ids[i]);
+            // Debug.Log("cartridge id" + ids[i]);
             CartridgeData data = CartridgeFactory.Instance.GetCartridgeData(ids[i]);
             if (data == null)
             {
@@ -134,6 +134,11 @@ public class UI_CartridgeShopPopup : UI_Popup
         {
             _cartridgeActionList[index].PlayExitAnimation();
         }
+    }
+
+    private void OnDisable()
+    {
+        PopupManager.Instance.Close(EPopupType.UI_RepairPopup);
     }
 
     private void OnDestroy()

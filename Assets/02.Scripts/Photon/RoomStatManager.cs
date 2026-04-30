@@ -55,6 +55,10 @@ public class RoomStatManager : Singleton<RoomStatManager>
 
     }
 
+    public bool CanChangeGP(int gp)
+    {
+        return PlayerGunpowder + gp >= 0;
+    }
     public void ChangeGunpowder(int myGunpowder)
     {
         PlayerGunpowder += myGunpowder;
@@ -72,6 +76,7 @@ public class RoomStatManager : Singleton<RoomStatManager>
             { EProperties.GP.ToString(), PlayerGunpowder }
         });
     }
+    
     public int GetGunpowder()
     {
         if (_initialized == false)
