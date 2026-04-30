@@ -7,12 +7,12 @@ public class UI_CartridgeGoods : MonoBehaviour
     [SerializeField] private Image _iconImage;
     [SerializeField] private TextMeshProUGUI _title;
     [SerializeField] private TextMeshProUGUI _explanation;
-    [SerializeField] private TextMeshProUGUI _price;
+    [SerializeField] private TextMeshProUGUI _priceText;
     
     [SerializeField] private UI_Gradient _gradient;
     
      private CartridgeData _cartridgeData;
-
+     private int _price;
      private void Awake()
      {
          if (_gradient == null)
@@ -34,7 +34,7 @@ public class UI_CartridgeGoods : MonoBehaviour
         _iconImage.sprite = data.ImageSprite;
         _title.text = data.Name;
         _explanation.text = data.Explanation;
-        _price.text = $"{data.GetPrice().ToString()} GP";
+        _priceText.text = $"{data.GetPrice().ToString()} GP";
         SetColor();
     }
 
@@ -47,16 +47,15 @@ public class UI_CartridgeGoods : MonoBehaviour
     }
     public bool CanBuy()
     {
-        int currentGP = RoomStatManager.Instance.PlayerGunpowder;
         int price = _cartridgeData.GetPrice();
-        
-        if (price > currentGP)
+
+        if (!RoomStatManager.Instance.CanChangeGP(-price))
         {
             return false;
         }
-        
+
         // 카트리지 적용
-        if(CartridgeInventoryManager.Instance.AddCartridge(_cartridgeData.ID))
+        if (CartridgeInventoryManager.Instance.AddCartridge(_cartridgeData.ID))
         {
             RoomStatManager.Instance.ChangeGunpowder(-price);
             return true;

@@ -5,4 +5,5 @@ public enum GimmickType
     AirDropSpawner,
     RotationPlatform,
     ValleyBall,
+    RacingCar,
 }

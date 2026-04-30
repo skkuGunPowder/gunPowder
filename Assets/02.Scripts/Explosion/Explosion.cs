@@ -65,7 +65,7 @@ public class Explosion : MonoBehaviour
                 }
                 
                 int damage = _stat.AttackPower;
-                if(!attackerPlayer.IsAlwaysMaxDamage)
+                if(attackerPlayer == null || !attackerPlayer.IsAlwaysMaxDamage)
                 {
                     damage = DamagePerDistance(other, otherRigidBody, transform.position, _stat.ExplosionRadius, _stat.AttackPower);
                 }

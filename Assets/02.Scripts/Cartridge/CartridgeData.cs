@@ -28,7 +28,7 @@ public class CartridgeData
     {
         ID = json["CartridgeID"].ToString();
         ImageAddress = json["ImageAddress"].ToString();
-        // ImageSprite = Addressables.LoadAssetAsync<Sprite>(ImageAddress).WaitForCompletion(); // TODO: 아직 어드레서블 이미지 없음
+        ImageSprite = Addressables.LoadAssetAsync<Sprite>(ImageAddress).WaitForCompletion(); // TODO: 아직 어드레서블 이미지 없음
         Name = json["Name"].ToString();
         Rarity = (CartridgeRarity)System.Enum.Parse(typeof(CartridgeRarity), json["Rarity"].ToString());
         Durability = int.Parse(json["Durability"].ToString());
@@ -92,14 +92,39 @@ public class CartridgeData
     {
         switch (Rarity)
         {
-            case CartridgeRarity.Common : 
+            case CartridgeRarity.Common :
                 return 20;
             case CartridgeRarity.Rare:
                 return 30;
             case CartridgeRarity.Epic:
                 return 45;
         }
-        
+
         return 0;
+    }
+
+    // repairCount: 현재까지 수리한 횟수 (수리 전 기준)
+    public int GetRepairCost(int repairCount)
+    {
+        int baseCost;
+        int increment;
+        switch (Rarity)
+        {
+            case CartridgeRarity.Common:
+                baseCost = 10;
+                increment = 5;
+                break;
+            case CartridgeRarity.Rare:
+                baseCost = 15;
+                increment = 10;
+                break;
+            case CartridgeRarity.Epic:
+                baseCost = 20;
+                increment = 15;
+                break;
+            default:
+                return 0;
+        }
+        return baseCost + repairCount * increment;
     }
 }

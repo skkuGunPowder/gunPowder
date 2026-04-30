@@ -182,6 +182,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         PhotonNetwork.LocalPlayer.SetCustomProperties(props);
     }
 
+    // 내부 수리 (AddCartridge에서 구매 가격으로 처리되는 경로)
     public bool Repair(string id)
     {
         if (_consumableCartridges.ContainsKey(id))
@@ -192,12 +193,59 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
 
         if (_permanentCartridges.TryGetValue(id, out Cartridge permanent))
         {
-            if(!permanent.Repair()) return false;
+            if (!permanent.Repair()) return false;
             SyncToCustomProperties();
             return true;
         }
 
         return false;
+    }
+
+    // 수리 팝업에서 호출 — 빚 체크, GP 차감 포함
+    public bool TryRepairWithCost(string id)
+    {
+        if (_consumableCartridges.ContainsKey(id))
+        {
+            Debug.LogError($"소모형 카트리지{id}는 수리가 불가능합니다.");
+            return false;
+        }
+
+        if (!_permanentCartridges.TryGetValue(id, out Cartridge permanent))
+        {
+            return false;
+        }
+
+        if (RoomStatManager.Instance.PlayerGunpowder < 0)
+        {
+            Debug.LogWarning("빚이 있는 상태에서는 수리할 수 없습니다.");
+            return false;
+        }
+
+        int repairCost = permanent.Data.GetRepairCost(permanent.GetRepairCount());
+        if (!RoomStatManager.Instance.CanChangeGP(-repairCost))
+        {
+            Debug.LogWarning("GP가 부족하여 수리할 수 없습니다.");
+            return false;
+        }
+
+        if (!permanent.Repair()) return false;
+
+        RoomStatManager.Instance.ChangeGunpowder(-repairCost);
+        SyncToCustomProperties();
+        return true;
+    }
+
+    public void ResetTurnRepairFlags()
+    {
+        foreach (KeyValuePair<string, Cartridge> kvp in _permanentCartridges)
+        {
+            kvp.Value.ResetTurnRepairFlag();
+        }
+    }
+
+    public Dictionary<string, Cartridge> GetPermanentCartridges()
+    {
+        return _permanentCartridges;
     }
 
     private void SyncToCustomProperties()
@@ -216,7 +264,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
 
         foreach (KeyValuePair<string, Cartridge> kvp in _permanentCartridges)
         {
-            serialized.Add($"{PermanentPrefix}{EntrySeparator}{kvp.Key}{EntrySeparator}{kvp.Value.GetCurrentDurability()}");
+            serialized.Add($"{PermanentPrefix}{EntrySeparator}{kvp.Key}{EntrySeparator}{kvp.Value.GetCurrentDurability()}{EntrySeparator}{kvp.Value.GetRepairCount()}");
         }
 
         Hashtable props = new Hashtable
@@ -256,7 +304,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             }
 
             string[] tokens = entry.Split(EntrySeparator);
-            if (tokens.Length != 3)
+            if (tokens.Length < 3)
             {
                 continue;
             }
@@ -278,6 +326,10 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             {
                 _permanentCartridges.Add(id, CartridgeFactory.Instance.GetCartridge(id));
                 _permanentCartridges[id].SetCurrentDurability(count);
+                if (tokens.Length >= 4 && int.TryParse(tokens[3], out int repairCount))
+                {
+                    _permanentCartridges[id].SetRepairCount(repairCount);
+                }
             }
         }
     }
