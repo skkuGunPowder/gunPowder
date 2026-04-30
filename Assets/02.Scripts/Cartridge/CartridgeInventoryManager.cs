@@ -243,6 +243,20 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         }
     }
 
+    public int GetDiscountedPrice(string id)
+    {
+        CartridgeData data = CartridgeFactory.Instance.GetCartridgeData(id);
+        int basePrice = data.GetPrice();
+
+        // 이미 보유 중인 카트리지는 반값
+        if (_permanentCartridges.ContainsKey(id) || _consumableCartridges.ContainsKey(id))
+        {
+            return basePrice / 2;
+        }
+
+        return basePrice;
+    }
+
     public Dictionary<string, Cartridge> GetPermanentCartridges()
     {
         return _permanentCartridges;

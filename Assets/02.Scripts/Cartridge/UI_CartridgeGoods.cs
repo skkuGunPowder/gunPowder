@@ -34,7 +34,8 @@ public class UI_CartridgeGoods : MonoBehaviour
         _iconImage.sprite = data.ImageSprite;
         _title.text = data.Name;
         _explanation.text = data.Explanation;
-        _priceText.text = $"{data.GetPrice().ToString()} GP";
+        _price = CartridgeInventoryManager.Instance.GetDiscountedPrice(data.ID);
+        _priceText.text = $"{_price} GP";
         SetColor();
     }
 
@@ -47,9 +48,7 @@ public class UI_CartridgeGoods : MonoBehaviour
     }
     public bool CanBuy()
     {
-        int price = _cartridgeData.GetPrice();
-
-        if (!RoomStatManager.Instance.CanChangeGP(-price))
+        if (!RoomStatManager.Instance.CanChangeGP(-_price))
         {
             return false;
         }
@@ -57,7 +56,7 @@ public class UI_CartridgeGoods : MonoBehaviour
         // 카트리지 적용
         if (CartridgeInventoryManager.Instance.AddCartridge(_cartridgeData.ID))
         {
-            RoomStatManager.Instance.ChangeGunpowder(-price);
+            RoomStatManager.Instance.ChangeGunpowder(-_price);
             return true;
         }
         return false;
