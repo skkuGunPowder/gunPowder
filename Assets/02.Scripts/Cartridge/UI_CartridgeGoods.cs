@@ -59,6 +59,7 @@ public class UI_CartridgeGoods : MonoBehaviour
             RoomStatManager.Instance.ChangeGunpowder(-_price);
             return true;
         }
+        
         return false;
     }
 }

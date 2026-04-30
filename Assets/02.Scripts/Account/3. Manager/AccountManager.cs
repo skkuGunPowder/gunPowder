@@ -46,16 +46,19 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         AccountDTO accountDTO = await _accountRepository.GetAccount(account);
         if(accountDTO != null)
         {
-            return new Result(false, "이미 가입한 이메일입니다.");
+            //return new Result(false, "이미 가입한 이메일입니다.");
+            return new Result(false, "このメールアドレスはすでに登録されています。");
         }
 
         if(await _accountRepository.TryAddAccount(account))
         {
-            return new Result(true, "회원가입에 성공하였습니다.");
+            //return new Result(true, "회원가입에 성공하였습니다.");
+            return new Result(true, "会員登録に成功しました。");
         }
         else
         {
-            return new Result(false, "회원가입에 실패하였습니다");
+            //return new Result(false, "회원가입에 실패하였습니다.");
+            return new Result(false, "会員登録に失敗しました。");
         }
     }
 
@@ -77,7 +80,8 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         if (accountDTO == null)
         {
             Debug.LogError("로그인 실패");
-            return new Result(false, "로그인에 실패하였습니다");
+            //return new Result(false, "로그인에 실패하였습니다.");
+            return new Result(false, "ログインに失敗しました。");
         }
 
 
@@ -96,7 +100,8 @@ public class AccountManager : DontDestroySingleton<AccountManager>
             accountDTO.Account_Flags
         );
         
-        return new Result(true, "로그인 성공!");
+        //return new Result(true, "로그인 성공!");
+        return new Result(true, "ログイン成功！");
     }
 
     // 1. 이메일 인증 메일 발송 (임시 계정 생성)
@@ -105,16 +110,19 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         // 이메일 중복 체크
         if (await _accountRepository.IsEmailExists(email))
         {
-            return new Result(false, "이미 존재하는 이메일입니다.");
+            //return new Result(false, "이미 존재하는 이메일입니다.");
+            return new Result(false, "このメールアドレスはすでに存在します。");
         }
 
         // 임시 비밀번호 생성 (보안상 실제 서비스에서는 더 복잡하게)
         string tempPassword = System.Guid.NewGuid().ToString().Substring(0, 8);
         bool sent = await _accountRepository.SendEmailVerification(email, tempPassword);
         if (sent)
-            return new Result(true, "인증 메일이 발송되었습니다. 이메일을 확인하세요.");
+            //return new Result(true, "인증 메일이 발송되었습니다. 이메일을 확인하세요.");
+            return new Result(true, "認証メールを送信しました。メールを確認してください。");
         else
-            return new Result(false, "인증 메일 발송에 실패하였습니다.");
+            //return new Result(false, "인증 메일 발송에 실패하였습니다.");
+            return new Result(false, "認証メールの送信に失敗しました。");
     }
 
     // 2. 이메일 인증 여부 확인
@@ -122,9 +130,11 @@ public class AccountManager : DontDestroySingleton<AccountManager>
     {
         bool verified = await _accountRepository.IsEmailVerified();
         if (verified)
-            return new Result(true, "이메일 인증이 완료되었습니다.");
+            //return new Result(true, "이메일 인증이 완료되었습니다.");
+            return new Result(true, "メール認証が完了しました。");
         else
-            return new Result(false, "아직 이메일 인증이 완료되지 않았습니다.");
+            //return new Result(false, "아직 이메일 인증이 완료되지 않았습니다.");
+            return new Result(false, "メール認証がまだ完了していません。");
     }
 
     // 3. 비밀번호/닉네임 설정 및 회원가입 완료
@@ -134,13 +144,15 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         bool updated = await _accountRepository.UpdatePassword(encryptedPassword);
         if (!updated)
         {
-            return new Result(false, "비밀번호 설정에 실패하였습니다.");
+            //return new Result(false, "비밀번호 설정에 실패하였습니다.");
+            return new Result(false, "パスワードの設定に失敗しました。");
         }
 
         // 뒤끝 회원가입
         _backendLogin.CustomSignUp(email, encryptedPassword);
 
-        return new Result(true, "회원가입이 완료되었습니다.");
+        //return new Result(true, "회원가입이 완료되었습니다.");
+        return new Result(true, "会員登録が完了しました。");
     }
 
     // 닉네임 설정
@@ -156,7 +168,8 @@ public class AccountManager : DontDestroySingleton<AccountManager>
         Result backendResult = _backendLogin.UpdateNickName(nickname);
         
         if (firebaseUpdated && backendResult.IsSuccess)
-            return new Result(true, "닉네임이 저장되었습니다.");
+            //return new Result(true, "닉네임이 저장되었습니다.");
+            return new Result(true, "ニックネームを保存しました。");
         else
             return new Result(false, $"{backendResult.Message}");
     }

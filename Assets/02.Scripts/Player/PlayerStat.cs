@@ -129,8 +129,8 @@ public class PlayerStat : MonoBehaviour
     [Header("궁극기 게이지 시스템")]
     [SerializeField] private float _currentUltimateGauge = 0f;
     [SerializeField] private float _maxUltimateGauge = 100f;
-    private const float ULTIMATE_GAUGE_RATE_ON_GP_GAIN = 0.3f;  // 획득 GP의 30%
-    private const float ULTIMATE_GAUGE_RATE_ON_GP_LOSS = 0.5f;  // 잃은 GP의 50%
+    private const float ULTIMATE_GAUGE_RATE_ON_DAMAGE_DEALT = 0.3f;  // 주는 데미지의 30%
+    private const float ULTIMATE_GAUGE_RATE_ON_DAMAGE_TAKEN = 0.5f;  // 받는 데미지의 50%
 
     public float CurrentUltimateGauge => _currentUltimateGauge;
     public float MaxUltimateGauge => _maxUltimateGauge;
@@ -294,9 +294,6 @@ public class PlayerStat : MonoBehaviour
 
         _currentHP += amount;
 
-        // GP 획득에 의한 궁극기 게이지 충전 (획득량의 30%)
-        ChargeUltimateOnGPGain(amount);
-
         _photonView.RPC(nameof(RPC_ChangeHP), RpcTarget.All, _currentHP,
             _currentPlayerLife, 0);
         OnHPIncreased?.Invoke(amount);
@@ -392,8 +389,18 @@ public class PlayerStat : MonoBehaviour
         RecordLastAttacker(attacker);
         _lastIsNormalAttack = isNormalAttack;
 
-        // GP 손실에 의한 궁극기 게이지 충전 (손실량의 50%)
-        ChargeUltimateOnGPLoss(amount);
+        // 받는 데미지에 의한 피격자 궁극기 게이지 충전 (데미지의 50%)
+        ChargeUltimateOnDamageTaken(amount);
+
+        // 주는 데미지에 의한 공격자 궁극기 게이지 충전 (데미지의 30%)
+        if (attacker != _photonView.OwnerActorNr && attacker > 0)
+        {
+            PhotonView attackerView = FindAttackerPhotonView(attacker);
+            if (attackerView != null && attackerView.Owner != null)
+            {
+                attackerView.RPC(nameof(RPC_ChargeUltimateOnDamageDealt), attackerView.Owner, amount);
+            }
+        }
 
         if (_currentHP <= 0)
         {
@@ -601,21 +608,28 @@ public class PlayerStat : MonoBehaviour
     }
 
     /// <summary>
-    /// GP 획득 시 궁극기 게이지 충전 (획득량의 30%)
+    /// 데미지를 입혔을 때 공격자 궁극기 게이지 충전 (데미지의 30%)
     /// </summary>
-    public void ChargeUltimateOnGPGain(int gpAmount)
+    public void ChargeUltimateOnDamageDealt(int damage)
     {
-        if (gpAmount <= 0) return;
-        IncreaseUltimateGauge(gpAmount * ULTIMATE_GAUGE_RATE_ON_GP_GAIN);
+        if (damage <= 0) return;
+        IncreaseUltimateGauge(damage * ULTIMATE_GAUGE_RATE_ON_DAMAGE_DEALT);
     }
 
     /// <summary>
-    /// GP 손실 시 궁극기 게이지 충전 (손실량의 50%)
+    /// 데미지를 입었을 때 피격자 궁극기 게이지 충전 (데미지의 50%)
     /// </summary>
-    public void ChargeUltimateOnGPLoss(int gpAmount)
+    public void ChargeUltimateOnDamageTaken(int damage)
     {
-        if (gpAmount <= 0) return;
-        IncreaseUltimateGauge(gpAmount * ULTIMATE_GAUGE_RATE_ON_GP_LOSS);
+        if (damage <= 0) return;
+        IncreaseUltimateGauge(damage * ULTIMATE_GAUGE_RATE_ON_DAMAGE_TAKEN);
+    }
+
+    [PunRPC]
+    public void RPC_ChargeUltimateOnDamageDealt(int damage)
+    {
+        if (!_photonView.IsMine) return;
+        ChargeUltimateOnDamageDealt(damage);
     }
 
     // 플레이어 상태 관리 메서드
