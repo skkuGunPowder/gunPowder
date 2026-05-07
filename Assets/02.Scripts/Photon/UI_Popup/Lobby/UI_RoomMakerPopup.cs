@@ -40,7 +40,7 @@ public class UI_RoomMakerPopup : UI_Popup
         {
             UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
             //popup.Init("방 이름은 3글자 이상이어야합니다.", false);
-            popup.Init("ルーム名は3文字以上で入力してください。", false);
+            popup.Init("TX0109", false);
             return;
         }
         
