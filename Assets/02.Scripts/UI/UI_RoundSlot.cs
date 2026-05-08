@@ -167,7 +167,6 @@ public class UI_RoundSlot : MonoBehaviour
         if (_scoreChange == false)
         {
             // 우승이 아닌팀은 대기
-            Debug.Log("defeat");
             float waitTime = _shakeInterval + _shakeDuration + _scaleoffDuration + _scaleDuration + _interval;
             Sequence seq = DOTween.Sequence();
             seq.AppendInterval(waitTime);
@@ -175,7 +174,6 @@ public class UI_RoundSlot : MonoBehaviour
             return;
         }
         
-        Debug.Log("winner");
         // 우승팀은 점수 변경
         Sequence  mySequence = DOTween.Sequence();
         mySequence.AppendInterval(_shakeInterval);

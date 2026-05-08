@@ -76,6 +76,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             _permanentCartridges.Add(id, newCartridge);
         }
 
+        Debug.Log($"[AddCartridge] 호출 - ID: {id}, 현재 소모형 보유: {_consumableCartridges.Count}, 현재 영구형 보유: {_permanentCartridges.Count}");
         SyncToCustomProperties();
         return true;
     }

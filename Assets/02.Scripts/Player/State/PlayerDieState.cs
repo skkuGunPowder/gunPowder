@@ -394,7 +394,6 @@ public class PlayerDieState : PlayerBaseState
     /// </summary>
     private void TransitionToObserveState()
     {
-        Debug.Log("Observe");
         SyncStateChange<PlayerObserveState>();
     }
 

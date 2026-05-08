@@ -48,6 +48,7 @@ public class UI_CartridgeGoods : MonoBehaviour
     }
     public bool CanBuy()
     {
+        Debug.Log($"[CanBuy] 구매 시도 - ID: {_cartridgeData.ID}, 가격: {_price}, 현재 GP: {RoomStatManager.Instance.PlayerGunpowder}");
         if (!RoomStatManager.Instance.CanChangeGP(-_price))
         {
             return false;

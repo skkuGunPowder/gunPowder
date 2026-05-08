@@ -98,6 +98,7 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnClickButton()
     {
+        Debug.Log($"[CartridgeAction] OnClickButton 호출 - _selected: {_selected}, SlotNumber: {_slotNumber}");
         if (_selected)
         {
             return;
