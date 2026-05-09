@@ -74,15 +74,20 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     /// </summary>
     public override void OnPlayerPropertiesUpdate(PhotonPlayer targetPlayer ,Hashtable changedProps)
     {
+        if (changedProps.ContainsKey(EProperties.Cartridges.ToString()))
+        {
+            EventManager.Instance.CartridgesChanged(targetPlayer);
+        }
+
         if (GameManager.Instance.CurrentGameState == EGameState.Waiting || GameManager.Instance.CurrentGameState == EGameState.GameOver)
         {
             return;
         }
-        
+
         if (changedProps.ContainsKey(EItemType.Bomb.ToString()) || changedProps.ContainsKey(EItemType.SubBomb.ToString()))
         {
             EventManager.Instance.ReadyChange(targetPlayer);
-            
+
             // 처음 폭탄 선택에서 발생 예정
             if (targetPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {

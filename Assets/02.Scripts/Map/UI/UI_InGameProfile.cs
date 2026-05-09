@@ -83,7 +83,8 @@ public class UI_InGameProfile : MonoBehaviour
                 
                 UI_InGameProfileSlotList[i].gameObject.SetActive(true);
                 // 후에 수정
-                UI_InGameProfileSlotList[i].Init(bomb, subImage,team, reorderedPlayers[i], RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, gp);
+                UI_InGameProfileSlotList[i].Init(bomb, subImage, team, reorderedPlayers[i], RoomStatManager.PlayerHP,
+                    RoomStatManager.Instance.PlayerLife, gp);
                 _playerActorNumberList.Add(reorderedPlayers[i].ActorNumber);
 
                 // 궁극기 게이지 바: 로컬 플레이어(index 0)만 활성화
@@ -163,6 +164,18 @@ public class UI_InGameProfile : MonoBehaviour
         }
     }
 
+    private void RefreshCartridges(PhotonPlayer player)
+    {
+        for (int i = 0; i < _playerActorNumberList.Count; i++)
+        {
+            if (_playerActorNumberList[i] == player.ActorNumber)
+            {
+                UI_InGameProfileSlotList[i].RefreshCartridges(player);
+                break;
+            }
+        }
+    }
+
     private void PlayerBombChange(PhotonPlayer changedPlayer)
     {
         string bombKey = EItemType.Bomb.ToString();
@@ -202,9 +215,10 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnDataChanged += Refresh;
             EventManager.Instance.OnGPDataChanged += RefreshGP;
             EventManager.Instance.OnTopPlayerChanged += SetTopPlayer;
-            EventManager.Instance.OnProfileInit += Init;   
+            EventManager.Instance.OnProfileInit += Init;
             EventManager.Instance.OnPlayerLeft += PlayerLeftRefresh;
             EventManager.Instance.OnReadyChanged += PlayerBombChange;
+            EventManager.Instance.OnCartridgesChanged += RefreshCartridges;
             Debug.Log("SubscribeEvents");       
         }
     }
@@ -220,6 +234,7 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnPlayerLeft -= PlayerLeftRefresh;
             EventManager.Instance.OnProfileInit -= Init;
             EventManager.Instance.OnReadyChanged -= PlayerBombChange;
+            EventManager.Instance.OnCartridgesChanged -= RefreshCartridges;
             Debug.Log("UnsubscribeEvents");
         }
     }
