@@ -46,7 +46,6 @@ public class Explosion : MonoBehaviour
                     {
                         continue;
                     }
-                    Debug.Log($"[넉백 로그] AddExplosionForce2D 진입 전 ExplodePower : {_stat.ExplosivePower}, Radius : {_stat.ExplosionRadius}");
                     AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
                 }
                 else

@@ -11,8 +11,8 @@ public class UI_ItemDetail : MonoBehaviour
     [Header("아이템 스펙 패널")]
     public GameObject ItemSpecPanel;
     public TextMeshProUGUI AttackPointText;
-    public TextMeshProUGUI CostText;
-    public TextMeshProUGUI PriorityText;
+    public TextMeshProUGUI StealPercentText;
+    public TextMeshProUGUI CooltimeText;
     public Slider ExlposionRadiusSlider;
 
     [SerializeField] private InventoryItem _selectedItem;
@@ -49,8 +49,8 @@ public class UI_ItemDetail : MonoBehaviour
 
             AttackPointText.text = $"{explosionStat.AttackPower}";
             ExlposionRadiusSlider.value = explosionStat.ExplosionRadius;
-            PriorityText.text = $"{bombStat.FuzeTime}";
-            CostText.text = $"{bombStat.Cost}";
+            CooltimeText.text = $"{bombStat.CoolTime}s";
+            StealPercentText.text = $"{explosionStat.StealPercent}%";
         }
         else
         {

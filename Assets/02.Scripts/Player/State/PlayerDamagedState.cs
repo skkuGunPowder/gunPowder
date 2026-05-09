@@ -122,8 +122,6 @@ public class PlayerDamagedState : PlayerBaseState
         // 건파우더 비율에 따른 히트스탑 시간 계산
         CalculateHitStopDuration();
 
-        Debug.Log($"[피격시스템] InitializeHitStop: 히트스탑 시간={_currentHitStopDuration:F2}s, 체력비율={CalculateCurrentHealthRatio():F2}");
-
         // 플레이어 정지 (폭발 정보는 Player에 별도 저장됨)
         FreezePlayer();
 
@@ -151,9 +149,7 @@ public class PlayerDamagedState : PlayerBaseState
         SetImmuneState(true);
         _isImmuneActive = true;
         _immuneTime = _actualDamagedTime * IMMUNE_TIME_RATIO;
-        Debug.Log($"[immuneTime] : {_immuneTime}");
-         Debug.Log($"[피격시스템] InitializeDamaged: 피격시간={_actualDamagedTime:F2}s (MaxStunTime={_owner.LastMaxStunTime:F2}s × damageRatio={_owner.LastDamageRatio:F2}), 무적시간={_immuneTime:F2}s (25%)");
-
+        
         // 넉백이 활성화되어 있을 때만 넉백 효과 적용
         if (_owner.IsKnockbackEnabled)
         {
@@ -526,7 +522,6 @@ public class PlayerDamagedState : PlayerBaseState
             direction = (direction + Vector2.up * 0.3f).normalized;
 
             Vector2 additionalForce = direction * forceMagnitude;
-            Debug.Log($"[넉백] addForce{additionalForce}");
             _owner.Rigidbody2D.AddForce(additionalForce, ForceMode2D.Impulse);
             _owner.Rigidbody2D.AddForce(Vector2.up * UPWARD_FORCE, ForceMode2D.Impulse);
         }

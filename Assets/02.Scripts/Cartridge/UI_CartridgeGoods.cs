@@ -13,6 +13,7 @@ public class UI_CartridgeGoods : MonoBehaviour
     
      private CartridgeData _cartridgeData;
      private int _price;
+     
      private void Awake()
      {
          if (_gradient == null)
@@ -48,6 +49,7 @@ public class UI_CartridgeGoods : MonoBehaviour
     }
     public bool CanBuy()
     {
+        Debug.Log($"[CanBuy] 구매 시도 - ID: {_cartridgeData.ID}, 가격: {_price}, 현재 GP: {RoomStatManager.Instance.PlayerGunpowder}");
         if (!RoomStatManager.Instance.CanChangeGP(-_price))
         {
             return false;
@@ -59,6 +61,7 @@ public class UI_CartridgeGoods : MonoBehaviour
             RoomStatManager.Instance.ChangeGunpowder(-_price);
             return true;
         }
+        
         return false;
     }
 }

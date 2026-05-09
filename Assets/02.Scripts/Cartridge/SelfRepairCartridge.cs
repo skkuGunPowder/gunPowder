@@ -21,6 +21,15 @@ public class SelfRepairCartridge : Cartridge
         return true;
     }
 
+    private void OnDestroy()
+    {
+        if (_healCoroutine != null)
+        {
+            StopCoroutine(_healCoroutine);
+            _healCoroutine = null;
+        }
+    }
+
     private IEnumerator HealRoutine(Player owner)
     {
         while (true)

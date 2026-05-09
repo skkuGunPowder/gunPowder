@@ -39,7 +39,8 @@ public class UI_RoomMakerPopup : UI_Popup
         else if (roomName.Length < 3)
         {
             UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
-            popup.Init("방 이름은 3글자 이상이어야합니다.", false);
+            //popup.Init("방 이름은 3글자 이상이어야합니다.", false);
+            popup.Init("TX0109", false);
             return;
         }
         

@@ -43,7 +43,6 @@ public class UI_Observing : MonoBehaviour
 
     private void OnOff(bool isOn)
     {
-        Debug.Log("onoff");
         if (isOn)
         {
             ObservingPanel.SetActive(true);

@@ -81,7 +81,7 @@ else
 - `PlayerDamageController` — 피격 처리, 팀 체크
 - `PlayerUltimateController` — 궁극기 상태 및 이펙트
 - `PlayerVisualController` — 스킨, 이펙트, 사운드
-- `PlayerFSM` (Assets/02.Scripts/Player/State/) — RobustFSM 기반 21개 상태 관리
+- `PlayerFSM` (Assets/02.Scripts/Player/State/) — RobustFSM 기반 다수 상태 관리 (Idle/Walk/Run/Jump/Dash/Damaged/Die/Fall/Recoil/Status 등)
 
 FSM 상태 동기화: `SyncStateChange<T>()` → `RPC_ChangeState(string stateName)` (RpcTarget.All)
 
@@ -138,7 +138,7 @@ if (_gameMode is BattleMode battleMode)
 }
 ```
 
-## 주요 알려진 이슈
+## 주요 주의사항
 
-- `UI_IngameChat.cs:42` — `UIChatManager.Instance.SendMessage(text)` 는 잘못된 호출. `SendChatMessage(text)` 를 사용해야 함
-- `EProperties`에 `CharacterType` 키가 없음 — CLAUDE.md 분석 문서는 오래된 열거형 기준으로 작성됨. 실제 열거형은 코드에서 확인할 것
+- 인게임 채팅 호출은 반드시 `UIChatManager.Instance.SendChatMessage(text)` — `SendMessage`는 Unity의 메시징 메서드와 충돌하므로 사용 금지
+- `EProperties` / `ERoomProperties` 등 열거형은 자주 추가/변경됨. 새 키를 가정하지 말고 항상 `Assets/02.Scripts/Enum/` 의 실제 정의를 먼저 확인할 것

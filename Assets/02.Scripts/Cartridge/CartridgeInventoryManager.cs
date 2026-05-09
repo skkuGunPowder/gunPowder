@@ -76,6 +76,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             _permanentCartridges.Add(id, newCartridge);
         }
 
+        Debug.Log($"[AddCartridge] 호출 - ID: {id}, 현재 소모형 보유: {_consumableCartridges.Count}, 현재 영구형 보유: {_permanentCartridges.Count}");
         SyncToCustomProperties();
         return true;
     }
@@ -88,14 +89,27 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             return;
         }
 
-        if (_consumableCartridges.Remove(id) || _permanentCartridges.Remove(id))
+        Cartridge removed = null;
+        if (_consumableCartridges.TryGetValue(id, out Cartridge consumable))
         {
+            removed = consumable;
+            _consumableCartridges.Remove(id);
+        }
+        else if (_permanentCartridges.TryGetValue(id, out Cartridge permanent))
+        {
+            removed = permanent;
+            _permanentCartridges.Remove(id);
+        }
+
+        if (removed != null)
+        {
+            Destroy(removed.gameObject);
             Debug.Log($"카트리지 제거 성공. ID: {id}");
             SyncToCustomProperties();
         }
         else
         {
-            Debug.LogWarning($"카트리지 제거 실패. 해당 ID의 카트리지가 인벤토리에 없습니다. ID: {id}");       
+            Debug.LogWarning($"카트리지 제거 실패. 해당 ID의 카트리지가 인벤토리에 없습니다. ID: {id}");
         }
     }
 
@@ -167,7 +181,22 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
 
     public void ClearAll()
     {
+        foreach (Cartridge cartridge in _consumableCartridges.Values)
+        {
+            if (cartridge != null)
+            {
+                Destroy(cartridge.gameObject);
+            }
+        }
         _consumableCartridges.Clear();
+
+        foreach (Cartridge cartridge in _permanentCartridges.Values)
+        {
+            if (cartridge != null)
+            {
+                Destroy(cartridge.gameObject);
+            }
+        }
         _permanentCartridges.Clear();
 
         if (PhotonNetwork.LocalPlayer == null)
@@ -307,7 +336,22 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             return;
         }
 
+        foreach (Cartridge cartridge in _consumableCartridges.Values)
+        {
+            if (cartridge != null)
+            {
+                Destroy(cartridge.gameObject);
+            }
+        }
         _consumableCartridges.Clear();
+
+        foreach (Cartridge cartridge in _permanentCartridges.Values)
+        {
+            if (cartridge != null)
+            {
+                Destroy(cartridge.gameObject);
+            }
+        }
         _permanentCartridges.Clear();
 
         foreach (string entry in entries)

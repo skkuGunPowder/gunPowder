@@ -15,18 +15,29 @@ public class GameStatePlaying : GameModeStateBase
     private Dictionary<EInGameTeam, int> _initialTeamCount = new Dictionary<EInGameTeam, int>(); // 게임 시작 시 팀 초기 인원 수
     private int _count = 0; // 모든 플레이어의 정보가 모였는지 확인
     private int _MaxCount = 0;
-
+    
     private SecondTimer _timer;
-
+    
+    // 관전 해제
+    private CameraController  _cameraController;
     public override void Initialize(GameModeBase gameMode)
     {
         base.Initialize(gameMode);
+        if (_cameraController == null)
+        {
+            _cameraController = Camera.main.GetComponent<CameraController>();   
+        }
         _teamCount = new Dictionary<EInGameTeam, int>();
         _teamCount.Clear();
     }
 
     private void Init()
     { 
+        if (_cameraController == null)
+        {
+            _cameraController = Camera.main.GetComponent<CameraController>();   
+        }
+        
         EventManager.Instance.GameStart(); // 게임 시작 321
         EventManager.Instance.ProfileInit(); // 프로필 리프레시
         
@@ -509,10 +520,12 @@ public class GameStatePlaying : GameModeStateBase
 
     public override void Exit()
     {
+        //관전이 켜져있다면 관전 해제
+        _cameraController.CancelObserve();
+        
         // 플레이어 GP를 RoomStatManager에 저장
         PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
         RoomStatManager.Instance.SetGunpowder(stat.CurrentGP);
-
         GameManager.Instance.GameStateChange(EGameState.Waiting); // Waiting 상태로 복귀
         _lastPlayer = false;
         _gameSet = false;

@@ -8,6 +8,8 @@ public class UI_KillPannel : MonoBehaviour
     public TextMeshProUGUI KillPannelBG;
     [SerializeField] private float _fadeTime = 1f;
     [SerializeField] private float _intervalTime = 1f;
+    [SerializeField] private string _killText;
+    
     private Color32 _bgColor;
     private Color32 _textColor;
     
@@ -22,8 +24,8 @@ public class UI_KillPannel : MonoBehaviour
         DOTween.Kill(this);
         
         // 중간에 킬 되었을 때, 처음 시작
-        KillPannelBG.text = $"{playerNickname}를 처치하였습니다.";
-        KillPannelText.text = $"<color=red>{playerNickname}</color>를 처치하였습니다.";
+        KillPannelBG.text = string.Format(_killText, playerNickname);
+        KillPannelText.text = string.Format(_killText, $"<color=red>{playerNickname}</color>");
         
         KillPannelBG.color = _bgColor;
         KillPannelText.color = _textColor;
