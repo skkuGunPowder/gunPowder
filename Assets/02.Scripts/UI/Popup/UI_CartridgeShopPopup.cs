@@ -11,7 +11,9 @@ public class UI_CartridgeShopPopup : UI_Popup
     [SerializeField] private Button _turnPassButton;
     private PhotonView _photonView;
     private List<CartridgeAction> _cartridgeActionList = new List<CartridgeAction>();
+    
     private bool _isMyTurn = false;
+    public bool MyTurn => _isMyTurn;
     
     private void Awake()
     {
@@ -87,6 +89,7 @@ public class UI_CartridgeShopPopup : UI_Popup
     {
         _turnPassButton.interactable = false;
         _isMyTurn = false;
+        
         EventManager.Instance.ScreenClick();
     }
     

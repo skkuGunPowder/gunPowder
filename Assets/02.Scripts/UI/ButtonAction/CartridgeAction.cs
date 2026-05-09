@@ -68,6 +68,11 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (_shopPopup.MyTurn == false) // 내 턴에만 작동
+        {
+            return;
+        }
+        
         if (_selected)
         {
             return;
@@ -78,6 +83,11 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (_shopPopup.MyTurn == false) // 내 턴에만 작동
+        {
+            return;
+        }
+        
         if (_selected)
         {
             return;
@@ -98,8 +108,13 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnClickButton()
     {
+        if (_shopPopup.MyTurn == false) // 내 턴에만 작동
+        {
+            return;
+        }
+        
         Debug.Log($"[CartridgeAction] OnClickButton 호출 - _selected: {_selected}, SlotNumber: {_slotNumber}");
-        if (_selected)
+        if (_selected) // 선택된 것만 작동
         {
             return;
         }

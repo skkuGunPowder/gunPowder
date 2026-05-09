@@ -13,6 +13,7 @@ public class UI_CartridgeGoods : MonoBehaviour
     
      private CartridgeData _cartridgeData;
      private int _price;
+     
      private void Awake()
      {
          if (_gradient == null)
