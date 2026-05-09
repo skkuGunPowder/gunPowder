@@ -69,6 +69,7 @@ public class UI_CartridgeProfile : MonoBehaviour
 
                 _profileSlotList[i].gameObject.SetActive(true);
                 _profileSlotList[i].Init(item.Image, sub.Image, team, player, RoomStatManager.PlayerHP, RoomStatManager.Instance.PlayerLife, gp);
+                _profileSlotList[i].RefreshCartridges(player);
                 _playerActorNumberList.Add(player.ActorNumber);
             }
             else
@@ -110,6 +111,18 @@ public class UI_CartridgeProfile : MonoBehaviour
         }
     }
 
+    private void RefreshCartridges(PhotonPlayer player)
+    {
+        for (int i = 0; i < _playerActorNumberList.Count; i++)
+        {
+            if (_playerActorNumberList[i] == player.ActorNumber)
+            {
+                _profileSlotList[i].RefreshCartridges(player);
+                break;
+            }
+        }
+    }
+
     public void SetCurrentSlot(PhotonPlayer player)
     {
         _currentTurnPlayer = player;
@@ -125,6 +138,7 @@ public class UI_CartridgeProfile : MonoBehaviour
         {
             EventManager.Instance.OnGPDataChanged += GPDataChange;
             EventManager.Instance.OnCartridgeStart += SetCurrentSlot;
+            EventManager.Instance.OnCartridgesChanged += RefreshCartridges;
         }
     }
 
@@ -134,6 +148,7 @@ public class UI_CartridgeProfile : MonoBehaviour
         {
             EventManager.Instance.OnGPDataChanged -= GPDataChange;
             EventManager.Instance.OnCartridgeStart -= SetCurrentSlot;
+            EventManager.Instance.OnCartridgesChanged -= RefreshCartridges;
         }
     }
 }

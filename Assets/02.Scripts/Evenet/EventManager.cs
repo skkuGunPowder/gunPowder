@@ -294,4 +294,11 @@ public class EventManager : DontDestroySingleton<EventManager> // Start is calle
     {
         OnCartridgeEnd?.Invoke();
     }
+
+    public event Action<PhotonPlayer> OnCartridgesChanged;
+
+    public void CartridgesChanged(PhotonPlayer player)
+    {
+        OnCartridgesChanged?.Invoke(player);
+    }
 }
