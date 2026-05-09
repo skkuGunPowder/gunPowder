@@ -99,6 +99,8 @@ public class UI_CartridgeShopPopup : UI_Popup
     
     public void RequestSelectCartridge(int index)
     {
+        _isMyTurn = false;
+        
         if (!_isMyTurn)
         {
             return;
