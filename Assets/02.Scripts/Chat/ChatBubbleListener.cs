@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using BackndChat; // MessageInfo 사용
 
@@ -32,6 +33,11 @@ public class ChatBubbleListener : MonoBehaviour
 
     private void OnChatMessage(MessageInfo info)
     {
+        if (this.gameObject.activeSelf == false)
+        {
+            return;
+        }
+        
         // 주인이 없거나, 보낸 사람이 주인이 아니면 무시
         if (string.IsNullOrEmpty(_ownerNickname) || info.GamerName != _ownerNickname)
             return;
@@ -44,11 +50,6 @@ public class ChatBubbleListener : MonoBehaviour
 
     private void ShowBubble(string message)
     {
-        if (this.gameObject.activeSelf == false)
-        {
-            return;
-        }
-        
         // 이전 말풍선 삭제 (새 대사로 교체)
         if (_currentBubble != null) Destroy(_currentBubble);
 
@@ -65,5 +66,10 @@ public class ChatBubbleListener : MonoBehaviour
             var bubble = _currentBubble.GetComponent<ChatBubble>();
             if (bubble != null) bubble.Setup(message);
         }
+    }
+
+    private void OnDisable()
+    {
+        if (_currentBubble != null) Destroy(_currentBubble);
     }
 }

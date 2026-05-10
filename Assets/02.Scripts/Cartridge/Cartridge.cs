@@ -14,6 +14,8 @@ public abstract class Cartridge : MonoBehaviour, ICartridge
         _currentDurability = _data.Durability;
         _repairCount = 0;
         _repairedThisTurn = false;
+        
+        Debug.LogWarning($"INITINITINITINIT : ID {_data.ID} : Durability {_currentDurability}");
     }
 
     public bool Repair()
@@ -56,6 +58,7 @@ public abstract class Cartridge : MonoBehaviour, ICartridge
 
     public virtual bool ExcuteGimmick(Player owner)
     {
+        Debug.LogWarning($"ID {_data.ID} : Durability {_currentDurability}");
         if(_data.Durability == 0)
         {
             if(_currentDurability < 0)
@@ -74,6 +77,8 @@ public abstract class Cartridge : MonoBehaviour, ICartridge
         }
         
         _currentDurability--;
+        
+        Debug.LogError($"ID {_data.ID} : Durability {_currentDurability}");
         return true;
     }
 

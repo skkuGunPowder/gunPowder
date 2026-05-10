@@ -22,10 +22,11 @@ public class UI_KillPannel : MonoBehaviour
     {
         
         DOTween.Kill(this);
-        
+
+        string text = TextManager.Instance.GetText(_killText);
         // 중간에 킬 되었을 때, 처음 시작
-        KillPannelBG.text = string.Format(_killText, playerNickname);
-        KillPannelText.text = string.Format(_killText, $"<color=red>{playerNickname}</color>");
+        KillPannelBG.text = string.Format(text, playerNickname);
+        KillPannelText.text = string.Format(text, $"<color=red>{playerNickname}</color>");
         
         KillPannelBG.color = _bgColor;
         KillPannelText.color = _textColor;

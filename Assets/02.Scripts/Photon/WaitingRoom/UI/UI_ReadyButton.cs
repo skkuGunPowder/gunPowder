@@ -12,10 +12,9 @@ public class UI_ReadyButton : MonoBehaviour
     [SerializeField] private Button _button;
     public TextMeshProUGUI ReadyTextUGUI;
 
-    public string Ready = "준비 완료";
-    public string NotReady = "준비";
-
-    public string Master = "시작";
+    public const string READY_ID = "TX0096";
+    public const string NOT_READY_ID = "TX0095";
+    public const string MASTER = "TX0097";
 
     private void OnEnable()
     {
@@ -26,12 +25,12 @@ public class UI_ReadyButton : MonoBehaviour
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            ReadyTextUGUI.text = Master;
+            ReadyTextUGUI.text = TextManager.Instance.GetText(MASTER);
             
         }
         else
         {
-            ReadyTextUGUI.text = NotReady;
+            ReadyTextUGUI.text =  TextManager.Instance.GetText(NOT_READY_ID);
         }
     }
 
@@ -68,6 +67,6 @@ public class UI_ReadyButton : MonoBehaviour
         
         PhotonNetwork.LocalPlayer.SetCustomProperties(ready);
 
-        ReadyTextUGUI.text = _isReady ? Ready : NotReady;
+        ReadyTextUGUI.text = _isReady ?  TextManager.Instance.GetText(READY_ID) :  TextManager.Instance.GetText(NOT_READY_ID);
     }
 }

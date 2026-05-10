@@ -146,8 +146,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
 
         if (_consumableCartridges.TryGetValue(id, out Cartridge consumable))
         {
-            if(!CheckCartridgeUsable(consumable)) return false;
-
+            CheckCartridgeUsable(consumable);
             consumable.ExcuteGimmick(owner);
             SyncToCustomProperties();
             return true;
@@ -155,8 +154,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
 
         if (_permanentCartridges.TryGetValue(id, out Cartridge permanent))
         {
-            if(!CheckCartridgeUsable(permanent)) return false;
-
+            CheckCartridgeUsable(permanent);
             permanent.ExcuteGimmick(owner);
             SyncToCustomProperties();
             return true;
@@ -169,18 +167,25 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
     // 라운드 시작 시 한 번에 모든 카트리지 count -1 (한 번만 동기화)
     public void ConsumeAll(Player owner)
     {
+        
+        Debug.LogError($"ComsumeAll START");
         List<Cartridge> consumables = new List<Cartridge>(_consumableCartridges.Values);
         List<Cartridge> permanents = new List<Cartridge>(_permanentCartridges.Values);
         foreach (Cartridge consumable in consumables)
         {
-            if(!CheckCartridgeUsable(consumable)) continue;
             consumable.ExcuteGimmick(owner);
+            CheckCartridgeUsable(consumable);
+            
+            Debug.LogError($"ComsumeAll {consumable.Data.ID}");
         }
 
         foreach (Cartridge permanent in permanents)
-        {
-            if(!CheckCartridgeUsable(permanent)) continue;
+        { 
+            
             permanent.ExcuteGimmick(owner);
+            CheckCartridgeUsable(permanent);
+            
+            Debug.LogError($"ComsumeAll {permanent.Data.ID}");
         }
 
         SyncToCustomProperties();
@@ -442,7 +447,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         }
     }
 
-    private bool CheckCartridgeUsable(Cartridge cartridge)
+    private void CheckCartridgeUsable(Cartridge cartridge)
     {
         // 결과 반환 : true - 사용가능, false - 사용불가 (내구도 부족)
         if (cartridge.GetMaxDurability() == 0)
@@ -451,7 +456,6 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             {
                 Debug.LogError($"소모형 카트리지{cartridge.Data.ID} 제거. Count: {cartridge.GetCurrentDurability()}");
                 RemoveCartridge(cartridge.Data.ID);
-                return false;
             }
         }
         else
@@ -460,10 +464,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             {
                 Debug.LogError($"영구형 카트리지{cartridge.Data.ID} 제거. Count: {cartridge.GetCurrentDurability()}");
                 RemoveCartridge(cartridge.Data.ID);
-                return false;
             }
         }
-        
-        return true;
     }
 }
