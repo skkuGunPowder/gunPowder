@@ -57,8 +57,8 @@ public class UI_ItemDetail : MonoBehaviour
             ItemSpecPanel.gameObject.SetActive(false);
         }
 
-        ItemNameText.text = _selectedItem.Item.Name;
-        ExplanationText.text = _selectedItem.Item.Explanation;
+        ItemNameText.text = TextManager.Instance.GetText(_selectedItem.Item.Name);
+        ExplanationText.text = TextManager.Instance.GetText(_selectedItem.Item.Explanation);
     }
 
     private void OnDestroy()

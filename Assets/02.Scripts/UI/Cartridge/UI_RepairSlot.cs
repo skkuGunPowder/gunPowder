@@ -38,7 +38,7 @@ public class UI_RepairSlot : MonoBehaviour
         int repairCost = _cartridge.Data.GetRepairCost(_cartridge.GetRepairCount());
         
         // 텍스트 수정
-        _explanationText.text = _explanation;
+        _explanationText.text = TextManager.Instance.GetText(_explanation);
         _durabilityText.text = $"{DUABILITY_NAME} : {currentDurability} ";
         // _repairCostText.text = $"{repairCost} GP";
 
