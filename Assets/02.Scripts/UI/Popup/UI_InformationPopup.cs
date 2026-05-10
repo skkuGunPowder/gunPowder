@@ -31,7 +31,7 @@ public class UI_InformationPopup : UI_Popup
 
         UI_MessagePopup messagePopup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
         //messagePopup.Init("이메일로 비밀번호 변경 메일을 보냈습니다.", false);
-        messagePopup.Init("TX0115", false);
+        messagePopup.Init(TextManager.Instance.GetText("TX0115"), false);
     }
 
     public void OnClickDeleteAccount()
@@ -43,7 +43,7 @@ public class UI_InformationPopup : UI_Popup
     {
         UI_MessagePopup messagePopup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
         //messagePopup.Init($"닉네임을 변경하시겠습니까? ({NicknameChangeCost} 다이아파우더 소모).", true, OnSetNickname);
-        messagePopup.Init($"TX0116 ({NicknameChangeCost} TX0117).", true, OnSetNickname);
+        messagePopup.Init($"{TextManager.Instance.GetText("TX0116")} ({NicknameChangeCost} {TextManager.Instance.GetText("TX0117")}).", true, OnSetNickname);
     }
 
     public void OnClickMyInfo()
@@ -51,7 +51,7 @@ public class UI_InformationPopup : UI_Popup
         // TODO: 내 정보 팝업 구현 필요
         UI_MessagePopup messagePopup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
         //messagePopup.Init("내 정보 기능은 현재 지원하지 않습니다.", false);
-        messagePopup.Init("TX0118", false);
+        messagePopup.Init(TextManager.Instance.GetText("TX0118"), false);
     }
 
     public void OnClickPrivacyPolicy()
@@ -72,14 +72,14 @@ public class UI_InformationPopup : UI_Popup
         {
             UI_MessagePopup messagePopup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup, null);
             //messagePopup.Init("닉네임이 변경되었습니다.", false);
-            messagePopup.Init("TX0119", false);
+            messagePopup.Init(TextManager.Instance.GetText("TX0119"), false);
             Refresh();
         }
         else
         {
             UI_MessagePopup messagePopup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup, null);
             //messagePopup.Init($"닉네임 변경에 실패했습니다: {result.Message}", false);
-            messagePopup.Init($"TX0120 : {result.Message}", false);
+            messagePopup.Init($"{TextManager.Instance.GetText("TX0120")} : {result.Message}", false);
             return;
         }
 

@@ -36,8 +36,8 @@ public class UI_CartridgeGoods : MonoBehaviour
         
         // 카트리지 인벤토리에서 체크해서 할인
         _iconImage.sprite = data.ImageSprite;
-        _title.text = data.Name;
-        _explanation.text = data.Explanation;
+        _title.text = TextManager.Instance.GetText(data.Name);
+        _explanation.text = TextManager.Instance.GetText(data.Explanation);
         _price = CartridgeInventoryManager.Instance.GetDiscountedPrice(data.ID);
         _priceText.text = $"{_price} GP";
         SetColor();

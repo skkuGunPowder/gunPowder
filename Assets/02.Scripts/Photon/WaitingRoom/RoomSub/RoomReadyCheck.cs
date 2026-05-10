@@ -13,7 +13,7 @@ public class RoomReadyCheck
         {
             UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
             //popup.Init("다른 플레이어가 없습니다.", false);
-            popup.Init("TX0110", false);
+            popup.Init(TextManager.Instance.GetText("TX0110"), false);
             return false;
         }
 
@@ -33,7 +33,7 @@ public class RoomReadyCheck
             {
                 UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
                 //popup.Init("모든 플레이어가 준비되지 않았습니다.", false);
-                popup.Init("TX0111", false);
+                popup.Init(TextManager.Instance.GetText("TX0111"), false);
                 return false;
             }
 
@@ -41,7 +41,7 @@ public class RoomReadyCheck
             {
                 UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
                 //popup.Init("다시 시도해주세요", false);
-                popup.Init("TX0113", false);
+                popup.Init(TextManager.Instance.GetText("TX0113"), false);
                 return false;
             }
             
@@ -56,7 +56,7 @@ public class RoomReadyCheck
         {
             UI_MessagePopup popup = (UI_MessagePopup)PopupManager.Instance.Open(EPopupType.UI_MessagePopup);
             //popup.Init("모두가 같은 팀입니다.", false);
-            popup.Init("TX0112", false);
+            popup.Init(TextManager.Instance.GetText("TX0112"), false);
             return false; //다른 팀 없음
         }
 

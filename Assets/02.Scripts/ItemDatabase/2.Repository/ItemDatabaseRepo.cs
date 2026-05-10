@@ -7,14 +7,6 @@ using UnityEngine;
 
 public class ItemDatabaseRepo
 {
-#if DEV_MODE
-    //Dev 폴더
-    private const int ITEM_DATA_FOLDER_ID = 3124;
-#else
-    //Build 폴더
-    private const int ITEM_DATA_FOLDER_ID = 3125;
-#endif
-
     public event Action<Dictionary<string, Item>, Dictionary<string, IStat>> OnitemDataLoaded;
 
     private bool _isItemLoadDone = false;
@@ -40,7 +32,7 @@ public class ItemDatabaseRepo
         Dictionary<string, Item> itemDataDict = new Dictionary<string, Item>();
         Dictionary<string, IStat> statDataDict = new Dictionary<string, IStat>();
 
-        Backend.Chart.GetChartListByFolderV2(ITEM_DATA_FOLDER_ID, result =>
+        Backend.Chart.GetChartListByFolderV2(BackendManager.FOLDER_ID, result =>
         {
             if (!result.IsSuccess())
             {
@@ -51,7 +43,7 @@ public class ItemDatabaseRepo
             foreach (JsonData chart in result.FlattenRows())
             {
                 // 아이템 데이터 파싱
-                if(chart["chartName"].ToString() == "Bomb_DEV" || chart["chartName"].ToString() == "Skin_DEV")
+                if(chart["chartName"].ToString() == "Bomb" || chart["chartName"].ToString() == "Skin")
                 {
                     var itemResult = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
                     if (!itemResult.IsSuccess())
@@ -77,7 +69,7 @@ public class ItemDatabaseRepo
                 _isItemLoadDone = true;
 
                 // 폭발 데이터 파싱
-                if (chart["chartName"].ToString() == "Explosion_DEV")
+                if (chart["chartName"].ToString() == "Explosion")
                 {
                     var chartContents = Backend.Chart.GetChartContents(chart["selectedChartFileId"].ToString());
                     if (!chartContents.IsSuccess())

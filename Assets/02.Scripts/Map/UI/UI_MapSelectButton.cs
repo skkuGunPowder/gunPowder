@@ -15,7 +15,7 @@ public class UI_MapSelectButton : MonoBehaviour
         Map = map;
         IsSelected.SetActive(isSelected);
         MapImage.sprite = mapImage;
-        MapNameText.text = mapName;
+        MapNameText.text = TextManager.Instance.GetText(mapName);
     }
     
     public void OnClickMapSelect()
