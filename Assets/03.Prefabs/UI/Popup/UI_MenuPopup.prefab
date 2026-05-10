@@ -87,6 +87,7 @@ GameObject:
   - component: {fileID: 5209360589288527788}
   - component: {fileID: 57579261461999339}
   - component: {fileID: 1398401280171765880}
+  - component: {fileID: 160713412905261342}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -213,6 +214,21 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &160713412905261342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4965353487747550278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f5196bcde67616449d57ef978eb6173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textId: TX0045
+  localizationIdPrefix: TX
+  autoUseCurrentTextAsId: 1
 --- !u!1 &6182179774614191296
 GameObject:
   m_ObjectHideFlags: 0
@@ -1004,10 +1020,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5353618415264902615, guid: 0cb8e9b538e2f4e47a9b265971c01a76, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7211663314657987235}
   m_SourcePrefab: {fileID: 100100000, guid: 0cb8e9b538e2f4e47a9b265971c01a76, type: 3}
 --- !u!224 &379297654806900673 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 129415628185579345, guid: 0cb8e9b538e2f4e47a9b265971c01a76, type: 3}
   m_PrefabInstance: {fileID: 326598801182015632}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5675538785863953735 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5353618415264902615, guid: 0cb8e9b538e2f4e47a9b265971c01a76, type: 3}
+  m_PrefabInstance: {fileID: 326598801182015632}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7211663314657987235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5675538785863953735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f5196bcde67616449d57ef978eb6173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textId: TX0041
+  localizationIdPrefix: TX
+  autoUseCurrentTextAsId: 1
