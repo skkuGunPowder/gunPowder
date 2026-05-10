@@ -41,7 +41,7 @@ public class UI_RoomStartOption : MonoBehaviour
     {
         MapData data = MapDataManager.Instance.GetDataLoad(map);
 
-        string mapName = data.MapName;
+        string mapName = TextManager.Instance.GetText(data.MapName);
         Sprite mapSprite = data.MapSprite;
         
         Refresh(mapName, mapSprite);

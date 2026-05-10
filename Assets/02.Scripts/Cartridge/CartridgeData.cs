@@ -32,7 +32,7 @@ public class CartridgeData
         Name = json["Name"].ToString();
         Rarity = (CartridgeRarity)System.Enum.Parse(typeof(CartridgeRarity), json["Rarity"].ToString());
         Durability = int.Parse(json["Durability"].ToString());
-        Explanation = json["Explanation"].ToString();
+       Explanation = json["Explanation"].ToString();
         GimmickValues = ParseValue(json);
     }
 
