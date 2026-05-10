@@ -18,6 +18,7 @@ public enum EProperties
     StateChange,
     Cartridges,
     GP,
+    UltimateGauge,
 
     Count
 }

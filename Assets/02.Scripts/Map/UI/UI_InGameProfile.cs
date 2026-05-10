@@ -66,17 +66,22 @@ public class UI_InGameProfile : MonoBehaviour
                 string subBombId = player.GetCustomProperty<string>(subBombKey, "BO0005");
                 // 플레이어의 gp
                 int gp = player.GetCustomProperty<int>(EProperties.GP.ToString(), RoomStatManager.Instance.InitGunpowder);
-                
+
                 ItemDTO item = ItemDatabase.Instance.GetItem(bombId);
                 ItemDTO sub = ItemDatabase.Instance.GetItem(subBombId);
-                
+
                 Sprite bomb = item.Image;
                 Sprite subImage = sub.Image;
-                
+
                 if (reorderedPlayers[i].ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
-                    _mainBomb.sprite = bomb;
-                    _subBomb.sprite = subImage;
+                    // Z슬롯 = 메인 폭탄
+                    Sprite zSlotSprite = bomb;
+                    // X슬롯 = SubBomb이 설정되어 있으면 그것, 없으면 메인 폭탄으로 fallback (Player.cs 슬롯 로직과 동일)
+                    Sprite xSlotSprite = player.CustomProperties.ContainsKey(subBombKey) ? subImage : bomb;
+
+                    _mainBomb.sprite = zSlotSprite;
+                    _subBomb.sprite = xSlotSprite;
                 }
                 
                 EInGameTeam team = reorderedPlayers[i].GetCustomProperty<EInGameTeam>(EProperties.Team);
@@ -186,11 +191,13 @@ public class UI_InGameProfile : MonoBehaviour
 
         ItemDTO item = ItemDatabase.Instance.GetItem(bombId);
         ItemDTO sub = ItemDatabase.Instance.GetItem(subBombId);
-        
+
         if (changedPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {
+            // _mainBomb = Z슬롯 = 메인 폭탄
             _mainBomb.sprite = item.Image;
-            _subBomb.sprite = sub.Image;
+            // _subBomb = X슬롯 = SubBomb이 설정되어 있으면 그것, 없으면 메인 폭탄으로 fallback
+            _subBomb.sprite = changedPlayer.CustomProperties.ContainsKey(subBombKey) ? sub.Image : item.Image;
         }
         
         for (int i = 0; i < _playerActorNumberList.Count; i++)

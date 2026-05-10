@@ -22,10 +22,14 @@ public class RoomStatManager : Singleton<RoomStatManager>
     public const int PlayerHP = 150; // HP 고정값
     
     private const int ADDITIONAL_GUNPOWDER = 30;
+    private const int NEGATIVE_GP_HP_PENALTY_CAP = 100; // 라운드 시작 시 음수 GP 페널티 HP 차감 캡
     [SerializeField] private bool _isManual = false;
     [SerializeField] private bool _infiniteLife = false;
 
     private bool _initialized = true;
+
+    // 라운드 시작 시 GP가 음수였던 만큼 HP에서 차감할 페널티 (PlayerStat.Start가 1회 소비)
+    private int _pendingNegativeGPPenalty = 0;
     
     protected override void Awake()
     {
@@ -83,29 +87,44 @@ public class RoomStatManager : Singleton<RoomStatManager>
         {
             if (PlayerGunpowder < 0)
             {
+                // 라운드 시작 시 빚 만큼 HP 페널티 (캡 적용)을 다음 PlayerStat.Start가 소비
+                _pendingNegativeGPPenalty = Mathf.Min(Mathf.Abs(PlayerGunpowder), NEGATIVE_GP_HP_PENALTY_CAP);
                 PlayerGunpowder = ADDITIONAL_GUNPOWDER;
-                
             }
             else
             {
+                _pendingNegativeGPPenalty = 0;
                 PlayerGunpowder += ADDITIONAL_GUNPOWDER;
             }
-            
+
             PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable()
             {
                 { EProperties.GP.ToString(), PlayerGunpowder }
             });
-            
+
             return PlayerGunpowder;
         }
-        
+
+        // 첫 매치 첫 호출은 페널티 없음
+        _pendingNegativeGPPenalty = 0;
+
         PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable()
         {
             { EProperties.GP.ToString(), PlayerGunpowder }
         });
-        
+
         _initialized = false;
         return PlayerGunpowder;
     }
-    
+
+    /// <summary>
+    /// 라운드 시작 시 음수 GP였던 만큼 HP에서 차감해야 하는 페널티 값을 한 번 소비하고 반환.
+    /// PlayerStat.Start에서 SetPlayer 직후 호출하여 _currentHP에서 차감.
+    /// </summary>
+    public int ConsumePendingNegativeGPPenalty()
+    {
+        int penalty = _pendingNegativeGPPenalty;
+        _pendingNegativeGPPenalty = 0;
+        return penalty;
+    }
 }
