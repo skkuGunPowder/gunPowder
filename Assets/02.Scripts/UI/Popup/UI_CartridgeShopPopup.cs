@@ -142,6 +142,7 @@ public class UI_CartridgeShopPopup : UI_Popup
     private void OnDisable()
     {
         PopupManager.Instance.Close(EPopupType.UI_RepairPopup);
+        PopupManager.Instance.Close(EPopupType.UI_ChangePopup);
     }
 
     private void OnDestroy()

@@ -64,6 +64,13 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             return false;
         }
 
+        // 슬롯 최대 3개 제한
+        if (GetTotalCount() >= 3)
+        {
+            Debug.LogWarning($"카트리지 슬롯이 가득 찼습니다. 교체 팝업을 사용하세요.");
+            return false;
+        }
+
         Cartridge newCartridge = CartridgeFactory.Instance.GetCartridge(id);
         int maxDurability = newCartridge.GetMaxDurability();
 
@@ -289,6 +296,49 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
     public Dictionary<string, Cartridge> GetPermanentCartridges()
     {
         return _permanentCartridges;
+    }
+
+    public Dictionary<string, Cartridge> GetConsumableCartridges()
+    {
+        return _consumableCartridges;
+    }
+
+    // 보유 카트리지 총 수 (소모형 + 영구형)
+    public int GetTotalCount()
+    {
+        return _consumableCartridges.Count + _permanentCartridges.Count;
+    }
+
+    // 교체: 기존 카트리지 제거 후 새 카트리지 추가 (GP 처리 없이, 슬롯 제한 없이)
+    public bool SwapCartridge(string removeId, string addId)
+    {
+        if (string.IsNullOrEmpty(removeId) || string.IsNullOrEmpty(addId))
+        {
+            Debug.LogError("SwapCartridge: ID가 Null 혹은 비어있습니다.");
+            return false;
+        }
+
+        RemoveCartridge(removeId);
+
+        Cartridge newCartridge = CartridgeFactory.Instance.GetCartridge(addId);
+        if (newCartridge == null)
+        {
+            Debug.LogError($"SwapCartridge: 카트리지 생성 실패. ID: {addId}");
+            return false;
+        }
+
+        if (newCartridge.GetMaxDurability() == 0)
+        {
+            _consumableCartridges.Add(addId, newCartridge);
+        }
+        else
+        {
+            _permanentCartridges.Add(addId, newCartridge);
+        }
+
+        Debug.Log($"[SwapCartridge] {removeId} → {addId} 교체 완료");
+        SyncToCustomProperties();
+        return true;
     }
 
     private void SyncToCustomProperties()

@@ -112,19 +112,60 @@ public class CartridgeAction : MonoBehaviour, IPointerEnterHandler, IPointerExit
         {
             return;
         }
-        
-        Debug.Log($"[CartridgeAction] OnClickButton 호출 - _selected: {_selected}, SlotNumber: {_slotNumber}");
+
         if (_selected) // 선택된 것만 작동
         {
             return;
         }
 
+        // GP 체크
+        if (!RoomStatManager.Instance.CanChangeGP(-uiCartridgeGoods.Price))
+        {
+            return;
+        }
+
+        string newId = uiCartridgeGoods.CartridgeData.ID;
+
+        // 이미 보유 중인 영구형 → 수리 경로 (ChangePopup 없이)
+        // 내구도 꽉 참 or 이번 턴 이미 수리한 경우 CanBuy가 false를 반환해 차단
+        if (CartridgeInventoryManager.Instance.GetPermanentCartridges().ContainsKey(newId))
+        {
+            if (uiCartridgeGoods.CanBuy() == false)
+            {
+                return;
+            }
+            _selected = true;
+            _shopPopup.RequestSelectCartridge(_slotNumber);
+            return;
+        }
+
+        // 이미 보유 중인 소모형 → 중복 구매 불가
+        if (CartridgeInventoryManager.Instance.GetConsumableCartridges().ContainsKey(newId))
+        {
+            return;
+        }
+
+        // 슬롯이 가득 찬 경우 교체 팝업
+        if (CartridgeInventoryManager.Instance.GetTotalCount() >= 3)
+        {
+            UI_ChangePopup changePopup = (UI_ChangePopup)PopupManager.Instance.Open(EPopupType.UI_ChangePopup);
+            changePopup.Setup(uiCartridgeGoods.CartridgeData, uiCartridgeGoods.Price, OnExchangeCompleted);
+            return;
+        }
+
+        // 정상 구매
         if (uiCartridgeGoods.CanBuy() == false)
         {
             return;
         }
 
         _selected = true; // 구매 직후 즉시 잠금
+        _shopPopup.RequestSelectCartridge(_slotNumber);
+    }
+
+    private void OnExchangeCompleted()
+    {
+        _selected = true;
         _shopPopup.RequestSelectCartridge(_slotNumber);
     }
 

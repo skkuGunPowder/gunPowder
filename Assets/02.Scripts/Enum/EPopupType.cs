@@ -19,5 +19,6 @@ public enum EPopupType
     UI_TempStorage,
     UI_CartridgeShopPopup,
     UI_RepairPopup,
+    UI_ChangePopup,
     Count
 }
