@@ -146,7 +146,7 @@ public class GameStateRound : GameModeStateBase
         {
             if (teamScore.score >= ROUND_SCORE_LIMIT)
             {
-                _gameMode.GameOver();
+                _gameMode.RequestStateChange(EModeState.Over);
                 EventManager.Instance.OnRoundEnd -= EndCheck;
                 return;
             }
