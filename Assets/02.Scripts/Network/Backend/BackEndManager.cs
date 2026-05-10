@@ -3,6 +3,13 @@ using BackEnd;
 
 public class BackendManager : DontDestroySingleton<BackendManager>
 {
+#if DEV_MODE
+    //Dev 폴더
+    public const int FOLDER_ID = 3124;
+#else
+    //Build 폴더
+    public const int FOLDER_ID = 3125;
+#endif
     protected override void Awake()
     {
         base.Awake();

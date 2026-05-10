@@ -6,13 +6,6 @@ using System;
 
 public class BuffRepository
 {
-#if DEV_MODE
-    //Dev 폴더
-    private const int ITEM_DATA_FOLDER_ID = 3124;
-#else
-    //Build 폴더
-    private const int ITEM_DATA_FOLDER_ID = 3125;
-#endif
     public event Action<Dictionary<string, BuffStat>> OnStatLoaded;
 
     public BuffRepository()
@@ -24,7 +17,7 @@ public class BuffRepository
     {
         Dictionary<string, BuffStat> statDict = new Dictionary<string, BuffStat>();
 
-        Backend.Chart.GetChartListByFolderV2(ITEM_DATA_FOLDER_ID, result =>
+        Backend.Chart.GetChartListByFolderV2(BackendManager.FOLDER_ID, result =>
         {
             if (!result.IsSuccess())
             {
@@ -34,7 +27,7 @@ public class BuffRepository
             
             foreach (JsonData chart in result.FlattenRows())
             {
-                if (chart["chartName"].ToString() != "Buff_DEV")
+                if (chart["chartName"].ToString() != "Buff")
                 {
                     continue;
                 }

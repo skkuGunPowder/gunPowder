@@ -14,7 +14,7 @@ public class UI_ThemeButton : MonoBehaviour
     {
         Theme = theme;
         ThemeImage.sprite = themeImage;
-        ThemeNameText.text = themeName;
+        ThemeNameText.text = TextManager.Instance.GetText(themeName);
     }
 
     public void SelectCheck(EMapTheme theme)

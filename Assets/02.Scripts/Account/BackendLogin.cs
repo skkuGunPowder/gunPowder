@@ -59,6 +59,7 @@ public class BackendLogin
 
                 // 뒤끝 실시간 알림 서버 연결 (친구 접속 상태, 친구 요청 이벤트)
                 FriendManager.Instance.ConnectNotification();
+                TextManager.Instance.LoadTextDataAsync();
             }
             catch (Exception e)
             {
