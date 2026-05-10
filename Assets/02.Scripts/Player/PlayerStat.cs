@@ -169,6 +169,119 @@ public class PlayerStat : MonoBehaviour
 
         SetPlayer(RoomStatManager.Instance.GetGunpowder(), RoomStatManager.Instance.PlayerLife,
                  RoomStatManager.Instance.PlayerDecreaseTime);
+
+        // 라운드 시작 시 GP가 음수였다면 빚 만큼 HP에서 차감 (RoomStatManager.GetGunpowder가 캐시한 값)
+        ApplyNegativeGPHPPenalty();
+
+        // 라운드 전환으로 Player GO가 재생성되어도 궁극기 게이지가 유지되도록
+        // Photon LocalPlayer CustomProperties에서 복원
+        RestoreUltimateGaugeFromCustomProperty();
+
+        // 라운드 종료(=GameOver 이벤트) 시점에 게이지를 영속화 (PhotonNetwork.DestroyAll 직전)
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnGameOver -= SaveUltimateGaugeToCustomProperty;
+            EventManager.Instance.OnGameOver += SaveUltimateGaugeToCustomProperty;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnGameOver -= SaveUltimateGaugeToCustomProperty;
+        }
+
+        // OnGameOver를 못 받고 파괴되는 경우 대비한 마지막 저장 (소유자만)
+        SaveUltimateGaugeToCustomProperty();
+    }
+
+    /// <summary>
+    /// 라운드 시작 시 GP가 음수였던 만큼 HP에서 차감. RoomStatManager가 캐시한 페널티 값을 1회 소비.
+    /// HP는 최소 1로 보장.
+    /// </summary>
+    private void ApplyNegativeGPHPPenalty()
+    {
+        if (RoomStatManager.Instance == null) return;
+
+        int penalty = RoomStatManager.Instance.ConsumePendingNegativeGPPenalty();
+        if (penalty <= 0) return;
+
+        _currentHP = Mathf.Max(1, _currentHP - penalty);
+
+        if (_photonView != null)
+        {
+            _photonView.RPC(nameof(RPC_ChangeHP), RpcTarget.All, _currentHP, _currentPlayerLife, 0);
+        }
+        OnHPChanged?.Invoke(_currentHP);
+
+        // DamageChecker는 GameState != Playing이면 OnDataChanged를 발화하지 않음.
+        // 또한 UI_InGameProfile.Init이 PlayerStat.Start보다 늦게 실행되면 _playerActorNumberList가
+        // 비어 있어 Refresh가 no-op이 됨. 다음 프레임에 직접 PlayerDataChange를 호출해 둘 다 우회.
+        StartCoroutine(FirePlayerDataChangedNextFrame(_currentHP, _currentPlayerLife));
+    }
+
+    private System.Collections.IEnumerator FirePlayerDataChangedNextFrame(int hp, int life)
+    {
+        yield return null; // UI Init / 등록 완료 대기
+        if (EventManager.Instance == null || _photonView == null) yield break;
+        EventManager.Instance.PlayerDataChange(hp, life, _photonView.OwnerActorNr, 0);
+    }
+
+    private void SaveUltimateGaugeToCustomProperty()
+    {
+        if (_photonView == null || !_photonView.IsMine) return;
+        if (PhotonNetwork.LocalPlayer == null) return;
+
+        // Playing(=실제 라운드 진행 중)이 아니면 저장하지 않음
+        // (Result/매치 종료 시점에 저장되어 다음 매치로 넘어가는 것을 방지)
+        if (GameManager.Instance == null
+            || GameManager.Instance.CurrentGameState != EGameState.Playing)
+        {
+            return;
+        }
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable
+        {
+            { EProperties.UltimateGauge.ToString(), _currentUltimateGauge }
+        });
+    }
+
+    private void RestoreUltimateGaugeFromCustomProperty()
+    {
+        if (_photonView == null || !_photonView.IsMine) return;
+        if (PhotonNetwork.LocalPlayer == null) return;
+
+        // Playing이 아닌 상태(Result/Waiting 등)에서는 복원하지 않고, 남아있는 값은 정리
+        if (GameManager.Instance == null
+            || GameManager.Instance.CurrentGameState != EGameState.Playing)
+        {
+            ClearUltimateGaugeCustomProperty();
+            return;
+        }
+
+        if (!PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(
+                EProperties.UltimateGauge.ToString(), out object value))
+        {
+            return;
+        }
+
+        float saved = Convert.ToSingle(value);
+        _currentUltimateGauge = Mathf.Clamp(saved, 0f, _maxUltimateGauge);
+        OnUltimateGaugeChanged?.Invoke(_currentUltimateGauge, _maxUltimateGauge);
+    }
+
+    private void ClearUltimateGaugeCustomProperty()
+    {
+        if (PhotonNetwork.LocalPlayer == null) return;
+        string key = EProperties.UltimateGauge.ToString();
+        if (!PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(key)) return;
+
+        // Photon: 값을 null로 설정하면 키 자체가 삭제됨
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable
+        {
+            { key, null }
+        });
     }
 
 

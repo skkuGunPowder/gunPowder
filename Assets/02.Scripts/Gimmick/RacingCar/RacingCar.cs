@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Photon.Pun;
@@ -22,10 +25,26 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
     [Header("이동 설정")]
     [SerializeField] private float _speed = 30f;
 
+    [Header("페이드 설정")]
+    [SerializeField] private float _fadeDuration = 0.2f;
+    [SerializeField] private float _destroyDelay = 0.5f;
+
     private int _direction;
     private float _leftBound;
     private float _rightBound;
+    private float _spawnOffset;
+
     private Sound _waitSoundInstance;
+    private Tween _moveTween;
+    private Tween _fadeTween;
+    private CancellationTokenSource _cts;
+    private readonly HashSet<int> _hitActorNumbers = new HashSet<int>();
+    private bool _isFading;
+
+    private void Awake()
+    {
+        _cts = new CancellationTokenSource();
+    }
 
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
@@ -33,10 +52,10 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
         _direction = (int)data[0];
         _leftBound = (float)data[1];
         _rightBound = (float)data[2];
+        _spawnOffset = data.Length > 3 ? (float)data[3] : 0f;
 
-        // direction 1 = 좌측 생성 → 우측으로, -1 = 우측 생성 → 좌측으로
-        _spriteRenderer.flipX = _direction == -1;
-
+        // 방향 표시는 RacingCarSpawner가 PhotonNetwork.Instantiate의 rotation으로 전달함
+        // (direction 1 → Y=180, direction -1 → Y=0)
         _hitCollider.enabled = false;
 
         WaitPhase().Forget();
@@ -44,20 +63,37 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     private async UniTaskVoid WaitPhase()
     {
-        SoundManager.Instance.PlayLocalSound(_readySoundName, transform);
-
-        await UniTask.WaitForSeconds(_readyAnimDuration);
-
-        _animator.SetTrigger("Wait");
-        _waitSoundInstance = SoundManager.Instance.PlayLocalSound(_waitSoundName, transform, isLoop: true);
-
-        float remainingWait = _waitDuration - _readyAnimDuration;
-        if (remainingWait > 0f)
+        CancellationToken token = _cts.Token;
+        try
         {
-            await UniTask.WaitForSeconds(remainingWait);
-        }
+            // AnyState → Start 진입 (준비 애니메이션 1회)
+            _animator.SetTrigger("Start");
 
-        MovePhase();
+            if (!string.IsNullOrEmpty(_readySoundName))
+            {
+                //SoundManager.Instance.PlayLocalSound(_readySoundName, transform);
+            }
+
+            await UniTask.WaitForSeconds(_readyAnimDuration, cancellationToken: token);
+
+            // Start → Wait 전이 (대기 애니메이션 반복)
+            _animator.SetTrigger("Wait");
+            if (!string.IsNullOrEmpty(_waitSoundName))
+            {
+                //_waitSoundInstance = SoundManager.Instance.PlayLocalSound(_waitSoundName, transform, isLoop: true);
+            }
+
+            float remainingWait = _waitDuration - _readyAnimDuration;
+            if (remainingWait > 0f)
+            {
+                await UniTask.WaitForSeconds(remainingWait, cancellationToken: token);
+            }
+
+            MovePhase();
+        }
+        catch (OperationCanceledException)
+        {
+        }
     }
 
     private void MovePhase()
@@ -67,34 +103,118 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
         if (_waitSoundInstance != null)
         {
             _waitSoundInstance.Stop();
+            _waitSoundInstance = null;
         }
 
-        // SoundManager.Instance.PlayLocalSound(_moveSoundName, transform);
-
+        // 모든 클라이언트가 자신의 로컬 플레이어와의 충돌을 감지하기 위해 collider 활성화
         _hitCollider.enabled = true;
 
-        float targetX = _direction == 1 ? _rightBound : _leftBound;
+        if (!photonView.IsMine) return;
+
+        if (!string.IsNullOrEmpty(_moveSoundName))
+        {
+            //SoundManager.Instance.PlayLocalSound(_moveSoundName, transform);
+        }
+
+        float targetX = _direction == 1
+            ? _rightBound + _spawnOffset
+            : _leftBound - _spawnOffset;
         float duration = Mathf.Abs(targetX - transform.position.x) / _speed;
 
-        transform.DOMoveX(targetX, duration).SetEase(Ease.Linear).OnComplete(() =>
+        _moveTween = transform.DOMoveX(targetX, duration).SetEase(Ease.Linear)
+            .OnComplete(() => photonView.RPC(nameof(RPC_StartFadeOut), RpcTarget.All));
+
+    }
+
+    [PunRPC]
+    private void RPC_StartFadeOut() => StartFadeOut();
+
+    private void StartFadeOut()
+    {
+        if (_isFading) return;
+        _isFading = true;
+
+        if (_hitCollider != null)
         {
-            if (photonView.IsMine)
+            _hitCollider.enabled = false;
+        }
+
+        if (_spriteRenderer != null)
+        {
+            _fadeTween = _spriteRenderer.DOFade(0f, _fadeDuration);
+        }
+
+        DelayedDestroy().Forget();
+    }
+
+    private async UniTaskVoid DelayedDestroy()
+    {
+        CancellationToken token = _cts.Token;
+        try
+        {
+            await UniTask.WaitForSeconds(_destroyDelay, cancellationToken: token);
+
+            if (photonView != null && photonView.IsMine && photonView.ViewID != 0)
             {
                 PhotonNetwork.Destroy(gameObject);
             }
-        });
+        }
+        catch (OperationCanceledException)
+        {
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!photonView.IsMine) { return; }
-        if (!other.CompareTag("Player")) { return; }
+        if (_isFading) return;
+        if (!other.CompareTag("Player")) return;
 
-        Vector3 midpoint = (transform.position + other.transform.position) * 0.5f;
+        // 각 클라이언트가 "자기 자신의 플레이어가 차에 부딪힌 경우"만 감지
+        PhotonView otherPv = other.GetComponentInParent<PhotonView>();
+        if (otherPv == null || !otherPv.IsMine) return;
+
+        int victimActorNr = otherPv.OwnerActorNr;
+        Vector3 carPos = transform.position;
+        Vector3 victimPos = other.transform.position;
+
+        // 모든 클라이언트에서 폭발을 생성해야, 피해자 본인 클라에서 PlayerDamageController.TakeDamage의
+        // IsMine 가드를 통과하고 데미지 RPC가 발화됨.
+        photonView.RPC(nameof(RPC_ExplodeAt), RpcTarget.All,
+            victimActorNr, carPos, victimPos);
+    }
+
+    [PunRPC]
+    private void RPC_ExplodeAt(int victimActorNr, Vector3 carPos, Vector3 victimPos)
+    {
+        if (_isFading) return;
+        if (!_hitActorNumbers.Add(victimActorNr)) return; // 같은 차 → 같은 플레이어 중복 방지 (각 클라이언트 로컬)
+
+        Vector3 midpoint = (carPos + victimPos) * 0.5f;
 
         Explosion explosion = ExplosionPool.Instance.Get(_explosionPrefab.name);
         explosion.transform.position = midpoint;
-        explosion.Explode(false, photonView);
-        
+        explosion.Explode(true, photonView);
+    }
+
+    private void OnDisable()
+    {
+        if (_cts != null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
+        }
+
+        _moveTween?.Kill();
+        _moveTween = null;
+
+        _fadeTween?.Kill();
+        _fadeTween = null;
+
+        if (_waitSoundInstance != null)
+        {
+            _waitSoundInstance.Stop();
+            _waitSoundInstance = null;
+        }
     }
 }

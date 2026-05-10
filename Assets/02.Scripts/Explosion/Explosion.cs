@@ -5,6 +5,9 @@ public class Explosion : MonoBehaviour
 {
     public GameObject VFXPrefab;
 
+    // 자기 자신이 던진 폭탄에 의한 넉백 임펄스 스케일 (1.0 = 그대로, 0.5 = 절반)
+    private const float SELF_KNOCKBACK_SCALE = 0.5f;
+
     protected ExplosionStat _stat;
     protected CameraController _cameraController;
     [SerializeField]
@@ -46,7 +49,10 @@ public class Explosion : MonoBehaviour
                     {
                         continue;
                     }
-                    AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower, transform.position, _stat.ExplosionRadius);
+                    // 공격자 == 피해자(자기 폭탄) → 넉백 절반 적용
+                    bool isSelfKnockback = (other.gameObject == attackerPhotonView.gameObject);
+                    float explosivePower = _stat.ExplosivePower * (isSelfKnockback ? SELF_KNOCKBACK_SCALE : 1f);
+                    AddExplosionForce2D(otherRigidBody, explosivePower, transform.position, _stat.ExplosionRadius);
                 }
                 else
                 {
