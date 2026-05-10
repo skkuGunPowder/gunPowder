@@ -13,6 +13,9 @@ public class UI_CartridgeGoods : MonoBehaviour
     
      private CartridgeData _cartridgeData;
      private int _price;
+
+     public CartridgeData CartridgeData => _cartridgeData;
+     public int Price => _price;
      
      private void Awake()
      {
