@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 2378972428517735097}
   - component: {fileID: 6308915137378322986}
   - component: {fileID: 5695604668242453639}
+  - component: {fileID: 1882568432702599770}
   m_Layer: 0
   m_Name: ModeNSpawner
   m_TagString: Untagged
@@ -151,6 +152,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   State: 4
+  _longtime: 8
+  _shortTime: 5
 --- !u!114 &5695604668242453639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -165,6 +168,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   State: 5
   _bombSelectDuration: 10
+--- !u!114 &1882568432702599770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035945805825258251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6224b69f29b5622459cc2d6e323f9938, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  State: 6
 --- !u!1 &3019794214641518552
 GameObject:
   m_ObjectHideFlags: 0

@@ -33,8 +33,9 @@ public abstract class UI_CartridgeSlotBase : MonoBehaviour
         }
 
         SetColor(cartridge);
-        _nameText.text = $"{actionName} : {cartridge.Data.Name}";
-        _explanationText.text = cartridge.Data.Explanation;
+        
+        _nameText.text = $"{actionName} : {TextManager.Instance.GetText(cartridge.Data.Name)}";
+        TextManager.Instance.GetText(cartridge.Data.Explanation);
 
         int currentDurability = cartridge.GetCurrentDurability();
 

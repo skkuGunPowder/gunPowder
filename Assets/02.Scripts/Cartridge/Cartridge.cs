@@ -74,6 +74,7 @@ public abstract class Cartridge : MonoBehaviour, ICartridge
         }
         
         _currentDurability--;
+        
         return true;
     }
 

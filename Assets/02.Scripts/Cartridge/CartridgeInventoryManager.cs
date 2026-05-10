@@ -54,20 +54,17 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
 
         if(_permanentCartridges.TryGetValue(id, out Cartridge existingPermanent))
         {
-            Debug.Log($"이미 보유 중인 영구형 카트리지{id} 수리 시도.");
             return Repair(existingPermanent.Data.ID);
         }
 
         if(_consumableCartridges.ContainsKey(id))
         {
-            Debug.LogWarning($"이미 보유 중인 소모형 카트리지{id}입니다.");
             return false;
         }
 
         // 슬롯 최대 3개 제한
         if (GetTotalCount() >= 3)
         {
-            Debug.LogWarning($"카트리지 슬롯이 가득 찼습니다. 교체 팝업을 사용하세요.");
             return false;
         }
 
@@ -83,7 +80,6 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             _permanentCartridges.Add(id, newCartridge);
         }
 
-        Debug.Log($"[AddCartridge] 호출 - ID: {id}, 현재 소모형 보유: {_consumableCartridges.Count}, 현재 영구형 보유: {_permanentCartridges.Count}");
         SyncToCustomProperties();
         return true;
     }
@@ -111,7 +107,6 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         if (removed != null)
         {
             Destroy(removed.gameObject);
-            Debug.Log($"카트리지 제거 성공. ID: {id}");
             SyncToCustomProperties();
         }
         else
@@ -146,8 +141,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
 
         if (_consumableCartridges.TryGetValue(id, out Cartridge consumable))
         {
-            if(!CheckCartridgeUsable(consumable)) return false;
-
+            CheckCartridgeUsable(consumable);
             consumable.ExcuteGimmick(owner);
             SyncToCustomProperties();
             return true;
@@ -155,8 +149,7 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
 
         if (_permanentCartridges.TryGetValue(id, out Cartridge permanent))
         {
-            if(!CheckCartridgeUsable(permanent)) return false;
-
+            CheckCartridgeUsable(permanent);
             permanent.ExcuteGimmick(owner);
             SyncToCustomProperties();
             return true;
@@ -173,14 +166,16 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         List<Cartridge> permanents = new List<Cartridge>(_permanentCartridges.Values);
         foreach (Cartridge consumable in consumables)
         {
-            if(!CheckCartridgeUsable(consumable)) continue;
             consumable.ExcuteGimmick(owner);
+            CheckCartridgeUsable(consumable);
+            
         }
 
         foreach (Cartridge permanent in permanents)
-        {
-            if(!CheckCartridgeUsable(permanent)) continue;
+        { 
+            
             permanent.ExcuteGimmick(owner);
+            CheckCartridgeUsable(permanent);
         }
 
         SyncToCustomProperties();
@@ -336,7 +331,6 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
             _permanentCartridges.Add(addId, newCartridge);
         }
 
-        Debug.Log($"[SwapCartridge] {removeId} → {addId} 교체 완료");
         SyncToCustomProperties();
         return true;
     }
@@ -442,28 +436,22 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         }
     }
 
-    private bool CheckCartridgeUsable(Cartridge cartridge)
+    private void CheckCartridgeUsable(Cartridge cartridge)
     {
         // 결과 반환 : true - 사용가능, false - 사용불가 (내구도 부족)
         if (cartridge.GetMaxDurability() == 0)
         {
             if (cartridge.GetCurrentDurability() != 0)
             {
-                Debug.LogError($"소모형 카트리지{cartridge.Data.ID} 제거. Count: {cartridge.GetCurrentDurability()}");
                 RemoveCartridge(cartridge.Data.ID);
-                return false;
             }
         }
         else
         {
             if (cartridge.GetCurrentDurability() <= 0)
             {
-                Debug.LogError($"영구형 카트리지{cartridge.Data.ID} 제거. Count: {cartridge.GetCurrentDurability()}");
                 RemoveCartridge(cartridge.Data.ID);
-                return false;
             }
         }
-        
-        return true;
     }
 }
