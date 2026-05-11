@@ -23,20 +23,36 @@ public class TeamScore
 
 public class GameStateRound : GameModeStateBase
 {
+    // 팀별 집계 데이터
+    private class TeamStatData
+    {
+        public int TotalHP;
+        public float TotalKill;
+        public float TotalDamage;
+        public int InitialCount;
+        public int MinActorNumber;
+
+        public TeamStatData(int initialCount)
+        {
+            InitialCount = initialCount;
+            MinActorNumber = int.MaxValue;
+        }
+
+        public float HPContribution => InitialCount > 0 ? (float)TotalHP / InitialCount : 0f;
+    }
+
     private Dictionary<EInGameTeam, TeamScore> _roundTeamCount = new Dictionary<EInGameTeam, TeamScore>();
     private const int ROUND_SCORE_LIMIT = 5; // 라운드 설정
-    
-    // 우승자 확인용 변수
-    private int _maxTime = int.MinValue;
-    private float _damage = float.MinValue;
-    private int _maxHp = int.MinValue;
+
+    // 팀별 집계 딕셔너리
+    private Dictionary<EInGameTeam, TeamStatData> _teamStats = new Dictionary<EInGameTeam, TeamStatData>();
     private int _playerCount = 0;
-    
+
     // 자신의 결과 저장
     private float _myDamage = 0;
     private float _myKill = 0;
     private int _mySurvivorTime = 0;
-    
+
     public EInGameTeam _winningTeam;
     
     
@@ -69,46 +85,94 @@ public class GameStateRound : GameModeStateBase
     // 초기화
     private void Init()
     {
-        _maxTime = int.MinValue;
-        _damage = float.MinValue;
-        _maxHp = int.MinValue;
         _playerCount = 0;
+        _teamStats.Clear();
+
+        // 팀별 초기 인원 수 설정
+        foreach (PhotonPlayer player in PhotonNetwork.PlayerList)
+        {
+            EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+            if (!_teamStats.ContainsKey(team))
+            {
+                _teamStats[team] = new TeamStatData(0);
+            }
+            _teamStats[team].InitialCount++;
+        }
     }
+
     // 우승팀 체크 >> 방장이 체크 후 플레이어들에게 전달
     private void CheckWinningTeam(int hp, PhotonPlayer player)
     {
         PhotonPlayer[] players = PhotonNetwork.PlayerList;
-        
+
         _playerCount += 1;
-        
+
         if (players.Length == 1)
         {
             _gameMode.GameOver();   // 플레이어가 한명이라면 바로 종료
             return;
         }
-        
-        int time = (int)player.CustomProperties[EProperties.SurvivorTime.ToString()];
-        
-        float damage = (float)player.CustomProperties[EProperties.Damage.ToString()];
-        
-        // 현재 플레이어가 더 우세한지 체크
-        bool isBetterHP = hp > _maxHp;
-        bool isBetterTime = _maxHp == hp && time > _maxTime;
-        bool isSameHealthButMoreDamage = _maxHp == hp && time == _maxTime && damage > _damage;
 
-        if (isBetterHP || isBetterTime || isSameHealthButMoreDamage)
-        {
-            _maxHp = hp;
-            _maxTime = time;
-            _damage = damage;
-            _winningTeam = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-        }
-        
+        EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+        float kill = player.CustomProperties.ContainsKey(EProperties.Kill.ToString())
+            ? (float)player.CustomProperties[EProperties.Kill.ToString()]
+            : 0f;
+        float damage = player.CustomProperties.ContainsKey(EProperties.Damage.ToString())
+            ? (float)player.CustomProperties[EProperties.Damage.ToString()]
+            : 0f;
+        bool isDead = player.CustomProperties.ContainsKey(EProperties.IsDead.ToString()) &&
+                      (bool)player.CustomProperties[EProperties.IsDead.ToString()];
 
-        if (players.Length == _playerCount)
+        if (!_teamStats.ContainsKey(team))
         {
-            SetWinningTeam(_winningTeam);
+            _teamStats[team] = new TeamStatData(1);
         }
+
+        _teamStats[team].TotalHP += hp;
+        _teamStats[team].TotalKill += kill;
+        _teamStats[team].TotalDamage += damage;
+
+        // 생존 플레이어 중 최소 액터 번호 추적
+        if (!isDead && player.ActorNumber < _teamStats[team].MinActorNumber)
+        {
+            _teamStats[team].MinActorNumber = player.ActorNumber;
+        }
+
+        if (players.Length != _playerCount)
+        {
+            return;
+        }
+
+        // 전원 수신 완료 → 팀 비교로 승자 결정
+        // HP 기여도 내림차순 → 킬 내림차순 → 딜량 내림차순 → 최소 액터 오름차순
+        EInGameTeam winTeam = EInGameTeam.Default;
+        float bestHP = float.MinValue;
+        float bestKill = float.MinValue;
+        float bestDamage = float.MinValue;
+        int bestMinActor = int.MaxValue;
+
+        foreach (KeyValuePair<EInGameTeam, TeamStatData> kv in _teamStats)
+        {
+            TeamStatData stat = kv.Value;
+            bool isBetterHP = stat.HPContribution > bestHP;
+            bool isSameHP = stat.HPContribution == bestHP;
+            bool isBetterKill = isSameHP && stat.TotalKill > bestKill;
+            bool isSameKill = isSameHP && stat.TotalKill == bestKill;
+            bool isBetterDamage = isSameKill && stat.TotalDamage > bestDamage;
+            bool isSameDamage = isSameKill && stat.TotalDamage == bestDamage;
+            bool isBetterActor = isSameDamage && stat.MinActorNumber < bestMinActor;
+
+            if (isBetterHP || isBetterKill || isBetterDamage || isBetterActor)
+            {
+                bestHP = stat.HPContribution;
+                bestKill = stat.TotalKill;
+                bestDamage = stat.TotalDamage;
+                bestMinActor = stat.MinActorNumber;
+                winTeam = kv.Key;
+            }
+        }
+
+        SetWinningTeam(winTeam);
     }
     
     private void RequestMyPlayerHealth()
