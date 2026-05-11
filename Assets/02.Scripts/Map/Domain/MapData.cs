@@ -36,6 +36,6 @@ public class MapData
         }
         
         // 한칸 공백
-        return mapName + "" + MapName;;
+        return mapName + " " + MapName;;
     }
 }

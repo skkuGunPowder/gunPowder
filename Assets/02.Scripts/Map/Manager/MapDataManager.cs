@@ -45,6 +45,21 @@ public class MapDataManager : Singleton<MapDataManager>
     
     private void ThemeSetting()
     {
+        string random = ""; // 랜덤 미리 찾기
+        
+        foreach (var themeSO in _mapThemeDataSOList)
+        {
+            if (themeSO == null)
+            {
+                continue;
+            }
+                        
+            if (themeSO.MapTheme == EMapTheme.Random)
+            {
+                random = themeSO.ThemeName;
+            }
+        }
+        
         _mapThemeDataDict = new Dictionary<EMapTheme, MapThemeData>();
         
         foreach (MapThemeDataSO theme in _mapThemeDataSOList)
@@ -71,21 +86,7 @@ public class MapDataManager : Singleton<MapDataManager>
 
                 if (dataSO.MapTheme == EMapTheme.Random)
                 {
-                    string themeCode = "";
-
-                    foreach (var themeSO in _mapThemeDataSOList)
-                    {
-                        if (themeSO == null)
-                        {
-                            continue;
-                        }
-                        
-                        if (themeSO.MapTheme == EMapTheme.Random)
-                        {
-                            themeCode = themeSO.ThemeName;
-                        }
-                    }
-                    MapData data = new MapData(dataSO.Map, themeCode, dataSO.MapName, dataSO.MapSprite);
+                    MapData data = new MapData(dataSO.Map, random, dataSO.MapName, dataSO.MapSprite);
                     themeData.AddMapData(data);
                     continue;
                 }
