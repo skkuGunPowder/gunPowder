@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
 {
@@ -14,9 +15,10 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
     [SerializeField] private Explosion _explosionPrefab;
 
     [Header("사운드")]
-    [SerializeField] private string _readySoundName;
     [SerializeField] private string _waitSoundName;
+    [SerializeField] private string _waitTireSoundName;
     [SerializeField] private string _moveSoundName;
+    [SerializeField] private string _hornSoundName;
 
     [Header("대기 설정")]
     [SerializeField] private float _readyAnimDuration = 0.5f;
@@ -33,8 +35,9 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
     private float _leftBound;
     private float _rightBound;
     private float _spawnOffset;
-
+    
     private Sound _waitSoundInstance;
+    private Sound _waitTireSoundInstance;
     private Tween _moveTween;
     private Tween _fadeTween;
     private CancellationTokenSource _cts;
@@ -69,20 +72,21 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
             // AnyState → Start 진입 (준비 애니메이션 1회)
             _animator.SetTrigger("Start");
 
-            if (!string.IsNullOrEmpty(_readySoundName))
+            if (!string.IsNullOrEmpty(_waitSoundName))
             {
-                //SoundManager.Instance.PlayLocalSound(_readySoundName, transform);
+                _waitSoundInstance = SoundManager.Instance.PlayLocalSound(_waitSoundName, transform);
+            }
+            
+            if (!string.IsNullOrEmpty(_waitTireSoundName))
+            {
+                _waitTireSoundInstance = SoundManager.Instance.PlayLocalSound(_waitTireSoundName, transform);
             }
 
             await UniTask.WaitForSeconds(_readyAnimDuration, cancellationToken: token);
 
             // Start → Wait 전이 (대기 애니메이션 반복)
             _animator.SetTrigger("Wait");
-            if (!string.IsNullOrEmpty(_waitSoundName))
-            {
-                //_waitSoundInstance = SoundManager.Instance.PlayLocalSound(_waitSoundName, transform, isLoop: true);
-            }
-
+            
             float remainingWait = _waitDuration - _readyAnimDuration;
             if (remainingWait > 0f)
             {
@@ -105,6 +109,12 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
             _waitSoundInstance.Stop();
             _waitSoundInstance = null;
         }
+        
+        if (_waitTireSoundInstance != null)
+        {
+            _waitTireSoundInstance.Stop();
+            _waitTireSoundInstance = null;
+        }
 
         // 모든 클라이언트가 자신의 로컬 플레이어와의 충돌을 감지하기 위해 collider 활성화
         _hitCollider.enabled = true;
@@ -113,7 +123,7 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
 
         if (!string.IsNullOrEmpty(_moveSoundName))
         {
-            //SoundManager.Instance.PlayLocalSound(_moveSoundName, transform);
+            SoundManager.Instance.PlayLocalSound(_moveSoundName, transform);
         }
 
         float targetX = _direction == 1
@@ -190,6 +200,11 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
         if (!_hitActorNumbers.Add(victimActorNr)) return; // 같은 차 → 같은 플레이어 중복 방지 (각 클라이언트 로컬)
 
         Vector3 midpoint = (carPos + victimPos) * 0.5f;
+        
+        if (!string.IsNullOrEmpty(_hornSoundName))
+        {
+            SoundManager.Instance.PlayLocalSound(_hornSoundName, transform);
+        }
 
         Explosion explosion = ExplosionPool.Instance.Get(_explosionPrefab.name);
         explosion.transform.position = midpoint;
@@ -215,6 +230,12 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
         {
             _waitSoundInstance.Stop();
             _waitSoundInstance = null;
+        }
+        
+        if (_waitTireSoundInstance != null)
+        {
+            _waitTireSoundInstance.Stop();
+            _waitTireSoundInstance = null;
         }
     }
 }
