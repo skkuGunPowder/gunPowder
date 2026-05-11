@@ -62,36 +62,101 @@ public class GameResultManager : PhotonSingleton<GameResultManager>
 
     private void Arrange()
     {
-        // 팀별로 묶기
-        // 팀별로 묶고 정렬
-        var groupedTeams = ResultDataList
+        // 마지막 라운드 우승 팀
+        EInGameTeam lastRoundWinner = EInGameTeam.Default;
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(ERoomProperties.LastRoundWinnerTeam.ToString()))
+        {
+            lastRoundWinner = (EInGameTeam)(int)PhotonNetwork.CurrentRoom.CustomProperties[ERoomProperties.LastRoundWinnerTeam.ToString()];
+        }
+
+        // 팀별로 묶고 팀 내 개인 정렬
+        List<List<GameResultData>> groupedTeams = ResultDataList
             .GroupBy(p => p.Team)
             .Select(g => g
-                .OrderByDescending(p => p.SurviveTime)  // 1. 생존시간 (오래할수록)
-                .ThenByDescending(p => p.Kill)          // 2. 킬 (많이할수록)
-                .ThenByDescending(p => p.Damage)        // 3. 딜 (많이할수록)
+                .OrderByDescending(p => p.SurviveTime)
+                .ThenByDescending(p => p.Kill)
+                .ThenByDescending(p => p.Damage)
                 .ToList())
-            .Where(g => g.Count > 0) // 빈 그룹 제거
-            .OrderByDescending(teamGroup => teamGroup[0].SurviveTime) // 각 팀 대표의 생존시간 기준
-            .ThenByDescending(teamGroup => teamGroup[0].Kill)         // 팀 대표의 킬 기준
-            .ThenByDescending(teamGroup => teamGroup[0].Damage)       // 팀 대표의 딜 기준
+            .Where(g => g.Count > 0)
             .ToList();
 
+        // 팀별 라운드 승리 수와 평균 통계 계산
+        groupedTeams.Sort((groupA, groupB) =>
+        {
+            // 1. 라운드 승리 수 내림차순
+            int roundWinsA = GetTeamRoundWins(groupA[0].Player);
+            int roundWinsB = GetTeamRoundWins(groupB[0].Player);
+            if (roundWinsA != roundWinsB)
+            {
+                return roundWinsB.CompareTo(roundWinsA);
+            }
+
+            // 2. 팀 평균 킬 내림차순
+            float avgKillA = (float)SumTeam(groupA, d => d.Kill) / groupA.Count;
+            float avgKillB = (float)SumTeam(groupB, d => d.Kill) / groupB.Count;
+            if (avgKillA != avgKillB)
+            {
+                return avgKillB.CompareTo(avgKillA);
+            }
+
+            // 3. 팀 평균 딜량 내림차순
+            float avgDamageA = (float)SumTeam(groupA, d => d.Damage) / groupA.Count;
+            float avgDamageB = (float)SumTeam(groupB, d => d.Damage) / groupB.Count;
+            if (avgDamageA != avgDamageB)
+            {
+                return avgDamageB.CompareTo(avgDamageA);
+            }
+
+            // 4. 팀 평균 생존시간 내림차순
+            float avgTimeA = (float)SumTeam(groupA, d => d.SurviveTime) / groupA.Count;
+            float avgTimeB = (float)SumTeam(groupB, d => d.SurviveTime) / groupB.Count;
+            if (avgTimeA != avgTimeB)
+            {
+                return avgTimeB.CompareTo(avgTimeA);
+            }
+
+            // 5. 마지막 라운드 우승 팀 우선
+            bool aIsLastWinner = groupA[0].Team == lastRoundWinner;
+            bool bIsLastWinner = groupB[0].Team == lastRoundWinner;
+            if (aIsLastWinner != bIsLastWinner)
+            {
+                return aIsLastWinner ? -1 : 1;
+            }
+
+            return 0;
+        });
 
         ResultDataList.Clear();
 
         int currentRank = 1;
-        foreach (var teamGroup in groupedTeams)
-        {  
-            foreach (var data in teamGroup)
+        foreach (List<GameResultData> teamGroup in groupedTeams)
+        {
+            foreach (GameResultData data in teamGroup)
             {
                 data.Rank = currentRank;
             }
-
-            currentRank ++;
-            
-            ResultDataList.AddRange(teamGroup); // 팀별 생존시간 내림차순
+            currentRank++;
+            ResultDataList.AddRange(teamGroup);
         }
+    }
+
+    private int GetTeamRoundWins(PhotonPlayer player)
+    {
+        if (player.CustomProperties.ContainsKey(EProperties.RoundWins.ToString()))
+        {
+            return (int)player.CustomProperties[EProperties.RoundWins.ToString()];
+        }
+        return 0;
+    }
+
+    private int SumTeam(List<GameResultData> group, Func<GameResultData, int> selector)
+    {
+        int sum = 0;
+        foreach (GameResultData data in group)
+        {
+            sum += selector(data);
+        }
+        return sum;
     }
 
 

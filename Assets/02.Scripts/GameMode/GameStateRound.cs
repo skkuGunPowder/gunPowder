@@ -197,6 +197,22 @@ public class GameStateRound : GameModeStateBase
     {
         _roundTeamCount[team].AddScore();
         EventManager.Instance.ScoreUpdate(team, _roundTeamCount[team].score);
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            int score = _roundTeamCount[team].score;
+            foreach (PhotonPlayer player in PhotonNetwork.PlayerList)
+            {
+                EInGameTeam playerTeam = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+                if (playerTeam == team)
+                {
+                    player.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+                    {
+                        { EProperties.RoundWins.ToString(), score }
+                    });
+                }
+            }
+        }
     }
     
     private void EndCheck()
@@ -238,12 +254,18 @@ public class GameStateRound : GameModeStateBase
     {
         _winningTeam = team;
         ProduceScore();
-        
+
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;
         }
-        
+
+        // 마지막 라운드 우승 팀 기록
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+        {
+            { ERoomProperties.LastRoundWinnerTeam.ToString(), (int)team }
+        });
+
         _photonView.RPC(nameof(RPC_WinningTeam), RpcTarget.Others, team);
     }
     

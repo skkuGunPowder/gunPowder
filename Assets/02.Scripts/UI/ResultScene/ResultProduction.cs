@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
@@ -40,6 +41,8 @@ public class ResultProduction : MonoBehaviour
     public float CameraOthorSize;
     public Color32 FadeColor;
     
+    private CancellationToken _cancellationToken;
+
     // 시작하자마자 연출 시작
     private void Awake()
     {
@@ -49,6 +52,7 @@ public class ResultProduction : MonoBehaviour
             throw new Exception("카메라가 없음");
         }
         _camera.orthographicSize = CameraOthorSize;
+        _cancellationToken = this.GetCancellationTokenOnDestroy();
     }
 
     private void OnEnable()
@@ -86,24 +90,29 @@ public class ResultProduction : MonoBehaviour
         }
 
         _timer = 0;
-        
-        Task_FireWorks().Forget();
+
+        Task_FireWorks(_cancellationToken).Forget();
     }
 
-    private async UniTaskVoid Task_FireWorks()
+    private async UniTaskVoid Task_FireWorks(CancellationToken cancellationToken)
     {
         foreach (GameObject particle in FireWorksParticle)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             int random = UnityEngine.Random.Range(0, FireWorksPercent);
 
             if (random != 0)
             {
                 continue;
             }
-            
+
             particle.SetActive(true);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(FireWorksSpacingTime));
+            await UniTask.Delay(TimeSpan.FromSeconds(FireWorksSpacingTime), cancellationToken: cancellationToken);
         }
     }
 }

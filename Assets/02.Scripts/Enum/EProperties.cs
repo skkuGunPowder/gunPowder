@@ -20,6 +20,7 @@ public enum EProperties
     GP,
     UltimateGauge,
     HP,
+    RoundWins,
 
     Count
 }

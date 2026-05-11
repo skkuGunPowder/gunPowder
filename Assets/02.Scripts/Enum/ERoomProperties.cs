@@ -14,6 +14,7 @@ public enum ERoomProperties
     ChatChannelNumber,
     StateChange,
     StateChangeId,
-    
+    LastRoundWinnerTeam,
+
     Count
 }
