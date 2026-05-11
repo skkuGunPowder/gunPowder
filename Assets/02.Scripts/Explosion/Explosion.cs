@@ -50,9 +50,11 @@ public class Explosion : MonoBehaviour
                         continue;
                     }
                     // 공격자 == 피해자(자기 폭탄) → 넉백 절반 적용
+                    // 단, 폭발점프(AllowBombDashForce=true) 중인 자기-넉백은 의도된 부스트이므로 1.0배 유지
                     bool isSelfKnockback = (other.gameObject == attackerPhotonView.gameObject);
-                    float explosivePower = _stat.ExplosivePower * (isSelfKnockback ? SELF_KNOCKBACK_SCALE : 1f);
-                    AddExplosionForce2D(otherRigidBody, explosivePower, transform.position, _stat.ExplosionRadius);
+                    bool isExplosionJump = isSelfKnockback && attackerPlayer != null && attackerPlayer.AllowBombDashForce;
+                    float scale = (isSelfKnockback && !isExplosionJump) ? SELF_KNOCKBACK_SCALE : 1f;
+                    AddExplosionForce2D(otherRigidBody, _stat.ExplosivePower * scale, transform.position, _stat.ExplosionRadius);
                 }
                 else
                 {

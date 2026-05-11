@@ -22,7 +22,7 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     [Header("대기 설정")]
     [SerializeField] private float _readyAnimDuration = 0.5f;
-    [SerializeField] private float _waitDuration = 2f;
+    [SerializeField] private float _waitDuration = 3f;
 
     [Header("이동 설정")]
     [SerializeField] private float _speed = 30f;
@@ -119,12 +119,9 @@ public class RacingCar : MonoBehaviourPun, IPunInstantiateMagicCallback
         // 모든 클라이언트가 자신의 로컬 플레이어와의 충돌을 감지하기 위해 collider 활성화
         _hitCollider.enabled = true;
 
+        SoundManager.Instance.PlayLocalSound(_moveSoundName, transform);
         if (!photonView.IsMine) return;
 
-        if (!string.IsNullOrEmpty(_moveSoundName))
-        {
-            SoundManager.Instance.PlayLocalSound(_moveSoundName, transform);
-        }
 
         float targetX = _direction == 1
             ? _rightBound + _spawnOffset
