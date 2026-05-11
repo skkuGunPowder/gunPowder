@@ -182,6 +182,11 @@ public class PlayerStat : MonoBehaviour
         {
             EventManager.Instance.OnGameOver -= SaveUltimateGaugeToCustomProperty;
             EventManager.Instance.OnGameOver += SaveUltimateGaugeToCustomProperty;
+
+            // UI_InGameProfile.Init이 슬롯 HP를 RoomStatManager.PlayerHP(150) const로 재설정하므로,
+            // 매 ProfileInit 직후 현재 _currentHP를 UI에 다시 push (페널티/감소된 HP 보존)
+            EventManager.Instance.OnProfileInit -= RepushHPToUI;
+            EventManager.Instance.OnProfileInit += RepushHPToUI;
         }
     }
 
@@ -190,10 +195,22 @@ public class PlayerStat : MonoBehaviour
         if (EventManager.Instance != null)
         {
             EventManager.Instance.OnGameOver -= SaveUltimateGaugeToCustomProperty;
+            EventManager.Instance.OnProfileInit -= RepushHPToUI;
         }
 
         // OnGameOver를 못 받고 파괴되는 경우 대비한 마지막 저장 (소유자만)
         SaveUltimateGaugeToCustomProperty();
+    }
+
+    /// <summary>
+    /// ProfileInit 직후 UI 슬롯에 현재 HP/Life를 다시 푸시 (페널티 차감값 보존).
+    /// UI_InGameProfile.Init은 OnProfileInit에 먼저 구독되어 있어 슬롯 list가 populated된 뒤에 본 핸들러가 실행됨.
+    /// </summary>
+    private void RepushHPToUI()
+    {
+        if (_photonView == null || !_photonView.IsMine) return;
+        if (EventManager.Instance == null) return;
+        EventManager.Instance.PlayerDataChange(_currentHP, _currentPlayerLife, _photonView.OwnerActorNr, 0);
     }
 
     /// <summary>
