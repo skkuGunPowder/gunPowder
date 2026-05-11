@@ -345,7 +345,8 @@ public class GameStatePlaying : GameModeStateBase
         {
             { EProperties.IsDead.ToString(), true },
             { EProperties.Kill.ToString(), stat.TotalKillCount },
-            { EProperties.Damage.ToString(),stat.TotalDamage }
+            { EProperties.Damage.ToString(), stat.TotalDamage },
+            { EProperties.HP.ToString(), 0 }
         });
     }
     
@@ -377,7 +378,8 @@ public class GameStatePlaying : GameModeStateBase
         {
             {EProperties.IsDead.ToString(), true},
             {EProperties.Kill.ToString(), stat.TotalKillCount},
-            {EProperties.Damage.ToString(), stat.TotalDamage}
+            {EProperties.Damage.ToString(), stat.TotalDamage},
+            {EProperties.HP.ToString(), stat.CurrentHP}
         };
 
         // 방장의 타이머 기준으로 SurvivorTime 설정 요청 (방장/비방장 공통)
@@ -409,57 +411,130 @@ public class GameStatePlaying : GameModeStateBase
         player.SetCustomProperties(hash);
     }
     
+    // 팀별 집계 데이터
+    private class TeamStatData
+    {
+        public int TotalHP;
+        public float TotalKill;
+        public float TotalDamage;
+        public int InitialCount;
+        public int MinActorNumber;
+
+        public TeamStatData(int initialCount)
+        {
+            InitialCount = initialCount;
+            MinActorNumber = int.MaxValue;
+        }
+
+        public float HPContribution => InitialCount > 0 ? (float)TotalHP / InitialCount : 0f;
+    }
+
     // LastDie로 죽었을 때 변화
     private void RequestStateChange()
     {
         if (PhotonNetwork.IsMasterClient && _gameMode is BattleMode battleMode)
         {
-            List<PhotonPlayer> deathOrderList = new List<PhotonPlayer>(battleMode.DeathOrderQueue);
-
-            // 팀원 전원 생존한 팀 탐색 (2인 이상)
-            bool foundSurvivingTeam = false;
-            EInGameTeam allSurvivedTeam = EInGameTeam.Default;
-            foreach (KeyValuePair<EInGameTeam, int> kv in _teamCount)
+            // 팀별 집계 딕셔너리 초기화
+            Dictionary<EInGameTeam, TeamStatData> teamStats = new Dictionary<EInGameTeam, TeamStatData>();
+            foreach (KeyValuePair<EInGameTeam, int> kv in _initialTeamCount)
             {
-                if (kv.Value >= 2 && _initialTeamCount.ContainsKey(kv.Key) && kv.Value == _initialTeamCount[kv.Key])
+                teamStats[kv.Key] = new TeamStatData(kv.Value);
+            }
+
+            // 팀별 플레이어 목록
+            Dictionary<EInGameTeam, List<PhotonPlayer>> teamPlayers = new Dictionary<EInGameTeam, List<PhotonPlayer>>();
+            foreach (EInGameTeam team in teamStats.Keys)
+            {
+                teamPlayers[team] = new List<PhotonPlayer>();
+            }
+
+            // 현재 플레이어 데이터 수집
+            foreach (PhotonPlayer player in PhotonNetwork.PlayerList)
+            {
+                EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+                if (!teamStats.ContainsKey(team))
                 {
-                    allSurvivedTeam = kv.Key;
-                    foundSurvivingTeam = true;
-                    break;
+                    continue;
+                }
+
+                teamPlayers[team].Add(player);
+
+                int hp = player.CustomProperties.ContainsKey(EProperties.HP.ToString())
+                    ? (int)player.CustomProperties[EProperties.HP.ToString()]
+                    : 0;
+                float kill = player.CustomProperties.ContainsKey(EProperties.Kill.ToString())
+                    ? (float)player.CustomProperties[EProperties.Kill.ToString()]
+                    : 0f;
+                float damage = player.CustomProperties.ContainsKey(EProperties.Damage.ToString())
+                    ? (float)player.CustomProperties[EProperties.Damage.ToString()]
+                    : 0f;
+                bool isDead = player.CustomProperties.ContainsKey(EProperties.IsDead.ToString()) &&
+                              (bool)player.CustomProperties[EProperties.IsDead.ToString()];
+
+                teamStats[team].TotalHP += hp;
+                teamStats[team].TotalKill += kill;
+                teamStats[team].TotalDamage += damage;
+
+                // 생존 플레이어 중 최소 액터 번호 추적
+                if (!isDead && player.ActorNumber < teamStats[team].MinActorNumber)
+                {
+                    teamStats[team].MinActorNumber = player.ActorNumber;
                 }
             }
 
-            // 전원 생존 팀이 있으면 해당 팀원을 기준에 따라 정렬
-            if (foundSurvivingTeam)
+            // 팀 정렬: HP 기여도 오름차순 → 킬 오름차순 → 딜량 오름차순 → 최소 액터 내림차순
+            List<EInGameTeam> sortedTeams = new List<EInGameTeam>(teamStats.Keys);
+            sortedTeams.Sort((a, b) =>
             {
-                List<PhotonPlayer> survivors = new List<PhotonPlayer>();
-                List<PhotonPlayer> others = new List<PhotonPlayer>();
-
-                foreach (PhotonPlayer player in deathOrderList)
+                float hpA = teamStats[a].HPContribution;
+                float hpB = teamStats[b].HPContribution;
+                if (hpA != hpB)
                 {
-                    EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-                    if (team == allSurvivedTeam)
-                    {
-                        survivors.Add(player);
-                    }
-                    else
-                    {
-                        others.Add(player);
-                    }
+                    return hpA.CompareTo(hpB);
                 }
 
-                // 킬 수 오름차순 → 딜량 오름차순 → 액터 번호 오름차순
-                survivors.Sort((a, b) =>
+                float killA = teamStats[a].TotalKill;
+                float killB = teamStats[b].TotalKill;
+                if (killA != killB)
                 {
-                    float killA = (float)a.CustomProperties[EProperties.Kill.ToString()];
-                    float killB = (float)b.CustomProperties[EProperties.Kill.ToString()];
+                    return killA.CompareTo(killB);
+                }
+
+                float damageA = teamStats[a].TotalDamage;
+                float damageB = teamStats[b].TotalDamage;
+                if (damageA != damageB)
+                {
+                    return damageA.CompareTo(damageB);
+                }
+
+                // 최소 액터 번호 내림차순: 낮은 번호 팀이 나중에 픽(유리)
+                return teamStats[b].MinActorNumber.CompareTo(teamStats[a].MinActorNumber);
+            });
+
+            // 팀 내 개인 정렬: 킬 오름차순 → 딜량 오름차순 → 액터 번호 오름차순
+            List<PhotonPlayer> finalOrder = new List<PhotonPlayer>();
+            foreach (EInGameTeam team in sortedTeams)
+            {
+                List<PhotonPlayer> players = teamPlayers[team];
+                players.Sort((a, b) =>
+                {
+                    float killA = a.CustomProperties.ContainsKey(EProperties.Kill.ToString())
+                        ? (float)a.CustomProperties[EProperties.Kill.ToString()]
+                        : 0f;
+                    float killB = b.CustomProperties.ContainsKey(EProperties.Kill.ToString())
+                        ? (float)b.CustomProperties[EProperties.Kill.ToString()]
+                        : 0f;
                     if (killA != killB)
                     {
                         return killA.CompareTo(killB);
                     }
 
-                    float damageA = (float)a.CustomProperties[EProperties.Damage.ToString()];
-                    float damageB = (float)b.CustomProperties[EProperties.Damage.ToString()];
+                    float damageA = a.CustomProperties.ContainsKey(EProperties.Damage.ToString())
+                        ? (float)a.CustomProperties[EProperties.Damage.ToString()]
+                        : 0f;
+                    float damageB = b.CustomProperties.ContainsKey(EProperties.Damage.ToString())
+                        ? (float)b.CustomProperties[EProperties.Damage.ToString()]
+                        : 0f;
                     if (damageA != damageB)
                     {
                         return damageA.CompareTo(damageB);
@@ -468,16 +543,22 @@ public class GameStatePlaying : GameModeStateBase
                     return a.ActorNumber.CompareTo(b.ActorNumber);
                 });
 
-                deathOrderList = others;
-                deathOrderList.AddRange(survivors);
+                finalOrder.AddRange(players);
             }
 
-            int[] actorNumbers = new int[deathOrderList.Count];
-            for (int i = 0; i < deathOrderList.Count; i++)
+            int[] actorNumbers = new int[finalOrder.Count];
+            for (int i = 0; i < finalOrder.Count; i++)
             {
-                actorNumbers[i] = deathOrderList[i].ActorNumber;
+                actorNumbers[i] = finalOrder[i].ActorNumber;
             }
             _photonView.RPC(nameof(RPC_SyncDeathOrder), RpcTarget.Others, actorNumbers);
+
+            // 마스터 클라이언트 로컬 큐도 갱신
+            battleMode.DeathOrderQueue.Clear();
+            foreach (PhotonPlayer player in finalOrder)
+            {
+                battleMode.DeathOrderQueue.Enqueue(player);
+            }
         }
         _gameMode.RequestStateChange(EModeState.Round);
     }

@@ -19,6 +19,7 @@ public enum EProperties
     Cartridges,
     GP,
     UltimateGauge,
+    HP,
 
     Count
 }
