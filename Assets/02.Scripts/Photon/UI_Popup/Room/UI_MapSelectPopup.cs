@@ -96,7 +96,7 @@ public class UI_MapSelectPopup : UI_Popup
                 MapData data = mapList[i];
                 bool isSelected = data.Map == Map;
                 UI_MapSelectButtonList[i].gameObject.SetActive(true);
-                UI_MapSelectButtonList[i].Refresh(data.Map, isSelected, data.MapSprite, data.MapName);
+                UI_MapSelectButtonList[i].Refresh(data.Map, isSelected, data.MapSprite, data.GetMapName());
             }
             else
             {
