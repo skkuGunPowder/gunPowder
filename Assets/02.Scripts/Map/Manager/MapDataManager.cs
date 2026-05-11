@@ -22,8 +22,8 @@ public class MapDataManager : Singleton<MapDataManager>
     protected override void Awake()
     {
         base.Awake();
-        MapDataSetting();
         ThemeSetting();
+        MapDataSetting();
     }
 
     private void MapDataSetting()
@@ -37,7 +37,8 @@ public class MapDataManager : Singleton<MapDataManager>
                 continue;
             }
             
-            MapData data = new MapData(dataSO.Map, dataSO.MapName, dataSO.MapSprite);
+            string theme = _mapThemeDataDict[dataSO.MapTheme].ThemeName;
+            MapData data = new MapData(dataSO.Map, theme,dataSO.MapName, dataSO.MapSprite);
             _mapDataList.Add(data);
         }
     }
@@ -67,10 +68,31 @@ public class MapDataManager : Singleton<MapDataManager>
                 {
                     continue;
                 }
-                
-                if (dataSO.MapTheme == themeData.MapTheme || dataSO.MapTheme == EMapTheme.Random)
+
+                if (dataSO.MapTheme == EMapTheme.Random)
                 {
-                    MapData data = new MapData(dataSO.Map, dataSO.MapName, dataSO.MapSprite);
+                    string themeCode = "";
+
+                    foreach (var themeSO in _mapThemeDataSOList)
+                    {
+                        if (themeSO == null)
+                        {
+                            continue;
+                        }
+                        
+                        if (themeSO.MapTheme == EMapTheme.Random)
+                        {
+                            themeCode = themeSO.ThemeName;
+                        }
+                    }
+                    MapData data = new MapData(dataSO.Map, themeCode, dataSO.MapName, dataSO.MapSprite);
+                    themeData.AddMapData(data);
+                    continue;
+                }
+                
+                if (dataSO.MapTheme == themeData.MapTheme)
+                {
+                    MapData data = new MapData(dataSO.Map, themeData.ThemeName, dataSO.MapName, dataSO.MapSprite);
                     themeData.AddMapData(data);
                 }
             }

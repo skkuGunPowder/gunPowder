@@ -4,10 +4,11 @@ using UnityEngine;
 public class MapData
 {
     public readonly EMap Map;
+    public readonly string ThemeCode;
     public readonly string MapName;
     public Sprite MapSprite;
 
-    public MapData(EMap map, string mapName, Sprite mapSprite)
+    public MapData(EMap map, string themeCode, string mapName, Sprite mapSprite)
     {
         if (mapName == null)
         {
@@ -19,9 +20,22 @@ public class MapData
         }
         
         Map = map;
+        ThemeCode = themeCode;
         MapName = mapName;
         MapSprite = mapSprite;
     }
-    
-    
+
+
+    public string GetMapName()
+    {
+        string  mapName = TextManager.Instance.GetText(ThemeCode);
+
+        if (MapName == "X")
+        {
+            return mapName;
+        }
+        
+        // 한칸 공백
+        return mapName + "" + MapName;;
+    }
 }
