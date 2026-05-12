@@ -2,6 +2,7 @@ using Photon.Pun;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 
 /// <summary>
@@ -72,6 +73,9 @@ public class PlayerDamagedState : PlayerBaseState
     // 히트스탑 여부를 전달하기 위한 static 변수
     private static bool _pendingHitStop = false;
 
+    // 히트 이펙트 지연 비활성화 취소 토큰
+    private CancellationTokenSource _hitEffectCts;
+
     /// <summary>
     /// 다음 상태 진입 시 히트스탑 여부 설정 (PlayerBaseState에서 호출)
     /// </summary>
@@ -97,7 +101,12 @@ public class PlayerDamagedState : PlayerBaseState
 
         _damagedTimer = 0f;
         _hitStopTimer = 0f;
-        
+
+        // 이전 히트 이펙트 태스크 취소
+        _hitEffectCts?.Cancel();
+        _hitEffectCts?.Dispose();
+        _hitEffectCts = null;
+
         // PlayerBaseState에서 설정한 히트스탑 여부 사용
         _isHitStopActive = _pendingHitStop;
         _pendingHitStop = false; // 사용 후 리셋
@@ -190,7 +199,8 @@ public class PlayerDamagedState : PlayerBaseState
         ResetAnimationsAndTriggerHit();
 
         // 히트 이펙트 비활성화 (UniTask로 지연 처리)
-        DeactivateHitEffectWithDelay().Forget();
+        _hitEffectCts = new CancellationTokenSource();
+        DeactivateHitEffectWithDelay(_hitEffectCts.Token).Forget();
 
         // 무적 상태 해제 (안전장치)
         SetImmuneState(false);
@@ -437,10 +447,15 @@ public class PlayerDamagedState : PlayerBaseState
     /// <summary>
     /// 지연 후 히트 이펙트 비활성화
     /// </summary>
-    private async UniTask DeactivateHitEffectWithDelay()
+    private async UniTask DeactivateHitEffectWithDelay(CancellationToken cancellationToken)
     {
-        await UniTask.WaitForSeconds(HIT_EFFECT_DURATION);
-        _owner.HitEffectPrefab.SetActive(false);
+        await UniTask.WaitForSeconds(HIT_EFFECT_DURATION, cancellationToken: cancellationToken);
+        if (_owner != null && _owner.HitEffectPrefab != null)
+        {
+            _owner.HitEffectPrefab.SetActive(false);
+        }
+        _hitEffectCts?.Dispose();
+        _hitEffectCts = null;
     }
 
     /// <summary>
