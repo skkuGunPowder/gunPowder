@@ -366,6 +366,7 @@ public class GameStatePlaying : GameModeStateBase
             return;
         }
         
+        SetGameSet();
         _photonView.RPC(nameof(RPC_TimeOver), RpcTarget.All);
     }
 
