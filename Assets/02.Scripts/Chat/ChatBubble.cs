@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using TMPro;
 using DG.Tweening; 
@@ -49,5 +50,9 @@ public class ChatBubble : MonoBehaviour
         // 애니메이션이 끝날 때까지 대기
         yield return new WaitForSeconds(ANIMATION_DURATION);
     }
-    
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+    }
 }

@@ -180,7 +180,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     public void CheckState()
     {
         _playerCount += 1;
-
+    
         if (PhotonNetwork.IsMasterClient == false)
         {
             return;

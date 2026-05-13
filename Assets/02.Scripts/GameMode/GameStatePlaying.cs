@@ -361,6 +361,11 @@ public class GameStatePlaying : GameModeStateBase
     
     private void OnTimeOver()
     {
+        if (_lastPlayer)
+        {
+            return;
+        }
+        
         _photonView.RPC(nameof(RPC_TimeOver), RpcTarget.All);
     }
 
