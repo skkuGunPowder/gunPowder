@@ -4875,7 +4875,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1250508717
-  m_SortingLayer: 5
+  m_SortingLayer: 1
   m_SortingOrder: 130
   m_RenderMode: 1
   m_MeshDistribution: 0
@@ -4983,7 +4983,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1250508717
-  m_SortingLayer: 5
+  m_SortingLayer: 1
   m_SortingOrder: 130
   m_Sprite: {fileID: 1662139909, guid: 9a4af37b53122104bbc5d2190136d4cd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -5010,6 +5010,7 @@ GameObject:
   - component: {fileID: -378163045493960610}
   - component: {fileID: 7047712776187153575}
   - component: {fileID: 9168520333893642162}
+  - component: {fileID: 8132182060259151484}
   m_Layer: 10
   m_Name: HeadBomb
   m_TagString: Bomb
@@ -5192,6 +5193,23 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &8132182060259151484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3001153516144104530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dfa2357bcfbb3a4e9bc9f57e90327cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _renderer: {fileID: 2335990409118881597}
+  _outlineMaterial: {fileID: 2100000, guid: da9778fcf4909e1418facf7d05840e59, type: 2}
+  _originalMaterial: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  _allyColor: {r: 0.2, g: 1, b: 0.3, a: 1}
+  _enemyColor: {r: 1, g: 0.2, b: 0.2, a: 1}
 --- !u!1 &3385468107547420901
 GameObject:
   m_ObjectHideFlags: 0
@@ -10044,7 +10062,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1250508717
-  m_SortingLayer: 5
+  m_SortingLayer: 1
   m_SortingOrder: 130
   m_RenderMode: 0
   m_MeshDistribution: 0
