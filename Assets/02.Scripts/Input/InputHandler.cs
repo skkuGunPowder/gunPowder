@@ -5,8 +5,8 @@ public class InputHandler
     private static bool _blockInput = false;
     public static bool BlockInput { get => _blockInput; set => _blockInput = value; }
     // 시스템용 블락
-    private static bool _systemInput = false;
-    public static bool SystemInput { get => _systemInput; set => _systemInput = value; }
+    private static bool _systemBlock = false;
+    public static bool SystemBlock { get => _systemBlock; set => _systemBlock = value; }
     
     public static float GetAxis(string axisName)
     {
@@ -70,7 +70,7 @@ public class InputHandler
     
     public static bool GetSystemKeyDown(KeyCode key) // 시스템용 인풋
     {
-        if (_systemInput)
+        if (_systemBlock)
         {
             return false;
         }
