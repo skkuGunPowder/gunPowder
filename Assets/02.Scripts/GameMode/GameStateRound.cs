@@ -109,7 +109,7 @@ public class GameStateRound : GameModeStateBase
 
         if (players.Length == 1)
         {
-            _gameMode.GameOver();   // 플레이어가 한명이라면 바로 종료
+            _gameMode.RequestStateChange(EModeState.Over);   // 플레이어가 한명이라면 바로 종료
             return;
         }
 

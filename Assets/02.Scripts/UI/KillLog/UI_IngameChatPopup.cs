@@ -284,7 +284,7 @@ public class UI_IngameChatPopup : UI_Popup
         }
 
         // T 키로 Mini/Full 전환 (InputField가 포커스 중이 아닐 때만)
-        if (Input.GetKeyDown(KeyCode.T) && !IsAnyInputFieldFocused())
+        if (InputHandler.GetSystemKeyDown(KeyCode.T) && !IsAnyInputFieldFocused())
         {
             ToggleChatPopup();
         }

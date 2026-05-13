@@ -232,7 +232,6 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     { 
         // 연출 종료
         EventManager.Instance.OnFindPlayer -= SetMyPlayer;
-        
         GameManager.Instance.RequestGameOver();
     }    
 }

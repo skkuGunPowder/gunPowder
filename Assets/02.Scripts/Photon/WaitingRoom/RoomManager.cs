@@ -263,14 +263,6 @@ public class RoomManager : PhotonSingleton<RoomManager>
         base.OnDisable();
         EventManager.Instance.OnPlayerLeft -= PlayerLeft;
     }
-
-    private void Update()
-    {
-        if (InputHandler.GetKeyDown(KeyCode.A))
-        {
-            PopupManager.Instance.Open(EPopupType.UI_TempStorage);
-        }
-    }
 }
     
     

@@ -16,6 +16,11 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
         EventManager.Instance.OnPlayerChanged += PlayerLoadCheck;
     }
 
+    private void Start()
+    {
+        InputHandler.SystemInput = false;
+    }
+
     public void Update()
     {
     }
