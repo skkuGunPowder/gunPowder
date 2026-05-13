@@ -87,6 +87,14 @@ public class Bomb : MonoBehaviourPun, IBomb
         if (ownerPhotonView != null)
         {
             _ownerPhotonview = ownerPhotonView;
+            if (TryGetComponent(out BombOutline outline))
+            {
+                outline.ApplyTeamColor(ownerPhotonView);
+            }
+            else
+            {
+                Debug.Log($"{this.gameObject.name}폭탄에 outline 컴포넌트 없음");
+            }
         }
         else
         {

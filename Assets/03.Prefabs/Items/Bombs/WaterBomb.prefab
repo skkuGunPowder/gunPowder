@@ -14773,6 +14773,7 @@ GameObject:
   - component: {fileID: 1569906325789633640}
   - component: {fileID: 1206809643993282565}
   - component: {fileID: 1677629830475996198}
+  - component: {fileID: -8598736818092490495}
   m_Layer: 10
   m_Name: WaterBomb
   m_TagString: Bomb
@@ -14898,6 +14899,23 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &-8598736818092490495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4980798640661375440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dfa2357bcfbb3a4e9bc9f57e90327cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _renderer: {fileID: 8110742840953045268}
+  _outlineMaterial: {fileID: 2100000, guid: da9778fcf4909e1418facf7d05840e59, type: 2}
+  _originalMaterial: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  _allyColor: {r: 0.2, g: 1, b: 0.3, a: 1}
+  _enemyColor: {r: 1, g: 0.2, b: 0.2, a: 1}
 --- !u!1 &5408304359995268594
 GameObject:
   m_ObjectHideFlags: 0
