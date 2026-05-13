@@ -9,7 +9,8 @@ public class GameStatePlaying : GameModeStateBase
 {
     // 게임이 진행되는 동안 벌어지는 일들을 정리
     // lastpalyer체크, 현재 팀에 남아있는 인원 체크
-    private bool _lastPlayer = false; 
+    private bool _lastPlayer = false;
+    private bool _lastDie = false;
     private bool _gameSet = false; // 동시 죽음 없애기 위함
     private Dictionary<EInGameTeam, int> _teamCount = new Dictionary<EInGameTeam, int>(); // 살아 있는 팀원 수 : 팀 / 팀원 수
     private Dictionary<EInGameTeam, int> _initialTeamCount = new Dictionary<EInGameTeam, int>(); // 게임 시작 시 팀 초기 인원 수
@@ -361,6 +362,12 @@ public class GameStatePlaying : GameModeStateBase
     
     private void OnTimeOver()
     {
+        if (_lastDie)
+        {
+            return;
+        }
+        
+        SetGameSet();
         _photonView.RPC(nameof(RPC_TimeOver), RpcTarget.All);
     }
 
@@ -594,12 +601,14 @@ public class GameStatePlaying : GameModeStateBase
     private void SetGameSet()
     {
         _gameSet = true;
+        _lastDie = true;
         _photonView.RPC(nameof(RPC_SetGameSet), RpcTarget.Others);
     }
 
     [PunRPC]
     private void RPC_SetGameSet()
     {
+        _lastDie = true;
         _gameSet = true;
     }
 
@@ -614,15 +623,20 @@ public class GameStatePlaying : GameModeStateBase
         //관전이 켜져있다면 관전 해제
         _cameraController.CancelObserve();
         
+        // 초기화 
+        _count = 0;
+        _lastPlayer = false;
+        _lastDie = false;
+        _gameSet = false;
+        _teamCount.Clear();
+        _initialTeamCount.Clear();
+        
         // 플레이어 GP를 RoomStatManager에 저장
         PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
         RoomStatManager.Instance.SetGunpowder(stat.CurrentGP);
         GameManager.Instance.GameStateChange(EGameState.Waiting); // Waiting 상태로 복귀
-        _lastPlayer = false;
-        _gameSet = false;
-        _teamCount.Clear();
-        _initialTeamCount.Clear();
-        _count = 0;
+        
+        // 구독 해제
         EventManager.Instance.OnLastDieComplete -= GameResultCheck;
         EventManager.Instance.OnPlayerLeft -= OnPlayerLeft;
         EventManager.Instance.OnTimeCheck -= OnPlayerDead;

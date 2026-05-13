@@ -26,7 +26,13 @@ public class IngameTimer : TimerBase
     // 타이머용 text에 표시될 내용
     protected override string ConvertTime(int time)
     {
-        string timeText = TimeSpan.FromSeconds(time).ToString(@"mm\:ss");
+        int realTime = time;
+        
+        if (time < 0)
+        {
+            realTime = 0;
+        }
+        string timeText = TimeSpan.FromSeconds(realTime).ToString(@"mm\:ss");
         
         return timeText;
     }
