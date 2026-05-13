@@ -115,7 +115,7 @@ public class CreditsAutoScroll : MonoBehaviour
 
     private void Update()
     {
-        if (InputHandler.GetKeyDown(KeyCode.Escape))
+        if (InputHandler.GetSystemKeyDown(KeyCode.Escape))
         {
             OnScrollFinished();
         }

@@ -141,6 +141,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
 
     public void RequestStateChange(EModeState state)
     {
+        Debug.LogWarning($"RequestStateChange NEXT : {state}");
         if (!PhotonNetwork.IsMasterClient)
         {
             return;

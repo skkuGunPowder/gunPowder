@@ -101,6 +101,7 @@ public class GameStartProduction : MonoBehaviour
 
         if (popup.gameObject.activeSelf)
         {
+            popup.SetCallback(() => InputHandler.BlockInput = false);
             InputHandler.BlockInput = true;
         }
         else

@@ -59,14 +59,10 @@ public class GameStateCartridge : GameModeStateBase
             {
                 EventManager.Instance.OnScreenClick += OnTurnAction;
             }
-            
+
             float duration = (isFirstTurn || _isLastTurn) ? _longtime : _shortTime;
-            // 모든 클라이언트에 턴 시작 알림
+            // 모든 클라이언트에 턴 시작 알림 (타이머 생성 포함)
             _photonView.RPC(nameof(RPC_StartTurn), RpcTarget.All, player.ActorNumber, (int)duration);
-            
-            //타이머 생성은 방장만
-            _timer?.Destroy();
-            _timer = new SecondTimer(duration, OnTimerEnd, RequestChangeTime);
         }
     }
 
@@ -74,13 +70,16 @@ public class GameStateCartridge : GameModeStateBase
     private void RPC_StartTurn(int actorNumber, int time)
     {
         PhotonPlayer player = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
-        
-        // 타이머 세팅
+
         EventManager.Instance.TimeSet(time);
         if (player != null)
         {
             EventManager.Instance.CartridgeStart(player);
         }
+
+        // 모든 클라이언트가 로컬 타이머 실행 — 방장 이탈 시 새 방장이 이어받을 수 있도록
+        _timer?.Destroy();
+        _timer = new SecondTimer(time, OnLocalTimerEnd, (sec) => EventManager.Instance.TimerUpdate(sec));
     }
 
     // 턴 소모 행동 발생 시 호출 (방장만 구독)
@@ -92,11 +91,15 @@ public class GameStateCartridge : GameModeStateBase
         StartTurn();
     }
 
-    // 타이머 만료 시 호출 (방장만)
-    private void OnTimerEnd()
+    // 로컬 타이머 만료 시 호출 (모든 클라이언트) — 방장만 턴 전환
+    private void OnLocalTimerEnd()
     {
-        EventManager.Instance.OnScreenClick -= OnTurnAction;
         _timer = null;
+        if (PhotonNetwork.IsMasterClient == false)
+        {
+            return;
+        }
+        EventManager.Instance.OnScreenClick -= OnTurnAction;
         StartTurn();
     }
 
@@ -108,10 +111,8 @@ public class GameStateCartridge : GameModeStateBase
 
     public override void Tick()
     {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            _timer?.Tick(Time.deltaTime);
-        }
+        // 모든 클라이언트가 로컬 타이머 진행
+        _timer?.Tick(Time.deltaTime);
 
 #if UNITY_EDITOR
         if (PhotonNetwork.IsMasterClient && InputHandler.GetKeyDown(KeyCode.Space))
@@ -119,19 +120,6 @@ public class GameStateCartridge : GameModeStateBase
             OnTurnAction();
         }
 #endif
-    }
-
-
-    // 시간 조절
-    private void RequestChangeTime(int time)
-    {
-        _photonView.RPC(nameof(RPC_ChangeTime), RpcTarget.All, time);
-    }
-
-    [PunRPC]
-    public void RPC_ChangeTime(int time)
-    {  
-        EventManager.Instance.TimerUpdate(time);
     }
     
     

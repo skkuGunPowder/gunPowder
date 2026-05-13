@@ -151,7 +151,6 @@ public class UI_Ultimate : MonoBehaviour
     /// </summary>
     private void ActivateUltimateUI()
     {
-        Debug.Log("[UI_Ultimate] ActivateUltimateUI 호출됨");
         if (_pressCButtonUI == null)
         {
             Debug.LogError("[UI_Ultimate] _pressCButtonUI가 null이어서 활성화 불가!");
@@ -282,17 +281,17 @@ public class UI_Ultimate : MonoBehaviour
         if (currentGunPowder > _middleThreshold)
         {
             targetColor = _colorHigh; // #FFA0A0
-            Debug.Log($"[UI_Ultimate] 색상 복원: High 상태 (건파우더 {currentGunPowder})");
+            // Debug.Log($"[UI_Ultimate] 색상 복원: High 상태 (건파우더 {currentGunPowder})");
         }
         else if (currentGunPowder > _lowThreshold)
         {
             targetColor = _colorMiddle; // #FF6161
-            Debug.Log($"[UI_Ultimate] 색상 복원: Middle 상태 (건파우더 {currentGunPowder})");
+            // Debug.Log($"[UI_Ultimate] 색상 복원: Middle 상태 (건파우더 {currentGunPowder})");
         }
         else
         {
             targetColor = _colorLow; // #FF0000
-            Debug.Log($"[UI_Ultimate] 색상 복원: Low 상태 (건파우더 {currentGunPowder})");
+            // Debug.Log($"[UI_Ultimate] 색상 복원: Low 상태 (건파우더 {currentGunPowder})");
         }
 
         // 5개 이미지 색상 복원

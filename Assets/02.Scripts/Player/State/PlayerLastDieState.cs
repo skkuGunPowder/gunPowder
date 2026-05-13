@@ -8,7 +8,6 @@ public class PlayerLastDieState : PlayerBaseState
     public float IntervalTime = 1.5f;
     public float VibratePower = 0.65f;
     public int Vibrato = 110;
-    private bool _effectInitial = false;
     public override void OnEnter()
     {
         base.OnEnter();
@@ -20,6 +19,7 @@ public class PlayerLastDieState : PlayerBaseState
 
     public override void OnExit()
     {
+        EventManager.Instance.OnGameSet -= LastDiePlay;
         base.OnExit();
     }
     
