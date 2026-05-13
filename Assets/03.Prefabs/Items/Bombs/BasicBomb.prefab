@@ -4925,6 +4925,7 @@ GameObject:
   - component: {fileID: 8147243018835788596}
   - component: {fileID: 9168520333893642162}
   - component: {fileID: 6305830556633820230}
+  - component: {fileID: 5378982101119654040}
   m_Layer: 10
   m_Name: BasicBomb
   m_TagString: Bomb
@@ -5140,6 +5141,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe0701ea4b8fe0242806be72066194f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5378982101119654040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3001153516144104530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dfa2357bcfbb3a4e9bc9f57e90327cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _renderer: {fileID: 2335990409118881597}
+  _outlineMaterial: {fileID: 2100000, guid: da9778fcf4909e1418facf7d05840e59, type: 2}
+  _originalMaterial: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  _allyColor: {r: 0.2, g: 1, b: 0.3, a: 1}
+  _enemyColor: {r: 1, g: 0.2, b: 0.2, a: 1}
 --- !u!1 &3385468107547420901
 GameObject:
   m_ObjectHideFlags: 0

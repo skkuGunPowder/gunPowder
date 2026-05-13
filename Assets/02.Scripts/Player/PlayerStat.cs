@@ -216,7 +216,7 @@ public class PlayerStat : MonoBehaviour
         if (_photonView == null) return;
         if (EventManager.Instance == null) return;
         // 원격에서 RPC_ChangeHP 도착 전엔 _currentHP가 int 기본값 0 — 잘못된 값 푸시 방지
-        if (_currentHP <= 0) return;
+        if (_currentHP <= 0 && _currentPlayerLife <= 0) return;
         EventManager.Instance.PlayerDataChange(_currentHP, _currentPlayerLife, _photonView.OwnerActorNr, 0);
     }
 
