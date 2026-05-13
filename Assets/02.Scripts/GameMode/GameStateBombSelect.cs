@@ -17,7 +17,7 @@ public class GameStateBombSelect : GameModeStateBase
         IsActive = true;
         _phaseStarted = false;
         _stateChangeRequested = false;
-        InputHandler.SystemInput = true; // 시스템 핸들어 해제
+        InputHandler.SystemBlock = true; // 시스템 핸들어 해제
         OnPhaseStart();
         
         // 아이템 보관함 열기 (닫을 때 인풋 해제)

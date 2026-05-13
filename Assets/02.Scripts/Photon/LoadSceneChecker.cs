@@ -18,7 +18,7 @@ public class LoadSceneChecker : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        InputHandler.SystemInput = false;
+        InputHandler.SystemBlock = true;
     }
 
     public void Update()
