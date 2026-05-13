@@ -17,6 +17,8 @@ public enum EColorType
     UltiBack,
     SelectedButton,
     UnSelectedButton,
+    BombMyTeam,
+    BombEnemy,
     
     //밑으로는 그라데이션 컬러
     
