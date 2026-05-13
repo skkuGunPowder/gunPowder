@@ -162,6 +162,15 @@ public class PlayerStat : MonoBehaviour
     {
         _photonView = GetComponent<PhotonView>();
 
+        // UI_InGameProfile.Init이 슬롯 HP를 RoomStatManager.PlayerHP(150) const로 재설정하므로,
+        // 매 ProfileInit 직후 현재 _currentHP를 UI에 다시 push (페널티/감소된 HP 보존).
+        // 원격 PlayerStat 인스턴스도 자기 슬롯 갱신을 위해 구독해야 하므로 IsMine 게이트 바깥에서 구독.
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnProfileInit -= RepushHPToUI;
+            EventManager.Instance.OnProfileInit += RepushHPToUI;
+        }
+
         if (_photonView.IsMine == false)
         {
             return;
@@ -182,11 +191,6 @@ public class PlayerStat : MonoBehaviour
         {
             EventManager.Instance.OnGameOver -= SaveUltimateGaugeToCustomProperty;
             EventManager.Instance.OnGameOver += SaveUltimateGaugeToCustomProperty;
-
-            // UI_InGameProfile.Init이 슬롯 HP를 RoomStatManager.PlayerHP(150) const로 재설정하므로,
-            // 매 ProfileInit 직후 현재 _currentHP를 UI에 다시 push (페널티/감소된 HP 보존)
-            EventManager.Instance.OnProfileInit -= RepushHPToUI;
-            EventManager.Instance.OnProfileInit += RepushHPToUI;
         }
     }
 
@@ -205,11 +209,14 @@ public class PlayerStat : MonoBehaviour
     /// <summary>
     /// ProfileInit 직후 UI 슬롯에 현재 HP/Life를 다시 푸시 (페널티 차감값 보존).
     /// UI_InGameProfile.Init은 OnProfileInit에 먼저 구독되어 있어 슬롯 list가 populated된 뒤에 본 핸들러가 실행됨.
+    /// 모든 클라이언트의 PlayerStat 인스턴스에서 호출되어 자기 슬롯을 갱신한다.
     /// </summary>
     private void RepushHPToUI()
     {
-        if (_photonView == null || !_photonView.IsMine) return;
+        if (_photonView == null) return;
         if (EventManager.Instance == null) return;
+        // 원격에서 RPC_ChangeHP 도착 전엔 _currentHP가 int 기본값 0 — 잘못된 값 푸시 방지
+        if (_currentHP <= 0) return;
         EventManager.Instance.PlayerDataChange(_currentHP, _currentPlayerLife, _photonView.OwnerActorNr, 0);
     }
 

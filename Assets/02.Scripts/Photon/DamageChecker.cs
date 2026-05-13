@@ -123,7 +123,8 @@ public class DamageChecker : Singleton<DamageChecker>
     public void RPC_RequestDamage(int hp, int life, int attacker, int player)
     {
 
-        if (GameManager.Instance.CurrentGameState != EGameState.Playing)
+        if (GameManager.Instance.CurrentGameState != EGameState.Playing && 
+            GameManager.Instance.CurrentGameState != EGameState.Waiting)
         {
             return;
         }
