@@ -33,7 +33,7 @@ public class ChatBubbleListener : MonoBehaviour
 
     private void OnChatMessage(MessageInfo info)
     {
-        if (this.gameObject.activeSelf == false)
+        if (this.gameObject.activeInHierarchy == false)
         {
             return;
         }

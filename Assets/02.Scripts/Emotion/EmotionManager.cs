@@ -80,7 +80,7 @@ public class EmotionManager : MonoBehaviour
         
         foreach (var kvp in _emotionKeyDictionary)
         {
-            if (InputHandler.GetSystemKeyDown(kvp.Key))
+            if (InputHandler.GetKeyDown(kvp.Key))
             {
                 Request_PlayEmotion(kvp.Value);
                 _canEmotion = false;
