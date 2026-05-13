@@ -219,13 +219,13 @@ public class GameStatePlaying : GameModeStateBase
         // 나가서 혼자인 경우 : 플레이어가 한명인 경우는 무조건 종료
         if (players.Length == 1)
         {
-            _gameMode.GameOver();
+            _gameMode.RequestStateChange(EModeState.Over);
             return;
         }
 
         if (RoomTeamCheck(players))
         {
-            _gameMode.GameOver();
+            _gameMode.RequestStateChange(EModeState.Over);
             return;
         }
         
@@ -375,6 +375,7 @@ public class GameStatePlaying : GameModeStateBase
     // 타임 오버가 되었을 때 로컬 플레이어가 살아있는 경우 나의 프로퍼티를 보낸다.
     public void GameResultCheck()
     {
+        Debug.Log("GameResultCheck");
         PhotonPlayer player = PhotonNetwork.LocalPlayer;
         if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
         {

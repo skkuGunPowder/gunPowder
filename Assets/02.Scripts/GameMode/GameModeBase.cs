@@ -141,6 +141,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
 
     public void RequestStateChange(EModeState state)
     {
+        Debug.LogWarning($"RequestStateChange NEXT : {state}");
         if (!PhotonNetwork.IsMasterClient)
         {
             return;
@@ -231,6 +232,7 @@ public class GameModeBase : MonoBehaviourPunCallbacks
     { 
         // 연출 종료
         EventManager.Instance.OnFindPlayer -= SetMyPlayer;
+        
         GameManager.Instance.RequestGameOver();
     }    
 }
