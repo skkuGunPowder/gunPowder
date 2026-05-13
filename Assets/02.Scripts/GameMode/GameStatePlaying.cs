@@ -49,11 +49,14 @@ public class GameStatePlaying : GameModeStateBase
         foreach (PhotonPlayer player in players)
         {
             EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
-
+            
+            Debug.LogWarning($"{player.NickName}이 팀은 {team.ToString()}입니다.");
             _teamCount.TryAdd(team, 0);
             _teamCount[team]++;
             _initialTeamCount.TryAdd(team, 0);
             _initialTeamCount[team]++;
+            
+            Debug.LogWarning($" teamcount {_teamCount[team].ToString()} 설정합니다., init {_initialTeamCount[team].ToString()}를 설정합니다.");
         }
         
         _MaxCount = players.Length;
@@ -69,7 +72,6 @@ public class GameStatePlaying : GameModeStateBase
     public override void Enter()
     {
         Init();
-        Debug.Log("playing enter");
         GameManager.Instance.GameStateChange(EGameState.Waiting); // 카운트다운 중 Waiting 유지
         
         EventManager.Instance.OnTimeCheck += OnPlayerDead;
@@ -121,7 +123,14 @@ public class GameStatePlaying : GameModeStateBase
             return;
         }
         
-        EInGameTeam team = (EInGameTeam)player.CustomProperties[EProperties.Team.ToString()];
+        string teamKey = EProperties.Team.ToString();
+        if (!player.CustomProperties.ContainsKey(teamKey))
+        {
+            Debug.LogError($"[OnPlayerDead] {player.NickName}의 Team 커스텀 프로퍼티를 찾을 수 없습니다.");
+            return;
+        }
+
+        EInGameTeam team = (EInGameTeam)player.CustomProperties[teamKey];
         _teamCount[team]--;
 
         if (_lastPlayer)

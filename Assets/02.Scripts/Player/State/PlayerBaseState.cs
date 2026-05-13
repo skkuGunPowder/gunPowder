@@ -653,8 +653,6 @@ public class PlayerBaseState : MonoState
     /// </summary>
     protected virtual void PlayBombAnimation(BombActionType action, Transform bombSpawnPoint, BombStat bombStat)
     {
-        Debug.Log($"[CurrentAction] : {action.ToString()}");   
-        Debug.Log($"[반동정보] - Spawn : {bombSpawnPoint}, Recoil :{bombStat.RecoilAmount}");   
         switch (action)
         {
             case BombActionType.ThrowStraight:
@@ -692,14 +690,12 @@ public class PlayerBaseState : MonoState
     protected virtual void ApplyRecoil(Transform bombSpawnPoint, float recoilPower = 5f, float upPower = 1f)
     {
         if (_owner.Rigidbody2D == null) return;
-        Debug.Log($"[반동적용전] {_owner.Rigidbody2D.linearVelocity}");
         
         // 폭탄 스폰 위치에서 플레이어까지의 방향 (x축 반대, y축 위)
         Vector2 dir = (_owner.transform.position - bombSpawnPoint.position).normalized;
         Vector2 recoil = new Vector2(dir.x, dir.y).normalized * recoilPower;
         recoil.y += upPower;
         _owner.Rigidbody2D.AddForce(recoil, ForceMode2D.Impulse);
-        Debug.Log($"[반동적용후] {_owner.Rigidbody2D.linearVelocity}, 방향 {dir}, 반동수치 : {recoil}");
     }
     
     /// <summary>

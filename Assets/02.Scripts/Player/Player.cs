@@ -280,7 +280,7 @@ public class Player : MonoBehaviourPun, IDamagable
 
     public void ApplyEquippedCartridges()
     {
-        Debug.Log($"[Cartridge] ApplyEquipped called. ActorNum={ActorNumber}, IsMine={PhotonView.IsMine}");
+        // Debug.Log($"[Cartridge] ApplyEquipped called. ActorNum={ActorNumber}, IsMine={PhotonView.IsMine}");
         if (!PhotonView.IsMine) return;
         CartridgeInventoryManager.Instance.ConsumeAll(this);
     }

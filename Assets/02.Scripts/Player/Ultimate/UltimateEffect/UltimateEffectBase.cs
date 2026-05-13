@@ -32,7 +32,6 @@ public abstract class UltimateEffectBase : MonoBehaviour,IUltimateEffect
 
     public virtual void Play()
     {
-        Debug.Log("Play");
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
         sequence.AppendInterval(Delay);
         sequence.AppendCallback(EffectOn);
