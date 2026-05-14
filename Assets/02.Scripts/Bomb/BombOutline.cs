@@ -18,15 +18,17 @@ public class BombOutline : MonoBehaviour
     [Tooltip("아군/자신 폭탄에 적용할 원본 Material")]
     [SerializeField] private Material _originalMaterial;
 
+    [Header("ColorSO")] 
+    [SerializeField] private ColorDataSO _allyColorSO;
+    [SerializeField] private ColorDataSO _enemyColorSO;
 
-    [Header("Colors")]
-    [Tooltip("아군(자신 포함) 폭탄 외곽선 색상")]
-    [SerializeField] private Color _allyColor = new Color(0.2f, 1f, 0.3f, 1f);
-    [Tooltip("적군 폭탄 외곽선 색상")]
-    [SerializeField] private Color _enemyColor = new Color(1f, 0.2f, 0.2f, 1f);
+    private Color _allyColor = new Color(0.2f, 1f, 0.3f, 1f);
+    private Color _enemyColor = new Color(1f, 0.2f, 0.2f, 1f);
 
     private void Awake()
     {
+        _allyColor = _allyColorSO.Color;
+        _enemyColor = _enemyColorSO.Color;
         // SetOwner 도착 전엔 팀을 알 수 없으므로 원본 Material로 시작
         if (_renderer != null && _originalMaterial != null)
         {
