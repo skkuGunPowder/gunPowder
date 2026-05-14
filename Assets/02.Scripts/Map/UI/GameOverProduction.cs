@@ -115,8 +115,6 @@ public class GameOverProduction : MonoBehaviour
 
     private void GameSetPlay()
     {
-        
-        Debug.Log("gameset");
         Sequence sequence = DOTween.Sequence();
         sequence.Append(GameOverProductionPanel.DOAnchorPos(GameSetPosition, GameSetTime).SetEase(GameSetEase));
         sequence.JoinCallback(()=> _proCamera.Zoom(+4,CameraZoomOutTime));

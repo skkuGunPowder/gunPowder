@@ -209,52 +209,52 @@ public class CartridgeFactory : DontDestroySingleton<CartridgeFactory>
 
     //     return cartridgeData.Durability;
     // }
-
-    #region 테스트용
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            string id = "CT0001";
-            TestCartridge("CT0001");
-            //CartridgeInventoryManager.Instance.AddCartridge(id);
-        }
-        if (Input.GetKeyDown(KeyCode.F2))
-        {
-            string id = "CT0011";
-            TestCartridge("CT0011");
-            //CartridgeInventoryManager.Instance.AddCartridge(id);
-        }
-        if (Input.GetKeyDown(KeyCode.F3))
-        {
-            string id = "CT0014";
-            TestCartridge("CT0014");
-            //CartridgeInventoryManager.Instance.AddCartridge(id);
-            
-        }
-    }
-
-    private void TestCartridge(string id)
-    {
-        Player owner = FindLocalPlayer();
-        if (owner == null) { Debug.LogWarning("[CartridgeTest] 로컬 플레이어를 찾을 수 없습니다."); return; }
-
-        Cartridge cartridge = GetCartridge(id);
-        if (cartridge == null) return;
-
-        cartridge.ExcuteGimmick(owner);
-        Debug.Log($"[CartridgeTest] {id} 실행 (Rarity: {_cartridgeDataDict[id].Rarity}, Values: [{string.Join(", ", _cartridgeDataDict[id].GimmickValues)}])");
-        Destroy(cartridge.gameObject);
-    }
-
-    private Player FindLocalPlayer()
-    {
-        foreach (var p in FindObjectsByType<Player>(FindObjectsSortMode.None))
-        {
-            if (p.PhotonView != null && p.PhotonView.IsMine) return p;
-        }
-        return null;
-    }
-    #endregion
+    //
+    // #region 테스트용
+    // private void Update()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.F1))
+    //     {
+    //         string id = "CT0001";
+    //         TestCartridge("CT0001");
+    //         //CartridgeInventoryManager.Instance.AddCartridge(id);
+    //     }
+    //     if (Input.GetKeyDown(KeyCode.F2))
+    //     {
+    //         string id = "CT0011";
+    //         TestCartridge("CT0011");
+    //         //CartridgeInventoryManager.Instance.AddCartridge(id);
+    //     }
+    //     if (Input.GetKeyDown(KeyCode.F3))
+    //     {
+    //         string id = "CT0014";
+    //         TestCartridge("CT0014");
+    //         //CartridgeInventoryManager.Instance.AddCartridge(id);
+    //         
+    //     }
+    // }
+    //
+    // private void TestCartridge(string id)
+    // {
+    //     Player owner = FindLocalPlayer();
+    //     if (owner == null) { Debug.LogWarning("[CartridgeTest] 로컬 플레이어를 찾을 수 없습니다."); return; }
+    //
+    //     Cartridge cartridge = GetCartridge(id);
+    //     if (cartridge == null) return;
+    //
+    //     cartridge.ExcuteGimmick(owner);
+    //     Debug.Log($"[CartridgeTest] {id} 실행 (Rarity: {_cartridgeDataDict[id].Rarity}, Values: [{string.Join(", ", _cartridgeDataDict[id].GimmickValues)}])");
+    //     Destroy(cartridge.gameObject);
+    // }
+    //
+    // private Player FindLocalPlayer()
+    // {
+    //     foreach (var p in FindObjectsByType<Player>(FindObjectsSortMode.None))
+    //     {
+    //         if (p.PhotonView != null && p.PhotonView.IsMine) return p;
+    //     }
+    //     return null;
+    // }
+    // #endregion
 
 }

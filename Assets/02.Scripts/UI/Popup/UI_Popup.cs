@@ -6,7 +6,7 @@ public abstract class UI_Popup : MonoBehaviour
     public bool CanCloseESC = true;
     private Action _closeCallback;
 
-    public void SetCallback(Action closeCallback)
+    public void SetCloseCallback(Action closeCallback)
     {
         _closeCallback = closeCallback;   
     }

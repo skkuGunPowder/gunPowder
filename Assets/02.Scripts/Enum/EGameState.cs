@@ -7,4 +7,6 @@ public enum EGameState
     GameOver,
     Ultimate,
     Tutorial,
+    Shop,
+    
 }

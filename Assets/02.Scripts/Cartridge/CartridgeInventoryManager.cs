@@ -69,6 +69,13 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         }
 
         Cartridge newCartridge = CartridgeFactory.Instance.GetCartridge(id);
+        if (newCartridge == null)
+        {
+            Debug.LogError($"카트리지 생성 실패. ID: {id}");
+            return false;
+        }
+        newCartridge.gameObject.SetActive(true);
+        
         int maxDurability = newCartridge.GetMaxDurability();
 
         if (maxDurability == 0)

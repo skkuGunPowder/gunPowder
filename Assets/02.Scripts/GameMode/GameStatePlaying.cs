@@ -149,7 +149,7 @@ public class GameStatePlaying : GameModeStateBase
 
             // 팀의 마지막 플레이어 - 게임 종료
             SetGameSet();
-            GameManager.Instance.GameStateChange(EGameState.Result);
+            GameManager.Instance.GameStateChange(EGameState.Shop); // Waiting 상태로 복귀
             _photonView.RPC(nameof(RPC_RequestPlayerDie), player, true);
             return;
         }
@@ -374,7 +374,7 @@ public class GameStatePlaying : GameModeStateBase
     [PunRPC]
     private void RPC_TimeOver()
     {
-        GameManager.Instance.GameStateChange(EGameState.Result);
+        GameManager.Instance.GameStateChange(EGameState.Shop); // Waiting 상태로 복귀
         SetGameSet();
         GameResultCheck();
     }
@@ -382,7 +382,6 @@ public class GameStatePlaying : GameModeStateBase
     // 타임 오버가 되었을 때 로컬 플레이어가 살아있는 경우 나의 프로퍼티를 보낸다.
     public void GameResultCheck()
     {
-        Debug.Log("GameResultCheck");
         PhotonPlayer player = PhotonNetwork.LocalPlayer;
         if ((bool)player.CustomProperties[EProperties.IsDead.ToString()])
         {
@@ -634,7 +633,6 @@ public class GameStatePlaying : GameModeStateBase
         // 플레이어 GP를 RoomStatManager에 저장
         PlayerStat stat = _gameMode.MyPlayer.GetComponent<PlayerStat>();
         RoomStatManager.Instance.SetGunpowder(stat.CurrentGP);
-        GameManager.Instance.GameStateChange(EGameState.Waiting); // Waiting 상태로 복귀
         
         // 구독 해제
         EventManager.Instance.OnLastDieComplete -= GameResultCheck;
