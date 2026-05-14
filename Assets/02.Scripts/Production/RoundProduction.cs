@@ -9,6 +9,8 @@ using UnityEngine.UI;
 using PhotonPlayer = Photon.Realtime.Player;
 public class RoundProduction : MonoBehaviour
 {
+    [SerializeField] private RectTransform _rect;
+    
     // 점수 득점 시 켜질 백그라운드 필요
     [SerializeField] private Image _backgroundImage;
     [SerializeField] private RectTransform _textPivot;
@@ -42,6 +44,11 @@ public class RoundProduction : MonoBehaviour
         {
            _skinPlayer = FindAnyObjectByType<SkinSettingForUlti>();
         }
+
+        if (_rect == null)
+        {
+            _rect = GetComponent<RectTransform>();
+        }
     }
     
     private void Start()
@@ -69,7 +76,7 @@ public class RoundProduction : MonoBehaviour
                 if (!_teamScoreDict.ContainsKey(team))
                 {
                     _teamScoreDict.Add(team, _textSlotList[i]);
-                    _teamScoreDict[team].Init(ColorSet(team), i, neg);
+                    _teamScoreDict[team].Init(ColorSet(team),(int)_rect.rect.height, i, neg);
                 }
                 else
                 {
@@ -100,7 +107,7 @@ public class RoundProduction : MonoBehaviour
                 if (!_teamScoreDict.ContainsKey(team))
                 {
                     _teamScoreDict.Add(team, _textSlotList[i]);
-                    _teamScoreDict[team].Init(ColorSet(team), i, neg);
+                    _teamScoreDict[team].Init(ColorSet(team), (int)_rect.rect.height,i, neg);
                 }
                 else
                 {
@@ -139,7 +146,6 @@ public class RoundProduction : MonoBehaviour
     public void Play(EInGameTeam team, int score)
     {
         
-        Debug.Log($"round play");
         _backgroundImage.gameObject.SetActive(true);
         _skinPlayer.AllActive(true);
         _initialized = false;

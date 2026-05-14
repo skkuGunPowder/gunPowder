@@ -69,6 +69,8 @@ public class CartridgeInventoryManager : PhotonSingleton<CartridgeInventoryManag
         }
 
         Cartridge newCartridge = CartridgeFactory.Instance.GetCartridge(id);
+        newCartridge.gameObject.SetActive(true);
+        
         int maxDurability = newCartridge.GetMaxDurability();
 
         if (maxDurability == 0)

@@ -226,7 +226,6 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnPlayerLeft += PlayerLeftRefresh;
             EventManager.Instance.OnReadyChanged += PlayerBombChange;
             EventManager.Instance.OnCartridgesChanged += RefreshCartridges;
-            Debug.Log("SubscribeEvents");       
         }
     }
 
@@ -242,7 +241,6 @@ public class UI_InGameProfile : MonoBehaviour
             EventManager.Instance.OnProfileInit -= Init;
             EventManager.Instance.OnReadyChanged -= PlayerBombChange;
             EventManager.Instance.OnCartridgesChanged -= RefreshCartridges;
-            Debug.Log("UnsubscribeEvents");
         }
     }
 }

@@ -18,7 +18,6 @@ public class LoadingScene : MonoBehaviour
     private int _currentImageIndex = 0;
     private float _imageChangeInterval = 0.5f;
     
-    private bool _isPhotonRoomReady = false;
     private bool _isSceneLoaded = false;
     
     public void Start()

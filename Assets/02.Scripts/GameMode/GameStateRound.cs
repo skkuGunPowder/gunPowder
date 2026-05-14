@@ -78,7 +78,6 @@ public class GameStateRound : GameModeStateBase
     {
         Init();
         EventManager.Instance.OnRoundEnd += EndCheck;
-        Debug.Log("round enter");
         RequestMyPlayerHealth();
     }
     
