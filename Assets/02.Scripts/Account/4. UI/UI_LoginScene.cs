@@ -113,8 +113,8 @@ public class UI_LoginScene : MonoBehaviour
         
         if (string.IsNullOrEmpty(email))
         {
-            // SignupInputFields.ResultText.text = "이메일을 입력해주세요.";
-            SignupInputFields.ResultText.text = "メールアドレスを入力してください。";
+            SignupInputFields.ResultText.text = "이메일을 입력해주세요.";
+            //SignupInputFields.ResultText.text = "メールアドレスを入力してください。";
             return;
         }
         
@@ -134,8 +134,8 @@ public class UI_LoginScene : MonoBehaviour
         SignupInputFields.ResultText.text = result.Message;
         if(result.IsSuccess)
         {
-            //SignupInputFields.ResultText.text = "이메일 인증이 완료되었습니다. 비밀번호를 설정해주세요.";
-            SignupInputFields.ResultText.text = "メール認証が完了しました。パスワードを設定してください。";
+            SignupInputFields.ResultText.text = "이메일 인증이 완료되었습니다. 비밀번호를 설정해주세요.";
+            //SignupInputFields.ResultText.text = "メール認証が完了しました。パスワードを設定してください。";
             SignupInputFields.PasswordInputField.interactable = true;
             SignupInputFields.PasswordConfirmInputField.interactable = true;
             RegisterConfirmButton.interactable = true;
@@ -161,8 +161,8 @@ public class UI_LoginScene : MonoBehaviour
 
         if (password != confirmPwd)
         {
-            //SignupInputFields.ResultText.text = "비밀번호가 일치하지 않습니다.";
-            SignupInputFields.ResultText.text = "パスワードが一致しません。";
+            SignupInputFields.ResultText.text = "비밀번호가 일치하지 않습니다.";
+            //SignupInputFields.ResultText.text = "パスワードが一致しません。";
             SignupInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
             Invoke(nameof(ResetRegisterCooldown), 1f);
             return;
@@ -170,8 +170,8 @@ public class UI_LoginScene : MonoBehaviour
 
         if (string.IsNullOrEmpty(password))
         {
-            //SignupInputFields.ResultText.text = "비밀번호를 입력해주세요.";
-            SignupInputFields.ResultText.text = "パスワードを入力してください。";
+            SignupInputFields.ResultText.text = "비밀번호를 입력해주세요.";
+            //SignupInputFields.ResultText.text = "パスワードを入力してください。";
             SignupInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
             Invoke(nameof(ResetRegisterCooldown), 1f);
             return;
@@ -219,16 +219,16 @@ public class UI_LoginScene : MonoBehaviour
 
         if (string.IsNullOrEmpty(email))
         {
-            //LoginInputFields.ResultText.text = "이메일을 입력해주세요.";
-            LoginInputFields.ResultText.text = "メールアドレスを入力してください。";
+            LoginInputFields.ResultText.text = "이메일을 입력해주세요.";
+            //LoginInputFields.ResultText.text = "メールアドレスを入力してください。";
             LoginInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
             Invoke(nameof(ResetLoginCooldown), 1f);
             return;
         }
         if (string.IsNullOrEmpty(password))
         {
-            //LoginInputFields.ResultText.text = "비밀번호를 입력해주세요.";
-            LoginInputFields.ResultText.text = "パスワードを入力してください。";
+            LoginInputFields.ResultText.text = "비밀번호를 입력해주세요.";
+            //LoginInputFields.ResultText.text = "パスワードを入力してください。";
             LoginInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
             Invoke(nameof(ResetLoginCooldown), 1f);
             return;
@@ -373,8 +373,8 @@ public class UI_LoginScene : MonoBehaviour
         string nickname = NicknameInputFields.NicknameInputField.text;
         if (string.IsNullOrEmpty(nickname))
         {
-            //NicknameInputFields.ResultText.text = "닉네임을 입력해주세요.";
-            NicknameInputFields.ResultText.text = "ニックネームを入力してください。";
+            NicknameInputFields.ResultText.text = "닉네임을 입력해주세요.";
+            //NicknameInputFields.ResultText.text = "ニックネームを入力してください。";
             NicknameInputFields.ResultText.transform.DOShakePosition(0.5f, 15);
             Invoke(nameof(ResetNicknameCooldown), 1f);
             return;
