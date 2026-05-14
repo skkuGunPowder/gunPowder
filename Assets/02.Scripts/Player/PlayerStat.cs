@@ -235,14 +235,11 @@ public class PlayerStat : MonoBehaviour
 
         if (_photonView != null)
         {
+            // RPC_ChangeHP가 모든 클라이언트(소유자 self-loop 포함)에서 1-프레임 fallback 코루틴을
+            // 시작하므로 여기서 별도 코루틴은 불필요.
             _photonView.RPC(nameof(RPC_ChangeHP), RpcTarget.All, _currentHP, _currentPlayerLife, 0);
         }
         OnHPChanged?.Invoke(_currentHP);
-
-        // DamageChecker는 GameState != Playing이면 OnDataChanged를 발화하지 않음.
-        // 또한 UI_InGameProfile.Init이 PlayerStat.Start보다 늦게 실행되면 _playerActorNumberList가
-        // 비어 있어 Refresh가 no-op이 됨. 다음 프레임에 직접 PlayerDataChange를 호출해 둘 다 우회.
-        StartCoroutine(FirePlayerDataChangedNextFrame(_currentHP, _currentPlayerLife));
     }
 
     private System.Collections.IEnumerator FirePlayerDataChangedNextFrame(int hp, int life)
@@ -257,14 +254,6 @@ public class PlayerStat : MonoBehaviour
         if (_photonView == null || !_photonView.IsMine) return;
         if (PhotonNetwork.LocalPlayer == null) return;
 
-        // Playing(=실제 라운드 진행 중)이 아니면 저장하지 않음
-        // (Result/매치 종료 시점에 저장되어 다음 매치로 넘어가는 것을 방지)
-        if (GameManager.Instance == null
-            || GameManager.Instance.CurrentGameState != EGameState.Playing)
-        {
-            return;
-        }
-
         PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable
         {
             { EProperties.UltimateGauge.ToString(), _currentUltimateGauge }
@@ -275,14 +264,6 @@ public class PlayerStat : MonoBehaviour
     {
         if (_photonView == null || !_photonView.IsMine) return;
         if (PhotonNetwork.LocalPlayer == null) return;
-
-        // Playing이 아닌 상태(Result/Waiting 등)에서는 복원하지 않고, 남아있는 값은 정리
-        if (GameManager.Instance == null
-            || GameManager.Instance.CurrentGameState != EGameState.Playing)
-        {
-            ClearUltimateGaugeCustomProperty();
-            return;
-        }
 
         if (!PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(
                 EProperties.UltimateGauge.ToString(), out object value))
@@ -623,7 +604,19 @@ public class PlayerStat : MonoBehaviour
     [PunRPC]
     private void RPC_ChangeHP(int hp, int life, int attacker, PhotonMessageInfo info)
     {
+        // DamageChecker의 GameState 가드 / _playerPhotonViewList 미초기화 상태에서도
+        // 자기 캐시는 항상 동기화되도록 직접 적용.
+        // (라운드 시작 페널티 RPC가 OnGameStart/Playing 진입 전에 도착하는 race 방지)
+        _currentHP = hp;
+        _currentPlayerLife = life;
+
         DamageChecker.Instance.RPC_RequestDamage(hp, life, attacker, info.Sender.ActorNumber);
+
+        // DamageChecker.RPC_RequestDamage는 state가 Playing/Waiting이 아니면 UI 갱신을 누락시킴.
+        // 라운드 시작 페널티 RPC는 state=Shop인 Spawn 단계에 도착하므로 가드에 차단됨.
+        // 또한 OnProfileInit이 _currentHP 갱신 전에 발화되는 race도 가능하므로,
+        // 모든 클라이언트에서 다음 프레임에 DamageChecker를 우회하여 직접 UI에 푸시.
+        StartCoroutine(FirePlayerDataChangedNextFrame(hp, life));
     }
 
     // 하위 호환성 (혹시 직접 호출되는 곳이 있을 수 있으므로)

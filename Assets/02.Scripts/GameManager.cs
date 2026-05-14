@@ -106,6 +106,16 @@ public class GameManager : PhotonSingleton<GameManager>
     private void RPC_GameOver()
     {
         GameStateChange(EGameState.Result);
+
+        // 매치 종료: 다음 매치로 궁극기 게이지가 이월되지 않도록 LocalPlayer의 게이지 프로퍼티 정리
+        if (PhotonNetwork.LocalPlayer != null)
+        {
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable
+            {
+                { EProperties.UltimateGauge.ToString(), null }
+            });
+        }
+
         EventManager.Instance.GameOver();
     }
     
