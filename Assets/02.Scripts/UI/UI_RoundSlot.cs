@@ -50,7 +50,7 @@ public class UI_RoundSlot : MonoBehaviour
         }
     }
     
-    public void Init(Color32 color, int i, bool negative)
+    public void Init(Color32 color, int height ,int i, bool negative)
     {
         // 비활성 오브젝트는 null 체크 후 초기화
         if (_rectTransform == null)
@@ -62,13 +62,12 @@ public class UI_RoundSlot : MonoBehaviour
         
         if (_isNegative)
         {
-            _startHeight = - _rectTransform.rect.height;   
+            _startHeight = -height;   
         }
         else
         {
-            _startHeight = _rectTransform.rect.height;
+            _startHeight = height;
         }
-        Debug.Log($"{_startHeight} is StartHeight");
         // 초기화
         _backGroundRectTransform.anchoredPosition = new Vector2(0, _startHeight);
         
@@ -204,13 +203,15 @@ public class UI_RoundSlot : MonoBehaviour
     {
         Sequence mySequence = DOTween.Sequence();
         // mySequence.AppendCallback(()=> _textSlot.gameObject.SetActive(false));
-        mySequence.Append(_backGroundRectTransform.DOAnchorPos(new Vector2(0, _startHeight), _duration).SetEase(_easeType));
+        // mySequence.Append(_backGroundRectTransform.DOAnchorPos(new Vector2(0, _startHeight), _duration).SetEase(_easeType));
+        mySequence.AppendInterval(_duration);
         mySequence.AppendCallback(()=> endCallback?.Invoke());
     }
 
     private void OnDisable()
     {
         // _rectTransform.sizeDelta = new Vector2(_rectTransform.sizeDelta.x, 0f);
+        _backGroundRectTransform.anchoredPosition = new  Vector2(0, _startHeight);
         _scoreChange =  false;
         _textSlot.gameObject.SetActive(false);
     }
